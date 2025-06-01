@@ -1,5 +1,7 @@
 name: Publish Helm Chart - CE
-
+permissions:
+  contents: read
+  packages: write
 on:
   push:
     branches:
@@ -11,10 +13,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,9 +32,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Helm for OCI Registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # Using password-stdin to avoid credentials in logs
-          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
       - name: Lint Helm Chart
         run: |
@@ -61,4 +61,4 @@ jobs:
       - name: Push to GitHub Container Registry
         run: |
           cd charts
-          helm push ${PACKAGE_NAME} oci://ghcr.io/intuitem/helm-charts/ce
+          helm push "${PACKAGE_NAME}" oci://ghcr.io/intuitem/helm-charts/ce

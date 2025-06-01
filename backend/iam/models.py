@@ -12,12 +12,13 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from ciso_assistant import settings
+from knox.models import AuthToken
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     BUILTIN_ROLE_CODENAMES,
 )
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
@@ -36,9 +37,9 @@ from ciso_assistant.settings import (
     EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
+from django.conf import settings
 
 import structlog
-from django.utils import translation
 
 logger = structlog.get_logger(__name__)
 
@@ -178,6 +179,55 @@ class Folder(NameDescriptionMixin):
         # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
         return None
 
+    @staticmethod
+    def create_default_ug_and_ra(folder: Self):
+        if folder.content_type == Folder.ContentType.DOMAIN:
+            readers = UserGroup.objects.create(
+                name=UserGroupCodename.READER, folder=folder, builtin=True
+            )
+            approvers = UserGroup.objects.create(
+                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
+            )
+            analysts = UserGroup.objects.create(
+                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
+            )
+            managers = UserGroup.objects.create(
+                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
+            )
+            ra1 = RoleAssignment.objects.create(
+                user_group=readers,
+                role=Role.objects.get(name=RoleCodename.READER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra1.perimeter_folders.add(folder)
+            ra2 = RoleAssignment.objects.create(
+                user_group=approvers,
+                role=Role.objects.get(name=RoleCodename.APPROVER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra2.perimeter_folders.add(folder)
+            ra3 = RoleAssignment.objects.create(
+                user_group=analysts,
+                role=Role.objects.get(name=RoleCodename.ANALYST),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra3.perimeter_folders.add(folder)
+            ra4 = RoleAssignment.objects.create(
+                user_group=managers,
+                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra4.perimeter_folders.add(folder)
+            # Clear the cache after a new folder is created - purposely clearing everything
+
 
 class FolderMixin(models.Model):
     """
@@ -261,7 +311,6 @@ class UserManager(BaseUserManager):
         On mail error, raise a corresponding exception, but the user is properly created
         TODO: find a better way to manage mailing error
         """
-
         validate_email(email)
         email = self.normalize_email(email)
         user = self.model(
@@ -271,9 +320,13 @@ class UserManager(BaseUserManager):
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
             folder=_get_root_folder(),
+            keep_local_login=extra_fields.get("keep_local_login", False),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
-        user.password = make_password(password if password else str(uuid.uuid4()))
+        if password:
+            user.password = make_password(password)
+        else:
+            user.set_unusable_password()
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)
@@ -290,9 +343,14 @@ class UserManager(BaseUserManager):
         logger.info("user created sucessfully", user=user)
 
         if mailing:
+            template_name = (
+                "registration/first_connexion_email.html"
+                if user.is_local
+                else "registration/first_connexion_email_sso.html"
+            )
             try:
                 user.mailing(
-                    email_template_name="registration/first_connexion_email.html",
+                    email_template_name=template_name,
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
@@ -323,6 +381,7 @@ class UserManager(BaseUserManager):
             password=password,
             mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            keep_local_login=True,
             **extra_fields,
         )
         return superuser
@@ -345,7 +404,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
-    is_sso = models.BooleanField(default=False)
+    keep_local_login = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -393,6 +457,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        if self.is_superuser and not self.is_active:
+            # avoid deactivation of superuser
+            self.is_active = True
+        if not self.is_local:
+            self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 
@@ -535,6 +604,26 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return any(
             any(perm.startswith(prefix) for prefix in editor_prefixes)
             for perm in permissions
+        )
+
+    @property
+    def is_local(self) -> bool:
+        """
+        Indicates whether the user can log in using a local password
+        """
+        from global_settings.models import GlobalSettings
+
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except GlobalSettings.DoesNotExist:
+            sso_settings = {}
+
+        return self.is_active and (
+            self.keep_local_login
+            or not sso_settings.get("is_enabled", False)
+            or not sso_settings.get("force_sso", False)
         )
 
     @classmethod
@@ -813,6 +902,30 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     for f in folder.get_sub_folders():
                         permissions[str(f.id)] |= ra_permissions
         return permissions
+
+
+class PersonalAccessToken(models.Model):
+    """
+    Personal Access Token model.
+    """
+
+    name = models.CharField(max_length=255)
+    auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
+
+    @property
+    def created(self):
+        return self.auth_token.created
+
+    @property
+    def expiry(self):
+        return self.auth_token.expiry
+
+    @property
+    def digest(self):
+        return self.auth_token.digest
+
+    def __str__(self):
+        return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
 auditlog.register(

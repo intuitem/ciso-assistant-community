@@ -6,6 +6,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	export let data: PageData;
 
@@ -31,6 +32,17 @@
 		fairly_relevant: 'bg-orange-200 text-orange-700',
 		higly_relevant: 'bg-red-200 text-red-700'
 	};
+
+	const user = $page.data.user;
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	const model = URL_MODEL_MAP['ro-to'];
+	const canEditObject = (roto): boolean =>
+		canPerformAction({
+			user,
+			action: 'change',
+			model: model.name,
+			domain: roto.folder?.id
+		});
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -44,13 +56,15 @@
 				<i class="fa-solid fa-arrow-left" />
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</Anchor>
-			<Anchor
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</Anchor>
+			{#if canEditObject(roto)}
+				<Anchor
+					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					class="btn variant-filled-primary h-fit"
+				>
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					{m.edit()}
+				</Anchor>
+			{/if}
 		</div>
 		<div
 			id="activityOne"

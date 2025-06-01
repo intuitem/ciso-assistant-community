@@ -65,7 +65,7 @@ test('user usual routine actions are working correctly', async ({
 	});
 
 	await test.step('user can create an asset', async () => {
-		await sideBar.click('Organization', pages.assetsPage.url);
+		await sideBar.click('Assetsmanagement', pages.assetsPage.url);
 		await pages.assetsPage.hasUrl();
 		await pages.assetsPage.hasTitle();
 
@@ -192,7 +192,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskMatricesPage.hasTitle();
 
 		await pages.riskMatricesPage.addButton.click();
-		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrix');
+		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrices');
 		await pages.librariesPage.hasTitle();
 
 		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);

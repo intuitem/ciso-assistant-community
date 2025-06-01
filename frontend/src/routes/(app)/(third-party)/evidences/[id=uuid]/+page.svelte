@@ -5,13 +5,14 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
-
+	import { page } from '$app/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
 	import { defaults } from 'sveltekit-superforms';
 	import { z } from 'zod';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	export let data: PageData;
 
@@ -32,6 +33,7 @@
 					{ id, urlmodel: 'evidences' },
 					zod(z.object({ id: z.string(), urlmodel: z.string() }))
 				),
+				schema: zod(z.object({ id: z.string(), urlmodel: z.string() })),
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel,
@@ -60,6 +62,17 @@
 		};
 		attachment = data.data.attachment ? await fetchAttachment() : undefined;
 	});
+
+	const user = $page.data.user;
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+	});
 </script>
 
 <DetailView {data} />
@@ -77,13 +90,16 @@
 					data-testid="attachment-download-button"
 					><i class="fa-solid fa-download mr-2" /> {m.download()}</Anchor
 				>
-				<button
-					on:click={(_) => {
-						modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment');
-					}}
-					on:keydown={(_) => modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment')}
-					class="btn variant-filled-tertiary h-full"><i class="fa-solid fa-trash" /></button
-				>
+				{#if canEditObject}
+					<button
+						on:click={(_) => {
+							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment');
+						}}
+						on:keydown={(_) =>
+							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment')}
+						class="btn variant-filled-tertiary h-full"><i class="fa-solid fa-trash" /></button
+					>
+				{/if}
 			</div>
 		</div>
 		{#if attachment}

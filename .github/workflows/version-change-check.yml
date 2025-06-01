@@ -1,4 +1,6 @@
 name: Version change checker
+permissions:
+  contents: read
 
 on:
   pull_request:

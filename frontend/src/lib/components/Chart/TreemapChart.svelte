@@ -35,6 +35,9 @@
 				},
 				series: {
 					type: 'treemap',
+					breadcrumb: {
+						show: false
+					},
 					// type: 'sunburst',
 					// emphasis: {
 					//     focus: 'ancestor'

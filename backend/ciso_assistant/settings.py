@@ -137,8 +137,43 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
-MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
-MEDIA_URL = ""
+
+USE_S3 = os.getenv("USE_S3", "False") == "True"
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv(
+        "AWS_STORAGE_BUCKET_NAME", "ciso-assistant-bucket"
+    )
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+
+    if not AWS_ACCESS_KEY_ID:
+        logger.error("AWS_ACCESS_KEY_ID must be set")
+    if not AWS_SECRET_ACCESS_KEY:
+        logger.error("AWS_SECRET_ACCESS_KEY must be set")
+    if not AWS_S3_ENDPOINT_URL:
+        logger.error("AWS_S3_ENDPOINT_URL must be set")
+    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
+        exit(1)
+
+    logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
+    logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+
+    AWS_S3_FILE_OVERWRITE = False
+
+else:
+    MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
+    MEDIA_URL = ""
 
 PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 
@@ -151,12 +186,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.forms",
     "django_structlog",
+    "auditlog",
     "tailwind",
     "iam",
     "global_settings",
     "ebios_rm",
     "tprm",
     "privacy",
+    "resilience",
     "core",
     "cal",
     "django_filters",
@@ -172,7 +209,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
-    "auditlog",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -200,6 +237,10 @@ AUTH_TOKEN_TTL = int(
 AUTH_TOKEN_AUTO_REFRESH = (
     os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
 )  # prevents token from expiring while user is active
+AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
+    int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
+)  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active
+
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
@@ -242,9 +283,12 @@ REST_KNOX = {
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
+    "AUTO_REFRESH_MAX_TTL": timedelta(seconds=(AUTH_TOKEN_AUTO_REFRESH_MAX_TTL or 0))
+    or None,
     "MIN_REFRESH_INTERVAL": 60,
 }
 
+KNOX_TOKEN_MODEL = "knox.AuthToken"
 
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
@@ -336,6 +380,7 @@ LANGUAGES = [
     ("sv", "Swedish"),
     ("id", "Indonesian"),
     ("da", "Danish"),
+    ("hu", "Hungarian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

@@ -19,15 +19,9 @@
 		tags={['analysis', 'assets']}
 	/>
 	<Article
-		title="Ecosystem radar"
-		desc="Visualize the stakeholders radar"
-		link="experimental/ecosystem"
-		tags={['analysis', 'tprm']}
-	/>
-	<Article
-		title="Data Import Wizard"
-		desc="Manage data import for various object"
-		link="experimental/data-wizard"
-		tags={['data', 'automation', 'pro']}
+		title="Requirements explorer"
+		desc="Visualize all requirements across all audits"
+		link="requirement-assessments"
+		tags={['analysis', 'assets']}
 	/>
 </div>

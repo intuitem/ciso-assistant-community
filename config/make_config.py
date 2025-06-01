@@ -62,8 +62,35 @@ def get_config():
 
     # Proxy selection
     config["proxy"] = questionary.select(
-        "Choose a proxy", choices=["caddy", "traefik"], default="caddy"
+        "Choose a proxy", choices=["caddy", "traefik", "bunkerweb"], default="caddy"
     ).ask()
+
+    if config["proxy"] == "bunkerweb":
+        config["bunkerweb"] = {
+            "db_name": questionary.text("BunkerWeb DB name: ", default="db").ask(),
+            "db_username": questionary.text(
+                "BunkerWeb DB username: ", default="bunkerweb"
+            ).ask(),
+            "db_password": questionary.password(
+                "BunkerWeb DB password: ", default="changeme"
+            ).ask(),
+            "use_ui": questionary.confirm(
+                "Would you like to use the BunkerWeb UI?",
+                default=True,
+            ).ask(),
+        }
+        if config["bunkerweb"]["use_ui"]:
+            if config["mode"] == "VM/Remote":
+                config["bunkerweb"]["ui_fqdn"] = questionary.text(
+                    "Please enter your BunkerWeb UI FQDN/hostname (must be different from CISO FQDN/hostname): ",
+                    default="bw.example.com",
+                ).ask()
+            config["bunkerweb"]["ui_username"] = questionary.text(
+                "BunkerWeb UI username: ", default="admin"
+            ).ask()
+            config["bunkerweb"]["ui_password"] = questionary.password(
+                "BunkerWeb UI password: ", default="ChangeMe123!"
+            ).ask()
 
     # Email configuration
     config["need_mailer"] = questionary.confirm(
@@ -85,6 +112,88 @@ def get_config():
             ).ask(),
         }
 
+    # Kafka Dispatcher Configuration
+    enable_dispatcher = questionary.confirm(
+        "Would you like to configure the Kafka dispatcher? This requires a kafka broker to be running.",
+        default=False,
+    ).ask()
+
+    if enable_dispatcher:
+        config["kafka_dispatcher"] = {
+            "enabled": True,
+            "broker_url": questionary.text(
+                "Enter the Kafka broker URL (e.g., localhost:9092):",
+                default="localhost:9092",
+            ).ask(),
+            "observation_topic": questionary.text(
+                "Enter the Kafka topic for dispatcher events (e.g., observation):",
+                default="observation",
+            ).ask(),
+            "errors_topic": questionary.text(
+                "Enter the topic name for error messages (e.g., errors):",
+                default="errors",
+            ).ask(),
+            "authentication": questionary.select(
+                "How would you like to authenticate requests to the CISO Assistant API using the dispatcher (credentials/token)?",
+                choices=["credentials", "token"],
+                default="credentials",
+            ).ask(),
+        }
+        if config["kafka_dispatcher"]["authentication"] == "credentials":
+            config["kafka_dispatcher"]["credentials"] = {
+                "user_email": questionary.text(
+                    "Enter the email of the CISO Assistant user account"
+                ).ask(),
+                "user_password": questionary.password(
+                    "Enter the password of the CISO Assistant user account"
+                ).ask(),
+            }
+            config["kafka_dispatcher"]["auto_renew_session"] = questionary.confirm(
+                "Enable silent reauthentication to the CISO Assistant API on session expiry?",
+                default=True,
+            ).ask()
+        elif config["kafka_dispatcher"]["authentication"] == "token":
+            config["kafka_dispatcher"]["token"] = questionary.password(
+                "Enter access token"
+            ).ask()
+        kafka_use_auth = questionary.confirm(
+            "Does your Kafka broker require authentication?",
+            default=False,
+        ).ask()
+        config["kafka_dispatcher"]["use_auth"] = kafka_use_auth
+        if kafka_use_auth:
+            config["kafka_dispatcher"]["sasl_mechanism"] = "PLAIN"
+            config["kafka_dispatcher"]["sasl_username"] = questionary.text(
+                "Enter the username of your Kafka service account"
+            ).ask()
+            config["kafka_dispatcher"]["sasl_password"] = questionary.password(
+                "Enter the password of your Kafka service account"
+            ).ask()
+
+        use_s3 = questionary.confirm(
+            "Would you like to connect a S3 bucket to the dispatcher? This can be used e.g. to upload files to the CISO Assistant backend.",
+            default=True,
+        ).ask()
+
+        config["kafka_dispatcher"]["s3_url"] = ""
+        config["kafka_dispatcher"]["s3_access_key"] = ""
+        config["kafka_dispatcher"]["s3_secret_key"] = ""
+        if use_s3:
+            config["kafka_dispatcher"]["s3_url"] = questionary.text(
+                "Enter the S3 storage URL (e.g., http://localhost:9000)",
+                default="http://localhost:9000",
+            ).ask()
+            config["kafka_dispatcher"]["s3_access_key"] = questionary.text(
+                "Enter the S3 access key (leave blank if using public S3 storage)",
+            ).ask()
+            config["kafka_dispatcher"]["s3_secret_key"] = ""
+            if config["kafka_dispatcher"]["s3_access_key"]:
+                config["kafka_dispatcher"]["s3_secret_key"] = questionary.password(
+                    "Enter the S3 secret key",
+                ).ask()
+    else:
+        config["kafka_dispatcher"] = {"enabled": False}
+
     # Debug mode for local development
     config["enable_debug"] = questionary.confirm(
         "Enable debug mode?", default=True if config["db"] == "sqlite" else False
@@ -105,22 +214,25 @@ def generate_compose_file(config):
     except Exception as e:
         print(f"[red]Error: Template {template_name} not found![/red]")
         print(
-            f"[yellow]Please ensure you have the following template file in your templates directory:[/yellow]"
+            "[yellow]Please ensure you have the following template file in your templates directory:[/yellow]"
         )
         print(f"[yellow]templates/{template_name}[/yellow]")
         print(
-            f"[yellow]Expected template name format: docker-compose-local-<db>-<proxy>.yml.j2[/yellow]"
+            "[yellow]Expected template name format: docker-compose-local-<db>-<proxy>.yml.j2[/yellow]"
         )
-        print(f"[yellow]Where <db> is one of: sqlite, postgresql[/yellow]")
-        print(f"[yellow]And <proxy> is one of: caddy, traefik[/yellow]")
+        print("[yellow]Where <db> is one of: sqlite, postgresql[/yellow]")
+        print("[yellow]And <proxy> is one of: caddy, traefik, bunkerweb[/yellow]")
         raise e
 
     # Render template with configuration
     compose_content = template.render(config)
 
+    lines = compose_content.splitlines()
+    filtered = [line for line in lines if line.strip() != ""]
+
     # Write to docker-compose-custom.yml
     with open("docker-compose-custom.yml", "w") as f:
-        f.write(compose_content)
+        f.write("\n".join(filtered))
 
 
 def validate_cert_paths(config):
@@ -165,14 +277,27 @@ def main():
         print("2. Ensure your certificate files are in place:")
         print(f"   - Certificate: {config['cert_config']['cert_path']}")
         print(f"   - Private key: {config['cert_config']['key_path']}")
+        if config["proxy"] == "bunkerweb":
+            print(
+                f"   - You will need to adjust the ownership of the files to the user running the BunkerWeb container: chown 101:101 {config['cert_config']['cert_path']} {config['cert_config']['key_path']}"
+            )
     if config["db"] == "postgresql":
         print("3. Make sure PostgreSQL passwords are properly set")
     if config["need_mailer"]:
         print("4. Verify email configuration settings")
     print(
-        f"5. Run './docker-compose.sh' and follow the instructions to create the first admin user"
+        "5. Run './docker-compose.sh' and follow the instructions to create the first admin user"
     )
     print(f"6. Access the application at https://{config['fqdn']}:{config['port']}")
+    if config["proxy"] == "bunkerweb" and config["bunkerweb"]["use_ui"]:
+        if config["mode"] == "VM/Remote":
+            print(
+                f"7. Access the BunkerWeb UI at https://{config['bunkerweb']['ui_fqdn']}:{config['port']} with credentials {config['bunkerweb']['ui_username']}:{config['bunkerweb']['ui_password']}"
+            )
+        else:
+            print(
+                f"7. Access the BunkerWeb UI at http://{config['fqdn']}:7010 with credentials {config['bunkerweb']['ui_username']}:{config['bunkerweb']['ui_password']}"
+            )
 
 
 if __name__ == "__main__":

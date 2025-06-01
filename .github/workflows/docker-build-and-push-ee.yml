@@ -1,4 +1,7 @@
 name: Build and Push Docker Images EE
+permissions:
+  contents: read
+  packages: write
 
 on:
   push:

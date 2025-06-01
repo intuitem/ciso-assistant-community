@@ -27,7 +27,10 @@ test('redirect to the right page after login', async ({ loginPage, page }) => {
 	await page.goto('/login?next=/calendar');
 	await loginPage.hasUrl(1);
 	await loginPage.login();
-	await expect(page).toHaveURL('/calendar');
+	const currentDate = new Date();
+	const year = currentDate.getFullYear();
+	const month = currentDate.getMonth() + 1;
+	await expect(page).toHaveURL(`/calendar/${year}/${month}`);
 });
 
 test('login invalid message is showing properly', async ({ loginPage, page }) => {
@@ -93,6 +96,7 @@ test('forgot password process is working properly', async ({
 	);
 
 	const resetLoginPage = new LoginPage(resetPasswordPage);
+	await resetLoginPage.page.waitForLoadState('networkidle');
 	await resetLoginPage.newPasswordInput.fill('new' + testData.user.password);
 	await resetLoginPage.confirmPasswordInput.fill('new' + testData.user.password);
 	await resetLoginPage.setPasswordButton.click();

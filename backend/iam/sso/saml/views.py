@@ -42,7 +42,9 @@ class AuthError(AllauthAuthError):
     SIGNUP_CLOSED = "signupClosed"
     PERMISSION_DENIED = "permissionDenied"
     FAILED_SSO = "failedSSO"
+    FAILED_TO_CONTACT_PROVIDER = "failedToContactProvider"
     USER_DOES_NOT_EXIST = "UserDoesNotExist"
+    USER_IS_NOT_SSO = "userIsNotSSO"
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -69,7 +71,9 @@ class FinishACSView(SAMLViewMixin, View):
             provider = self.get_provider(organization_slug)
         except:
             logger.error("Could not get provider")
-            return render_authentication_error(request, None)
+            return render_authentication_error(
+                request, None, error=AuthError.FAILED_TO_CONTACT_PROVIDER
+            )
         acs_session = LoginSession(request, "saml_acs_session", "saml-acs-session")
         acs_request = None
         acs_request_data = acs_session.store.get("request")
@@ -157,7 +161,6 @@ class FinishACSView(SAMLViewMixin, View):
             )
             user.first_name = idp_first_names[0] if idp_first_names else user.first_name
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
-            user.is_sso = True
             user.save()
             token = generate_token(user)
             login.state["next"] += f"sso/authenticate/{token}"
@@ -179,6 +182,9 @@ class FinishACSView(SAMLViewMixin, View):
         except ValidationError as e:
             error = e.code
             logger.error("Validation error", exc_info=e)
+        except NotImplementedError as e:
+            error = AuthError.USER_IS_NOT_SSO
+            logger.error("SSO not permitted error", exc_info=e)
         except Exception as e:
             error = AuthError.FAILED_SSO
             logger.error("SSO failed", exc_info=e)

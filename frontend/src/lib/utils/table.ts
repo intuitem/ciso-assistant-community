@@ -2,6 +2,8 @@ import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte'
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
+import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+
 interface ListViewFilterConfig {
 	component: ComponentType;
 	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
@@ -24,6 +26,8 @@ const YES_NO_OPTIONS = [
 	{ label: 'yes', value: 'true' },
 	{ label: 'no', value: 'false' }
 ];
+
+const YES_OPTION = [{ label: 'yes', value: 'true' }];
 
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -125,6 +129,52 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const TASK_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'task-nodes/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/detection',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'detection',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -279,7 +329,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_LEVEL_FILTER: ListViewFilterConfig = {
+const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_level',
@@ -287,6 +337,14 @@ const RISK_LEVEL_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
+	}
+};
+
+const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'residual_level'
 	}
 };
 
@@ -306,11 +364,8 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'residual_criticality',
-		options: [1, 2, 3, 4],
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		multiple: true
+		...CURRENT_CRITICALITY_FILTER.props,
+		label: 'residual_criticality'
 	}
 };
 
@@ -357,6 +412,17 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_FILTER: ListViewFilterConfig = {
+	//still broken
+	component: AutocompleteSelect,
+	props: {
+		label: 'assetClass',
+		optionsEndpoint: 'asset-class',
+		optionsLabelField: 'full_path',
+		optionsValueField: 'id',
+		multiple: false
+	}
+};
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -408,7 +474,16 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
-		options: YES_NO_OPTIONS,
+		options: YES_OPTION,
+		multiple: true
+	}
+};
+
+const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'mappingSuggested',
+		options: YES_OPTION,
 		multiple: true
 	}
 };
@@ -522,8 +597,8 @@ export const listViewFields = {
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
-			current_level: RISK_LEVEL_FILTER,
-			residual_level: RISK_LEVEL_FILTER
+			current_level: CURRENT_RISK_LEVEL_FILTER,
+			residual_level: RESIDUAL_RISK_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -619,10 +694,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
-			'description',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
-			'owner',
 			'domain',
 			'labels'
 		],
@@ -630,10 +703,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
-			'description',
 			'security_objectives',
 			'disaster_recovery_objectives',
-			'owner',
 			'folder',
 			'filtering_labels'
 		],
@@ -643,9 +714,13 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'asset-class': {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'is_sso', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'is_sso', 'is_third_party']
+		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -710,7 +785,8 @@ export const listViewFields = {
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			object_type: LIBRARY_TYPE_FILTER
+			object_type: LIBRARY_TYPE_FILTER,
+			mapping_suggested: MAPPING_SUGGESTED_FILTER
 		}
 	},
 	'loaded-libraries': {
@@ -759,6 +835,36 @@ export const listViewFields = {
 	representatives: {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
+	},
+	'business-impact-analysis': {
+		head: ['name', 'perimeter', 'status'],
+		body: ['name', 'perimeter', 'status']
+	},
+	'asset-assessments': {
+		head: [
+			'asset',
+			'folder',
+			'bia',
+			'dependencies',
+			'associatedControls',
+			'recoveryDocumented',
+			'recoveryTested',
+			'recoveryTargetsMet'
+		],
+		body: [
+			'asset',
+			'asset_folder',
+			'bia',
+			'dependencies',
+			'associated_controls',
+			'recovery_documented',
+			'recovery_tested',
+			'recovery_targets_met'
+		]
+	},
+	'escalation-thresholds': {
+		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
+		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
@@ -852,7 +958,7 @@ export const listViewFields = {
 			'risk_origin',
 			'target_objective',
 			'stakeholders',
-			'attackPath'
+			'description'
 		],
 		body: [
 			'is_selected',
@@ -886,25 +992,75 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'findings_assessment',
 			'severity',
+			'owner',
 			'status',
 			'filtering_labels'
 		],
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {
-		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
-		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'detection',
+			'folder',
+			'qualifications',
+			'updated_at'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'detection',
+			'folder',
+			'qualifications',
+			'updated_at'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			status: INCIDENT_STATUS_FILTER,
+			detection: INCIDENT_DETECTION_FILTER,
+			severity: INCIDENT_SEVERITY_FILTER
+		}
 	},
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
+	'task-templates': {
+		head: [
+			'name',
+			'description',
+			'is_recurrent',
+			'assigned_to',
+			'lastOccurrenceStatus',
+			'nextOccurrence'
+		],
+		body: [
+			'name',
+			'description',
+			'is_recurrent',
+			'assigned_to',
+			'last_occurrence_status',
+			'next_occurrence'
+		]
+	},
+	'task-nodes': {
+		head: ['due_date', 'status', 'evidences'],
+		body: ['due_date', 'status', 'evidences'],
+		filters: {
+			status: TASK_STATUS_FILTER
+		}
 	},
 	extra: {
 		filters: {
@@ -922,3 +1078,5 @@ export type FilterKeys = {
 		? keyof F
 		: never;
 }[keyof typeof listViewFields];
+
+export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };

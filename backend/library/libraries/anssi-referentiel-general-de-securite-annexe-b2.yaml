@@ -1,0 +1,772 @@
+urn: urn:protocolpaladin:risk:library:anssi-referentiel-general-de-securite-annexe-b2
+locale: fr
+ref_id: ANSSI-RGS-ANNEXE-B2
+name: "R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 2.0 - Annexe B2"
+description: "Gestion des cl\xE9s cryptographiques\nR\xE8gles et recommandations concernant\
+  \ la gestion des cl\xE9s utilis\xE9es dans les m\xE9canismes cryptographiques\n\n\
+  Ce document traite des r\xE8gles et recommandations concernant la gestion des cl\xE9\
+  s utilis\xE9es dans les m\xE9canismes cryptographiques. Il compl\xE8te le document\
+  \ \xAB M\xE9canismes cryptographiques \u2013 R\xE8gles et recommandations concernant\
+  \ le choix et le dimensionnement des m\xE9canismes cryptographiques \xBB qui constitue\
+  \ l\u2019annexe B1 du RGS 1, notamment ses paragraphes \xAB 2.5 Gestion de cl\xE9\
+  s \xBB et \xAB A.5 Gestion de cl\xE9s \xBB. Ce document constitue l\u2019annexe\
+  \ B2 du RGS.\n\nhttps://cyber.gouv.fr/sites/default/files/2022-10/RGS_v-2-0_B2.pdf"
+copyright: "Loi fran\xE7aise"
+version: '1'
+publication_date: 2025-05-13
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-referentiel-general-de-securite-annexe-b2
+    ref_id: ANSSI-RGS-ANNEXE-B2
+    name: "R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 2.0 - Annexe B2"
+    description: "Gestion des cl\xE9s cryptographiques\nR\xE8gles et recommandations\
+      \ concernant la gestion des cl\xE9s utilis\xE9es dans les m\xE9canismes cryptographiques\n\
+      \nCe document traite des r\xE8gles et recommandations concernant la gestion\
+      \ des cl\xE9s utilis\xE9es dans les m\xE9canismes cryptographiques. Il compl\xE8\
+      te le document \xAB M\xE9canismes cryptographiques \u2013 R\xE8gles et recommandations\
+      \ concernant le choix et le dimensionnement des m\xE9canismes cryptographiques\
+      \ \xBB qui constitue l\u2019annexe B1 du RGS 1, notamment ses paragraphes \xAB\
+      \ 2.5 Gestion de cl\xE9s \xBB et \xAB A.5 Gestion de cl\xE9s \xBB. Ce document\
+      \ constitue l\u2019annexe B2 du RGS.\n\nhttps://cyber.gouv.fr/sites/default/files/2022-10/RGS_v-2-0_B2.pdf"
+    implementation_groups_definition:
+    - ref_id: "R\xE8gle"
+      name: "R\xE8gles"
+      description: null
+    - ref_id: Recommandation
+      name: Recommandations
+      description: null
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1
+      assessable: false
+      depth: 1
+      ref_id: '2.1'
+      name: "R\xE8gles et recommandations g\xE9n\xE9rales"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1
+      name: "R\xE8gleImpact-1"
+      description: "Dans une architecture de gestion de cl\xE9s l\u2019impact de chaque\
+        \ cl\xE9 du syst\xE8me doit \xEAtre \xE9valu\xE9."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1
+      name: "R\xE8gleDur\xE9e-1"
+      description: "Dans une architecture de gestion de cl\xE9s l\u2019\xE9tude d\u2019\
+        impact d\u2019une cl\xE9 doit prendre en compte les diff\xE9rentes dur\xE9\
+        es associ\xE9es \xE0 celle-ci."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1:3
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1
+      name: "R\xE8gleImpactSyst\xE9mique-1"
+      description: "Dans une architecture de gestion de cl\xE9s les proc\xE9dures\
+        \ de r\xE9cup\xE9ration du syst\xE8me en cas d\u2019atteinte \xE0 la confidentialit\xE9\
+        \ \xE0 l\u2019int\xE9grit\xE9 ou \xE0 l\u2019authenticit\xE9 d\u2019une cl\xE9\
+        \ pr\xE9sentant un risque d\u2019impact syst\xE9mique doivent \xEAtre \xE9\
+        tudi\xE9es et document\xE9es."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1:4
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.1
+      name: "RecomImpactSyst\xE9mique-1"
+      description: "Dans une architecture de gestion de cl\xE9s il est recommand\xE9\
+        \ d\u2019\xE9viter d\u2019avoir recours \xE0 des cl\xE9s pr\xE9sentant un\
+        \ risque syst\xE9mique."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3
+      assessable: false
+      depth: 1
+      ref_id: '2.3'
+      name: "G\xE9n\xE9ration de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3
+      ref_id: 2.3.1
+      name: "G\xE9n\xE9ration locale de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1
+      ref_id: 2.3.1.1
+      name: "G\xE9n\xE9ration locale de cl\xE9 al\xE9atoire"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.1:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.1
+      name: "R\xE8gleAl\xE9aLocal-1"
+      description: "La g\xE9n\xE9ration locale d\u2019une cl\xE9 cryptographique al\xE9\
+        atoire doit faire appel \xE0 un g\xE9n\xE9rateur d\u2019al\xE9a conforme au\
+        \ r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1
+      ref_id: 2.3.1.2
+      name: "Diff\xE9rentiation locale de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.2:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.2
+      name: "R\xE8gleDiff\xE9rentiation-1"
+      description: "La diff\xE9rentiation locale d\u2019une cl\xE9 cryptographique\
+        \ doit faire appel \xE0 un m\xE9canisme cryptographique conforme au r\xE9\
+        f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1
+      ref_id: 2.3.1.3
+      name: "\xC9change de cl\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.3:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.1.3
+      name: "R\xE8gle\xC9changeCl\xE9s-1"
+      description: "L\u2019\xE9change d\u2019une cl\xE9 cryptographique avec une entit\xE9\
+        \ homologue distante doit faire appel \xE0 un m\xE9canisme cryptographique\
+        \ conforme au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3
+      ref_id: 2.3.2
+      name: "G\xE9n\xE9ration centralis\xE9e de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2
+      ref_id: 2.3.2.1
+      name: "G\xE9n\xE9ration centralis\xE9e de cl\xE9 al\xE9atoire"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1
+      name: "R\xE8gleAl\xE9aCentral-1"
+      description: "La g\xE9n\xE9ration centralis\xE9e d\u2019une cl\xE9 cryptographique\
+        \ al\xE9atoire doit faire appel \xE0 un g\xE9n\xE9rateur d\u2019al\xE9a conforme\
+        \ au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1
+      name: "RecomAl\xE9aCentral-1"
+      description: "Il est recommand\xE9 que la g\xE9n\xE9ration centralis\xE9e d\u2019\
+        une cl\xE9 cryptographique al\xE9atoire fasse appel \xE0 un g\xE9n\xE9rateur\
+        \ d\u2019al\xE9a conforme au r\xE9f\xE9rentiel et respectant de plus l\u2019\
+        ensemble des recommandations associ\xE9es."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1
+      name: "R\xE8gleG\xE9n\xE9rationCentralis\xE9e-1"
+      description: "La g\xE9n\xE9ration centralis\xE9e d\u2019une cl\xE9 cryptographique\
+        \ al\xE9atoire doit intervenir dans un environnement de confiance conforme\
+        \ au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1:4
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.1
+      name: "RecomG\xE9n\xE9rationCentralis\xE9e-1"
+      description: "Il est recommand\xE9 que la g\xE9n\xE9ration centralis\xE9e d\u2019\
+        une cl\xE9 cryptographique al\xE9atoire intervienne dans un environnement\
+        \ de confiance conforme au r\xE9f\xE9rentiel et respectant de plus l\u2019\
+        ensemble des recommandations associ\xE9es."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2
+      ref_id: 2.3.2.2
+      name: "D\xE9rivation de cl\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2
+      name: "R\xE8gleD\xE9rivation-1"
+      description: "La cl\xE9 ma\xEEtre d\u2019un m\xE9canisme de d\xE9rivation de\
+        \ cl\xE9 doit \xEAtre exploit\xE9e dans un environnement de confiance conforme\
+        \ au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2
+      name: "RecomD\xE9rivation-1"
+      description: "Il est recommand\xE9 que la cl\xE9 ma\xEEtre d\u2019un m\xE9canisme\
+        \ de d\xE9rivation de cl\xE9 soit exploit\xE9e dans un environnement de confiance\
+        \ conforme au r\xE9f\xE9rentiel et respectant de plus l\u2019ensemble des\
+        \ recommandations associ\xE9es."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.2.2
+      name: "RecomD\xE9rivation-2"
+      description: "Les m\xE9canismes de d\xE9rivation de cl\xE9 ne devraient \xEA\
+        tre utilis\xE9s que dans des architectures applicatives centralis\xE9es."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3
+      ref_id: 2.3.3
+      name: "G\xE9n\xE9ration de cl\xE9 de signature"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3
+      name: "R\xE8gleD\xE9rivationSignature-1"
+      description: "La g\xE9n\xE9ration d\u2019une cl\xE9 de signature ne doit pas\
+        \ faire intervenir de m\xE9canisme de d\xE9rivation de cl\xE9."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3
+      name: "RecomG\xE9n\xE9rationAl\xE9atoireSignature-1"
+      description: "Il est recommand\xE9 que la g\xE9n\xE9ration d\u2019une cl\xE9\
+        \ de signature al\xE9atoire soit effectu\xE9e directement par l\u2019utilisateur\
+        \ final dans son environnement de confiance."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.3.3
+      name: "RecomG\xE9n\xE9rationAl\xE9atoireSignature-2"
+      description: "Il est recommand\xE9 que la g\xE9n\xE9ration d\u2019une cl\xE9\
+        \ de signature al\xE9atoire fasse intervenir de l\u2019al\xE9a provenant d\u2019\
+        une source ma\xEEtris\xE9e par l\u2019utilisateur final."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4
+      assessable: false
+      depth: 1
+      ref_id: '2.4'
+      name: "Affectation d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4
+      ref_id: 2.4.1
+      name: "Usage d\u2019une cl\xE9 cryptographique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.1:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.1
+      name: "R\xE8gleUsage-1"
+      description: "L\u2019usage d\u2019une cl\xE9 doit \xEAtre unique (Afin de ne\
+        \ pas freiner la mise en place de solutions s\xE9curis\xE9es dans les syst\xE8\
+        mes d\u2019information de l\u2019administration, il est possible que le corps\
+        \ du RGS, ainsi que ses annexes A, d\xE9finissent des exceptions ponctuelles\
+        \ \xE0 cette r\xE8gle.)"
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4
+      ref_id: 2.4.2
+      name: "Objectifs de s\xE9curit\xE9 de l\u2019affectation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.2:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.2
+      name: "R\xE8gleAffectation-1"
+      description: "Les m\xE9canismes cryptographiques utilis\xE9s lors de l\u2019\
+        affectation d\u2019une cl\xE9 cryptographique \xE0 un utilisateur ou \xE0\
+        \ un \xE9quipement donn\xE9 doivent \xEAtre conformes au r\xE9f\xE9rentiel.\
+        \ Ces m\xE9canismes doivent garantir la confidentialit\xE9, l\u2019int\xE9\
+        grit\xE9 et l\u2019authenticit\xE9 de la cl\xE9."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.2:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.2
+      name: RecomAffectation-1
+      description: "Il est recommand\xE9 que les m\xE9canismes cryptographiques utilis\xE9\
+        s lors de l\u2019affectation d\u2019une cl\xE9 cryptographique \xE0 un utilisateur\
+        \ ou \xE0 un \xE9quipement donn\xE9 garantissent la possession de la cl\xE9\
+        \ par l\u2019utilisateur ou l\u2019\xE9quipement auquel elle est affect\xE9\
+        e."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4
+      ref_id: 2.4.3
+      name: "Objectifs sur le premier enr\xF4lement"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3
+      ref_id: 2.4.3.1
+      name: "Premier enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e localement"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1
+      name: "Premier enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e localement sans\
+        \ tiers de confiance"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:1:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:1
+      name: "R\xE8gleEnr\xF4lementPrivatif-1"
+      description: "Lors de son premier enr\xF4lement, l\u2019utilisateur final d\u2019\
+        un syst\xE8me doit proposer \xE0 ses interlocuteurs un moyen de contr\xF4\
+        ler son identit\xE9, l\u2019authenticit\xE9 de la cl\xE9 qu\u2019il cherche\
+        \ \xE0 s\u2019affecter et le fait qu\u2019il poss\xE8de bien cette cl\xE9."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:1:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:1
+      name: "RecomContr\xF4leInd\xE9pendant-1"
+      description: "Dans un syst\xE8me, il est recommand\xE9 que le moyen de contr\xF4\
+        le propos\xE9 par l\u2019utilisateur final lors de son premier enr\xF4lement\
+        \ soit v\xE9hicul\xE9 de fa\xE7on ind\xE9pendante de sa cl\xE9."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1
+      name: "Premier enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e localement aupr\xE8\
+        s d\u2019un tiers de confiance"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:2:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:2
+      name: "R\xE8gleEnr\xF4lementIGC-1"
+      description: "Dans un syst\xE8me avec tiers de confiance, pour assurer le premier\
+        \ enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e localement, le tiers de\
+        \ confiance doit disposer d\u2019un moyen de contr\xF4ler l\u2019identit\xE9\
+        \ de l\u2019utilisateur final, l\u2019authenticit\xE9 de sa cl\xE9 et le fait\
+        \ qu\u2019il poss\xE8de bien cette cl\xE9. L\u2019utilisateur final doit disposer\
+        \ de m\xEAme d\u2019un moyen de contr\xF4ler l\u2019authenticit\xE9 des \xE9\
+        l\xE9ments publics de l\u2019IGC."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:2:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.1:2
+      name: "RecomContr\xF4leInd\xE9pendant-1"
+      description: "Il est recommand\xE9 que le premier enr\xF4lement aupr\xE8s d\u2019\
+        un tiers de confiance d\u2019un utilisateur final g\xE9n\xE9rant localement\
+        \ sa cl\xE9 utilise un moyen d\u2019acheminement ind\xE9pendant du processus\
+        \ d\u2019enregistrement pour tous les \xE9l\xE9ments de contr\xF4le de l\u2019\
+        identit\xE9 de l\u2019utilisateur, de l\u2019authenticit\xE9 de la cl\xE9\
+        \ et de celle des \xE9l\xE9ments publics de l\u2019IGC."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3
+      ref_id: 2.4.3.2
+      name: "Premier enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e de fa\xE7on\
+        \ centralis\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2
+      name: "Premier enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e de fa\xE7on\
+        \ centralis\xE9e avec tiers de confiance"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:1:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:1
+      name: "R\xE8gleEnr\xF4lementCntralS\xE9curit\xE9Physique-1"
+      description: "Dans un syst\xE8me avec tiers de confiance, le premier enr\xF4\
+        lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e de fa\xE7on centralis\xE9e doit\
+        \ \xEAtre r\xE9alis\xE9 dans un environnement de confiance et par un lien\
+        \ physique de confiance."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:1:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:1
+      name: "R\xE8gleEnr\xF4lementCentral-1"
+      description: "Dans un syst\xE8me avec tiers de confiance, lors d\u2019un premier\
+        \ enr\xF4lement, le tiers de confiance doit disposer d\u2019un moyen de contr\xF4\
+        ler l\u2019identit\xE9 de l\u2019utilisateur final et l\u2019utilisateur final\
+        \ doit avoir un moyen de v\xE9rifier l\u2019authenticit\xE9 de sa cl\xE9 g\xE9\
+        n\xE9r\xE9e de fa\xE7on centralis\xE9e par le tiers de confiance."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2
+      name: "Premier enr\xF4lement d\u2019une cl\xE9 d\xE9riv\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:2:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:2
+      name: "R\xE8gleEnr\xF4lementD\xE9rivationS\xE9curit\xE9Physique-1"
+      description: "Le premier enr\xF4lement d\u2019une cl\xE9 g\xE9n\xE9r\xE9e par\
+        \ un processus de d\xE9rivation \xE0 partir d\u2019une cl\xE9 ma\xEEtre doit\
+        \ \xEAtre r\xE9alis\xE9 dans un environnement de confiance et par un lien\
+        \ physique de confiance."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:2:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.4.3.2:2
+      name: "R\xE8gleEnr\xF4lementD\xE9rivation-1"
+      description: "Lors d\u2019un premier enr\xF4lement, le tiers de confiance doit\
+        \ disposer d\u2019un moyen de contr\xF4ler l\u2019identit\xE9 de l\u2019utilisateur\
+        \ final et l\u2019utilisateur final doit avoir un moyen de v\xE9rifier l\u2019\
+        authenticit\xE9 de sa cl\xE9 g\xE9n\xE9r\xE9e par d\xE9rivation d\u2019une\
+        \ cl\xE9 ma\xEEtre contr\xF4l\xE9e par le tiers de confiance."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5
+      assessable: false
+      depth: 1
+      ref_id: '2.5'
+      name: "Introduction d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5
+      ref_id: 2.5.1
+      name: "Acheminement de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1
+      ref_id: 2.5.1.1
+      name: "Acheminement de cl\xE9 al\xE9atoire g\xE9n\xE9r\xE9e de fa\xE7on centralis\xE9\
+        e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.1:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.1
+      name: "R\xE8gleAcheminemementCl\xE9Central-1"
+      description: "L\u2019acheminement jusqu\u2019\xE0 l\u2019utilisateur final d\u2019\
+        une cl\xE9 cryptographique g\xE9n\xE9r\xE9e al\xE9atoirement de fa\xE7on centralis\xE9\
+        e doit b\xE9n\xE9ficier de moyens de protection conformes au r\xE9f\xE9rentiel.\
+        \ Ces moyens doivent garantir l\u2019authenticit\xE9, l\u2019int\xE9grit\xE9\
+        \ et la confidentialit\xE9 de la cl\xE9 achemin\xE9e."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.1:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.1
+      name: RecomAcheminementNoirCentralBout-en-bout-1
+      description: "Il est recommand\xE9 que l\u2019acheminement jusqu\u2019\xE0 l\u2019\
+        utilisateur final d\u2019une cl\xE9 cryptographique g\xE9n\xE9r\xE9e al\xE9\
+        atoirement de fa\xE7on centralis\xE9e soit prot\xE9g\xE9 cryptographiquement\
+        \ de bout en bout en authenticit\xE9, int\xE9grit\xE9 et confidentialit\xE9\
+        \ par des m\xE9canismes de protection conformes au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1
+      ref_id: 2.5.1.2
+      name: "Acheminement de cl\xE9 g\xE9n\xE9r\xE9e par d\xE9rivation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.2:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.2
+      name: "R\xE8gleAcheminemementCl\xE9D\xE9riv\xE9e-1"
+      description: "L\u2019acheminement jusqu\u2019\xE0 l\u2019utilisateur final d\u2019\
+        une cl\xE9 cryptographique g\xE9n\xE9r\xE9e par un proc\xE9d\xE9 de d\xE9\
+        rivation \xE0 partir d\u2019une cl\xE9 ma\xEEtre doit b\xE9n\xE9ficier de\
+        \ moyens de protection conformes au r\xE9f\xE9rentiels. Ces moyens doivent\
+        \ garantir l\u2019authenticit\xE9, l\u2019int\xE9grit\xE9 et la confidentialit\xE9\
+        \ de la cl\xE9 achemin\xE9e."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.2:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.1.2
+      name: "RecomAcheminementNoirD\xE9riv\xE9eBout-en-bout-1"
+      description: "Il est recommand\xE9 que l\u2019acheminement jusqu\u2019\xE0 l\u2019\
+        utilisateur final d\u2019une cl\xE9 cryptographique g\xE9n\xE9r\xE9e par un\
+        \ proc\xE9d\xE9 de d\xE9rivation \xE0 partir d\u2019une cl\xE9 ma\xEEtre soit\
+        \ prot\xE9g\xE9 cryptographiquement de bout en bout en authenticit\xE9, int\xE9\
+        grit\xE9 et confidentialit\xE9 par des m\xE9canismes de protection conformes\
+        \ au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5
+      ref_id: 2.5.2
+      name: "Injection de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2
+      ref_id: 2.5.2.1
+      name: "Injection de cl\xE9 g\xE9n\xE9r\xE9e localement"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.1:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.1
+      name: "RecomInjectionCl\xE9Locale-1"
+      description: "Il est recommand\xE9 que la g\xE9n\xE9ration locale d\u2019une\
+        \ cl\xE9 cryptographique ne donne pas lieu \xE0 un processus d\u2019injection."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.1:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.1
+      name: "R\xE8gleInjectionCl\xE9Locale-1"
+      description: "L\u2019injection d\u2019une cl\xE9 cryptographique g\xE9n\xE9\
+        r\xE9e localement doit b\xE9n\xE9ficier de moyens de protection conformes\
+        \ au r\xE9f\xE9rentiel. Ces moyens doivent garantir l\u2019authenticit\xE9\
+        , l\u2019int\xE9grit\xE9 et la confidentialit\xE9 de la cl\xE9 inject\xE9\
+        e."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2
+      ref_id: 2.5.2.2
+      name: "Injection de cl\xE9 g\xE9n\xE9r\xE9e de fa\xE7on centralis\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2
+      name: "Injection de cl\xE9 al\xE9atoire g\xE9n\xE9r\xE9e de fa\xE7on centralis\xE9\
+        e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:1:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:1
+      name: "R\xE8gleInjectionCl\xE9Central-1"
+      description: "L\u2019injection dans l\u2019environnement de confiance de l\u2019\
+        utilisateur final d\u2019une cl\xE9 cryptographique g\xE9n\xE9r\xE9e al\xE9\
+        atoirement de fa\xE7on centralis\xE9e doit b\xE9n\xE9ficier de moyens de protection\
+        \ conformes au r\xE9f\xE9rentiel. Ces moyens doivent garantir l\u2019authenticit\xE9\
+        , l\u2019int\xE9grit\xE9 et la confidentialit\xE9 de la cl\xE9 inject\xE9\
+        e."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:1:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:1
+      name: "RecomInjectionCl\xE9Central-1"
+      description: "Il est recommand\xE9 que l\u2019injection dans l\u2019environnement\
+        \ de confiance de l\u2019utilisateur final d\u2019une cl\xE9 cryptographique\
+        \ g\xE9n\xE9r\xE9e al\xE9atoirement de fa\xE7on centralis\xE9e soit effectu\xE9\
+        e \xE0 partir d\u2019une donn\xE9e prot\xE9g\xE9e d\xE8s la g\xE9n\xE9ration\
+        \ en confidentialit\xE9, authenticit\xE9 et int\xE9grit\xE9 par des m\xE9\
+        canismes cryptographiques conformes au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2
+      name: "Injection de cl\xE9 g\xE9n\xE9r\xE9e par d\xE9rivation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:2:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:2
+      name: "R\xE8gleInjectionCl\xE9D\xE9riv\xE9e-1"
+      description: "L\u2019injection dans l\u2019environnement de confiance de l\u2019\
+        utilisateur final d\u2019une cl\xE9 cryptographique g\xE9n\xE9r\xE9e par un\
+        \ processus de d\xE9rivation \xE0 partir d\u2019une cl\xE9 ma\xEEtre doit\
+        \ b\xE9n\xE9ficier de moyens de protection conformes au r\xE9f\xE9rentiel.\
+        \ Ces moyens doivent garantir l\u2019authenticit\xE9, l\u2019int\xE9grit\xE9\
+        \ et la confidentialit\xE9 de la cl\xE9 inject\xE9e."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:2:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.5.2.2:2
+      name: "RecomInjectionCl\xE9D\xE9riv\xE9e-1"
+      description: "Il est recommand\xE9 que l\u2019injection dans l\u2019environnement\
+        \ de confiance de l\u2019utilisateur final d\u2019une cl\xE9 cryptographique\
+        \ g\xE9n\xE9r\xE9e par un processus de d\xE9rivation \xE0 partir d\u2019une\
+        \ cl\xE9 ma\xEEtre soit effectu\xE9e \xE0 partir d\u2019une donn\xE9e prot\xE9\
+        g\xE9e d\xE8s la g\xE9n\xE9ration en confidentialit\xE9, authenticit\xE9 et\
+        \ int\xE9grit\xE9 par des m\xE9canismes cryptographiques conformes au r\xE9\
+        f\xE9rentiel."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6
+      assessable: false
+      depth: 1
+      ref_id: '2.6'
+      name: "Utilisation d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6
+      ref_id: 2.6.1
+      name: "Diffusion d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.1:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.1
+      name: RecomDiffusion-1
+      description: "Il est recommand\xE9 que la diffusion d\u2019une cl\xE9 priv\xE9\
+        e ou secr\xE8te soit limit\xE9e aux seuls environnements de confiance qui\
+        \ l\u2019utilisent vraiment."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6
+      ref_id: 2.6.2
+      name: "Utilisation applicative d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2
+      name: "R\xE8gleEnvironnementConfiance-1"
+      description: "L\u2019utilisation d\u2019une cl\xE9 cryptographique dans un syst\xE8\
+        me applicatif doit obligatoirement se faire dans un environnement de confiance\
+        \ ayant un niveau de s\xE9curit\xE9 conforme au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2
+      name: "R\xE8gleV\xE9rificationAuthenticit\xE9-1"
+      description: "Avant toute utilisation d\u2019une cl\xE9 dans un syst\xE8me applicatif,\
+        \ son authenticit\xE9 et son int\xE9grit\xE9 doivent \xEAtre v\xE9rifi\xE9\
+        es par un m\xE9canisme de s\xE9curit\xE9 conforme au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6.2
+      name: "R\xE8gleV\xE9rificationUtilisabilit\xE9-1"
+      description: "Avant toute utilisation d\u2019une cl\xE9 dans un syst\xE8me applicatif,\
+        \ il doit \xEAtre v\xE9rifi\xE9 par un m\xE9canisme de s\xE9curit\xE9 conforme\
+        \ au r\xE9f\xE9rentiel que la cl\xE9 est toujours utilisable."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6
+      ref_id: '2.7'
+      name: "Fin de vie d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7
+      name: "R\xE8gleFinUtilisation-1"
+      description: "Une architecture de gestion de cl\xE9s doit pr\xE9voir la fin\
+        \ de vie de l\u2019ensemble des cl\xE9s qu\u2019elle g\xE8re ou utilise."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7
+      name: RecomCauseFinUtilisation-1
+      description: "Il est recommand\xE9 qu\u2019une architecture de gestion de cl\xE9\
+        s traite les diff\xE9rentes causes de fin de vie d\u2019une cl\xE9 de fa\xE7\
+        on distincte."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.7
+      name: "R\xE8gleEffacement-1"
+      description: "Une cl\xE9 dont la dur\xE9e d\u2019utilisation est d\xE9pass\xE9\
+        e doit \xEAtre effac\xE9e des environnements de confiance o\xF9 elle \xE9\
+        tait utilis\xE9e par un moyen technique conforme au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6
+      ref_id: '2.8'
+      name: "Renouvellement d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.8:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.8
+      name: "R\xE8gleRenouvellement-1"
+      description: "Une architecture de gestion de cl\xE9s doit pr\xE9voir le renouvellement\
+        \ de l\u2019ensemble des cl\xE9s qu\u2019elle g\xE8re ou utilise."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.8:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.8
+      name: "R\xE8gleRenouvellementEnr\xF4lement-1"
+      description: "Une architecture de gestion de cl\xE9s doit assurer que le renouvellement\
+        \ d\u2019une cl\xE9 ne puisse se faire qu\u2019apr\xE8s v\xE9rification de\
+        \ l\u2019authenticit\xE9 de la nouvelle cl\xE9 et de la possession de celle-ci\
+        \ par l\u2019utilisateur. Les m\xE9canismes utilis\xE9s pour cette v\xE9rification\
+        \ doivent \xEAtre conformes au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.6
+      ref_id: '2.9'
+      name: "Recouvrement d\u2019une cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.9:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-referentiel-general-de-securite-annexe-b2:2.9
+      name: "R\xE8gleRecouvrement-1"
+      description: "Une architecture de gestion de cl\xE9s qui pr\xE9voit des fonctions\
+        \ de recouvrement de cl\xE9s doit mettre en place des contr\xF4les d\u2019\
+        acc\xE8s \xE0 cette fonctionnalit\xE9 conformes au r\xE9f\xE9rentiel et respectant\
+        \ de plus l\u2019ensemble des recommandations associ\xE9es."
+      implementation_groups:
+      - "R\xE8gle"

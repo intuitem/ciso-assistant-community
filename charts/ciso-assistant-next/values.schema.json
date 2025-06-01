@@ -1,0 +1,468 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+        "backend": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "config": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "databaseType": {
+                            "type": "string"
+                        },
+                        "djangoDebug": {
+                            "type": "boolean"
+                        },
+                        "djangoExistingSecretKey": {
+                            "type": "string"
+                        },
+                        "djangoSecretKey": {
+                            "type": "string"
+                        },
+                        "emailAdmin": {
+                            "type": "string"
+                        },
+                        "smtp": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "defaultFrom": {
+                                    "type": "string"
+                                },
+                                "existingSecret": {
+                                    "type": "string"
+                                },
+                                "host": {
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "type": "string"
+                                },
+                                "port": {
+                                    "type": "integer"
+                                },
+                                "useTls": {
+                                    "type": "boolean"
+                                },
+                                "username": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "containerSecurityContext": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "env": {
+                    "type": "array"
+                },
+                "huey": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "env": {
+                            "type": "array"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "additionalProperties": true,
+                            "properties": {},
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "persistence": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "localStorage": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "accessMode": {
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "existingClaim": {
+                                    "type": "string"
+                                },
+                                "size": {
+                                    "type": "string"
+                                },
+                                "storageClass": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "sqlite": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "accessMode": {
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "existingClaim": {
+                                    "type": "string"
+                                },
+                                "size": {
+                                    "type": "string"
+                                },
+                                "storageClass": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "replicas": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "service": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "annotations": {
+                            "additionalProperties": true,
+                            "properties": {},
+                            "type": "object"
+                        },
+                        "labels": {
+                            "additionalProperties": true,
+                            "properties": {},
+                            "type": "object"
+                        },
+                        "port": {
+                            "type": "integer"
+                        },
+                        "portName": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "externalPgsql": {
+            "additionalProperties": false,
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "user": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "frontend": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "config": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "bodySizeLimit": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "containerSecurityContext": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "env": {
+                    "type": "array"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "podAnnotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "replicas": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "service": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "annotations": {
+                            "additionalProperties": true,
+                            "properties": {},
+                            "type": "object"
+                        },
+                        "labels": {
+                            "additionalProperties": true,
+                            "properties": {},
+                            "type": "object"
+                        },
+                        "port": {
+                            "type": "integer"
+                        },
+                        "portName": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "fullnameOverride": {
+            "type": "string"
+        },
+        "global": {
+            "additionalProperties": false,
+            "properties": {
+                "clusterDomain": {
+                    "type": "string"
+                },
+                "commonLabels": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "extraAllowedHosts": {
+                    "type": "string"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "nodeSelector": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "securityContext": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "tls": {
+                    "type": "boolean"
+                },
+                "tolerations": {
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "ingress": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "ingressClassName": {
+                    "type": "string"
+                },
+                "labels": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "pathType": {
+                    "type": "string"
+                },
+                "tls": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "certificateSecret": {
+                            "additionalProperties": true,
+                            "properties": {},
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "postgresql": {
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "global": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "postgresql": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "auth": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "database": {
+                                            "type": "string"
+                                        },
+                                        "password": {
+                                            "type": "string"
+                                        },
+                                        "postgresPassword": {
+                                            "type": "string"
+                                        },
+                                        "username": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "primary": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "persistence": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "size": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "type": "object"
+}
