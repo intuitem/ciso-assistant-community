@@ -917,5 +917,8 @@
 	"forceSSOLoginHelpText": "Solicitați SSO pentru toți utilizatorii și resetați parolele salvate. Utilizatorii cu 'Excludeți din SSO forțat' activat vor păstra accesul de rezervă bazat pe parolă.",
 	"forceSSOLoginHelpText2": "Asigurați-vă că SSO-ul dvs. funcționează sau că aveți un cont de rezervă înainte de a activa această opțiune.",
 	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
-	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv"
+	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv",
+	"mappingSuggested": "Sugestie de mapare",
+	"mappingSuggestedHelpText": "Sugestii de mapare bazate pe cadre încărcate",
+	"mappingSuggestionTeasing": "Mapările sunt acum sugerate! Puteți folosi filtrele pentru a explora sugestiile bazate pe cadre încărcate."
 }

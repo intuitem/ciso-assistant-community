@@ -911,5 +911,8 @@
 	"forceSSOLogin": "Tvinga SSO-inloggning",
 	"forceSSOLoginHelpText": "Kräv SSO för alla användare och återställ alla sparade lösenord. Användare med 'Undanta från tvingad SSO' aktiverat behåller lösenordsbaserad reservåtkomst.",
 	"forceSSOLoginHelpText2": "Se till att din SSO fungerar eller att du har ett reservkonto innan du aktiverar detta alternativ.",
-	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
+	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent",
+	"mappingSuggested": "Förslag på kartläggning",
+	"mappingSuggestedHelpText": "Förslag på kartläggning baserade på inlästa ramverk",
+	"mappingSuggestionTeasing": "Kartläggningsförslag finns nu tillgängliga! Du kan använda filtren för att utforska förslag baserade på inlästa ramverk."
 }
