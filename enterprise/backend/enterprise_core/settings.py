@@ -261,7 +261,7 @@ REST_FRAMEWORK = {
         "enterprise_core.permissions.LicensePermission",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
