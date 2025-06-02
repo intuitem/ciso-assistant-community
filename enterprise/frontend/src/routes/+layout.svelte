@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	// Most of your app wide CSS should be put in this file
 	import '../app.css';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -75,9 +77,14 @@
 		url: string;
 	}
 
-	let favicon: Attachment | string = '';
+	let favicon: Attachment | string = $state('');
 
 	import { persisted } from 'svelte-persisted-store';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const faviconB64 = persisted('favicon', {
 		data: '',
@@ -102,10 +109,12 @@
 			: favicon;
 	});
 
-	$: if (browser && $page.url.searchParams.has('refresh')) {
-		$page.url.searchParams.delete('refresh');
-		window.location.href = $page.url.href;
-	}
+	run(() => {
+		if (browser && $page.url.searchParams.has('refresh')) {
+			$page.url.searchParams.delete('refresh');
+			window.location.href = $page.url.href;
+		}
+	});
 </script>
 
 <svelte:head>
@@ -116,7 +125,7 @@
 	<Modal components={modalRegistry} />
 	<Toast />
 	<CommandPalette />
-	<slot />
+	{@render children?.()}
 
 	{#if $flash}
 		{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}

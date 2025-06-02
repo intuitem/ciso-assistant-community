@@ -7,19 +7,19 @@
 	import ClientSettings from './client-settings/+page.svelte';
 	import { goto, preloadData, pushState } from '$app/navigation';
 
-	let tabSet = 0;
+	let tabSet = $state(0);
 
-	export let data;
+	let { data } = $props();
 </script>
 
 <TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
 	<Tab bind:group={tabSet} name="instanceSettings" value={0}
 		><i class="fa-solid fa-globe"></i> {m.general()}</Tab
 	>
-	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
+	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key"></i> {m.sso()}</Tab
 	>
 	<Tab bind:group={tabSet} name="featureFlags" value={2}
-		><i class="fa-solid fa-flag" /> {m.featureFlags()}</Tab
+		><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tab
 	>
 	<Tab
 		bind:group={tabSet}
@@ -35,7 +35,7 @@
 				// Something went wrong, try navigating
 				goto(href);
 			}
-		}}><i class="fa-solid fa-key" /> {m.clientSettings()}</Tab
+		}}><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tab
 	>
 </TabGroup>
 {#if tabSet === 1}

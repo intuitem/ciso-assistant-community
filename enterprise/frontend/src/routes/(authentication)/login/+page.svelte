@@ -4,8 +4,12 @@
 	import Greetings from './Greetings.svelte';
 	import FormCard from './FormCard.svelte';
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
 </script>
 
 <div class="lg:relative h-screen w-screen bg-slate-200">

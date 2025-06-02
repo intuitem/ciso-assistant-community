@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
 	// retain module scoped expansion state for each tree node
 	const _expansionState = {
 		/* treeNodeId: expanded <boolean> */
@@ -6,9 +6,10 @@
 </script>
 
 <script>
-	export let tree;
+	import TreeView from './TreeView.svelte';
+	let { tree } = $props();
 	const { name, children, uuid } = tree;
-	let expanded = _expansionState[name] || false;
+	let expanded = $state(_expansionState[name] || false);
 
 	// Generate href from uuid if it exists
 	const href = uuid ? `/domain-analytics/details/${uuid}/` : null;
@@ -17,14 +18,14 @@
 		expanded = _expansionState[name] = !expanded;
 	};
 
-	$: arrowDown = expanded;
+	let arrowDown = $derived(expanded);
 </script>
 
 <ul>
 	<li>
 		{#if children}
 			<div class="node-container">
-				<span class="arrow-container" on:click={toggleExpansion}>
+				<span class="arrow-container" onclick={toggleExpansion}>
 					<span class="arrow" class:arrowDown>&#x25b6;</span>
 				</span>
 				{#if uuid}
@@ -35,7 +36,7 @@
 			</div>
 			{#if expanded}
 				{#each children as child}
-					<svelte:self tree={child} />
+					<TreeView tree={child} />
 				{/each}
 			{/if}
 		{:else}

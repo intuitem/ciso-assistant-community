@@ -10,11 +10,15 @@
 		mimeType: ''
 	});
 
-	export let height = 200;
-	export let width = 200;
+	interface Props {
+		height?: number;
+		width?: number;
+	}
+
+	let { height = 200, width = 200 }: Props = $props();
 
 	const clientSettings = $page.data.clientSettings;
-	let logo: string;
+	let logo: string = $state();
 
 	onMount(async () => {
 		if (!clientSettings.settings.logo) {

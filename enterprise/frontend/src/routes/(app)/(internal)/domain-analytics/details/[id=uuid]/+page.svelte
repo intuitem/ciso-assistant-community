@@ -2,19 +2,23 @@
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
 	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
-	$: totalRisksCount = data.risks_count_per_level.current.reduce(
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	let totalRisksCount = $derived(data.risks_count_per_level.current.reduce(
 		(sum, level) => sum + level.value,
 		0
-	);
+	));
 
 	// Reactive boolean that checks if there are any risks (sum > 0)
-	$: hasRisks = totalRisksCount > 0;
+	let hasRisks = $derived(totalRisksCount > 0);
 </script>
 
 <main class="bg-white p-2">
