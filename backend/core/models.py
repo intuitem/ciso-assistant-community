@@ -566,7 +566,7 @@ class LibraryUpdater:
                         requirement_assessment_objects_to_update.append(ra)
                         continue
 
-                    answers = ra.answers
+                    answers = ra.answers or {}
 
                     # Remove answers corresponding to questions that have been removed
                     for urn in list(answers.keys()):
