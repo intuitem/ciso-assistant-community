@@ -3592,6 +3592,35 @@ class RiskScenario(NameDescriptionMixin):
         self.risk_assessment.upsert_daily_metrics()
 
 
+class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_PROGRESS = "in_progress", _("In progress")
+        IN_REVIEW = "in_review", _("In review")
+        DONE = "done", _("Done")
+        DEPRECATED = "deprecated", _("Deprecated")
+
+    framework = models.ForeignKey(
+        Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
+    )
+    selected_implementation_groups = models.JSONField(
+        blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Start date"),
+    )
+    perimeters = models.ManyToManyField(Perimeter, blank=True, related_name="campaigns")
+
+    class Meta:
+        verbose_name = "Campaign"
+        verbose_name_plural = "Campaigns"
+
+    def metrics(self):
+        pass
+
+
 class ComplianceAssessment(Assessment):
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
@@ -3618,6 +3647,9 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
+    campaign = models.ForeignKey(
+        Campaign, on_delete=models.PROTECT, null=True, blank=True
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:

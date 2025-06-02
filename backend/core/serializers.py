@@ -993,6 +993,12 @@ class AttachmentUploadSerializer(serializers.Serializer):
         fields = ["attachment"]
 
 
+class CampaignReadSerializer(serializers.Serializer):
+    class Meta:
+        model = Campaign
+        fields = "__all__"
+
+
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
