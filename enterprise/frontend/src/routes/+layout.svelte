@@ -8,19 +8,15 @@
 	import { browser } from '$app/environment';
 
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
-
-	import { getToastStore, storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	// Initializing stores prevents known security issues with SvelteKit SSR
 	// https://github.com/skeletonlabs/skeleton/wiki/SvelteKit-SSR-Warning
-	import { initializeStores } from '@skeletonlabs/skeleton';
-
 	initializeStores();
 
 	import Toast from '$lib/components/Toast/Toast.svelte';
 	import Modal from '$lib/components/Modals/Modal.svelte';
-	import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton-svelte';
 
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
@@ -45,12 +41,12 @@
 		toast($flash.message, {
 			background:
 				$flash.type == 'success'
-					? 'variant-filled-success'
+					? 'preset-filled-success-500'
 					: $flash.type === 'error'
-						? 'variant-filled-error'
+						? 'preset-filled-error-500'
 						: $flash.type == 'warning'
-							? 'variant-filled-warning'
-							: 'variant-filled-primary'
+							? 'preset-filled-warning-500'
+							: 'preset-filled-primary-500'
 		});
 
 		// Clearing the flash message could sometimes

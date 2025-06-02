@@ -3,7 +3,7 @@
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
-	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ClientSettings from './client-settings/+page.svelte';
 	import { goto, preloadData, pushState } from '$app/navigation';
 
@@ -12,7 +12,7 @@
 	let { data } = $props();
 </script>
 
-<TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
+<Tabs active="bg-primary-100 text-primary-800 border-b border-primary-800">
 	<Tab bind:group={tabSet} name="instanceSettings" value={0}
 		><i class="fa-solid fa-globe"></i> {m.general()}</Tab
 	>
@@ -37,7 +37,7 @@
 			}
 		}}><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tab
 	>
-</TabGroup>
+</Tabs>
 {#if tabSet === 1}
 	<div>
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { Accordion, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { darkenColor } from '$lib/utils/helpers';
-	import { page } from '$app/stores';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { page } from '$app/state';
+	import { } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
 	interface Props {
@@ -67,7 +67,7 @@
 
 		{#each data.metrics as domain, domainIndex}
 			<Accordion class="my-4">
-				<AccordionItem open>
+				<Accordion.Item open>
 					{#snippet lead()}
 									
 							<i class="fa-solid fa-sitemap text-primary-500"></i>
@@ -150,7 +150,7 @@
 
 														<Anchor
 															breadcrumbAction="push"
-															href={`/compliance-assessments/${assessment.id}?next=${$page.url.pathname}`}
+															href={`/compliance-assessments/${assessment.id}?next=${page.url.pathname}`}
 															label={assessment.name}
 															class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
 														>
@@ -170,7 +170,7 @@
 													<div class="flex w-full items-center justify-center">
 														<Anchor
 															breadcrumbAction="push"
-															href={`/compliance-assessments/${assessment.id}?next=${$page.url.pathname}`}
+															href={`/compliance-assessments/${assessment.id}?next=${page.url.pathname}`}
 															label={assessment.name}
 															class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
 														>
@@ -183,7 +183,7 @@
 												<!-- Requirement Assessment Card -->
 												<Anchor
 													breadcrumbAction="push"
-													href={`/requirement-assessments/${requirementAssessment.id}?next=${$page.url.pathname}`}
+													href={`/requirement-assessments/${requirementAssessment.id}?next=${page.url.pathname}`}
 													label={requirementAssessment.name}
 													class="flex flex-col items-center justify-center space-y-2 border w-full h-full p-2 rounded-lg bg-gray-200 shadow-md hover:border-2"
 													style="border-color: {complianceResultColorMap[
@@ -212,7 +212,7 @@
 
 													{#if requirementAssessment.is_scored}
 														<div class="flex flex-row space-x-2">
-															<ProgressRadial
+															<ProgressRing
 																stroke={100}
 																meter={displayScoreColor(
 																	requirementAssessment.score,
@@ -227,10 +227,10 @@
 																width={'w-10'}
 															>
 																{requirementAssessment.score}
-															</ProgressRadial>
+															</ProgressRing>
 
 															{#if assessment.show_documentation_score}
-																<ProgressRadial
+																<ProgressRing
 																	stroke={100}
 																	meter={displayScoreColor(
 																		requirementAssessment.documentation_score,
@@ -245,7 +245,7 @@
 																	width={'w-10'}
 																>
 																	{requirementAssessment.documentation_score}
-																</ProgressRadial>
+																</ProgressRing>
 															{/if}
 														</div>
 													{/if}
@@ -257,7 +257,7 @@
 							</div>
 						
 									{/snippet}
-				</AccordionItem>
+				</Accordion.Item>
 			</Accordion>
 		{/each}
 	{:else}

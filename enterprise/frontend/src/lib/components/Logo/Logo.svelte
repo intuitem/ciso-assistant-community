@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ciso from '$lib/assets/ciso.svg';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { persisted } from 'svelte-persisted-store';
 
 	const logoB64 = persisted('logo', {
@@ -17,7 +17,7 @@
 
 	let { height = 200, width = 200 }: Props = $props();
 
-	const clientSettings = $page.data.clientSettings;
+	const clientSettings = page.data.clientSettings;
 	let logo: string = $state();
 
 	onMount(async () => {

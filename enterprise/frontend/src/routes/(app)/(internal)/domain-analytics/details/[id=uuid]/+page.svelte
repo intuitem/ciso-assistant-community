@@ -31,7 +31,7 @@
 		<div class="grid grid-cols-4 p-2 gap-2">
 			<!---->
 			<fieldset
-				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-gradient-to-b from-slate-50 to-white"
+				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
 					><i class="fa-solid fa-shield-halved m-2"></i>{m.appliedControls()}</legend
@@ -50,7 +50,7 @@
 			</fieldset>
 			<!---->
 			<fieldset
-				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-gradient-to-b from-slate-50 to-white"
+				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
 					><i class="fa-solid fa-list-check m-2"></i>{m.compliance()}</legend

@@ -13,8 +13,8 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud.js';
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
+
 	interface Props {
 		data: PageData;
 	}
@@ -72,7 +72,7 @@
 				</div>
 				{#if data.settings.logo != null}
 					<button
-						class="btn variant-filled-tertiary h-full"
+						class="btn preset-filled-tertiary-500 h-full"
 						type="button"
 						onclick={(_) =>
 							modalConfirm(
@@ -100,7 +100,7 @@
 			</div>
 			{#if data.settings.favicon != null}
 				<button
-					class="btn variant-filled-tertiary h-full"
+					class="btn preset-filled-tertiary-500 h-full"
 					type="button"
 					onclick={(_) =>
 						modalConfirm(
@@ -119,7 +119,7 @@
 				helpText={m.showImagesUnauthenticatedHelpText()}
 			/>
 			<button
-				class="btn variant-filled-primary font-semibold w-full"
+				class="btn preset-filled-primary-500 font-semibold w-full"
 				data-testid="save-button"
 				type="submit">{m.save()}</button
 			>

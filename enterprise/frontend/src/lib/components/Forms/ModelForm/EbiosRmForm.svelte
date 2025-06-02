@@ -5,7 +5,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import * as m from '$paraglide/messages.js';
 	import TextArea from '../TextArea.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -27,7 +27,7 @@
 
 	let activeActivity: string | null = $state(null);
 
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {

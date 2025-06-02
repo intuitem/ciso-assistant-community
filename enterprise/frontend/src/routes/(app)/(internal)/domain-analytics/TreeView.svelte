@@ -26,7 +26,7 @@
 		{#if children}
 			<div class="node-container">
 				<span class="arrow-container" onclick={toggleExpansion}>
-					<span class="arrow" class:arrowDown>&#x25b6;</span>
+					<span class="arrow" class:arrowDown>▶</span>
 				</span>
 				{#if uuid}
 					<a {href} class="label-text">{name}</a>
