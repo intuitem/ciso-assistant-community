@@ -79,7 +79,6 @@
 		deleteConfirmModal: { ref: DeleteConfirmModal }
 	};
 
-
 	import { persisted } from 'svelte-persisted-store';
 	interface Props {
 		children?: import('svelte').Snippet;
@@ -94,21 +93,18 @@
 	});
 
 	const clientSettings = $page.data.clientSettings;
-  let favicon;
+	let favicon = $derived(`data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}`);
+	let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
 
 	onMount(async () => {
-		if (!clientSettings.settings.favicon) {
+		if (!clientSettings?.settings?.favicon) {
 			return;
 		}
-		const faviconHash = clientSettings.settings.favicon_hash;
 		if (faviconHash !== $faviconB64.hash) {
 			console.log('favicon changed, fetching new favicon...');
 			const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
 			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
 		}
-		favicon = clientSettings.settings.favicon
-			? `data:${$faviconB64.mimeType};base64, ${$faviconB64.data}`
-			: favicon;
 	});
 
 	run(() => {
@@ -120,7 +116,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon && Object.hasOwn(favicon, 'url') ? favicon.url : favicon} />
+	<link rel="icon" href={favicon ?? '/favicon.ico'} />
 </svelte:head>
 
 <ParaglideJsProvider>
