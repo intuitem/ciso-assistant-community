@@ -719,7 +719,7 @@
 	"addRepresentative": "Agregar representante",
 	"phone": "Teléfono",
 	"role": "Role",
-	"question": "Pregunta",
+	"questions": "Preguntas",
 	"recipientEntity": "Entidad destinataria",
 	"financial": "Finanzas",
 	"legal": "Jurídico",
@@ -925,5 +925,8 @@
 	"forceSSOLoginHelpText": "Requerir SSO para todos los usuarios y restablecer cualquier contraseña guardada. Los usuarios con 'Excluir del SSO forzado' habilitado conservarán el acceso de respaldo basado en contraseña.",
 	"forceSSOLoginHelpText2": "Asegúrese de que su SSO funcione o que tenga una cuenta de respaldo antes de habilitar esta opción.",
 	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
-	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente"
+	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente",
+	"mappingSuggested": "Sugerencia de mapeo",
+	"mappingSuggestedHelpText": "Sugerencias de mapeo basadas en marcos cargados",
+	"mappingSuggestionTeasing": "¡Ahora se sugieren mapeos! Puede usar los filtros para explorar sugerencias basadas en marcos cargados."
 }

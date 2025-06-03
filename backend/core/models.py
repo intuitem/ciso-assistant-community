@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Type, Union
+from typing import Self, Union, List
 
 from icecream import ic
 from auditlog.registry import auditlog
@@ -42,6 +42,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from collections import defaultdict
 
 logger = get_logger(__name__)
 
@@ -299,7 +300,7 @@ class StoredLibrary(LibraryMixin):
             outdated_library.delete()
 
         objects_meta = {
-            key: (1 if key in ["framework", "requirement_mapping_set"] else len(value))
+            key: (1 if key == "framework" else len(value))
             for key, value in library_data["objects"].items()
         }
 
@@ -356,32 +357,43 @@ class StoredLibrary(LibraryMixin):
 
 
 class LibraryUpdater:
-    def __init__(self, old_library: Type["LoadedLibrary"], new_library: StoredLibrary):
+    def __init__(self, old_library: "LoadedLibrary", new_library: StoredLibrary):
         self.old_library = old_library
-        self.old_objects = [
-            *old_library.threats.all(),
-            *old_library.reference_controls.all(),
-            *old_library.threats.all(),
-            *old_library.risk_matrices.all(),
-        ]
         self.new_library = new_library
         new_library_content = self.new_library.content
-        self.dependencies = self.new_library.dependencies
-        if self.dependencies is None:
-            self.dependencies = []
-        self.new_framework = new_library_content.get("framework")
-        self.new_matrices = new_library_content.get("risk_matrix")
+        self.dependencies: List[str] = self.new_library.dependencies or []
+        self.i18n_object_dict = {
+            "locale": self.old_library.locale,
+            "default_locale": self.old_library.default_locale,
+        }
+        self.referential_object_dict = {
+            "provider": self.new_library.provider,
+            "is_published": True,
+        }
+
+        # The "framework" field will be ignored if the "frameworks" field is defined.
+        self.new_frameworks = new_library_content.get(
+            "frameworks"
+        ) or new_library_content.get("framework")
+        if isinstance(self.new_frameworks, dict):
+            self.new_frameworks = [self.new_frameworks]
+
+        # The "risk_matrix" field will be ignored if the "risk_matrices" field is defined.
+        self.new_matrices = new_library_content.get(
+            "risk_matrices"
+        ) or new_library_content.get("risk_matrix")
+        if isinstance(self.new_matrices, dict):
+            self.new_matrices = [self.new_matrices]
+
+        # The "requirement_mapping_sets" field will be ignored if the "requirement_mapping_set" field is defined.
+        self.new_requirement_mapping_sets = new_library_content.get(
+            "requirement_mapping_sets"
+        ) or new_library_content.get("requirement_mapping_set")
+        if isinstance(self.new_requirement_mapping_sets, dict):
+            self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
+
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
-        self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
-        self.new_objects.update(
-            {obj["urn"].lower(): obj for obj in self.reference_controls}
-        )
-        if self.new_framework:
-            self.new_objects[self.new_framework["urn"].lower()] = self.new_framework
-        if self.new_matrices:
-            for matrix in self.new_matrices:
-                self.new_objects[matrix["urn"].lower()] = matrix
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -399,8 +411,8 @@ class LibraryUpdater:
                     stored_dependency = stored_dependencies[i]
                     if stored_dependency.locale == self.old_library.locale:
                         dependency = stored_dependency
-                if err_msg := dependency.load():
-                    return err_msg
+                if error_msg := dependency.load():
+                    return error_msg
                 continue
 
             dependency = possible_dependencies[0]
@@ -409,8 +421,369 @@ class LibraryUpdater:
                 if possible_dependency.locale == self.old_library.locale:
                     dependency = possible_dependency
 
-            if (err_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
-                return err_msg
+            if (error_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
+                return error_msg
+
+    def update_threats(self):
+        for threat in self.threats:
+            normalized_urn = threat["urn"].lower()
+            Threat.objects.update_or_create(
+                urn=normalized_urn,
+                defaults=threat,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **threat,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_reference_controls(self):
+        for reference_control in self.reference_controls:
+            normalized_urn = reference_control["urn"].lower()
+            ReferenceControl.objects.update_or_create(
+                urn=normalized_urn,
+                defaults=reference_control,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **reference_control,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_frameworks(self):
+        for new_framework in self.new_frameworks:
+            requirement_nodes = new_framework["requirement_nodes"]
+            framework_dict = {**new_framework}
+            del framework_dict["requirement_nodes"]
+
+            new_framework, _ = Framework.objects.update_or_create(
+                urn=new_framework["urn"],
+                defaults=framework_dict,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **framework_dict,
+                    "library": self.old_library,
+                },
+            )
+
+            # update requirement_nodes
+            requirement_node_urns = set(
+                rc.urn.lower()
+                for rc in RequirementNode.objects.filter(framework=new_framework)
+            )
+            new_requirement_node_urns = set(
+                rc["urn"].lower() for rc in requirement_nodes
+            )
+            deleted_requirement_node_urns = (
+                requirement_node_urns - new_requirement_node_urns
+            )
+
+            for requirement_node_urn in deleted_requirement_node_urns:
+                requirement_node = RequirementNode.objects.filter(
+                    urn=requirement_node_urn
+                ).first()
+                if requirement_node is not None:
+                    requirement_node.delete()
+
+            involved_library_urns = [*self.dependencies, self.old_library.urn]
+            involved_libraries = set(
+                LoadedLibrary.objects.filter(urn__in=involved_library_urns)
+            )
+            objects_tracked = {}
+
+            for threat in Threat.objects.filter(library__in=involved_libraries):
+                objects_tracked[threat.urn.lower()] = threat
+
+            for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
+                objects_tracked[rc.urn.lower()] = rc
+
+            compliance_assessments = [
+                *ComplianceAssessment.objects.filter(framework=new_framework)
+            ]
+
+            existing_requirement_node_objects = {
+                rn.urn.lower(): rn
+                for rn in RequirementNode.objects.filter(framework=new_framework)
+            }
+            existing_requirement_assessment_objects = defaultdict(list)
+            for ra in RequirementAssessment.objects.filter(
+                requirement__framework=new_framework
+            ):
+                existing_requirement_assessment_objects[
+                    ra.requirement.urn.lower()
+                ].append(ra)
+
+            requirement_assessment_objects_to_create = []
+            requirement_assessment_objects_to_update = []
+            requirement_node_objects_to_update = []
+            order_id = 0
+            all_fields_to_update = set()
+
+            # main loop by requirement_node
+            for requirement_node in requirement_nodes:
+                urn = requirement_node["urn"].lower()
+                questions = requirement_node.get("questions")
+
+                requirement_node_dict = {
+                    k: v
+                    for k, v in requirement_node.items()
+                    if k not in ["urn", "depth", "reference_controls", "threats"]
+                }
+                requirement_node_dict["order_id"] = order_id
+                order_id += 1
+                all_fields_to_update.update(requirement_node_dict.keys())
+
+                if urn in existing_requirement_node_objects:
+                    requirement_node_object = existing_requirement_node_objects[urn]
+                    for key, value in requirement_node_dict.items():
+                        setattr(requirement_node_object, key, value)
+                    requirement_node_objects_to_update.append(requirement_node_object)
+                else:
+                    requirement_node_object = RequirementNode.objects.create(
+                        urn=urn,
+                        framework=new_framework,
+                        **self.referential_object_dict,
+                        **requirement_node_dict,
+                    )
+                    for ca in compliance_assessments:
+                        requirement_assessment_objects_to_create.append(
+                            RequirementAssessment(
+                                compliance_assessment=ca,
+                                requirement=requirement_node_object,
+                                folder=ca.perimeter.folder,
+                                answers=transform_questions_to_answers(questions)
+                                if questions
+                                else {},
+                            )
+                        )
+
+                # update anwsers for each ra for the current requirement_node, when relevant
+                for ra in existing_requirement_assessment_objects.get(urn, []):
+                    if not questions:
+                        requirement_assessment_objects_to_update.append(ra)
+                        continue
+
+                    answers = ra.answers or {}
+
+                    # Remove answers corresponding to questions that have been removed
+                    for urn in list(answers.keys()):
+                        if urn not in questions:
+                            del answers[urn]
+                    # Add answers corresponding to questions that have been updated/added
+                    for urn, question in questions.items():
+                        # If the question is not present in answers, initialize it
+                        if urn not in answers:
+                            answers[urn] = None
+                            continue
+
+                        answer_val = answers[urn]
+                        type = question.get("type")
+
+                        if type == "multiple_choice":
+                            # Keep only the choices that exist in the question
+                            if isinstance(answer_val, list):
+                                valid_choices = {
+                                    choice["urn"]
+                                    for choice in question.get("choices", [])
+                                }
+                                answers[urn] = [
+                                    choice
+                                    for choice in answer_val
+                                    if choice in valid_choices
+                                ]
+                            else:
+                                answers[urn] = []
+
+                        elif type == "unique_choice":
+                            # If the answer does not match a valid choice, reset it to None
+                            valid_choices = {
+                                choice["urn"] for choice in question.get("choices", [])
+                            }
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val if answer_val in valid_choices else None
+                                )
+
+                        elif type == "text":
+                            # For a text question, simply check that it is a string
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val
+                                    if isinstance(answer_val, str)
+                                    and answer_val.split(":")[0] != "urn"
+                                    else None
+                                )
+
+                        elif type == "date":
+                            # For a date question, check the expected format (e.g., "YYYY-MM-DD")
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                try:
+                                    datetime.strptime(answer_val, "%Y-%m-%d")
+                                    answers[urn] = answer_val
+                                except Exception:
+                                    answers[urn] = None
+
+                    ra.answers = answers
+                    requirement_assessment_objects_to_update.append(ra)
+
+                # update threats linked to the requirement_node
+                for threat_urn in requirement_node.get("threats", []):
+                    normalized_threat_urn = threat_urn.lower()
+                    threat_object = (
+                        objects_tracked.get(normalized_threat_urn)
+                        or Threat.objects.filter(urn=normalized_threat_urn).first()
+                    )
+                    if threat_object:
+                        requirement_node_object.threats.add(threat_object)
+
+                # update reference_controls linked to the requirement_node
+                for rc_urn in requirement_node.get("reference_controls", []):
+                    normalized_rc_urn = rc_urn.lower()
+                    rc_object = (
+                        objects_tracked.get(normalized_rc_urn)
+                        or ReferenceControl.objects.filter(
+                            urn=normalized_rc_urn
+                        ).first()
+                    )
+                    if rc_object:
+                        requirement_node_object.reference_controls.add(rc_object)
+
+            # Fix for the dual bulk_update issue - consolidate into one update
+            if requirement_node_objects_to_update:
+                # Ensure all needed fields are included
+                fields_to_update = sorted(
+                    all_fields_to_update.union(
+                        {"name", "description", "order_id", "questions"}
+                    )
+                )
+                RequirementNode.objects.bulk_update(
+                    requirement_node_objects_to_update,
+                    fields_to_update,
+                    batch_size=200,
+                )
+
+            if requirement_assessment_objects_to_update:
+                RequirementAssessment.objects.bulk_update(
+                    requirement_assessment_objects_to_update,
+                    ["answers"],
+                    batch_size=100,
+                )
+
+            if requirement_assessment_objects_to_create:
+                RequirementAssessment.objects.bulk_create(
+                    requirement_assessment_objects_to_create, batch_size=100
+                )
+
+    def update_risk_matrices(self):
+        for matrix in self.new_matrices:
+            json_definition_keys = {
+                "grid",
+                "probability",
+                "impact",
+                "risk",
+            }  # Store this as a constant somewhere (as a static attribute of the class)
+            other_keys = set(matrix.keys()) - json_definition_keys
+            matrix_dict = {key: matrix[key] for key in other_keys}
+            matrix_dict["json_definition"] = {}
+            for key in json_definition_keys:
+                if key in matrix:  # If all keys are mandatory this condition is useless
+                    matrix_dict["json_definition"][key] = matrix[key]
+
+            RiskMatrix.objects.update_or_create(
+                urn=matrix["urn"].lower(),
+                defaults=matrix_dict,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **matrix_dict,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_requirement_mapping_sets(self):
+        for requirement_mapping_set in self.new_requirement_mapping_sets:
+            requirement_mapping_set_dict = {
+                key: value
+                for key, value in requirement_mapping_set.items()
+                if key
+                not in [
+                    "requirement_mappings",
+                    "source_framework_urn",
+                    "target_framework_urn",
+                ]
+            }
+
+            normalized_urn = requirement_mapping_set["urn"].lower()
+            queryset = RequirementMappingSet.objects.filter(urn=normalized_urn)
+            if not queryset.exists():
+                # We don't support the creation of new RequirementMappingSet during updates for the moment.
+                continue
+
+            requirement_mapping_set_obj = RequirementMappingSet.objects.get(
+                urn=normalized_urn
+            )
+            source_framework_urn = requirement_mapping_set[
+                "source_framework_urn"
+            ].lower()
+            target_framework_urn = requirement_mapping_set[
+                "target_framework_urn"
+            ].lower()
+            if (
+                requirement_mapping_set_obj.source_framework.urn != source_framework_urn
+                or requirement_mapping_set_obj.target_framework.urn
+                != target_framework_urn
+            ):
+                # We don't allow an update to modify the "source_framework" and "target_framework" of a RequirementMappingSet.
+                return "invalidLibraryUpdate"
+
+            queryset.update(
+                **self.referential_object_dict, **requirement_mapping_set_dict
+            )
+
+            # Delete existing RequirementMapping objects for the given mapping_set
+            RequirementMapping.objects.filter(
+                mapping_set=requirement_mapping_set_obj
+            ).delete()
+
+            for requirement_mapping in requirement_mapping_set.get(
+                "requirement_mappings", []
+            ):
+                requirement_mapping_dict = {
+                    key: value
+                    for key, value in requirement_mapping.items()
+                    if key
+                    not in [
+                        "source_requirement_urn",
+                        "target_requirement_urn",
+                        "strength_of_relationship",
+                    ]
+                }
+                requirement_mapping_dict["strength_of_relationship"] = (
+                    requirement_mapping.get("strength_of_relationship")
+                )  # # Fix the typo caused by the convert_library.py code.
+                source_requirement = RequirementNode.objects.get(
+                    urn=requirement_mapping["source_requirement_urn"]
+                )
+                target_requirement = RequirementNode.objects.get(
+                    urn=requirement_mapping["target_requirement_urn"]
+                )
+
+                # Re-create the RequirementMapping object
+                RequirementMapping.objects.create(
+                    mapping_set=requirement_mapping_set_obj,
+                    source_requirement=source_requirement,
+                    target_requirement=target_requirement,
+                    **requirement_mapping_dict,
+                )
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
@@ -423,7 +796,7 @@ class LibraryUpdater:
         dependencies_urn = set(self.dependencies)
         new_dependencies_urn = dependencies_urn - old_dependencies_urn
 
-        if not set(dependencies_urn).issuperset(old_dependencies_urn):
+        if not dependencies_urn.issuperset(old_dependencies_urn):
             return "invalidLibraryUpdate"
 
         new_dependencies = []
@@ -432,7 +805,7 @@ class LibraryUpdater:
                 new_dependency = LoadedLibrary.objects.filter(
                     urn=new_dependency_urn
                 ).first()  # The locale is not handled by this code
-            except:
+            except ValueError:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
         for key, value in [
@@ -458,252 +831,17 @@ class LibraryUpdater:
         for new_dependency in new_dependencies:
             self.old_library.dependencies.add(new_dependency)
 
-        referential_object_dict = {
-            "locale": self.old_library.locale,
-            "default_locale": self.old_library.default_locale,
-            "provider": self.new_library.provider,
-            "is_published": True,
-        }
+        self.update_threats()
+        self.update_reference_controls()
 
-        for threat in self.threats:
-            Threat.objects.update_or_create(
-                urn=threat["urn"].lower(),
-                defaults=threat,
-                create_defaults={
-                    **referential_object_dict,
-                    **threat,
-                    "library": self.old_library,
-                },
-            )
-
-        for reference_control in self.reference_controls:
-            ReferenceControl.objects.update_or_create(
-                urn=reference_control["urn"].lower(),
-                defaults=reference_control,
-                create_defaults={
-                    **referential_object_dict,
-                    **reference_control,
-                    "library": self.old_library,
-                },
-            )
-
-        if self.new_framework is not None:
-            framework_dict = {**self.new_framework}
-            del framework_dict["requirement_nodes"]
-
-            new_framework, _ = Framework.objects.update_or_create(
-                urn=self.new_framework["urn"],
-                defaults=framework_dict,
-                create_defaults={
-                    **referential_object_dict,
-                    **framework_dict,
-                    "library": self.old_library,
-                },
-            )
-
-            requirement_node_urns = set(
-                rc.urn for rc in RequirementNode.objects.filter(framework=new_framework)
-            )
-            new_requirement_node_urns = set(
-                rc["urn"].lower() for rc in self.new_framework["requirement_nodes"]
-            )
-            deleted_requirement_node_urns = (
-                requirement_node_urns - new_requirement_node_urns
-            )
-
-            for requirement_node_urn in deleted_requirement_node_urns:
-                requirement_node = RequirementNode.objects.filter(
-                    urn=requirement_node_urn
-                ).first()  # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
-                if requirement_node is not None:
-                    requirement_node.delete()
-
-            requirement_nodes = self.new_framework["requirement_nodes"]
-            involved_library_urns = [*self.dependencies, self.old_library.urn]
-            involved_libraries = set(
-                LoadedLibrary.objects.filter(urn__in=involved_library_urns)
-            )
-            objects_tracked = {}
-
-            for threat in Threat.objects.filter(library__in=involved_libraries):
-                objects_tracked[threat.urn] = threat
-
-            for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
-                objects_tracked[rc.urn] = rc
-
-            compliance_assessments = [
-                *ComplianceAssessment.objects.filter(framework=new_framework)
-            ]
-
-            order_id = 0
-            for requirement_node in requirement_nodes:
-                requirement_node_dict = {**requirement_node}
-                for key in ["depth", "reference_controls", "threats"]:
-                    requirement_node_dict.pop(key, None)
-                requirement_node_dict["order_id"] = order_id
-                order_id += 1
-
-                (
-                    new_requirement_node,
-                    created,
-                ) = RequirementNode.objects.update_or_create(
-                    urn=requirement_node["urn"].lower(),
-                    defaults=requirement_node_dict,
-                    create_defaults={
-                        **referential_object_dict,
-                        **requirement_node_dict,
-                        "framework": new_framework,
-                    },
-                )
-
-                if created:
-                    for compliance_assessment in compliance_assessments:
-                        ra = RequirementAssessment.objects.create(
-                            compliance_assessment=compliance_assessment,
-                            requirement=new_requirement_node,
-                            folder=compliance_assessment.perimeter.folder,
-                            answers=transform_questions_to_answers(
-                                new_requirement_node.questions
-                            )
-                            if new_requirement_node.questions
-                            else {},
-                        )
-                else:
-                    questions = requirement_node.get("questions")
-
-                    for ra in RequirementAssessment.objects.filter(
-                        requirement=new_requirement_node
-                    ):
-                        ra.name = new_requirement_node.name
-                        ra.description = new_requirement_node.description
-                        if not questions:
-                            ra.save()
-                            continue
-
-                        answers = ra.answers
-
-                        # Remove answers corresponding to questions that have been removed
-                        for urn in list(answers.keys()):
-                            if urn not in questions:
-                                del answers[urn]
-                        # Add answers corresponding to questions that have been updated/added
-                        for urn, question in questions.items():
-                            # If the question is not present in answers, initialize it
-                            if urn not in answers:
-                                answers[urn] = None
-                                continue
-
-                            answer_val = answers[urn]
-                            type = question.get("type")
-
-                            if type == "multiple_choice":
-                                # Keep only the choices that exist in the question
-                                if isinstance(answer_val, list):
-                                    valid_choices = {
-                                        choice["urn"]
-                                        for choice in question.get("choices", [])
-                                    }
-                                    answers[urn] = [
-                                        choice
-                                        for choice in answer_val
-                                        if choice in valid_choices
-                                    ]
-                                else:
-                                    answers[urn] = []
-
-                            elif type == "unique_choice":
-                                # If the answer does not match a valid choice, reset it to None
-                                valid_choices = {
-                                    choice["urn"]
-                                    for choice in question.get("choices", [])
-                                }
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if answer_val in valid_choices
-                                        else None
-                                    )
-
-                            elif type == "text":
-                                # For a text question, simply check that it is a string
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if isinstance(answer_val, str)
-                                        and answer_val.split(":")[0] != "urn"
-                                        else None
-                                    )
-
-                            elif type == "date":
-                                # For a date question, check the expected format (e.g., "YYYY-MM-DD")
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    try:
-                                        datetime.strptime(answer_val, "%Y-%m-%d")
-                                        answers[urn] = answer_val
-                                    except Exception:
-                                        answers[urn] = None
-                        ra.answers = answers
-                        ra.save()
-
-                for threat_urn in requirement_node_dict.get("threats", []):
-                    thread_to_add = objects_tracked.get(threat_urn)
-                    if thread_to_add is None:  # I am not 100% this condition is usefull
-                        thread_to_add = Threat.objects.filter(
-                            urn=threat_urn
-                        ).first()  # No locale support
-                    if thread_to_add is not None:
-                        new_requirement_node.threats.add(thread_to_add)
-
-                for reference_control_urn in requirement_node.get(
-                    "reference_controls", []
-                ):
-                    reference_control_to_add = objects_tracked.get(
-                        reference_control_urn
-                    )
-                    if (
-                        reference_control_to_add is None
-                    ):  # I am not 100% this condition is useful
-                        reference_control_to_add = ReferenceControl.objects.filter(
-                            urn=reference_control_urn.lower()
-                        ).first()  # No locale support
-
-                    if reference_control_to_add is not None:
-                        new_requirement_node.reference_controls.add(
-                            reference_control_to_add
-                        )
+        if self.new_frameworks is not None:
+            self.update_frameworks()
 
         if self.new_matrices is not None:
-            for matrix in self.new_matrices:
-                json_definition_keys = {
-                    "grid",
-                    "probability",
-                    "impact",
-                    "risk",
-                }  # Store this as a constant somewhere (as a static attribute of the class)
-                other_keys = set(matrix.keys()) - json_definition_keys
-                matrix_dict = {key: matrix[key] for key in other_keys}
-                matrix_dict["json_definition"] = {}
-                for key in json_definition_keys:
-                    if (
-                        key in matrix
-                    ):  # If all keys are mandatory this condition is useless
-                        matrix_dict["json_definition"][key] = matrix[key]
+            self.update_risk_matrices()
 
-                RiskMatrix.objects.update_or_create(
-                    urn=matrix["urn"].lower(),
-                    defaults=matrix_dict,
-                    create_defaults={
-                        **referential_object_dict,
-                        **matrix_dict,
-                        "library": self.old_library,
-                    },
-                )
+        if self.new_requirement_mapping_sets is not None:
+            self.update_requirement_mapping_sets()
 
 
 class LoadedLibrary(LibraryMixin):
@@ -2281,6 +2419,10 @@ class Incident(NameDescriptionMixin, FolderMixin):
         SEV5 = 5, "Low"
         UNDEFINED = 6, "unknown"
 
+    class Detection(models.TextChoices):
+        INTERNAL = "internally_detected", "Internal"
+        EXTERNAL = "externally_detected", "External"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -2318,6 +2460,25 @@ class Incident(NameDescriptionMixin, FolderMixin):
         verbose_name="Qualifications",
         blank=True,
     )
+
+    reported_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="Reported at", default=now
+    )
+    detection = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True,
+        choices=Detection.choices,
+        default=Detection.INTERNAL,
+    )
+
+    link = models.CharField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+    )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
@@ -4186,7 +4347,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
@@ -4444,7 +4605,7 @@ class FindingsAssessment(Assessment):
         }
 
 
-class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         IDENTIFIED = "identified", _("Identified")
@@ -4711,6 +4872,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name="Risk assessments",
         blank=True,
         help_text="Risk assessments related to the task",
+        related_name="task_templates",
+    )
+
+    findings_assessment = models.ManyToManyField(
+        FindingsAssessment,
+        verbose_name="Finding assessments",
+        blank=True,
+        help_text="Finding assessments related to the task",
         related_name="task_templates",
     )
 

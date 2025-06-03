@@ -729,7 +729,7 @@
 	"addRepresentative": "Aggiungi rappresentante",
 	"phone": "Telefono",
 	"role": "Ruolo",
-	"question": "Domanda",
+	"questions": "Domande",
 	"recipientEntity": "Entità destinataria",
 	"financial": "Finanziario",
 	"legal": "Legale",
@@ -1299,5 +1299,8 @@
 	"forceSSOLogin": "Forza accesso SSO",
 	"forceSSOLoginHelpText": "Richiedi SSO per tutti gli utenti e reimposta eventuali password salvate. Gli utenti con 'Escludi dal SSO forzato' abilitato manterranno l'accesso di fallback basato su password.",
 	"forceSSOLoginHelpText2": "Assicurati che il tuo SSO sia funzionante o che tu abbia un account di fallback prima di abilitare questa opzione.",
-	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente"
+	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente",
+	"mappingSuggested": "Mappatura suggerita",
+	"mappingSuggestedHelpText": "Suggerimenti di mappatura basati sui framework caricati",
+	"mappingSuggestionTeasing": "Le mappature sono ora suggerite! Puoi usare i filtri per esplorare i suggerimenti basati sui framework caricati."
 }

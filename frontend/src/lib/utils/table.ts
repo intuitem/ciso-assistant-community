@@ -27,6 +27,8 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
+const YES_OPTION = [{ label: 'yes', value: 'true' }];
+
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -151,6 +153,17 @@ const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/detection',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'detection',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -316,7 +329,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_LEVEL_FILTER: ListViewFilterConfig = {
+const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_level',
@@ -324,6 +337,14 @@ const RISK_LEVEL_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
+	}
+};
+
+const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'residual_level'
 	}
 };
 
@@ -343,11 +364,8 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'residual_criticality',
-		options: [1, 2, 3, 4],
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		multiple: true
+		...CURRENT_CRITICALITY_FILTER.props,
+		label: 'residual_criticality'
 	}
 };
 
@@ -456,7 +474,16 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
-		options: YES_NO_OPTIONS,
+		options: YES_OPTION,
+		multiple: true
+	}
+};
+
+const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'mappingSuggested',
+		options: YES_OPTION,
 		multiple: true
 	}
 };
@@ -570,8 +597,8 @@ export const listViewFields = {
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
-			current_level: RISK_LEVEL_FILTER,
-			residual_level: RISK_LEVEL_FILTER
+			current_level: CURRENT_RISK_LEVEL_FILTER,
+			residual_level: RESIDUAL_RISK_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -758,7 +785,8 @@ export const listViewFields = {
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			object_type: LIBRARY_TYPE_FILTER
+			object_type: LIBRARY_TYPE_FILTER,
+			mapping_suggested: MAPPING_SUGGESTED_FILTER
 		}
 	},
 	'loaded-libraries': {
@@ -964,25 +992,44 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'findings_assessment',
 			'severity',
+			'owner',
 			'status',
 			'filtering_labels'
 		],
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {
-		head: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
-		body: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'detection',
+			'folder',
+			'qualifications',
+			'updated_at'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'detection',
+			'folder',
+			'qualifications',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			status: INCIDENT_STATUS_FILTER,
+			detection: INCIDENT_DETECTION_FILTER,
 			severity: INCIDENT_SEVERITY_FILTER
 		}
 	},

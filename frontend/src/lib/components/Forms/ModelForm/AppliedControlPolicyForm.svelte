@@ -9,6 +9,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { onMount } from 'svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -18,8 +19,21 @@
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
 
-	if (model.selectOptions && 'priority' in model.selectOptions) {
-		model.selectOptions['priority'].forEach((element) => {
+	onMount(async () => {
+		if (!model.selectOptions) {
+			const selectOptions = {
+				status: await fetch('/applied-controls/status').then((r) => r.json()),
+				priority: await fetch('/applied-controls/priority').then((r) => r.json()),
+				category: await fetch('/applied-controls/category').then((r) => r.json()),
+				csf_function: await fetch('/applied-controls/csf_function').then((r) => r.json()),
+				effort: await fetch('/applied-controls/effort').then((r) => r.json())
+			};
+			model.selectOptions = selectOptions;
+		}
+	});
+
+	$: if (model?.selectOptions?.priority) {
+		model.selectOptions.priority.forEach((element) => {
 			element.value = parseInt(element.value);
 		});
 	}
@@ -38,7 +52,7 @@
 	/>
 	<Select
 		{form}
-		options={model.selectOptions['status']}
+		options={model.selectOptions?.status}
 		field="status"
 		label={m.status()}
 		cacheLock={cacheLocks['status']}
@@ -81,7 +95,7 @@
 		/>
 		<Select
 			{form}
-			options={model.selectOptions['priority']}
+			options={model.selectOptions?.priority}
 			field="priority"
 			label={m.priority()}
 			cacheLock={cacheLocks['priority']}
@@ -111,7 +125,7 @@
 		{#if schema.shape.category}
 			<Select
 				{form}
-				options={model.selectOptions['category']}
+				options={model.selectOptions?.category}
 				field="category"
 				label={m.category()}
 				cacheLock={cacheLocks['category']}
@@ -120,7 +134,7 @@
 		{/if}
 		<Select
 			{form}
-			options={model.selectOptions['csf_function']}
+			options={model.selectOptions?.csf_function}
 			field="csf_function"
 			label={m.csfFunction()}
 			cacheLock={cacheLocks['csf_function']}
@@ -146,7 +160,7 @@
 		/>
 		<Select
 			{form}
-			options={model.selectOptions['effort']}
+			options={model.selectOptions?.effort}
 			field="effort"
 			label={m.effort()}
 			helpText={m.effortHelpText()}
@@ -155,7 +169,7 @@
 		/>
 		<Select
 			{form}
-			options={model.selectOptions['control_impact']}
+			options={model.selectOptions?.control_impact}
 			field="control_impact"
 			label={m.controlImpact()}
 			helpText={m.impactHelpText()}
