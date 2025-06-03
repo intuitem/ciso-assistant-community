@@ -7,33 +7,35 @@ with the expanded mappings.
 Functionality:
 --------------
 - Reads a mapping table from a source Excel file (sheet and columns are configurable).
-- For each row, takes the `target_node_id` prefix and finds all `node_id` values in the reference file
+- For each row, takes the "target_node_id" prefix and finds all "node_id" values in the reference file
   that start with this prefix.
-- For each match found, it creates a new row with the original `source_node_id` and the full `node_id` from the reference.
+- For each match found, it creates a new row with the original "source_node_id" and the full "node_id" from the reference.
 - The output is written to a destination Excel file, with the following sheets:
     * "info": metadata and context about the mapping.
     * "mappings": the expanded result table.
-    * "warnings": optional sheet listing any source entries that did not match anything in the reference.
+    * "warnings": lists any source entries that did not match anything in the reference.
+    * "exceptions": lists all applied prefix remappings (see below).
 
 Exceptions System:
 ------------------
 - A framework-specific exception system is supported via an external JSON file.
-- This JSON file maps special `target_node_id` values to custom prefixes based on the `framework_exception` setting.
+- This JSON file maps special "target_node_id" values to custom prefixes based on the "framework_exception" setting.
 - Example use case: if `framework_exception = "soc2_rev2022"` and `target_node_id == "cc6.5"`, 
-  the script can be configured (via JSON) to match against `"c6.5"` instead.
-- The path to this JSON file is set via the `exceptions_json_path` variable in the script.
+  the script can be configured (via JSON) to match against "c6.5" instead.
+- The path to this JSON file is set via the "exceptions_json_path" variable in the script.
 - This system is useful when we want to force a search for a specific node ID in case of an error in a framework, for example
 
 Usage:
 ------
 1. Configure the paths and sheet/column names at the top of the script.
-2. (Optional) Set `framework_exception` to activate any custom remapping logic.
-3. Run the script to generate the expanded Excel file.
+2. Set the "framework_exception" if needed (optional).
+3. Provide the path to the exceptions JSON file.
+4. Run the script to generate the expanded Excel file.
 
 Note:
 -----
 This tool is intended as a utility to support data expansion. It does not replace the output
-of `prepare_mapping.py`, and should be used as a complement.
+of "prepare_mapping.py", and should be used as a complement.
 """
 
 
