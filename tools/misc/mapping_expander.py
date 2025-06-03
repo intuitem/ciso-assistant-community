@@ -48,7 +48,7 @@ import json
 
 # === Configuration variables ===
 source_file = "../excel/ccf/part_mapping_adobe-ccf-v5_to_soc2.xlsx"
-reference_file = "../excel/ccf/mapping-adobe-ccf-v5-to-soc2-2017-rev-2022.xlsx"
+reference_file = "../excel/ccf/mapping-adobe-ccf-v5-to-soc2-2017-rev-2022_new.xlsx"
 destination_file = "../excel/ccf/destination.xlsx"
 exceptions_json_path = "mapping_expander_exceptions.json"
 
@@ -181,12 +181,12 @@ wb.save(destination_file)
 
 # === Confirmation message ===
 print("✅ Conversion completed successfully.")
-print(f"➡ Source sheet: '{source_sheet_name}'")
-print(f"➡ Reference sheet: '{reference_sheet_name}', column: '{reference_column_name}'")
-print(f"📁 Output file: {destination_file}")
+print(f"➡ Source sheet: \"{source_sheet_name}\"")
+print(f"➡ Reference sheet: \"{reference_sheet_name}\", column: \"{reference_column_name}\"")
+print(f"📁 Output file: \"{destination_file}\"")
 
 if warnings_list:
-    print(f"⚠️  {len(warnings_list)} warnings found. See the 'warnings' sheet in the output file.")
+    print(f"⚠️  {len(warnings_list)} warnings found. See the \"warnings\" sheet in the output file.")
 
 if exceptions_list:
-    print(f"ℹ️  {len(exceptions_list)} exceptions applied. See the 'exceptions' sheet in the output file.")
+    print(f"ℹ️  {len(exceptions_list)} exceptions applied. See the \"exceptions\" sheet in the output file.")
