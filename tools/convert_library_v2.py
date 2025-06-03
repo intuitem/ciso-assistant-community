@@ -774,8 +774,8 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 source_node_id = str(data.get("source_node_id", "")).strip()
                 target_node_id = str(data.get("target_node_id", "")).strip()
                 entry = {
-                    "source_requirement_urn": source_node_base_urn + ":" + source_node_id,
-                    "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
+                    "source_requirement_urn": source_node_base_urn + ":" + source_node_id.lower().replace(" ", "-"),
+                    "target_requirement_urn": target_node_base_urn + ":" + target_node_id.lower().replace(" ", "-"),
                     "relationship": data.get("relationship").strip(),
                 }
                 entry_revert = {
