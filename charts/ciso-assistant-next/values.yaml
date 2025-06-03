@@ -309,12 +309,12 @@ ingress:
 ## Bundeled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
-postgresql:
+postgresql: # @schema additionalProperties: true
   # -- Enable to deploy PostgreSQL.
   enabled: false
-  global:
-    postgresql:
-      auth:
+  global: # @schema additionalProperties: true
+    postgresql: # @schema additionalProperties: true
+      auth: # @schema additionalProperties: true
         # -- Super-user postgres account password
         ## Note: if not set, it will be dynamically generated
         postgresPassword: ""
@@ -325,8 +325,8 @@ postgresql:
         # -- Database user account password
         ## Note: if not set, it will be dynamically generated
         password: ""
-  primary:
-    persistence:
+  primary: # @schema additionalProperties: true
+    persistence: # @schema additionalProperties: true
       # -- PostgreSQL persistant volume size (default 8Gi).
       size: 5Gi
 
