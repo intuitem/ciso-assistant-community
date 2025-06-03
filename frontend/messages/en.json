@@ -937,6 +937,22 @@
 	"addTag": "Add tag",
 	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu.",
 	"enabled": "Enabled",
+	"hour": [{
+		"declarations": ["input count", "local countPlural = count: plural"],
+		"selectors": ["countPlural", "count"],
+		"match": {
+			"countPlural=one": "{count} Hour",
+			"countPlural=other": "{count} Hours"
+		}
+	}],
+	"minute": [{
+		"declarations": ["input count", "local countPlural = count: plural"],
+		"selectors": ["countPlural"],
+		"match": {
+			"countPlural=one": "{count} Minute",
+			"countPlural=other": "{count} Minutes"
+		}
+	}],
 	"hours": "Hours",
 	"minutes": "Minutes",
 	"seconds": "Seconds",
@@ -1471,7 +1487,14 @@
 	"the": "The",
 	"of": "Of",
 	"recurrent": "Recurrent",
-	"day": "Day",
+	"day": [{
+		"declarations": ["input count", "local countPlural = count: plural"],
+		"selectors": ["countPlural"],
+		"match": {
+			"countPlural=one": "{count} Day",
+			"countPlural=other": "{count} Days"
+		}
+	}],
 	"week": "Week",
 	"weeks": "Weeks",
 	"month": "Month",

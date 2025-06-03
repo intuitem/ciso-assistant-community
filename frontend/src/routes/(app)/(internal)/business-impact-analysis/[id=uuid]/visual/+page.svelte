@@ -21,9 +21,9 @@
 		const minutes = Math.floor((seconds % 3600) / 60);
 
 		const parts = [];
-		if (days) parts.push(`${days}${m.days()}`);
-		if (hours) parts.push(`${hours}${m.hours()}`);
-		if (minutes) parts.push(`${minutes}${m.minutes()}`);
+		if (days) parts.push(`${m['day']({count: days})}`);
+		if (hours) parts.push(`${m['hour']({count: hours})}`);
+		if (minutes) parts.push(`${m['minute']({count: minutes})}`);
 
 		return parts.join(' ');
 	}
