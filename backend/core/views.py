@@ -4043,6 +4043,22 @@ class QualificationViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
+class CampaignViewSet(BaseModelViewSet):
+    model = Campaign
+
+    filterset_fields = [
+        "folder",
+        "framework",
+        "status",
+    ]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Campaign.Status.choices))
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
