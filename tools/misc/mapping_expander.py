@@ -59,12 +59,23 @@ node_id_list = df_reference[reference_column_name].dropna().tolist()
 
 # === Prepare new rows for output ===
 new_rows = []
+warnings_list = []
 
 for _, row in df_source.iterrows():
     source_id = row["source_node_id"]
     target_prefix = row["target_node_id"]
 
     matches = [node_id for node_id in node_id_list if node_id.startswith(target_prefix)]
+    
+    # Show a warning if no match was found
+    if not matches:
+        warning_msg = f"No match found in reference for target_node_id \"{target_prefix}\" (source_node_id: \"{source_id}\")"
+        print(f"⚠️  [WARNING] {warning_msg}")
+        warnings_list.append({
+            "source_node_id": source_id,
+            "target_node_id": target_prefix,
+            "message": warning_msg
+        })
 
     for full_node_id in matches:
         new_rows.append({
@@ -114,6 +125,17 @@ for row in dataframe_to_rows(df_result, index=False, header=False):
 for column in ws_mappings.columns:
     for cell in column:
         cell.number_format = numbers.FORMAT_TEXT
+
+
+# === Sheet: warnings (if any) ===
+if warnings_list:
+    ws_warn = wb.create_sheet(title="warnings")
+    # Write headers
+    ws_warn.append(["source_node_id", "target_node_id", "message"])
+    # Write warning rows
+    for warn in warnings_list:
+        ws_warn.append([warn["source_node_id"], warn["target_node_id"], warn["message"]])
+
 
 # Save workbook
 wb.save(destination_file)
