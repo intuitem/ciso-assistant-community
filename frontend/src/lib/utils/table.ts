@@ -748,8 +748,26 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'progress'],
+		head: [
+			'ref_id',
+			'name',
+			'framework',
+			'assets',
+			'evidences',
+			'description',
+			'perimeter',
+			'reviewProgress'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'framework',
+			'assets',
+			'evidences',
+			'description',
+			'perimeter',
+			'progress'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
