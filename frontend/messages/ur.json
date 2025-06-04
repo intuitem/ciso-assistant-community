@@ -891,5 +891,51 @@
 	"taskScheduleWarning": "نئی شیڈول کا حصہ نہ ہونے والے کسی بھی کام کو مستقل طور پر حذف کر دیا جائے گا۔",
 	"mappingSuggested": "نقشہ سازی تجویز کردہ",
 	"mappingSuggestedHelpText": "لوڈ کردہ فریم ورکس کے بنیاد پر نقشہ سازی کی تجویزیں",
-	"mappingSuggestionTeasing": "اب نقشہ سازی کی تجویزیں دی جاتی ہیں! آپ لوڈ کردہ فریم ورکس کے بنیاد پر تجویزوں کو تلاش کرنے کے لیے فلٹرز استعمال کر سکتے ہیں۔"
+	"mappingSuggestionTeasing": "اب نقشہ سازی کی تجویزیں دی جاتی ہیں! آپ لوڈ کردہ فریم ورکس کے بنیاد پر تجویزوں کو تلاش کرنے کے لیے فلٹرز استعمال کر سکتے ہیں۔",
+	"hourCount": [
+		{
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
+			"match": {
+				"countPlural=one": "گھنٹہ {count}",
+				"countPlural=other": "گھنٹے {count}"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
+			"match": {
+				"countPlural=one": "منٹ {count}",
+				"countPlural=other": "منٹ {count}"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
+			"match": {
+				"countPlural=one": "دن {count}",
+				"countPlural=other": "دن {count}"
+			}
+		}
+	]
 }

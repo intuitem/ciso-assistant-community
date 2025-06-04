@@ -892,5 +892,51 @@
 	"taskScheduleWarning": "नए अनुसूची का हिस्सा न होने वाले किसी भी कार्य को स्थायी रूप से हटा दिया जाएगा।",
 	"mappingSuggested": "मैपिंग सुझाई गई",
 	"mappingSuggestedHelpText": "लोड किए गए फ्रेमवर्कों के आधार पर मैपिंग सुझाव",
-	"mappingSuggestionTeasing": "अब मैपिंग सुझाई जाती है! आप लोड किए गए फ्रेमवर्कों के आधार पर सुझावों को खोजने के लिए फ़िल्टर का उपयोग कर सकते हैं।"
+	"mappingSuggestionTeasing": "अब मैपिंग सुझाई जाती है! आप लोड किए गए फ्रेमवर्कों के आधार पर सुझावों को खोजने के लिए फ़िल्टर का उपयोग कर सकते हैं।",
+	"hourCount": [
+		{
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
+			"match": {
+				"countPlural=one": "{count} घंटा",
+				"countPlural=other": "{count} घंटे"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
+			"match": {
+				"countPlural=one": "{count} मिनट",
+				"countPlural=other": "{count} मिनट"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
+			"match": {
+				"countPlural=one": "{count} दिन",
+				"countPlural=other": "{count} दिन"
+			}
+		}
+	]
 }
