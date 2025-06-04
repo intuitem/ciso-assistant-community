@@ -12,9 +12,9 @@ export function unsafeTranslate(key: string | { day?: number, hour?: number, min
 		if (typeof key === 'object' && key !== null && 'day' in key && 'hour' in key && 'minute' in key) {
 			const { day, hour, minute } = key;
 			const parts = [];
-			if (day !== undefined) parts.push(`${m['day']({count: day}, options)}`);
-			if (hour !== undefined) parts.push(`${m['hour']({count: hour}, options)}`);
-			if (minute !== undefined) parts.push(`${m['minute']({count: minute}, options)}`);
+			if (day !== undefined) parts.push(`${m['dayCount']({count: day}, options)}`);
+			if (hour !== undefined) parts.push(`${m['hourCount']({count: hour}, options)}`);
+			if (minute !== undefined) parts.push(`${m['minuteCount']({count: minute}, options)}`);
 			return parts.join(', ');
 		}
 
