@@ -217,11 +217,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
         hours, seconds = divmod(seconds, 3600)
         minutes, _ = divmod(seconds, 60)
 
-        return {
-            "day": days,
-            "hour": hours,
-            "minute": minutes
-        }
+        return {"day": days, "hour": hours, "minute": minutes}
 
     @staticmethod
     def format_impact(impact: int, parsed_matrix: dict):
