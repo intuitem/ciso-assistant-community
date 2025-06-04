@@ -86,26 +86,32 @@
 <!-- App Shell -->
 <div>
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
-	<AppBar background="bg-white" padding="py-2 px-4" class="relative">
-		<span
-			class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-			id="page-title"
-		>
-			{safeTranslate($pageTitle)}
-		</span>
-		{#if data?.user?.is_admin}
-			<button
-				onclick={modalQuickStart}
-				class="absolute top-7 right-9 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+	<AppBar
+		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
+		background="bg-white"
+		padding="py-2 px-4"
+	>
+		{#snippet headline()}
+			<span
+				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+				id="page-title"
+			>
+				{safeTranslate($pageTitle)}
+			</span>
+			{#if data?.user?.is_admin}
+				<button
+					onclick={modalQuickStart}
+					class="absolute top-7 right-9 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
         ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
         hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
         focus:outline-hidden focus:ring-violet-500"
-			>
-				{m.quickStart()}
-			</button>
-		{/if}
-		<hr class="w-screen my-1" />
-		<Breadcrumbs />
+				>
+					{m.quickStart()}
+				</button>
+			{/if}
+			<hr class="w-screen my-1" />
+			<Breadcrumbs />
+		{/snippet}
 	</AppBar>
 	<!-- Router Slot -->
 	<CommandPalette />

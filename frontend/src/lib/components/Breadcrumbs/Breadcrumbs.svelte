@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
@@ -45,13 +43,13 @@
 		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, page.url.pathname);
 	});
 
-	run(() => {
+	$effect(() => {
 		$pageTitle = getPageTitle();
 		if ($breadcrumbs.length < 2) breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
 	});
 </script>
 
-<ol class="breadcrumb-nonresponsive h-6 overflow-hidden whitespace-nowrap">
+<ol class="flex items-center gap-4 h-6 overflow-hidden whitespace-nowrap">
 	{#each $breadcrumbs as c, i}
 		{#if i == $breadcrumbs.length - 1}
 			<span
@@ -64,7 +62,7 @@
 				{safeTranslate(c.label)}
 			</span>
 		{:else}
-			<li class="crumb">
+			<li>
 				{#if c.href}
 					<a
 						class="max-w-[64ch] overflow-hidden unstyled text-sm hover:text-primary-500 font-semibold antialiased whitespace-nowrap"
@@ -89,7 +87,7 @@
 					</span>
 				{/if}
 			</li>
-			<li class="crumb-separator" aria-hidden>›</li>
+			<li class="crumb-separator" aria-hidden="true">›</li>
 		{/if}
 	{/each}
 </ol>
