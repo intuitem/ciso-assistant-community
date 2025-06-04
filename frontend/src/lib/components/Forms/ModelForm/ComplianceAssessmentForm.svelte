@@ -127,6 +127,13 @@
 		cacheLock={cacheLocks['show_documentation_score']}
 		bind:cachedValue={formDataCache['show_documentation_score']}
 	/>
+	<TextField
+		{form}
+		field="ref_id"
+		label={m.refId()}
+		cacheLock={cacheLocks['ref_id']}
+		bind:cachedValue={formDataCache['ref_id']}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -136,12 +143,14 @@
 		field="assets"
 		label={m.assets()}
 	/>
-	<TextField
+	<AutocompleteSelect
+		multiple
 		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
+		optionsEndpoint="evidences"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="evidences"
+		label={m.evidences()}
 	/>
 	<TextField
 		{form}
