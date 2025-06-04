@@ -18,6 +18,8 @@
 
 	$: availableUpdatesCount = data?.updatableLibraries?.length;
 
+	$: mappingSuggestedCount = data?.mappingSuggested?.length;
+
 	$: if (data.loadedLibrariesTable.meta.count === 0) tabSet = 0;
 </script>
 
@@ -26,8 +28,13 @@
 		{#if data.loadedLibrariesTable.meta.count > 0}
 			<Tab bind:group={tabSet} value={0}
 				>{m.librariesStore()}
-				<span class="badge variant-soft-primary">{data.storedLibrariesTable.meta.count}</span></Tab
-			>
+				<span class="badge variant-soft-primary">{data.storedLibrariesTable.meta.count}</span>
+				{#if mappingSuggestedCount > 0}
+					<span class="badge variant-soft-secondary" title={m.mappingSuggestedHelpText()}
+						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
+					>
+				{/if}
+			</Tab>
 			<Tab bind:group={tabSet} value={1}
 				>{m.loadedLibraries()}
 				<span class="badge variant-soft-primary">{data.loadedLibrariesTable.meta.count}</span>
@@ -46,7 +53,18 @@
 		<svelte:fragment slot="panel">
 			<!-- storedlibraries -->
 			{#if tabSet === 0}
-				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+				<!-- start of mapping suggestions teasing -->
+				{#if mappingSuggestedCount > 0}
+					<div
+						class="flex items-center justify-center w-full -mt-4 p-2 variant-soft-secondary text-sm"
+					>
+						<span class="badge variant-soft-secondary mr-1" title={m.mappingSuggestedHelpText()}
+							>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
+						><span class="">{m.mappingSuggestionTeasing()}</span>
+					</div>
+				{/if}
+				<!-- end of mapping suggestions teasing -->
+				<div class="flex items-center mt-1 px-2 text-xs space-x-2">
 					<i class="fa-solid fa-info-circle" />
 					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
 				</div>

@@ -37,7 +37,7 @@
 	export let spacing: CssClasses = 'space-x-4';
 	export let rounded: CssClasses = 'rounded-container-token';
 	export let shadow: CssClasses = 'shadow-lg';
-	export let zIndex: CssClasses = 'z-[888]';
+	export let zIndex: CssClasses = 'z-[9999]';
 
 	// Props (buttons)
 	export let buttonAction: CssClasses = 'btn variant-filled';

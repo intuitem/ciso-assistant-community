@@ -499,6 +499,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
 			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true }
 		]
 	},
@@ -516,7 +517,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
@@ -1024,13 +1026,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		// reverseForeignKeyFields: [
-		// 	{ field: 'findings', urlModel: 'vulnerabilities' },
-		// 	{ field: 'findings', urlModel: 'reference-controls' },
-		// 	{ field: 'findings', urlModel: 'applied-controls' }
-		// ],
+		reverseForeignKeyFields: [
+			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
+			// 	{ field: 'findings', urlModel: 'reference-controls' },
+			{ field: 'findings', urlModel: 'applied-controls' }
+		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
 	incidents: {

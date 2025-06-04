@@ -178,6 +178,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.forms",
     "django_structlog",
+    "auditlog",
     "tailwind",
     "iam",
     "global_settings",
@@ -200,7 +201,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
-    "auditlog",
     "storages",
 ]
 
@@ -263,7 +263,7 @@ REST_FRAMEWORK = {
         "core.permissions.RBACPermissions",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
@@ -280,6 +280,7 @@ REST_KNOX = {
     "MIN_REFRESH_INTERVAL": 60,
 }
 
+KNOX_TOKEN_MODEL = "knox.AuthToken"
 
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
