@@ -127,6 +127,7 @@ erDiagram
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     COMPLIANCE_ASSESSMENT        }o--o{ ASSET                 : relates_to
+    COMPLIANCE_ASSESSMENT        }o--o{ EVIDENCE              : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
