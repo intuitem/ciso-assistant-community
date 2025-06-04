@@ -7,14 +7,24 @@ import { toCamelCase } from '$lib/utils/locales';
  * @param params The parameters to pass to the translation function.
  * @param options The options to pass to the translation function.
  */
-export function unsafeTranslate(key: string | { day?: number, hour?: number, minute?: number }, params = {}, options = {}): string | undefined {
+export function unsafeTranslate(
+	key: string | { day?: number; hour?: number; minute?: number },
+	params = {},
+	options = {}
+): string | undefined {
 	try {
-		if (typeof key === 'object' && key !== null && 'day' in key && 'hour' in key && 'minute' in key) {
+		if (
+			typeof key === 'object' &&
+			key !== null &&
+			'day' in key &&
+			'hour' in key &&
+			'minute' in key
+		) {
 			const { day, hour, minute } = key;
 			const parts = [];
-			if (day !== undefined) parts.push(`${m['dayCount']({count: day}, options)}`);
-			if (hour !== undefined) parts.push(`${m['hourCount']({count: hour}, options)}`);
-			if (minute !== undefined) parts.push(`${m['minuteCount']({count: minute}, options)}`);
+			if (day !== undefined) parts.push(`${m['dayCount']({ count: day }, options)}`);
+			if (hour !== undefined) parts.push(`${m['hourCount']({ count: hour }, options)}`);
+			if (minute !== undefined) parts.push(`${m['minuteCount']({ count: minute }, options)}`);
 			return parts.join(', ');
 		}
 

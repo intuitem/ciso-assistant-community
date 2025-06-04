@@ -894,14 +894,8 @@
 	"mappingSuggestionTeasing": "اب نقشہ سازی کی تجویزیں دی جاتی ہیں! آپ لوڈ کردہ فریم ورکس کے بنیاد پر تجویزوں کو تلاش کرنے کے لیے فلٹرز استعمال کر سکتے ہیں۔",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "گھنٹہ {count}",
 				"countPlural=other": "گھنٹے {count}"
@@ -910,13 +904,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "منٹ {count}",
 				"countPlural=other": "منٹ {count}"
@@ -925,13 +914,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "دن {count}",
 				"countPlural=other": "دن {count}"

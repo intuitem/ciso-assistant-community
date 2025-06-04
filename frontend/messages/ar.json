@@ -894,14 +894,8 @@
 	"mappingSuggestionTeasing": "تم اقتراح خرائط! يمكنك استخدام المرشحات لاستكشاف الاقتراحات بناءً على الأطر المحملة.",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "ساعة {count} ",
 				"countPlural=other": "ساعات {count} "
@@ -910,13 +904,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "دقيقة {count}",
 				"countPlural=other": "دقائق {count}"
@@ -925,13 +914,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "يوم {count}",
 				"countPlural=other": "أيام {count}"
