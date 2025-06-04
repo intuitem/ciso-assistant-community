@@ -779,8 +779,8 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                     "relationship": data.get("relationship").strip(),
                 }
                 entry_revert = {
-                    "source_requirement_urn": target_node_base_urn + ":" + target_node_id,
-                    "target_requirement_urn": source_node_base_urn + ":" + source_node_id,
+                    "source_requirement_urn": target_node_base_urn + ":" + target_node_id.lower().replace(" ", "-"),
+                    "target_requirement_urn": source_node_base_urn + ":" + source_node_id.lower().replace(" ", "-"),
                     "relationship": revert_relationship(data.get("relationship").strip()),
                 }
                 if "rationale" in data and data["rationale"]:
