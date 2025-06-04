@@ -1,11 +1,11 @@
 """
-create_library.py — Build a CISO Assistant YAML library from a v2 Excel file
+convert@_library_v2.py — Build a CISO Assistant YAML library from a v2 Excel file
 
 This script processes an Excel file in v2 format (with *_meta and *_content tabs),
 extracts all declared objects, and generates a fully structured YAML library.
 
 Usage:
-    python create_library.py path/to/library.xlsx [--compat]
+    python convert_library_v2.py path/to/library.xlsx [--compat]
 
 Arguments:
     --compat  Use legacy URN fallback logic (for requirements without ref_id)
@@ -326,6 +326,15 @@ def parse_risk_matrix(meta, content_ws, wb):
 
     return risk_matrix
 
+# --- Mapping logic ---------------------------------------------------------------
+
+def revert_relationship(relation: str):
+    if relation == "subset":
+        return "superset"
+    elif relation == "superset":
+        return "subset"
+    else:
+        return relation
 
 # --- Main logic ---------------------------------------------------------------
 
@@ -624,6 +633,9 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 for row in rows[1:]:
                     counter += 1
                     data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+                    if all(value is None for value in data.values()):
+                        print(f"empty line {counter}")
+                        continue
                     depth = int(data.get("depth", 1))
                     ref_id = data.get("ref_id")
                     ref_id = str(ref_id).strip() if ref_id is not None else None
@@ -734,16 +746,26 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 "source_framework_urn": meta.get("source_framework_urn"),
                 "target_framework_urn": meta.get("target_framework_urn"),
             }
+            requirement_mapping_set_revert = {
+                "urn": meta.get("urn") + "-revert",
+                "ref_id": meta.get("ref_id") + "-revert",
+                "name": meta.get("name"),
+                "description": meta.get("description"),
+                "target_framework_urn": meta.get("source_framework_urn"),
+                "source_framework_urn": meta.get("target_framework_urn"),
+            }
 
             translations = extract_translations_from_metadata(meta, "requirement_mapping_set")
             if translations:
                 requirement_mapping_set["translations"] = translations
+                requirement_mapping_set_revert["translations"] = translations
 
             rows = list(content_ws.iter_rows())
             if not rows:
                 continue
             header = [str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]]
             requirement_mappings = []
+            requirement_mappings_revert = []
 
             for row in rows[1:]:
                 if not any(cell.value for cell in row):
@@ -756,13 +778,22 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                     "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
                     "relationship": data.get("relationship").strip(),
                 }
+                entry_revert = {
+                    "source_requirement_urn": target_node_base_urn + ":" + target_node_id,
+                    "target_requirement_urn": source_node_base_urn + ":" + source_node_id,
+                    "relationship": revert_relationship(data.get("relationship").strip()),
+                }
                 if "rationale" in data and data["rationale"]:
                     entry["rationale"] = data.get("rationale").strip()
+                    entry_revert["rationale"] = data.get("rationale").strip()
                 if "strength_of_relationship" in data and data["strength_of_relationship"]:
                     entry["strength_of_relationship"] = int(data.get("strength_of_relationship"))
+                    entry_revert["strength_of_relationship"] = int(data.get("strength_of_relationship"))
                 requirement_mappings.append(entry)
+                requirement_mappings_revert.append(entry_revert)
             requirement_mapping_set["requirement_mappings"] = requirement_mappings
-            library["objects"]["requirement_mapping_set"] = requirement_mapping_set
+            requirement_mapping_set_revert["requirement_mappings"] = requirement_mappings_revert
+            library["objects"]["requirement_mapping_sets"] = [requirement_mapping_set, requirement_mapping_set_revert]
 
         else:
             if obj_type not in ["answers", "implementation_groups", "scores", "urn_prefix"]:

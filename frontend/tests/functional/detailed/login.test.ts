@@ -96,6 +96,7 @@ test('forgot password process is working properly', async ({
 	);
 
 	const resetLoginPage = new LoginPage(resetPasswordPage);
+	await resetLoginPage.page.waitForLoadState('networkidle');
 	await resetLoginPage.newPasswordInput.fill('new' + testData.user.password);
 	await resetLoginPage.confirmPasswordInput.fill('new' + testData.user.password);
 	await resetLoginPage.setPasswordButton.click();

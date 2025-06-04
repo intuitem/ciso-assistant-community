@@ -27,6 +27,8 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
+const YES_OPTION = [{ label: 'yes', value: 'true' }];
+
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -472,7 +474,16 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
-		options: YES_NO_OPTIONS,
+		options: YES_OPTION,
+		multiple: true
+	}
+};
+
+const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'mappingSuggested',
+		options: YES_OPTION,
 		multiple: true
 	}
 };
@@ -737,8 +748,26 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'progress'],
+		head: [
+			'ref_id',
+			'name',
+			'framework',
+			'assets',
+			'evidences',
+			'description',
+			'perimeter',
+			'reviewProgress'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'framework',
+			'assets',
+			'evidences',
+			'description',
+			'perimeter',
+			'progress'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -774,7 +803,8 @@ export const listViewFields = {
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			object_type: LIBRARY_TYPE_FILTER
+			object_type: LIBRARY_TYPE_FILTER,
+			mapping_suggested: MAPPING_SUGGESTED_FILTER
 		}
 	},
 	'loaded-libraries': {

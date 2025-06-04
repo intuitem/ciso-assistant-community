@@ -19,7 +19,7 @@ from django.http import HttpResponse
 
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary
+from core.models import StoredLibrary, LoadedLibrary, Framework
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
@@ -66,16 +66,87 @@ class LibraryMixinFilterSet(df.FilterSet):
 
 class StoredLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
-        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        choices=list(
+            zip(
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+            )
+        ),
         method="filter_object_type",
     )
+    mapping_suggested = df.BooleanFilter(
+        method="filter_mapping_suggested",
+    )
+
+    def filter_mapping_suggested(self, queryset, name, value):
+        """
+        Returns StoredLibraries containing at least one mapping with a source framework already loaded
+        """
+
+        def _extract_requirement_mappings(content):
+            """Extract requirement mappings from library content, handling both dict and list formats."""
+            mapping_set = content.get("requirement_mapping_set") or content.get(
+                "requirement_mapping_sets", []
+            )
+
+            if isinstance(mapping_set, dict):
+                return [mapping_set]
+            elif isinstance(mapping_set, list):
+                return mapping_set
+            else:
+                return []
+
+        def _has_matching_source_framework(requirement_mappings, loaded_framework_urns):
+            """Check if any mapping has a source framework that's loaded."""
+            return any(
+                mapping.get("source_framework_urn") in loaded_framework_urns
+                for mapping in requirement_mappings
+            )
+
+        if not value:
+            return queryset
+
+        # Get all loaded framework URNs and library URNs in single queries
+        loaded_framework_urns = set(Framework.objects.values_list("urn", flat=True))
+        loaded_library_urns = set(LoadedLibrary.objects.values_list("urn", flat=True))
+
+        # Early return if no loaded frameworks
+        if not loaded_framework_urns:
+            return queryset.none()
+
+        # Filter to libraries that have requirement mappings
+        queryset_with_mappings = queryset.filter(
+            Q(content__requirement_mapping_set__isnull=False)
+            | Q(content__requirement_mapping_sets__isnull=False)
+        ).exclude(urn__in=loaded_library_urns)
+
+        # Extract libraries with matching source frameworks
+        matching_library_pks = []
+
+        for (
+            library
+        ) in queryset_with_mappings.iterator():  # Use iterator for memory efficiency
+            requirement_mappings = _extract_requirement_mappings(library.content)
+
+            if _has_matching_source_framework(
+                requirement_mappings, loaded_framework_urns
+            ):
+                matching_library_pks.append(library.pk)
+
+        return queryset.filter(pk__in=matching_library_pks)
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        # For backward compatibility
+        if "risk_matrices" in value:
+            value.append("risk_matrix")
+        if "requirement_mapping_sets" in value:
+            value.append("requirement_mapping_set")
+        if "frameworks" in value:
+            value.append("framework")
         union_qs = Q()
         _value = {f"content__{v}__isnull": False for v in value}
         for item in _value:
             union_qs |= Q(**{item: _value[item]})
-
         return queryset.filter(union_qs)
 
     class Meta:
@@ -253,12 +324,17 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all library objects types")
     def object_type(self, request):
-        return Response(LibraryImporter.OBJECT_FIELDS)
+        return Response(LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS)
 
 
 class LoadedLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
-        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        choices=list(
+            zip(
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+            )
+        ),
         method="filter_object_type",
     )
     has_update = df.BooleanFilter(method="filter_has_update")
@@ -284,6 +360,11 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
             )
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        # For backward compatibility
+        if "risk_matrix" in value:
+            value.append("risk_matrices")
+        if "requirement_mapping_set" in value:
+            value.append("requirement_mapping_sets")
         union_qs = Q()
         _value = {
             k: v
