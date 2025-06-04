@@ -928,5 +928,6 @@
 	"taskScheduleWarning": "Alle Aufgaben, die nicht Teil des neuen Zeitplans sind, werden dauerhaft gelöscht",
 	"mappingSuggested": "Vorgeschlagene Zuordnung",
 	"mappingSuggestedHelpText": "Vorschläge zur Zuordnung basierend auf geladenen Frameworks",
-	"mappingSuggestionTeasing": "Zuordnungen werden nun vorgeschlagen! Sie können die Filter verwenden, um Vorschläge basierend auf geladenen Frameworks zu erkunden."
+	"mappingSuggestionTeasing": "Zuordnungen werden nun vorgeschlagen! Sie können die Filter verwenden, um Vorschläge basierend auf geladenen Frameworks zu erkunden.",
+	"associatedFindingsAssessments": "Zugeordnete Nachverfolgungen"
 }

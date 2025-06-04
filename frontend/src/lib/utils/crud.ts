@@ -500,7 +500,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
 			{ field: 'evidences', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true }
+			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'findings-assessments', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'findings', disableAddDeleteButtons: true }
 		]
 	},
 	'compliance-assessments': {

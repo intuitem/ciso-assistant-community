@@ -1207,5 +1207,6 @@
 	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet",
 	"mappingSuggested": "Forslag til kortlægning",
 	"mappingSuggestedHelpText": "Forslag til kortlægning baseret på indlæste rammeværk",
-	"mappingSuggestionTeasing": "Kortlægninger foreslås nu! Du kan bruge filtrene til at udforske forslag baseret på indlæste rammeværk."
+	"mappingSuggestionTeasing": "Kortlægninger foreslås nu! Du kan bruge filtrene til at udforske forslag baseret på indlæste rammeværk.",
+	"associatedFindingsAssessments": "Tilknyttede opfølgninger"
 }

@@ -58,6 +58,17 @@
 	bind:cachedValue={formDataCache['status']}
 />
 <AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="evidences"
+	label={m.evidences()}
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+/>
+<AutocompleteSelect
 	{form}
 	multiple
 	optionsEndpoint="users?is_third_party=false"
@@ -101,15 +112,4 @@
 	label={m.observation()}
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
-/>
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="evidences"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsLabelField="auto"
-	field="evidences"
-	label={m.evidences()}
-	cacheLock={cacheLocks['evidences']}
-	bind:cachedValue={formDataCache['evidences']}
 />
