@@ -28,6 +28,7 @@ import sys
 import os
 import yaml
 from openpyxl import Workbook
+from datetime import date
 
 
 # Validates that urn_root only contains allowed characters
@@ -126,6 +127,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     ws1.append(["copyright", copyright_])
     ws1.append(["provider", provider])
     ws1.append(["packager", "intuitem"])
+    ws1.append(["publication_date", str(date.today())])
 
     # Sheet 2: <framework>_meta
     framework_meta_sheet = wb.create_sheet(f"{framework_sheet_base}_meta")
