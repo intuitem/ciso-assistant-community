@@ -1096,6 +1096,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'folder', urlModel: 'folders' }
 		]
+	},
+	campaigns: {
+		name: 'campaign',
+		localName: 'campaign',
+		localNamePlural: 'campaigns',
+		verboseName: 'Campaign',
+		verboseNamePlural: 'Campaigns',
+		selectFields: [{ field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'framework', urlModel: 'frameworks' }
+		]
 	}
 };
 

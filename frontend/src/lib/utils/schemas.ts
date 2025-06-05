@@ -321,6 +321,13 @@ export const ComplianceAssessmentSchema = z.object({
 	assets: z.string().uuid().optional().array().optional()
 });
 
+export const CampaignSchema = z.object({
+	...NameDescriptionMixin,
+	framework: z.string(),
+	status: z.string().optional().nullable(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
 export const EvidenceSchema = z.object({
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
@@ -815,6 +822,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
+	campaign: CampaignSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,

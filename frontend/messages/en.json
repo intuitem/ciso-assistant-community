@@ -1631,5 +1631,8 @@
 	"mappingSuggestedHelpText": "Mapping suggestions based on loaded frameworks",
 	"mappingSuggestionTeasing": "Mappings are now suggested! You can use the filters to explore suggestions based on loaded frameworks.",
 	"errorCreatingPersonalAccessToken": "An error occurred while creating the personal access token.",
-	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user."
+	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user.",
+	"campaign": "Campaign",
+	"campaigns": "Campaigns",
+	"addCampaign": "Start a campaign"
 }

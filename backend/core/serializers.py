@@ -993,10 +993,31 @@ class AttachmentUploadSerializer(serializers.Serializer):
         fields = ["attachment"]
 
 
-class CampaignReadSerializer(serializers.Serializer):
+class CampaignReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    framework = FieldsRelatedField(
+        [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
+    )
+
     class Meta:
         model = Campaign
         fields = "__all__"
+
+
+class CampaignWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = "__all__"
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):

@@ -4049,7 +4049,6 @@ class CampaignViewSet(BaseModelViewSet):
     filterset_fields = [
         "folder",
         "framework",
-        "status",
     ]
     search_fields = ["name", "description"]
 

@@ -411,6 +411,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -634,6 +639,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
