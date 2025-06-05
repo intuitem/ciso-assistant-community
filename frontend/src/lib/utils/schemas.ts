@@ -822,7 +822,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
-	campaign: CampaignSchema,
+	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
