@@ -128,6 +128,9 @@ def transform_excel(source_path, target_path):
 
     # Save the transformed workbook
     wb_tgt.save(target_path)
+    
+    # Notify the user
+    print(f"✅ Framework successfully converted and exported to \"{target_path}\"")
 
 # Example usage
-transform_excel("Cisco-CCFv3-Public.xlsx", "target_file.xlsx")
+transform_excel("Cisco-CCFv3-Public.xlsx", "conv_Cisco-CCFv3-Public.xlsx")
