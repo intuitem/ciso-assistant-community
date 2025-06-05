@@ -74,8 +74,9 @@ def transform_excel(source_path, target_path):
         domain = read_merged_cell(sheet_rfi, row, idx_domain)
         if domain and domain not in seen_domains:
             seen_domains.add(domain)
+            suffix = "2" if domain_depth == 2 else ""
             ws_main.append([
-                "", str(domain_depth), clean_string(domain), domain, "", "", "", ""
+                "", str(domain_depth), clean_string(domain) + suffix, domain, "", "", "", ""
             ])
 
         # Add control reference row if present
