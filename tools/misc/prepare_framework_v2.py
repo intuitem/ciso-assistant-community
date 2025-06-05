@@ -142,7 +142,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
 
     # Sheet 3: <framework>_content
     framework_content_sheet = wb.create_sheet(f"{framework_sheet_base}_content")
-    framework_content_sheet.append(["assessable", "depth", "ref_id", "name", "description", "implementation_groups"])
+    framework_content_sheet.append(["assessable", "depth", "ref_id", "name", "description", "annotation", "typical_evidence", "implementation_groups"])
 
     # Optional implementation group sheets
     if impl_group_base:
