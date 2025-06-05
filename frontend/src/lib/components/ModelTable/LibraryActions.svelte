@@ -4,13 +4,15 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
+	import type { DataHandler } from '@vincjo/datatables/remote';
 
 	interface Props {
 		meta: any;
 		actionsURLModel: string;
+		handler: DataHandler;
 	}
 
-	let { meta, actionsURLModel }: Props = $props();
+	let { meta, actionsURLModel, handler }: Props = $props();
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
 
@@ -62,7 +64,8 @@
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
-						update();
+						await update();
+						handler.invalidate();
 					};
 				}}
 				onsubmit={handleSubmit}
