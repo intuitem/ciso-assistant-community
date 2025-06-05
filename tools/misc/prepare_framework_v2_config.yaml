@@ -16,6 +16,10 @@
 # - framework_sheet_base_name: (str) Base name used for the framework-related sheets.
 #
 # OPTIONAL / CONDITIONAL FIELDS:
+# - excel_file_name: (str) Custom name for the output Excel file.
+#   If not defined or empty, a default name will be used.
+#   The ".xlsx" extension will be automatically enforced.
+#
 # - implementation_groups_sheet_base_name: (str) If you use it, you MUST also define
 #   a non-empty "implementation_groups" list (see example below).
 #
@@ -25,9 +29,13 @@
 #     - name (str, required)
 #     - description (str, optional) — warning shown if missing
 #
+# TO ENABLE custom Excel file name : Uncomment the first block below.
 # TO ENABLE implementation groups: Uncomment the last two blocks below.
 # ==============================================================================
 
+
+# --- Output Excel file name (optional) ---
+# excel_file_name: "output.xlsx"
 
 # --- Metadata sheets ---
 urn_root: "risk-framework_2025.example"

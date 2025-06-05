@@ -1,5 +1,5 @@
 """
-Excel Framework Generator v0.2
+Excel Framework Generator v0.3
 --------------------------
 
 This script reads a YAML configuration file and generates a structured Excel (.xlsx) file
@@ -74,7 +74,7 @@ def validate_yaml_data(data):
 
 
 # Main logic to create Excel workbook from the YAML content
-def create_excel_from_yaml(yaml_path, output_excel):
+def create_excel_from_yaml(yaml_path, output_excel=None):
     if not os.path.isfile(yaml_path):
         raise FileNotFoundError(f"YAML file not found: \"{yaml_path}\"")
 
@@ -82,6 +82,22 @@ def create_excel_from_yaml(yaml_path, output_excel):
         data = yaml.safe_load(f)
 
     validate_yaml_data(data)
+    
+    
+    # Determine output Excel file name based on YAML or CLI
+    yaml_output_name = data.get("excel_file_name")
+    if output_excel is None:
+        if yaml_output_name and str(yaml_output_name).strip():
+            output_excel = yaml_output_name.strip()
+        else:
+            output_excel = "output.xlsx"
+    elif yaml_output_name and str(yaml_output_name).strip() and output_excel != yaml_output_name.strip():
+        print(f"ℹ️  [INFO] Overriding YAML \"excel_file_name\" with command line argument.")
+        
+    # Ensure the filename ends with .xlsx
+    if not output_excel.lower().endswith(".xlsx"):
+        output_excel += ".xlsx"
+
 
     # Extract fields for easier reference
     urn_root = data["urn_root"]
@@ -154,11 +170,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     yaml_file = sys.argv[1]
-    output_file = sys.argv[2] if len(sys.argv) >= 3 else "output.xlsx"
-
-    # Ensure output file ends with '.xlsx'
-    if not output_file.lower().endswith(".xlsx"):
-        output_file += ".xlsx"
+    output_file = sys.argv[2] if len(sys.argv) >= 3 else None
 
     try:
         create_excel_from_yaml(yaml_file, output_file)
