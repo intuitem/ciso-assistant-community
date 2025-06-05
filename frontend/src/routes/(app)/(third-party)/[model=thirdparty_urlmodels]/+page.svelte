@@ -3,8 +3,13 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData, ActionData } from './$types';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -14,7 +19,7 @@
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -30,7 +35,7 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 </script>
 
