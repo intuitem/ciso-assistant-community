@@ -63,7 +63,7 @@ def transform_excel(source_path, target_path):
         cell_val = sheet_rfi.cell(row=row, column=1).value
         if cell_val and isinstance(cell_val, str) and "irap unique controls" in cell_val.lower():
             cleaned = clean_string(cell_val)
-            ws_main.append(["", "1", cleaned, cell_val.strip(), "", "", "", ""])
+            ws_main.append(["", "1", "", cell_val.strip(), "", "", "", ""])
             seen_domains = set()     # Reset known domains
             domain_depth = 2         # Adjust depth for new section
             control_depth = 3
@@ -76,7 +76,7 @@ def transform_excel(source_path, target_path):
             seen_domains.add(domain)
             suffix = "2" if domain_depth == 2 else ""
             ws_main.append([
-                "", str(domain_depth), clean_string(domain) + suffix, domain, "", "", "", ""
+                "", str(domain_depth), "", domain, "", "", "", ""
             ])
 
         # Add control reference row if present
