@@ -115,6 +115,7 @@
 	"provider": "Poskytovatel",
 	"providerColon": "Poskytovatel:",
 	"domain": "Doména",
+	"domainSemiColon": "Doména:",
 	"urn": "URN",
 	"treatmentStatus": "Stav zpracování",
 	"qualification": "Kvalifikace",
