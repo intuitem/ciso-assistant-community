@@ -123,18 +123,20 @@
 		<div class="flex justify-center items-center w-full gap-5">
 			<span class="text-sm text-gray-500"
 				>{m.domainSemiColon()}
-				<a class="anchor" href="/entities/{ebiosRmStudy.folder}">{ebiosRmStudy.folder.str}</a>
+				<Anchor class="anchor" href="/folders/{ebiosRmStudy.folder.id}"
+					>{ebiosRmStudy.folder.str}</Anchor
+				>
 			</span>
 			<span class="text-sm text-gray-500"
 				>{m.referenceEntitySemiColon()}
-				<a class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
-					>{ebiosRmStudy.reference_entity.str}</a
+				<Anchor class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
+					>{ebiosRmStudy.reference_entity.str}</Anchor
 				>
 			</span>
 			<span class="text-sm text-gray-500"
 				>{m.ebiosRmMatrixHelpText()}
-				<a class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
-					>{ebiosRmStudy.risk_matrix.str}</a
+				<Anchor class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
+					>{ebiosRmStudy.risk_matrix.str}</Anchor
 				>
 			</span>
 		</div>
