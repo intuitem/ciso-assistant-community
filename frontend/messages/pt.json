@@ -922,5 +922,35 @@
 	"taskScheduleWarning": "Qualquer tarefa que não faça parte do novo cronograma será excluída permanentemente",
 	"mappingSuggested": "Mapeamento sugerido",
 	"mappingSuggestedHelpText": "Sugestões de mapeamento com base em frameworks carregados",
-	"mappingSuggestionTeasing": "Os mapeamentos agora são sugeridos! Você pode usar os filtros para explorar sugestões com base em frameworks carregados."
+	"mappingSuggestionTeasing": "Os mapeamentos agora são sugeridos! Você pode usar os filtros para explorar sugestões com base em frameworks carregados.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Hora",
+				"countPlural=other": "{count} Horas"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minuto",
+				"countPlural=other": "{count} Minutos"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dia",
+				"countPlural=other": "{count} Dias"
+			}
+		}
+	]
 }

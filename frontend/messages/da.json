@@ -1208,5 +1208,35 @@
 	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet",
 	"mappingSuggested": "Forslag til kortlægning",
 	"mappingSuggestedHelpText": "Forslag til kortlægning baseret på indlæste rammeværk",
-	"mappingSuggestionTeasing": "Kortlægninger foreslås nu! Du kan bruge filtrene til at udforske forslag baseret på indlæste rammeværk."
+	"mappingSuggestionTeasing": "Kortlægninger foreslås nu! Du kan bruge filtrene til at udforske forslag baseret på indlæste rammeværk.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Time",
+				"countPlural=other": "{count} Timer"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minut",
+				"countPlural=other": "{count} Minutter"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dag",
+				"countPlural=other": "{count} Dage"
+			}
+		}
+	]
 }
