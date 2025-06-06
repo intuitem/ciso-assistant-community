@@ -448,10 +448,10 @@
 												<span class="mr-2">
 													{#if createAppliedControlsLoading}
 														<ProgressRing
-															class="-ml-2"
-															width="w-6"
-															meter="stroke-white"
-															stroke={80}
+															strokeWidth="16px"
+															meterStroke="stroke-white"
+															classes="-ml-2"
+															size="size-6"
 														/>
 													{:else}
 														<i class="fa-solid fa-fire-extinguisher"></i>

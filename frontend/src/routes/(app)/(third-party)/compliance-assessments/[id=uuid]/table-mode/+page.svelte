@@ -672,29 +672,27 @@
 								<div class="flex flex-row items-center space-x-2 w-full">
 									<span>{m.implementationScoreResult()}</span>
 									<ProgressRing
-										stroke={100}
-										meter={displayScoreColor(
+										strokeWidth="20px"
+										meterStroke={displayScoreColor(
 											requirementAssessment.score,
 											data.compliance_assessment.max_score
 										)}
-										font={150}
 										value={(requirementAssessment.score * 100) /
 											data.compliance_assessment.max_score}
-										width="w-10"
+										size="size-10"
 									>
 										{requirementAssessment.score ?? '--'}
 									</ProgressRing>
 									<span>{m.documentationScoreResult()}</span>
 									<ProgressRing
-										stroke={100}
-										meter={displayScoreColor(
+										strokeWidth="20px"
+										meterStroke={displayScoreColor(
 											requirementAssessment.documentation_score,
 											data.compliance_assessment.max_score
 										)}
-										font={150}
 										value={(requirementAssessment.documentation_score * 100) /
 											data.compliance_assessment.max_score}
-										width="w-10"
+										size="size-10"
 									>
 										{requirementAssessment.documentation_score ?? '--'}
 									</ProgressRing>
@@ -703,15 +701,14 @@
 								<div class="flex flex-row items-center space-x-2 w-full">
 									<span>{m.scoreResult()}</span>
 									<ProgressRing
-										stroke={100}
-										meter={displayScoreColor(
+										strokeWidth="20px"
+										meterStroke={displayScoreColor(
 											requirementAssessment.score,
 											data.compliance_assessment.max_score
 										)}
-										font={150}
 										value={(requirementAssessment.score * 100) /
 											data.compliance_assessment.max_score}
-										width="w-10"
+										size="size-10"
 									>
 										{requirementAssessment.score ?? '--'}
 									</ProgressRing>

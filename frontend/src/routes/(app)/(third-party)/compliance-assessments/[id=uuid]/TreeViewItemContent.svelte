@@ -114,7 +114,13 @@
 	);
 
 	function nodeScore(): number | null {
-		if (!resultCounts) return null;
+		if (
+			!resultCounts ||
+			!resultCounts.hasOwnProperty('total_score') ||
+			!resultCounts.hasOwnProperty('scored')
+		) {
+			return null;
+		}
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
