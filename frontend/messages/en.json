@@ -938,7 +938,9 @@
 	"addTag": "Add tag",
 	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu.",
 	"enabled": "Enabled",
+	"hour": "Hour",
 	"hours": "Hours",
+	"minute": "Minute",
 	"minutes": "Minutes",
 	"seconds": "Seconds",
 	"days": "Days",
@@ -1472,7 +1474,7 @@
 	"the": "The",
 	"of": "Of",
 	"recurrent": "Recurrent",
-	"day": "Day",
+	"day": "day",
 	"week": "Week",
 	"weeks": "Weeks",
 	"month": "Month",
@@ -1632,5 +1634,35 @@
 	"mappingSuggestedHelpText": "Mapping suggestions based on loaded frameworks",
 	"mappingSuggestionTeasing": "Mappings are now suggested! You can use the filters to explore suggestions based on loaded frameworks.",
 	"errorCreatingPersonalAccessToken": "An error occurred while creating the personal access token.",
-	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user."
+	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Hour",
+				"countPlural=other": "{count} Hours"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minute",
+				"countPlural=other": "{count} Minutes"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Day",
+				"countPlural=other": "{count} Days"
+			}
+		}
+	]
 }
