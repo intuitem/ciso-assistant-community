@@ -184,7 +184,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
-58. Adobe Common Controls Framework (CCF) 🌐
+58. Adobe Common Controls Framework (CCF) v5 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
@@ -203,6 +203,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
+77. Vehicle Cyber Security Audit (VCS) v1.1 🚘
+78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 
 ### Community contributions
 
@@ -226,6 +228,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 18. Recommandations de sécurité relatives à IPsec pour la protection des flux réseau 🇫🇷
 19. Recommandations relatives à l'interconnexion d'un système d'information à internet 🇫🇷
 20. Guides des mécanismes cryptographiques 🇫🇷
+21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 
 <br/>
 
