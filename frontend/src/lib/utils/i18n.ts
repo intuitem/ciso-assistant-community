@@ -22,9 +22,11 @@ export function unsafeTranslate(
 		) {
 			const { day, hour, minute } = key;
 			const parts = [];
-			if (day !== undefined) parts.push(`${m['dayCount']({ count: day }, options)}`);
-			if (hour !== undefined) parts.push(`${m['hourCount']({ count: hour }, options)}`);
-			if (minute !== undefined) parts.push(`${m['minuteCount']({ count: minute }, options)}`);
+			if (day !== undefined && day !== 0) parts.push(`${m['dayCount']({ count: day }, options)}`);
+			if (hour !== undefined && hour !== 0)
+				parts.push(`${m['hourCount']({ count: hour }, options)}`);
+			if (minute !== undefined && minute !== 0)
+				parts.push(`${m['minuteCount']({ count: minute }, options)}`);
 			return parts.join(', ');
 		}
 
