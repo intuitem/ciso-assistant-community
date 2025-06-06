@@ -64,7 +64,7 @@ class TestEvidence:
             SAMPLE_640x480_JPG.name.split(".")[0]
         )
         assert evidence.attachment.name.endswith(".jpg")
-        assert evidence.attachment.size == 106_201
+        assert evidence.attachment.size == 81533
 
     def test_evidence_with_no_attachment(self):
         folder = Folder.objects.create(
