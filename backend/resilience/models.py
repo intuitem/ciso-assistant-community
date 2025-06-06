@@ -200,7 +200,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
         unique_together = ["asset_assessment", "point_in_time"]
 
     def __str__(self):
-        return f"Downtime after {self.get_human_pit} on {self.asset_assessment.asset}"
+        return f"Downtime on {self.asset_assessment.asset}"
 
     @property
     def risk_matrix(self):
@@ -217,15 +217,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
         hours, seconds = divmod(seconds, 3600)
         minutes, _ = divmod(seconds, 60)
 
-        parts = []
-        if days:
-            parts.append(f"{days} {'Day' if days == 1 else 'Days'}")
-        if hours:
-            parts.append(f"{hours} {'Hour' if hours == 1 else 'Hours'}")
-        if minutes:
-            parts.append(f"{minutes} {'Minute' if minutes == 1 else 'Minutes'}")
-
-        return ", ".join(parts) or "0 Minutes"
+        return {"day": days, "hour": hours, "minute": minutes}
 
     @staticmethod
     def format_impact(impact: int, parsed_matrix: dict):

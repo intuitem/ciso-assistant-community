@@ -64,7 +64,7 @@ class EscalationThresholdReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
 
     qualifications = FieldsRelatedField(["name"], many=True)
-    get_human_pit = serializers.CharField()
+    get_human_pit = serializers.JSONField()
     quali_impact = serializers.JSONField(source="get_impact_display")
 
     class Meta:
