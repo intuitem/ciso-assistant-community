@@ -911,5 +911,6 @@
 	"taskScheduleWarning": "Jakékoli úlohy, které nejsou součástí nového rozvrhu, budou trvale smazány",
 	"mappingSuggested": "Navrhované mapování",
 	"mappingSuggestedHelpText": "Návrhy mapování založené na načtených rámcích",
-	"mappingSuggestionTeasing": "Nyní jsou navrhována mapování! Můžete použít filtry k prozkoumání návrhů založených na načtených rámcích."
+	"mappingSuggestionTeasing": "Nyní jsou navrhována mapování! Můžete použít filtry k prozkoumání návrhů založených na načtených rámcích.",
+	"associatedFindingsAssessments": "Přidružené následné kroky"
 }

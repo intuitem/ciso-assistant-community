@@ -1112,5 +1112,6 @@
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
 	"mappingSuggested": "Pemetaan disarankan",
 	"mappingSuggestedHelpText": "Saran pemetaan berdasarkan kerangka kerja yang dimuat",
-	"mappingSuggestionTeasing": "Pemetaan sekarang disarankan! Anda dapat menggunakan filter untuk menjelajahi saran berdasarkan kerangka kerja yang dimuat."
+	"mappingSuggestionTeasing": "Pemetaan sekarang disarankan! Anda dapat menggunakan filter untuk menjelajahi saran berdasarkan kerangka kerja yang dimuat.",
+	"associatedFindingsAssessments": "Tindak lanjut terkait"
 }

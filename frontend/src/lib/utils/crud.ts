@@ -500,7 +500,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
 			{ field: 'evidences', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true }
+			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'findings-assessments', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'findings', disableAddDeleteButtons: true }
 		]
 	},
 	'compliance-assessments': {
@@ -1012,7 +1014,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
 		selectFields: [{ field: 'status' }, { field: 'category' }]
@@ -1025,7 +1028,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },

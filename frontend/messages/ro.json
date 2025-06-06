@@ -920,5 +920,6 @@
 	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv",
 	"mappingSuggested": "Sugestie de mapare",
 	"mappingSuggestedHelpText": "Sugestii de mapare bazate pe cadre încărcate",
-	"mappingSuggestionTeasing": "Mapările sunt acum sugerate! Puteți folosi filtrele pentru a explora sugestiile bazate pe cadre încărcate."
+	"mappingSuggestionTeasing": "Mapările sunt acum sugerate! Puteți folosi filtrele pentru a explora sugestiile bazate pe cadre încărcate.",
+	"associatedFindingsAssessments": "Urmărire asociată"
 }
