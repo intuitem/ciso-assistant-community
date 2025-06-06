@@ -13,13 +13,13 @@ description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availa
   s operational, reporting, or compliance objectives; and (d) for a particular type\
   \ of information used by the entity. Link: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022"
 copyright: "\xA9 2023 Association of International Certified Professional Accountants\xAE"
-version: 1
+version: 2
 publication_date: 2025-01-12
 provider: AICPA
 packager: intuitem
 translations:
   es:
-    name: 'SOC2-2017 Trust Services Criteria '
+    name: SOC2-2017 Trust Services Criteria
     description: "TSP Secci\xF3n 100\n2017 Trust Services Criteria for Security, Availability,\
       \ Processing Integrity, Confidentiality, and Privacy (con puntos de atenci\xF3\
       n revisados - 2022)\n\nTSC presenta criterios de control establecidos por el\
@@ -51,7 +51,7 @@ objects:
     translations:
       es:
         name: SOC2-2017-Rev-2022
-        description: 'SOC2-2017 Trust Services Criteria '
+        description: SOC2-2017 Trust Services Criteria
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       assessable: false
@@ -61,7 +61,6 @@ objects:
       translations:
         es:
           name: Entorno de control
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1
       assessable: false
       depth: 2
@@ -85,12 +84,11 @@ objects:
         \ functioning of the system of internal control."
       translations:
         es:
-          name: null
           description: "[COSO] Establece la pauta en fa alta direcci\xF3n: El Consejo\
             \ de Administraci\xF3n y Direcci\xF3n, a todos los niveles, demuestra\
             \ por sus directrices, acciones y comportamiento la importancia de la\
             \ integridad y los valores \xE9ticos para apoyar el funcionamiento del\
-            \ sistema de control interno. "
+            \ sistema de control interno."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1.2
       assessable: true
       depth: 3
@@ -103,12 +101,11 @@ objects:
         \ and business partners."
       translations:
         es:
-          name: null
           description: "[COSO] Establece est\xE1ndares de conducta: las expectativas\
             \ de la Junta de Administraci\xF3n y la direcci\xF3n senior relativas\
             \ a la integridad y valores \xE9ticos est\xE1 definida en los est\xE1\
             ndares de conducta de la entidad y concierne a todos Jos niveles de la\
-            \ entidad y a proveedores de servicios externos, as\xED como a sus socios. "
+            \ entidad y a proveedores de servicios externos, as\xED como a sus socios."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1.3
       assessable: true
       depth: 3
@@ -119,10 +116,9 @@ objects:
         \ the entity\u2019s expected standards of conduct."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa la adherencia a los est\xE1ndares de conducta:\
             \ se establecen procesos para evaluar el rendimiento de los individuos\
-            \ y equipos contra los est\xE1ndares de conducta esperados por la entidad. "
+            \ y equipos contra los est\xE1ndares de conducta esperados por la entidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1.4
       assessable: true
       depth: 3
@@ -133,7 +129,6 @@ objects:
         \ remedied in a timely and consistent manner."
       translations:
         es:
-          name: null
           description: "[COSO] Aborda las desviaciones de manera peri\xF3dica: las\
             \ desviaciones de los est\xE1ndares de conducta esperados por la entidad\
             \ est\xE1n definidos y se remedian de manera peri\xF3dica y consistente."
@@ -149,7 +144,6 @@ objects:
         \ deviations in a timely manner."
       translations:
         es:
-          name: null
           description: "[TSC] Considera a los empleados de contratistas y proveedores\
             \ para demostrar su compromiso: la Direcci\xF3n y \nla Junta de Administraci\xF3\
             n considera el uso de empleados de contratistas y proveedores en sus procesos\
@@ -180,10 +174,9 @@ objects:
         \ to established requirements and expectations."
       translations:
         es:
-          name: null
           description: "[COSO] Estable responsabilidad de supervisi\xF3n: El Consejo\
             \ de Administraci\xF3n identifica y acepta su responsabilidad de supervisi\xF3\
-            n en relaci\xF3n con los requisitos y expectativas establecidas. "
+            n en relaci\xF3n con los requisitos y expectativas establecidas."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.2.2
       assessable: true
       depth: 3
@@ -195,11 +188,10 @@ objects:
         \ management and take commensurate action."
       translations:
         es:
-          name: null
           description: "[COSO] Aplica la experiencia relevante: La Junta de Administraci\xF3\
             n define, mantiene y eval\xFAa peri\xF3dicamente las capacidades y experiencia\
             \ necesaria entre sus miembros para permitirles sondear a la Direcci\xF3\
-            n Senior y tomar las acciones correspondientes. "
+            n Senior y tomar las acciones correspondientes."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.2.3
       assessable: true
       depth: 3
@@ -210,10 +202,9 @@ objects:
         \ in evaluations and decision making."
       translations:
         es:
-          name: null
           description: "[COSO] Opera independientemente: La Junta de Administraci\xF3\
             n tiene los suficientes miembros, los cuales son independientes de la\
-            \ gesti\xF3n y objetivos, en la evaluaci\xF3n y toma de decisiones. "
+            \ gesti\xF3n y objetivos, en la evaluaci\xF3n y toma de decisiones."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.2.4
       assessable: true
       depth: 3
@@ -225,7 +216,6 @@ objects:
         \ subcommittee or consultants."
       translations:
         es:
-          name: null
           description: "[TSC] Complementa la experiencia del Consejo de Administraci\xF3\
             n - El Consejo de Administraci\xF3n complementa su experiencia en materia\
             \ de seguridad, disponibilidad, integridad del procesamiento, confidencialidad\
@@ -257,7 +247,6 @@ objects:
         \ service providers) to support the achievement of objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Considera todas las estructuras de la entidad - La\
             \ direcci\xF3n y el consejo de administraci\xF3n tienen en cuenta las\
             \ m\xFAltiples estructuras utilizadas (incluidas las unidades operativas,\
@@ -275,7 +264,6 @@ objects:
         \ activities of the entity."
       translations:
         es:
-          name: null
           description: "[COSO] Establece l\xEDneas de informaci\xF3n - La direcci\xF3\
             n dise\xF1a y eval\xFAa l\xEDneas de informaci\xF3n para cada estructura\
             \ de la entidad con el fin de permitir la ejecuci\xF3n de las autoridades\
@@ -293,7 +281,6 @@ objects:
         \ the organization."
       translations:
         es:
-          name: null
           description: "[COSO] Define, Asigna y Limita Autoridades y Responsabilidades\
             \ - La direcci\xF3n y el consejo de administraci\xF3n delegan autoridad,\
             \ definen responsabilidades y utilizan procesos y tecnolog\xEDa adecuados\
@@ -310,7 +297,6 @@ objects:
         \ and privacy when defining authorities and responsibilities."
       translations:
         es:
-          name: null
           description: "[TSC] La direcci\xF3n y el consejo de administraci\xF3n tienen\
             \ en cuenta los requisitos relativos a la seguridad, disponibilidad, integridad\
             \ del procesamiento, confidencialidad y privacidad a la hora de definir\
@@ -327,7 +313,6 @@ objects:
         \ reporting lines, authorities, and responsibilities."
       translations:
         es:
-          name: null
           description: "[TSC] La direcci\xF3n y el consejo de administraci\xF3n tienen\
             \ en cuenta la necesidad de que la entidad interact\xFAe con partes externas\
             \ y supervise sus actividades a la hora de establecer estructuras, l\xED\
@@ -343,7 +328,6 @@ objects:
         \ considers legal and contractual privacy requirements and objectives."
       translations:
         es:
-          name: null
           description: "[P] Establece estructuras, l\xEDneas jer\xE1rquicas y autoridades\
             \ para apoyar el cumplimiento de los requisitos legales y contractuales\
             \ de privacidad - Al establecer estructuras, l\xEDneas jer\xE1rquicas\
@@ -372,7 +356,6 @@ objects:
         \ of objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Establece pol\xEDticas y pr\xE1cticas - Las pol\xED\
             ticas y pr\xE1cticas reflejan las expectativas de competencia necesarias\
             \ para apoyar la consecuci\xF3n de los objetivos."
@@ -387,7 +370,6 @@ objects:
         \ and practices and act as necessary to address shortcomings."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa la competencia y aborda las deficiencias\
             \ - El consejo de administraci\xF3n y la direcci\xF3n eval\xFAan la competencia\
             \ en toda la entidad y en los proveedores de servicios subcontratados\
@@ -404,7 +386,6 @@ objects:
         \ to support the achievement of objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Atrae, desarrolla y retiene a las personas - La entidad\
             \ proporciona la tutor\xEDa y la formaci\xF3n necesarias para atraer,\
             \ desarrollar y retener a personal suficiente y competente y a proveedores\
@@ -419,7 +400,6 @@ objects:
         \ responsibility important for internal control."
       translations:
         es:
-          name: null
           description: "[COSO] Planifica y prepara la sucesi\xF3n - La alta direcci\xF3\
             n y el consejo de administraci\xF3n elaboran planes de contingencia para\
             \ la asignaci\xF3n de responsabilidades relevantes para el control interno."
@@ -433,7 +413,6 @@ objects:
         \ and vendor employees when determining whether to employ and retain the individuals."
       translations:
         es:
-          name: null
           description: '[TSC] Considera los antecedentes de los individuos - La entidad
             considera los antecedentes del personal potencial y existente, contratistas
             y empleados de proveedores al determinar si emplear y retener a los individuos.'
@@ -448,7 +427,6 @@ objects:
         \ employ and retain the individuals."
       translations:
         es:
-          name: null
           description: "[TSC] Considera la competencia t\xE9cnica de los individuos\
             \ - La entidad considera la competencia t\xE9cnica del personal potencial\
             \ y existente, proveedores y contratistas para determinar si procede la\
@@ -464,7 +442,6 @@ objects:
         \ contractors, and vendor employees are developed and maintained."
       translations:
         es:
-          name: null
           description: "[TSC] Proporciona formaci\xF3n para mantener las competencias\
             \ t\xE9cnicas - La entidad proporciona programas de formaci\xF3n, incluida\
             \ la educaci\xF3n y formaci\xF3n continuas, para garantizar el desarrollo\
@@ -495,7 +472,6 @@ objects:
         \ action as necessary."
       translations:
         es:
-          name: null
           description: "[COSO] Exige la rendici\xF3n de cuentas a trav\xE9s de estructuras,\
             \ autoridades y responsabilidades - La direcci\xF3n y el consejo de administraci\xF3\
             n establecen los mecanismos para comunicar y exigir a las personas que\
@@ -514,7 +490,6 @@ objects:
         \ and longer-term objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Establece medidas de rendimiento, incentivos y recompensas\
             \ - La direcci\xF3n y el consejo de administraci\xF3n establecen medidas\
             \ de rendimiento, incentivos y otras recompensas apropiadas para las responsabilidades\
@@ -532,7 +507,6 @@ objects:
         \ in the achievement of objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa las medidas de rendimiento, los incentivos\
             \ y las recompensas para que sigan siendo pertinentes - La direcci\xF3\
             n y el consejo de administraci\xF3n alinean los incentivos y las recompensas\
@@ -549,7 +523,6 @@ objects:
         \ and evaluate performance."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa las medidas de rendimiento, los incentivos\
             \ y las recompensas para que sigan siendo pertinentes - La direcci\xF3\
             n y el consejo de administraci\xF3n alinean los incentivos y las recompensas\
@@ -567,7 +540,6 @@ objects:
         \ action, as appropriate."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa el rendimiento y recompensa o disciplina\
             \ a los individuos - La direcci\xF3n y el consejo de administraci\xF3\
             n eval\xFAan el rendimiento de las responsabilidades de control interno,\
@@ -585,7 +557,6 @@ objects:
         \ incident."
       translations:
         es:
-          name: null
           description: "[P] Toma de medidas disciplinarias - Se define un proceso\
             \ de sanciones, que se aplica seg\xFAn sea necesario, cuando un empleado\
             \ viola las pol\xEDticas de privacidad de la entidad o cuando el comportamiento\
@@ -598,7 +569,6 @@ objects:
       translations:
         es:
           name: "Informaci\xF3n y Comunicaci\xF3n"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1
       assessable: false
       depth: 2
@@ -623,7 +593,6 @@ objects:
         \ of the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Identifica los requisitos de informaci\xF3n - Existe\
             \ un proceso para identificar la informaci\xF3n necesaria y esperada para\
             \ apoyar el funcionamiento de los dem\xE1s componentes del control interno\
@@ -637,7 +606,6 @@ objects:
         \ systems capture internal and external sources of data."
       translations:
         es:
-          name: null
           description: "[COSO] Capta fuentes de datos internas y externas - Los sistemas\
             \ de informaci\xF3n captan fuentes de datos internas y externas."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1.3
@@ -649,7 +617,6 @@ objects:
         \ systems process and transform relevant data into information."
       translations:
         es:
-          name: null
           description: "[COSO] Procesa los datos relevantes en informaci\xF3n - Los\
             \ sistemas de informaci\xF3n procesan y transforman los datos relevantes\
             \ en informaci\xF3n."
@@ -664,7 +631,6 @@ objects:
         \ to assess its relevance in supporting the internal control components."
       translations:
         es:
-          name: null
           description: "[COSO] Mantiene la calidad durante todo el proceso - Los sistemas\
             \ de informaci\xF3n producen informaci\xF3n oportuna, actual, precisa,\
             \ completa, accesible, protegida, verificable y conservada. La informaci\xF3\
@@ -680,7 +646,6 @@ objects:
         \ operation of controls."
       translations:
         es:
-          name: null
           description: "[TSC] Documenta el flujo de datos - La entidad documenta y\
             \ utiliza la informaci\xF3n interna y externa y los flujos de datos para\
             \ apoyar el dise\xF1o y el funcionamiento de los controles."
@@ -696,7 +661,6 @@ objects:
         \ systems, and organizational roles."
       translations:
         es:
-          name: null
           description: "[TSC] Gestiona Activos - La entidad identifica, documenta\
             \ y mantiene registros de los componentes del sistema tales como infraestructura,\
             \ software y otros activos de informaci\xF3n. Los activos de informaci\xF3\
@@ -715,7 +679,6 @@ objects:
         \ of controls."
       translations:
         es:
-          name: null
           description: "[TSC] Clasifica la informaci\xF3n - La entidad clasifica la\
             \ informaci\xF3n por sus caracter\xEDsticas relevantes (por ejemplo, informaci\xF3\
             n personal identificable, informaci\xF3n confidencial de clientes y propiedad\
@@ -731,7 +694,6 @@ objects:
         \ and valid in the operation of controls."
       translations:
         es:
-          name: null
           description: "[TSC] La entidad utiliza informaci\xF3n e informes que son\
             \ completos, precisos, actuales y v\xE1lidos en el funcionamiento de los\
             \ controles."
@@ -747,7 +709,6 @@ objects:
         \ employee mobile phones under a bring-yourown-device policy)."
       translations:
         es:
-          name: null
           description: "[TSC] Gestiona la ubicaci\xF3n de los activos - La entidad\
             \ identifica, documenta y mantiene registros de la ubicaci\xF3n f\xED\
             sica y la custodia de los activos de informaci\xF3n, en particular para\
@@ -780,7 +741,6 @@ objects:
         \ to understand and carry out their internal control responsibilities."
       translations:
         es:
-          name: null
           description: "[COSO] Comunica la informaci\xF3n de control interno - Existe\
             \ un proceso para comunicar la informaci\xF3n necesaria para que todo\
             \ el personal pueda comprender y desempe\xF1ar sus responsabilidades de\
@@ -795,7 +755,6 @@ objects:
         \ needed to fulfill their roles with respect to the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Se comunica con el consejo de administraci\xF3n - Existe\
             \ comunicaci\xF3n entre la direcci\xF3n y el consejo de administraci\xF3\
             n de modo que ambos dispongan de la informaci\xF3n necesaria para desempe\xF1\
@@ -811,7 +770,6 @@ objects:
         \ channels are inoperative or ineffective."
       translations:
         es:
-          name: null
           description: "[COSO] Proporciona l\xEDneas de comunicaci\xF3n separadas\
             \ - Existen canales de comunicaci\xF3n separados, como l\xEDneas directas\
             \ de denuncia de irregularidades, que sirven como mecanismos a prueba\
@@ -826,7 +784,6 @@ objects:
         \ of communication considers the timing, audience, and nature of the information."
       translations:
         es:
-          name: null
           description: "[COSO] Selecciona el m\xE9todo de comunicaci\xF3n pertinente\
             \ - El m\xE9todo de comunicaci\xF3n tiene en cuenta el momento, la audiencia\
             \ y la naturaleza de la informaci\xF3n."
@@ -842,7 +799,6 @@ objects:
         \ to carry out those responsibilities."
       translations:
         es:
-          name: null
           description: "[TSC] Comunica Responsabilidades - El personal de la entidad\
             \ con responsabilidad para dise\xF1ar, desarrollar, implementar, operar,\
             \ mantener o monitorizar los controles del sistema recibe comunicaciones\
@@ -858,7 +814,6 @@ objects:
         \ on how to report systems failures, incidents, concerns, and other complaints."
       translations:
         es:
-          name: null
           description: "[TSC] Comunica informaci\xF3n sobre la notificaci\xF3n de\
             \ fallos, incidentes, preocupaciones y otras cuestiones - El personal\
             \ de la entidad recibe informaci\xF3n sobre c\xF3mo notificar fallos,\
@@ -873,7 +828,6 @@ objects:
         \ personnel in a timely manner."
       translations:
         es:
-          name: null
           description: '[TSC] Comunica objetivos y cambios en los objetivos - La entidad
             comunica oportunamente al personal sus objetivos y los cambios en los
             mismos.'
@@ -888,7 +842,6 @@ objects:
         \ through a security awareness training program."
       translations:
         es:
-          name: null
           description: "[TSC] Comunica informaci\xF3n para mejorar el conocimiento\
             \ y la concienciaci\xF3n de la seguridad - La entidad comunica informaci\xF3\
             n para mejorar el conocimiento y la concienciaci\xF3n de la seguridad\
@@ -906,7 +859,6 @@ objects:
         \ through a privacy awareness training program."
       translations:
         es:
-          name: null
           description: "[P] Comunica informaci\xF3n para mejorar el conocimiento y\
             \ la concienciaci\xF3n sobre la privacidad - La entidad comunica informaci\xF3\
             n para mejorar el conocimiento y la concienciaci\xF3n sobre la privacidad\
@@ -922,7 +874,6 @@ objects:
         \ to report a suspected privacy incident."
       translations:
         es:
-          name: null
           description: "[P] Comunica m\xE9todos de notificaci\xF3n de incidentes -\
             \ La entidad ha comunicado a los empleados y a otras personas de la entidad\
             \ el proceso utilizado para notificar un presunto incidente relacionado\
@@ -939,7 +890,6 @@ objects:
         \ results of system operation."
       translations:
         es:
-          name: null
           description: "[SYSTEM LEVEL] Comunica informaci\xF3n sobre el funcionamiento\
             \ y los l\xEDmites del sistema - La entidad prepara y comunica informaci\xF3\
             n sobre el dise\xF1o y el funcionamiento del sistema y sus l\xEDmites\
@@ -955,7 +905,6 @@ objects:
         \ responsibilities."
       translations:
         es:
-          name: null
           description: "[SYSTEM LEVEL] Comunica los objetivos del sistema - La entidad\
             \ comunica sus objetivos al personal para permitirle desempe\xF1ar sus\
             \ responsabilidades."
@@ -969,7 +918,6 @@ objects:
         \ are communicated in a timely manner."
       translations:
         es:
-          name: null
           description: "[SYSTEM LEVEL] Comunica los cambios del sistema - Los cambios\
             \ del sistema que afectan a las responsabilidades o a la consecuci\xF3\
             n de los objetivos de la entidad se comunican oportunamente."
@@ -997,7 +945,6 @@ objects:
         \ analysts, and other external parties."
       translations:
         es:
-          name: null
           description: "[COSO] Comunica a las partes externas - Existen procesos para\
             \ comunicar informaci\xF3n relevante y oportuna a las partes externas,\
             \ incluidos accionistas, socios, propietarios, reguladores, clientes,\
@@ -1013,7 +960,6 @@ objects:
         \ board of directors with relevant information."
       translations:
         es:
-          name: null
           description: "[COSO] Permite las comunicaciones entrantes - Los canales\
             \ de comunicaci\xF3n abiertos permiten recibir aportaciones de clientes,\
             \ consumidores, proveedores, auditores externos, reguladores, analistas\
@@ -1029,7 +975,6 @@ objects:
         \ communicated to the board of directors."
       translations:
         es:
-          name: null
           description: "[COSO] Se comunica con el Consejo de Administraci\xF3n - La\
             \ informaci\xF3n pertinente resultante de las evaluaciones realizadas\
             \ por partes externas se comunica al Consejo de Administraci\xF3n."
@@ -1044,7 +989,6 @@ objects:
         \ channels are inoperative or ineffective."
       translations:
         es:
-          name: null
           description: "[COSO] Proporciona l\xEDneas de comunicaci\xF3n separadas\
             \ - Existen canales de comunicaci\xF3n separados, como l\xEDneas directas\
             \ de denuncia de irregularidades, que sirven como mecanismos a prueba\
@@ -1060,7 +1004,6 @@ objects:
         \ and legal, regulatory, and fiduciary requirements and expectations."
       translations:
         es:
-          name: null
           description: "[COSO] Selecciona el m\xE9todo de comunicaci\xF3n pertinente:\
             \ el m\xE9todo de comunicaci\xF3n tiene en cuenta el momento, la audiencia\
             \ y la naturaleza de la comunicaci\xF3n, as\xED como los requisitos y\
@@ -1078,7 +1021,6 @@ objects:
         \ objectives."
       translations:
         es:
-          name: null
           description: "[C] Comunica los objetivos relacionados con la confidencialidad\
             \ y los cambios en dichos objetivos - La entidad comunica a los usuarios\
             \ externos, proveedores, socios comerciales y otras personas cuyos productos\
@@ -1097,7 +1039,6 @@ objects:
         \ of personal information, as well as changes to those objectives."
       translations:
         es:
-          name: null
           description: "[P] Comunica los objetivos relacionados con la privacidad\
             \ y los cambios en dichos objetivos - La entidad comunica a los usuarios\
             \ externos, proveedores, socios comerciales y otros cuyos productos o\
@@ -1114,7 +1055,6 @@ objects:
         \ the process used to report a suspected privacy incident."
       translations:
         es:
-          name: null
           description: "[P] Comunica los m\xE9todos de notificaci\xF3n de incidentes\
             \ - La entidad comunica a las entidades usuarias, terceros, interesados\
             \ y otros el proceso utilizado para notificar un presunto incidente relacionado\
@@ -1131,7 +1071,6 @@ objects:
         \ the results of system operation."
       translations:
         es:
-          name: null
           description: "[SYSTEM LEVEL] Comunica informaci\xF3n sobre el funcionamiento\
             \ y los l\xEDmites del sistema - La entidad prepara y comunica informaci\xF3\
             n sobre el dise\xF1o y el funcionamiento del sistema y sus l\xEDmites\
@@ -1146,7 +1085,6 @@ objects:
         \ communicates its system objectives to appropriate external users."
       translations:
         es:
-          name: null
           description: '[SYSTEM LEVEL] Comunica los objetivos del sistema - La entidad
             comunica los objetivos de su sistema a los usuarios externos apropiados.'
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.3.11
@@ -1160,7 +1098,6 @@ objects:
         \ responsibilities and have the information necessary to carry out such responsibilities."
       translations:
         es:
-          name: null
           description: "[NIVEL DEL SISTEMA] Comunica las responsabilidades del sistema\
             \ - Los usuarios externos con responsabilidad en el dise\xF1o, desarrollo,\
             \ implementaci\xF3n, operaci\xF3n, mantenimiento y monitoreo de los controles\
@@ -1177,7 +1114,6 @@ objects:
         \ and other complaints to appropriate entity personnel."
       translations:
         es:
-          name: null
           description: "[SYSTEM LEVEL] Comunica informaci\xF3n sobre la notificaci\xF3\
             n de fallos del sistema, incidentes, preocupaciones y otras cuestiones\
             \ - Los usuarios externos reciben informaci\xF3n sobre c\xF3mo notificar\
@@ -1191,7 +1127,6 @@ objects:
       translations:
         es:
           name: "Evaluaci\xF3n del Riesgo"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.1
       assessable: false
       depth: 2
@@ -1216,7 +1151,6 @@ objects:
         \ and performance of the entity."
       translations:
         es:
-          name: null
           description: "[Refleja las decisiones de la direcci\xF3n - Los objetivos\
             \ operativos reflejan las decisiones de la direcci\xF3n sobre la estructura,\
             \ las consideraciones sectoriales y el rendimiento de la entidad."
@@ -1230,7 +1164,6 @@ objects:
         \ of operations objectives."
       translations:
         es:
-          name: null
           description: "[Objetivos de las operaciones] Considera las tolerancias de\
             \ riesgo - La direcci\xF3n considera los niveles aceptables de variaci\xF3\
             n en relaci\xF3n con la consecuci\xF3n de los objetivos de las operaciones."
@@ -1244,7 +1177,6 @@ objects:
         \ financial performance for the entity within operations objectives."
       translations:
         es:
-          name: null
           description: "[Objetivos de las operaciones] Incluye metas de rendimiento\
             \ operativo y financiero - La organizaci\xF3n refleja el nivel deseado\
             \ de rendimiento operativo y financiero para la entidad dentro de los\
@@ -1259,7 +1191,6 @@ objects:
         \ needed to attain desired operations and financial performance."
       translations:
         es:
-          name: null
           description: "[Objetivos de las operaciones] Forms a Basis for Committing\
             \ of Resources \u2014 Management uses operations objectives as a basis\
             \ for allocating resources needed to attain desired operations and financial\
@@ -1275,7 +1206,6 @@ objects:
         \ principles selected are appropriate in the circumstances."
       translations:
         es:
-          name: null
           description: "[Objetivos de la informaci\xF3n financiera externa] Cumple\
             \ con las normas contables aplicables - Los objetivos de la informaci\xF3\
             n financiera son coherentes con los principios contables adecuados y disponibles\
@@ -1290,7 +1220,6 @@ objects:
         \ \u2014 Management considers materiality in financial statement presentation."
       translations:
         es:
-          name: null
           description: "[Objetivos de la informaci\xF3n financiera externa] Tiene\
             \ en cuenta la importancia relativa - La direcci\xF3n tiene en cuenta\
             \ la importancia relativa en la presentaci\xF3n de los estados financieros."
@@ -1304,7 +1233,6 @@ objects:
         \ to show qualitative characteristics and assertions."
       translations:
         es:
-          name: null
           description: "[Objetivos de la informaci\xF3n financiera externa] Refleja\
             \ las actividades de la entidad - La informaci\xF3n externa refleja las\
             \ transacciones y eventos subyacentes para mostrar las caracter\xEDsticas\
@@ -1320,7 +1248,6 @@ objects:
         \ organizations."
       translations:
         es:
-          name: null
           description: "[Objetivos de reporting externo no financiero] Cumple con\
             \ marcos establecidos externamente - La direcci\xF3n establece objetivos\
             \ coherentes con leyes y reglamentos o normas y marcos de organizaciones\
@@ -1336,7 +1263,6 @@ objects:
         \ third parties in nonfinancial reporting."
       translations:
         es:
-          name: null
           description: "[Objetivos de reporting externo no financiero] Considera el\
             \ nivel de precisi\xF3n requerido - La direcci\xF3n refleja el nivel requerido\
             \ de precisi\xF3n y exactitud adecuado a las necesidades de los usuarios\
@@ -1352,7 +1278,6 @@ objects:
         \ within a range of acceptable limits."
       translations:
         es:
-          name: null
           description: "[Objetivos de reporting externo no financiero] Refleja las\
             \ actividades de la entidad - La informaci\xF3n externa refleja las transacciones\
             \ y eventos subyacentes dentro de un rango de l\xEDmites aceptables."
@@ -1367,7 +1292,6 @@ objects:
         \ the entity."
       translations:
         es:
-          name: null
           description: "[Objetivos de la informaci\xF3n interna] Refleja las decisiones\
             \ de la direcci\xF3n - La informaci\xF3n interna proporciona a la direcci\xF3\
             n datos precisos y completos sobre las decisiones de la direcci\xF3n y\
@@ -1383,7 +1307,6 @@ objects:
         \ materiality within financial reporting objectives."
       translations:
         es:
-          name: null
           description: "[Objetivos de la informaci\xF3n interna] Tiene en cuenta el\
             \ nivel de precisi\xF3n requerido - La direcci\xF3n refleja el nivel requerido\
             \ de precisi\xF3n y exactitud adecuado a las necesidades de los usuarios\
@@ -1399,7 +1322,6 @@ objects:
         \ a range of acceptable limits."
       translations:
         es:
-          name: null
           description: "[Refleja las actividades de la entidad - La informaci\xF3\
             n interna refleja las transacciones y hechos subyacentes dentro de unos\
             \ l\xEDmites aceptables."
@@ -1413,7 +1335,6 @@ objects:
         \ the entity integrates into compliance objectives."
       translations:
         es:
-          name: null
           description: "[Refleja las leyes y reglamentos externos - Las leyes y reglamentos\
             \ establecen normas m\xEDnimas de conducta, que la entidad integra en\
             \ los objetivos de cumplimiento."
@@ -1427,7 +1348,6 @@ objects:
         \ of operations objectives."
       translations:
         es:
-          name: null
           description: "[Objetivos de cumplimiento] Considera las tolerancias de riesgo\
             \ - La direcci\xF3n considera los niveles aceptables de variaci\xF3n en\
             \ relaci\xF3n con la consecuci\xF3n de los objetivos de las operaciones."
@@ -1442,7 +1362,6 @@ objects:
         \ the achievement of the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "Establece subobjetivos para la evaluaci\xF3n de riesgos -\
             \ La direcci\xF3n identifica subobjetivos para su uso en la evaluaci\xF3\
             n de riesgos relacionados con la seguridad, la disponibilidad, la integridad\
@@ -1474,7 +1393,6 @@ objects:
         \ relevant to the achievement of objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Incluye los niveles de entidad, filial, divisi\xF3\
             n, unidad operativa y funcional - La entidad identifica y eval\xFAa el\
             \ riesgo en los niveles de entidad, filial, divisi\xF3n, unidad operativa\
@@ -1489,7 +1407,6 @@ objects:
         \ of objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Analiza los factores internos y externos - La identificaci\xF3\
             n de riesgos tiene en cuenta tanto los factores internos como los externos\
             \ y su impacto en la consecuci\xF3n de los objetivos."
@@ -1503,7 +1420,6 @@ objects:
         \ levels of management."
       translations:
         es:
-          name: null
           description: "[COSO] Implica a los niveles de direcci\xF3n adecuados - La\
             \ entidad establece mecanismos eficaces de evaluaci\xF3n de riesgos que\
             \ implican a los niveles de direcci\xF3n adecuados."
@@ -1517,7 +1433,6 @@ objects:
         \ significance of the risk."
       translations:
         es:
-          name: null
           description: "[COSO] Estima la importancia de los riesgos identificados\
             \ - Los riesgos identificados se analizan mediante un proceso que incluye\
             \ la estimaci\xF3n de la importancia potencial del riesgo."
@@ -1533,7 +1448,6 @@ objects:
         \ (including malicious) and unintentional acts and environmental events."
       translations:
         es:
-          name: null
           description: "[COSO] Determina c\xF3mo responder a los riesgos - La evaluaci\xF3\
             n de riesgos incluye considerar c\xF3mo debe gestionarse el riesgo y si\
             \ debe aceptarse, evitarse, reducirse o compartirse. Identifica las amenazas\
@@ -1550,7 +1464,6 @@ objects:
         \ processes, infrastructure, software, and other information assets."
       translations:
         es:
-          name: null
           description: "[TSC] Identifica la vulnerabilidad de los componentes del\
             \ sistema - La entidad identifica las vulnerabilidades de los componentes\
             \ del sistema, incluidos los procesos del sistema, la infraestructura,\
@@ -1568,7 +1481,6 @@ objects:
         \ access to the entity's information systems."
       translations:
         es:
-          name: null
           description: "[TSC] Analiza las amenazas y vulnerabilidades de proveedores,\
             \ socios comerciales y otras partes - El proceso de evaluaci\xF3n de riesgos\
             \ de la entidad incluye el an\xE1lisis de las posibles amenazas y vulnerabilidades\
@@ -1593,7 +1505,6 @@ objects:
         \ or share such risks)."
       translations:
         es:
-          name: null
           description: "[TSC] Eval\xFAa la importancia de los riesgos - La entidad\
             \ eval\xFAa la importancia de los riesgos identificados, incluyendo (1)\
             \ la determinaci\xF3n de la criticidad de los componentes del sistema,\
@@ -1630,7 +1541,6 @@ objects:
         \ resulting from the various ways that fraud and misconduct can occur."
       translations:
         es:
-          name: null
           description: "[COSO] Considera varios tipos de fraude - La evaluaci\xF3\
             n del fraude considera la informaci\xF3n fraudulenta, la posible p\xE9\
             rdida de activos y la corrupci\xF3n resultante de las diversas formas\
@@ -1644,7 +1554,6 @@ objects:
         \ of fraud risks considers incentives and pressures."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa los incentivos y las presiones - La evaluaci\xF3\
             n de los riesgos de fraude tiene en cuenta los incentivos y las presiones."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.3.3
@@ -1658,7 +1567,6 @@ objects:
         \ inappropriate acts."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa las oportunidades - La evaluaci\xF3n del\
             \ riesgo de fraude tiene en cuenta las oportunidades de adquisici\xF3\
             n, uso o enajenaci\xF3n no autorizados de activos, alteraci\xF3n de los\
@@ -1674,7 +1582,6 @@ objects:
         \ in or justify inappropriate actions."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa actitudes y racionalizaciones - La evaluaci\xF3\
             n del riesgo de fraude tiene en cuenta el modo en que la direcci\xF3n\
             \ y el resto del personal pueden llevar a cabo o justificar acciones inadecuadas."
@@ -1689,7 +1596,6 @@ objects:
         \ from the use of IT and access to information."
       translations:
         es:
-          name: null
           description: "[TSC] Considera los riesgos relacionados con el uso de TI\
             \ y el acceso a la informaci\xF3n - La evaluaci\xF3n de los riesgos de\
             \ fraude incluye la consideraci\xF3n de las amenazas y vulnerabilidades\
@@ -1721,7 +1627,6 @@ objects:
         \ and physical environment in which the entity operates."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa los cambios en el entorno externo: El proceso\
             \ de identificaci\xF3n de riesgos considera los cambios en el entorno\
             \ normativo, econ\xF3mico y f\xEDsico en el que opera la entidad."
@@ -1737,7 +1642,6 @@ objects:
         \ geographies, and new technologies."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa los cambios en el modelo de negocio: La entidad\
             \ analiza los posibles impactos en el sistema de control interno derivados\
             \ de nuevas l\xEDneas de negocio, alteraciones significativas en la composici\xF3\
@@ -1754,7 +1658,6 @@ objects:
         \ of internal control."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa los cambios en el liderazgo: La entidad considera\
             \ las modificaciones en la direcci\xF3n y las actitudes y filosof\xED\
             as asociadas respecto al sistema de control interno."
@@ -1768,7 +1671,6 @@ objects:
         s systems and changes in the technology environment."
       translations:
         es:
-          name: null
           description: "[TSC] Eval\xFAa los cambios en los sistemas y la tecnolog\xED\
             a: El proceso de identificaci\xF3n de riesgos considera los cambios derivados\
             \ de modificaciones en los sistemas de la entidad y en el entorno tecnol\xF3\
@@ -1783,7 +1685,6 @@ objects:
         \ partner relationships."
       translations:
         es:
-          name: null
           description: "[TSC] Eval\xFAa los cambios en las relaciones con proveedores\
             \ y socios comerciales: El proceso de identificaci\xF3n de riesgos contempla\
             \ las variaciones en las relaciones con proveedores y socios comerciales."
@@ -1799,7 +1700,6 @@ objects:
         \ of the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "[TSC] Eval\xFAa los cambios en las amenazas y vulnerabilidades:\
             \ El proceso de identificaci\xF3n de riesgos analiza los cambios en (1)\
             \ las amenazas internas y externas, as\xED como las vulnerabilidades de\
@@ -1814,7 +1714,6 @@ objects:
       translations:
         es:
           name: "Actividades de Supervisi\xF3n"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4.1
       assessable: false
       depth: 2
@@ -1839,7 +1738,6 @@ objects:
         \ Management includes a balance of ongoing and separate evaluations."
       translations:
         es:
-          name: null
           description: "[COSO] Considera una combinaci\xF3n de evaluaciones continuas\
             \ y separadas - La direcci\xF3n incluye un equilibrio entre evaluaciones\
             \ continuas y separadas."
@@ -1853,7 +1751,6 @@ objects:
         \ ongoing and separate evaluations."
       translations:
         es:
-          name: null
           description: "[COSO] Tiene en cuenta el ritmo de cambio - La direcci\xF3\
             n tiene en cuenta el ritmo de cambio de la empresa y de los procesos empresariales\
             \ a la hora de seleccionar y desarrollar evaluaciones continuas y separadas."
@@ -1867,7 +1764,6 @@ objects:
         \ for ongoing and separate evaluations."
       translations:
         es:
-          name: null
           description: "[COSO] Establece una base de comprensi\xF3n - El dise\xF1\
             o y el estado actual de un sistema de control interno se utilizan para\
             \ establecer una base de referencia para las evaluaciones en curso y por\
@@ -1882,7 +1778,6 @@ objects:
         \ what is being evaluated."
       translations:
         es:
-          name: null
           description: "[COSO] Utiliza personal con conocimientos - Los evaluadores\
             \ que realizan evaluaciones continuas y separadas tienen conocimientos\
             \ suficientes para comprender lo que se est\xE1 evaluando."
@@ -1895,7 +1790,6 @@ objects:
         \ are built into the business processes and adjust to changing conditions."
       translations:
         es:
-          name: null
           description: '[COSO] Se integra con los procesos empresariales: las evaluaciones
             continuas se incorporan a los procesos empresariales y se ajustan a las
             condiciones cambiantes.'
@@ -1908,7 +1802,6 @@ objects:
         \ scope and frequency of separate evaluations depending on risk."
       translations:
         es:
-          name: null
           description: "[COSO] Ajusta el alcance y la frecuencia - La direcci\xF3\
             n var\xEDa el alcance y la frecuencia de las evaluaciones independientes\
             \ en funci\xF3n del riesgo."
@@ -1921,7 +1814,6 @@ objects:
         \ periodically to provide objective feedback."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa de forma objetiva - Peri\xF3dicamente se\
             \ realizan evaluaciones independientes para proporcionar informaci\xF3\
             n objetiva."
@@ -1939,7 +1831,6 @@ objects:
         \ scans, security assessment, penetration testing, and third-party assessments."
       translations:
         es:
-          name: null
           description: "[TSC] Considera diferentes tipos de evaluaciones continuas\
             \ y separadas - La direcci\xF3n utiliza una variedad de evaluaciones continuas\
             \ y separadas de riesgos y controles para determinar si los controles\
@@ -1974,7 +1865,6 @@ objects:
         \ as appropriate, assess results of ongoing and separate evaluations."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa los resultados - La direcci\xF3n y el consejo\
             \ de administraci\xF3n, seg\xFAn proceda, eval\xFAan los resultados de\
             \ las evaluaciones en curso y de las independientes."
@@ -1988,7 +1878,6 @@ objects:
         \ and the board of directors, as appropriate."
       translations:
         es:
-          name: null
           description: "[COSO] Comunica las deficiencias - Las deficiencias se comunican\
             \ a las partes responsables de tomar medidas correctoras y a la alta direcci\xF3\
             n y al consejo de administraci\xF3n, seg\xFAn proceda."
@@ -2001,7 +1890,6 @@ objects:
         \ deficiencies are remedied on a timely basis."
       translations:
         es:
-          name: null
           description: "[COSO] Supervisa las medidas correctoras: la direcci\xF3n\
             \ controla si las deficiencias se subsanan a tiempo."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5
@@ -2012,7 +1900,6 @@ objects:
       translations:
         es:
           name: Actividades de control
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.1
       assessable: false
       depth: 2
@@ -2038,7 +1925,6 @@ objects:
         \ out."
       translations:
         es:
-          name: null
           description: "[COSO] Se integra con la evaluaci\xF3n de riesgos - Las actividades\
             \ de control ayudan a garantizar que se llevan a cabo las respuestas que\
             \ abordan y mitigan los riesgos."
@@ -2053,7 +1939,6 @@ objects:
         \ and development of control activities."
       translations:
         es:
-          name: null
           description: "[COSO] Considera factores espec\xEDficos de la entidad - La\
             \ direcci\xF3n tiene en cuenta c\xF3mo el entorno, la complejidad, la\
             \ naturaleza y el alcance de sus operaciones, as\xED como las caracter\xED\
@@ -2068,7 +1953,6 @@ objects:
         \ determines which relevant business processes require control activities."
       translations:
         es:
-          name: null
           description: "[COSO] Determina los procesos de negocio relevantes - La direcci\xF3\
             n determina qu\xE9 procesos de negocio relevantes requieren actividades\
             \ de control."
@@ -2083,7 +1967,6 @@ objects:
         \ and preventive and detective controls."
       translations:
         es:
-          name: null
           description: "[COSO] Eval\xFAa una mezcla de tipos de actividades de control\
             \ - Las actividades de control incluyen una gama y variedad de controles\
             \ y pueden incluir un equilibrio de enfoques para mitigar los riesgos,\
@@ -2098,7 +1981,6 @@ objects:
         \ considers control activities at various levels in the entity."
       translations:
         es:
-          name: null
           description: "[COSO] Considera a qu\xE9 nivel se aplican las actividades\
             \ - La direcci\xF3n considera las actividades de control a varios niveles\
             \ en la entidad."
@@ -2112,7 +1994,6 @@ objects:
         \ selects and develops alternative control activities."
       translations:
         es:
-          name: null
           description: "[COSO] Aborda la segregaci\xF3n de funciones - La direcci\xF3\
             n segrega las funciones incompatibles y, cuando dicha segregaci\xF3n no\
             \ resulta pr\xE1ctica, selecciona y desarrolla actividades de control\
@@ -2142,7 +2023,6 @@ objects:
         \ control activities, and technology general controls."
       translations:
         es:
-          name: null
           description: "[COSO] Determina la dependencia entre el uso de la tecnolog\xED\
             a en los procesos de negocio y los controles generales de tecnolog\xED\
             a: La direcci\xF3n comprende y determina la dependencia y vinculaci\xF3\
@@ -2159,7 +2039,6 @@ objects:
         \ accuracy, and availability of technology processing."
       translations:
         es:
-          name: null
           description: "[COSO] Establece actividades de control relevantes sobre la\
             \ infraestructura tecnol\xF3gica: La direcci\xF3n selecciona y desarrolla\
             \ actividades de control sobre la infraestructura tecnol\xF3gica, que\
@@ -2178,7 +2057,6 @@ objects:
         s assets from external threats."
       translations:
         es:
-          name: null
           description: "[COSO] Establece actividades de control relevantes en los\
             \ procesos de gesti\xF3n de la seguridad: La direcci\xF3n selecciona y\
             \ desarrolla actividades de control dise\xF1adas e implementadas para\
@@ -2196,7 +2074,6 @@ objects:
         \ technology and its infrastructure to achieve management\u2019s objectives."
       translations:
         es:
-          name: null
           description: "[COSO] Establece actividades de control relevantes en la adquisici\xF3\
             n, desarrollo y mantenimiento de la tecnolog\xEDa: La direcci\xF3n selecciona\
             \ y desarrolla actividades de control sobre la adquisici\xF3n, desarrollo\
@@ -2214,7 +2091,6 @@ objects:
         expected and in procedures that put policies into action.'
       translations:
         es:
-          name: null
           description: "La entidad despliega actividades de control a trav\xE9s de\
             \ pol\xEDticas que establecen lo que se\nesperado y en procedimientos\
             \ que ponen las pol\xEDticas en acci\xF3n\xBB."
@@ -2230,7 +2106,6 @@ objects:
         \ actions."
       translations:
         es:
-          name: null
           description: "[COSO] Establece pol\xEDticas y procedimientos para apoyar\
             \ el despliegue de las directivas de la direcci\xF3n - La direcci\xF3\
             n establece actividades de control que se incorporan a los procesos empresariales\
@@ -2249,7 +2124,6 @@ objects:
         \ reside."
       translations:
         es:
-          name: null
           description: "[COSO] Establece la responsabilidad y la obligaci\xF3n de\
             \ rendir cuentas para la ejecuci\xF3n de pol\xEDticas y procedimientos\
             \ - La direcci\xF3n establece la responsabilidad y la obligaci\xF3n de\
@@ -2266,7 +2140,6 @@ objects:
         \ and procedures."
       translations:
         es:
-          name: null
           description: "[COSO] Realizaci\xF3n oportuna - El personal responsable realiza\
             \ las actividades de control de forma oportuna, tal y como se define en\
             \ las pol\xEDticas y procedimientos."
@@ -2279,7 +2152,6 @@ objects:
         \ and act on matters identified as a result of executing control activities."
       translations:
         es:
-          name: null
           description: "[COSO] Toma medidas correctivas - El personal responsable\
             \ investiga y act\xFAa sobre los asuntos identificados como resultado\
             \ de la ejecuci\xF3n de las actividades de control."
@@ -2293,7 +2165,6 @@ objects:
         \ continuing focus."
       translations:
         es:
-          name: null
           description: "[COSO] Performs Using Competent Personnel \u2014 Competent\
             \ personnel with sufficient authority perform control activities with\
             \ diligence and continuing focus."
@@ -2307,7 +2178,6 @@ objects:
         \ them when necessary."
       translations:
         es:
-          name: null
           description: "[COSO] Reevaluaci\xF3n de pol\xEDticas y procedimientos -\
             \ La direcci\xF3n revisa peri\xF3dicamente las actividades de control\
             \ para determinar si siguen siendo pertinentes y las actualiza cuando\
@@ -2320,7 +2190,6 @@ objects:
       translations:
         es:
           name: "Controles de acceso l\xF3gico y f\xEDsico"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1
       assessable: false
       depth: 2
@@ -2331,7 +2200,6 @@ objects:
         events to meet the entity's objectives.
       translations:
         es:
-          name: null
           description: "La entidad implementa software de seguridad de acceso l\xF3\
             gico, infraestructura y arquitecturas sobre activos de informaci\xF3n\
             \ protegidos para protegerlos de eventos de seguridad y cumplir con los\
@@ -2346,7 +2214,6 @@ objects:
         \ assets (for example, infrastructure, software, and data)."
       translations:
         es:
-          name: null
           description: "[TSC] Identifica y gestiona el inventario de activos de informaci\xF3\
             n: La entidad identifica, inventar\xEDa, clasifica y gestiona los activos\
             \ de informaci\xF3n (por ejemplo, infraestructura, software y datos)."
@@ -2360,7 +2227,6 @@ objects:
         \ into the system environment."
       translations:
         es:
-          name: null
           description: "[TSC] Eval\xFAa nuevas arquitecturas: La entidad identifica\
             \ nuevas arquitecturas del sistema y eval\xFAa su seguridad antes de implementarlas\
             \ en el entorno del sistema."
@@ -2376,7 +2242,6 @@ objects:
         \ control software, rule sets, and standard configuration hardening processes."
       translations:
         es:
-          name: null
           description: "[TSC] Restringe el acceso l\xF3gico: La entidad restringe\
             \ el acceso l\xF3gico a los activos de informaci\xF3n, incluida la infraestructura\
             \ (por ejemplo, servidores, almacenamiento, elementos de red, API y dispositivos\
@@ -2397,7 +2262,6 @@ objects:
         \ strategy."
       translations:
         es:
-          name: null
           description: "[TSC] Identifica y autentica a los usuarios: La entidad identifica\
             \ y autentica a las personas, infraestructura y software antes de acceder\
             \ a los activos de informaci\xF3n, ya sea localmente o de forma remota.\
@@ -2415,7 +2279,6 @@ objects:
         \ based on the entity\u2019s risk mitigation strategy."
       translations:
         es:
-          name: null
           description: "[TSC] Considera la segmentaci\xF3n de la red: La entidad utiliza\
             \ la segmentaci\xF3n de la red, arquitecturas de confianza cero y otras\
             \ t\xE9cnicas para aislar partes no relacionadas de la tecnolog\xEDa de\
@@ -2432,7 +2295,6 @@ objects:
         \ using each point of access are identified, documented, and managed."
       translations:
         es:
-          name: null
           description: "[TSC] Gestiona los puntos de acceso: Los puntos de acceso\
             \ utilizados por entidades externas y los tipos de datos que fluyen a\
             \ trav\xE9s de ellos se identifican, inventar\xEDan y gestionan. Se identifican,\
@@ -2450,7 +2312,6 @@ objects:
         \ assets."
       translations:
         es:
-          name: null
           description: "[TSC] Restringe el acceso a los activos de informaci\xF3n:\
             \ Se utilizan combinaciones de clasificaci\xF3n de datos, estructuras\
             \ de datos separadas, restricciones de puertos, restricciones de protocolos\
@@ -2468,7 +2329,6 @@ objects:
         \ and software."
       translations:
         es:
-          name: null
           description: "[TSC] Gestiona la identificaci\xF3n y autenticaci\xF3n: Los\
             \ requisitos de identificaci\xF3n y autenticaci\xF3n se establecen, documentan\
             \ y gestionan para individuos y sistemas que acceden a la informaci\xF3\
@@ -2486,7 +2346,6 @@ objects:
         \ no longer in use."
       translations:
         es:
-          name: null
           description: '[TSC] Gestiona las credenciales de infraestructura y software:
             Las infraestructuras y software internos y externos nuevos son registrados,
             autorizados y documentados antes de otorgar credenciales de acceso e implementarlos
@@ -2504,7 +2363,6 @@ objects:
         \ strategy."
       translations:
         es:
-          name: null
           description: "[TSC] Utiliza el cifrado para proteger los datos: La entidad\
             \ utiliza el cifrado para proteger los datos (en reposo, durante el procesamiento\
             \ o en transmisi\xF3n) cuando dichas protecciones se consideran apropiadas\
@@ -2520,7 +2378,6 @@ objects:
         \ entity\u2019s risk mitigation strategy."
       translations:
         es:
-          name: null
           description: "[TSC] Protege las claves criptogr\xE1ficas: La entidad protege\
             \ las claves criptogr\xE1ficas durante su generaci\xF3n, almacenamiento,\
             \ uso y destrucci\xF3n. Los m\xF3dulos criptogr\xE1ficos, algoritmos,\
@@ -2536,7 +2393,6 @@ objects:
         \ is restricted to identified purposes."
       translations:
         es:
-          name: null
           description: "[C] Restringe el acceso y uso de la informaci\xF3n confidencial\
             \ para fines identificados: El acceso l\xF3gico y el uso de la informaci\xF3\
             n confidencial est\xE1n restringidos a los fines identificados."
@@ -2551,7 +2407,6 @@ objects:
         \ support the achievement of the entity\u2019s objectives\nrelated to privacy."
       translations:
         es:
-          name: null
           description: "[P] Restringe el acceso y el uso de la informaci\xF3n personal:\
             \ El acceso l\xF3gico y el uso de la informaci\xF3n personal est\xE1n\
             \ restringidos al personal autorizado que requiere dicho acceso para cumplir\
@@ -2569,7 +2424,6 @@ objects:
         longer authorized.
       translations:
         es:
-          name: null
           description: "Antes de emitir credenciales del sistema y conceder acceso,\
             \ la entidad registra y autoriza a los nuevos usuarios internos y externos\
             \ cuyo acceso es gestionado por la entidad. Para aquellos usuarios cuyo\
@@ -2588,7 +2442,6 @@ objects:
         \ partner personnel), systems, and software."
       translations:
         es:
-          name: null
           description: "Crea credenciales de acceso a activos de informaci\xF3n protegidos:\
             \ La entidad crea credenciales para acceder a activos de informaci\xF3\
             n protegidos con base en una autorizaci\xF3n del propietario del activo\
@@ -2607,7 +2460,6 @@ objects:
         \ system or service accounts."
       translations:
         es:
-          name: null
           description: "Revisa la validez de las credenciales de acceso: La entidad\
             \ revisa peri\xF3dicamente las credenciales de acceso para verificar su\
             \ validez (por ejemplo, empleados, contratistas, proveedores y personal\
@@ -2623,7 +2475,6 @@ objects:
         \ credentials when no longer valid."
       translations:
         es:
-          name: null
           description: "Evita el uso de credenciales cuando ya no son v\xE1lidas:\
             \ Se implementan procesos para deshabilitar, destruir o prevenir el uso\
             \ de credenciales de acceso cuando dejan de ser v\xE1lidas."
@@ -2638,7 +2489,6 @@ objects:
         \ least privilege and segregation of duties, to meet the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "La entidad autoriza, modifica o elimina el acceso a datos,\
             \ software, funciones y otros activos de informaci\xF3n protegida en funci\xF3\
             n de roles, responsabilidades o del dise\xF1o y cambios del sistema, considerando\
@@ -2654,7 +2504,6 @@ objects:
         \ assets based on authorization from the asset\u2019s owner."
       translations:
         es:
-          name: null
           description: "Crea o modifica el acceso a activos de informaci\xF3n protegidos:\
             \ Existen procesos para crear o modificar el acceso a activos de informaci\xF3\
             n protegidos, bas\xE1ndose en la autorizaci\xF3n del propietario del activo."
@@ -2668,7 +2517,6 @@ objects:
         \ required."
       translations:
         es:
-          name: null
           description: "Elimina el acceso a activos de informaci\xF3n protegidos:\
             \ Se implementan procesos para eliminar el acceso a activos de informaci\xF3\
             n protegidos cuando ya no es necesario."
@@ -2683,7 +2531,6 @@ objects:
         \ functions."
       translations:
         es:
-          name: null
           description: "Utiliza estructuras de control de acceso: La entidad utiliza\
             \ estructuras de control de acceso, como controles de acceso basados en\
             \ roles, para restringir el acceso a activos de informaci\xF3n protegidos,\
@@ -2700,7 +2547,6 @@ objects:
         \ Access roles and rules are modified, as appropriate."
       translations:
         es:
-          name: null
           description: "Revisa los roles y reglas de acceso: Se revisa peri\xF3dicamente\
             \ la adecuaci\xF3n de los roles y reglas de acceso para identificar accesos\
             \ innecesarios o inapropiados (por ejemplo, empleados, contratistas, proveedores\
@@ -2717,7 +2563,6 @@ objects:
         s objectives."
       translations:
         es:
-          name: null
           description: "La entidad restringe el acceso f\xEDsico a instalaciones y\
             \ activos de informaci\xF3n protegida (por ejemplo, centros de datos,\
             \ almacenamiento de copias de seguridad y otras ubicaciones sensibles)\
@@ -2733,7 +2578,6 @@ objects:
         \ spaces, and work areas, based on appropriate authorization."
       translations:
         es:
-          name: null
           description: "Crea o modifica el acceso f\xEDsico: Se implementan procesos\
             \ para crear o modificar el acceso f\xEDsico de empleados, contratistas,\
             \ proveedores y socios comerciales a instalaciones como centros de datos,\
@@ -2748,7 +2592,6 @@ objects:
         \ contractor, vendor, or business partner no longer requires access."
       translations:
         es:
-          name: null
           description: "Elimina el acceso f\xEDsico: Se implementan procesos para\
             \ eliminar el acceso f\xEDsico a instalaciones y activos de informaci\xF3\
             n protegidos cuando un empleado, contratista, proveedor o socio comercial\
@@ -2763,7 +2606,6 @@ objects:
         \ employee, contractor, vendor, or business partner no longer requires access."
       translations:
         es:
-          name: null
           description: "Recupera dispositivos f\xEDsicos: Se implementan procesos\
             \ para recuperar dispositivos de la entidad (por ejemplo, credenciales\
             \ de acceso, ordenadores port\xE1tiles y dispositivos m\xF3viles) cuando\
@@ -2778,7 +2620,6 @@ objects:
         \ review physical access to help ensure consistency with job responsibilities."
       translations:
         es:
-          name: null
           description: "Revisa el acceso f\xEDsico: Se implementan procesos para revisar\
             \ peri\xF3dicamente el acceso f\xEDsico y asegurar que sea consistente\
             \ con las responsabilidades laborales."
@@ -2793,7 +2634,6 @@ objects:
         \ the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "La entidad interrumpe las protecciones l\xF3gicas y f\xED\
             sicas de activos f\xEDsicos \xFAnicamente cuando la capacidad de leer\
             \ o recuperar datos y software de dichos activos se ha reducido y ya no\
@@ -2802,7 +2642,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.5
-      ref_id: C6.5.1
+      ref_id: CC6.5.1
       description: "Removes Data and Software for Disposal \u2014 Procedures are in\
         \ place to remove, delete, or otherwise render data and software inaccessible\
         \ from physical assets and other devices owned by the entity, its vendors,\
@@ -2810,7 +2650,6 @@ objects:
         \ or the asset will no longer be under the control of the entity."
       translations:
         es:
-          name: null
           description: "Elimina datos y software para su eliminaci\xF3n: Se implementan\
             \ procedimientos para eliminar, borrar o hacer inaccesibles los datos\
             \ y software de activos f\xEDsicos y otros dispositivos propiedad de la\
@@ -2826,7 +2665,6 @@ objects:
         against threats from sources outside its system boundaries.
       translations:
         es:
-          name: null
           description: "La entidad implementa medidas de seguridad de acceso l\xF3\
             gico para protegerse contra amenazas provenientes de fuentes externas\
             \ a los l\xEDmites de su sistema."
@@ -2840,7 +2678,6 @@ objects:
         \ restricted."
       translations:
         es:
-          name: null
           description: "Restringe el acceso: Se restringen los tipos de actividades\
             \ que pueden ocurrir a trav\xE9s de un canal de comunicaci\xF3n (por ejemplo,\
             \ sitios FTP, puertos de router)."
@@ -2854,7 +2691,6 @@ objects:
         \ outside its system boundaries."
       translations:
         es:
-          name: null
           description: "Protege las credenciales de identificaci\xF3n y autenticaci\xF3\
             n: Las credenciales de identificaci\xF3n y autenticaci\xF3n se protegen\
             \ durante la transmisi\xF3n fuera de los l\xEDmites del sistema."
@@ -2868,7 +2704,6 @@ objects:
         \ system from outside its boundaries."
       translations:
         es:
-          name: null
           description: "Requiere autenticaci\xF3n adicional o credenciales: Se requiere\
             \ informaci\xF3n o credenciales adicionales de autenticaci\xF3n al acceder\
             \ al sistema desde fuera de sus l\xEDmites."
@@ -2883,7 +2718,6 @@ objects:
         \ configured, implemented, and maintained to protect external access points."
       translations:
         es:
-          name: null
           description: "Implementa sistemas de protecci\xF3n de l\xEDmites: Los sistemas\
             \ de protecci\xF3n de l\xEDmites (por ejemplo, firewalls, zonas desmilitarizadas,\
             \ sistemas de detecci\xF3n o prevenci\xF3n de intrusiones y sistemas de\
@@ -2900,7 +2734,6 @@ objects:
         s objectives."
       translations:
         es:
-          name: null
           description: "La entidad restringe la transmisi\xF3n, movimiento y eliminaci\xF3\
             n de informaci\xF3n a usuarios y procesos internos y externos autorizados,\
             \ y la protege durante la transmisi\xF3n, el movimiento o la eliminaci\xF3\
@@ -2915,7 +2748,6 @@ objects:
         \ and execute transmission, movement, and removal of information."
       translations:
         es:
-          name: null
           description: "Restringe la capacidad de realizar transmisiones: Se utilizan\
             \ procesos y tecnolog\xEDas de prevenci\xF3n de p\xE9rdida de datos para\
             \ restringir la capacidad de autorizar y ejecutar la transmisi\xF3n, movimiento\
@@ -2931,7 +2763,6 @@ objects:
         \ beyond connectivity access points."
       translations:
         es:
-          name: null
           description: "Utiliza tecnolog\xEDas de cifrado o canales de comunicaci\xF3\
             n seguros para proteger los datos: Se utilizan tecnolog\xEDas de cifrado\
             \ o canales de comunicaci\xF3n seguros para proteger la transmisi\xF3\
@@ -2947,7 +2778,6 @@ objects:
         \ tapes), as appropriate."
       translations:
         es:
-          name: null
           description: "Protege medios extra\xEDbles: Se aplican tecnolog\xEDas de\
             \ cifrado y protecciones f\xEDsicas para medios extra\xEDbles (como unidades\
             \ USB y cintas de respaldo), seg\xFAn corresponda."
@@ -2961,7 +2791,6 @@ objects:
         \ and sensors)."
       translations:
         es:
-          name: null
           description: "Protege dispositivos terminales: Se implementan procesos y\
             \ controles para proteger dispositivos terminales (como dispositivos m\xF3\
             viles, ordenadores port\xE1tiles, escritorios y sensores)."
@@ -2975,7 +2804,6 @@ objects:
         s objectives."
       translations:
         es:
-          name: null
           description: "La entidad implementa controles para prevenir o detectar la\
             \ introducci\xF3n de software no autorizado o malicioso y actuar en consecuencia\
             \ para cumplir los objetivos de la entidad."
@@ -2991,7 +2819,6 @@ objects:
         \ and is monitored regularly."
       translations:
         es:
-          name: null
           description: "Restringe la instalaci\xF3n y modificaci\xF3n de aplicaciones\
             \ y software - La capacidad de instalar y modificar aplicaciones y software\
             \ est\xE1 restringida a personas autorizadas. El software de utilidad\
@@ -3008,7 +2835,6 @@ objects:
         \ parameters that may be indicative of unauthorized or malicious software."
       translations:
         es:
-          name: null
           description: "Detecta cambios no autorizados en el software y los par\xE1\
             metros de configuraci\xF3n - Existen procesos para detectar cambios en\
             \ el software y los par\xE1metros de configuraci\xF3n que puedan ser indicativos\
@@ -3022,7 +2848,6 @@ objects:
         \ change control process is used for the implementation of software."
       translations:
         es:
-          name: null
           description: "Utiliza un proceso de control de cambios definido - Para la\
             \ implantaci\xF3n del software se utiliza un proceso de control de cambios\
             \ definido por la direcci\xF3n."
@@ -3037,7 +2862,6 @@ objects:
         \ of malware."
       translations:
         es:
-          name: null
           description: "Utiliza software antivirus y antimalware: el software antivirus\
             \ y antimalware de los servidores y dispositivos de punto final est\xE1\
             \ configurado, implementado y mantenido para permitir la interceptaci\xF3\
@@ -3054,7 +2878,6 @@ objects:
         \ is removed prior to connection to the entity\u2019s network."
       translations:
         es:
-          name: null
           description: "Analiza los activos de informaci\xF3n procedentes de fuera\
             \ de la entidad en busca de malware y otro software no autorizado - Existen\
             \ procedimientos para analizar los activos de informaci\xF3n que han sido\
@@ -3069,7 +2892,6 @@ objects:
       translations:
         es:
           name: Operaciones del sistema
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1
       assessable: false
       depth: 2
@@ -3081,7 +2903,6 @@ objects:
         \ discovered vulnerabilities."
       translations:
         es:
-          name: null
           description: "Para cumplir con sus objetivos, la entidad utiliza procedimientos\
             \ de detecci\xF3n y monitorizaci\xF3n para identificar: (1) cambios en\
             \ configuraciones que resultan en la introducci\xF3n de nuevas vulnerabilidades,\
@@ -3095,7 +2916,6 @@ objects:
         \ configuration standards to be used for hardening systems."
       translations:
         es:
-          name: null
           description: "Utiliza est\xE1ndares de configuraci\xF3n definidos: La entidad\
             \ define est\xE1ndares de configuraci\xF3n para el endurecimiento de sistemas."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1.2
@@ -3108,7 +2928,6 @@ objects:
         \ could threaten the achievement of the entity's objectives."
       translations:
         es:
-          name: null
           description: "Monitoriza la infraestructura y el software: La entidad supervisa\
             \ la infraestructura y el software para detectar incumplimientos con los\
             \ est\xE1ndares establecidos, lo cual podr\xEDa amenazar el logro de los\
@@ -3124,7 +2943,6 @@ objects:
         \ configuration files, or content files."
       translations:
         es:
-          name: null
           description: "Implementa mecanismos de detecci\xF3n de cambios: El sistema\
             \ de TI incluye un mecanismo de detecci\xF3n de cambios (por ejemplo,\
             \ herramientas de monitorizaci\xF3n de integridad de archivos) para alertar\
@@ -3139,7 +2957,6 @@ objects:
         \ in place to detect the introduction of unknown or unauthorized components."
       translations:
         es:
-          name: null
           description: "Detecta componentes desconocidos o no autorizados: Se implementan\
             \ procedimientos para detectar la introducci\xF3n de componentes desconocidos\
             \ o no autorizados."
@@ -3155,7 +2972,6 @@ objects:
         \ in a timely manner to support the achievement of the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "Realiza escaneos de vulnerabilidades: La entidad realiza escaneos\
             \ de vulnerabilidades de infraestructura y software dise\xF1ados para\
             \ identificar posibles vulnerabilidades o configuraciones incorrectas\
@@ -3174,7 +2990,6 @@ objects:
         are analyzed to determine whether they represent security events.
       translations:
         es:
-          name: null
           description: "La entidad monitoriza los componentes del sistema y el funcionamiento\
             \ de esos componentes para detectar anomal\xEDas indicativas de actos\
             \ maliciosos, desastres naturales y errores que afecten la capacidad de\
@@ -3194,7 +3009,6 @@ objects:
         \ threats and vulnerabilities; and \n(3) logging of unusual system activities."
       translations:
         es:
-          name: null
           description: "Implementa pol\xEDticas, procedimientos y herramientas de\
             \ detecci\xF3n: Se definen e implementan pol\xEDticas, procedimientos\
             \ y herramientas de detecci\xF3n en la infraestructura y el software para\
@@ -3218,7 +3032,6 @@ objects:
         \ unauthorized hardware and software."
       translations:
         es:
-          name: null
           description: "Dise\xF1a medidas de detecci\xF3n: Las medidas de detecci\xF3\
             n se dise\xF1an para identificar anomal\xEDas que podr\xEDan resultar\
             \ de:\n(1) Compromiso de barreras f\xEDsicas.\n(2) Acciones no autorizadas\
@@ -3236,7 +3049,6 @@ objects:
         \ security events."
       translations:
         es:
-          name: null
           description: "Implementa filtros para analizar anomal\xEDas: La direcci\xF3\
             n implementa procedimientos para filtrar, resumir y analizar anomal\xED\
             as con el fin de identificar eventos de seguridad."
@@ -3250,7 +3062,6 @@ objects:
         \ tools."
       translations:
         es:
-          name: null
           description: "Monitoriza las herramientas de detecci\xF3n para una operaci\xF3\
             n efectiva: La direcci\xF3n implementa procesos para supervisar y mantener\
             \ la efectividad de las herramientas de detecci\xF3n."
@@ -3264,7 +3075,6 @@ objects:
         incidents) and, if so, takes actions to prevent or address such failures.
       translations:
         es:
-          name: null
           description: "La entidad eval\xFAa los eventos de seguridad para determinar\
             \ si podr\xEDan o han resultado en un fallo que impida el cumplimiento\
             \ de los objetivos de la entidad (incidentes de seguridad) y, en tal caso,\
@@ -3279,7 +3089,6 @@ objects:
         \ those policies and procedures on a periodic basis."
       translations:
         es:
-          name: null
           description: "Responde a los incidentes de seguridad: Se implementan procedimientos\
             \ para responder a los incidentes de seguridad y evaluar la efectividad\
             \ de dichas pol\xEDticas y procedimientos de manera peri\xF3dica."
@@ -3293,7 +3102,6 @@ objects:
         \ for the management of the security program, and actions are taken, if necessary."
       translations:
         es:
-          name: null
           description: "Comunica y revisa los eventos de seguridad detectados: Los\
             \ eventos de seguridad detectados son comunicados y revisados por las\
             \ personas responsables de la gesti\xF3n del programa de seguridad, y\
@@ -3308,7 +3116,6 @@ objects:
         \ system impact."
       translations:
         es:
-          name: null
           description: 'Desarrolla e implementa procedimientos para analizar incidentes
             de seguridad: Se implementan procedimientos para analizar los incidentes
             de seguridad y determinar el impacto en el sistema.'
@@ -3322,7 +3129,6 @@ objects:
         \ in the unauthorized disclosure or use of confidential information."
       translations:
         es:
-          name: null
           description: "[C] Eval\xFAa el impacto sobre la informaci\xF3n confidencial:\
             \ Los eventos de seguridad detectados son evaluados para determinar si\
             \ pudieron o resultaron en la divulgaci\xF3n o uso no autorizado de informaci\xF3\
@@ -3339,7 +3145,6 @@ objects:
         \ of entity objectives."
       translations:
         es:
-          name: null
           description: "[C] Determina la informaci\xF3n confidencial utilizada o divulgada:\
             \ Cuando ocurre un uso o divulgaci\xF3n no autorizada de informaci\xF3\
             n confidencial, se identifica la informaci\xF3n afectada y se toman acciones\
@@ -3355,7 +3160,6 @@ objects:
         \ there has been a failure to comply with aplicable laws or regulations."
       translations:
         es:
-          name: null
           description: "[P] Eval\xFAa el impacto sobre la informaci\xF3n personal:\
             \ Los eventos de seguridad detectados son evaluados para determinar si\
             \ pudieron o resultaron en la divulgaci\xF3n o uso no autorizado de informaci\xF3\
@@ -3372,7 +3176,6 @@ objects:
         \ of entity objectives."
       translations:
         es:
-          name: null
           description: "[P] Determina la informaci\xF3n personal utilizada o divulgada:\
             \ Cuando ocurre un uso o divulgaci\xF3n no autorizada de informaci\xF3\
             n personal, se identifica la informaci\xF3n afectada y se toman acciones\
@@ -3387,7 +3190,6 @@ objects:
         communicate security incidents, as appropriate.
       translations:
         es:
-          name: null
           description: "La entidad responde a incidentes de seguridad identificados\
             \ ejecutando un programa de respuesta a incidentes definido para comprender,\
             \ contener, remediar y comunicar los incidentes de seguridad, seg\xFA\
@@ -3402,7 +3204,6 @@ objects:
         \ program are assigned, including the use of external resources when necessary."
       translations:
         es:
-          name: null
           description: "Asigna roles y responsabilidades: Los roles y responsabilidades\
             \ para el dise\xF1o, implementaci\xF3n, mantenimiento y ejecuci\xF3n del\
             \ programa de respuesta a incidentes son asignados, incluyendo el uso\
@@ -3417,7 +3218,6 @@ objects:
         \ threaten entity objectives."
       translations:
         es:
-          name: null
           description: 'Contiene y responde a incidentes de seguridad: Se implementan
             procedimientos para responder y contener incidentes de seguridad que amenacen
             activamente los objetivos de la entidad.'
@@ -3430,7 +3230,6 @@ objects:
         \ place to mitigate the effects of ongoing security incidents."
       translations:
         es:
-          name: null
           description: 'Mitiga los incidentes de seguridad en curso: Se implementan
             procedimientos para mitigar los efectos de incidentes de seguridad en
             curso.'
@@ -3444,7 +3243,6 @@ objects:
         \ unauthorized access, and other remediation actions."
       translations:
         es:
-          name: null
           description: "Resuelve incidentes de seguridad: Se implementan procedimientos\
             \ para resolver incidentes de seguridad mediante el cierre de vulnerabilidades,\
             \ eliminaci\xF3n de accesos no autorizados y otras acciones de remediaci\xF3\
@@ -3459,7 +3257,6 @@ objects:
         \ of entity objectives."
       translations:
         es:
-          name: null
           description: 'Restaura operaciones: Se implementan procedimientos para restaurar
             datos y operaciones comerciales a un estado provisional que permita el
             logro de los objetivos de la entidad.'
@@ -3474,7 +3271,6 @@ objects:
         \ to support the achievement of the entity's objectives."
       translations:
         es:
-          name: null
           description: "Desarrolla e implementa la comunicaci\xF3n de incidentes de\
             \ seguridad: Se desarrollan e implementan protocolos para comunicar de\
             \ manera oportuna informaci\xF3n sobre incidentes de seguridad y las acciones\
@@ -3493,7 +3289,6 @@ objects:
         \ approach."
       translations:
         es:
-          name: null
           description: "Obtiene comprensi\xF3n de la naturaleza del incidente y determina\
             \ la estrategia de contenci\xF3n: Se obtiene informaci\xF3n sobre la naturaleza\
             \ y gravedad del incidente para determinar la respuesta y estrategia de\
@@ -3509,7 +3304,6 @@ objects:
         \ are remediated through the development and execution of remediation activities."
       translations:
         es:
-          name: null
           description: "Remedia vulnerabilidades identificadas: Las vulnerabilidades\
             \ identificadas se remedian mediante el desarrollo y ejecuci\xF3n de actividades\
             \ de remediaci\xF3n."
@@ -3523,7 +3317,6 @@ objects:
         \ program."
       translations:
         es:
-          name: null
           description: "Comunica las actividades de remediaci\xF3n: Las actividades\
             \ de remediaci\xF3n se documentan y comunican conforme al programa de\
             \ respuesta a incidentes."
@@ -3537,7 +3330,6 @@ objects:
         \ basis."
       translations:
         es:
-          name: null
           description: "Eval\xFAa la efectividad de la respuesta a incidentes: Se\
             \ eval\xFAa peri\xF3dicamente la efectividad de las actividades de respuesta\
             \ a incidentes."
@@ -3552,7 +3344,6 @@ objects:
         \ based on incident patterns and root causes."
       translations:
         es:
-          name: null
           description: "Eval\xFAa peri\xF3dicamente los incidentes: La direcci\xF3\
             n revisa de forma peri\xF3dica los incidentes relacionados con seguridad,\
             \ confidencialidad y privacidad, identificando patrones y causas ra\xED\
@@ -3566,7 +3357,6 @@ objects:
         \ procedures are defined and applied in the event of a confirmed privacy incident."
       translations:
         es:
-          name: null
           description: '[P] Aplica procedimientos de respuesta a brechas: Se aplican
             procedimientos definidos de respuesta en caso de un incidente confirmado
             de privacidad.'
@@ -3581,7 +3371,6 @@ objects:
         \ and others as required."
       translations:
         es:
-          name: null
           description: "[P] Comunica usos y divulgaciones no autorizados: Los eventos\
             \ que resultaron en el uso o divulgaci\xF3n no autorizada de informaci\xF3\
             n personal se comunican a los titulares de datos, autoridades legales\
@@ -3598,7 +3387,6 @@ objects:
         \ and regulatory requirements."
       translations:
         es:
-          name: null
           description: "[P] Aplicaci\xF3n de sanciones: Se eval\xFAa la conducta de\
             \ individuos u organizaciones involucradas en el uso o divulgaci\xF3n\
             \ no autorizada de informaci\xF3n personal, aplicando sanciones seg\xFA\
@@ -3613,7 +3401,6 @@ objects:
         from identified security incidents.
       translations:
         es:
-          name: null
           description: La entidad identifica, desarrolla e implementa actividades
             para recuperarse de los incidentes de seguridad identificados.
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.1
@@ -3627,7 +3414,6 @@ objects:
         \ configurations, as needed."
       translations:
         es:
-          name: null
           description: "Restaura el Entorno Afectado - Las actividades restauran el\
             \ entorno afectado a su operaci\xF3n funcional reconstruyendo sistemas,\
             \ actualizando software, instalando parches, modificando controles de\
@@ -3643,7 +3429,6 @@ objects:
         \ and others as appropriate (internal and external)."
       translations:
         es:
-          name: null
           description: "Comunica informaci\xF3n sobre el incidente - Las comunicaciones\
             \ sobre la naturaleza del incidente, las medidas de recuperaci\xF3n adoptadas\
             \ y las actividades necesarias para la prevenci\xF3n de futuros incidentes\
@@ -3658,7 +3443,6 @@ objects:
         \ the incident is determined."
       translations:
         es:
-          name: null
           description: "Determina la causa ra\xEDz del incidente - Se determina la\
             \ causa ra\xEDz del incidente."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5.4
@@ -3671,7 +3455,6 @@ objects:
         \ to prevent and detect incident recurrences in a timely manner."
       translations:
         es:
-          name: null
           description: Implementa cambios para prevenir y detectar reincidencias -
             Se implementa una arquitectura adicional o cambios a los controles preventivos
             y detectivos para prevenir y detectar reincidencias de incidentes de manera
@@ -3686,7 +3469,6 @@ objects:
         \ improved."
       translations:
         es:
-          name: null
           description: "Mejora de los procedimientos de respuesta y recuperaci\xF3\
             n - Se analizan las lecciones aprendidas y se mejoran el plan de respuesta\
             \ a incidentes y los procedimientos de recuperaci\xF3n."
@@ -3704,7 +3486,6 @@ objects:
         \ resilience posture and continuity plans based on test results."
       translations:
         es:
-          name: null
           description: "Implementa pruebas del plan de recuperaci\xF3n de incidentes\
             \ - Las pruebas del plan de recuperaci\xF3n de incidentes se realizan\
             \ de forma peri\xF3dica. Las pruebas incluyen \n(1) desarrollo de escenarios\
@@ -3722,7 +3503,6 @@ objects:
       translations:
         es:
           name: "Gesti\xF3n del Cambio"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1
       assessable: false
       depth: 2
@@ -3733,7 +3513,6 @@ objects:
         software, and procedures to meet its objectives.
       translations:
         es:
-          name: null
           description: "La entidad autoriza, dise\xF1a, desarrolla o adquiere, configura,\
             \ documenta, prueba, aprueba e implementa cambios en la infraestructura,\
             \ datos, software y procedimientos para cumplir con sus objetivos."
@@ -3748,7 +3527,6 @@ objects:
         \ procedures) is used to support the achievement of entity objectives."
       translations:
         es:
-          name: null
           description: 'Gestiona los cambios a lo largo del ciclo de vida del sistema:
             Existe un proceso para gestionar los cambios en el sistema durante su
             ciclo de vida y el de sus componentes (infraestructura, datos, software
@@ -3764,7 +3542,6 @@ objects:
         \ configuration."
       translations:
         es:
-          name: null
           description: "Autoriza cambios: Existe un proceso para autorizar cambios\
             \ en el sistema y en la arquitectura antes de su dise\xF1o, desarrollo,\
             \ adquisici\xF3n o configuraci\xF3n."
@@ -3778,7 +3555,6 @@ objects:
         \ of entity objectives."
       translations:
         es:
-          name: null
           description: "Dise\xF1a y desarrolla cambios: Se cuenta con un proceso para\
             \ dise\xF1ar y desarrollar cambios en el sistema de manera segura con\
             \ el fin de apoyar el logro de los objetivos de la entidad."
@@ -3792,7 +3568,6 @@ objects:
         \ and external users in performing their responsibilities."
       translations:
         es:
-          name: null
           description: "Documenta los cambios: Existe un proceso para documentar los\
             \ cambios del sistema y as\xED apoyar el mantenimiento continuo del sistema\
             \ y ayudar a los usuarios internos y externos en el desempe\xF1o de sus\
@@ -3806,7 +3581,6 @@ objects:
         \ changes prior to implementation."
       translations:
         es:
-          name: null
           description: "Rastrea los cambios del sistema: Se dispone de un proceso\
             \ para rastrear los cambios en el sistema antes de su implementaci\xF3\
             n."
@@ -3820,7 +3594,6 @@ objects:
         \ of developed and acquired software."
       translations:
         es:
-          name: null
           description: "Configura el software: Existe un proceso para seleccionar,\
             \ implementar, mantener y supervisar los par\xE1metros de configuraci\xF3\
             n utilizados para controlar la funcionalidad del software desarrollado\
@@ -3837,7 +3610,6 @@ objects:
         \ testing (whether point in time or continuous)."
       translations:
         es:
-          name: null
           description: "Prueba los cambios del sistema: Se implementa un proceso para\
             \ probar los cambios desarrollados y adquiridos en el sistema antes de\
             \ su implementaci\xF3n en el entorno de producci\xF3n. Las pruebas pueden\
@@ -3853,7 +3625,6 @@ objects:
         \ system changes prior to implementation."
       translations:
         es:
-          name: null
           description: "Aprueba los cambios del sistema: Existe un proceso para aprobar\
             \ los cambios del sistema antes de su implementaci\xF3n."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1.9
@@ -3867,7 +3638,6 @@ objects:
         \ by a single user) to prevent or detect unauthorized changes."
       translations:
         es:
-          name: null
           description: "Despliega los cambios del sistema: Se cuenta con un proceso\
             \ para implementar los cambios en el sistema considerando la segregaci\xF3\
             n de responsabilidades (por ejemplo, restringir que una sola persona desarrolle,\
@@ -3884,7 +3654,6 @@ objects:
         \ system development life cycle."
       translations:
         es:
-          name: null
           description: "Identifica y eval\xFAa los cambios del sistema: Se identifican\
             \ los objetivos afectados por los cambios del sistema y se eval\xFAa la\
             \ capacidad del sistema modificado para apoyar el cumplimiento de dichos\
@@ -3900,7 +3669,6 @@ objects:
         \ and the change process is initiated upon identification."
       translations:
         es:
-          name: null
           description: "Identifica cambios en infraestructura, datos, software y procedimientos\
             \ necesarios para remediar incidentes: Se identifican los cambios en infraestructura,\
             \ datos, software y procedimientos requeridos para remediar incidentes,\
@@ -3914,7 +3682,6 @@ objects:
         \ configuration of IT and control systems is created and maintained."
       translations:
         es:
-          name: null
           description: "Crea una configuraci\xF3n base de tecnolog\xEDa de TI: Se\
             \ crea y mantiene una configuraci\xF3n base de los sistemas de TI y control."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1.13
@@ -3928,7 +3695,6 @@ objects:
         \ that need to be implemented in an urgent time frame)."
       translations:
         es:
-          name: null
           description: "Proporciona cambios necesarios en situaciones de emergencia:\
             \ Existe un proceso para autorizar, dise\xF1ar, probar, aprobar e implementar\
             \ cambios necesarios en situaciones de emergencia (es decir, cambios que\
@@ -3943,7 +3709,6 @@ objects:
         \ and software."
       translations:
         es:
-          name: null
           description: 'Gestiona cambios de parches: Existe un proceso para identificar,
             evaluar, probar, aprobar e implementar parches de manera oportuna en la
             infraestructura y el software.'
@@ -3958,7 +3723,6 @@ objects:
         \ resume operations through significant disruptions."
       translations:
         es:
-          name: null
           description: "[A] Considera la resiliencia del sistema: La entidad considera\
             \ la resiliencia del sistema al dise\xF1ar sus sistemas y realiza pruebas\
             \ de resiliencia durante el desarrollo para garantizar la capacidad de\
@@ -3975,7 +3739,6 @@ objects:
         \ related to confidentiality."
       translations:
         es:
-          name: null
           description: "[C] Protege la informaci\xF3n confidencial: La entidad protege\
             \ la informaci\xF3n confidencial durante el dise\xF1o, desarrollo, prueba,\
             \ implementaci\xF3n y procesos de cambio del sistema para cumplir con\
@@ -3991,7 +3754,6 @@ objects:
         \ related to privacy."
       translations:
         es:
-          name: null
           description: "[P] Protege la informaci\xF3n personal: La entidad protege\
             \ la informaci\xF3n personal durante el dise\xF1o, desarrollo, prueba,\
             \ implementaci\xF3n y procesos de cambio del sistema para apoyar el cumplimiento\
@@ -4007,7 +3769,6 @@ objects:
         \ purpose."
       translations:
         es:
-          name: null
           description: "[P] Privacidad desde el dise\xF1o: La entidad considera los\
             \ requisitos de privacidad en el dise\xF1o de sus sistemas y procesos,\
             \ y limita la recopilaci\xF3n y el procesamiento de informaci\xF3n personal\
@@ -4020,7 +3781,6 @@ objects:
       translations:
         es:
           name: "Mitigaci\xF3n de riesgos"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.1
       assessable: false
       depth: 2
@@ -4030,7 +3790,6 @@ objects:
         for risks arising from potential business disruptions.
       translations:
         es:
-          name: null
           description: "La entidad identifica, selecciona y desarrolla actividades\
             \ de mitigaci\xF3n de riesgos para los riesgos derivados de posibles interrupciones\
             \ de la actividad."
@@ -4048,7 +3807,6 @@ objects:
         \ and recovery efforts."
       translations:
         es:
-          name: null
           description: "Considera la Mitigaci\xF3n de los Riesgos de Interrupci\xF3\
             n del Negocio - Las actividades de mitigaci\xF3n de riesgos incluyen el\
             \ desarrollo de pol\xEDticas, procedimientos, comunicaciones y soluciones\
@@ -4069,7 +3827,6 @@ objects:
         \ of the entity to support the achievement of its objectives."
       translations:
         es:
-          name: null
           description: "Considera el uso de seguros para mitigar los riesgos de impacto\
             \ financiero - Las actividades de gesti\xF3n de riesgos consideran el\
             \ uso de seguros para compensar el impacto financiero de los eventos que,\
@@ -4084,7 +3841,6 @@ objects:
         business partners.
       translations:
         es:
-          name: null
           description: "La entidad eval\xFAa y gestiona los riesgos asociados a los\
             \ proveedores y socios comerciales."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2.1
@@ -4099,7 +3855,6 @@ objects:
         (4) service levels."
       translations:
         es:
-          name: null
           description: "\xABEstablece requisitos para las contrataciones de proveedores\
             \ y socios comerciales - La entidad establece requisitos espec\xEDficos\
             \ para las contrataciones de proveedores y socios comerciales que incluyen\
@@ -4117,7 +3872,6 @@ objects:
         \ networks."
       translations:
         es:
-          name: null
           description: "Identifica vulnerabilidades - La entidad eval\xFAa las vulnerabilidades\
             \ derivadas de las relaciones con proveedores y socios comerciales, incluido\
             \ el acceso de terceros a los sistemas inform\xE1ticos de la entidad y\
@@ -4137,7 +3891,6 @@ objects:
         \ failure to meet business or regulatory requirements."
       translations:
         es:
-          name: null
           description: "\xAB Eval\xFAa los riesgos de proveedores y socios comerciales\
             \ - La entidad hace inventario, clasifica y eval\xFAa peri\xF3dicamente\
             \ las amenazas derivadas de las relaciones con proveedores y socios comerciales\
@@ -4159,7 +3912,6 @@ objects:
         \ and business partners."
       translations:
         es:
-          name: null
           description: "Asigna responsabilidad y rendici\xF3n de cuentas para la gesti\xF3\
             n de proveedores y socios comerciales - La entidad asigna responsabilidad\
             \ y rendici\xF3n de cuentas para la gesti\xF3n de riesgos y cambios en\
@@ -4174,7 +3926,6 @@ objects:
         \ service or product issues related to vendors and business partners."
       translations:
         es:
-          name: null
           description: "Establece protocolos de comunicaci\xF3n para proveedores y\
             \ socios comerciales - La entidad establece protocolos de comunicaci\xF3\
             n y resoluci\xF3n de problemas de servicios o productos relacionados con\
@@ -4189,7 +3940,6 @@ objects:
         \ service or product issues related to vendors and business partners."
       translations:
         es:
-          name: null
           description: "Establece procedimientos de gesti\xF3n de excepciones de proveedores\
             \ y socios comerciales - La entidad establece procedimientos de gesti\xF3\
             n de excepciones para problemas de servicios o productos relacionados\
@@ -4204,7 +3954,6 @@ objects:
         \ as warranted, based on the risk associated with the vendor or business partner."
       translations:
         es:
-          name: null
           description: "Eval\xFAa el rendimiento de los proveedores y socios comerciales\
             \ - La entidad eval\xFAa el rendimiento de los proveedores y socios comerciales,\
             \ con la frecuencia que se justifique, en funci\xF3n del riesgo asociado\
@@ -4219,7 +3968,6 @@ objects:
         \ for addressing issues identified with vendor and business partner relationships."
       translations:
         es:
-          name: null
           description: Implementa procedimientos para abordar los problemas identificados
             durante las evaluaciones de proveedores y socios comerciales - La entidad
             implementa procedimientos para abordar los problemas identificados en
@@ -4236,7 +3984,6 @@ objects:
         \ or business partner system."
       translations:
         es:
-          name: null
           description: "Implementa Procedimientos para Terminar Relaciones con Proveedores\
             \ y Socios de Negocio - La entidad implementa procedimientos para terminar\
             \ relaciones con proveedores y socios de negocio basados en consideraciones\
@@ -4253,7 +4000,6 @@ objects:
         \ from vendors and business partners who have access to confidential information."
       translations:
         es:
-          name: null
           description: "[C] Obtenci\xF3n de compromisos de confidencialidad por parte\
             \ de proveedores y socios comerciales - La entidad obtiene compromisos\
             \ de confidencialidad coherentes con los compromisos y requisitos de confidencialidad\
@@ -4270,7 +4016,6 @@ objects:
         s confidentiality commitments and requirements."
       translations:
         es:
-          name: null
           description: "[C] Eval\xFAa el cumplimiento de los compromisos de confidencialidad\
             \ de los proveedores y socios comerciales - De forma peri\xF3dica y seg\xFA\
             n sea necesario, la entidad eval\xFAa el cumplimiento por parte de los\
@@ -4287,7 +4032,6 @@ objects:
         \ who have access to personal information."
       translations:
         es:
-          name: null
           description: "[P] Obtiene compromisos de privacidad de proveedores y socios\
             \ comerciales - La entidad obtiene compromisos de privacidad, coherentes\
             \ con los compromisos y requisitos de privacidad de la entidad, de los\
@@ -4304,7 +4048,6 @@ objects:
         \ commitments and requirements and takes corrective action as necessary."
       translations:
         es:
-          name: null
           description: "[P] Eval\xFAa el cumplimiento de los compromisos de privacidad\
             \ de los proveedores y socios comerciales - De forma peri\xF3dica y seg\xFA\
             n sea necesario, la entidad eval\xFAa el cumplimiento por parte de los\
@@ -4318,7 +4061,6 @@ objects:
       translations:
         es:
           name: Criterios adicionales de disponibilidad
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.1
       assessable: false
       depth: 2
@@ -4330,7 +4072,6 @@ objects:
         to help meet its objectives.
       translations:
         es:
-          name: null
           description: "La entidad mantiene, supervisa y eval\xFAa la capacidad de\
             \ procesamiento actual y el uso de los componentes del sistema (infraestructura,\
             \ datos y software) para gestionar la demanda de capacidad y permitir\
@@ -4347,7 +4088,6 @@ objects:
         \ constraints."
       translations:
         es:
-          name: null
           description: "Mide el uso actual - El uso de los componentes del sistema\
             \ se mide para establecer una l\xEDnea de base para la gesti\xF3n de la\
             \ capacidad y para utilizar cuando se supervisa y eval\xFAa el riesgo\
@@ -4363,7 +4103,6 @@ objects:
         \ event of the failure of system components that constrain capacity."
       translations:
         es:
-          name: null
           description: "Previsi\xF3n de capacidad - Se prev\xE9 el uso medio y m\xE1\
             ximo previsto de los componentes del sistema y se compara con la capacidad\
             \ del sistema y las tolerancias asociadas. La previsi\xF3n tiene en cuenta\
@@ -4378,7 +4117,6 @@ objects:
         \ process is initiated when forecasted usage exceeds capacity tolerances."
       translations:
         es:
-          name: null
           description: "Realiza cambios en funci\xF3n de las previsiones - El proceso\
             \ de gesti\xF3n de cambios del sistema se inicia cuando el uso previsto\
             \ supera las tolerancias de capacidad."
@@ -4392,7 +4130,6 @@ objects:
         data backup processes, and recovery infrastructure to meet its objectives.
       translations:
         es:
-          name: null
           description: "La entidad autoriza, dise\xF1a, desarrolla o adquiere, implementa,\
             \ opera, aprueba, mantiene y supervisa protecciones ambientales, software,\
             \ procesos de copia de seguridad de datos e infraestructura de recuperaci\xF3\
@@ -4409,7 +4146,6 @@ objects:
         \ water."
       translations:
         es:
-          name: null
           description: "Identifica amenazas ambientales: Como parte del proceso de\
             \ evaluaci\xF3n de riesgos, la direcci\xF3n identifica las amenazas ambientales\
             \ que podr\xEDan afectar la disponibilidad del sistema, incluidas las\
@@ -4425,7 +4161,6 @@ objects:
         \ to identify anomalies that could result from environmental threat events."
       translations:
         es:
-          name: null
           description: "Dise\xF1a medidas de detecci\xF3n: Se implementan medidas\
             \ de detecci\xF3n para identificar anomal\xEDas que podr\xEDan ser resultado\
             \ de eventos de amenaza ambiental."
@@ -4439,7 +4174,6 @@ objects:
         \ to prevent and mitigate environmental events."
       translations:
         es:
-          name: null
           description: "Implementa y mantiene mecanismos de protecci\xF3n ambiental:\
             \ La direcci\xF3n implementa y mantiene mecanismos de protecci\xF3n ambiental\
             \ para prevenir y mitigar eventos ambientales."
@@ -4453,7 +4187,6 @@ objects:
         \ threat events."
       translations:
         es:
-          name: null
           description: "Implementa alertas para analizar anomal\xEDas: La direcci\xF3\
             n implementa alertas que se comunican al personal para su an\xE1lisis,\
             \ con el objetivo de identificar eventos de amenaza ambiental."
@@ -4469,7 +4202,6 @@ objects:
         \ power system and generator backup subsystem)."
       translations:
         es:
-          name: null
           description: "Responde a eventos de amenaza ambiental: Existen procedimientos\
             \ para responder a eventos de amenaza ambiental y evaluar la efectividad\
             \ de dichas pol\xEDticas y procedimientos de manera peri\xF3dica. Esto\
@@ -4486,7 +4218,6 @@ objects:
         \ are taken, if necessary."
       translations:
         es:
-          name: null
           description: "Comunica y revisa los eventos de amenaza ambiental detectados:\
             \ Los eventos de amenaza ambiental detectados se comunican y revisan con\
             \ las personas responsables de la gesti\xF3n del sistema, y se toman acciones\
@@ -4500,7 +4231,6 @@ objects:
         \ whether backup is required."
       translations:
         es:
-          name: null
           description: "Determina los datos que requieren copia de seguridad: Los\
             \ datos se eval\xFAan para determinar si requieren ser respaldados."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.2.8
@@ -4513,7 +4243,6 @@ objects:
         \ action when such failures occur."
       translations:
         es:
-          name: null
           description: 'Realiza copias de seguridad de los datos: Existen procedimientos
             para realizar copias de seguridad de los datos, supervisar para detectar
             fallos en las copias de seguridad e iniciar acciones correctivas cuando
@@ -4529,7 +4258,6 @@ objects:
         \ is reduced to an appropriate level."
       translations:
         es:
-          name: null
           description: "Gestiona el almacenamiento externo: Las copias de seguridad\
             \ de los datos se almacenan en una ubicaci\xF3n distante de su ubicaci\xF3\
             n principal, de forma que se reduzca la probabilidad de que un evento\
@@ -4547,7 +4275,6 @@ objects:
         \ for components."
       translations:
         es:
-          name: null
           description: "Implementa infraestructura alternativa de procesamiento: Se\
             \ implementan medidas para migrar el procesamiento a una infraestructura\
             \ alternativa en caso de que la infraestructura de procesamiento habitual\
@@ -4564,7 +4291,6 @@ objects:
         \ procedures."
       translations:
         es:
-          name: null
           description: "Considera la recuperabilidad de los datos: La direcci\xF3\
             n identifica amenazas a la recuperabilidad de los datos (por ejemplo,\
             \ ataques de ransomware) que podr\xEDan afectar la disponibilidad del\
@@ -4579,7 +4305,6 @@ objects:
         to meet its objectives.
       translations:
         es:
-          name: null
           description: "La entidad prueba los procedimientos del plan de recuperaci\xF3\
             n que apoyan la recuperaci\xF3n del sistema para cumplir sus objetivos."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.3.1
@@ -4598,7 +4323,6 @@ objects:
         \ test results."
       translations:
         es:
-          name: null
           description: "Implementa pruebas del plan de continuidad del negocio - Las\
             \ pruebas del plan de continuidad del negocio se realizan de forma peri\xF3\
             dica para comprobar la capacidad de la entidad para responder, recuperarse\
@@ -4619,7 +4343,6 @@ objects:
         \ and completeness of backup information is tested on a periodic basis."
       translations:
         es:
-          name: null
           description: "Pruebas de integridad y exhaustividad de los datos de las\
             \ copias de seguridad - La integridad y exhaustividad de la informaci\xF3\
             n de las copias de seguridad se comprueba peri\xF3dicamente."
@@ -4631,7 +4354,6 @@ objects:
       translations:
         es:
           name: Criterios adicionales de confidencialidad
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.1
       assessable: false
       depth: 2
@@ -4641,7 +4363,6 @@ objects:
         \ meet the entity\u2019s objectives related to confidentiality."
       translations:
         es:
-          name: null
           description: "La entidad identifica y mantiene la informaci\xF3n confidencial\
             \ para cumplir los objetivos de la entidad relacionados con la confidencialidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.1.1
@@ -4654,7 +4375,6 @@ objects:
         \ when it is received or created."
       translations:
         es:
-          name: null
           description: "Define e identifica la informaci\xF3n confidencial - Existen\
             \ procedimientos para definir, identificar y designar la informaci\xF3\
             n confidencial cuando se recibe o se crea."
@@ -4668,7 +4388,6 @@ objects:
         \ unless a law or regulation specifically requires otherwise."
       translations:
         es:
-          name: null
           description: "Conserva la informaci\xF3n confidencial - La informaci\xF3\
             n confidencial no se conserva m\xE1s tiempo del necesario para cumplir\
             \ el objetivo identificado, a menos que una ley o reglamento exija espec\xED\
@@ -4683,7 +4402,6 @@ objects:
         \ or destruction during the specified retention period of the information."
       translations:
         es:
-          name: null
           description: "Protege la informaci\xF3n confidencial frente a la destrucci\xF3\
             n - Existen pol\xEDticas y procedimientos para proteger la informaci\xF3\
             n confidencial frente al borrado o la destrucci\xF3n durante el periodo\
@@ -4697,7 +4415,6 @@ objects:
         s objectives related to confidentiality."
       translations:
         es:
-          name: null
           description: "La entidad elimina la informaci\xF3n confidencial para cumplir\
             \ los objetivos de la entidad relacionados con la confidencialidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.2.1
@@ -4710,7 +4427,6 @@ objects:
         \ when the end of the retention period is reached."
       translations:
         es:
-          name: null
           description: "Identifica la informaci\xF3n confidencial que debe destruirse\
             \ - Existen procedimientos para identificar la informaci\xF3n confidencial\
             \ que debe destruirse una vez finalizado el per\xEDodo de conservaci\xF3\
@@ -4725,7 +4441,6 @@ objects:
         \ information that has been identified for destruction."
       translations:
         es:
-          name: null
           description: "Destruye la informaci\xF3n confidencial - Existen pol\xED\
             ticas y procedimientos para borrar autom\xE1tica o manualmente o destruir\
             \ de cualquier otra forma la informaci\xF3n confidencial que ha sido identificada\
@@ -4741,7 +4456,6 @@ objects:
           name: "Criterios adicionales para la integridad del tratamiento (SOBRE LA\
             \ PRESTACI\xD3N DE SERVICIOS O LA PRODUCCI\xD3N, FABRICACI\xD3N O DISTRIBUCI\xD3\
             N DE BIENES)"
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
       assessable: true
       depth: 2
@@ -4753,7 +4467,6 @@ objects:
         the use of products and services.
       translations:
         es:
-          name: null
           description: "La entidad obtiene o genera, utiliza y comunica informaci\xF3\
             n pertinente y de calidad sobre los objetivos relacionados con el tratamiento,\
             \ incluidas las definiciones de los datos tratados y las especificaciones\
@@ -4768,7 +4481,6 @@ objects:
         \ services, and reporting to meet the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "La entidad aplica pol\xEDticas y procedimientos a las entradas\
             \ del sistema, incluidos controles de integridad y exactitud, para obtener\
             \ productos, servicios e informes que cumplan los objetivos de la entidad."
@@ -4782,7 +4494,6 @@ objects:
         s objectives."
       translations:
         es:
-          name: null
           description: "La entidad aplica pol\xEDticas y procedimientos sobre el procesamiento\
             \ de sistemas para obtener productos, servicios e informes que cumplan\
             \ los objetivos de la entidad."
@@ -4796,7 +4507,6 @@ objects:
         \ specifications to meet the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "La entidad aplica pol\xEDticas y procedimientos para poner\
             \ a disposici\xF3n o entregar resultados de forma completa, precisa y\
             \ puntual de acuerdo con las especificaciones para cumplir los objetivos\
@@ -4811,7 +4521,6 @@ objects:
         \ with system specifications to meet the entity\u2019s objectives."
       translations:
         es:
-          name: null
           description: "La entidad aplica pol\xEDticas y procedimientos para almacenar\
             \ las entradas, los elementos en proceso y las salidas de forma completa,\
             \ precisa y oportuna de acuerdo con las especificaciones del sistema para\
@@ -4824,7 +4533,6 @@ objects:
       translations:
         es:
           name: Criterios adicionales de Privacidad
-          description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.0
       assessable: false
       depth: 2
@@ -4834,7 +4542,6 @@ objects:
         Related to Privacy
       translations:
         es:
-          name: null
           description: "Criterios de privacidad relativos a la notificaci\xF3n y comunicaci\xF3\
             n de objetivos relacionados con la privacidad"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
@@ -4849,7 +4556,6 @@ objects:
         \ personal information, to meet the entity\u2019s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad notifica a los interesados sus pr\xE1cticas de\
             \ protecci\xF3n de la intimidad para cumplir los objetivos de la entidad\
             \ en materia de protecci\xF3n de la intimidad. La notificaci\xF3n se actualiza\
@@ -4865,7 +4571,6 @@ objects:
       description: Privacy Criteria Related to Choice and Consent
       translations:
         es:
-          name: null
           description: "Criterios de privacidad relacionados con la elecci\xF3n y\
             \ el consentimiento"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
@@ -4884,7 +4589,6 @@ objects:
         \ use, retention, disclosure, and disposal of personal information is documented."
       translations:
         es:
-          name: null
           description: "La entidad comunica a los interesados las opciones disponibles\
             \ en relaci\xF3n con la recogida, uso, conservaci\xF3n, divulgaci\xF3\
             n y eliminaci\xF3n de la informaci\xF3n personal, as\xED como las consecuencias,\
@@ -4905,7 +4609,6 @@ objects:
       description: Privacy Criteria Related to Collection
       translations:
         es:
-          name: null
           description: Criterios de privacidad relacionados con la recogida
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
       assessable: true
@@ -4916,7 +4619,6 @@ objects:
         s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La informaci\xF3n personal se recoge de acuerdo con los objetivos\
             \ de la entidad en materia de privacidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.2
@@ -4931,7 +4633,6 @@ objects:
         \ related to privacy."
       translations:
         es:
-          name: null
           description: "Para la informaci\xF3n que requiere el consentimiento expl\xED\
             cito, la entidad comunica la necesidad de dicho consentimiento, as\xED\
             \ como las consecuencias de la falta de consentimiento para la solicitud\
@@ -4948,7 +4649,6 @@ objects:
         \ provide the entity with explicit consent."
       translations:
         es:
-          name: null
           description: "Informa a los interesados de las consecuencias de no dar su\
             \ consentimiento [C] - Se informa a los interesados de las consecuencias\
             \ de no dar su consentimiento expl\xEDcito a la entidad."
@@ -4963,7 +4663,6 @@ objects:
         \ related to privacy."
       translations:
         es:
-          name: null
           description: "Documenta el consentimiento expl\xEDcito para conservar la\
             \ informaci\xF3n [C] - La documentaci\xF3n del consentimiento expl\xED\
             cito para la recogida, uso o divulgaci\xF3n de informaci\xF3n personal\
@@ -4977,7 +4676,6 @@ objects:
       description: Privacy Criteria Related to Use, Retention, and Disposal
       translations:
         es:
-          name: null
           description: "Criterios de privacidad relacionados con el uso, la retenci\xF3\
             n y la eliminaci\xF3n"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p4.1
@@ -4989,7 +4687,6 @@ objects:
         \ identified in the entity\u2019s objectives\nrelated to privacy."
       translations:
         es:
-          name: null
           description: "La entidad limita el uso de la informaci\xF3n personal a los\
             \ fines identificados en los objetivos de privacidad de la entidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p4.1.1
@@ -5003,7 +4700,6 @@ objects:
         \ unless a law or regulation specifically requires otherwise."
       translations:
         es:
-          name: null
           description: "Utiliza la informaci\xF3n personal para los fines previstos\
             \ [P][C]: La informaci\xF3n personal se utiliza \xFAnicamente para los\
             \ fines previstos para los cuales fue recopilada y solo cuando se ha obtenido\
@@ -5018,7 +4714,6 @@ objects:
         s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad retiene la informaci\xF3n personal de manera coherente\
             \ con los objetivos de privacidad de la entidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p4.2.1
@@ -5031,7 +4726,6 @@ objects:
         \ unless a law or regulation specifically requires otherwise."
       translations:
         es:
-          name: null
           description: "Retiene la informaci\xF3n personal [P][C]: La informaci\xF3\
             n personal se conserva durante un per\xEDodo no mayor al necesario para\
             \ cumplir con los fines establecidos, a menos que una ley o regulaci\xF3\
@@ -5046,7 +4740,6 @@ objects:
         \ during the specified retention period of the information."
       translations:
         es:
-          name: null
           description: "Protege la informaci\xF3n personal [P][C]: Se implementan\
             \ pol\xEDticas y procedimientos para proteger la informaci\xF3n personal\
             \ contra la eliminaci\xF3n o destrucci\xF3n durante el per\xEDodo de retenci\xF3\
@@ -5060,7 +4753,6 @@ objects:
         \ entity\u2019s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad elimina de manera segura la informaci\xF3n personal\
             \ para cumplir con los objetivos de privacidad de la entidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p4.3.1
@@ -5074,7 +4766,6 @@ objects:
         \ the achievement of the entity\u2019s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "Captura, identifica y marca solicitudes de eliminaci\xF3n\
             \ [P][C]: Las solicitudes de eliminaci\xF3n de informaci\xF3n personal\
             \ se capturan y la informaci\xF3n relacionada con dichas solicitudes se\
@@ -5091,7 +4782,6 @@ objects:
         \ access."
       translations:
         es:
-          name: null
           description: "Elimina, destruye y redacta informaci\xF3n personal [P][C]:\
             \ La informaci\xF3n personal que ya no se retiene se anonimiza, elimina\
             \ o destruye de manera que se prevenga la p\xE9rdida, robo, mal uso o\
@@ -5106,7 +4796,6 @@ objects:
         \ has been identified for destruction"
       translations:
         es:
-          name: null
           description: "Destruye la informaci\xF3n personal [P][C]: Se implementan\
             \ pol\xEDticas y procedimientos para borrar o destruir de otro modo la\
             \ informaci\xF3n personal que ha sido identificada para su destrucci\xF3\
@@ -5119,7 +4808,6 @@ objects:
       description: Privacy Criteria Related to Access
       translations:
         es:
-          name: null
           description: Criterios de privacidad relacionados con el acceso
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p5.1
       assessable: false
@@ -5134,7 +4822,6 @@ objects:
         \ denial, as required, to meet the entity\u2019s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad concede a los interesados identificados y autenticados\
             \ la posibilidad de acceder a su informaci\xF3n personal almacenada para\
             \ revisarla y, previa solicitud, proporciona copias f\xEDsicas o electr\xF3\
@@ -5156,7 +4843,6 @@ objects:
         \ denied."
       translations:
         es:
-          name: null
           description: "Responde a las solicitudes de los responsables del tratamiento\
             \ [P]: La entidad dispone de un proceso para responder a las solicitudes\
             \ de los titulares de datos recibidas de responsables del tratamiento,\
@@ -5174,7 +4860,6 @@ objects:
         \ before they are given access to that information."
       translations:
         es:
-          name: null
           description: "Autentica la identidad de los titulares de los datos [P][C]:\
             \ La identidad de los titulares de datos que solicitan acceso a su informaci\xF3\
             n personal es verificada antes de proporcionarles dicho acceso."
@@ -5189,7 +4874,6 @@ objects:
         \ their personal information."
       translations:
         es:
-          name: null
           description: "Permite a los titulares de datos acceder a su informaci\xF3\
             n personal [P][C]: Los titulares de datos pueden determinar si la entidad\
             \ mantiene informaci\xF3n personal sobre ellos y, previa solicitud, obtener\
@@ -5205,7 +4889,6 @@ objects:
         \ cost, if any."
       translations:
         es:
-          name: null
           description: "Proporciona informaci\xF3n personal comprensible en un plazo\
             \ razonable [P][C]: La informaci\xF3n personal se proporciona a los titulares\
             \ de datos en un formato comprensible, dentro de un plazo razonable y\
@@ -5221,7 +4904,6 @@ objects:
         \ prohibited by law or regulation."
       translations:
         es:
-          name: null
           description: "Informa a los titulares de datos si el acceso es denegado\
             \ [P][C]: Cuando se deniega a los titulares de datos el acceso a su informaci\xF3\
             n personal, la entidad les informa de la denegaci\xF3n y de los motivos\
@@ -5240,7 +4922,6 @@ objects:
         s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad corrige, modifica o a\xF1ade informaci\xF3n personal\
             \ bas\xE1ndose en la informaci\xF3n proporcionada por los titulares de\
             \ datos y comunica dicha informaci\xF3n a terceros, seg\xFAn lo comprometido\
@@ -5260,7 +4941,6 @@ objects:
         \ related to privacy."
       translations:
         es:
-          name: null
           description: "Responde a las solicitudes de los responsables del tratamiento\
             \ [P]: La entidad dispone de un proceso para responder a las solicitudes\
             \ de actualizaci\xF3n de los responsables del tratamiento, incluyendo\
@@ -5279,7 +4959,6 @@ objects:
         \ challenge such denial, as specifically permitted or required by law or regulation."
       translations:
         es:
-          name: null
           description: "Comunica la denegaci\xF3n de solicitudes de acceso [P][C]:\
             \ Los titulares de datos son informados, por escrito, del motivo por el\
             \ cual se deneg\xF3 una solicitud de acceso a su informaci\xF3n personal,\
@@ -5299,7 +4978,6 @@ objects:
         \ to privacy."
       translations:
         es:
-          name: null
           description: "Permite a los titulares de datos actualizar o corregir su\
             \ informaci\xF3n personal [P][C]: Los titulares de datos pueden actualizar\
             \ o corregir su informaci\xF3n personal que est\xE1 en posesi\xF3n de\
@@ -5317,7 +4995,6 @@ objects:
         \ of personal information was denied and how they may appeal."
       translations:
         es:
-          name: null
           description: "Comunica la denegaci\xF3n de solicitudes de correcci\xF3n\
             \ [P][C]: Los titulares de datos son informados, por escrito, del motivo\
             \ por el cual se deneg\xF3 una solicitud de correcci\xF3n de informaci\xF3\
@@ -5330,7 +5007,6 @@ objects:
       description: Privacy Criteria Related to Disclosure and Notification
       translations:
         es:
-          name: null
           description: "Criterios de privacidad relacionados con la divulgaci\xF3\
             n y notificaci\xF3n"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.1
@@ -5343,7 +5019,6 @@ objects:
         \ to disclosure to meet the entity\u2019s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad divulga informaci\xF3n personal a terceros con\
             \ el consentimiento expl\xEDcito de los titulares de los datos y dicho\
             \ consentimiento se obtiene antes de la divulgaci\xF3n para cumplir con\
@@ -5359,7 +5034,6 @@ objects:
         \ is disclosed."
       translations:
         es:
-          name: null
           description: "Comunica las pol\xEDticas de privacidad a terceros [P][C]:\
             \ Las pol\xEDticas de privacidad u otras instrucciones o requisitos espec\xED\
             ficos para el manejo de la informaci\xF3n personal se comunican a los\
@@ -5376,7 +5050,6 @@ objects:
         \ specifically requires otherwise."
       translations:
         es:
-          name: null
           description: "Divulga informaci\xF3n personal solo cuando es apropiado [P][C]:\
             \ La informaci\xF3n personal se divulga a terceros \xFAnicamente para\
             \ los fines para los cuales fue recopilada o creada y solo cuando se ha\
@@ -5394,7 +5067,6 @@ objects:
         \ or other specific instructions or requirements."
       translations:
         es:
-          name: null
           description: "Divulga informaci\xF3n personal \xFAnicamente a terceros apropiados\
             \ [P][C]: La informaci\xF3n personal se divulga \xFAnicamente a terceros\
             \ que tengan acuerdos con la entidad para proteger dicha informaci\xF3\
@@ -5411,7 +5083,6 @@ objects:
         \ subjects."
       translations:
         es:
-          name: null
           description: "Divulga informaci\xF3n a terceros para nuevos fines y usos\
             \ [P][C]: La informaci\xF3n personal se divulga a terceros para nuevos\
             \ fines o usos \xFAnicamente con el consentimiento previo, impl\xEDcito\
@@ -5426,7 +5097,6 @@ objects:
         s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad crea y mantiene un registro completo, preciso y\
             \ oportuno de las divulgaciones autorizadas de informaci\xF3n personal\
             \ para cumplir con los objetivos de privacidad de la entidad."
@@ -5440,7 +5110,6 @@ objects:
         \ information that is complete, accurate, and timely."
       translations:
         es:
-          name: null
           description: "Crea y mantiene un registro de las divulgaciones autorizadas\
             \ [P][C]: La entidad crea y mantiene un registro de las divulgaciones\
             \ autorizadas de informaci\xF3n personal que sea completo, preciso y oportuno."
@@ -5455,7 +5124,6 @@ objects:
         \ privacy."
       translations:
         es:
-          name: null
           description: "La entidad crea y mantiene un registro completo, preciso y\
             \ oportuno de las divulgaciones no autorizadas detectadas o reportadas\
             \ (incluyendo violaciones) de informaci\xF3n personal para cumplir con\
@@ -5471,7 +5139,6 @@ objects:
         \ is complete, accurate, and timely."
       translations:
         es:
-          name: null
           description: "Crea y mantiene un registro de las divulgaciones no autorizadas\
             \ detectadas o reportadas [P][C]: La entidad crea y mantiene un registro\
             \ de las divulgaciones no autorizadas detectadas o reportadas de informaci\xF3\
@@ -5487,7 +5154,6 @@ objects:
         \ on a periodic and as-needed basis and takes corrective action, if necessary."
       translations:
         es:
-          name: null
           description: "La entidad obtiene compromisos de privacidad de proveedores\
             \ y otras terceras partes que tienen acceso a la informaci\xF3n personal\
             \ para cumplir con los objetivos de privacidad de la entidad. La entidad\
@@ -5504,7 +5170,6 @@ objects:
         \ or requirements."
       translations:
         es:
-          name: null
           description: "Eval\xFAa el cumplimiento de los compromisos de privacidad\
             \ por terceros [P][C]: La entidad cuenta con procedimientos para evaluar\
             \ si los terceros tienen controles efectivos para cumplir con los t\xE9\
@@ -5519,7 +5184,6 @@ objects:
         \ information by a third party to whom the entity has transferred such information."
       translations:
         es:
-          name: null
           description: "Corrige el uso indebido de la informaci\xF3n personal por\
             \ parte de un tercero [P][C]: La entidad toma medidas correctivas en respuesta\
             \ al uso indebido de la informaci\xF3n personal por parte de un tercero\
@@ -5535,7 +5199,6 @@ objects:
         \ of personal information."
       translations:
         es:
-          name: null
           description: "Obtiene compromisos para reportar divulgaciones no autorizadas\
             \ [P][C]: Existe un proceso para obtener compromisos de proveedores y\
             \ otras terceras partes para notificar a la entidad sobre divulgaciones\
@@ -5553,7 +5216,6 @@ objects:
         \ objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad obtiene compromisos de proveedores y otras terceras\
             \ partes con acceso a informaci\xF3n personal para notificar a la entidad\
             \ en caso de divulgaciones no autorizadas reales o sospechadas de informaci\xF3\
@@ -5570,7 +5232,6 @@ objects:
         \ information by a third party to whom the entity has transferred such information."
       translations:
         es:
-          name: null
           description: "Corrige el uso indebido de la informaci\xF3n personal por\
             \ parte de un tercero [P][C]: La entidad toma medidas correctivas en respuesta\
             \ al uso indebido de la informaci\xF3n personal por parte de un tercero\
@@ -5586,7 +5247,6 @@ objects:
         \ of personal information."
       translations:
         es:
-          name: null
           description: "Reporta divulgaciones no autorizadas reales o sospechadas\
             \ [P][C]: Existe un proceso para obtener compromisos de proveedores y\
             \ otras terceras partes para notificar a la entidad sobre divulgaciones\
@@ -5601,7 +5261,6 @@ objects:
         s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad proporciona notificaci\xF3n de brechas e incidentes\
             \ a los titulares de datos afectados, reguladores y otras partes, para\
             \ cumplir con los objetivos de privacidad de la entidad."
@@ -5616,7 +5275,6 @@ objects:
         \ recipients of such notifications."
       translations:
         es:
-          name: null
           description: "Identifica los requisitos de notificaci\xF3n [P][C]: La entidad\
             \ cuenta con un proceso para determinar si es necesario notificar una\
             \ brecha de privacidad, incluyendo el m\xE9todo a utilizar, los plazos\
@@ -5632,7 +5290,6 @@ objects:
         \ entity\u2019s objectives related to privacy."
       translations:
         es:
-          name: null
           description: "Proporciona notificaci\xF3n de brechas e incidentes [P][C]:\
             \ La entidad tiene un proceso para proporcionar notificaci\xF3n de brechas\
             \ e incidentes a los titulares de datos afectados, reguladores y otras\
@@ -5649,7 +5306,6 @@ objects:
         \ related to privacy."
       translations:
         es:
-          name: null
           description: "La entidad proporciona a los titulares de datos un registro\
             \ de la informaci\xF3n personal que posee y las divulgaciones de dicha\
             \ informaci\xF3n personal, a solicitud de los titulares de los datos,\
@@ -5664,7 +5320,6 @@ objects:
         \ information held in accordance with service agreements and privacy objectives."
       translations:
         es:
-          name: null
           description: "Responde a solicitudes de los responsables del tratamiento\
             \ [P]: La entidad cuenta con un proceso para responder a las solicitudes\
             \ de los responsables del tratamiento sobre un registro de la informaci\xF3\
@@ -5681,7 +5336,6 @@ objects:
         \ of such information are identified."
       translations:
         es:
-          name: null
           description: "Identifica los tipos de informaci\xF3n personal y el proceso\
             \ de manejo [P][C]: Se identifican los tipos de informaci\xF3n personal\
             \ y de informaci\xF3n personal sensible, as\xED como los procesos, sistemas\
@@ -5699,7 +5353,6 @@ objects:
         \ related to privacy."
       translations:
         es:
-          name: null
           description: "Captura, identifica y comunica solicitudes de informaci\xF3\
             n [P][C]: Se capturan las solicitudes de registro de la informaci\xF3\
             n personal mantenida y las divulgaciones de la informaci\xF3n personal\
@@ -5714,7 +5367,6 @@ objects:
       description: Privacy Criteria Related to Quality
       translations:
         es:
-          name: null
           description: Criterios de privacidad relacionados con la calidad
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p7.1
       assessable: false
@@ -5726,7 +5378,6 @@ objects:
         \ to privacy."
       translations:
         es:
-          name: null
           description: "La entidad recopila y mantiene informaci\xF3n personal precisa,\
             \ actualizada, completa y relevante para cumplir con los objetivos de\
             \ privacidad de la entidad."
@@ -5740,7 +5391,6 @@ objects:
         \ which it is to be used."
       translations:
         es:
-          name: null
           description: "Garantiza la exactitud y completitud de la informaci\xF3n\
             \ personal [P][C]: La informaci\xF3n personal es precisa y completa para\
             \ los fines para los que va a ser utilizada."
@@ -5753,7 +5403,6 @@ objects:
         \ information is relevant to the purposes for which it is to be used."
       translations:
         es:
-          name: null
           description: "Garantiza la relevancia de la informaci\xF3n personal [P][C]:\
             \ La informaci\xF3n personal es relevante para los fines para los que\
             \ va a ser utilizada."
@@ -5765,7 +5414,6 @@ objects:
       description: Privacy Criteria Related to Monitoring and Enforcement
       translations:
         es:
-          name: null
           description: "Criterios de privacidad relacionados con la monitorizaci\xF3\
             n y aplicaci\xF3n"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p8.1
@@ -5781,7 +5429,6 @@ objects:
         \ manner."
       translations:
         es:
-          name: null
           description: "La entidad implementa un proceso para recibir, abordar, resolver\
             \ y comunicar la resoluci\xF3n de consultas, quejas y disputas de los\
             \ titulares de datos y otras partes, y monitoriza peri\xF3dicamente el\
@@ -5798,7 +5445,6 @@ objects:
         \ entity with inquiries, complaints, and disputes."
       translations:
         es:
-          name: null
           description: "Comunica a los titulares de datos o responsables del tratamiento\
             \ [P][C]: Los titulares de datos o los responsables del tratamiento son\
             \ informados sobre c\xF3mo contactar con la entidad para consultas, quejas\
@@ -5812,7 +5458,6 @@ objects:
         \ process is in place to address inquiries, complaints, and disputes."
       translations:
         es:
-          name: null
           description: 'Aborda consultas, quejas y disputas [P][C]: Existe un proceso
             para abordar consultas, quejas y disputas.'
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p8.1.3
@@ -5825,7 +5470,6 @@ objects:
         \ communicated to the individual."
       translations:
         es:
-          name: null
           description: "Documenta y comunica la resoluci\xF3n de disputas y recursos\
             \ [P][C]: Cada queja es atendida y su resoluci\xF3n es documentada y comunicada\
             \ al individuo."
@@ -5840,7 +5484,6 @@ objects:
         \ are identified, remediation plans are developed and implemented."
       translations:
         es:
-          name: null
           description: "Documenta y reporta los resultados de las revisiones de cumplimiento\
             \ [P][C]: El cumplimiento de los objetivos de privacidad se revisa y documenta,\
             \ y los resultados de dichas revisiones se reportan a la direcci\xF3n.\
@@ -5857,7 +5500,6 @@ objects:
         \ on a timely basis."
       translations:
         es:
-          name: null
           description: 'Documenta y reporta casos de incumplimiento [P][C]: Los casos
             de incumplimiento de los objetivos de privacidad se documentan y reportan,
             y, si es necesario, se toman medidas correctivas y disciplinarias de manera
@@ -5872,7 +5514,6 @@ objects:
         \ and for taking timely corrective actions when necessary."
       translations:
         es:
-          name: null
           description: "Realiza monitorizaci\xF3n continua [P][C]: Se llevan a cabo\
             \ procedimientos continuos para monitorizar la efectividad de los controles\
             \ sobre la informaci\xF3n personal y para tomar acciones correctivas oportunas\
