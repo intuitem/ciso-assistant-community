@@ -893,8 +893,8 @@ for tab in dataframe:
                     print(
                         f"WARNING: this target node id: {tgt_node_id} is not recognized. Fix it and try again before uploading your file."
                     )
-                source_requirement_urn = source_prefix + ":" + src_node_id
-                target_requirement_urn = target_prefix + ":" + tgt_node_id
+                source_requirement_urn = source_prefix + ":" + src_node_id.lower().replace(" ", "-")
+                target_requirement_urn = target_prefix + ":" + tgt_node_id.lower().replace(" ", "-")
                 relationship = row[header["relationship"]].value
                 rationale = (
                     row[header["rationale"]].value if "rationale" in header else None
