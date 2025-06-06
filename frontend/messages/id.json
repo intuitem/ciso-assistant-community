@@ -115,6 +115,7 @@
 	"provider": "Penyedia",
 	"providerColon": "Penyedia:",
 	"domain": "Domain",
+	"domainSemiColon": "Domain:",
 	"urn": "URN",
 	"treatmentStatus": "Status perlakuan",
 	"qualification": "Kualifikasi",

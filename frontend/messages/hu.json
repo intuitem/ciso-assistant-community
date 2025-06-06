@@ -115,6 +115,7 @@
 	"provider": "Szolgáltató",
 	"providerColon": "Szolgáltató:",
 	"domain": "Tartomány",
+	"domainSemiColon": "Tartomány:",
 	"urn": "URN",
 	"treatmentStatus": "Kockázat kezelésének módja",
 	"qualification": "Minősítés",
