@@ -121,13 +121,14 @@
 							<Segment class="w-full flex-wrap items-center">
 								{#each possible_options as option}
 									<Segment.Item
-										class="h-full"
+										classes="h-full"
 										active={color}
 										id={option.id}
 										value={option.id}
 										bind:group={result}
 										name="result"
 										style="border-color: {color}"
+										background="bg-red-500"
 										on:click={() => {
 											const newResult = result === option.id ? 'not_assessed' : option.id;
 											updateResult(newResult);
