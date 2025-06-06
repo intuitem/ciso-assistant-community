@@ -115,6 +115,7 @@
 	"provider": "Leverandør",
 	"providerColon": "Leverandør:",
 	"domain": "Domæne",
+	"domainSemiColon": "Domæne:",
 	"urn": "URN",
 	"treatmentStatus": "Behandlingsstatus",
 	"qualification": "Kvalifikation",

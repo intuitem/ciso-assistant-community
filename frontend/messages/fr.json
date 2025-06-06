@@ -118,6 +118,7 @@
 	"provider": "Fournisseur",
 	"providerColon": "Fournisseur :",
 	"domain": "Domaine",
+	"domainSemiColon": "Domaine :",
 	"urn": "URN",
 	"treatmentStatus": "Statut de traitement",
 	"qualification": "Qualification",
