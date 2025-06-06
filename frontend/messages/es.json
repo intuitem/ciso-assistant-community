@@ -115,6 +115,7 @@
 	"provider": "Proveedor",
 	"providerColon": "Proveedor:",
 	"domain": "Dominio",
+	"domainSemiColon": "Dominio:",
 	"urn": "URN",
 	"treatmentStatus": "Estado del tratamiento",
 	"qualification": "Cualificación",
