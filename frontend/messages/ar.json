@@ -115,6 +115,7 @@
 	"provider": "المزود",
 	"providerColon": "مزود:",
 	"domain": "النطاق",
+	"domainSemiColon": "النطاق:",
 	"urn": "URN",
 	"treatmentStatus": "حالة المعالجة",
 	"qualification": "المؤهلات",

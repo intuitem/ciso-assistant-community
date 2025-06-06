@@ -913,8 +913,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'description', 'domain'],
+		body: ['name', 'description', 'folder']
 	},
 	'feared-events': {
 		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
