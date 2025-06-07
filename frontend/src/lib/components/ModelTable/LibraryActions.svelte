@@ -5,6 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import type { DataHandler } from '@vincjo/datatables/remote';
+	import { tableHandlers } from '$lib/utils/stores';
 
 	interface Props {
 		meta: any;
@@ -65,7 +66,9 @@
 						loading.form = false;
 						loading.library = '';
 						await update();
-						handler.invalidate();
+						Object.values($tableHandlers).forEach((handler) => {
+							handler.invalidate();
+						});
 					};
 				}}
 				onsubmit={handleSubmit}
