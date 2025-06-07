@@ -1,8 +1,9 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { persisted } from 'svelte-persisted-store';
-import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 import type { Driver } from 'driver.js';
+import { DataHandler } from '@vincjo/datatables/remote';
+import type { TreeViewNode } from '$lib/components/TreeView/types';
 
 export const showNotification = writable(
 	(browser && localStorage.getItem('showNotification')) || 'false'
@@ -57,3 +58,5 @@ export const createModalCache = {
 };
 
 export const driverInstance = writable<Driver | null>(null);
+
+export const tableHandlers = writable<Record<string, DataHandler>>({});
