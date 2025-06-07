@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
