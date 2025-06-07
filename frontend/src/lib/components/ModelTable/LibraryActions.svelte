@@ -13,7 +13,7 @@
 		handler: DataHandler;
 	}
 
-	let { meta, actionsURLModel, handler }: Props = $props();
+	let { meta, actionsURLModel }: Props = $props();
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
 
@@ -71,7 +71,6 @@
 						});
 					};
 				}}
-				onsubmit={handleSubmit}
 			>
 				<button
 					type="submit"
