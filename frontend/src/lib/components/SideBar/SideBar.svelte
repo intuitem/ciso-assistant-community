@@ -7,7 +7,7 @@
 	import { writable } from 'svelte/store';
 
 	import { getCookie, setCookie } from '$lib/utils/cookies';
-	import { driverInstance } from '$lib/utils/stores';
+	import { driverInstance, tableHandlers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 
 	import { invalidateAll } from '$app/navigation';
@@ -249,6 +249,9 @@
 		});
 
 		invalidateAll();
+		Object.values($tableHandlers).forEach((handler) => {
+			handler.invalidate();
+		});
 		$loading = false;
 		return true;
 	}
