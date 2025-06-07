@@ -62,8 +62,8 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('slide-toggle').click({ force: true });
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', '25');
+	await page.getByTestId('switch-thumb').click({ force: true });
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
 
 	const IDAM1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDAM1SliderBoundingBox &&
@@ -73,7 +73,7 @@ test('compliance assessments scoring is working properly', async ({
 				y: IDAM1SliderBoundingBox.height / 2
 			}
 		}));
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
 		IDAM1Score.progress
 	);
@@ -93,8 +93,8 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM2TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('slide-toggle').click({ force: true });
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', '25');
+	await page.getByTestId('switch-thumb').click({ force: true });
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
 
 	const IDAM2SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDAM2SliderBoundingBox &&
@@ -104,7 +104,7 @@ test('compliance assessments scoring is working properly', async ({
 				y: IDAM2SliderBoundingBox.height / 2
 			}
 		}));
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
 		IDAM2Score.progress
 	);
@@ -124,8 +124,8 @@ test('compliance assessments scoring is working properly', async ({
 	await IDBE1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('slide-toggle').click({ force: true });
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', '25');
+	await page.getByTestId('switch-thumb').click({ force: true });
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
 
 	const IDBE1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDBE1SliderBoundingBox &&
@@ -135,7 +135,7 @@ test('compliance assessments scoring is working properly', async ({
 				y: IDBE1SliderBoundingBox.height / 2
 			}
 		}));
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
 		IDBE1Score.progress
 	);
@@ -155,8 +155,8 @@ test('compliance assessments scoring is working properly', async ({
 	await PRAC1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('slide-toggle').click({ force: true });
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', '25');
+	await page.getByTestId('switch-thumb').click({ force: true });
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
 
 	const PRAC1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	PRAC1SliderBoundingBox &&
@@ -166,7 +166,7 @@ test('compliance assessments scoring is working properly', async ({
 				y: PRAC1SliderBoundingBox.height / 2
 			}
 		}));
-	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
 		PRAC1Score.progress
 	);
@@ -188,14 +188,14 @@ test('compliance assessments scoring is working properly', async ({
 			await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM - Asset Management', [
 				'ID - Identify'
 			])
-		).content.getByTestId('progress-radial')
+		).content.getByTestId('progress-ring-svg')
 	).toHaveAttribute('aria-valuenow', IDAMScore.toString());
 	await expect(
 		(
 			await complianceAssessmentsPage.itemDetail.treeViewItem('ID - Identify', [])
-		).content.getByTestId('progress-radial')
+		).content.getByTestId('progress-ring-svg')
 	).toHaveAttribute('aria-valuenow', IDScore.toString());
-	await expect(page.getByTestId('progress-radial').first()).toHaveAttribute(
+	await expect(page.getByTestId('progress-ring-svg').first()).toHaveAttribute(
 		'aria-valuenow',
 		globalScore.toString()
 	);
