@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import {
@@ -272,6 +273,23 @@
 			};
 		})
 	);
+
+	let resultRegistry = $state(
+		Object.fromEntries(
+			data.requirement_assessments.map((requirementAssessment) => [
+				requirementAssessment.id,
+				requirementAssessment.result
+			])
+		)
+	);
+	let statusRegistry = $state(
+		Object.fromEntries(
+			data.requirement_assessments.map((requirementAssessment) => [
+				requirementAssessment.id,
+				requirementAssessment.status
+			])
+		)
+	);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -440,54 +458,37 @@
 							<div class="flex flex-row w-full space-x-2 my-4">
 								<div class="flex flex-col items-center w-1/2">
 									<p class="flex items-center font-semibold text-blue-600 italic">{m.status()}</p>
-									<Segment class="w-full flex-wrap items-center">
-										{#each status_options as option}
-											<Segment.Item
-												class="h-full"
-												id={option.id}
-												active={addColor(
-													requirementAssessment.status,
-													complianceStatusTailwindColorMap
-												)}
-												value={option.id}
-												bind:group={requirementAssessment.status}
-												name="status"
-												on:click={async () => {
-													const newStatus =
-														requirementAssessment.status === option.id ? 'to_do' : option.id;
-													requirementAssessment.status = newStatus;
-													await update(requirementAssessment, 'status');
-												}}>{option.label}</Segment.Item
-											>
-										{/each}
-									</Segment>
+									<RadioGroup
+										possibleOptions={status_options}
+										value={statusRegistry[requirementAssessment.id]}
+										colorMap={complianceStatusTailwindColorMap}
+										inputName="status"
+										onChange={(newValue) => {
+											const newStatus =
+												requirementAssessment.status === newValue ? 'to_do' : newValue;
+											requirementAssessment.status = newStatus;
+											statusRegistry[requirementAssessment.id] = newStatus;
+											update(requirementAssessment, 'status'); // await
+										}}
+									/>
 								</div>
 								<div class="flex flex-col items-center w-1/2">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
-									<Segment class="w-full flex-wrap items-center">
-										{#each result_options as option}
-											<Segment.Item
-												class="h-full"
-												active={addColor(
-													requirementAssessment.result,
-													complianceResultTailwindColorMap
-												)}
-												id={option.id}
-												value={option.id}
-												bind:group={requirementAssessment.result}
-												name="result"
-												on:click={async () => {
-													const newResult =
-														requirementAssessment.result === option.id ? 'not_assessed' : option.id;
-													requirementAssessment.result = newResult;
-													await update(requirementAssessment, 'result'); // Update result for both select and deselect
-												}}
-												>{option.label}
-											</Segment.Item>
-										{/each}
-									</Segment>
+									<RadioGroup
+										possibleOptions={result_options}
+										value={resultRegistry[requirementAssessment.id]}
+										colorMap={complianceResultTailwindColorMap}
+										inputName="result"
+										onChange={(newValue) => {
+											const newResult =
+												requirementAssessment.result === newValue ? 'to_do' : newValue;
+											requirementAssessment.result = newResult;
+											resultRegistry[requirementAssessment.id] = newResult;
+											update(requirementAssessment, 'result'); // await
+										}}
+									/>
 								</div>
 							</div>
 						{/if}
