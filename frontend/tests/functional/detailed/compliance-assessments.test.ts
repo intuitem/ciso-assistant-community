@@ -63,7 +63,7 @@ test('compliance assessments scoring is working properly', async ({
 
 	await page.waitForURL('/requirement-assessments/**');
 	await page.getByTestId('switch-thumb').click({ force: true });
-	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
 	const IDAM1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDAM1SliderBoundingBox &&
@@ -75,7 +75,7 @@ test('compliance assessments scoring is working properly', async ({
 		}));
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
-		IDAM1Score.progress
+		IDAM1Score.value.toString()
 	);
 
 	await complianceAssessmentsPage.form.saveButton.click();
@@ -94,7 +94,7 @@ test('compliance assessments scoring is working properly', async ({
 
 	await page.waitForURL('/requirement-assessments/**');
 	await page.getByTestId('switch-thumb').click({ force: true });
-	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
 	const IDAM2SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDAM2SliderBoundingBox &&
@@ -106,7 +106,7 @@ test('compliance assessments scoring is working properly', async ({
 		}));
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
-		IDAM2Score.progress
+		IDAM2Score.value.toString()
 	);
 
 	await complianceAssessmentsPage.form.saveButton.click();
@@ -125,7 +125,7 @@ test('compliance assessments scoring is working properly', async ({
 
 	await page.waitForURL('/requirement-assessments/**');
 	await page.getByTestId('switch-thumb').click({ force: true });
-	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
 	const IDBE1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDBE1SliderBoundingBox &&
@@ -137,7 +137,7 @@ test('compliance assessments scoring is working properly', async ({
 		}));
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
-		IDBE1Score.progress
+		IDBE1Score.value.toString()
 	);
 
 	await complianceAssessmentsPage.form.saveButton.click();
@@ -156,7 +156,7 @@ test('compliance assessments scoring is working properly', async ({
 
 	await page.waitForURL('/requirement-assessments/**');
 	await page.getByTestId('switch-thumb').click({ force: true });
-	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '25');
+	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
 	const PRAC1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	PRAC1SliderBoundingBox &&
@@ -168,7 +168,7 @@ test('compliance assessments scoring is working properly', async ({
 		}));
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 		'aria-valuenow',
-		PRAC1Score.progress
+		PRAC1Score.value.toString()
 	);
 
 	await complianceAssessmentsPage.form.saveButton.click();
