@@ -145,6 +145,7 @@ A _meta of type "reference_controls" contains the following keys:
 - ref_id (*)
 - name (*)
 - description (*)
+- base_urn
 
 The _content tab for a "reference_controls" object contains the following columns:
 - ref_id (*)

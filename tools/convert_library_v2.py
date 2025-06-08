@@ -523,7 +523,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
 
             # --- Retrieve answers block if declared ---
             answers_dict = {}
-            answers_block_name = meta.get("answers")
+            answers_block_name = meta.get("answers_definition")
             if answers_block_name:
                 if answers_block_name not in object_blocks:
                     raise ValueError(f"❌ Missing answers sheet: '{answers_block_name}'")
