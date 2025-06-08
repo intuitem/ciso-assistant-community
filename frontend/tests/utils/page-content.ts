@@ -71,6 +71,7 @@ export class PageContent extends BasePage {
 
 	async importLibrary(name: string, urn?: string, language = 'English') {
 		await this.page.waitForTimeout(3000);
+		await this.page.getByRole('searchbox').first().clear();
 		await this.page.getByRole('searchbox').first().fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&
@@ -89,6 +90,7 @@ export class PageContent extends BasePage {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
 				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+				await this.page.getByRole('searchbox').first().clear();
 				await this.page.getByRole('searchbox').first().fill(name);
 			}
 			await expect(this.getRow(name)).toBeVisible();
@@ -100,6 +102,7 @@ export class PageContent extends BasePage {
 		});
 		await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+		await this.page.getByRole('searchbox').first().clear();
 		await this.page.getByRole('searchbox').first().fill(name);
 		await expect(this.getRow(name)).toBeVisible();
 	}
