@@ -76,6 +76,7 @@
 			title: 'About CISO Assistant',
 			body: JSON.stringify(res)
 		};
+		openState = false;
 		modalStore.trigger(modal);
 	}
 
@@ -122,7 +123,7 @@
 					</button>
 				{/snippet}
 				{#snippet content()}
-					<div class="" data-testid="sidebar-more-panel" data-popup="popupUser">
+					<div data-testid="sidebar-more-panel">
 						<a
 							href="/my-profile"
 							onclick={(e) => {
