@@ -115,6 +115,7 @@
 	"provider": "Fornecedor",
 	"providerColon": "Fornecedor:",
 	"domain": "Domínio",
+	"domainSemiColon": "Domínio:",
 	"urn": "URN",
 	"treatmentStatus": "Status de tratamento",
 	"qualification": "Qualificação",
@@ -717,7 +718,7 @@
 	"addRepresentative": "Adicionar representante",
 	"phone": "Telefone",
 	"role": "Papel",
-	"question": "Pergunta",
+	"questions": "Perguntas",
 	"recipientEntity": "Entidade beneficiária",
 	"financial": "Financeiro",
 	"legal": "Jurídica",
@@ -918,5 +919,38 @@
 	"forceSSOLoginHelpText": "Exigir SSO para todos os usuários e redefinir quaisquer senhas salvas. Usuários com 'Excluir do SSO forçado' ativado manterão o acesso de fallback baseado em senha.",
 	"forceSSOLoginHelpText2": "Certifique-se de que seu SSO está funcional ou que você tem uma conta de fallback antes de ativar esta opção.",
 	"youCanSetPasswordHere": "Você pode definir sua senha aqui.",
-	"taskScheduleWarning": "Qualquer tarefa que não faça parte do novo cronograma será excluída permanentemente"
+	"taskScheduleWarning": "Qualquer tarefa que não faça parte do novo cronograma será excluída permanentemente",
+	"mappingSuggested": "Mapeamento sugerido",
+	"mappingSuggestedHelpText": "Sugestões de mapeamento com base em frameworks carregados",
+	"mappingSuggestionTeasing": "Os mapeamentos agora são sugeridos! Você pode usar os filtros para explorar sugestões com base em frameworks carregados.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Hora",
+				"countPlural=other": "{count} Horas"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minuto",
+				"countPlural=other": "{count} Minutos"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dia",
+				"countPlural=other": "{count} Dias"
+			}
+		}
+	]
 }

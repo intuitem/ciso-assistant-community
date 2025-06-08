@@ -566,7 +566,7 @@
 							{form}
 							field="answers"
 							questions={page.data.requirementAssessment.requirement.questions}
-							label={m.question()}
+							label={m.questionSingular()}
 						/>
 					{/if}
 					<Select

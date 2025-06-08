@@ -115,6 +115,7 @@
 	"provider": "Leverandør",
 	"providerColon": "Leverandør:",
 	"domain": "Domæne",
+	"domainSemiColon": "Domæne:",
 	"urn": "URN",
 	"treatmentStatus": "Behandlingsstatus",
 	"qualification": "Kvalifikation",
@@ -729,7 +730,7 @@
 	"addRepresentative": "Tilføj repræsentant",
 	"phone": "Telefon",
 	"role": "Rolle",
-	"question": "Spørgsmål",
+	"questions": "Spørgsmål",
 	"recipientEntity": "Modtagerenhed",
 	"financial": "Finansiel",
 	"legal": "Juridisk",
@@ -1204,5 +1205,38 @@
 	"forceSSOLogin": "Tving SSO-login",
 	"forceSSOLoginHelpText": "Kræv SSO for alle brugere og nulstil alle gemte adgangskoder. Brugere med 'Udeluk fra tvungen SSO' aktiveret vil bevare adgang med adgangskode som en fallback.",
 	"forceSSOLoginHelpText2": "Sørg for, at din SSO fungerer, eller at du har en fallback-konto, før du aktiverer denne mulighed.",
-	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
+	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet",
+	"mappingSuggested": "Forslag til kortlægning",
+	"mappingSuggestedHelpText": "Forslag til kortlægning baseret på indlæste rammeværk",
+	"mappingSuggestionTeasing": "Kortlægninger foreslås nu! Du kan bruge filtrene til at udforske forslag baseret på indlæste rammeværk.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Time",
+				"countPlural=other": "{count} Timer"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minut",
+				"countPlural=other": "{count} Minutter"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dag",
+				"countPlural=other": "{count} Dage"
+			}
+		}
+	]
 }

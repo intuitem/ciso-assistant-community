@@ -115,6 +115,7 @@
 	"provider": "مہیا کرنے والا",
 	"providerColon": "مہیا کرنے والا:",
 	"domain": "ڈومین",
+	"domainSemiColon": "ڈومین:",
 	"urn": "URN",
 	"treatmentStatus": "علاج کی حیثیت",
 	"qualification": "اہلیت",
@@ -715,7 +716,7 @@
 	"addRepresentative": "نمائندہ شامل کریں۔",
 	"phone": "فون",
 	"role": "کردار",
-	"question": "سوال",
+	"questions": "سوالات",
 	"recipientEntity": "وصول کنندہ ادارہ",
 	"financial": "مالیاتی",
 	"legal": "قانونی",
@@ -888,6 +889,38 @@
 	"forceSSOLogin": "SSO لاگ ان کو مجبور کریں",
 	"forceSSOLoginHelpText": "تمام صارفین کے لیے SSO کی ضرورت ہے اور کسی بھی محفوظ کردہ پاس ورڈز کو ری سیٹ کرتا ہے۔ جن صارفین کے لیے 'مجبور SSO سے مستثنیٰ کریں' فعال ہے، وہ پاس ورڈ پر مبنی بیک اپ رسائی برقرار رکھیں گے۔",
 	"forceSSOLoginHelpText2": "اس آپشن کو فعال کرنے سے پہلے یقینی بنائیں کہ آپ کا SSO فعال ہے یا آپ کے پاس بیک اپ اکاؤنٹ موجود ہے۔",
-	"youCanSetPasswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں",
-	"taskScheduleWarning": "نئی شیڈول کا حصہ نہ ہونے والے کسی بھی کام کو مستقل طور پر حذف کر دیا جائے گا۔"
+	"taskScheduleWarning": "نئی شیڈول کا حصہ نہ ہونے والے کسی بھی کام کو مستقل طور پر حذف کر دیا جائے گا۔",
+	"mappingSuggested": "نقشہ سازی تجویز کردہ",
+	"mappingSuggestedHelpText": "لوڈ کردہ فریم ورکس کے بنیاد پر نقشہ سازی کی تجویزیں",
+	"mappingSuggestionTeasing": "اب نقشہ سازی کی تجویزیں دی جاتی ہیں! آپ لوڈ کردہ فریم ورکس کے بنیاد پر تجویزوں کو تلاش کرنے کے لیے فلٹرز استعمال کر سکتے ہیں۔",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "گھنٹہ {count}",
+				"countPlural=other": "گھنٹے {count}"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "منٹ {count}",
+				"countPlural=other": "منٹ {count}"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "دن {count}",
+				"countPlural=other": "دن {count}"
+			}
+		}
+	]
 }

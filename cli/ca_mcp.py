@@ -1,76 +1,38 @@
 from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
-
-# Initialize FastMCP server
-mcp = FastMCP("weather")
-
 import requests
-import yaml
 import json
 from rich import print as rprint
-
 import sys
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .mcp.env file
+load_dotenv(".mcp.env")
+
+# Initialize FastMCP server
+mcp = FastMCP("ciso-assistant")
 
 cli_cfg = dict()
 auth_data = dict()
-
-API_URL = ""
 GLOBAL_FOLDER_ID = None
-TOKEN = ""
-EMAIL = ""
-PASSWORD = ""
 
-CLICA_CONFG_PATH = ".clica_config.yaml"
-
-try:
-    with open(CLICA_CONFG_PATH, "r") as yfile:
-        cli_cfg = yaml.safe_load(yfile)
-except FileNotFoundError:
-    print(
-        "Config file not found. Running the init command to create it but you need to fill it.",
-        file=sys.stderr,
-    )
-
-try:
-    API_URL = cli_cfg["rest"]["url"]
-except KeyError:
-    print(
-        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one.",
-        file=sys.stderr,
-    )
-    sys.exit(1)
-
-try:
-    EMAIL = cli_cfg["credentials"]["email"]
-    PASSWORD = cli_cfg["credentials"]["password"]
-except KeyError:
-    print(
-        "Missing credentials in the config file. You need to pass them to the CLI in this case.",
-        file=sys.stderr,
-    )
-
-VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
-
-
-def check_auth():
-    if Path(".tmp.yaml").exists():
-        with open(".tmp.yaml", "r") as yfile:
-            auth_data = yaml.safe_load(yfile)
-            return auth_data["token"]
-    else:
-        print("Could not find authentication data.")
-
-
-TOKEN = check_auth()
+# Read TOKEN and VERIFY_CERTIFICATE from environment variables
+API_URL = os.getenv("API_URL", "")
+TOKEN = os.getenv("TOKEN", "")
+VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+    "on",
+)
 
 
 @mcp.tool()
 async def get_risk_scenarios():
     """Get risks scenarios
-
     Query CISO Assistant Risk Registry
     """
     headers = {
@@ -80,7 +42,6 @@ async def get_risk_scenarios():
     url = f"{API_URL}/risk-scenarios/"
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     data = res.json()
-
     if res.status_code != 200:
         rprint(f"Error: check credentials or filename.", file=sys.stderr)
         return
@@ -101,7 +62,6 @@ async def get_risk_scenarios():
 @mcp.tool()
 async def get_applied_controls():
     """Get applied controls
-
     Query CISO Assistant combined action plan
     """
     headers = {
@@ -111,7 +71,6 @@ async def get_applied_controls():
     url = f"{API_URL}/applied-controls/"
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     data = res.json()
-
     if res.status_code != 200:
         rprint(f"Error: check credentials or filename.", file=sys.stderr)
         return
@@ -141,7 +100,6 @@ async def get_audits_progress():
     url = f"{API_URL}/compliance-assessments/"
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     data = res.json()
-
     if res.status_code != 200:
         rprint(f"Error: check credentials or filename.", file=sys.stderr)
         return

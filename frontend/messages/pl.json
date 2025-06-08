@@ -115,6 +115,7 @@
 	"provider": "Dostawca",
 	"providerColon": "Dostawca:",
 	"domain": "Domena",
+	"domainSemiColon": "Domena:",
 	"urn": "URN",
 	"treatmentStatus": "Status leczenia",
 	"qualification": "Kwalifikacja",
@@ -716,7 +717,7 @@
 	"addRepresentative": "Dodaj przedstawiciela",
 	"phone": "Telefon",
 	"role": "Rola",
-	"question": "Pytanie",
+	"questions": "Pytania",
 	"recipientEntity": "Podmiot odbierający",
 	"financial": "Finansowy",
 	"legal": "Prawne",
@@ -914,5 +915,41 @@
 	"forceSSOLogin": "Wymuś logowanie SSO",
 	"forceSSOLoginHelpText": "Wymagaj SSO dla wszystkich użytkowników i zresetuj zapisane hasła. Użytkownicy z włączoną opcją 'Wyklucz z wymuszonego SSO' zachowają dostęp awaryjny oparty na haśle.",
 	"forceSSOLoginHelpText2": "Upewnij się, że Twoje SSO działa lub że masz konto awaryjne przed włączeniem tej opcji.",
-	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj."
+	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj.",
+	"mappingSuggested": "Sugestia mapowania",
+	"mappingSuggestedHelpText": "Sugestie mapowania oparte na załadowanych ramach",
+	"mappingSuggestionTeasing": "Mapowania są teraz sugerowane! Możesz użyć filtrów, aby eksplorować sugestie oparte na załadowanych ramach.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Godzina",
+				"countPlural=few": "{count} Godziny",
+				"countPlural=other": "{count} Godzin"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minuta",
+				"countPlural=few": "{count} Minuty",
+				"countPlural=other": "{count} Minut"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dzień",
+				"countPlural=few": "{count} Dni",
+				"countPlural=other": "{count} Dni"
+			}
+		}
+	]
 }

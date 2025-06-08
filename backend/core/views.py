@@ -8,8 +8,17 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from dateutil import relativedelta
-from django.db.models import F, Count, Q, ExpressionWrapper, FloatField
+from django.db.models import (
+    F,
+    Count,
+    Q,
+    ExpressionWrapper,
+    FloatField,
+    Value,
+)
+from django.db.models.functions import Greatest, Coalesce
+
+
 from collections import defaultdict
 import pytz
 from uuid import UUID
@@ -42,7 +51,6 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
-from django.db.models import F, Q
 
 from django.apps import apps
 from django.contrib.auth.models import Permission
@@ -178,7 +186,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     #         )
     #     return None
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.query.QuerySet:
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
@@ -737,7 +745,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
-        options = []
+        options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {
                 i: name
@@ -745,11 +753,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
                     x["name"] for x in matrix.json_definition["risk"]
                 )
             }
-            choices = undefined | _choices
-            options = options | choices.items()
-        return Response(
-            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
-        )
+            options = options | _choices
+        res = [{"value": k, "label": v} for k, v in options.items()]
+        return Response(res)
 
     @action(detail=False, name="Get impact choices")
     def impact(self, request):
@@ -1891,6 +1897,7 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         "findings": ["exact"],
         "eta": ["exact", "lte", "gte", "lt", "gt"],
     }
+    search_fields = ["name", "description", "ref_id"]
 
     serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
@@ -1938,28 +1945,41 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
+class RiskScenarioFilter(df.FilterSet):
+    # Aliased filters for user-friendly query params
+    folder = df.UUIDFilter(
+        field_name="risk_assessment__perimeter__folder", label="Folder ID"
+    )
+    perimeter = df.UUIDFilter(
+        field_name="risk_assessment__perimeter", label="Perimeter ID"
+    )
+
+    class Meta:
+        model = RiskScenario
+        # Only include actual model fields here
+        fields = {
+            "risk_assessment": ["exact"],
+            "current_impact": ["exact"],
+            "current_proba": ["exact"],
+            "current_level": ["exact"],
+            "residual_impact": ["exact"],
+            "residual_proba": ["exact"],
+            "residual_level": ["exact"],
+            "treatment": ["exact"],
+            "threats": ["exact"],
+            "assets": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+        }
+
+
 class RiskScenarioViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk scenarios to be viewed or edited.
     """
 
     model = RiskScenario
-    filterset_fields = [
-        "risk_assessment",
-        "risk_assessment__perimeter",
-        "risk_assessment__perimeter__folder",
-        "current_impact",
-        "current_proba",
-        "current_level",
-        "residual_impact",
-        "residual_proba",
-        "residual_level",
-        "treatment",
-        "threats",
-        "assets",
-        "applied_controls",
-        "security_exceptions",
-    ]
+    filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
 
@@ -2466,7 +2486,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.progress
+                sum += audit.get_progress()
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -2670,11 +2690,10 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        domain_name = f"DEMO"
+        domain_name = "DEMO"
         try:
-            dummy_fixture_path = (
-                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
-            )
+            PROJECT_DIR = Path(__file__).resolve().parent.parent
+            dummy_fixture_path = PROJECT_DIR / "fixtures" / "dummy-domain.bak"
             if not dummy_fixture_path.exists():
                 logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
                 return Response(
@@ -3660,7 +3679,7 @@ class FrameworkViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Framework as an Excel template")
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
-        req_nodes = RequirementNode.objects.filter(framework=fwk)
+        req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
         entries = []
         for rn in req_nodes:
             entry = {
@@ -4037,25 +4056,46 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "status",
         "ebios_rm_studies",
         "assets",
+        "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
 
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
+    def get_queryset(self):
+        qs = super().get_queryset()
+        ordering = self.request.query_params.get("ordering", "")
 
-        ordering = request.query_params.get("ordering", "")
-        ordering_fields = [field.strip() for field in ordering.split(",") if field]
-
-        if any(field.lstrip("-") == "progress" for field in ordering_fields):
-            reverse = ordering_fields[0].startswith("-")  # use only first 'progress'
-            results = sorted(
-                response.data["results"],  # assumes paginated response
-                key=lambda x: x.get("progress", 0),
-                reverse=reverse,
+        if any(
+            field in ordering
+            for field in (
+                "total_requirements",
+                "assessed_requirements",
+                "progress",
             )
-            response.data["results"] = results
-
-        return response
+        ):
+            qs = qs.annotate(
+                total_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(requirement_assessments__requirement__assessable=True),
+                    distinct=True,
+                ),
+                assessed_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(
+                        ~Q(
+                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                        ),
+                        requirement_assessments__requirement__assessable=True,
+                    ),
+                    distinct=True,
+                ),
+                progress=ExpressionWrapper(
+                    F("assessed_requirements")
+                    * 1.0
+                    / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                    output_field=FloatField(),
+                ),
+            )
+        return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -4074,10 +4114,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if UUID(pk) in viewable_objects:
             writer = csv.writer(response, delimiter=";")
             columns = [
+                "urn",
                 "ref_id",
+                "name",
                 "description",
                 "compliance_result",
-                "progress",
+                "requirement_progress",
                 "score",
                 "observations",
             ]
@@ -4085,14 +4127,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
                 req_node = RequirementNode.objects.get(pk=req.requirement.id)
-                req_text = (
-                    req_node.get_description_translated
-                    if req_node.description
-                    else req_node.get_name_translated
-                )
                 row = [
+                    req_node.urn,
                     req_node.ref_id,
-                    req_text,
+                    req_node.get_name_translated,
+                    req_node.get_description_translated,
                 ]
                 if req_node.assessable:
                     row += [
@@ -4108,6 +4147,82 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
+    @action(detail=True, methods=["get"], name="Audit as an Excel")
+    def xlsx(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        audit = ComplianceAssessment.objects.get(id=pk)
+        entries = []
+        for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+            req_node = RequirementNode.objects.get(pk=req.requirement.id)
+            entry = {
+                "urn": req_node.urn,
+                "assessable": req_node.assessable,
+                "ref_id": req_node.ref_id,
+                "name": req_node.name,
+                "description": req_node.description,
+                "compliance_result": req.result,
+                "requirement_progress": req.status,
+                "score": req.score,
+                "observations": req.observation,
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+
+        buffer = io.BytesIO()
+
+        # Create ExcelWriter with openpyxl engine
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+
+            # Get the worksheet
+            worksheet = writer.sheets["Sheet1"]
+
+            # For text wrapping, we need to define which columns need wrapping
+            # Assuming 'description' and 'observations' columns need text wrapping
+            wrap_columns = ["name", "description", "observations"]
+
+            # Find the indices of the columns that need wrapping
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            # Apply text wrapping to those columns
+            from openpyxl.styles import Alignment
+
+            for col_idx in wrap_indices:
+                for row_idx in range(
+                    2, len(df) + 2
+                ):  # +2 because of header row and 1-indexing
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            # Adjust column widths for better readability
+            for idx, col in enumerate(df.columns):
+                column_width = 40  # default width
+                if col in wrap_columns:
+                    column_width = 60  # wider for wrapped text columns
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        # Get the value of the buffer and return as response
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{audit.name}.xlsx"'
+
+        return response
 
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
@@ -4147,7 +4262,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             FileWrapper(buffer_doc),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-        response["Content-Disposition"] = "attachment; filename=sales_report.docx"
+        response["Content-Disposition"] = "attachment; filename=exec_report.docx"
 
         return response
 
@@ -5204,7 +5319,7 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = ["folder", "status", "severity", "qualifications"]
+    filterset_fields = ["folder", "status", "severity", "qualifications", "detection"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5215,6 +5330,11 @@ class IncidentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Incident.Severity.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get detection channel choices")
+    def detection(self, request):
+        return Response(dict(Incident.Detection.choices))
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()

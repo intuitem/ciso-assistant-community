@@ -163,7 +163,7 @@
 		}),
 		{
 			rowsPerPage: pagination ? numberRowsPerPage : undefined,
-			totalRows: source.meta.count
+			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
@@ -208,7 +208,9 @@
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters =
-		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+		tableURLModel &&
+		listViewFields[tableURLModel] &&
+		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
 			: {};
 

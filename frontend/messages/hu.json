@@ -115,6 +115,7 @@
 	"provider": "Szolgáltató",
 	"providerColon": "Szolgáltató:",
 	"domain": "Tartomány",
+	"domainSemiColon": "Tartomány:",
 	"urn": "URN",
 	"treatmentStatus": "Kockázat kezelésének módja",
 	"qualification": "Minősítés",
@@ -719,7 +720,7 @@
 	"addRepresentative": "Képviselő hozzáadása",
 	"phone": "Telefon",
 	"role": "Szerep",
-	"question": "Kérdés",
+	"questions": "Kérdések",
 	"recipientEntity": "Címzett vállalat",
 	"financial": "Pénzügyi",
 	"legal": "Jogi",
@@ -920,5 +921,38 @@
 	"keepLocalLoginHelpText": "Amikor a globális 'Kényszerített SSO' engedélyezve van, ez lehetővé teszi a felhasználó számára, hogy megkerülje azt, és szükség esetén helyileg kezelt jelszóval jelentkezzen be.",
 	"forceSSOLogin": "SSO bejelentkezés kényszerítése",
 	"forceSSOLoginHelpText": "Kötelezővé teszi az SSO-t minden felhasználó számára, és visszaállítja az összes mentett jelszót. Azok a felhasználók, akiknél a 'Kizárás a kényszerített SSO-ból' engedélyezve van, megőrzik a jelszó alapú tartalék hozzáférést.",
-	"forceSSOLoginHelpText2": "Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót."
+	"forceSSOLoginHelpText2": "Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót.",
+	"mappingSuggested": "Leképezés javasolt",
+	"mappingSuggestedHelpText": "Leképezési javaslatok a betöltött keretek alapján",
+	"mappingSuggestionTeasing": "A leképezések most javasoltak! A szűrők segítségével felfedezheti a betöltött keretek alapján történő javaslatokat.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Óra",
+				"countPlural=other": "{count} Óra"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Perc",
+				"countPlural=other": "{count} Perc"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Nap",
+				"countPlural=other": "{count} Nap"
+			}
+		}
+	]
 }
