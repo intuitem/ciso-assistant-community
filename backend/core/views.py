@@ -4748,6 +4748,58 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["post"])
+    def update_requirement(self, request, pk):
+        compliance_assessment = self.get_object()
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=ComplianceAssessment,
+        )
+        if not compliance_assessment.id in viewable_objects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            ref_id = request.data.get("ref_id")
+            result = request.data.get("result")
+            observation = request.data.get("observation")
+
+            if not all([ref_id, result]):
+                return Response(
+                    {"error": "ref_id and result are required fields"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Find the requirement assessment to update
+            requirement_assessment = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
+            ).first()
+
+            if not requirement_assessment:
+                return Response(
+                    {"error": f"Requirement with ref_id {ref_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Update the requirement assessment
+            requirement_assessment.result = result
+            requirement_assessment.observation = observation
+            requirement_assessment.save()
+
+            return Response(
+                {
+                    "message": "Requirement updated successfully",
+                    "ref_id": ref_id,
+                    "result": result,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
