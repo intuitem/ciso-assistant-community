@@ -410,19 +410,19 @@
             "type": "string"
         },
         "postgresql": {
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
                 "enabled": {
                     "type": "boolean"
                 },
                 "global": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                         "postgresql": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "auth": {
-                                    "additionalProperties": false,
+                                    "additionalProperties": true,
                                     "properties": {
                                         "database": {
                                             "type": "string"
@@ -446,10 +446,10 @@
                     "type": "object"
                 },
                 "primary": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                         "persistence": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "size": {
                                     "type": "string"
