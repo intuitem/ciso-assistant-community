@@ -3,7 +3,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
-	import Typewriter from 'svelte-typewriter';
+	import Typewriter from 'sv-typewriter';
 
 	import { m } from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
