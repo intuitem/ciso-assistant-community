@@ -640,7 +640,7 @@
 				{/each}
 			</div>
 			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-				{#if $displayOnlyAssessableNodes}
+				{#if displayOnlyAssessableNodes}
 					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
 				{:else}
 					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
@@ -650,10 +650,10 @@
 					class="flex flex-row items-center justify-center"
 					active="bg-primary-500"
 					background="bg-green-500"
-					bind:checked={$displayOnlyAssessableNodes}
-					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
+					onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
+					onclick={() => (displayOnlyAssessableNodes = !displayOnlyAssessableNodes)}
 				>
-					{#if $displayOnlyAssessableNodes}
+					{#if displayOnlyAssessableNodes}
 						<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
 					{:else}
 						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
