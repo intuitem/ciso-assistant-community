@@ -36,9 +36,9 @@ class Command(BaseCommand):
             )
 
             with transaction.atomic():
-                for requirement in requirements:
-                    requirement.result = "not_assessed"
-                    requirement.save()
+                requirements.update(result="not_assessed")
 
-        except Exception as e:  # Replace with your specific model's DoesNotExist
-            raise CommandError(f"Object with UUID {target_uuid} not found: {str(e)}")
+        except (
+            ComplianceAssessment.DoesNotExist
+        ):  # Replace with your specific model's DoesNotExist
+            raise CommandError(f"Object with UUID {target_uuid} not found") from None
