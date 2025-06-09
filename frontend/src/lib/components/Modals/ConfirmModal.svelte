@@ -24,6 +24,7 @@
 		bodyComponent: ComponentType | undefined;
 		bodyProps?: Record<string, unknown>;
 		debug?: boolean;
+		schema?: any;
 	}
 
 	let {
@@ -34,7 +35,8 @@
 		formAction,
 		bodyComponent,
 		bodyProps = {},
-		debug = false
+		debug = false,
+		schema
 	}: Props = $props();
 
 	const { form } = superForm(_form, {
