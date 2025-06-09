@@ -511,6 +511,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'campaign', urlModel: 'campaigns' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
@@ -1109,8 +1110,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
-		]
+			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
+			{ field: 'campaigns', urlModel: 'perimeters', disableAddDeleteButtons: true }
+		],
 	}
 };
 

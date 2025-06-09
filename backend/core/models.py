@@ -3603,6 +3603,14 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
     )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+        blank=True,
+        null=True,
+    )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
     )
@@ -3610,6 +3618,11 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
         verbose_name=_("Start date"),
+    )
+    due_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Due date"),
     )
     perimeters = models.ManyToManyField(Perimeter, blank=True, related_name="campaigns")
 
@@ -3648,7 +3661,11 @@ class ComplianceAssessment(Assessment):
     )
 
     campaign = models.ForeignKey(
-        Campaign, on_delete=models.PROTECT, null=True, blank=True
+        Campaign,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="compliance_assessments",
     )
     fields_to_check = ["name", "version"]
 

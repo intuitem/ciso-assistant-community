@@ -326,7 +326,8 @@ export const CampaignSchema = z.object({
 	framework: z.string(),
 	perimeters: z.array(z.string().optional()).optional(),
 	status: z.string().optional().nullable(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
 });
 
 export const EvidenceSchema = z.object({

@@ -4057,6 +4057,10 @@ class CampaignViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Campaign.Status.choices))
 
+    @action(detail=True, name="Get campaign metrics")
+    def metrics(self, request, pk):
+        return Response({})
+
     def perform_create(self, serializer):
         super().perform_create(serializer)
         campaign = serializer.instance

@@ -995,6 +995,9 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 class CampaignReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    compliance_assessments = FieldsRelatedField(many=True)
+    perimeters = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
     framework = FieldsRelatedField(
         [
             "id",
@@ -1023,6 +1026,7 @@ class CampaignWriteSerializer(BaseModelSerializer):
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    campaign = FieldsRelatedField()
     framework = FieldsRelatedField(
         [
             "id",
