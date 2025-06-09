@@ -4417,9 +4417,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"])
     def update_requirement(self, request, pk):
-        compliance_assessment = self.get_object()
+        compliance_assessment = get_object_or_404(self.get_queryset(), pk=pk)
 
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+        viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
             object_type=ComplianceAssessment,
@@ -4434,6 +4434,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if not all([ref_id, result]):
                 return Response(
                     {"error": "ref_id and result are required fields"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # validate if result value is valid choice
+            valid_results = [
+                choice[0] for choice in RequirementAssessment.Result.choices
+            ]
+            if result not in valid_results:
+                return Response(
+                    {"error": f"invalid result value. Must be one of: {valid_results}"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -4462,9 +4471,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
-        except Exception as e:
+        except RequirementAssessment.DoesNotExist:
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": f"Requirement with ref_id {ref_id} not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error in update_requirement: {str(e)}")
+            return Response(
+                {"error": "An unexpected error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def perform_create(self, serializer):
