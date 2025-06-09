@@ -1107,6 +1107,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'framework', urlModel: 'frameworks' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
 		]
 	}
 };

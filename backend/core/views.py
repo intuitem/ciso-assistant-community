@@ -4057,6 +4057,20 @@ class CampaignViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Campaign.Status.choices))
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        campaign = serializer.instance
+        framework = serializer.instance.framework
+        for perimeter in campaign.perimeters.all():
+            compliance_assessment = ComplianceAssessment.objects.create(
+                name=f"{campaign.name}_{perimeter.name}_{str(perimeter.id)[:5]}",
+                campaign=campaign,
+                perimeter=perimeter,
+                framework=framework,
+                folder=perimeter.folder,
+            )
+            compliance_assessment.create_requirement_assessments()
+
 
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """

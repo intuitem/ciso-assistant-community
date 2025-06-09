@@ -28,6 +28,15 @@
 	label={m.status()}
 />
 <AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="perimeters"
+	field="perimeters"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
+/>
+<AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
