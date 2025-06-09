@@ -127,6 +127,7 @@ This is a topological representation. The display on the screen (transposition, 
 A _meta of type "threats" contains the following keys:
 - type (*): must be "threats"
 - urn (*)
+- base_urn (*)
 - ref_id (*)
 - name (*)
 - description (*)
@@ -142,6 +143,7 @@ The _content tab for a "threats" object contains the following columns:
 A _meta of type "reference_controls" contains the following keys:
 - type (*): must be "reference_controls"
 - urn (*)
+- base_urn (*)
 - ref_id (*)
 - name (*)
 - description (*)
