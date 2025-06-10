@@ -118,6 +118,7 @@
 	"provider": "Fournisseur",
 	"providerColon": "Fournisseur :",
 	"domain": "Domaine",
+	"domainSemiColon": "Domaine :",
 	"urn": "URN",
 	"treatmentStatus": "Statut de traitement",
 	"qualification": "Qualification",
@@ -915,7 +916,7 @@
 	"days": "Jours",
 	"milliseconds": "Millisecondes",
 	"existingMeasures": "Mesures existantes",
-	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
+	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"forgotPassword": "Mot de passe oublié",
 	"score": "Score",
 	"scoreSemiColon": "Score :",
@@ -1462,7 +1463,6 @@
 	"schedule": "Programme",
 	"taskDate": "Date",
 	"isTemplate": "Recurrence",
-	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"reminderWarningStrategicScenarios": "Rappel : N'oubliez pas d'identifier les chemins d'attaque pour réaliser les scénarios opérationnels.",
 	"addAttackPathToDoOperationalScenarios": "Vous devez ajouter un chemin d'attaque à ces scénarios stratégiques si vous souhaitez les utiliser dans les scénarios opérationnels :",
 	"impactHelpText": "Estimation de l'impact de la mesure",
@@ -1615,5 +1615,35 @@
 	"externallyDetected": "Externe",
 	"mappingSuggested": "Suggestion de mapping",
 	"mappingSuggestedHelpText": "Suggestions de mapping basées sur les référentiels chargés",
-	"mappingSuggestionTeasing": "Les mappings sont maintenant suggérés ! Vous pouvez utiliser les filtres pour explorer les suggestions basées sur les référentiels chargés."
+	"mappingSuggestionTeasing": "Les mappings sont maintenant suggérés ! Vous pouvez utiliser les filtres pour explorer les suggestions basées sur les référentiels chargés.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Heure",
+				"countPlural=other": "{count} Heures"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minute",
+				"countPlural=other": "{count} Minutes"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Jour",
+				"countPlural=other": "{count} Jours"
+			}
+		}
+	]
 }

@@ -115,6 +115,7 @@
 	"provider": "Penyedia",
 	"providerColon": "Penyedia:",
 	"domain": "Domain",
+	"domainSemiColon": "Domain:",
 	"urn": "URN",
 	"treatmentStatus": "Status perlakuan",
 	"qualification": "Kualifikasi",
@@ -1112,5 +1113,35 @@
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
 	"mappingSuggested": "Pemetaan disarankan",
 	"mappingSuggestedHelpText": "Saran pemetaan berdasarkan kerangka kerja yang dimuat",
-	"mappingSuggestionTeasing": "Pemetaan sekarang disarankan! Anda dapat menggunakan filter untuk menjelajahi saran berdasarkan kerangka kerja yang dimuat."
+	"mappingSuggestionTeasing": "Pemetaan sekarang disarankan! Anda dapat menggunakan filter untuk menjelajahi saran berdasarkan kerangka kerja yang dimuat.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Jam",
+				"countPlural=other": "{count} Jam"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Menit",
+				"countPlural=other": "{count} Menit"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Hari",
+				"countPlural=other": "{count} Hari"
+			}
+		}
+	]
 }
