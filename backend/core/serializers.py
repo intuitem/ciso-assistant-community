@@ -963,7 +963,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         many=True, required=False, queryset=Finding.objects.all()
     )
     findings_assessment = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=FindingsAssessment.objects.all(), required=False  
+        many=True, queryset=FindingsAssessment.objects.all(), required=False
     )
 
     class Meta:

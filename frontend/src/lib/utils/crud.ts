@@ -496,8 +496,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'findings' , urlModel: 'findings'},
-			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'findings', urlModel: 'findings' },
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
@@ -1019,7 +1019,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' },
+		reverseForeignKeyFields: [
+			{ field: 'findings_assessment', urlModel: 'findings' },
 			{ field: 'findings_assessment', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }]
@@ -1033,13 +1034,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{field: 'evidences', urlModel: 'evidences' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
 			{ field: 'findings', urlModel: 'evidences' },
-			{ field: 'findings', urlModel: 'applied-controls' },
+			{ field: 'findings', urlModel: 'applied-controls' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},

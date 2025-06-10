@@ -331,7 +331,6 @@ export const EvidenceSchema = z.object({
 	findings: z.string().optional().array().optional(),
 	findings_assessments: z.string().optional().array().optional(),
 
-
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -710,7 +709,7 @@ export const FindingsAssessmentSchema = z.object({
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional()
 });
 
 export const IncidentSchema = z.object({
