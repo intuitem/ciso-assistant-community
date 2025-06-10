@@ -89,7 +89,7 @@
 		selected.map((item) => item.value || item.label || item)
 	);
 	let isInternalUpdate = false;
-	let optionsLoaded = Boolean(options.length);
+	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : selectedValues[0];
 
