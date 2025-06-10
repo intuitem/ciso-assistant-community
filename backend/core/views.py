@@ -326,6 +326,7 @@ class PerimeterViewSet(BaseModelViewSet):
     model = Perimeter
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
+    filterset_fields = ["folder", "campaigns"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -4046,10 +4047,7 @@ class QualificationViewSet(BaseModelViewSet):
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = [
-        "folder",
-        "framework",
-    ]
+    filterset_fields = ["folder", "framework", "perimeters"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -4086,6 +4084,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "folder",
         "framework",
         "perimeter",
+        "campaign",
         "status",
         "ebios_rm_studies",
         "assets",

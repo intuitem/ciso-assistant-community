@@ -3593,6 +3593,7 @@ class RiskScenario(NameDescriptionMixin):
 
 
 class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+    # name description and due date are inherited
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -3618,11 +3619,6 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
         verbose_name=_("Start date"),
-    )
-    due_date = models.DateField(
-        blank=True,
-        null=True,
-        verbose_name=_("Due date"),
     )
     perimeters = models.ManyToManyField(Perimeter, blank=True, related_name="campaigns")
 
