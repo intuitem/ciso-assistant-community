@@ -959,6 +959,12 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+    findings_assessment = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=FindingsAssessment.objects.all(), required=False  
+    )
 
     class Meta:
         model = Evidence

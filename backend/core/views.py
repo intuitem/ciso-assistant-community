@@ -3945,6 +3945,8 @@ class EvidenceViewSet(BaseModelViewSet):
         "name",
         "timeline_entries",
         "filtering_labels",
+        "findings",
+        "findings_assessments",
     ]
 
     @action(methods=["get"], detail=True)

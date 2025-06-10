@@ -4560,6 +4560,8 @@ class FindingsAssessment(Assessment):
         blank=True,
         help_text="Evidences related to the follow-up",
         related_name="findings_assessments",
+        verbose_name=_("Evidences"),
+
     )
 
     ref_id = models.CharField(
@@ -4679,6 +4681,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         blank=True,
         help_text="Evidences related to the follow-up",
         related_name="findings",
+        verbose_name=_("Evidences"),
     )
 
     class Meta:
