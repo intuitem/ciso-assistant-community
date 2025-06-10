@@ -69,7 +69,9 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	data.requirement_assessments.forEach((ra) => {
+	const requirementAssessments = $state(data.requirement_assessments);
+	const complianceAssessment = $state(data.compliance_assessment);
+	requirementAssessments.forEach((ra) => {
 		hideSuggestionHashmap[ra.id] = true;
 	});
 
@@ -184,7 +186,7 @@
 	});
 
 	const requirementAssessmentScores = Object.fromEntries(
-		data.requirement_assessments.map((requirement) => {
+		requirementAssessments.map((requirement) => {
 			return [requirement.id, [requirement.is_scored, requirement.score]];
 		})
 	);
@@ -243,7 +245,7 @@
 	let isScoredForms = $state({});
 	run(() => {
 		// Initialize the form instances
-		data.requirement_assessments.forEach((requirementAssessment, index) => {
+		requirementAssessments.forEach((requirementAssessment, index) => {
 			const id = requirementAssessment.id;
 			if (!scoreForms[id]) {
 				scoreForms[id] = superForm(requirementAssessment.scoreForm, {
@@ -264,7 +266,7 @@
 	});
 
 	const accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
-		data.requirement_assessments.reduce((acc, requirementAssessment) => {
+		requirementAssessments.reduce((acc, requirementAssessment) => {
 			const requirement =
 				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
 			return {
@@ -272,23 +274,6 @@
 				[requirementAssessment.id]: ['']
 			};
 		})
-	);
-
-	let resultRegistry = $state(
-		Object.fromEntries(
-			data.requirement_assessments.map((requirementAssessment) => [
-				requirementAssessment.id,
-				requirementAssessment.result
-			])
-		)
-	);
-	let statusRegistry = $state(
-		Object.fromEntries(
-			data.requirement_assessments.map((requirementAssessment) => [
-				requirementAssessment.id,
-				requirementAssessment.status
-			])
-		)
 	);
 </script>
 
@@ -301,11 +286,11 @@
 				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
 			>
 				<a
-					href="/compliance-assessments/{data.compliance_assessment.id}"
+					href="/compliance-assessments/{complianceAssessment.id}"
 					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 				>
 					<i class="fa-solid fa-arrow-left"></i>
-					<p class="">{m.goBackToAudit()} {data.compliance_assessment.name}</p>
+					<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
 				</a>
 				<div class="flex items-center justify-center space-x-4">
 					{#if questionnaireMode}
@@ -330,7 +315,7 @@
 				</div>
 			</div>
 		{/if}
-		{#each data.requirement_assessments as requirementAssessment, i}
+		{#each requirementAssessments as requirementAssessment, i}
 			<div class="w-2"></div>
 
 			<span class="relative flex justify-center py-4">
@@ -460,15 +445,16 @@
 									<p class="flex items-center font-semibold text-blue-600 italic">{m.status()}</p>
 									<RadioGroup
 										possibleOptions={status_options}
-										value={statusRegistry[requirementAssessment.id]}
-										colorMap={complianceStatusTailwindColorMap}
+										key="id"
+										labelKey="label"
 										inputName="status"
+										colorMap={complianceStatusTailwindColorMap}
+										value={requirementAssessment.status}
 										onChange={(newValue) => {
 											const newStatus =
 												requirementAssessment.status === newValue ? 'to_do' : newValue;
 											requirementAssessment.status = newStatus;
-											statusRegistry[requirementAssessment.id] = newStatus;
-											update(requirementAssessment, 'status'); // await
+											update(requirementAssessment, 'status');
 										}}
 									/>
 								</div>
@@ -478,15 +464,16 @@
 									</p>
 									<RadioGroup
 										possibleOptions={result_options}
-										value={resultRegistry[requirementAssessment.id]}
-										colorMap={complianceResultTailwindColorMap}
+										key="id"
+										labelKey="label"
 										inputName="result"
+										colorMap={complianceResultTailwindColorMap}
+										value={requirementAssessment.result}
 										onChange={(newValue) => {
 											const newResult =
 												requirementAssessment.result === newValue ? 'to_do' : newValue;
 											requirementAssessment.result = newResult;
-											resultRegistry[requirementAssessment.id] = newResult;
-											update(requirementAssessment, 'result'); // await
+											update(requirementAssessment, 'result');
 										}}
 									/>
 								</div>
@@ -520,33 +507,19 @@
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
 										{:else if question.type === 'unique_choice'}
-											<Segment
-												class="flex-col"
-												active="preset-filled-primary-500"
-												hover="hover:preset-tonal-primary"
-											>
-												{#each question.choices as option}
-													<Segment.Item
-														class="shadow-md flex"
-														bind:group={requirementAssessment.answers[urn]}
-														name="question"
-														value={option.urn}
-														on:click={async () => {
-															const newAnswer =
-																requirementAssessment.answers[urn] === option.urn
-																	? null
-																	: option.urn;
-															requirementAssessment.answers[urn] = newAnswer;
-															await update(
-																requirementAssessment,
-																'answers',
-																requirementAssessment.answers
-															);
-														}}
-														><span class="text-left">{option.value}</span>
-													</Segment.Item>
-												{/each}
-											</Segment>
+											<RadioGroup
+												possibleOptions={question.choices}
+												value={requirementAssessment.answers[urn]}
+												key="urn"
+												labelKey="value"
+												inputName="answers"
+												onChange={(newValue) => {
+													const newAnswer =
+														requirementAssessment.answers[urn] === newValue ? null : newValue;
+													requirementAssessment.answers[urn] = newAnswer;
+													update(requirementAssessment, 'answers', requirementAssessment.answers);
+												}}
+											/>
 										{:else if question.type === 'multiple_choice'}
 											<div
 												class="flex flex-col gap-1 p-1 bg-surface-200-800 border border-surface-500 rounded-base"
@@ -624,16 +597,18 @@
 							{#if !shallow}
 								<Score
 									form={scoreForms[requirementAssessment.id]}
-									min_score={data.compliance_assessment.min_score}
-									max_score={data.compliance_assessment.max_score}
-									scores_definition={data.compliance_assessment.scores_definition}
+									min_score={complianceAssessment.min_score}
+									max_score={complianceAssessment.max_score}
+									scores_definition={complianceAssessment.scores_definition}
 									field="score"
-									label={data.compliance_assessment.show_documentation_score
+									label={complianceAssessment.show_documentation_score
 										? m.implementationScore()
 										: m.score()}
 									styles="w-full p-1"
-									bind:score={requirementAssessment.score}
-									on:change={async () => await updateScore(requirementAssessment)}
+									onChange={(newScore) => {
+										requirementAssessment.score = newScore;
+										updateScore(requirementAssessment);
+									}}
 									disabled={!requirementAssessment.is_scored ||
 										requirementAssessment.result === 'not_applicable'}
 								>
@@ -645,9 +620,9 @@
 												label={''}
 												helpText={m.scoringHelpText()}
 												checkboxComponent="switch"
-												class="h-full flex flex-row items-center justify-center my-1"
+												classes="h-full flex flex-row items-center justify-center my-1"
 												classesContainer="h-full flex flex-row items-center space-x-4"
-												on:change={async () => {
+												onChange={async (isChecked) => {
 													requirementAssessment.is_scored = !requirementAssessment.is_scored;
 													await update(requirementAssessment, 'is_scored');
 												}}
@@ -655,31 +630,32 @@
 										</div>
 									{/snippet}
 								</Score>
-								{#if data.compliance_assessment.show_documentation_score}
+								{#if complianceAssessment.show_documentation_score}
 									<Score
 										form={docScoreForms[requirementAssessment.id]}
-										min_score={data.compliance_assessment.min_score}
-										max_score={data.compliance_assessment.max_score}
+										min_score={complianceAssessment.min_score}
+										max_score={complianceAssessment.max_score}
 										field="documentation_score"
 										label={m.documentationScore()}
 										styles="w-full p-1"
-										bind:score={requirementAssessment.documentation_score}
-										on:change={async () => await updateScore(requirementAssessment)}
+										onChange={(newScore) => {
+											requirementAssessment.score = newScore;
+											updateScore(requirementAssessment);
+										}}
 										disabled={!requirementAssessment.is_scored ||
 											requirementAssessment.result === 'not_applicable'}
 									/>
 								{/if}
-							{:else if data.compliance_assessment.show_documentation_score && requirementAssessment.is_scored}
+							{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 								<div class="flex flex-row items-center space-x-2 w-full">
 									<span>{m.implementationScoreResult()}</span>
 									<ProgressRing
 										strokeWidth="20px"
 										meterStroke={displayScoreColor(
 											requirementAssessment.score,
-											data.compliance_assessment.max_score
+											complianceAssessment.max_score
 										)}
-										value={(requirementAssessment.score * 100) /
-											data.compliance_assessment.max_score}
+										value={(requirementAssessment.score * 100) / complianceAssessment.max_score}
 										size="size-10"
 									>
 										{requirementAssessment.score ?? '--'}
@@ -689,10 +665,10 @@
 										strokeWidth="20px"
 										meterStroke={displayScoreColor(
 											requirementAssessment.documentation_score,
-											data.compliance_assessment.max_score
+											complianceAssessment.max_score
 										)}
 										value={(requirementAssessment.documentation_score * 100) /
-											data.compliance_assessment.max_score}
+											complianceAssessment.max_score}
 										size="size-10"
 									>
 										{requirementAssessment.documentation_score ?? '--'}
@@ -705,10 +681,9 @@
 										strokeWidth="20px"
 										meterStroke={displayScoreColor(
 											requirementAssessment.score,
-											data.compliance_assessment.max_score
+											complianceAssessment.max_score
 										)}
-										value={(requirementAssessment.score * 100) /
-											data.compliance_assessment.max_score}
+										value={(requirementAssessment.score * 100) / complianceAssessment.max_score}
 										size="size-10"
 									>
 										{requirementAssessment.score ?? '--'}

@@ -601,7 +601,7 @@
 										label={''}
 										helpText={m.scoringHelpText()}
 										checkboxComponent="switch"
-										class="h-full flex flex-row items-center justify-center my-1"
+										classes="h-full flex flex-row items-center justify-center my-1"
 										classesContainer="h-full flex flex-row items-center space-x-4"
 									/>
 								</div>

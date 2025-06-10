@@ -27,6 +27,7 @@
 		scores_definition?: ScoresDefinition[];
 		form: SuperForm<Record<string, any>>;
 		score?: any;
+		onChange?: (score: number) => void;
 		left?: import('svelte').Snippet;
 	}
 
@@ -45,20 +46,19 @@
 		scores_definition = [],
 		form,
 		score = $bindable(),
+		onChange = () => {},
 		left
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 	const dispatch = createEventDispatcher();
-	let previous = $state([$value]);
+	let previous = $state($value);
 
-	$effect(() => (score = $value));
-
-	run(() => {
-		if (previous[0] !== $value && previous[0] !== undefined) {
-			dispatch('change', { score: $value });
+	$effect(() => {
+		if (previous !== $value && previous !== undefined) {
+			onChange($value);
 		}
-		previous = [$value];
+		previous = $value;
 	});
 
 	run(() => {

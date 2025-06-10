@@ -268,8 +268,6 @@
 	});
 
 	run(() => {
-		console.log('selected', selected);
-		console.log('selectedValues', selectedValues);
 		// Only update value after options are loaded
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
