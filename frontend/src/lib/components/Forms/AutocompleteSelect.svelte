@@ -43,6 +43,7 @@
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
 		allowUserOptions?: boolean | 'append';
+		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
 	}
@@ -72,6 +73,7 @@
 		optionsSelf = null,
 		optionsSelfSelect = false,
 		allowUserOptions = false,
+		onChange = () => {},
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
@@ -228,7 +230,8 @@
 			}
 		}
 
-		dispatch('change', $value);
+		// dispatch('change', $value);
+		$effect(() => onChange($value));
 		dispatch('cache', selected);
 	}
 

@@ -224,7 +224,7 @@
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 	});
 
-	run(() => {
+	$effect(() => {
 		for (const field of filteredFields) {
 			handler.filter(
 				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
@@ -344,8 +344,7 @@
 											{...filters[field].props}
 											fieldContext="filter"
 											label={safeTranslate(filters[field].props?.label)}
-											on:change={(e) => {
-												const value = e.detail;
+											onChange={(value) => {
 												filterValues[field] = value.map((v) => ({ value: v }));
 												invalidateTable = true;
 											}}
