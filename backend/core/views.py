@@ -315,7 +315,7 @@ class PerimeterFilter(df.FilterSet):
 
     class Meta:
         model = Perimeter
-        fields = ["folder", "lc_status"]
+        fields = ["folder", "lc_status", "campaigns"]
 
 
 class PerimeterViewSet(BaseModelViewSet):
