@@ -748,8 +748,26 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'progress'],
+		head: [
+			'ref_id',
+			'name',
+			'framework',
+			'assets',
+			'evidences',
+			'description',
+			'perimeter',
+			'reviewProgress'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'framework',
+			'assets',
+			'evidences',
+			'description',
+			'perimeter',
+			'progress'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -895,8 +913,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'description', 'domain'],
+		body: ['name', 'description', 'folder']
 	},
 	'feared-events': {
 		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],

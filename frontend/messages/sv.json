@@ -115,6 +115,7 @@
 	"provider": "Leverantör",
 	"providerColon": "Leverantör:",
 	"domain": "Domän",
+	"domainSemiColon": "Domän:",
 	"urn": "URN",
 	"treatmentStatus": "Behandlingsstatus",
 	"qualification": "Kvalificering",
@@ -914,5 +915,35 @@
 	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent",
 	"mappingSuggested": "Förslag på kartläggning",
 	"mappingSuggestedHelpText": "Förslag på kartläggning baserade på inlästa ramverk",
-	"mappingSuggestionTeasing": "Kartläggningsförslag finns nu tillgängliga! Du kan använda filtren för att utforska förslag baserade på inlästa ramverk."
+	"mappingSuggestionTeasing": "Kartläggningsförslag finns nu tillgängliga! Du kan använda filtren för att utforska förslag baserade på inlästa ramverk.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Timme",
+				"countPlural=other": "{count} Timmar"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minut",
+				"countPlural=other": "{count} Minuter"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dag",
+				"countPlural=other": "{count} Dagar"
+			}
+		}
+	]
 }

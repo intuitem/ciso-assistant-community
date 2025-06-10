@@ -1042,6 +1042,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     )
     progress = serializers.ReadOnlyField(source="get_progress")
     assets = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = ComplianceAssessment

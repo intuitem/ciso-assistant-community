@@ -318,7 +318,8 @@ export const ComplianceAssessmentSchema = z.object({
 	create_applied_controls_from_suggestions: z.boolean().optional().default(false),
 	observation: z.string().optional().nullable(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional()
 });
 
 export const CampaignSchema = z.object({

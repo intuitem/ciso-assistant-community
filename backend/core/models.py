@@ -3663,6 +3663,15 @@ class ComplianceAssessment(Assessment):
         blank=True,
         related_name="compliance_assessments",
     )
+
+    evidences = models.ManyToManyField(
+        Evidence,
+        verbose_name=_("Evidences"),
+        blank=True,
+        help_text=_("Evidences related to the compliance assessment"),
+        related_name="compliance_assessments",
+    )
+
     fields_to_check = ["name", "version"]
 
     class Meta:

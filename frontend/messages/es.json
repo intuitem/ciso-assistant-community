@@ -115,6 +115,7 @@
 	"provider": "Proveedor",
 	"providerColon": "Proveedor:",
 	"domain": "Dominio",
+	"domainSemiColon": "Dominio:",
 	"urn": "URN",
 	"treatmentStatus": "Estado del tratamiento",
 	"qualification": "Cualificación",
@@ -928,5 +929,35 @@
 	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente",
 	"mappingSuggested": "Sugerencia de mapeo",
 	"mappingSuggestedHelpText": "Sugerencias de mapeo basadas en marcos cargados",
-	"mappingSuggestionTeasing": "¡Ahora se sugieren mapeos! Puede usar los filtros para explorar sugerencias basadas en marcos cargados."
+	"mappingSuggestionTeasing": "¡Ahora se sugieren mapeos! Puede usar los filtros para explorar sugerencias basadas en marcos cargados.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Hora",
+				"countPlural=other": "{count} Horas"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minuto",
+				"countPlural=other": "{count} Minutos"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Día",
+				"countPlural=other": "{count} Días"
+			}
+		}
+	]
 }
