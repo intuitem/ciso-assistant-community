@@ -21,6 +21,8 @@ import fitz
 import re
 from openpyxl import Workbook
 
+REF_ID_PREFIX = 'Cm'
+
 def is_chapter(line): return re.match(r"^[IVX]+\.$", line.strip())
 def is_subchapter(line): return re.match(r"^[A-Z]\.$", line.strip())
 def is_section(line): return re.match(r"^[a-z]\)$", line.strip())
@@ -72,7 +74,7 @@ def join_lines_with_hyphen(lines):
 
 # Exceptions pour titres multi-lignes
 title_exceptions = {
-    "chapter": {"VI.": 4, "VII.": 1},
+    "chapter": {"VI.": 3, "VII.": 1},
     "subchapter": {"VII.B.": 3},
     "section": {
         "IV.B.a)": 1,
@@ -80,7 +82,7 @@ title_exceptions = {
     }
 }
 
-merge_page_paragraphs = {3, 4, 5, 6, 7, 15}
+merge_page_paragraphs = {6+1, 14+1}
 
 wb = Workbook()
 ws = wb.active
@@ -93,12 +95,12 @@ in_chapter_IV = False
 paragraph_counter = 1
 previous_paragraph_row = None
 
-pdf_path = "finma_rs_2023_01_20221207.pdf"
+pdf_path = "finma_rs_2023_01_20221207_en.pdf"
 doc = fitz.open(pdf_path)
 full_text = "\n".join(page.get_text() for page in doc)
 annotations = extract_annotations(full_text)
 
-for i in range(2, 15):
+for i in range(2, 14):
     page = doc.load_page(i)
     blocks = page.get_text("blocks")
     blocks.sort(key=lambda b: (round(b[1]), round(b[0])))
@@ -184,7 +186,7 @@ for i in range(2, 15):
 
             full_paragraph = join_lines_with_hyphen(para_lines)
             assessable = "x" if in_chapter_IV else ""
-            ref_id = f"Cm {paragraph_counter}"
+            ref_id = f"{REF_ID_PREFIX} {paragraph_counter}"
 
             annotation_set = set()
             for word, num in re.findall(r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE):
@@ -192,7 +194,7 @@ for i in range(2, 15):
                     annotation_set.add(f"[{num}] {annotations[num]}")
             annotation_str = "\n".join(sorted(annotation_set))
 
-            ws.append([assessable, current_depth + 1, ref_id, "", full_paragraph, annotation_str])
+            ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
             previous_paragraph_row = ws.max_row
             paragraph_counter += 1
             continue
@@ -202,7 +204,7 @@ for i in range(2, 15):
         if line.endswith((".", "!", "?", ";")):
             full_paragraph = join_lines_with_hyphen(paragraph_lines)
             assessable = "x" if in_chapter_IV else ""
-            ref_id = f"Cm {paragraph_counter}"
+            ref_id = f"{REF_ID_PREFIX} {paragraph_counter}"
 
             annotation_set = set()
             for word, num in re.findall(r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE):
@@ -221,7 +223,7 @@ for i in range(2, 15):
                             existing.append(new_ann)
                     ann_cell.value = "\n".join(existing)
             else:
-                ws.append([assessable, current_depth + 1, ref_id, "", full_paragraph, annotation_str])
+                ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
                 previous_paragraph_row = ws.max_row
                 paragraph_counter += 1
 
@@ -233,12 +235,12 @@ for i in range(2, 15):
 if paragraph_lines:
     full_paragraph = join_lines_with_hyphen(paragraph_lines)
     assessable = "x" if in_chapter_IV else ""
-    ref_id = f"Cm {paragraph_counter}"
+    ref_id = f"{REF_ID_PREFIX} {paragraph_counter}"
     annotation_set = set()
     for word, num in re.findall(r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE):
         if num in annotations:
             annotation_set.add(f"[{num}] {annotations[num]}")
     annotation_str = "\n".join(sorted(annotation_set))
-    ws.append([assessable, current_depth + 1, ref_id, "", full_paragraph, annotation_str])
+    ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
 
-wb.save("finma_framework_final_TEST.xlsx")
+wb.save("finma_framework_final_EN.xlsx")

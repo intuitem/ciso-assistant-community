@@ -1,0 +1,2578 @@
+urn: urn:intuitem:risk:library:finma-2023-01
+locale: fr
+ref_id: finma-2023-01
+name: "FINMA - Circulaire 2023/01 - Risques et r\xE9silience op\xE9rationnels - Banques"
+description: "Gestion des risques op\xE9rationnels et garantie de la r\xE9silience\
+  \ op\xE9rationnelle\nR\xE9f\xE9rence :  Circ.-FINMA 23/1 \xAB Risques et r\xE9silience\
+  \ op\xE9rationnels - banques \xBB \nDate :  7 d\xE9cembre 2022 \nEntr\xE9e en vigueur\
+  \ :  1er janvier 2024 \nConcordance : remplace la Circ.-FINMA 08/21 \xAB Risques\
+  \ op\xE9rationnels - banques \xBB du 20 novembre 2008 \nBases l\xE9gales :  LFINMA,\
+  \ art. 7 al. 1 let. b et 29 al. 1 \n                         LB art. 1b al. 3 let.\
+  \ b, art. 3 al. 2 let. a et 3f  \n                         OB art. 12 et 14e \n\
+  \                         LEFin art. 9 et 49 \n                         OEFin art.\
+  \ 12 et 6"
+copyright: FINMA
+version: 1
+publication_date: 2025-06-10
+provider: FINMA
+packager: intuitem
+translations:
+  en:
+    name: FINMA - Circular 2023/01 - Operational risks and resilience - Banks
+    description: "Managing operational risks and ensuring operational resilience\n\
+      Reference: FINMA Circ. 23/1 \u201COperational risks and resilience \u2013 banks\u201D\
+      \nDate: 7 December 2022\nEntry into force: 1 January 2024\nConcordance: former\
+      \ FINMA Circ. 08/21 \u201COperational risk \u2013 banks\u201D, dated 20 November\
+      \ 2008\nLegal framework: FINMASA Articles 7 para. 1 let. b and 29 para. 1\n\
+      \                                 BA Article 1b para. 3 let. b, Articles 3 para.\
+      \ 2 let. a and 3f\n                                 BO Articles 12 and 14e\n\
+      \                                 FinIA Articles 9 and 49\n                \
+      \                 FinIO Articles 12 and 68"
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:finma-2023-01
+    ref_id: finma-2023-01
+    name: "FINMA - Circulaire 2023/01 - Risques et r\xE9silience op\xE9rationnels\
+      \ - Banques"
+    description: "Gestion des risques op\xE9rationnels et garantie de la r\xE9silience\
+      \ op\xE9rationnelle\nR\xE9f\xE9rence :  Circ.-FINMA 23/1 \xAB Risques et r\xE9\
+      silience op\xE9rationnels - banques \xBB \nDate :  7 d\xE9cembre 2022 \nEntr\xE9\
+      e en vigueur :  1er janvier 2024 \nConcordance : remplace la Circ.-FINMA 08/21\
+      \ \xAB Risques op\xE9rationnels - banques \xBB du 20 novembre 2008 \nBases l\xE9\
+      gales :  LFINMA, art. 7 al. 1 let. b et 29 al. 1 \n                        \
+      \ LB art. 1b al. 3 let. b, art. 3 al. 2 let. a et 3f  \n                   \
+      \      OB art. 12 et 14e \n                         LEFin art. 9 et 49 \n  \
+      \                       OEFin art. 12 et 6"
+    translations:
+      en:
+        name: FINMA - Circular 2023/01 - Operational risks and resilience - Banks
+        description: "Managing operational risks and ensuring operational resilience\n\
+          Reference: FINMA Circ. 23/1 \u201COperational risks and resilience \u2013\
+          \ banks\u201D\nDate: 7 December 2022\nEntry into force: 1 January 2024\n\
+          Concordance: former FINMA Circ. 08/21 \u201COperational risk \u2013 banks\u201D\
+          , dated 20 November 2008\nLegal framework: FINMASA Articles 7 para. 1 let.\
+          \ b and 29 para. 1\n                                 BA Article 1b para.\
+          \ 3 let. b, Articles 3 para. 2 let. a and 3f\n                         \
+          \        BO Articles 12 and 14e\n                                 FinIA\
+          \ Articles 9 and 49\n                                 FinIO Articles 12\
+          \ and 68"
+    requirement_nodes:
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application"
+      assessable: false
+      depth: 1
+      name: "I. Objet et champ d\u2019application"
+      translations:
+        en:
+          name: I. Subject and scope of application
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application:1"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019\
+        application"
+      name: Cm 1
+      description: "La pr\xE9sente circulaire se r\xE9f\xE8re aux prescriptions en\
+        \ mati\xE8re de s\xE9paration des fonctions, de gestion des risques et de\
+        \ contr\xF4le interne de l\u2019ordonnance sur les banques (art. 12 et 14e\
+        \ OB ; RS 952.02) et de l\u2019ordonnance sur les \xE9tablissements financiers\
+        \ (art. 12 et 68 OEFin ; RS 954.11) et concr\xE9tise la pratique prudentielle\
+        \ correspondante. Elle tient compte des principes du Comit\xE9 de B\xE2le\
+        \ pour une gestion irr\xE9prochable des risques op\xE9rationnels1 et de la\
+        \ r\xE9silience op\xE9rationnelle2."
+      annotation: "[1] CBCB, \xAB Revisions to the Principles for the Sound Management\
+        \ of Operational Risk \xBB (31 mars 2021)\n[2] CBCB, \xAB Principles for Operational\
+        \ Resilience \xBB (31 mars 2021)"
+      translations:
+        en:
+          name: Margin no. 1
+          description: "This Circular relates to the rules on the segregation of duties,\
+            \ risk management and internal controls contained in the Banking Ordinance\
+            \ (Arts. 12 and 14e BO, SR 952.02) and the Financial Institutions Ordinance\
+            \ (Arts. 12 and 68 FinIO; SR 954.11) and sets out the corresponding supervisory\
+            \ practice. It takes account of the Basel Committee\u2019s principles\
+            \ for the sound management of operational risk1 and operational resilience2."
+          annotation: '[1] BCBS Revisions to the Principles for the Sound Management
+            of Operational Risk (31 March 2021).
+
+            [2] BCBS Principles for Operational Resilience (31 March 2021).'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application:2"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019\
+        application"
+      name: Cm 2
+      description: "La pr\xE9sente circulaire s\u2019adresse aux banques selon l\u2019\
+        art. 1a et aux personnes selon l\u2019art. 1b de la loi sur les banques (LB\
+        \ ; RS 952.0), aux maisons de titres selon les art. 2 al. 1 let. e et 41 de\
+        \ la loi sur les \xE9tablissements financiers (LEFin ; RS 954.1) ainsi qu\u2019\
+        aux groupes financiers et aux conglom\xE9rats financiers selon l\u2019art.\
+        \ 3c LB et l\u2019art. 49 LEFin. Par \xAB \xE9tablissements \xBB, on entend\
+        \ ci-apr\xE8s les banques, les personnes selon l\u2019art. 1b LB, les maisons\
+        \ de titres ainsi que les groupes et conglom\xE9rats financiers."
+      translations:
+        en:
+          name: Margin no. 2
+          description: "This Circular applies to banks under Article 1a and persons\
+            \ under Article 1b of the Banking Act (BA; SR 952.0), securities dealers\
+            \ under Article 2 para. 1 let. e and Article 41 of the Financial Institutions\
+            \ Act (FinIA; SR 954.1), and financial groups and financial conglomerates\
+            \ under Article 3c BA and Article 49 FinIA. In the following, banks, persons\
+            \ under Article 1b BA, securities firms, financial groups and financial\
+            \ conglomerates are referred to collectively as \u201Cinstitutions\u201D\
+            ."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      assessable: false
+      depth: 1
+      name: "II. D\xE9finitions"
+      translations:
+        en:
+          name: II. Definition of terms
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:1"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 3
+      description: "Les risques op\xE9rationnels sont d\xE9finis \xE0 l\u2019art.\
+        \ 89 OFR. On entend par l\xE0 le risque de pertes financi\xE8res r\xE9sultant\
+        \ de l\u2019inad\xE9quation ou de la d\xE9faillance de processus ou de syst\xE8\
+        mes internes, d\u2019actions inappropri\xE9es de personnes ou d'erreurs qu\u2019\
+        elles ont commises ou encore d'\xE9v\xE9nements externes. Sont comprises les\
+        \ pertes financi\xE8res qui peuvent d\xE9couler des risques juridiques ou\
+        \ des risques de compliance. La gestion des risques op\xE9rationnels prend\
+        \ typiquement \xE9galement en compte d\u2019autres types de dommages3, dans\
+        \ la mesure o\xF9 ceux-ci peuvent aussi aboutir \xE0 des pertes financi\xE8\
+        res. Les risques strat\xE9giques en sont exclus."
+      annotation: "[3] Par ex. r\xE9percussions n\xE9gatives sur la r\xE9putation,\
+        \ perte potentielle de confiance et perte de client\xE8le, incidences n\xE9\
+        gatives sur le march\xE9, cons\xE9quences r\xE9glementaires n\xE9gatives (par\
+        \ ex. perte potentielle de licence)."
+      translations:
+        en:
+          name: Margin no. 3
+          description: Operational risk is defined in Article 89 CAO. It refers to
+            the risk of financial loss resulting from inadequate or failed internal
+            processes or systems, inappropriate actions taken by people or mistakes
+            made by them, or from external events. This includes the financial losses
+            that can result from legal or compliance risks. Operational risk management
+            typically also takes other types of damage into account3, provided that
+            these can ultimately also result in financial loss. It does not include
+            strategic risk.
+          annotation: '[3] For example, negative impact on reputation, possible loss
+            of confidence and loss of clients, negative impact on the market, negative
+            regulatory impact (e.g. possible loss of licence).'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:2"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 4
+      description: "Les risques inh\xE9rents sont les risques op\xE9rationnels auxquels\
+        \ est expos\xE9 l\u2019\xE9tablissement en raison de ses produits, de ses\
+        \ activit\xE9s, de ses proc\xE9dures et de ses syst\xE8mes, sans prise en\
+        \ compte des mesures de contr\xF4le et d\u2019att\xE9nuation."
+      translations:
+        en:
+          name: Margin no. 4
+          description: Inherent risks are operational risks that the institution is
+            exposed to through its products, activities, processes and systems, without
+            taking control or mitigation measures into account.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:3"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 5
+      description: "Les risques r\xE9siduels sont les risques op\xE9rationnels auxquels\
+        \ est expos\xE9 l\u2019\xE9tablissement apr\xE8s prise en compte des mesures\
+        \ de contr\xF4le et d\u2019att\xE9nuation."
+      translations:
+        en:
+          name: Margin no. 5
+          description: Residual risks are operational risks that the institution is
+            exposed to after taking control and mitigation measures into account.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:4"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 6
+      description: "Par technologie de l\u2019information et de la communication (TIC),\
+        \ on entend la structure physique et logique (\xE9lectronique) des syst\xE8\
+        mes IT et de communication, les diff\xE9rentes composantes mat\xE9rielles\
+        \ et logicielles, les r\xE9seaux, les donn\xE9es et les environnements d\u2019\
+        exploitation."
+      translations:
+        en:
+          name: Margin no. 6
+          description: Information and communication technology (ICT) refers to the
+            physical and logical (electronic) architecture of IT and communication
+            systems, the individual hardware and software assets, networks, data and
+            operating environments.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:5"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 7
+      description: "Les donn\xE9es critiques sont des donn\xE9es qui, compte tenu\
+        \ de la taille, de la complexit\xE9, de la structure, du profil de risque\
+        \ ainsi que du mod\xE8le d\u2019affaires de l\u2019\xE9tablissement rev\xEA\
+        tent une importance telle qu\u2019elles n\xE9cessitent des exigences accrues\
+        \ en mati\xE8re de s\xE9curit\xE9. Ces donn\xE9es sont importantes pour la\
+        \ prestation r\xE9ussie et durable des services de l\u2019\xE9tablissement\
+        \ ou \xE0 des fins r\xE9glementaires. Lors de l\u2019\xE9valuation et de la\
+        \ d\xE9finition de la criticit\xE9 des donn\xE9es, il faut prendre en compte\
+        \ la confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9. Chacun\
+        \ de ces trois aspects peut \xEAtre d\xE9terminant pour classifier des donn\xE9\
+        es comme critiques."
+      translations:
+        en:
+          name: Margin no. 7
+          description: "Critical data are data that, in view of the institution\u2019\
+            s size, complexity, structure, risk profile and business model, are of\
+            \ such crucial significance that they require increased security measures.\
+            \ These are data that are crucial for the successful and sustainable provision\
+            \ of the institution\u2019s services or for regulatory purposes. When\
+            \ assessing and determining the criticality of data, the confidentiality\
+            \ as well as the integrity and availability must be taken into account.\
+            \ Each of these three aspects can determine whether data is classified\
+            \ as critical."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:6"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 8
+      description: "Les processus critiques sont des processus qui, s\u2019ils connaissent\
+        \ des incidents ou interruptions majeurs mettent en danger l\u2019ex\xE9cution\
+        \ des fonctions critiques. Ils font partie des fonctions critiques."
+      translations:
+        en:
+          name: Margin no. 8
+          description: Critical processes are processes whose significant disruption
+            endanger the provision of critical functions. They are part of the critical
+            functions.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:7"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 9
+      description: "Le business continuity management (BCM) d\xE9signe l\u2019approche\
+        \ adopt\xE9e \xE0 l\u2019\xE9chelle de l\u2019\xE9tablissement pour r\xE9\
+        tablir le fonctionnement des processus critiques en cas d\u2019incident ou\
+        \ d\u2019interruption majeurs qui vont au-del\xE0 de la gestion des incidents.\
+        \ Il d\xE9finit la r\xE9action \xE0 un incident ou une interruption majeurs.\
+        \ Un BCM efficace diminue les risques r\xE9siduels li\xE9s aux incidents ou\
+        \ interruptions majeurs."
+      translations:
+        en:
+          name: Margin no. 9
+          description: Business continuity management (BCM) refers to the institution-wide
+            approach for recovering the operation of critical processes in the event
+            of a significant disruption going beyond incident management. It defines
+            the response to significant disruptions. Effective BCM reduces the residual
+            risks in connection with significant disruptions.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:8"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 10
+      description: "Le recovery time objective (RTO) est le d\xE9lai n\xE9cessaire\
+        \ jusqu\u2019au r\xE9tablissement d\u2019une application, d\u2019un syst\xE8\
+        me et/ou d\u2019un processus. Le recovery point objective (RPO) est la dur\xE9\
+        e maximale acceptable d\u2019une perte de donn\xE9es."
+      translations:
+        en:
+          name: Margin no. 10
+          description: The recovery time objective (RTO) is the time within which
+            an application, system and/or process must be recovered. The recovery
+            point objective (RPO) is the maximum tolerable period during which data
+            is lost.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:9"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 11
+      description: "Le business continuity plan (BCP) est un plan qui d\xE9finit les\
+        \ proc\xE9dures, les options de remplacement et les ressources de remplacement\
+        \ n\xE9cessaires (les processus de r\xE9tablissement) pour garantir la continuit\xE9\
+        \ et le r\xE9tablissement des processus critiques."
+      translations:
+        en:
+          name: Margin no. 11
+          description: The business continuity plan (BCP) is a forward-looking plan
+            that sets out the necessary procedures, recovery options and alternative
+            resources (the recovery processes) for ensuring continuity and recovering
+            critical processes.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:10"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 12
+      description: "Le disaster recovery plan (DRP) d\xE9finit les processus de r\xE9\
+        tablissement qui permettent d\u2019atteindre les objectifs de r\xE9tablissement\
+        \ en cas de d\xE9faillance majeure ou de destruction de la TIC, en tenant\
+        \ compte de l\u2019\xE9ventuelle indisponibilit\xE9 de personnes cl\xE9s."
+      translations:
+        en:
+          name: Margin no. 12
+          description: The disaster recovery plan (DRP) defines the recovery processes
+            for achieving the recovery goals in the event of a catastrophic failure
+            or destruction of the ICT and taking into account the possible loss of
+            key personnel.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:11"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 13
+      description: "Les situations de crise sont des situations exceptionnelles mettant\
+        \ potentiellement en danger l\u2019existence de l\u2019\xE9tablissement et\
+        \ qui ne peuvent pas \xEAtre ma\xEEtris\xE9es \xE0 l\u2019aide de mesures\
+        \ et comp\xE9tences d\xE9cisionnelles ordinaires. Elles se distinguent des\
+        \ incidents ordinaires ainsi que des incidents ou interruptions majeurs, qui\
+        \ peuvent \xEAtre ma\xEEtris\xE9s \xE0 l\u2019aide de la gestion des incidents\
+        \ en situation normale ou des BCP et DRP d\xE9finis."
+      translations:
+        en:
+          name: Margin no. 13
+          description: "Crisis situations are exceptional situations that potentially\
+            \ threaten the institution\u2019s existence, and that cannot be managed\
+            \ with ordinary measures and decision-making authority. They differ from\
+            \ incidents and significant disruptions that can be overcome with incident\
+            \ management in normal operation or with the defined BCPs and DRPs."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:12"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 14
+      description: 'Les fonctions critiques comprennent :'
+      translations:
+        en:
+          name: Margin no. 14
+          description: 'Critical functions include:'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:13"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 15
+      description: "a. les activit\xE9s, les processus et les services, y compris\
+        \ les ressources sous-jacentes n\xE9cessaires \xE0 leur r\xE9alisation, dont\
+        \ l\u2019interruption mettrait en danger la poursuite de l\u2019\xE9tablissement\
+        \ ou son r\xF4le sur le march\xE9 financier, et donc le bon fonctionnement\
+        \ des march\xE9s financiers ; et"
+      translations:
+        en:
+          name: Margin no. 15
+          description: "a. the activities, processes and services \u2013 including\
+            \ the underlying resources necessary for their provision \u2013 whose\
+            \ disruption would jeopardise the institution\u2019s continuation or its\
+            \ role on the financial market and thus the proper functioning of the\
+            \ financial markets; and"
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:14"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 16
+      description: "b. les fonctions d\u2019importance syst\xE9mique selon l\u2019\
+        art. 8 LB."
+      translations:
+        en:
+          name: Margin no. 16
+          description: b. the systemically important functions under Article 8 BA.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:15"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 17
+      description: "La tol\xE9rance aux interruptions est l\u2019ampleur (par ex.\
+        \ dur\xE9e ou dommages attendus) de l\u2019interruption d\u2019une fonction\
+        \ critique que l\u2019\xE9tablissement est dispos\xE9 \xE0 accepter en tenant\
+        \ compte de sc\xE9narios graves mais plausibles. Une tol\xE9rance aux interruptions\
+        \ doit \xEAtre d\xE9finie pour chaque fonction critique."
+      translations:
+        en:
+          name: Margin no. 17
+          description: The tolerance for disruption is the extent (e.g. the duration
+            or expected damage) of the disruption of a critical function that the
+            institution is willing to accept, taking severe but plausible scenarios
+            into account. A tolerance for disruption must be defined for each critical
+            function.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:16"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      name: Cm 18
+      description: "La r\xE9silience op\xE9rationnelle d\xE9signe la capacit\xE9 de\
+        \ l\u2019\xE9tablissement \xE0 pouvoir r\xE9tablir ses fonctions critiques\
+        \ en cas d\u2019interruptions dans les limites de la tol\xE9rance aux interruptions,\
+        \ c.-\xE0-d. la capacit\xE9 de l\u2019\xE9tablissement \xE0 identifier les\
+        \ menaces et les d\xE9faillances \xE9ventuelles, \xE0 s\u2019en prot\xE9ger\
+        \ et \xE0 y r\xE9agir, \xE0 r\xE9tablir la marche ordinaire des affaires en\
+        \ cas d\u2019interruptions et \xE0 en tirer des enseignements pour minimiser\
+        \ les cons\xE9quences sur l\u2019ex\xE9cution des fonctions critiques. Un\
+        \ \xE9tablissement r\xE9silient sur le plan op\xE9rationnel a \xE9tabli son\
+        \ mod\xE8le d\u2019exploitation4 de mani\xE8re \xE0 \xEAtre moins expos\xE9\
+        \ au risque d\u2019interruptions de ses fonctions critiques. La r\xE9silience\
+        \ op\xE9rationnelle diminue non seulement les risques r\xE9siduels des interruptions,\
+        \ mais aussi le risque inh\xE9rent d\u2019\xEAtre soumis \xE0 une interruption.\
+        \ Une gestion efficace des risques op\xE9rationnels contribue \xE0 renforcer\
+        \ la r\xE9silience op\xE9rationnelle de l\u2019\xE9tablissement."
+      annotation: "[4] Souvent appel\xE9 resilience by design"
+      translations:
+        en:
+          name: Margin no. 18
+          description: "Operational resilience refers to the institution\u2019s ability\
+            \ to restore its critical functions in case of a disruption within the\
+            \ tolerance for disruption. That is to say, the institution\u2019s ability\
+            \ to identify threats and possible failures, to protect itself from them\
+            \ and to respond to them, to restore normal business operations in the\
+            \ event of disruptions and to learn from them, so as to minimise the impact\
+            \ of disruptions on the provision of critical functions. An operationally\
+            \ resilient institution has designed its operating model in such a way4\
+            \ that it is less exposed to the risk of disruptions in relation to its\
+            \ critical functions. Operational resilience thus reduces not only the\
+            \ residual risks of disruptions, but also the inherent risk of disruptions\
+            \ occurring. Effective operational risk management helps strengthen the\
+            \ institution\u2019s operational resilience."
+          annotation: '[4] Often also called resilience by design.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      assessable: false
+      depth: 1
+      name: "III. Principe de proportionnalit\xE9"
+      translations:
+        en:
+          name: III. Principle of proportionality
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9\
+        :1"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      name: Cm 19
+      description: "La pr\xE9sente circulaire s\u2019applique fondamentalement \xE0\
+        \ l\u2019ensemble de ses destinataires. Elle doit cependant \xEAtre mise en\
+        \ \u0153uvre au cas par cas en fonction de la taille, de la complexit\xE9\
+        , de la structure et du profil de risque de l\u2019\xE9tablissement. La FINMA\
+        \ ordonne des all\xE8gements ou des renforcements au cas par cas."
+      translations:
+        en:
+          name: Margin no. 19
+          description: This Circular applies to all addressees. However, the requirements
+            are to be implemented on a case-by-case basis, depending on the size,
+            complexity, structure and risk profile of each institution. FINMA can
+            relax or tighten the rules in individual cases.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9\
+        :2"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      name: Cm 20
+      description: "Les banques et les maisons de titres des cat\xE9gories FINMA 4\
+        \ et 5 sont exempt\xE9es du respect des Cm 33 \xE0 38, 41 \xE0 46, 48, 51,\
+        \ 57, 73, 74, 76 \xE0 78, 80, 87, 92, 93, 96, 103, 104 et 110 \xE0 112."
+      translations:
+        en:
+          name: Margin no. 20
+          description: "Banks and securities firms in FINMA Categories 4 and 5 are\
+            \ exempt from complying with margin nos. 33\u201338, 41\u201346, 48, 51,\
+            \ 57, 73, 74, 76\u201378, 80, 87, 92, 93, 96, 103, 104 and 110\u2013112."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9\
+        :3"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      name: Cm 21
+      description: "Les \xE9tablissements selon les art. 47a \xE0 47e OFR, les personnes\
+        \ selon l\u2019art. 1b LB ainsi que les maisons de titres qui ne g\xE8rent\
+        \ pas de comptes sont en plus exempt\xE9s du respect des exigences des Cm\
+        \ 72, 75, 79 ainsi que 105 \xE0 109."
+      translations:
+        en:
+          name: Margin no. 21
+          description: "Institutions under Articles 47a\u201347e CAO, persons under\
+            \ Article 1b BA, and investment firms (non-proprietarian trading) are\
+            \ also exempt from complying with margin nos. 72, 75, 79 and 105\u2013\
+            109."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      assessable: false
+      depth: 1
+      name: "IV. Gestion des risques op\xE9rationnels"
+      translations:
+        en:
+          name: IV. Operational risk management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      name: "A. Gestion globale des risques op\xE9rationnels"
+      translations:
+        en:
+          name: A. Overarching operational risk management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:1"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 22
+      description: "La gestion des risques op\xE9rationnels fait partie de la gestion\
+        \ des risques \xE0 l\u2019\xE9chelle de l\u2019\xE9tablissement conform\xE9\
+        ment \xE0 la circulaire FINMA 2017/1 \xAB Gouvernance d\u2019entreprise \u2013\
+        \ banques \xBB."
+      translations:
+        en:
+          name: Margin no. 22
+          description: "Operational risk management forms part of institution-wide\
+            \ risk management under FINMA Circular 2017/1 \u201CCorporate governance\
+            \ \u2013 banks\u201D."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:2"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 23
+      description: "L\u2019organe responsable de la haute direction approuve l\u2019\
+        approche pour la gestion des risques op\xE9rationnels pertinents pour l\u2019\
+        \xE9tablissement et surveille son respect. Sont inclus notamment les risques\
+        \ TIC, les cyberrisques, les risques des donn\xE9es critiques, les risques\
+        \ d\xE9coulant de la conception et de la mise en \u0153uvre du BCM et, le\
+        \ cas \xE9ch\xE9ant, les risques li\xE9s aux activit\xE9s de service transfronti\xE8\
+        res. Il approuve au moins une fois par ann\xE9e la tol\xE9rance au risque\
+        \ en mati\xE8re de risques op\xE9rationnels en fonction de la politique de\
+        \ risque et compte tenu des objectifs strat\xE9giques et financiers de l\u2019\
+        \xE9tablissement. Ce faisant, il tient compte des r\xE9sultats issus des \xE9\
+        valuations de risques et de contr\xF4le selon le Cm 30. Soit il accepte le\
+        \ degr\xE9 d\u2019exposition aux risques op\xE9rationnels de l\u2019\xE9tablissement,\
+        \ soit il d\xE9cide d\u2019une adaptation de la tol\xE9rance au risque et\
+        \ des modifications strat\xE9giques n\xE9cessaires \xE0 cet effet5."
+      annotation: "[5] Par exemple un changement de mod\xE8le d\u2019affaires"
+      translations:
+        en:
+          name: Margin no. 23
+          description: "The board of directors approves the basic principles for the\
+            \ management of operational risks relevant for the institution and monitors\
+            \ their application. Among others, these include the ICT risks, the cyber\
+            \ risks, the risks relating to critical data, the risks resulting from\
+            \ the design and implementation of BCM and, where applicable, the risks\
+            \ from crossborder service business. At least once a year, the board of\
+            \ directors approves the risk tolerance for operational risk in accordance\
+            \ with the risk policy, taking the institution\u2019s strategic and financial\
+            \ goals into account. In doing so it considers the results from the risk\
+            \ and control assessments under margin no. 30. It accepts either the extent\
+            \ to which the institution is exposed to operational risk, or decides\
+            \ to adjust the risk tolerance and make the strategic changes necessary\
+            \ for this5."
+          annotation: '[5] For example, a change to the business model.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:3"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 24
+      description: "L\u2019organe responsable de la haute direction approuve r\xE9\
+        guli\xE8rement les strat\xE9gies de gestion des TIC, des cyberrisques, des\
+        \ donn\xE9es critiques et du BCM, et surveille leur respect."
+      translations:
+        en:
+          name: Margin no. 24
+          description: The board of directors regularly approves strategies for dealing
+            with ICT, cyber risks, critical data and BCM, and monitors their application.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:4"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 25
+      description: "La direction s\u2019assure de mani\xE8re compr\xE9hensible que\
+        \ les risques op\xE9rationnels sont identifi\xE9s, \xE9valu\xE9s, limit\xE9\
+        s et surveill\xE9s et que l\u2019efficacit\xE9 tant de la conception que de\
+        \ la mise en \u0153uvre de cette gestion des risques op\xE9rationnels est\
+        \ r\xE9guli\xE8rement v\xE9rifi\xE9e. Pour limiter les risques inh\xE9rents\
+        \ jug\xE9s importants6, elle prend, en fonction de la situation, des mesures\
+        \ compl\xE9mentaires sp\xE9cifiques au risque ou renforce les mesures existantes."
+      annotation: "[6] Appel\xE9s aussi risques principaux ou risques cl\xE9s (key\
+        \ risks)"
+      translations:
+        en:
+          name: Margin no. 25
+          description: The executive board ensures in a comprehensible way that the
+            operational risks are identified, assessed, limited and monitored, and
+            that the effectiveness of both the design and also of the implementation
+            of this operational risk management is regularly reviewed. It takes risk-specific
+            supplementary or intensified measures in order to limit the inherent risks
+            deemed to be material6 as the situation demands.
+          annotation: '[6] Often called top risks or key risks.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:5"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 26
+      description: "Des mesures doivent \xEAtre mises en \u0153uvre7 pour sensibiliser\
+        \ le personnel \xE0 la r\xE9duction des risques op\xE9rationnels pertinents,\
+        \ en particulier les risques TIC, les cyberrisques, les risques des donn\xE9\
+        es critiques et les risques d\xE9coulant de la conception et de la mise en\
+        \ \u0153uvre du BCM, en tenant compte de ses t\xE2ches, comp\xE9tences et\
+        \ responsabilit\xE9s."
+      annotation: "[7] Cela inclut notamment la s\xE9lection rigoureuse et la qualification\
+        \ du personnel pour ses t\xE2ches, comp\xE9tences et res- ponsabilit\xE9s,\
+        \ et sa formation continue dans le cadre de ses activit\xE9s."
+      translations:
+        en:
+          name: Margin no. 26
+          description: To raise awareness among employees for reducing relevant operational
+            risks, particularly ICT risks, cyber risks, risks with regard to critical
+            data and the risks resulting from the design and implementation of BCM,
+            measures are to be implemented and carried out taking into account their
+            tasks, competencies and responsibilities7.
+          annotation: '[7] Among other things, this includes carefully selecting employees,
+            ensuring that they are suitably qualified for their tasks, competencies
+            and responsibilities and providing them with continuing education within
+            the context of their activities.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:6"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 27
+      description: "Si n\xE9cessaire, la FINMA d\xE9finit, dans le cadre de sa surveillance\
+        \ courante, d\u2019autres exigences en mati\xE8re de gestion des risques op\xE9\
+        rationnels pour des th\xE8mes sp\xE9cifiques. Elle le fait avec retenue et\
+        \ en appliquant le principe de proportionnalit\xE9."
+      translations:
+        en:
+          name: Margin no. 27
+          description: If necessary, FINMA will define more stringent requirements
+            for operational risk management for specific topics as part of ongoing
+            supervision. This will be done cautiously and in accordance with the proportionality
+            principle.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:7"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 28
+      description: "Les risques op\xE9rationnels doivent \xEAtre cat\xE9goris\xE9\
+        s de fa\xE7on uniforme \xE0 l\u2019\xE9chelle de l\u2019\xE9tablissement et\
+        \ r\xE9pertori\xE9s dans un inventaire. Cette cat\xE9gorisation peut s\u2019\
+        appuyer sur la cat\xE9gorisation des types d\u2019\xE9v\xE9nements utilis\xE9\
+        e dans le cadre du calcul des fonds propres minimaux pour les risques op\xE9\
+        rationnels ou sur une taxonomie interne. La cat\xE9gorisation doit \xEAtre\
+        \ appliqu\xE9e de mani\xE8re coh\xE9rente dans tous les domaines de l\u2019\
+        \xE9tablissement et dans toutes les composantes de la gestion des risques\
+        \ op\xE9rationnels."
+      translations:
+        en:
+          name: Margin no. 28
+          description: The operational risks must be categorised in a uniform manner
+            across the institution and listed in an inventory. The categorisation
+            may be performed based on the categorisation of event types used to calculate
+            the minimum capital requirements for operational risk or based on an internal
+            taxonomy. The categorisation must be applied consistently in all areas
+            of the institution and in all components of operational risk management.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:8"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 29
+      description: "Des facteurs internes8 et externes9 sont pris en compte dans l\u2019\
+        identification des risques op\xE9rationnels. Les risques op\xE9rationnels\
+        \ identifi\xE9s sont \xE9valu\xE9s de mani\xE8re compr\xE9hensible tant du\
+        \ point de vue des risques inh\xE9rents que des risques r\xE9siduels."
+      annotation: "[8] Sont consid\xE9r\xE9s comme facteurs internes par ex. les changements\
+        \ apport\xE9s aux produits, aux activit\xE9s, aux proces- sus et aux syst\xE8\
+        mes, les r\xE9sultats d\u2019audit et les pertes internes issues des risques\
+        \ op\xE9rationnels.\n[9] Sont consid\xE9r\xE9s comme facteurs externes par\
+        \ ex. les \xE9v\xE9nements de perte reconnus d\u2019autres \xE9tablissements,\
+        \ les changements sur le plan de la s\xE9curit\xE9 (par ex. en raison d\u2019\
+        influences environnementales, de cyberattaques ou du terrorisme) ou les changements\
+        \ en mati\xE8re d\u2019exigences r\xE9glementaires."
+      translations:
+        en:
+          name: Margin no. 29
+          description: Internal8 and external9 factors shall be taken into account
+            for identifying operational risks. The identified operational risks shall
+            be assessed in a comprehensible way both from the perspective of inherent
+            as well as residual risks.
+          annotation: '[8] Internal factors include, for example, changes to products,
+            activities, processes and systems, review results and internal losses
+            resulting from operational risks.
+
+            [9] External factors include, for example, loss events at other institutions,
+            changes in the security situation (e.g. as a result of environmental influences,
+            cyber attacks or terrorism) or changes to the regulatory requirements.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:9"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 30
+      description: "L\u2019identification et l\u2019\xE9valuation des risques op\xE9\
+        rationnels s\u2019appuient au moins sur les r\xE9sultats d\u2019audit10 et\
+        \ les \xE9valuations des risques et des contr\xF4les \xE0 effectuer r\xE9\
+        guli\xE8rement. Les \xE9valuations des risques et des contr\xF4les tiennent\
+        \ compte des risques inh\xE9rents, de l\u2019efficacit\xE9 des mesures de\
+        \ contr\xF4le et d\u2019att\xE9nuation existantes ainsi que des risques r\xE9\
+        siduels."
+      annotation: "[10] Les r\xE9sultats d\u2019audit comprennent ici les r\xE9sultats\
+        \ des audits effectu\xE9s par la r\xE9vision interne et la soci\xE9t\xE9 d\u2019\
+        audit externe, si disponibles, ainsi que les r\xE9sultats d\u2019examens effectu\xE9\
+        s par ex. par les domaines d'activit\xE9 et d'organisa- tion, le contr\xF4\
+        le des risques, la fonction de compliance ou les autorit\xE9s de surveillance."
+      translations:
+        en:
+          name: Margin no. 30
+          description: The identification and assessment of operational risks shall
+            be based on at least review results10 and regularly conducted risk and
+            control assessments. The risk and control assessments shall take into
+            account the inherent risks, the effectiveness of the existing control
+            and mitigation measures and the residual risks.
+          annotation: '[10] Review results encompass here results of internal and
+            external audits, where available, as well as results of reviews performed,
+            for example, by the business and organisational areas, the risk control
+            and compliance functions or supervisory authorities.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:10"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 31
+      description: "Pour \xE9valuer les mesures de contr\xF4le et d\u2019att\xE9nuation\
+        \ existantes, une instance de contr\xF4le ind\xE9pendante proc\xE8de \xE0\
+        \ un examen r\xE9gulier de l\u2019efficacit\xE9 des contr\xF4les cl\xE9s et\
+        \ le documente (design effectiveness et operating effectiveness testing).\
+        \ Les contr\xF4les cl\xE9s sont les mesures de contr\xF4le et d\u2019att\xE9\
+        nuation qui diminuent les risques inh\xE9rents consid\xE9r\xE9s comme principaux.\
+        \ La s\xE9paration des t\xE2ches, comp\xE9tences et responsabilit\xE9s pour\
+        \ garantir l\u2019ind\xE9pendance et pr\xE9venir les conflits d\u2019int\xE9\
+        r\xEAts fait l\u2019objet d\u2019\xE9valuations r\xE9guli\xE8res."
+      translations:
+        en:
+          name: Margin no. 31
+          description: To assess the existing control and mitigation measures, in
+            particular a regular assessment of the effectiveness of key controls must
+            be performed and documented by an independent control body (design effectiveness
+            and operating effectiveness testing). Key controls are those control and
+            mitigation measures that minimise the inherent risks deemed to be material.
+            The separation of tasks, competencies and responsibilities to ensure independence
+            and prevent conflicts of interests shall also be regularly assessed.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:11"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 32
+      description: "Des \xE9valuations ad hoc des risques et des contr\xF4les doivent\
+        \ \xEAtre effectu\xE9es avant des changements importants dans les produits,\
+        \ les activit\xE9s, les proc\xE9dures et les syst\xE8mes. Celles-ci prennent\
+        \ en compte les risques op\xE9rationnels d\xE9coulant du processus de changement\
+        \ et les risques op\xE9rationnels de l\u2019\xE9tat cible. La tol\xE9rance\
+        \ au risque est adapt\xE9e si besoin et des mesures de contr\xF4le et d\u2019\
+        att\xE9nuation sont mises en \u0153uvre."
+      translations:
+        en:
+          name: Margin no. 32
+          description: Ad hoc risk and control assessments shall be conducted prior
+            to major changes in products, activities, processes and systems. These
+            shall take into account the operational risks associated with the change
+            process and the operational risks of the target state. If necessary, the
+            risk tolerance should be adjusted and control and mitigation measures
+            implemented.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:12"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 33
+      description: "En fonction de la nature, de l\u2019ampleur, de la complexit\xE9\
+        \ et du risque des produits, activit\xE9s, proc\xE9dures et syst\xE8mes sp\xE9\
+        cifiques \xE0 l\u2019\xE9tablissement, il s\u2019agit d\u2019appliquer les\
+        \ instruments et m\xE9thodes suppl\xE9mentaires suivants :"
+      translations:
+        en:
+          name: Margin no. 33
+          description: 'Depending on the type, scope, complexity and risk of institution-specific
+            products, activities, processes and systems, the following tools and methods
+            shall be applied:'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:13"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 34
+      description: "a. la collecte et l\u2019analyse syst\xE9matiques des donn\xE9\
+        es de pertes internes et des \xE9v\xE9nements externes pertinents li\xE9s\
+        \ \xE0 des risques op\xE9rationnels ;"
+      translations:
+        en:
+          name: Margin no. 34
+          description: a. Systematic collection and analysis of internal loss data
+            and relevant external events associated with operational risk;
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:14"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 35
+      description: "b. les indicateurs de risque et de contr\xF4le pour la surveillance\
+        \ des risques op\xE9rationnels et l\u2019identification rapide des hausses\
+        \ de risque pertinentes ;"
+      translations:
+        en:
+          name: Margin no. 35
+          description: b. Risk and control indicators for monitoring operational risk
+            and identifying relevant risk increases in a timely manner;
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:15"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 36
+      description: "c. les analyses de sc\xE9nario et/ou l\u2019estimation du potentiel\
+        \ de perte compte tenu ou vis\xE0-vis des fonds propres minimaux pour les\
+        \ risques op\xE9rationnels ;"
+      translations:
+        en:
+          name: Margin no. 36
+          description: c. Scenario analyses and/or estimates of the loss potential
+            in view of or in comparison with the minimum capital requirements for
+            operational risk;
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:16"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 37
+      description: "d. les analyses comparatives (read across), comme les analyses\
+        \ de pertinence des r\xE9sultats d\u2019audit pour d\u2019autres domaines\
+        \ de l\u2019\xE9tablissement ou des comparaisons crois\xE9es entre les r\xE9\
+        sultats issus des \xE9valuations des risques et des contr\xF4les de diff\xE9\
+        rents domaines."
+      translations:
+        en:
+          name: Margin no. 37
+          description: d. Comparative analyses (read-across), for example, analyses
+            of the relevance of review results for other areas of the institution
+            or comparisons between the results of the risk and control assessments
+            for various areas.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:17"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 38
+      description: "La tol\xE9rance au risque pour les risques op\xE9rationnels tient\
+        \ compte de la tol\xE9rance en lien tant avec les risques inh\xE9rents11 qu\u2019\
+        avec les risques op\xE9rationnels r\xE9siduels. Elle fait l\u2019objet d\u2019\
+        une surveillance au moyen d\u2019indicateurs de risque ou de contr\xF4le."
+      annotation: "[11] La tol\xE9rance au risque par rapport aux risques inh\xE9\
+        rents tient compte de d\xE9cisions strat\xE9giques en lien avec le mo- d\xE8\
+        le d\u2019affaires ou d\u2019exploitation, par ex. la tol\xE9rance aux risques\
+        \ inh\xE9rents, qui peuvent d\xE9couler d\u2019activit\xE9s avec certains\
+        \ pays ou segments de client\xE8le, de l\u2019offre de certains produits,\
+        \ de l\u2019application de processus majoritairement manuels, du recours \xE0\
+        \ une infrastructure informatique complexe ou de certaines externalisations\
+        \ (outsourcing)."
+      translations:
+        en:
+          name: Margin no. 38
+          description: The risk tolerance for operational risk takes account of both
+            the tolerance in relation to inherent11 as well as residual operational
+            risk and is monitored using risk or control indicators.
+          annotation: '[11] The risk tolerance in relation to inherent risk takes
+            account of strategic decisions in relation to the business or operating
+            model, for example, tolerance for the inherent risks associated with serving
+            certain client segments or countries, with offering certain products,
+            with using primarily manual processes, with relying on a complex IT infrastructure
+            or with outsourcing certain operations.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:18"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 39
+      description: "Le rapport du contr\xF4le des risques remis au moins une fois\
+        \ par ann\xE9e \xE0 l\u2019organe responsable de la haute direction et au\
+        \ moins une fois par semestre \xE0 la direction selon les Cm 75 et 76 de la\
+        \ Circ.-FINMA 17/1 rend compte des risques op\xE9rationnels selon le niveau\
+        \ sup\xE9rieur12 de leur cat\xE9gorisation d\xE9finie conform\xE9ment au Cm\
+        \ 28, de leur comparaison avec la tol\xE9rance aux risques fix\xE9e ainsi\
+        \ que des d\xE9tails concernant les pertes internes importantes."
+      annotation: "[12] Le niveau sup\xE9rieur de la cat\xE9gorisation est souvent\
+        \ appel\xE9 niveau 1 ou level 1. Le rapport peut aussi \xEAtre effectu\xE9\
+        \ de fa\xE7on plus d\xE9taill\xE9e."
+      translations:
+        en:
+          name: Margin no. 39
+          description: "The risk control function reports to the board of directors\
+            \ at least annually and to the executive board at least every six months\
+            \ in accordance with margin nos. 75\u201376 of FINMA Circ. 17/1 on the\
+            \ operational risks at the top level12 of the categorisation defined in\
+            \ accordance with margin no. 28, on their comparison with the defined\
+            \ risk tolerance, and on details of material internal losses."
+          annotation: '[12] The top level of the categorisation is often referred
+            to as level 1. The reporting can also take place on a more detailed level.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:19"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 40
+      description: "En ce qui concerne les risques TIC et les cyberrisques, le rapport\
+        \ remis au moins une fois par ann\xE9e \xE0 la direction contient en outre\
+        \ des informations sur l\u2019\xE9volution de ces risques, l\u2019efficacit\xE9\
+        \ des contr\xF4les cl\xE9s correspondants et les \xE9v\xE9nements importants\
+        \ internes et externes en lien avec ces risques."
+      translations:
+        en:
+          name: Margin no. 40
+          description: In relation to the relevant ICT and cyber risks, the report
+            for the executive board produced at least annually shall also contain
+            information on the development of these risks, on the effectiveness of
+            the corresponding key controls, and on material internal and external
+            events in connection with these risks.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:20"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 41
+      description: "Le rapport interne au sens du Cm 39 contient \xE0 titre compl\xE9\
+        mentaire les informations suivantes :"
+      translations:
+        en:
+          name: Margin no. 41
+          description: 'The internal reporting in accordance with margin no. 39 shall
+            contain in addition the following information:'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:21"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 42
+      description: "\u2022 les facteurs externes pertinents selon la note de bas de\
+        \ page 9,"
+      translations:
+        en:
+          name: Margin no. 42
+          description: "\u2022 relevant, external factors in accordance with footnote\
+            \ 9,"
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:22"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 43
+      description: "\u2022 la vue d\u2019ensemble r\xE9capitulative sur l\u2019efficacit\xE9\
+        \ des contr\xF4les cl\xE9s selon le Cm 31,"
+      translations:
+        en:
+          name: Margin no. 43
+          description: "\u2022 summary overview of the effectiveness of the key controls\
+            \ in accordance with margin no. 31,"
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:23"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 44
+      description: "\u2022 les risques op\xE9rationnels \xE9mergents,"
+      translations:
+        en:
+          name: Margin no. 44
+          description: "\u2022 emerging operational risks;"
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:24"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 45
+      description: "\u2022 les r\xE9sultats d\xE9coulant de l\u2019application des\
+        \ instruments et des m\xE9thodes suppl\xE9mentaires selon le Cm 33."
+      translations:
+        en:
+          name: Margin no. 45
+          description: "\u2022 results from the application of additional tools and\
+            \ methods in accordance with margin no. 33."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1:25"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:1"
+      name: Cm 46
+      description: "De plus, conform\xE9ment au principe de proportionnalit\xE9, les\
+        \ banques d\u2019importance syst\xE9mique rendent compte r\xE9guli\xE8rement\
+        \ des risques op\xE9rationnels au niveau des domaines d\u2019activit\xE9 et\
+        \ d\u2019organisation expos\xE9s \xE0 des risques op\xE9rationnels pertinents\
+        \ ou principaux."
+      translations:
+        en:
+          name: Margin no. 46
+          description: In accordance with the principle of proportionality, for systemically
+            important banks, regular reporting on operational risks shall also be
+            conducted at the level of the business or organisational areas that are
+            exposed to relevant or material operational risks.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      name: B. Gestion des risques TIC
+      translations:
+        en:
+          name: B. ICT risk management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2"
+      name: "a) Strat\xE9gie TIC et gouvernance"
+      translations:
+        en:
+          name: a) ICT strategy and governance
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1:1"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1"
+      name: Cm 47
+      description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
+        gie, de la gouvernance et de la sensibilisation aux TIC sont d\xE9finies aux\
+        \ Cm 23 \xE0 26 et 40."
+      translations:
+        en:
+          name: Margin no. 47
+          description: "The basic expectations for the strategy, governance and raising\
+            \ of awareness in relation to ICT are set out in margin nos. 23\u2013\
+            26 and 40."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1:2"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1"
+      name: Cm 48
+      description: "La gestion des risques TIC tient compte des normes pertinentes\
+        \ et pratiques reconnues \xE0 l\u2019\xE9chelle internationale ainsi que de\
+        \ l\u2019influence des nouvelles \xE9volutions technologiques sur les risques\
+        \ TIC."
+      translations:
+        en:
+          name: Margin no. 48
+          description: ICT risk management shall take into account relevant internationally
+            recognised standards and practices as well as the influence of new technological
+            developments on the ICT risks.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1:3"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:1"
+      name: Cm 49
+      description: "La direction s\u2019assure que des proc\xE9dures, des processus,\
+        \ des contr\xF4les ainsi que des t\xE2ches, comp\xE9tences et responsabilit\xE9\
+        s soient impl\xE9ment\xE9s et document\xE9s tant pour la gestion des changements\
+        \ (change management) que pour l\u2019exploitation TIC (run, maintenance).\
+        \ Ceux-ci sont dot\xE9s de ressources qualifi\xE9es et appropri\xE9es."
+      translations:
+        en:
+          name: Margin no. 49
+          description: The executive board shall ensure that procedures, processes
+            and controls as well as tasks, competencies and responsibilities are implemented
+            and documented both for change management and for ICT operations (run,
+            maintenance). These shall be adequately resourced with qualified staff.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2"
+      name: b) Gestion des changements (change management)
+      translations:
+        en:
+          name: b) Change management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2:1"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2"
+      name: Cm 50
+      description: "La gestion des changements d\xE9finit des proc\xE9dures, des processus\
+        \ et des contr\xF4les pour toutes les phases de d\xE9veloppement ou d\u2019\
+        acquisition de TIC. Elle prend en compte dans chaque phase les cons\xE9quences\
+        \ du changement qui en d\xE9coulent pour les risques TIC. Ce faisant, l\u2019\
+        accent est mis notamment sur les exigences concernant la confidentialit\xE9\
+        , l\u2019int\xE9grit\xE9 et la disponibilit\xE9."
+      translations:
+        en:
+          name: Margin no. 50
+          description: Change management shall define the procedures, processes and
+            controls for all phases in the development or procurement of ICT. In each
+            of these phases it shall consider the impact of the change on the ICT
+            risks. It shall focus in particular on the requirements with regard to
+            confidentiality, integrity and availability.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2:2"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2"
+      name: Cm 51
+      description: "Il faut garantir la s\xE9paration entre, d\u2019une part, les\
+        \ environnements de d\xE9veloppement ou de test et, d\u2019autre part, l\u2019\
+        environnement de production TIC. Cela comprend \xE9galement une attribution\
+        \ claire de t\xE2ches, comp\xE9tences et responsabilit\xE9s ainsi qu\u2019\
+        une r\xE9glementation des autorisations d\u2019acc\xE8s aff\xE9rentes."
+      translations:
+        en:
+          name: Margin no. 51
+          description: It must be ensured that the development or test environments
+            are separate from the ICT production environment. This also involves the
+            clear allocation of tasks, competencies and responsibilities and laying
+            down rules for the associated access rights.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2:3"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:2"
+      name: Cm 52
+      description: "Lors du d\xE9veloppement et de l\u2019acquisition de TIC, les\
+        \ exigences fonctionnelles et non fonctionnelles13 sont clairement d\xE9finies\
+        \ et approuv\xE9es, puis test\xE9es et valid\xE9es selon leur criticit\xE9\
+        ."
+      annotation: "[13] Par ex. en ce qui concerne l\u2019architecture ou les exigences\
+        \ \xE0 l\u2019\xE9gard de la s\xE9curit\xE9 de l\u2019information"
+      translations:
+        en:
+          name: Margin no. 52
+          description: When developing and procuring ICT, functional and non-functional
+            requirements13 shall be clearly defined and approved; they shall be tested
+            and validated based on their criticality.
+          annotation: '[13] E.g. with regard to architecture or information security
+            requirements.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2"
+      name: c) Exploitation TIC (run, maintenance)
+      translations:
+        en:
+          name: c) ICT operations (run, maintenance)
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3:1"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3"
+      name: Cm 53
+      description: "L\u2019\xE9tablissement dresse un ou plusieurs inventaire(s) des\
+        \ composantes TIC. L\u2019inventaire inclut les composantes mat\xE9rielles\
+        \ et logicielles ainsi que les lieux de sauvegarde des donn\xE9es critiques.\
+        \ Il tient compte des d\xE9pendances au sein de l\u2019\xE9tablissement ainsi\
+        \ que des interfaces avec les prestataires externes importants."
+      translations:
+        en:
+          name: Margin no. 53
+          description: The institution shall keep one or more inventories of the ICT
+            assets. The inventory shall include hardware and software assets as well
+            as the storage locations of critical data. Both dependencies within the
+            institution as well as interfaces to significant external service providers
+            should be taken into account.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3:2"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3"
+      name: Cm 54
+      description: "L\u2019inventaire est disponible rapidement et est r\xE9guli\xE8\
+        rement revu et mis \xE0 jour en ce qui concerne son exhaustivit\xE9 et sa\
+        \ v\xE9racit\xE9."
+      translations:
+        en:
+          name: Margin no. 54
+          description: The inventory is available in real time and shall be reviewed
+            and updated regularly with regard to its completeness and accuracy.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3:3"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3"
+      name: Cm 55
+      description: "L\u2019\xE9tablissement dispose de proc\xE9dures, de processus\
+        \ et de contr\xF4les qui garantissent la confidentialit\xE9, l\u2019int\xE9\
+        grit\xE9 et la disponibilit\xE9 de l\u2019environnement de production TIC\
+        \ en tenant compte de la tol\xE9rance au risque correspondante."
+      translations:
+        en:
+          name: Margin no. 55
+          description: The institution shall have procedures, processes and controls
+            in place that ensure the confidentiality, integrity and availability of
+            the ICT production environment, taking into account the respective risk
+            tolerance.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3:4"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3"
+      name: Cm 56
+      description: "L\u2019\xE9tablissement garantit la transition irr\xE9prochable\
+        \ entre la gestion op\xE9rationnelle TIC et les proc\xE9dures BCM et DRP en\
+        \ cas d\u2019incidents ou interruptions majeurs. Il met en \u0153uvre des\
+        \ proc\xE9dures de sauvegarde et de restauration appropri\xE9es qui sont r\xE9\
+        guli\xE8rement test\xE9es et valid\xE9es."
+      translations:
+        en:
+          name: Margin no. 56
+          description: The institution shall ensure that it can transition smoothly
+            to its BCP and DRP processes in the event of significant disruptions to
+            its ICT operations. It shall implement adequate back-up processes and
+            recovery processes that are tested and validated regularly.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3:5"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:3"
+      name: Cm 57
+      description: "L\u2019\xE9tablissement dispose de proc\xE9dures, de processus\
+        \ et de contr\xF4les qui garantissent une gestion orient\xE9e vers le risque\
+        \ des TIC dont la fin d\u2019exploitation approche ou dont la mise hors service\
+        \ pr\xE9vue a \xE9t\xE9 d\xE9pass\xE9e."
+      translations:
+        en:
+          name: Margin no. 57
+          description: The institution shall have procedures, processes and controls
+            in place to ensure that ICT that its nearing the end of its operational
+            life or whose planned decommissioning date has passed is dealt with in
+            a risk-oriented way.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2"
+      name: d) Gestion des incidents (incident management)
+      translations:
+        en:
+          name: d) Incident management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4:1"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4"
+      name: Cm 58
+      description: "L\u2019\xE9tablissement dispose de proc\xE9dures, de processus\
+        \ et de contr\xF4les visant \xE0 traiter les incidents TIC importants, y compris\
+        \ ceux qui sont dus \xE0 des d\xE9pendances vis-\xE0-vis de prestataires externes\
+        \ importants ou \xE0 des externalisations au sein d\u2019un groupe. Il tient\
+        \ compte de l\u2019ensemble du cycle de vie des incidents TIC importants et\
+        \ d\xE9finit des t\xE2ches, comp\xE9tences et responsabilit\xE9s pour traiter\
+        \ ces incidents."
+      translations:
+        en:
+          name: Margin no. 58
+          description: The institution shall have procedures, processes and controls
+            in place for dealing with significant ICT incidents, including those resulting
+            from dependencies on external service providers and outsourcing operations
+            within the group. In this regard, the full life-cycle of significant ICT
+            incidents must be taken into account and tasks, competencies and responsibilities
+            for dealing with these incidents must be defined.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4:2"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4"
+      name: Cm 59
+      description: "Le traitement des incidents TIC importants doit \xEAtre coordonn\xE9\
+        \ et rattach\xE9 aux processus BCM et DRP."
+      translations:
+        en:
+          name: Margin no. 59
+          description: Dealing with significant ICT incidents must be coordinated
+            and linked with the processes for BCM and the DRP.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4:3"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:2:4"
+      name: Cm 60
+      description: "Les \xE9tablissements renseignent sans d\xE9lai la FINMA sur les\
+        \ incidents TIC qu\u2019ils consid\xE8rent comme des perturbations importantes\
+        \ pour l\u2019ex\xE9cution de leurs processus critiques et qui sont susceptibles\
+        \ de l\u2019int\xE9resser."
+      translations:
+        en:
+          name: Margin no. 60
+          description: ICT incidents that are regarded by the institution as a significant
+            disruption in the provision of its critical processes and are of material
+            significance for supervision must be reported to FINMA without delay.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      name: C. Gestion des cyberrisques
+      translations:
+        en:
+          name: C. Cyber risk management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:1"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 61
+      description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
+        gie, de la gouvernance et du renforcement de la prise de conscience en lien\
+        \ avec les cyberrisques sont d\xE9finies aux Cm 23 \xE0 26 et 40."
+      translations:
+        en:
+          name: Margin no. 61
+          description: "The basic expectations for the strategy, governance and raising\
+            \ of awareness in relation to cyber risks are set out in margin nos. 23\u2013\
+            26 and 40."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:2"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 62
+      description: "L\u2019\xE9tablissement d\xE9finit des t\xE2ches, comp\xE9tences\
+        \ et responsabilit\xE9s claires. Il doit couvrir au moins les aspects suivants\
+        \ selon les meilleures pratiques et normes internationalement reconnues et\
+        \ garantir, d\xE9velopper et am\xE9liorer continuellement leur mise en \u0153\
+        uvre effective au moyen de proc\xE9dures, de processus et de contr\xF4les\
+        \ appropri\xE9s :"
+      translations:
+        en:
+          name: Margin no. 62
+          description: 'The institution shall define clear tasks, competencies and
+            responsibilities. It must cover at least the following aspects in accordance
+            with internationally recognised standards and practices, and ensure their
+            effective implementation through appropriate procedures, processes and
+            controls and continuously develop and improve them:'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:3"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 63
+      description: "a. identification des menaces potentielles li\xE9es aux cyberattaques14\
+        \ sp\xE9cifiques \xE0 l\u2019\xE9tablissement et \xE9valuation des cons\xE9\
+        quences possibles li\xE9es \xE0 l\u2019exploitation des vuln\xE9rabilit\xE9\
+        s relatives aux composantes TIC r\xE9pertori\xE9es et des donn\xE9es \xE9\
+        lectroniques critiques (selon Cm 53, 54 et 7) ;"
+      annotation: "[14] Attaques contre la confidentialit\xE9, l\u2019int\xE9grit\xE9\
+        \ et la disponibilit\xE9 des TIC ainsi que les donn\xE9es \xE9lectroniques\
+        \ critiques au moyen de l\u2019exploitation des vuln\xE9rabilit\xE9s ou du\
+        \ contournement des mesures protectrices par des cybercriminels externes ou\
+        \ internes."
+      translations:
+        en:
+          name: Margin no. 63
+          description: a. Identification of the institution-specific threat landscape
+            from cyber attacks14 and assessment of the possible impacts of exploiting
+            vulnerabilities with regard to the inventoried ICT assets and the electronic
+            critical data (in accordance with margin nos. 53, 54 and 7);
+          annotation: '[14] Attacks on the confidentiality, integrity and availability
+            of ICT as well as the electronic critical data that take place as a result
+            of external or internal attackers exploiting vulnerabilities or circumventing
+            protective measures.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:4"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 64
+      description: "b. protection des composantes TIC r\xE9pertori\xE9es et des donn\xE9\
+        es \xE9lectroniques critiques contre les cyberattaques par l\u2019impl\xE9\
+        mentation de mesures de protection appropri\xE9es, en particulier en ce qui\
+        \ concerne la confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
+        \ ;"
+      translations:
+        en:
+          name: Margin no. 64
+          description: b. Protection of the inventoried ICT assets and the electronic
+            critical data from cyber attacks by implementing appropriate protective
+            measures, particularly with regard to the confidentiality, integrity and
+            availability;
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:5"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 65
+      description: "c. enregistrement et d\xE9tection rapides des cyberattaques sur\
+        \ la base d\u2019un processus de surveillance syst\xE9matique et constant\
+        \ des composantes TIC r\xE9pertori\xE9es et des donn\xE9es \xE9lectroniques\
+        \ critiques ;"
+      translations:
+        en:
+          name: Margin no. 65
+          description: c. Timely logging and detection of cyber attacks on the basis
+            of a process for the systematic and consistent monitoring of the inventoried
+            ICT assets and the electronic critical data;
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:6"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 66
+      description: "d. r\xE9action aux vuln\xE9rabilit\xE9s et aux cyberattaques identifi\xE9\
+        es par le d\xE9veloppement et l\u2019impl\xE9mentation de processus appropri\xE9\
+        s afin de prendre rapidement des mesures d\u2019att\xE9nuation et de suppression\
+        \ ; et"
+      translations:
+        en:
+          name: Margin no. 66
+          description: d. Response to identified vulnerabilities and cyber attacks
+            by developing and implementing appropriate processes for taking rapid
+            containment and remediation measures; and
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:7"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 67
+      description: "e. garantie d\u2019un r\xE9tablissement rapide de la marche ordinaire\
+        \ des affaires apr\xE8s des cyberattaques, gr\xE2ce \xE0 des mesures appropri\xE9\
+        es."
+      translations:
+        en:
+          name: Margin no. 67
+          description: e. Ensuring the prompt recovery of normal business operations
+            after a cyber attack through appropriate measures.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:8"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 68
+      description: "La gestion des cyberrisques doit garantir qu\u2019une cyberattaque,\
+        \ qu\u2019elle ait atteint son but enti\xE8rement ou partiellement, soit analys\xE9\
+        e selon son importance pour les composantes TIC r\xE9pertori\xE9es ainsi que\
+        \ les donn\xE9es \xE9lectroniques critiques et les processus critiques (y\
+        \ compris les fonctions et services externalis\xE9s) et que l\u2019obligation\
+        \ d\u2019annoncer selon la LFINMA soit respect\xE9e. Apr\xE8s une premi\xE8\
+        re \xE9valuation et une information pr\xE9alable au service comp\xE9tent de\
+        \ la FINMA dans les 24 heures, l\u2019annonce doit \xEAtre transmise dans\
+        \ les 72 heures, conform\xE9ment au cahier des charges de la plate-forme de\
+        \ saisie EHP (champs obligatoires). Une fois que le cas a \xE9t\xE9 trait\xE9\
+        \ par l\u2019\xE9tablissement, un rapport conclusif sur les causes conforme\
+        \ au degr\xE9 de gravit\xE9 doit \xEAtre remis au service comp\xE9tent de\
+        \ la FINMA."
+      annotation: "[15] Analyse visant \xE0 identifier les vuln\xE9rabilit\xE9s actuelles\
+        \ des logiciels ainsi que les failles de s\xE9curit\xE9 de l\u2019infrastructure\
+        \ IT par rapport aux cyberattaques"
+      translations:
+        en:
+          name: Margin no. 68
+          description: Cyber risk management must ensure that a successful or partially
+            successful cyber attack is analysed based on its materiality for critical
+            inventoried ICT assets or electronic critical data and critical processes
+            (including outsourced services and functions) and that the reporting obligation
+            under the FINMASA is met. After an initial assessment and preliminary
+            notification to the body responsible at FINMA within 24 hours, the report
+            in accordance with the catalogue of requirements on the EHP survey and
+            application platform (mandatory fields) must be submitted to FINMA within
+            72 hours. Once the institution has finished processing the case, a conclusive
+            root cause analysis corresponding to the degree of severity must be submitted
+            to the body responsible at FINMA.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:9"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 69
+      description: "La direction fait r\xE9guli\xE8rement proc\xE9der \xE0 des analyses\
+        \ de vuln\xE9rabilit\xE915 et \xE0 des tests d\u2019intrusion16. Ces derniers\
+        \ doivent \xEAtre effectu\xE9s par du personnel qualifi\xE9 disposant de ressources\
+        \ ad\xE9quates. Ce faisant, toutes les composantes TIC r\xE9pertori\xE9es\
+        \ et accessibles par Internet doivent \xEAtre prises en compte. En outre,\
+        \ les composantes TIC r\xE9pertori\xE9es et non accessibles par Internet mais\
+        \ qui sont n\xE9cessaires \xE0 l\u2019ex\xE9cution de processus critiques\
+        \ ou qui contiennent des donn\xE9es \xE9lectroniques critiques, doivent \xEA\
+        tre prises en compte. Sur la base des menaces potentielles sp\xE9cifiques\
+        \ \xE0 l\u2019\xE9tablissement, il y a lieu d\u2019effectuer, en fonction\
+        \ des risques, des cyberexercices17 fond\xE9s sur des sc\xE9narios. Le r\xE9\
+        sultat des exercices doit \xEAtre document\xE9 et rapport\xE9 en forme appropri\xE9\
+        e."
+      annotation: "[16] \xC9valuation cibl\xE9e et exploitation des vuln\xE9rabilit\xE9\
+        s des logiciels et des failles de s\xE9curit\xE9 des TIC"
+      translations:
+        en:
+          name: Margin no. 69
+          description: The executive board shall arrange for vulnerability assessments15
+            and penetration tests16 to be conducted regularly. These must be performed
+            by qualified staff with adequate resources. All inventoried ICT assets
+            that are accessible over the internet must be taken into account. In addition,
+            inventoried ICT assets that are not accessible over the internet, but
+            that are necessary for the provision of critical processes, or that contain
+            electronic critical data, must be included as well.
+          annotation: '[15] Analysis used to identify existing software vulnerabilities
+            and security gaps in the IT infrastructure towards cyber attacks.
+
+            [16] Targeted audit and exploitation of software vulnerabilities and security
+            gaps in the ICT.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3:10"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:3"
+      name: Cm 70
+      description: "Sur la base des menaces potentielles sp\xE9cifiques \xE0 l\u2019\
+        \xE9tablissement, il y a lieu d\u2019effectuer, en fonction des risques, des\
+        \ cyberexercices17 fond\xE9s sur des sc\xE9narios. Le r\xE9sultat des exercices\
+        \ doit \xEAtre document\xE9 et rapport\xE9 en forme appropri\xE9e."
+      annotation: '[17] En tenant compte du Cm 19, ces cyberexercices pourraient par
+        ex. inclure des exercices table-top, red teaming, etc.'
+      translations:
+        en:
+          name: Margin no. 70
+          description: Risk-based, threat intelligence-related scenario cyber exercises17
+            must be conducted on the basis of the institution-specific threat landscape.
+            The result of the exercises must be documented and reported in an appropriate
+            form.
+          annotation: '[17] Taking into account margin no. 19, such cyber exercises
+            may include, for example, tabletop, red team exercises etc.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      name: "D. Gestion des risques des donn\xE9es critiques"
+      translations:
+        en:
+          name: D. Critical data risk management
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:1"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 71
+      description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
+        gie, de la gouvernance et du renforcement de la prise de conscience en lien\
+        \ avec les risques des donn\xE9es critiques sont d\xE9finies aux Cm 23 \xE0\
+        \ 26."
+      translations:
+        en:
+          name: Margin no. 71
+          description: "The basic expectations for the strategy, governance and raising\
+            \ of awareness in relation to the risks of critical data are set out in\
+            \ margin nos. 23\u201326."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:2"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 72
+      description: "La direction d\xE9finit des processus, des proc\xE9dures et des\
+        \ contr\xF4les ad\xE9quats ainsi que des t\xE2ches, comp\xE9tences et responsabilit\xE9\
+        s claires relatifs au traitement des donn\xE9es critiques identifi\xE9es par\
+        \ l\u2019\xE9tablissement. Par ailleurs, la direction mandate une unit\xE9\
+        \ pour cr\xE9er et maintenir les conditions-cadres permettant de garantir\
+        \ la confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9 des\
+        \ donn\xE9es critiques et de surveiller leur respect."
+      translations:
+        en:
+          name: Margin no. 72
+          description: The executive board shall define appropriate processes, procedures
+            and controls as well as clear tasks, competencies and responsibilities
+            for dealing with the data identified as critical by the institution. Furthermore,
+            the executive board shall appoint a unit to establish the framework for
+            ensuring the confidentiality, integrity and availability of critical data
+            and to monitor its observance.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:3"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 73
+      description: "L\u2019\xE9tablissement identifie ses donn\xE9es critiques de\
+        \ mani\xE8re syst\xE9matique et exhaustive, les cat\xE9gorise selon leur criticit\xE9\
+        \ et d\xE9finit des responsabilit\xE9s claires en mati\xE8re de donn\xE9es."
+      translations:
+        en:
+          name: Margin no. 73
+          description: The institution shall identify its critical data in a systematic
+            and comprehensive way, categorise it on the basis of its criticality and
+            define clear responsibilities.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:4"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 74
+      description: "Les donn\xE9es critiques d\xE9finies par l\u2019\xE9tablissement\
+        \ sont g\xE9r\xE9es tout au long de leur cycle de vie."
+      translations:
+        en:
+          name: Margin no. 74
+          description: The critical data defined by the institution must be managed
+            throughout its entire lifecycle.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:5"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 75
+      description: "Dans ce cadre, des processus, des proc\xE9dures et des contr\xF4\
+        les appropri\xE9s garantissent en particulier le respect de la confidentialit\xE9\
+        , de l\u2019int\xE9grit\xE9 et de la disponibilit\xE9 lors de l\u2019administration\
+        \ des donn\xE9es critiques."
+      translations:
+        en:
+          name: Margin no. 75
+          description: In the management of critical data, in particular the confidentiality,
+            integrity and availability of the critical data must be ensured through
+            appropriate processes, procedures and controls.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:6"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 76
+      description: "Durant l\u2019exploitation et pendant le d\xE9veloppement, le\
+        \ changement et la migration des TIC, l\u2019acc\xE8s et l\u2019utilisation\
+        \ des donn\xE9es critiques doivent \xEAtre prot\xE9g\xE9s de mani\xE8re appropri\xE9\
+        e vis-\xE0-vis des personnes non autoris\xE9es. Cela s\u2019applique \xE9\
+        galement aux donn\xE9es critiques dans les environnements de test."
+      translations:
+        en:
+          name: Margin no. 76
+          description: Critical data must be adequately protected from being accessed
+            and used by unauthorised persons during operations and during the development,
+            change and migration of ICT. This also applies to critical data in test
+            environments.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:7"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 77
+      description: "Les composantes TIC, qui sauvegardent ou traitent des donn\xE9\
+        es critiques, sont \xE0 prot\xE9ger en particulier. L\u2019acc\xE8s \xE0 ces\
+        \ donn\xE9es doit \xEAtre r\xE9glement\xE9 syst\xE9matiquement et surveill\xE9\
+        \ en permanence."
+      translations:
+        en:
+          name: Margin no. 77
+          description: The ICT assets that store or process critical data must be
+            afforded particular protection. Access to these data must be regulated
+            systematically and monitored continuously.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:8"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 78
+      description: "L\u2019acc\xE8s aux donn\xE9es critiques et aux fonctionnalit\xE9\
+        s de traitement de ces donn\xE9es est limit\xE9 aux personnes qui en ont besoin\
+        \ pour accomplir leurs t\xE2ches18. \xC0 cet \xE9gard, l\u2019\xE9tablissement\
+        \ doit disposer d\u2019un syst\xE8me d\u2019autorisation. L\u2019acc\xE8s\
+        \ \xE0 ce syst\xE8me doit \xEAtre particuli\xE8rement prot\xE9g\xE9 et r\xE9\
+        guli\xE8rement v\xE9rifi\xE9. Les autorisations contenues dans ce syst\xE8\
+        me doivent \xEAtre r\xE9guli\xE8rement contr\xF4l\xE9es."
+      annotation: '[18] Par ex. principe du need-to-know et du least privilege'
+      translations:
+        en:
+          name: Margin no. 78
+          description: Access to critical data and processing functionalities shall
+            be restricted to persons who require this to carry out their tasks18.
+            The institution must have an authorisation system in place. Access to
+            this authorisation system must be afforded particular protection and reviewed
+            on a regular basis. The authorisations included in the authorisation system
+            must be reviewed on a regular basis.
+          annotation: '[18] For example, need-to-know and least privilege principles.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:9"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 79
+      description: "Lorsque les donn\xE9es critiques sont stock\xE9es hors de Suisse19\
+        \ ou qu\u2019elles sont accessibles depuis l\u2019\xE9tranger, les risques\
+        \ accrus qui en r\xE9sultent doivent \xEAtre limit\xE9s de mani\xE8re appropri\xE9\
+        e et surveill\xE9s au moyen de mesures appropri\xE9es et les donn\xE9es doivent\
+        \ \xEAtre particuli\xE8rement prot\xE9g\xE9es."
+      annotation: "[19] Par ex. \xE0 l\u2019aide de solutions de cloud ou de hosting"
+      translations:
+        en:
+          name: Margin no. 79
+          description: If critical data is stored outside of Switzerland19 or if it
+            can be accessed from abroad, increased risks associated with this must
+            be adequately mitigated and monitored via suitable means and the data
+            afforded particular protection.
+          annotation: '[19] For example, in the context of cloud or hosting solutions.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:10"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 80
+      description: "Tant les personnes internes qu\u2019externes qui peuvent acc\xE9\
+        der aux donn\xE9es critiques ou les modifier doivent \xEAtre soigneusement\
+        \ s\xE9lectionn\xE9es. Ces personnes doivent \xEAtre surveill\xE9es \xE0 l\u2019\
+        aide des mesures appropri\xE9es20 et form\xE9es r\xE9guli\xE8rement sur le\
+        \ traitement de ces donn\xE9es. Des exigences accrues en mati\xE8re de s\xE9\
+        curit\xE9 s\u2019appliquent aux personnes b\xE9n\xE9ficiant de privil\xE8\
+        ges accrus21. Il convient en outre de tenir une liste de ces personnes et\
+        \ de la mettre continuellement \xE0 jour."
+      annotation: "[20] Par ex. \xE9valuation des fichiers journaux, principe des\
+        \ quatre yeux, etc.\n[21] Par ex. les personnes qui b\xE9n\xE9ficient de droits\
+        \ d\u2019administration, les utilisatrices et utilisateurs qui disposent d\u2019\
+        un ac- c\xE8s fonctionnel \xE0 une grande quantit\xE9 de donn\xE9es critiques,\
+        \ etc."
+      translations:
+        en:
+          name: Margin no. 80
+          description: Both internal and external persons who can access critical
+            data or who can change these must be selected carefully. These persons
+            must be monitored with the help of appropriate measures20 and given regular
+            training in the handling of these data. Increased security requirements
+            shall apply to persons with increased privileges21. In addition, a list
+            of all persons with privileged access rights must be kept and updated
+            on a regular basis.
+          annotation: "[20] For example, analysis of log files, \u201Cfour eyes principle\u201D\
+            \ etc.\n[21] For example, persons with administrator rights, users with\
+            \ functional access to a large quantity of critical data etc."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:11"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 81
+      description: "Les incidents qui entravent de mani\xE8re importante la confidentialit\xE9\
+        , l\u2019int\xE9grit\xE9 ou la disponibilit\xE9 des donn\xE9es critiques doivent\
+        \ \xEAtre annonc\xE9s imm\xE9diatement \xE0 la FINMA."
+      translations:
+        en:
+          name: Margin no. 81
+          description: Incidents that substantially impair the confidentiality, integrity
+            or availability of critical data must be reported to FINMA without delay.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4:12"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:4"
+      name: Cm 82
+      description: "Une grande importance doit \xEAtre accord\xE9e \xE0 l\u2019examen\
+        \ de diligence (due diligence) lors du choix des prestataires qui peuvent\
+        \ acc\xE9der aux donn\xE9es critiques ou les traiter22. Il faut d\xE9finir\
+        \ des crit\xE8res clairs pour \xE9valuer la mani\xE8re dont les prestataires\
+        \ g\xE8rent les donn\xE9es critiques et les v\xE9rifier avant de signer des\
+        \ contrats. En fonction du risque, les prestataires doivent \xEAtre soumis\
+        \ \xE0 une surveillance et \xE0 un contr\xF4le p\xE9riodiques dans le cadre\
+        \ du syst\xE8me de contr\xF4le interne de l\u2019\xE9tablissement."
+      annotation: "[22] Traiter : toute op\xE9ration relative \xE0 des donn\xE9es\
+        \ critiques, quels que soient les moyens et proc\xE9d\xE9s utilis\xE9s, notam-\
+        \ ment la collecte, l\u2019enregistrement, la conservation, l\u2019utilisation,\
+        \ la modification, la communication, l\u2019archivage, l\u2019efface- ment\
+        \ ou la destruction de donn\xE9es"
+      translations:
+        en:
+          name: Margin no. 82
+          description: "When selecting service providers that can process22 or view\
+            \ critical data, due diligence must be particularly thorough. Clear criteria\
+            \ for assessing how service providers handle critical data must be defined\
+            \ and checked before entering into a contractual agreement. The service\
+            \ providers must be monitored and checked periodically as part of the\
+            \ institution\u2019s internal control system."
+          annotation: '[22] Processing: any handling of critical data, irrespective
+            of the means and procedures used, in particular the collection, saving,
+            storage, use, changing, disclosing, archiving, deletion or destruction
+            of data.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      name: E. Business continuity management (BCM)
+      translations:
+        en:
+          name: E. Business continuity management (BCM)
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:1"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 83
+      description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
+        gie, de la gouvernance et du renforcement de la prise de conscience en lien\
+        \ avec les risques d\xE9coulant de la conception et de la mise en \u0153uvre\
+        \ du BCM sont d\xE9finies aux Cm 23 \xE0 26."
+      translations:
+        en:
+          name: Margin no. 83
+          description: "The basic expectations for the strategy, governance and raising\
+            \ of awareness in relation to risks resulting from the design and implementation\
+            \ of BCM are set out in margin nos. 23\u201326."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:2"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 84
+      description: "Chaque domaine d\u2019activit\xE9 ou d\u2019organisation pertinent\
+        \ doit identifier ses processus critiques et les ressources correspondantes\
+        \ n\xE9cessaires23 dans le cadre de la business impact analysis (BIA)."
+      annotation: "[23] Personnel, infrastructure (par ex. immeubles, infrastructure\
+        \ des postes de travail), syst\xE8mes IT ou infrastructure IT (y compris syst\xE8\
+        mes de communication), d\xE9pendances vis-\xE0-vis d\u2019autres domaines\
+        \ de l\u2019\xE9tablissement et de tiers, par ex. prestataires ou fournisseurs\
+        \ externes (externalisation), banques centrales ou chambres de compensation."
+      translations:
+        en:
+          name: Margin no. 84
+          description: Every relevant business and organisational area must identify
+            its critical processes and the resources required for these23 in a business
+            impact analysis (BIA).
+          annotation: '[23] Staff, facilities (e.g. building, workplace infrastructure),
+            information, IT systems or IT infrastructure (including communication
+            systems), dependencies on other areas of the institution and on third
+            parties, e.g. external service providers and suppliers (outsourcing),
+            central banks or clearing houses.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:3"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 85
+      description: "Pour les processus critiques, l\u2019\xE9tablissement d\xE9finit\
+        \ le RTO et le RPO conform\xE9ment au Cm 10. Ceux-ci sont coordonn\xE9s avec\
+        \ les fournisseurs de prestations24 requis \xE0 cet effet et leur respect\
+        \ est r\xE9gi par des service level agreements ou des contrats, ou garantis\
+        \ par d\u2019autres proc\xE9dures et contr\xF4les appropri\xE9s."
+      annotation: "[24] Par ex. avec le d\xE9partement IT, d\u2019autres domaines\
+        \ de l\u2019\xE9tablissement ou des externes."
+      translations:
+        en:
+          name: Margin no. 85
+          description: The institution shall define the RTO and RPO for the critical
+            processes in accordance with margin no. 10. These shall be coordinated
+            with the necessary service providers24 and adherence to the RTO and RPO
+            shall be regulated by service level agreements or contracts or by other
+            appropriate procedures, processes and controls.
+          annotation: '[24] For example, with the IT department, other units of the
+            institution or external parties.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:4"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 86
+      description: "L\u2019\xE9tablissement d\xE9finit au moins un BCP selon le Cm\
+        \ 11, qui d\xE9crit aussi les processus de d\xE9cision ainsi que les \xE9\
+        v\xE9nements d\xE9clencheurs du plan et tient compte de la perte des ressources\
+        \ selon le Cm 84. L\u2019acceptation des risques r\xE9siduels est document\xE9\
+        e de mani\xE8re ad\xE9quate."
+      translations:
+        en:
+          name: Margin no. 86
+          description: The institution shall define at least one BCP in accordance
+            with margin no. 11 that also describes the conditions triggering the plan
+            and the decision-making processes, and takes into account the loss of
+            resources in accordance with margin no. 84. The acceptance of residual
+            risks must be adequately documented.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:5"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 87
+      description: "La BIA et le BCP sont \xE9tablis et document\xE9s de mani\xE8\
+        re coh\xE9rente selon une directive applicable \xE0 l\u2019\xE9chelle de l\u2019\
+        \xE9tablissement. Ils doivent \xEAtre revus et mis \xE0 jour chaque ann\xE9\
+        e ainsi qu\u2019en cas de changements majeurs dans l\u2019activit\xE9 (r\xE9\
+        organisations, cr\xE9ation d\u2019un nouveau champ d\u2019activit\xE9, etc.)."
+      translations:
+        en:
+          name: Margin no. 87
+          description: The BIA and BCP shall be prepared and documented in a consistent
+            manner following institution-wide guidelines. They must be reviewed and
+            updated annually and on an ad hoc basis in the event of significant changes
+            to the business operations (reorganisations, development of a new business
+            segment etc.).
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:6"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 88
+      description: "L\u2019\xE9tablissement d\xE9finit au moins un DRP en tant que\
+        \ partie int\xE9grante du BCP. Lorsque des processus critiques ou des parties\
+        \ de ceux-ci sont externalis\xE9s, le DRP tient compte des d\xE9pendances\
+        \ externes et des dispositions contractuelles ainsi que des solutions alternatives.\
+        \ Le DRP est revu et mis \xE0 jour en cas de changements majeurs, mais au\
+        \ moins une fois par ann\xE9e."
+      translations:
+        en:
+          name: Margin no. 88
+          description: The institution shall define at least one DRP as part of the
+            BCP. If critical processes or parts thereof are outsourced, the DRP shall
+            take into account the external dependencies and contractual provisions
+            as well as alternative solutions. The DRP must be reviewed and updated
+            on an ad hoc basis in the event of significant changes and at least annually.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:7"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 89
+      description: "Dans les situations de crise, un \xE9tat-major de crise est charg\xE9\
+        \ de g\xE9rer celle-ci jusqu\u2019au r\xE9tablissement de la situation. Les\
+        \ \xE9v\xE9nements d\xE9clencheurs d\u2019une crise et les t\xE2ches, comp\xE9\
+        tences et responsabilit\xE9s de l\u2019\xE9tat-major de crise doivent \xEA\
+        tre r\xE9gl\xE9s au pr\xE9alable. L\u2019organisation de crise doit \xEAtre\
+        \ ax\xE9e sur l\u2019activit\xE9 commerciale et la structure g\xE9ographique\
+        \ de l\u2019\xE9tablissement. L\u2019accessibilit\xE9 des responsables en\
+        \ situation de crise doit \xEAtre garantie."
+      translations:
+        en:
+          name: Margin no. 89
+          description: In crisis situations, a crisis unit shall take on the task
+            of crisis management until order is restored. The conditions triggering
+            a crisis and the tasks, competencies and responsibilities of the crisis
+            unit must be regulated in advance and the crisis organisation aligned
+            to the business activities and geographical structure of the institution.
+            The availability of responsible persons in crisis situations must be ensured.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:8"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 90
+      description: "L\u2019\xE9tablissement d\xE9finit une strat\xE9gie de communication\
+        \ interne et externe en situation de crise."
+      translations:
+        en:
+          name: Margin no. 90
+          description: The institution shall define a communication strategy for internal
+            and external communication in crisis situations.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:9"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 91
+      description: "La mise en \u0153uvre du BCP et du DRP ainsi que le bon fonctionnement\
+        \ de l\u2019organisation de crise sont r\xE9guli\xE8rement soumis \xE0 des\
+        \ tests. \xC0 cet effet, l\u2019\xE9tablissement met en \u0153uvre une planification\
+        \ syst\xE9matique afin de garantir une couverture r\xE9guli\xE8re. Diff\xE9\
+        rentes mani\xE8res de proc\xE9der au test avec des degr\xE9s d\u2019intensit\xE9\
+        \ et d\u2019efficacit\xE9 variables peuvent \xEAtre choisies, comme des exercices\
+        \ table-top."
+      translations:
+        en:
+          name: Margin no. 91
+          description: The implementation of the BCP and DRP as well as the functioning
+            of the crisis organisation must be regularly evaluated through tests.
+            Systematic plans shall be drawn up for this, which ensure regular coverage.
+            Various means of testing of varying intensity and effectiveness can be
+            selected including, for example, tabletop exercises.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:10"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 92
+      description: "Les principales mesures du BCP et du DRP ainsi que l\u2019organisation\
+        \ de crise sont test\xE9es au moins une fois par ann\xE9e."
+      translations:
+        en:
+          name: Margin no. 92
+          description: The most important measures according to the BCP and DRP and
+            the crisis organisation must be tested at least once a year.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:11"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 93
+      description: "Les parties prenantes, y compris celles issues des fonctions IT\
+        \ et des fonctions sp\xE9cialis\xE9es, participent aux tests pour se familiariser\
+        \ aux processus de r\xE9tablissement."
+      translations:
+        en:
+          name: Margin no. 93
+          description: Relevant stakeholder groups, including those in specialist
+            and IT functions, shall take part in the tests in order to familiarise
+            themselves with the recovery processes.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:12"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 94
+      description: "Les tests comprennent diff\xE9rents sc\xE9narios graves mais plausibles,\
+        \ et prennent en compte les d\xE9pendances en mati\xE8re de r\xE9tablissement,\
+        \ y compris celles qui existent \xE0 l\u2019\xE9gard de tiers internes ou\
+        \ externes."
+      translations:
+        en:
+          name: Margin no. 94
+          description: The tests shall encompass various severe but plausible scenarios
+            and take into account recovery dependencies, including those that exist
+            with internal or external third parties.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:13"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 95
+      description: "Des comptes rendus r\xE9guliers informent l\u2019organe responsable\
+        \ de la haute direction et la direction des activit\xE9s de test et de v\xE9\
+        rification effectu\xE9es ainsi que de leurs r\xE9sultats. Ils pr\xE9sentent\
+        \ clairement les priorit\xE9s adopt\xE9es (par ex. priorisation des processus\
+        \ critiques requis pour l\u2019ex\xE9cution des fonctions critiques selon\
+        \ le Cm 14) et les lacunes identifi\xE9es dans la couverture d\u2019autres\
+        \ processus critiques."
+      translations:
+        en:
+          name: Margin no. 95
+          description: Regular reporting to the board of directors and the executive
+            board shall include information about the testing and review activities
+            carried out and their results. It shall clearly show prioritisations made
+            (e.g. prioritisation of the critical processes necessary for the provision
+            of the critical functions in accordance with margin no. 14) and recognised
+            gaps in the coverage of other critical processes.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5:14"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:5"
+      name: Cm 96
+      description: "Les collaborateurs ainsi que les membres de l\u2019organisation\
+        \ de crise doivent \xEAtre suffisamment form\xE9s au sujet de leurs t\xE2\
+        ches, comp\xE9tences et responsabilit\xE9s qui d\xE9coulent des diverses activit\xE9\
+        s BCM. Cela s\u2019applique aussi bien lors de l\u2019entr\xE9e en fonction\
+        \ de nouveaux membres du personnel qu\u2019en ce qui concerne les formations\
+        \ r\xE9guli\xE8res."
+      translations:
+        en:
+          name: Margin no. 96
+          description: The employees and members of the crisis organisation shall
+            be adequately trained in their tasks, competencies and responsibilities
+            resulting from the various BCM activities, both when new employees join
+            the institution and as part of regular training.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6"
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels"
+      name: "F. Gestion des risques li\xE9s aux activit\xE9s de service transfronti\xE8\
+        res"
+      translations:
+        en:
+          name: F. Management of risks from cross-border service business
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6:1"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6"
+      name: Cm 97
+      description: "Quand des \xE9tablissements ou leurs filiales fournissent des\
+        \ services ou distribuent des produits financiers dans le cadre d\u2019op\xE9\
+        rations transfronti\xE8res, les risques r\xE9sultant d\u2019une application\
+        \ des l\xE9gislations \xE9trang\xE8res (droit fiscal, droit p\xE9nal, l\xE9\
+        gislation en mati\xE8re de blanchiment d\u2019argent, etc.) doivent \xE9galement\
+        \ \xEAtre identifi\xE9s, limit\xE9s et contr\xF4l\xE9s de fa\xE7on appropri\xE9\
+        e."
+      translations:
+        en:
+          name: Margin no. 97
+          description: If institutions or their group companies provide services or
+            distribute financial products cross-border, then the risks resulting from
+            the application of foreign legislation (tax, criminal, anti-money laundering
+            legislation etc.) must also be adequately identified, limited and controlled.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6:2"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6"
+      name: Cm 98
+      description: "Les \xE9tablissements soumettent leurs activit\xE9s de services\
+        \ transfronti\xE8res ainsi que la distribution transfronti\xE8re de produits\
+        \ financiers \xE0 une analyse approfondie des conditionscadres juridiques\
+        \ et des risques correspondants. Sur la base de cette analyse, les \xE9tablissements\
+        \ prennent les mesures strat\xE9giques et organisationnelles n\xE9cessaires\
+        \ \xE0 l\u2019\xE9limination et \xE0 la minimisation des risques et les adaptent\
+        \ au fur et \xE0 mesure \xE0 l\u2019\xE9volution de la situation. Ils poss\xE8\
+        dent notamment les connaissances sp\xE9cialis\xE9es requises sp\xE9cifiques\
+        \ aux pays en question, d\xE9finissent des mod\xE8les de prestations sp\xE9\
+        cifiques aux pays desservis, forment le personnel et garantissent le respect\
+        \ des prescriptions gr\xE2ce \xE0 des mesures organisationnelles, des directives\
+        \ et des mod\xE8les de r\xE9mun\xE9ration et de sanction correspondants."
+      translations:
+        en:
+          name: Margin no. 98
+          description: The institutions shall conduct a thorough analysis of their
+            cross-border service business and cross-border distribution of financial
+            products, examining the legal framework and associated risks. Based on
+            this analysis, the institutions shall take the necessary strategic and
+            organisational measures to eliminate and minimise risk, and continuously
+            adapt these to changing conditions. In particular, they shall have the
+            necessary country-specific specialist knowledge, define specific service
+            models for the countries served, train employees and ensure compliance
+            with the guidelines through appropriate organisational measures, directives,
+            remuneration and sanctions models.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6:3"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6"
+      name: Cm 99
+      description: "Les risques g\xE9n\xE9r\xE9s par les g\xE9rants de fortune ind\xE9\
+        pendants, les interm\xE9diaires et autres prestataires doivent \xE9galement\
+        \ \xEAtre pris en compte. En cons\xE9quence, ces partenaires doivent \xEA\
+        tre choisis et instruits avec soin."
+      translations:
+        en:
+          name: Margin no. 99
+          description: The risks generated by external asset managers, intermediaries
+            and other service providers must also be taken into account. Accordingly,
+            a diligent approach must be adopted in selecting and instructing these
+            partners.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6:4"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
+        rationnels:6"
+      name: Cm 100
+      description: "Ce principe s\u2019applique \xE9galement aux cas dans lesquels\
+        \ une filiale, une succursale ou une entit\xE9 similaire d\u2019un \xE9tablissement\
+        \ financier suisse domicili\xE9e \xE0 l\u2019\xE9tranger offre des services\
+        \ transfronti\xE8res \xE0 des clients."
+      translations:
+        en:
+          name: Margin no. 100
+          description: This basic approach also covers situations where a foreign-based
+            subsidiary, branch or similar serves clients of a Swiss financial institution
+            cross-border.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle"
+      assessable: false
+      depth: 1
+      name: "V. Garantie de la r\xE9silience op\xE9rationnelle"
+      translations:
+        en:
+          name: V. Ensuring operational resilience
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:1"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 101
+      description: "L\u2019\xE9tablissement identifie ses fonctions critiques et leurs\
+        \ tol\xE9rances aux interruptions. Celles-ci sont approuv\xE9es par l\u2019\
+        organe responsable de la haute direction. En outre, l\u2019organe responsable\
+        \ de la haute direction approuve et surveille r\xE9guli\xE8rement la proc\xE9\
+        dure visant \xE0 garantir la r\xE9silience op\xE9rationnelle."
+      translations:
+        en:
+          name: Margin no. 101
+          description: The institution shall identify its critical functions and their
+            tolerances for disruption. These must be approved by the board of directors.
+            The board of directors must also regularly approve and monitor the approach
+            for ensuring operational resilience.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:2"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 102
+      description: "L\u2019\xE9tablissement prend des mesures pour garantir la r\xE9\
+        silience op\xE9rationnelle en tenant compte de sc\xE9narios graves, mais plausibles25."
+      annotation: "[25] Il ne peut \xEAtre exclu que certains sc\xE9narios ne puissent\
+        \ pas \xEAtre g\xE9r\xE9s sans intervention de l\u2019\xC9tat (par ex. pand\xE9\
+        - mies, guerres, p\xE9nuries d\u2019\xE9lectricit\xE9 durables). Pour de tels\
+        \ sc\xE9narios, l\u2019\xE9tablissement doit effectuer des travaux pr\xE9\
+        - paratoires pour renforcer sa r\xE9silience op\xE9rationnelle dans le cadre\
+        \ de ses possibilit\xE9s."
+      translations:
+        en:
+          name: Margin no. 102
+          description: The institution shall take measures to ensure operational resilience,
+            taking into account severe but plausible scenarios25.
+          annotation: '[25] It cannot be ruled out that some scenarios cannot be managed
+            without state involvement (e.g. pandemics, wars, long-term power shortages).
+            For such scenarios, preliminary work must be carried out by the institution
+            for the purpose of strengthening its operational resilience to these scenarios
+            in so far as its means allow.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:3"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 103
+      description: "Les fonctions critiques et leurs tol\xE9rances aux interruptions\
+        \ au sens du Cm 14 doivent \xEAtre approuv\xE9es par l\u2019organe responsable\
+        \ de la haute direction au moins une fois par ann\xE9e."
+      translations:
+        en:
+          name: Margin no. 103
+          description: The critical functions and the associated tolerances for disruption
+            according to margin no. 14 must be approved at least annually by the board
+            of directors.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:4"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 104
+      description: "L\u2019\xE9tablissement coordonne les composantes pertinentes\
+        \ d\u2019une gestion des risques globale, comme la gestion des risques op\xE9\
+        rationnels, y compris la gestion des risques TIC et des cyberrisques, le business\
+        \ continuity management, la gestion des externalisations (outsourcing ; cf.\
+        \ circulaire FINMA 2018/3 \xAB Outsourcing \xBB) et le plan d\u2019urgence\
+        \ (chapitre VI), pour qu\u2019elles contribuent \xE0 renforcer la r\xE9silience\
+        \ op\xE9rationnelle de l\u2019\xE9tablissement. Cela inclut un \xE9change\
+        \ appropri\xE9 des informations pertinentes entre ces diff\xE9rents domaines."
+      translations:
+        en:
+          name: Margin no. 104
+          description: "The institution shall coordinate the relevant components of\
+            \ a comprehensive risk management framework, such as operational risk\
+            \ management, including ICT and cyber risk management, business continuity\
+            \ management, outsourcing management (cf. FINMA Circular 2018/3 \u201C\
+            Outsourcing\u201D), and emergency planning (Chapter VI.) such that these\
+            \ contribute to strengthening the institution\u2019s operational resilience.\
+            \ This includes an appropriate exchange of relevant information between\
+            \ these various areas."
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:5"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 105
+      description: "La direction et l\u2019organe responsable de la haute direction\
+        \ doivent recevoir au moins une fois par ann\xE9e des rapports sur la r\xE9\
+        silience op\xE9rationnelle ainsi qu\u2019en cas de faiblesses de contr\xF4\
+        le importantes ou d\u2019incidents qui menacent la r\xE9silience op\xE9rationnelle."
+      translations:
+        en:
+          name: Margin no. 105
+          description: Reporting to the board of directors and the executive board
+            must take place annually and in the event of significant control weaknesses
+            or incidents that jeopardise operational resilience.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:6"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 106
+      description: "Pour les fonctions critiques, les menaces internes et externes\
+        \ ainsi que l\u2019exploitation correspondante des vuln\xE9rabilit\xE9s sont\
+        \ identifi\xE9es et \xE9valu\xE9es. Les risques op\xE9rationnels en r\xE9\
+        sultant sont identifi\xE9s, \xE9valu\xE9s, limit\xE9s et surveill\xE9s dans\
+        \ le cadre de la gestion des risques op\xE9rationnels."
+      translations:
+        en:
+          name: Margin no. 106
+          description: Internal and external threats and the corresponding exploitation
+            of vulnerabilities shall be identified and assessed for the critical functions.
+            The resulting operational risks shall be identified, assessed, limited
+            and monitored as part of operational risk management.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:7"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 107
+      description: "L\u2019\xE9tablissement constitue un inventaire de ses fonctions\
+        \ critiques, qui doit \xEAtre revu et mis \xE0 jour au moins une fois par\
+        \ ann\xE9e. Cet inventaire comporte les tol\xE9rances aux interruptions des\
+        \ fonctions critiques ainsi que les connexions et les d\xE9pendances entre\
+        \ les processus critiques n\xE9cessaires et leurs ressources26 pour ex\xE9\
+        cuter les fonctions critiques."
+      annotation: "[26] Y compris les composantes de l\u2019inventaire pertinentes\
+        \ pour les fonctions critiques selon le Cm 53"
+      translations:
+        en:
+          name: Margin no. 107
+          description: The institution shall keep an inventory of its critical functions,
+            which is reviewed and updated at least annually. This inventory shall
+            contain the tolerances for disruption of the critical functions, as well
+            as connections and dependencies between the necessary critical processes
+            and their resources26 for providing the critical functions.
+          annotation: '[26] Including the ICT assets of the inventory in accordance
+            with margin no. 53 relevant to the critical functions.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:8"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 108
+      description: "Pour les fonctions critiques, l\u2019\xE9tablissement documente\
+        \ au minimum les risques op\xE9rationnels importants et les contr\xF4les cl\xE9\
+        s."
+      translations:
+        en:
+          name: Margin no. 108
+          description: As a minimum, the significant operational risks and the key
+            controls must be documented for the critical functions.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:9"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 109
+      description: "Les fonctions critiques et les processus critiques et ressources\
+        \ n\xE9cessaires \xE0 cet effet sont couverts par les BCP selon le chapitre\
+        \ IV lettre E."
+      translations:
+        en:
+          name: Margin no. 109
+          description: The critical functions and the critical processes and resources
+            required for these shall be covered by BCPs pursuant to Chapter IV./E.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:10"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 110
+      description: "La capacit\xE9 \xE0 ex\xE9cuter des fonctions critiques dans les\
+        \ limites de leurs tol\xE9rances aux interruptions en cas de sc\xE9narios\
+        \ graves mais plausibles est r\xE9guli\xE8rement test\xE9e ou exerc\xE9e.\
+        \ Il s\u2019agit notamment de sc\xE9narios qui se distinguent des interruptions\
+        \ br\xE8ves et plut\xF4t limit\xE9es en se d\xE9marquant par des interruptions\
+        \ de longue dur\xE9e (par ex. plusieurs mois) et la d\xE9faillance de ressources\
+        \ fondamentales27. Les tests ou exercices sont con\xE7us de sorte \xE0 ne\
+        \ pas menacer fondamentalement l\u2019\xE9tablissement."
+      annotation: "[27] Par ex. pand\xE9mie, p\xE9nurie d\u2019\xE9lectricit\xE9,\
+        \ d\xE9faillance prolong\xE9e en raison de l\u2019insolvabilit\xE9 d\u2019\
+        un prestataire important (comme exemple de stressed exit d\u2019un prestataire)\
+        \ ou interdiction persistante de la part de gouvernements \xE9trangers aux\
+        \ fournisseurs de cloud ou d'autres prestataires bas\xE9s \xE0 l'\xE9tranger\
+        \ de servir des entreprises suisses."
+      translations:
+        en:
+          name: Margin no. 110
+          description: The ability to provide critical functions within their tolerance
+            for disruption in severe but plausible scenarios shall be tested or exercised
+            regularly. These also include scenarios that differ from shorter and more
+            limited interruptions and that are characterised by a longer duration
+            (e.g. over several months) and a lack of basic resources27. The tests
+            or exercises must be designed in such a way that they do not fundamentally
+            endanger the institution.
+          annotation: '[27] Examples include a pandemic, a power shortage, a prolonged
+            downtime resulting from the insolvency of a key service provider (as an
+            example of a stressed exit by a service provider) or a long-term prohibition
+            of foreign governments, according to which foreign-based cloud providers
+            or other service providers are no longer permitted to serve Swiss firms.'
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
+        rationnelle:11"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
+        silience-op\xE9rationnelle"
+      name: Cm 111
+      description: "S\u2019agissant des banques d\u2019importance syst\xE9mique, le\
+        \ BCP, le DRP et l\u2019organisation en cas de crise selon le chapitre IV\
+        \ lettre E, pertinents pour la poursuite des fonctions critiques selon le\
+        \ Cm 14, doivent \xEAtre coordonn\xE9s avec leur plan d\u2019urgence selon\
+        \ le chapitre VI."
+      translations:
+        en:
+          name: Margin no. 111
+          description: For systemically important banks, the BCP, DRP and the crisis
+            organisation in accordance with Chapter IV./E. that are relevant for the
+            continuation of the critical functions in accordance with margin no. 14
+            must be coordinated with the emergency planning in accordance with Chapter
+            VI.
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
+        assainissement-des-banques-d\u2019importance-syst\xE9mique"
+      assessable: false
+      depth: 1
+      name: "VI. Maintien des prestations critiques lors de la liquidation et de l\u2019\
+        assainissement des banques d\u2019importance syst\xE9mique"
+      translations:
+        en:
+          name: VI. Continuation of critical services during the resolution and recovery
+            of systemically important banks
+    - urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
+        assainissement-des-banques-d\u2019importance-syst\xE9mique:1"
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
+        assainissement-des-banques-d\u2019importance-syst\xE9mique"
+      name: Cm 112
+      description: "Dans le cadre de leur plan d\u2019urgence, les banques d\u2019\
+        importance syst\xE9mique prennent les mesures requises pour que leurs fonctions\
+        \ d\u2019importance syst\xE9mique puissent \xEAtre poursuivies sans interruption\
+        \ (art. 9 al. 2 let. d LB en lien avec les art. 60 ss OB). Elles identifient\
+        \ les prestations requises pour la poursuite des fonctions d\u2019importance\
+        \ syst\xE9mique en cas de liquidation, d\u2019assainissement ou de restructuration\
+        \ (\xAB prestations critiques \xBB) et prennent les mesures n\xE9cessaires\
+        \ \xE0 leur poursuite. Elles tiennent compte \xE0 cet \xE9gard des prescriptions\
+        \ des organismes \xE9dictant les standards internationaux."
+      translations:
+        en:
+          name: Margin no. 112
+          description: "As part of their emergency planning, systemically important\
+            \ banks shall take the necessary measures for the uninterrupted continuation\
+            \ of systemically important functions (Art. 9 para. 2 let. d BA in conjunction\
+            \ with Art. 60 ff. BO). They shall identify the services necessary to\
+            \ continue the systemically important functions in the event of resolution,\
+            \ recovery or restructuring (\u201Ccritical services\u201D) and take the\
+            \ measures necessary for their continuation. In doing so they shall take\
+            \ into account the requirements issued by international standard setters\
+            \ in this context."
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires
+      assessable: false
+      depth: 1
+      name: VII. Dispositions transitoires
+      translations:
+        en:
+          name: VII. Transitional provisions
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires
+      name: "A. \xC0 propos de la garantie de la r\xE9silience op\xE9rationnelle"
+      translations:
+        en:
+          name: A. Concerning ensuring operational resilience
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:1:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:1
+      name: Cm 113
+      description: "L\u2019identification des fonctions critiques, la d\xE9finition\
+        \ des tol\xE9rances aux interruptions et les premi\xE8res approbations selon\
+        \ les Cm 101 et 103 ainsi que le premier rapport selon le Cm 105 sont attendus\
+        \ d\xE8s l\u2019entr\xE9e en vigueur de la pr\xE9sente circulaire. Un d\xE9\
+        lai transitoire d\u2019une ann\xE9e \xE0 compter de l\u2019entr\xE9e en vigueur\
+        \ est applicable pour satisfaire aux exigences selon les Cm 106 \xE0 109 ainsi\
+        \ qu\u2019effectuer les premiers tests selon le Cm 110. La garantie de la\
+        \ r\xE9silience op\xE9rationnelle selon le Cm 102 ainsi que la satisfaction\
+        \ des exigences selon les Cm 104 et 111 sont attendues dans un d\xE9lai transitoire\
+        \ de deux ans."
+      translations:
+        en:
+          name: Margin no. 113
+          description: "The identification of critical functions, the definition of\
+            \ tolerances for disruption and initial approvals in accordance with margin\
+            \ nos. 101 and 103, as well as initial reporting in accordance with margin\
+            \ no. 105, will be expected following the Circular\u2019s entry into force.\
+            \ A transitional period of one year from the entry into force shall apply\
+            \ for fulfilling the requirements in accordance with margin nos. 106\u2013\
+            109 and the first tests in accordance with margin no. 110. It is expected\
+            \ that operational resilience will be ensured in accordance with margin\
+            \ no. 102 and the requirements met in accordance with margin nos. 104\
+            \ and 111 within a transitional period of two years."
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires
+      name: "B. \xC0 propos des exigences de fonds propres pour les risques op\xE9\
+        rationnels"
+      translations:
+        en:
+          name: B. Concerning the capital requirements for operational risk
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:2:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:2
+      name: Cm 114
+      description: "Les exigences de fonds propres pour les risques op\xE9rationnels\
+        \ au sens des art. 89 ss OFR s\u2019appuient sur les Cm 3 \xE0 116 de la circulaire\
+        \ FINMA 2008/21 \xAB Risques op\xE9rationnels \u2013 banques \xBB jusqu\u2019\
+        \xE0 l\u2019entr\xE9e en vigueur de l\u2019OFR r\xE9vis\xE9e dans le cadre\
+        \ du paquet de r\xE9visions des normes finales de B\xE2le III et de l\u2019\
+        ordonnance d\u2019ex\xE9cution FINMA correspondante."
+      translations:
+        en:
+          name: Margin no. 114
+          description: "The capital requirements for operational risk in accordance\
+            \ with Article 89 ff. CAO shall be based on margin nos. 3\u2013116 of\
+            \ FINMA Circular 2008/21 \u201COperational risk \u2013 banks\u201D until\
+            \ the entry into force of the CAO revised as part of the final Basel III\
+            \ revision package and the implementing FINMA ordinance."
