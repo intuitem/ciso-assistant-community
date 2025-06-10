@@ -21,7 +21,7 @@ import fitz
 import re
 from openpyxl import Workbook
 
-def is_chapter(line): return re.match(r"^[IVXLCDM]+\.$", line.strip())
+def is_chapter(line): return re.match(r"^[IVX]+\.$", line.strip())
 def is_subchapter(line): return re.match(r"^[A-Z]\.$", line.strip())
 def is_section(line): return re.match(r"^[a-z]\)$", line.strip())
 def is_paragraph_start(line): return re.match(r"^[a-z]\.", line.strip()) or line.strip().startswith("•")
@@ -80,7 +80,7 @@ title_exceptions = {
     }
 }
 
-merge_page_paragraphs = {15}
+merge_page_paragraphs = {3, 4, 5, 6, 7, 15}
 
 wb = Workbook()
 ws = wb.active
