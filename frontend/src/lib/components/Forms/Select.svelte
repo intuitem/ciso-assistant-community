@@ -97,11 +97,11 @@
 			{...$constraints}
 			{...rest}
 		>
-			{#if !disableDoubleDash && !$constraints?.required && !options.find( (o) => new Set( ['--', 'undefined'] ).has(o.label.toLowerCase()) )}
+			{#if !disableDoubleDash && !$constraints?.required && options && !options.find( (o) => new Set( ['--', 'undefined'] ).has(o.label.toLowerCase()) )}
 				{@const defaultValue = blank ? '' : null}
 				<option value={defaultValue} selected>--</option>
 			{/if}
-			{#each options as option}
+			{#each options || [] as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
 					{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
 				</option>

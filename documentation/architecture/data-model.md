@@ -92,7 +92,7 @@ erDiagram
     LOADED_LIBRARY      |o--o{ THREAT                   : contains
     LOADED_LIBRARY      ||--o{ FRAMEWORK                : contains
     LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
-    LOADED_LIBRARY      ||--o{ REQUIREMMENT_MAPPING_SET : contains
+    LOADED_LIBRARY      ||--o{ REQUIREMENT_MAPPING_SET : contains
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
 
 ```
@@ -127,6 +127,7 @@ erDiagram
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     COMPLIANCE_ASSESSMENT        }o--o{ ASSET                 : relates_to
+    COMPLIANCE_ASSESSMENT        }o--o{ EVIDENCE              : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements

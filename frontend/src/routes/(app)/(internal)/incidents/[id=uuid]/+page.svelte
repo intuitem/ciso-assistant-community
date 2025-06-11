@@ -190,7 +190,7 @@
 			>
 				{#if canEditObject}
 					<!-- new record form -->
-					<h1 class="text-xl font-bold font-serif mb-2">{m.addTimelineEntry()}</h1>
+					<h1 class="text-xl font-bold mb-2">{m.addTimelineEntry()}</h1>
 					<SuperForm
 						class="flex flex-col space-y-3"
 						action={formAction}
@@ -280,7 +280,7 @@
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
 		<div class="flex flex-row justify-between items-center">
-			<h1 class="text-xl font-bold font-serif">{m.timeline()}</h1>
+			<h1 class="text-xl font-bold">{m.timeline()}</h1>
 			<Search {handler} />
 			<RowsPerPage {handler} />
 		</div>

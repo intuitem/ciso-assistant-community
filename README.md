@@ -145,7 +145,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
+19. OWASP Application Security Verification Standard (ASVS) 4 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -184,7 +184,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
-58. Adobe Common Controls Framework (CCF) 🌐
+58. Adobe Common Controls Framework (CCF) v5 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
@@ -203,6 +203,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
+77. Vehicle Cyber Security Audit (VCS) v1.1 🚘
+78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 
 ### Community contributions
 
@@ -220,6 +222,14 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
 13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
 14. IGI 1300 / II 901 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
+15. Référentiel Général de Sécurité 2.0 - Annexe B2 🇫🇷
+16. Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection 🇫🇷
+17. Recommandations pour un usage sécurisé d’(Open)SSH 🇫🇷
+18. Recommandations de sécurité relatives à IPsec pour la protection des flux réseau 🇫🇷
+19. Recommandations relatives à l'interconnexion d'un système d'information à internet 🇫🇷
+20. Guides des mécanismes cryptographiques 🇫🇷
+21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
+22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 
 <br/>
 
@@ -233,7 +243,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
-- VCS framework from ENX
 - OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧

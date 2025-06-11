@@ -11,9 +11,13 @@
 
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { getModelInfo } from '$lib/utils/crud.js';
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;

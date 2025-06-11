@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 
@@ -25,16 +23,21 @@
 	$effect(() => {
 		if (data.loadedLibrariesTable.meta.count === 0) group = 'stored';
 	});
+	let mappingSuggestedCount = $derived(data?.mappingSuggested?.length);
 </script>
 
 <div class="card bg-white shadow-sm">
 	<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
 		{#snippet list()}
-			<Tabs.Control value="stored"
-				>{m.librariesStore()}
-				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span
-				></Tabs.Control
-			>
+			<Tabs.Control value="stored">
+				{m.librariesStore()}
+				<span class="badge variant-soft-primary">{data.storedLibrariesTable.meta.count}</span>
+				{#if mappingSuggestedCount > 0}
+					<span class="badge variant-soft-secondary" title={m.mappingSuggestedHelpText()}
+						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
+					>
+				{/if}
+			</Tabs.Control>
 			<Tabs.Control value="loaded"
 				>{m.loadedLibraries()}
 				<span class="badge preset-tonal-primary">{data.loadedLibrariesTable.meta.count}</span>
@@ -51,9 +54,17 @@
 				{m.currentlyNoLoadedLibraries()}.
 			</div>
 		{/if}
-
 		{#snippet content()}
 			<Tabs.Panel value="stored">
+				{#if mappingSuggestedCount > 0}
+					<div
+						class="flex items-center justify-center w-full -mt-4 p-2 variant-soft-secondary text-sm"
+					>
+						<span class="badge variant-soft-secondary mr-1" title={m.mappingSuggestedHelpText()}
+							>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
+						><span class="">{m.mappingSuggestionTeasing()}</span>
+					</div>
+				{/if}
 				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 					<i class="fa-solid fa-info-circle"></i>
 					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>

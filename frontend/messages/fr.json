@@ -118,6 +118,7 @@
 	"provider": "Fournisseur",
 	"providerColon": "Fournisseur :",
 	"domain": "Domaine",
+	"domainSemiColon": "Domaine :",
 	"urn": "URN",
 	"treatmentStatus": "Statut de traitement",
 	"qualification": "Qualification",
@@ -175,7 +176,8 @@
 	"lcStatus": "Statut",
 	"internalReference": "Référence interne",
 	"isActive": "Actif",
-	"dateJoined": "Date d'adhésion",
+	"isThirdParty": "Identité d'un tiers",
+	"dateJoined": "Date d'activation",
 	"version": "Version",
 	"versionColon": "Version :",
 	"treatment": "Traitement",
@@ -267,6 +269,7 @@
 	"plan": "Plan",
 	"asPDF": "en PDF",
 	"asCSV": "en CSV",
+	"asXLSX": "en Excel",
 	"asWord": "en Word",
 	"draft": "Brouillon",
 	"riskMatrixView": "Vue matricielle",
@@ -441,7 +444,7 @@
 	"etaHelpText": "Date d'arrivée estimée",
 	"dueDateHelpText": "Date à laquelle l'évaluation doit être complétée",
 	"expiryDateHelpText": "Date à laquelle l'objet n'est plus valide",
-	"linkHelpText": "URL externe pour suivi ou référence (ex. sharepoint, jira, etc.)",
+	"linkHelpText": "URL externe pour suivi ou référence (ex. ITSM, sharepoint, jira, etc.)",
 	"effortHelpText": "L'effort requis pour mettre en œuvre la mesure appliquée",
 	"costHelpText": "Le coût requis pour mettre en œuvre la mesure appliquée",
 	"riskAcceptanceJusitficationHelpText": "Justification de l'acceptation du risque. Seul l'approbateur peut modifier ce champ.",
@@ -734,7 +737,7 @@
 	"addRepresentative": "Ajouter un représentant",
 	"phone": "Téléphone",
 	"role": "Rôle",
-	"question": "Question",
+	"questions": "Questions",
 	"recipientEntity": "Entité destinataire",
 	"financial": "Financier",
 	"legal": "Juridique",
@@ -883,7 +886,7 @@
 	"step": "Étape {number}",
 	"critical": "Critique",
 	"vulnerabilities": "Vulnérabilités",
-	"severity": "Gravité",
+	"severity": "Niveau de gravité",
 	"potential": "Potentielle",
 	"exploitable": "Exploitable",
 	"mitigated": "Atténuée",
@@ -913,7 +916,7 @@
 	"days": "Jours",
 	"milliseconds": "Millisecondes",
 	"existingMeasures": "Mesures existantes",
-	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
+	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"forgotPassword": "Mot de passe oublié",
 	"score": "Score",
 	"scoreSemiColon": "Score :",
@@ -1460,7 +1463,6 @@
 	"schedule": "Programme",
 	"taskDate": "Date",
 	"isTemplate": "Recurrence",
-	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"reminderWarningStrategicScenarios": "Rappel : N'oubliez pas d'identifier les chemins d'attaque pour réaliser les scénarios opérationnels.",
 	"addAttackPathToDoOperationalScenarios": "Vous devez ajouter un chemin d'attaque à ces scénarios stratégiques si vous souhaitez les utiliser dans les scénarios opérationnels :",
 	"impactHelpText": "Estimation de l'impact de la mesure",
@@ -1483,6 +1485,17 @@
 	"showAllEvents": "Afficher tous les événements",
 	"noEvents": "Aucun événement pour ce jour",
 	"domainAnalytics": "Analytiques par domaine",
+	"personalAccessTokens": "Jetons d'accès personnels",
+	"personalAccessTokensDescription": "Jetons que vous avez générés pouvant être utilisés pour accéder à l'API CISO Assistant.",
+	"generateNewPersonalAccessToken": "Générer un nouveau jeton",
+	"personalAccessTokenCreateDescription": "Les jetons d'accès personnels (PAT) peuvent être utilisés à la place d'un mot de passe pour s'authentifier auprès de l'API. Ils sont utiles pour automatiser des tâches ou pour l'intégration avec d'autres systèmes.",
+	"personalAccessTokenCreateWarning": "Avertissement : Les PAT sont des informations sensibles. Traitez-les comme des mots de passe. Si vous perdez un PAT, vous devrez en générer un nouveau.",
+	"personalAccessTokenOnlyDisplayedOnce": "Le jeton ne sera affiché qu'une seule fois. Assurez-vous de le copier et de le conserver en lieu sûr.",
+	"expiresOn": "Expire le {date}",
+	"personalAccessTokenExpiryHelpText": "Nombre de jours après lequel le jeton expirera",
+	"expiry": "Expiration",
+	"successfullyDeletedPersonalAccessToken": "Jeton d'accès personnel supprimé avec succès",
+	"personalAccessTokenDeleteConfirm": "Êtes-vous sûr de vouloir supprimer ce jeton d'accès personnel ? Toute application ou script utilisant ce jeton ne pourra plus accéder à l'API CISO Assistant. Cette action est irréversible.",
 	"syncToAppliedControls": "S'aligner aux actions",
 	"theFollowingChangesWillBeApplied": "Les changements suivants seront appliqués :",
 	"syncToAppliedControlsMessage": "Cette opération permettra de synchroniser votre niveau de conformité sur le statut des mesures associées. Cette opération ne pourrait pas être annulée.",
@@ -1592,5 +1605,45 @@
 	"assetClassGovernmentRelations": "Relations Gouvernementales",
 	"assetClassCommunityRelations": "Relations Communautaires",
 	"assetClassInvestorRelations": "Relations avec les Investisseurs",
-	"unknownOrDeletedUser": "Utilisateur inconnu ou supprimé"
+	"unknownOrDeletedUser": "Utilisateur inconnu ou supprimé",
+	"reportedAt": "Remonté le",
+	"reportedAtHelpText": "Horodatage de la remontée",
+	"detectedBy": "Détécté via",
+	"internal": "Interne",
+	"external": "Externe",
+	"internallyDetected": "Interne",
+	"externallyDetected": "Externe",
+	"mappingSuggested": "Suggestion de mapping",
+	"mappingSuggestedHelpText": "Suggestions de mapping basées sur les référentiels chargés",
+	"mappingSuggestionTeasing": "Les mappings sont maintenant suggérés ! Vous pouvez utiliser les filtres pour explorer les suggestions basées sur les référentiels chargés.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Heure",
+				"countPlural=other": "{count} Heures"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minute",
+				"countPlural=other": "{count} Minutes"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Jour",
+				"countPlural=other": "{count} Jours"
+			}
+		}
+	]
 }

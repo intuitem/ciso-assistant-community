@@ -24,11 +24,7 @@
 	import type { urlModel } from '$lib/utils/types.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import {
-		type CssClasses,
-		type PopupSettings,
-		type SvelteEvent
-	} from '@skeletonlabs/skeleton-svelte';
+	import { type SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -41,6 +37,7 @@
 	import Th from './Th.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
+	import { tableHandlers } from '$lib/utils/stores';
 
 	interface Props {
 		// Props
@@ -53,16 +50,16 @@
 		numberRowsPerPage?: number;
 		orderBy?: { identifier: string; direction: 'asc' | 'desc' } | undefined;
 		// Props (styles)
-		element?: CssClasses;
-		text?: CssClasses;
-		backgroundColor?: CssClasses;
-		color?: CssClasses;
-		regionHead?: CssClasses;
-		regionHeadCell?: CssClasses;
-		regionBody?: CssClasses;
-		regionCell?: CssClasses;
-		regionFoot?: CssClasses;
-		regionFootCell?: CssClasses;
+		element?: string;
+		text?: string;
+		backgroundColor?: string;
+		color?: string;
+		regionHead?: string;
+		regionHeadCell?: string;
+		regionBody?: string;
+		regionCell?: string;
+		regionFoot?: string;
+		regionFootCell?: string;
 		displayActions?: boolean;
 		identifierField?: string;
 		deleteForm?: SuperValidated<AnyZodObject> | undefined;
@@ -166,11 +163,13 @@
 		}),
 		{
 			rowsPerPage: pagination ? numberRowsPerPage : undefined,
-			totalRows: source.meta.count
+			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
 	let invalidateTable = $state(true);
+
+	$tableHandlers[baseEndpoint] = handler;
 
 	handler.onChange((state: State) =>
 		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
@@ -209,7 +208,9 @@
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters =
-		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+		tableURLModel &&
+		listViewFields[tableURLModel] &&
+		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
 			: {};
 
@@ -529,7 +530,7 @@
 												{#snippet tail()}
 													{@const SvelteComponent_2 = actionsComponent}
 													{#if tail_render}{@render tail_render()}{:else}
-														<SvelteComponent_2 meta={row.meta ?? {}} {actionsURLModel} />
+														<SvelteComponent_2 meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
 											</TableRowActions>

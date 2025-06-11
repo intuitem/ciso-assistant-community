@@ -115,6 +115,7 @@
 	"provider": "Leverantör",
 	"providerColon": "Leverantör:",
 	"domain": "Domän",
+	"domainSemiColon": "Domän:",
 	"urn": "URN",
 	"treatmentStatus": "Behandlingsstatus",
 	"qualification": "Kvalificering",
@@ -717,7 +718,7 @@
 	"addRepresentative": "Lägg till representant",
 	"phone": "Telefon",
 	"role": "Roll",
-	"question": "Fråga",
+	"questions": "Frågor",
 	"recipientEntity": "Mottagarenhet",
 	"financial": "Finansiell",
 	"legal": "Juridisk",
@@ -911,5 +912,38 @@
 	"forceSSOLogin": "Tvinga SSO-inloggning",
 	"forceSSOLoginHelpText": "Kräv SSO för alla användare och återställ alla sparade lösenord. Användare med 'Undanta från tvingad SSO' aktiverat behåller lösenordsbaserad reservåtkomst.",
 	"forceSSOLoginHelpText2": "Se till att din SSO fungerar eller att du har ett reservkonto innan du aktiverar detta alternativ.",
-	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
+	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent",
+	"mappingSuggested": "Förslag på kartläggning",
+	"mappingSuggestedHelpText": "Förslag på kartläggning baserade på inlästa ramverk",
+	"mappingSuggestionTeasing": "Kartläggningsförslag finns nu tillgängliga! Du kan använda filtren för att utforska förslag baserade på inlästa ramverk.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Timme",
+				"countPlural=other": "{count} Timmar"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minut",
+				"countPlural=other": "{count} Minuter"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Dag",
+				"countPlural=other": "{count} Dagar"
+			}
+		}
+	]
 }

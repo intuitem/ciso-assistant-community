@@ -4,10 +4,13 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
+	import type { DataHandler } from '@vincjo/datatables/remote';
+	import { tableHandlers } from '$lib/utils/stores';
 
 	interface Props {
 		meta: any;
 		actionsURLModel: string;
+		handler: DataHandler;
 	}
 
 	let { meta, actionsURLModel }: Props = $props();
@@ -62,10 +65,12 @@
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
-						update();
+						await update();
+						Object.values($tableHandlers).forEach((handler) => {
+							handler.invalidate();
+						});
 					};
 				}}
-				onsubmit={handleSubmit}
 			>
 				<button
 					type="submit"

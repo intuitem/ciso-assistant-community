@@ -15,6 +15,7 @@
 	import { AppliedControlSchema } from '$lib/utils/schemas';
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { getModalStore } from '$lib/components/Modals/stores';
 
 	interface Props {
 		form: SuperValidated<any>;

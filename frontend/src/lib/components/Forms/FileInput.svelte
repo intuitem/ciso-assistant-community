@@ -3,14 +3,6 @@
 
 	import { formFieldProxy, fileProxy } from 'sveltekit-superforms';
 
-	// allowPaste should be set to false when we have multiple FileField at the same time (the ideal implementation would be to deduce to which FileInput the paste operation must be forwarded depending on the targetElement of the "paste" event)
-
-	const { errors, constraints } = formFieldProxy(form, field);
-	let value = fileProxy(form, field);
-	let fileInput: null | HTMLInputElement = $state(null);
-
-	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
-
 	interface Props {
 		class?: string;
 		label?: string | undefined;
@@ -34,6 +26,12 @@
 		allowedExtensions,
 		...rest
 	}: Props = $props();
+
+	const { errors, constraints } = formFieldProxy(form, field);
+	let value = fileProxy(form, field);
+	let fileInput: null | HTMLInputElement = $state(null);
+
+	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
 
 	function getShortenPreciseType(preciseType: string): string {
 		const shortPreciseTypeResult = /^[a-z0-9]+/.exec(preciseType);

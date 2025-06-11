@@ -13,7 +13,7 @@
 		{#each data as entry}
 			<div class="p-2 grow" style="background-color: {entry?.impact?.hexcolor || '#f0f0f0'};">
 				<div class="text-lg font-bold">{safeTranslate(entry?.impact?.name || 'unknown')}</div>
-				<div>{entry?.pit || '-'}</div>
+				<div>{safeTranslate(entry?.pit) || '-'}</div>
 			</div>
 		{/each}
 	{/if}

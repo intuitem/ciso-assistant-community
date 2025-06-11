@@ -339,7 +339,7 @@
 					</div>
 				{/if}
 				{#if requirementAssessment.assessable}
-					{#if data.requirements[i].annotation || requirementAssessment.mapping_inference.result}
+					{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference.result}
 						<div
 							class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
 						>
@@ -364,6 +364,17 @@
 										</p>
 										<p class="whitespace-pre-line py-1">
 											{data.requirements[i].annotation}
+										</p>
+									</div>
+								{/if}
+								{#if data.requirements[i].typical_evidence}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-pencil" />
+											{m.typicalEvidence()}
+										</p>
+										<p class="whitespace-pre-line py-1">
+											{data.requirements[i].typical_evidence}
 										</p>
 									</div>
 								{/if}

@@ -4,9 +4,12 @@ from core.serializers import (
     BaseModelSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
+from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User
 
 from .models import ClientSettings
+from auditlog.models import LogEntry
+
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -27,8 +30,13 @@ class FolderWriteSerializer(BaseModelSerializer):
         if not self.instance:
             return parent_folder
         if parent_folder:
-            if parent_folder == self.instance or parent_folder in self.instance.get_sub_folders():
-                raise serializers.ValidationError("errorFolderGraphMustNotContainCycles")
+            if (
+                parent_folder == self.instance
+                or parent_folder in self.instance.get_sub_folders()
+            ):
+                raise serializers.ValidationError(
+                    "errorFolderGraphMustNotContainCycles"
+                )
         return parent_folder
 
 
@@ -82,7 +90,37 @@ class ClientSettingsWriteSerializer(BaseModelSerializer):
 class ClientSettingsReadSerializer(BaseModelSerializer):
     logo_hash = serializers.CharField()
     favicon_hash = serializers.CharField()
+    logo = serializers.SerializerMethodField()
+    favicon = serializers.SerializerMethodField()
+
+    def get_logo(self, obj):
+        if obj.logo:
+            return obj.logo.name.split("/")[-1]
+        return None
+
+    def get_favicon(self, obj):
+        if obj.favicon:
+            return obj.favicon.name.split("/")[-1]
+        return None
 
     class Meta:
         model = ClientSettings
         exclude = ["is_published", "folder"]
+
+
+class LogEntrySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the LogEntry model.
+    """
+
+    actor = FieldsRelatedField()
+    action = serializers.CharField(source="get_action_display")
+    content_type = serializers.SerializerMethodField(method_name="get_content_type")
+
+    def get_content_type(self, obj):
+        return obj.content_type.name
+
+    class Meta:
+        model = LogEntry
+        fields = "__all__"
+        read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]

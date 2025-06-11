@@ -3,7 +3,6 @@
 
 	import { page } from '$app/state';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { displayOnlyAssessableNodes } from './store';
 
 	import { onMount } from 'svelte';
 
@@ -33,8 +32,8 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
-	import { expandedNodesState } from '$lib/utils/stores';
-	import {} from '@skeletonlabs/skeleton-svelte';
+	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 
 	interface Props {
@@ -141,6 +140,11 @@
 		'not_assessed',
 		'not_applicable'
 	]);
+	let displayOnlyAssessableNodes = $state(false);
+
+	// derive the current filters for this audit ID
+	const currentFilters = derived(auditFiltersStore, ($f) => $f[page.params.id] ?? {});
+
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {
 			return selectedItems.filter((s) => s !== item);
@@ -151,25 +155,27 @@
 
 	function toggleStatus(status) {
 		selectedStatus = toggleItem(status, selectedStatus);
+		auditFiltersStore.setStatus(page.params.id, selectedStatus);
 	}
 
 	function toggleResult(result) {
 		selectedResults = toggleItem(result, selectedResults);
+		auditFiltersStore.setResults(page.params.id, selectedResults);
 	}
 
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
-			!(!displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
-			((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
-				node.assessable)
+			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
+			(node.assessable &&
+				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
+					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
 		);
 	}
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
-			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = isNodeHidden(node, $displayOnlyAssessableNodes);
+			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
 
 			return {
 				id: id,
@@ -252,7 +258,6 @@
 				throw new Error('Failed to fetch requirement assessments sync data');
 			}
 		});
-		console.log(requirementAssessmentsSync);
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -346,7 +351,7 @@
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
 						class="text-sm font-medium text-gray-800 capitalize-first"
@@ -464,6 +469,11 @@
 								<a
 									href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
 									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+									>... {m.asXLSX()}</a
 								>
 								<a
 									href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
@@ -639,7 +649,7 @@
 				{/each}
 			</div>
 			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-				{#if $displayOnlyAssessableNodes}
+				{#if displayOnlyAssessableNodes}
 					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
 				{:else}
 					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
@@ -649,10 +659,10 @@
 					class="flex flex-row items-center justify-center"
 					active="bg-primary-500"
 					background="bg-green-500"
-					bind:checked={$displayOnlyAssessableNodes}
-					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
+					onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
+					onclick={() => (displayOnlyAssessableNodes = !displayOnlyAssessableNodes)}
 				>
-					{#if $displayOnlyAssessableNodes}
+					{#if displayOnlyAssessableNodes}
 						<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
 					{:else}
 						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
@@ -666,7 +676,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

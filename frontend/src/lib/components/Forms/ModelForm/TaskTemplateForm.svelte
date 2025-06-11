@@ -287,5 +287,15 @@
 		bind:cachedValue={formDataCache['risk_assessments']}
 		label={m.riskAssessments()}
 	/>
+
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="findings-assessments"
+		field="findings_assessment"
+		cacheLock={cacheLocks['findings_assessment']}
+		bind:cachedValue={formDataCache['findings_assessment']}
+		label={m.findingsAssessment()}
+	/>
 </Dropdown>
 <Checkbox {form} field="enabled" label={m.enabled()} />

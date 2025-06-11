@@ -24,6 +24,7 @@
 		bodyComponent: ComponentType | undefined;
 		bodyProps?: Record<string, unknown>;
 		debug?: boolean;
+		schema?: any;
 	}
 
 	let {
@@ -34,7 +35,8 @@
 		formAction,
 		bodyComponent,
 		bodyProps = {},
-		debug = false
+		debug = false,
+		schema
 	}: Props = $props();
 
 	const { form } = superForm(_form, {
@@ -54,7 +56,13 @@
 			</div>
 		{/if}
 		<!-- Enable for debugging: -->
-		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
+		<SuperForm
+			dataType="json"
+			action={formAction}
+			data={_form}
+			class="modal-form {cForm}"
+			validators={schema}
+		>
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>{m.cancel()}</button>

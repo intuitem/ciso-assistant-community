@@ -48,7 +48,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.8.4
+    image: caddy:2.10.0
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped

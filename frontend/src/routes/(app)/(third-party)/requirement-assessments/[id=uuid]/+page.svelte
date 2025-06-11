@@ -12,7 +12,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import { Tab, ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 
 	interface Props {
@@ -290,17 +290,10 @@
 		</Tabs>
 	</div>
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
-		<h1 class="font-semibold text-sm">{m.question()}</h1>
-		{#each Object.keys(data.requirementAssessment.requirement.questions) as key}
+		<h1 class="font-semibold text-sm">{m.questions()}</h1>
+		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
 			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-				{data.requirementAssessment.requirement.questions[key].text}
-				{#if data.requirementAssessment.answers[key].value}
-					<p class="text-sm font-semibold text-primary-500">
-						{data.requirementAssessment.answers[key].value}
-					</p>
-				{:else}
-					<p class="text-sm font-semibold text-primary-500">{m.undefined()}</p>
-				{/if}
+				<p>{question.text} ({safeTranslate(question.type)})</p>
 			</li>
 		{/each}
 	{/if}

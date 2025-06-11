@@ -115,6 +115,7 @@
 	"provider": "Penyedia",
 	"providerColon": "Penyedia:",
 	"domain": "Domain",
+	"domainSemiColon": "Domain:",
 	"urn": "URN",
 	"treatmentStatus": "Status perlakuan",
 	"qualification": "Kualifikasi",
@@ -720,7 +721,7 @@
 	"addRepresentative": "Tambahkan perwakilan",
 	"phone": "Telepon",
 	"role": "Peran",
-	"question": "Pertanyaan",
+	"questions": "Pertanyaan",
 	"recipientEntity": "Entitas penerima",
 	"financial": "Finansial",
 	"legal": "Legal",
@@ -1109,5 +1110,38 @@
 	"forceSSOLogin": "Paksa login SSO",
 	"forceSSOLoginHelpText": "Wajibkan SSO untuk semua pengguna dan atur ulang semua kata sandi yang disimpan. Pengguna dengan 'Kecualikan dari SSO wajib' yang diaktifkan akan mempertahankan akses cadangan berbasis kata sandi.",
 	"forceSSOLoginHelpText2": "Pastikan SSO Anda berfungsi atau Anda memiliki akun cadangan sebelum mengaktifkan opsi ini.",
-	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini."
+	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
+	"mappingSuggested": "Pemetaan disarankan",
+	"mappingSuggestedHelpText": "Saran pemetaan berdasarkan kerangka kerja yang dimuat",
+	"mappingSuggestionTeasing": "Pemetaan sekarang disarankan! Anda dapat menggunakan filter untuk menjelajahi saran berdasarkan kerangka kerja yang dimuat.",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Jam",
+				"countPlural=other": "{count} Jam"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Menit",
+				"countPlural=other": "{count} Menit"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Hari",
+				"countPlural=other": "{count} Hari"
+			}
+		}
+	]
 }

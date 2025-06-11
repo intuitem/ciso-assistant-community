@@ -24,6 +24,7 @@
 	placeholder={m.searchPlaceholder()}
 	data-testid="search-input"
 	id="search-input"
+	type="search"
 	bind:value
 	oninput={search}
 />

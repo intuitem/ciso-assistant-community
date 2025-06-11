@@ -168,15 +168,15 @@ importers:
       storybook:
         specifier: ^8.4.7
         version: 8.4.7(prettier@3.4.2)
+      sv-typewriter:
+        specifier: ^4.1.2
+        version: 4.1.2(svelte@5.28.6)
       svelte:
         specifier: ^5.28.6
         version: 5.28.6
       svelte-check:
         specifier: ^4.1.7
         version: 4.1.7(picomatch@4.0.2)(svelte@5.28.6)(typescript@5.7.2)
-      svelte-typewriter:
-        specifier: ^3.2.3
-        version: 3.2.3(svelte@5.28.6)
       sveltekit-flash-message:
         specifier: ^2.4.4
         version: 2.4.4(@sveltejs/kit@2.21.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.28.6)(vite@5.4.18(@types/node@20.17.10)(lightningcss@1.29.2)))(svelte@5.28.6)(vite@5.4.18(@types/node@20.17.10)(lightningcss@1.29.2)))(svelte@5.28.6)
@@ -796,18 +796,6 @@ packages:
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
-
-  '@formatjs/ecma402-abstract@2.3.1':
-    resolution: {integrity: sha512-Ip9uV+/MpLXWRk03U/GzeJMuPeOXpJBSB5V1tjA6kJhvqssye5J5LoYLc7Z5IAHb7nR62sRoguzrFiVCP/hnzw==}
-
-  '@formatjs/fast-memoize@2.2.5':
-    resolution: {integrity: sha512-6PoewUMrrcqxSoBXAOJDiW1m+AmkrAj0RiXnOMD59GRaswjXhm3MDhgepXPBgonc09oSirAJTsAggzAGQf6A6g==}
-
-  '@formatjs/intl-localematcher@0.5.9':
-    resolution: {integrity: sha512-8zkGu/sv5euxbjfZ/xmklqLyDGQSxsLqg8XOq88JW3cmJtzhCP8EtSJXlaKZnVO4beEaoiT9wj4eIoCQ9smwxA==}
-
-  '@formatjs/intl-segmenter@11.7.7':
-    resolution: {integrity: sha512-610J5xz5DxtEpa16zNR89CrvA9qWHxQFkUB3FKiGao0Nwn7i8cl+oyBhuH9SvtXF9j2LUOM9VMdVCMzJkVANNw==}
 
   '@fortawesome/fontawesome-free@6.7.1':
     resolution: {integrity: sha512-ALIk/MOh5gYe1TG/ieS5mVUsk7VUIJTJKPMK9rFFqOgfp0Q3d5QiBXbcOMwUvs37fyZVCz46YjOE6IFeOAXCHA==}
@@ -3947,6 +3935,11 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  sv-typewriter@4.1.2:
+    resolution: {integrity: sha512-x9/igEUCEat1uTlwtPqdW2kSNh7G18LuX0FGhb3GzSya5CFH45h39C3K8jQ6rwCRgtDPgrsPtCKvCvKUI4eZ1w==}
+    peerDependencies:
+      svelte: ^5.0.0
+
   svelte-check@4.1.7:
     resolution: {integrity: sha512-1jX4BzXrQJhC/Jt3SqYf6Ntu//vmfc6VWp07JkRfK2nn+22yIblspVUo96gzMkg0Zov8lQicxhxsMzOctwcMQQ==}
     engines: {node: '>= 18.0.0'}
@@ -4011,11 +4004,6 @@ packages:
         optional: true
       typescript:
         optional: true
-
-  svelte-typewriter@3.2.3:
-    resolution: {integrity: sha512-762k01kIU+IyXfe5f2MEYQ1yIfJZfueAEmJNbO36cxJG56/vciHiWacPQLnSECK/4cvlH/Ll1Mv6B45InMJ1zg==}
-    peerDependencies:
-      svelte: '>=3.47.x'
 
   svelte2tsx@0.7.30:
     resolution: {integrity: sha512-sHXK/vw/sVJmFuPSq6zeKrtuZKvo0jJyEi8ybN0dfrqSYVvHu8zFbO0zQKAL8y/fYackYojH41EJGe6v8rd5fw==}
@@ -4859,27 +4847,6 @@ snapshots:
   '@floating-ui/utils@0.2.8': {}
 
   '@floating-ui/utils@0.2.9': {}
-
-  '@formatjs/ecma402-abstract@2.3.1':
-    dependencies:
-      '@formatjs/fast-memoize': 2.2.5
-      '@formatjs/intl-localematcher': 0.5.9
-      decimal.js: 10.4.3
-      tslib: 2.8.1
-
-  '@formatjs/fast-memoize@2.2.5':
-    dependencies:
-      tslib: 2.8.1
-
-  '@formatjs/intl-localematcher@0.5.9':
-    dependencies:
-      tslib: 2.8.1
-
-  '@formatjs/intl-segmenter@11.7.7':
-    dependencies:
-      '@formatjs/ecma402-abstract': 2.3.1
-      '@formatjs/intl-localematcher': 0.5.9
-      tslib: 2.8.1
 
   '@fortawesome/fontawesome-free@6.7.1': {}
 
@@ -8423,6 +8390,10 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  sv-typewriter@4.1.2(svelte@5.28.6):
+    dependencies:
+      svelte: 5.28.6
+
   svelte-check@4.1.7(picomatch@4.0.2)(svelte@5.28.6)(typescript@5.7.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -8465,11 +8436,6 @@ snapshots:
       postcss: 8.4.49
       postcss-load-config: 4.0.2(postcss@8.4.49)
       typescript: 5.7.2
-
-  svelte-typewriter@3.2.3(svelte@5.28.6):
-    dependencies:
-      '@formatjs/intl-segmenter': 11.7.7
-      svelte: 5.28.6
 
   svelte2tsx@0.7.30(svelte@5.28.6)(typescript@5.7.2):
     dependencies:

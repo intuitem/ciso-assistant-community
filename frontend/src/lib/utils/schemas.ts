@@ -161,7 +161,12 @@ export const AppliedControlSchema = z.object({
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	link: z.string().url().optional().or(z.literal('')),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
 	effort: z.string().optional().nullable(),
 	control_impact: z.number().optional().nullable(),
 	cost: z.number().multipleOf(0.000001).optional().nullable(),
@@ -232,7 +237,13 @@ export const AssetSchema = z.object({
 				.optional()
 		})
 		.optional(),
-	reference_link: z.string().url().optional().or(z.literal('')),
+	reference_link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+
 	owner: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
@@ -307,7 +318,8 @@ export const ComplianceAssessmentSchema = z.object({
 	create_applied_controls_from_suggestions: z.boolean().optional().default(false),
 	observation: z.string().optional().nullable(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional()
 });
 
 export const EvidenceSchema = z.object({
@@ -316,7 +328,12 @@ export const EvidenceSchema = z.object({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().nullable(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -350,8 +367,8 @@ export const FeatureFlagsSchema = z.object({
 });
 
 export const SSOSettingsSchema = z.object({
-	is_enabled: z.boolean().optional(),
-	force_sso: z.boolean().optional(),
+	is_enabled: z.boolean().default(false).optional(),
+	force_sso: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),
@@ -398,7 +415,12 @@ export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	mission: z.string().optional(),
-	reference_link: z.string().url().optional().or(z.literal(''))
+	reference_link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional()
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -526,7 +548,12 @@ export const dataContractorSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
-	documentation_link: z.string().optional(),
+	documentation_link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
 	processing: z.string(),
 	entity: z.string().optional()
 });
@@ -534,7 +561,12 @@ export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
-	documentation_link: z.string().optional(),
+	documentation_link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
 	legal_basis: z.string(),
 	guarantees: z.string().optional(),
 	processing: z.string(),
@@ -655,7 +687,9 @@ export const FindingSchema = z.object({
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
 	severity: z.number().default(-1),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 
 export const FindingsAssessmentSchema = z.object({
@@ -676,9 +710,23 @@ export const FindingsAssessmentSchema = z.object({
 export const IncidentSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	reported_at: z
+		.string()
+		.datetime({ local: true })
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
 	ref_id: z.string().optional(),
 	status: z.string().default('new'),
+	detection: z.string().default('internally_detected'),
 	severity: z.number().default(6),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
@@ -721,6 +769,7 @@ export const TaskTemplateSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
+	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	schedule: z
@@ -744,6 +793,11 @@ export const TaskNodeSchema = z.object({
 	status: z.string().optional(),
 	observation: z.string().optional(),
 	evidences: z.string().uuid().optional().array().optional()
+});
+
+export const AuthTokenCreateSchema = z.object({
+	name: z.string().min(1),
+	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

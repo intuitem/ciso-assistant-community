@@ -37,6 +37,7 @@
 					{ id, urlmodel: 'evidences' },
 					zod(z.object({ id: z.string(), urlmodel: z.string() }))
 				),
+				schema: zod(z.object({ id: z.string(), urlmodel: z.string() })),
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel,
