@@ -84,7 +84,7 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
 class FearedEventWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FearedEvent
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class FearedEventReadSerializer(BaseModelSerializer):
