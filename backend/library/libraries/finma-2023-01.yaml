@@ -103,7 +103,7 @@ objects:
           \ und 14e\n                                           FINIG Art. 9 und 49\n\
           \                                           FINIV Art. 12 und 68"
     requirement_nodes:
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-dapplication
       assessable: false
       depth: 1
       name: "I. Objet et champ d\u2019application"
@@ -117,8 +117,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:1
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019\
-        application"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-dapplication
       ref_id: '1'
       description: "La pr\xE9sente circulaire se r\xE9f\xE8re aux prescriptions en\
         \ mati\xE8re de s\xE9paration des fonctions, de gestion des risques et de\
@@ -169,8 +168,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:2
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019\
-        application"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-dapplication
       ref_id: '2'
       description: "La pr\xE9sente circulaire s\u2019adresse aux banques selon l\u2019\
         art. 1a et aux personnes selon l\u2019art. 1b de la loi sur les banques (LB\
@@ -208,7 +206,7 @@ objects:
             \ Art. 3c BankG und Art. 49 FINIG. Im Folgenden werden Banken, Personen\
             \ nach Art. 1b BankG, Wertpapierh\xE4user, Finanzgruppen und Finanzkonglomerate\
             \ unter dem Begriff \u201EInstitute\u201C zusammengefasst."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       assessable: false
       depth: 1
       name: "II. D\xE9finitions"
@@ -222,7 +220,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:3
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '3'
       description: "Les risques op\xE9rationnels sont d\xE9finis \xE0 l\u2019art.\
         \ 89 OFR. On entend par l\xE0 le risque de pertes financi\xE8res r\xE9sultant\
@@ -283,7 +281,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:4
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '4'
       description: "Les risques inh\xE9rents sont les risques op\xE9rationnels auxquels\
         \ est expos\xE9 l\u2019\xE9tablissement en raison de ses produits, de ses\
@@ -305,7 +303,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:5
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '5'
       description: "Les risques r\xE9siduels sont les risques op\xE9rationnels auxquels\
         \ est expos\xE9 l\u2019\xE9tablissement apr\xE8s prise en compte des mesures\
@@ -324,7 +322,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:6
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '6'
       description: "Par technologie de l\u2019information et de la communication (TIC),\
         \ on entend la structure physique et logique (\xE9lectronique) des syst\xE8\
@@ -349,7 +347,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:7
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '7'
       description: "Les donn\xE9es critiques sont des donn\xE9es qui, compte tenu\
         \ de la taille, de la complexit\xE9, de la structure, du profil de risque\
@@ -397,7 +395,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:8
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '8'
       description: "Les processus critiques sont des processus qui, s\u2019ils connaissent\
         \ des incidents ou interruptions majeurs mettent en danger l\u2019ex\xE9cution\
@@ -418,7 +416,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:9
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '9'
       description: "Le business continuity management (BCM) d\xE9signe l\u2019approche\
         \ adopt\xE9e \xE0 l\u2019\xE9chelle de l\u2019\xE9tablissement pour r\xE9\
@@ -452,7 +450,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:10
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '10'
       description: "Le recovery time objective (RTO) est le d\xE9lai n\xE9cessaire\
         \ jusqu\u2019au r\xE9tablissement d\u2019une application, d\u2019un syst\xE8\
@@ -476,7 +474,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:11
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '11'
       description: "Le business continuity plan (BCP) est un plan qui d\xE9finit les\
         \ proc\xE9dures, les options de remplacement et les ressources de remplacement\
@@ -502,7 +500,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:12
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '12'
       description: "Le disaster recovery plan (DRP) d\xE9finit les processus de r\xE9\
         tablissement qui permettent d\u2019atteindre les objectifs de r\xE9tablissement\
@@ -528,7 +526,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:13
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '13'
       description: "Les situations de crise sont des situations exceptionnelles mettant\
         \ potentiellement en danger l\u2019existence de l\u2019\xE9tablissement et\
@@ -561,7 +559,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:14
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '14'
       description: 'Les fonctions critiques comprennent :'
       translations:
@@ -574,7 +572,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:15
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '15'
       description: "a. les activit\xE9s, les processus et les services, y compris\
         \ les ressources sous-jacentes n\xE9cessaires \xE0 leur r\xE9alisation, dont\
@@ -603,7 +601,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:16
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '16'
       description: "b. les fonctions d\u2019importance syst\xE9mique selon l\u2019\
         art. 8 LB."
@@ -618,7 +616,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:17
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '17'
       description: "La tol\xE9rance aux interruptions est l\u2019ampleur (par ex.\
         \ dur\xE9e ou dommages attendus) de l\u2019interruption d\u2019une fonction\
@@ -647,7 +645,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:18
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:ii.-definitions
       ref_id: '18'
       description: "La r\xE9silience op\xE9rationnelle d\xE9signe la capacit\xE9 de\
         \ l\u2019\xE9tablissement \xE0 pouvoir r\xE9tablir ses fonctions critiques\
@@ -712,7 +710,7 @@ objects:
             \ Ein effektives Management der operationellen Risiken tr\xE4gt dazu bei,\
             \ die operationelle Resilienz des Instituts zu st\xE4rken."
           annotation: "[4] H\xE4ufig auch Resilience by Design genannt."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalite
       assessable: false
       depth: 1
       name: "III. Principe de proportionnalit\xE9"
@@ -726,7 +724,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:19
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalite
       ref_id: '19'
       description: "La pr\xE9sente circulaire s\u2019applique fondamentalement \xE0\
         \ l\u2019ensemble de ses destinataires. Elle doit cependant \xEAtre mise en\
@@ -754,7 +752,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:20
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalite
       ref_id: '20'
       description: "Les banques et les maisons de titres des cat\xE9gories FINMA 4\
         \ et 5 sont exempt\xE9es du respect des Cm 33 \xE0 38, 41 \xE0 46, 48, 51,\
@@ -776,7 +774,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:21
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalite
       ref_id: '21'
       description: "Les \xE9tablissements selon les art. 47a \xE0 47e OFR, les personnes\
         \ selon l\u2019art. 1b LB ainsi que les maisons de titres qui ne g\xE8rent\
@@ -797,8 +795,7 @@ objects:
           description: "Institute nach Art. 47a\u201347e ERV, Personen gem\xE4ss Art.\
             \ 1b BankG, sowie nicht-kontof\xFChrende Wertpapierh\xE4user sind zus\xE4\
             tzlich von der Erf\xFCllung der Rz 72, 75, 79 und 105\u2013109 ausgenommen."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       assessable: false
       depth: 1
       name: "IV. Gestion des risques op\xE9rationnels"
@@ -809,12 +806,10 @@ objects:
           name: IV. Gestione dei rischi operativi
         de:
           name: IV. Management der operationellen Risiken
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       name: "A. Gestion globale des risques op\xE9rationnels"
       translations:
         en:
@@ -826,8 +821,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:22
       assessable: false
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '22'
       description: "La gestion des risques op\xE9rationnels fait partie de la gestion\
         \ des risques \xE0 l\u2019\xE9chelle de l\u2019\xE9tablissement conform\xE9\
@@ -849,8 +843,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:23
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '23'
       description: "L\u2019organe responsable de la haute direction approuve l\u2019\
         approche pour la gestion des risques op\xE9rationnels pertinents pour l\u2019\
@@ -916,8 +909,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:24
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '24'
       description: "L\u2019organe responsable de la haute direction approuve r\xE9\
         guli\xE8rement les strat\xE9gies de gestion des TIC, des cyberrisques, des\
@@ -937,8 +929,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:25
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '25'
       description: "La direction s\u2019assure de mani\xE8re compr\xE9hensible que\
         \ les risques op\xE9rationnels sont identifi\xE9s, \xE9valu\xE9s, limit\xE9\
@@ -979,8 +970,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:26
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '26'
       description: "Des mesures doivent \xEAtre mises en \u0153uvre7 pour sensibiliser\
         \ le personnel \xE0 la r\xE9duction des risques op\xE9rationnels pertinents,\
@@ -1025,8 +1015,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:27
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '27'
       description: "Si n\xE9cessaire, la FINMA d\xE9finit, dans le cadre de sa surveillance\
         \ courante, d\u2019autres exigences en mati\xE8re de gestion des risques op\xE9\
@@ -1051,8 +1040,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:28
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '28'
       description: "Les risques op\xE9rationnels doivent \xEAtre cat\xE9goris\xE9\
         s de fa\xE7on uniforme \xE0 l\u2019\xE9chelle de l\u2019\xE9tablissement et\
@@ -1090,8 +1078,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:29
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '29'
       description: "Des facteurs internes8 et externes9 sont pris en compte dans l\u2019\
         identification des risques op\xE9rationnels. Les risques op\xE9rationnels\
@@ -1144,8 +1131,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:30
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '30'
       description: "L\u2019identification et l\u2019\xE9valuation des risques op\xE9\
         rationnels s\u2019appuient au moins sur les r\xE9sultats d\u2019audit10 et\
@@ -1196,8 +1182,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:31
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '31'
       description: "Pour \xE9valuer les mesures de contr\xF4le et d\u2019att\xE9nuation\
         \ existantes, une instance de contr\xF4le ind\xE9pendante proc\xE8de \xE0\
@@ -1239,8 +1224,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:32
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '32'
       description: "Des \xE9valuations ad hoc des risques et des contr\xF4les doivent\
         \ \xEAtre effectu\xE9es avant des changements importants dans les produits,\
@@ -1274,8 +1258,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:33
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '33'
       description: "En fonction de la nature, de l\u2019ampleur, de la complexit\xE9\
         \ et du risque des produits, activit\xE9s, proc\xE9dures et syst\xE8mes sp\xE9\
@@ -1298,8 +1281,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:34
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '34'
       description: "a. la collecte et l\u2019analyse syst\xE9matiques des donn\xE9\
         es de pertes internes et des \xE9v\xE9nements externes pertinents li\xE9s\
@@ -1318,8 +1300,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:35
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '35'
       description: "b. les indicateurs de risque et de contr\xF4le pour la surveillance\
         \ des risques op\xE9rationnels et l\u2019identification rapide des hausses\
@@ -1339,8 +1320,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:36
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '36'
       description: "c. les analyses de sc\xE9nario et/ou l\u2019estimation du potentiel\
         \ de perte compte tenu ou vis\xE0-vis des fonds propres minimaux pour les\
@@ -1360,8 +1340,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:37
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '37'
       description: "d. les analyses comparatives (read across), comme les analyses\
         \ de pertinence des r\xE9sultats d\u2019audit pour d\u2019autres domaines\
@@ -1387,8 +1366,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:38
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '38'
       description: "La tol\xE9rance au risque pour les risques op\xE9rationnels tient\
         \ compte de la tol\xE9rance en lien tant avec les risques inh\xE9rents11 qu\u2019\
@@ -1440,8 +1418,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:39
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '39'
       description: "Le rapport du contr\xF4le des risques remis au moins une fois\
         \ par ann\xE9e \xE0 l\u2019organe responsable de la haute direction et au\
@@ -1487,8 +1464,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:40
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '40'
       description: "En ce qui concerne les risques TIC et les cyberrisques, le rapport\
         \ remis au moins une fois par ann\xE9e \xE0 la direction contient en outre\
@@ -1517,8 +1493,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:41
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '41'
       description: "Le rapport interne au sens du Cm 39 contient \xE0 titre compl\xE9\
         mentaire les informations suivantes :"
@@ -1535,8 +1510,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:42
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '42'
       description: "\u2022 les facteurs externes pertinents selon la note de bas de\
         \ page 9,"
@@ -1551,8 +1525,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:43
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '43'
       description: "\u2022 la vue d\u2019ensemble r\xE9capitulative sur l\u2019efficacit\xE9\
         \ des contr\xF4les cl\xE9s selon le Cm 31,"
@@ -1569,8 +1542,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:44
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '44'
       description: "\u2022 les risques op\xE9rationnels \xE9mergents,"
       translations:
@@ -1583,8 +1555,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:45
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '45'
       description: "\u2022 les r\xE9sultats d\xE9coulant de l\u2019application des\
         \ instruments et des m\xE9thodes suppl\xE9mentaires selon le Cm 33."
@@ -1601,8 +1572,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:46
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '46'
       description: "De plus, conform\xE9ment au principe de proportionnalit\xE9, les\
         \ banques d\u2019importance syst\xE9mique rendent compte r\xE9guli\xE8rement\
@@ -1626,12 +1596,10 @@ objects:
             \ die relevanten oder wesentlichen operationellen Risiken ausgesetzt sind,\
             \ eine regelm\xE4ssige Berichterstattung zu den operationellen Risiken\
             \ vorgenommen."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       name: B. Gestion des risques TIC
       translations:
         en:
@@ -1640,12 +1608,10 @@ objects:
           name: B. Gestione dei rischi TIC
         de:
           name: B. Management der IKT-Risiken
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:1"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:1
       assessable: false
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2
       name: "a) Strat\xE9gie TIC et gouvernance"
       translations:
         en:
@@ -1657,8 +1623,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:47
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:1
       ref_id: '47'
       description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
         gie, de la gouvernance et de la sensibilisation aux TIC sont d\xE9finies aux\
@@ -1679,8 +1644,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:48
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:1
       ref_id: '48'
       description: "La gestion des risques TIC tient compte des normes pertinentes\
         \ et pratiques reconnues \xE0 l\u2019\xE9chelle internationale ainsi que de\
@@ -1702,8 +1666,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:49
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:1"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:1
       ref_id: '49'
       description: "La direction s\u2019assure que des proc\xE9dures, des processus,\
         \ des contr\xF4les ainsi que des t\xE2ches, comp\xE9tences et responsabilit\xE9\
@@ -1727,12 +1690,10 @@ objects:
             \ (Run, Maintenance) Verfahren, Prozesse und Kontrollen sowie AKV implementiert\
             \ und dokumentiert sind. Diese sind mit qualifizierten und angemessenen\
             \ Ressourcen ausgestattet."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:2"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:2
       assessable: false
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2
       name: b) Gestion des changements (change management)
       translations:
         en:
@@ -1744,8 +1705,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:50
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:2
       ref_id: '50'
       description: "La gestion des changements d\xE9finit des proc\xE9dures, des processus\
         \ et des contr\xF4les pour toutes les phases de d\xE9veloppement ou d\u2019\
@@ -1776,8 +1736,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:51
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:2
       ref_id: '51'
       description: "Il faut garantir la s\xE9paration entre, d\u2019une part, les\
         \ environnements de d\xE9veloppement ou de test et, d\u2019autre part, l\u2019\
@@ -1803,8 +1762,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:52
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:2
       ref_id: '52'
       description: "Lors du d\xE9veloppement et de l\u2019acquisition de TIC, les\
         \ exigences fonctionnelles et non fonctionnelles13 sont clairement d\xE9finies\
@@ -1831,12 +1789,10 @@ objects:
             \ gem\xE4ss ihrer Kritikalit\xE4t getestet und validiert."
           annotation: '[13] Bspw. im Hinblick auf die Architektur oder die Anforderungen
             an die Informationssicherheit.'
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:3"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
       assessable: false
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2
       name: c) Exploitation TIC (run, maintenance)
       translations:
         en:
@@ -1848,8 +1804,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:53
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
       ref_id: '53'
       description: "L\u2019\xE9tablissement dresse un ou plusieurs inventaire(s) des\
         \ composantes TIC. L\u2019inventaire inclut les composantes mat\xE9rielles\
@@ -1878,8 +1833,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:54
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
       ref_id: '54'
       description: "L\u2019inventaire est disponible rapidement et est r\xE9guli\xE8\
         rement revu et mis \xE0 jour en ce qui concerne son exhaustivit\xE9 et sa\
@@ -1898,8 +1852,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:55
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
       ref_id: '55'
       description: "L\u2019\xE9tablissement dispose de proc\xE9dures, de processus\
         \ et de contr\xF4les qui garantissent la confidentialit\xE9, l\u2019int\xE9\
@@ -1923,8 +1876,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:56
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
       ref_id: '56'
       description: "L\u2019\xE9tablissement garantit la transition irr\xE9prochable\
         \ entre la gestion op\xE9rationnelle TIC et les proc\xE9dures BCM et DRP en\
@@ -1951,8 +1903,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:57
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
       ref_id: '57'
       description: "L\u2019\xE9tablissement dispose de proc\xE9dures, de processus\
         \ et de contr\xF4les qui garantissent une gestion orient\xE9e vers le risque\
@@ -1973,12 +1924,10 @@ objects:
           description: "Das Institut verf\xFCgt \xFCber Verfahren, Prozesse und Kontrollen,\
             \ die einen risikoorientierten Umgang mit IKT, deren Betriebsende naht\
             \ oder deren geplante Dekommissionierung \xFCberschritten wurde, sicherstellt."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:4"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:4
       assessable: false
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2
       name: d) Gestion des incidents (incident management)
       translations:
         en:
@@ -1990,8 +1939,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:58
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:4
       ref_id: '58'
       description: "L\u2019\xE9tablissement dispose de proc\xE9dures, de processus\
         \ et de contr\xF4les visant \xE0 traiter les incidents TIC importants, y compris\
@@ -2025,8 +1973,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:59
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:4
       ref_id: '59'
       description: "Le traitement des incidents TIC importants doit \xEAtre coordonn\xE9\
         \ et rattach\xE9 aux processus BCM et DRP."
@@ -2043,8 +1990,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:60
       assessable: true
       depth: 4
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:2:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:4
       ref_id: '60'
       description: "Les \xE9tablissements renseignent sans d\xE9lai la FINMA sur les\
         \ incidents TIC qu\u2019ils consid\xE8rent comme des perturbations importantes\
@@ -2065,12 +2011,10 @@ objects:
             \ bei der Erbringung seiner kritischen Prozesse erachtet werden und f\xFC\
             r die Aufsicht von wesentlicher Bedeutung sind, m\xFCssen der FINMA unverz\xFC\
             glich gemeldet werden."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       name: C. Gestion des cyberrisques
       translations:
         en:
@@ -2082,8 +2026,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:61
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '61'
       description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
         gie, de la gouvernance et du renforcement de la prise de conscience en lien\
@@ -2104,8 +2047,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:62
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '62'
       description: "L\u2019\xE9tablissement d\xE9finit des t\xE2ches, comp\xE9tences\
         \ et responsabilit\xE9s claires. Il doit couvrir au moins les aspects suivants\
@@ -2135,8 +2077,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:63
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '63'
       description: "a. identification des menaces potentielles li\xE9es aux cyberattaques14\
         \ sp\xE9cifiques \xE0 l\u2019\xE9tablissement et \xE9valuation des cons\xE9\
@@ -2182,8 +2123,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:64
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '64'
       description: "b. protection des composantes TIC r\xE9pertori\xE9es et des donn\xE9\
         es \xE9lectroniques critiques contre les cyberattaques par l\u2019impl\xE9\
@@ -2209,8 +2149,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:65
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '65'
       description: "c. enregistrement et d\xE9tection rapides des cyberattaques sur\
         \ la base d\u2019un processus de surveillance syst\xE9matique et constant\
@@ -2233,8 +2172,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:66
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '66'
       description: "d. r\xE9action aux vuln\xE9rabilit\xE9s et aux cyberattaques identifi\xE9\
         es par le d\xE9veloppement et l\u2019impl\xE9mentation de processus appropri\xE9\
@@ -2258,8 +2196,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:67
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '67'
       description: "e. garantie d\u2019un r\xE9tablissement rapide de la marche ordinaire\
         \ des affaires apr\xE8s des cyberattaques, gr\xE2ce \xE0 des mesures appropri\xE9\
@@ -2277,8 +2214,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:68
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '68'
       description: "La gestion des cyberrisques doit garantir qu\u2019une cyberattaque,\
         \ qu\u2019elle ait atteint son but enti\xE8rement ou partiellement, soit analys\xE9\
@@ -2338,8 +2274,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:69
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '69'
       description: "La direction fait r\xE9guli\xE8rement proc\xE9der \xE0 des analyses\
         \ de vuln\xE9rabilit\xE915 et \xE0 des tests d\u2019intrusion16. Ces derniers\
@@ -2400,8 +2335,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:70
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:3"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '70'
       description: "Sur la base des menaces potentielles sp\xE9cifiques \xE0 l\u2019\
         \xE9tablissement, il y a lieu d\u2019effectuer, en fonction des risques, des\
@@ -2433,12 +2367,10 @@ objects:
           annotation: "[17] Unter Ber\xFCcksichtigung der Rz 19 k\xF6nnten solche\
             \ Cyber-\xDCbungen beispielsweise beinhalten, Table-Top-, Red Teaming-\xDC\
             bungen usw."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       name: "D. Gestion des risques des donn\xE9es critiques"
       translations:
         en:
@@ -2450,8 +2382,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:71
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '71'
       description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
         gie, de la gouvernance et du renforcement de la prise de conscience en lien\
@@ -2473,8 +2404,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:72
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '72'
       description: "La direction d\xE9finit des processus, des proc\xE9dures et des\
         \ contr\xF4les ad\xE9quats ainsi que des t\xE2ches, comp\xE9tences et responsabilit\xE9\
@@ -2508,8 +2438,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:73
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '73'
       description: "L\u2019\xE9tablissement identifie ses donn\xE9es critiques de\
         \ mani\xE8re syst\xE9matique et exhaustive, les cat\xE9gorise selon leur criticit\xE9\
@@ -2530,8 +2459,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:74
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '74'
       description: "Les donn\xE9es critiques d\xE9finies par l\u2019\xE9tablissement\
         \ sont g\xE9r\xE9es tout au long de leur cycle de vie."
@@ -2548,8 +2476,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:75
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '75'
       description: "Dans ce cadre, des processus, des proc\xE9dures et des contr\xF4\
         les appropri\xE9s garantissent en particulier le respect de la confidentialit\xE9\
@@ -2571,8 +2498,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:76
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '76'
       description: "Durant l\u2019exploitation et pendant le d\xE9veloppement, le\
         \ changement et la migration des TIC, l\u2019acc\xE8s et l\u2019utilisation\
@@ -2598,8 +2524,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:77
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '77'
       description: "Les composantes TIC, qui sauvegardent ou traitent des donn\xE9\
         es critiques, sont \xE0 prot\xE9ger en particulier. L\u2019acc\xE8s \xE0 ces\
@@ -2622,8 +2547,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:78
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '78'
       description: "L\u2019acc\xE8s aux donn\xE9es critiques et aux fonctionnalit\xE9\
         s de traitement de ces donn\xE9es est limit\xE9 aux personnes qui en ont besoin\
@@ -2662,8 +2586,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:79
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '79'
       description: "Lorsque les donn\xE9es critiques sont stock\xE9es hors de Suisse19\
         \ ou qu\u2019elles sont accessibles depuis l\u2019\xE9tranger, les risques\
@@ -2693,8 +2616,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:80
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '80'
       description: "Tant les personnes internes qu\u2019externes qui peuvent acc\xE9\
         der aux donn\xE9es critiques ou les modifier doivent \xEAtre soigneusement\
@@ -2747,8 +2669,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:81
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '81'
       description: "Les incidents qui entravent de mani\xE8re importante la confidentialit\xE9\
         , l\u2019int\xE9grit\xE9 ou la disponibilit\xE9 des donn\xE9es critiques doivent\
@@ -2768,8 +2689,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:82
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:4"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '82'
       description: "Une grande importance doit \xEAtre accord\xE9e \xE0 l\u2019examen\
         \ de diligence (due diligence) lors du choix des prestataires qui peuvent\
@@ -2822,12 +2742,10 @@ objects:
             ngig von den angewandten Mitteln und Verfahren, insbeson- dere das Beschaffen,\
             \ Speichern, Aufbewahren, Verwenden, Ver\xE4ndern, Bekanntgeben, Archivieren,\
             \ L\xF6schen oder Vernichten von Daten."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       name: E. Business continuity management (BCM)
       translations:
         en:
@@ -2839,8 +2757,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:83
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '83'
       description: "Les attentes fondamentales \xE0 l\u2019\xE9gard de la strat\xE9\
         gie, de la gouvernance et du renforcement de la prise de conscience en lien\
@@ -2863,8 +2780,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:84
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '84'
       description: "Chaque domaine d\u2019activit\xE9 ou d\u2019organisation pertinent\
         \ doit identifier ses processus critiques et les ressources correspondantes\
@@ -2905,8 +2821,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:85
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '85'
       description: "Pour les processus critiques, l\u2019\xE9tablissement d\xE9finit\
         \ le RTO et le RPO conform\xE9ment au Cm 10. Ceux-ci sont coordonn\xE9s avec\
@@ -2943,8 +2858,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:86
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '86'
       description: "L\u2019\xE9tablissement d\xE9finit au moins un BCP selon le Cm\
         \ 11, qui d\xE9crit aussi les processus de d\xE9cision ainsi que les \xE9\
@@ -2972,8 +2886,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:87
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '87'
       description: "La BIA et le BCP sont \xE9tablis et document\xE9s de mani\xE8\
         re coh\xE9rente selon une directive applicable \xE0 l\u2019\xE9chelle de l\u2019\
@@ -3002,8 +2915,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:88
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '88'
       description: "L\u2019\xE9tablissement d\xE9finit au moins un DRP en tant que\
         \ partie int\xE9grante du BCP. Lorsque des processus critiques ou des parties\
@@ -3034,8 +2946,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:89
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '89'
       description: "Dans les situations de crise, un \xE9tat-major de crise est charg\xE9\
         \ de g\xE9rer celle-ci jusqu\u2019au r\xE9tablissement de la situation. Les\
@@ -3072,8 +2983,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:90
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '90'
       description: "L\u2019\xE9tablissement d\xE9finit une strat\xE9gie de communication\
         \ interne et externe en situation de crise."
@@ -3090,8 +3000,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:91
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '91'
       description: "La mise en \u0153uvre du BCP et du DRP ainsi que le bon fonctionnement\
         \ de l\u2019organisation de crise sont r\xE9guli\xE8rement soumis \xE0 des\
@@ -3124,8 +3033,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:92
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '92'
       description: "Les principales mesures du BCP et du DRP ainsi que l\u2019organisation\
         \ de crise sont test\xE9es au moins une fois par ann\xE9e."
@@ -3142,8 +3050,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:93
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '93'
       description: "Les parties prenantes, y compris celles issues des fonctions IT\
         \ et des fonctions sp\xE9cialis\xE9es, participent aux tests pour se familiariser\
@@ -3164,8 +3071,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:94
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '94'
       description: "Les tests comprennent diff\xE9rents sc\xE9narios graves mais plausibles,\
         \ et prennent en compte les d\xE9pendances en mati\xE8re de r\xE9tablissement,\
@@ -3188,8 +3094,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:95
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '95'
       description: "Des comptes rendus r\xE9guliers informent l\u2019organe responsable\
         \ de la haute direction et la direction des activit\xE9s de test et de v\xE9\
@@ -3225,8 +3130,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:96
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:5"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:5
       ref_id: '96'
       description: "Les collaborateurs ainsi que les membres de l\u2019organisation\
         \ de crise doivent \xEAtre suffisamment form\xE9s au sujet de leurs t\xE2\
@@ -3250,12 +3154,10 @@ objects:
             \ werden hinsichtlich ihrer AKV, die sich aus den diversen BCM Aktivit\xE4\
             ten ergeben, ausreichend geschult, sowohl bei Neueintritt von Mitarbeitenden\
             \ als auch als Teil regelm\xE4ssiger Schulungen."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:6"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:6
       assessable: false
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels
       name: "F. Gestion des risques li\xE9s aux activit\xE9s de service transfronti\xE8\
         res"
       translations:
@@ -3269,8 +3171,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:97
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:6"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:6
       ref_id: '97'
       description: "Quand des \xE9tablissements ou leurs filiales fournissent des\
         \ services ou distribuent des produits financiers dans le cadre d\u2019op\xE9\
@@ -3300,8 +3201,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:98
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:6"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:6
       ref_id: '98'
       description: "Les \xE9tablissements soumettent leurs activit\xE9s de services\
         \ transfronti\xE8res ainsi que la distribution transfronti\xE8re de produits\
@@ -3354,8 +3254,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:99
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:6"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:6
       ref_id: '99'
       description: "Les risques g\xE9n\xE9r\xE9s par les g\xE9rants de fortune ind\xE9\
         pendants, les interm\xE9diaires et autres prestataires doivent \xE9galement\
@@ -3379,8 +3278,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:100
       assessable: true
       depth: 3
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
-        rationnels:6"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:6
       ref_id: '100'
       description: "Ce principe s\u2019applique \xE9galement aux cas dans lesquels\
         \ une filiale, une succursale ou une entit\xE9 similaire d\u2019un \xE9tablissement\
@@ -3401,8 +3299,7 @@ objects:
             \ in denen eine im Ausland ans\xE4ssige Tochtergesellschaft, Zweigniederlassung\
             \ oder dergleichen eines Schweizer Finanzinstituts Kunden grenz\xFCberschreitend\
             \ bedient."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
-        rationnelle"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       assessable: false
       depth: 1
       name: "V. Garantie de la r\xE9silience op\xE9rationnelle"
@@ -3416,8 +3313,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:101
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '101'
       description: "L\u2019\xE9tablissement identifie ses fonctions critiques et leurs\
         \ tol\xE9rances aux interruptions. Celles-ci sont approuv\xE9es par l\u2019\
@@ -3444,8 +3340,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:102
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '102'
       description: "L\u2019\xE9tablissement prend des mesures pour garantir la r\xE9\
         silience op\xE9rationnelle en tenant compte de sc\xE9narios graves, mais plausibles25."
@@ -3486,8 +3381,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:103
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '103'
       description: "Les fonctions critiques et leurs tol\xE9rances aux interruptions\
         \ au sens du Cm 14 doivent \xEAtre approuv\xE9es par l\u2019organe responsable\
@@ -3508,8 +3402,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:104
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '104'
       description: "L\u2019\xE9tablissement coordonne les composantes pertinentes\
         \ d\u2019une gestion des risques globale, comme la gestion des risques op\xE9\
@@ -3551,8 +3444,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:105
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '105'
       description: "La direction et l\u2019organe responsable de la haute direction\
         \ doivent recevoir au moins une fois par ann\xE9e des rapports sur la r\xE9\
@@ -3576,8 +3468,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:106
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '106'
       description: "Pour les fonctions critiques, les menaces internes et externes\
         \ ainsi que l\u2019exploitation correspondante des vuln\xE9rabilit\xE9s sont\
@@ -3604,8 +3495,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:107
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '107'
       description: "L\u2019\xE9tablissement constitue un inventaire de ses fonctions\
         \ critiques, qui doit \xEAtre revu et mis \xE0 jour au moins une fois par\
@@ -3644,8 +3534,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:108
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '108'
       description: "Pour les fonctions critiques, l\u2019\xE9tablissement documente\
         \ au minimum les risques op\xE9rationnels importants et les contr\xF4les cl\xE9\
@@ -3663,8 +3552,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:109
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '109'
       description: "Les fonctions critiques et les processus critiques et ressources\
         \ n\xE9cessaires \xE0 cet effet sont couverts par les BCP selon le chapitre\
@@ -3683,8 +3571,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:110
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '110'
       description: "La capacit\xE9 \xE0 ex\xE9cuter des fonctions critiques dans les\
         \ limites de leurs tol\xE9rances aux interruptions en cas de sc\xE9narios\
@@ -3748,8 +3635,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:111
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9\
-        silience-op\xE9rationnelle"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '111'
       description: "S\u2019agissant des banques d\u2019importance syst\xE9mique, le\
         \ BCP, le DRP et l\u2019organisation en cas de crise selon le chapitre IV\
@@ -3774,8 +3660,7 @@ objects:
             hrung der kritischen Funktionen nach Rz 14 relevanten BCP, DRP und die\
             \ Krisenorganisation nach Kapitel IV Bst. E. mit der Notfallplanung nach\
             \ Kapitel VI abzustimmen."
-    - urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
-        assainissement-des-banques-d\u2019importance-syst\xE9mique"
+    - urn: urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-lassainissement-des-banques-dimportance-systemique
       assessable: false
       depth: 1
       name: "VI. Maintien des prestations critiques lors de la liquidation et de l\u2019\
@@ -3793,8 +3678,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:finma-2023-01:112
       assessable: true
       depth: 2
-      parent_urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
-        assainissement-des-banques-d\u2019importance-syst\xE9mique"
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-lassainissement-des-banques-dimportance-systemique
       ref_id: '112'
       description: "Dans le cadre de leur plan d\u2019urgence, les banques d\u2019\
         importance syst\xE9mique prennent les mesures requises pour que leurs fonctions\
