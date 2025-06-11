@@ -21,7 +21,7 @@ import fitz
 import re
 from openpyxl import Workbook
 
-REF_ID_PREFIX = 'Cm'
+REF_ID_PREFIX = 'nm.'
 
 def is_chapter(line): return re.match(r"^[IVX]+\.$", line.strip())
 def is_subchapter(line): return re.match(r"^[A-Z]\.$", line.strip())
@@ -82,7 +82,7 @@ title_exceptions = {
     }
 }
 
-merge_page_paragraphs = {6+1, 14+1}
+merge_page_paragraphs = {13+1}
 
 wb = Workbook()
 ws = wb.active
@@ -95,7 +95,7 @@ in_chapter_IV = False
 paragraph_counter = 1
 previous_paragraph_row = None
 
-pdf_path = "finma_rs_2023_01_20221207_en.pdf"
+pdf_path = "finma_rs_2023_01_20221207_it.pdf"
 doc = fitz.open(pdf_path)
 full_text = "\n".join(page.get_text() for page in doc)
 annotations = extract_annotations(full_text)
@@ -243,4 +243,4 @@ if paragraph_lines:
     annotation_str = "\n".join(sorted(annotation_set))
     ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
 
-wb.save("finma_framework_final_EN.xlsx")
+wb.save("finma_framework_final_IT.xlsx")
