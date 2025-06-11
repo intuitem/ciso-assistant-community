@@ -4927,11 +4927,6 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 # Fake method to trigger the CI to remove
-class FaketoRemove:
-    def fakemethod(self):
-        print("This is a fake method to remove")
-        pass
-    pass
 
 
 class TaskNode(AbstractBaseModel, FolderMixin):
