@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
 	import RadioGroup from './RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
 
 	interface Props {
 		class?: string;
