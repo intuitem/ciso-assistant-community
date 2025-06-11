@@ -5,6 +5,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Question from '$lib/components/Forms/Question.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import {
@@ -482,116 +483,18 @@
 						{/if}
 						{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
 							<div class="flex flex-col w-full space-y-2">
-								{#each Object.entries(requirementAssessment.requirement.questions) as [urn, question]}
-									<li class="flex flex-col space-y-2 rounded-xl">
-										<p>{question.text} ({safeTranslate(question.type)})</p>
-										{#if shallow}
-											{#if Array.isArray(requirementAssessment.answers[urn])}
-												{#each requirementAssessment.answers[urn] as answerUrn}
-													{#if question.choices.find((choice) => choice.urn === answerUrn)}
-														<p class="text-primary-500 font-semibold">
-															{question.choices.find((choice) => choice.urn === answerUrn).value}
-														</p>
-													{:else}
-														<p class="text-primary-500 font-semibold">
-															{answerUrn}
-														</p>
-													{/if}
-												{/each}
-											{:else if question.choices.find((choice) => choice.urn === requirementAssessment.answers[urn])}
-												<p class="text-primary-500 font-semibold">
-													{question.choices.find(
-														(choice) => choice.urn === requirementAssessment.answers[urn]
-													).value}
-												</p>
-											{:else}
-												<p class="text-gray-400 italic">{m.noAnswer()}</p>
-											{/if}
-										{:else if question.type === 'unique_choice'}
-											<RadioGroup
-												possibleOptions={question.choices}
-												initialValue={requirementAssessment.answers[urn]}
-												key="urn"
-												labelKey="value"
-												field="answers"
-												onChange={(newValue) => {
-													const newAnswer =
-														requirementAssessment.answers[urn] === newValue ? null : newValue;
-													requirementAssessment.answers[urn] = newAnswer;
-													update(requirementAssessment, 'answers', requirementAssessment.answers);
-												}}
-											/>
-										{:else if question.type === 'multiple_choice'}
-											<div
-												class="flex flex-col gap-1 p-1 bg-surface-200-800 border border-surface-500 rounded-base"
-											>
-												{#each question.choices as option}
-													<button
-														type="button"
-														name="question"
-														class="shadow-md p-1
-															{requirementAssessment.answers[urn] && requirementAssessment.answers[urn].includes(option.urn)
-															? 'preset-filled-primary-500 rounded-base'
-															: 'hover:preset-tonal-primary bg-surface-200-800 rounded-base'}"
-														onclick={async () => {
-															// Initialize the array if it hasn't been already.
-															if (!Array.isArray(requirementAssessment.answers[urn])) {
-																requirementAssessment.answers[urn] = [];
-															}
-															// Toggle the option's selection
-															if (requirementAssessment.answers[urn].includes(option.urn)) {
-																requirementAssessment.answers[urn] = requirementAssessment.answers[
-																	urn
-																].filter((val) => val !== option.urn);
-															} else {
-																requirementAssessment.answers[urn] = [
-																	...requirementAssessment.answers[urn],
-																	option.urn
-																];
-															}
-															// Update the requirement assessment with the new answers
-															await update(
-																requirementAssessment,
-																'answers',
-																requirementAssessment.answers
-															);
-														}}
-													>
-														{option.value}
-													</button>
-												{/each}
-											</div>
-										{:else if question.type === 'date'}
-											<input
-												type="date"
-												placeholder=""
-												class="input w-fit"
-												bind:value={requirementAssessment.answers[urn]}
-												onchange={async () =>
-													await update(
-														requirementAssessment,
-														'answers',
-														requirementAssessment.answers
-													)}
-												{...rest}
-											/>
-										{:else}
-											<textarea
-												placeholder=""
-												class="input w-full"
-												bind:value={requirementAssessment.answers[urn]}
-												onkeydown={(event) => event.key === 'Enter' && event.preventDefault()}
-												onchange={async () =>
-													await update(
-														requirementAssessment,
-														'answers',
-														requirementAssessment.answers
-													)}
-												{...rest}
-											></textarea>
-										{/if}
-									</li>
-								{/each}
+								<Question
+									questions={requirementAssessment.requirement.questions}
+									initialValue={requirementAssessment.answers}
+									field="answers"
+									{shallow}
+									onChange={(urn, newValue) => {
+										const newAnswer =
+											requirementAssessment.answers[urn] === newValue ? null : newValue;
+										requirementAssessment.answers[urn] = newAnswer;
+										update(requirementAssessment, 'answers', requirementAssessment.answers);
+									}}
+								/>
 							</div>
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
