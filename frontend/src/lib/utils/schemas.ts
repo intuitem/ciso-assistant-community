@@ -408,7 +408,9 @@ export const SSOSettingsSchema = z.object({
 	want_attribute_statement: z.boolean().optional().nullable(),
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
-	want_name_id_encrypted: z.boolean().optional().nullable()
+	want_name_id_encrypted: z.boolean().optional().nullable(),
+	sp_x509cert: z.string().optional(),
+	sp_private_key: z.string().optional()
 });
 
 export const EntitiesSchema = z.object({

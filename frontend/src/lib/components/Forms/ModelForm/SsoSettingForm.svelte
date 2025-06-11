@@ -208,7 +208,6 @@
 				<Checkbox
 					{form}
 					field="authn_request_signed"
-					hidden
 					label={m.authnRequestSigned()}
 					disabled={!data.is_enabled}
 				/>
@@ -281,7 +280,6 @@
 				<Checkbox
 					{form}
 					field="want_assertion_signed"
-					hidden
 					label={m.wantAssertionSigned()}
 					disabled={!data.is_enabled}
 				/>
@@ -305,6 +303,22 @@
 					hidden
 					label={m.wantNameIDEncrypted()}
 					disabled={!data.is_enabled}
+				/>
+				<TextArea
+					{form}
+					field="sp_x509cert"
+					label={m.x509Cert()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['sp_x509cert']}
+					bind:cachedValue={formDataCache['sp_x509cert']}
+				/>
+				<TextArea
+					{form}
+					field="sp_private_key"
+					label={m.privateKey()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['sp_private_key']}
+					bind:cachedValue={formDataCache['sp_private_key']}
 				/>
 			</svelte:fragment>
 		</AccordionItem>

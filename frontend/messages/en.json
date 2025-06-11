@@ -1664,5 +1664,6 @@
 				"countPlural=other": "{count} Days"
 			}
 		}
-	]
+	],
+	"privateKey": "Private Key"
 }

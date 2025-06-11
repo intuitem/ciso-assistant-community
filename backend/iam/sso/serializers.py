@@ -183,6 +183,18 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         required=False,
         source="settings.advanced.want_name_id_encrypted",
     )
+    sp_x509cert = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        source="settings.advanced.x509cert",
+    )
+    sp_private_key = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        source="settings.advanced.private_key",
+    )
 
     class Meta:
         model = SSOSettings
