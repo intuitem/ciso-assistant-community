@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
 
@@ -39,9 +41,6 @@
 }
 @utility btn-mini-tertiary {
 	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
-}
-
-@layer utilities {
 }
 
 @layer utilities {
