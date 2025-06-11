@@ -501,7 +501,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
                 
                 entry = {
                     "urn": f"{base_urn}:{ref_id_clean}",
-                    "ref_id": ref_id
+                    "ref_id": ref_id_raw
                 }
                 
                 if "name" in data and data["name"]:
