@@ -1516,7 +1516,7 @@
 	"domainAnalytics": "Domain Analytics",
 	"syncToAppliedControls": "Sync to actions",
 	"theFollowingChangesWillBeApplied": "The following changes will be applied:",
-	"syncToAppliedControlsMessage": "This audit requirements assessments will be synced to the status of the associated applied controls. Pleas note that this cannot be undone.",
+	"syncToAppliedControlsMessage": "This audit requirements assessments will be synced to the status of the associated applied controls. Please note that this cannot be undone.",
 	"syncToAppliedControlsSuccess": "Audit's requirements assessments synced to the associated applied controls",
 	"syncToAppliedControlsError": "Failed to sync your audit",
 	"settingsRiskMatrixSwapAxes": "Swap axes",
