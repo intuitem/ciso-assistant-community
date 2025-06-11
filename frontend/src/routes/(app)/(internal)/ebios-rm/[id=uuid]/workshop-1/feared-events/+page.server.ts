@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'feared-events';
 	const createSchema = modelSchema(URLModel);
-  	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
+	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
 	const objectResponse = await fetch(objectEndpoint);
 	let object: any = {};
 	if (objectResponse.ok) {
