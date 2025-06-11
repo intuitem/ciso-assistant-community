@@ -98,7 +98,7 @@
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!select',
+		outerDivClass: '!input !px-2 !flex',
 		closeDropdownOnSelect: !multiple
 	};
 
