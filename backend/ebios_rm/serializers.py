@@ -83,7 +83,7 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
 
 class FearedEventWriteSerializer(BaseModelSerializer):
     folder = serializers.PrimaryKeyRelatedField(read_only=True)
-    
+
     class Meta:
         model = FearedEvent
         exclude = ["created_at", "updated_at"]
