@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import RadioGroup from './RadioGroup.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
@@ -125,13 +125,15 @@
 						>
 							<RadioGroup
 								possibleOptions={possible_options}
-								initialValue={result}
+								initialValue={currentRequirementAssessment.result}
 								colorMap={complianceResultTailwindColorMap}
 								field="result"
 								onChange={(newValue) => {
 									const newResult = result === newValue ? 'not_assessed' : newValue;
 									updateResult(newResult);
 								}}
+								key="id"
+								labelKey="label"
 							/>
 						</ul>
 					</form>

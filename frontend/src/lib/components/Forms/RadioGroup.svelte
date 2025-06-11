@@ -27,6 +27,12 @@
 
 	let internalValue = $state(value ? $value : initialValue);
 	$effect(() => {
+		if (initialValue) {
+			internalValue = initialValue;
+		}
+	});
+
+	$effect(() => {
 		if (value) {
 			$value = internalValue;
 		}
