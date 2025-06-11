@@ -300,11 +300,12 @@
 					{/if}
 					<Switch
 						name="questionnaireToggle"
-						class="flex flex-row items-center justify-center"
+						classes="flex flex-row items-center justify-center"
 						active="bg-primary-500"
 						background="bg-green-500"
-						bind:checked={questionnaireMode}
-						on:click={() => (questionnaireMode = !questionnaireMode)}
+						onCheckedChange={(e) => {
+							questionnaireMode = e.checked;
+						}}
 					>
 						{#if questionnaireMode}
 							<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
