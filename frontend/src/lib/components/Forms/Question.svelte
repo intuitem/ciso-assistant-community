@@ -62,8 +62,7 @@
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 				<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
 				{#if shallow}
-					<!-- We must test the entity assessment (with an audit) to check if the shallow routing works as expected for this component (which is not possible for now as we have some kind of regression/bug which make the entity-assessment detail view unavailable (error 500)) -->
-					{#if Array.isArray(internalAnswers[urn])}
+					{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}
 						{#each internalAnswers[urn] as answerUrn}
 							{#if question.choices.find((choice) => choice.urn === answerUrn)}
 								<p class="text-primary-500 font-semibold">

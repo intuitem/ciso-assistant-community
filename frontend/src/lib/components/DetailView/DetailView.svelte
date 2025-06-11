@@ -209,7 +209,7 @@
 		})
 	);
 
-	let group = $derived(relatedModels[0][0]);
+	let group = $derived(relatedModels.length > 0 ? relatedModels[0][0] : undefined);
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
