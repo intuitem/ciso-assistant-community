@@ -125,9 +125,9 @@
 						>
 							<RadioGroup
 								possibleOptions={possible_options}
-								value={result}
+								initialValue={result}
 								colorMap={complianceResultTailwindColorMap}
-								inputName="result"
+								field="result"
 								onChange={(newValue) => {
 									const newResult = result === newValue ? 'not_assessed' : newValue;
 									updateResult(newResult);

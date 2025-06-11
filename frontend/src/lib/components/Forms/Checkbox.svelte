@@ -2,7 +2,6 @@
 	import { run } from 'svelte/legacy';
 
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
@@ -41,8 +40,9 @@
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
-
-	const dispatch = createEventDispatcher();
+	$effect(() => {
+		cachedValue = $value;
+	});
 
 	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));
 	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));

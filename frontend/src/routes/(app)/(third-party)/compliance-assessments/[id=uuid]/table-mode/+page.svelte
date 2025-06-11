@@ -447,9 +447,9 @@
 										possibleOptions={status_options}
 										key="id"
 										labelKey="label"
-										inputName="status"
+										field="status"
 										colorMap={complianceStatusTailwindColorMap}
-										value={requirementAssessment.status}
+										initialValue={requirementAssessment.status}
 										onChange={(newValue) => {
 											const newStatus =
 												requirementAssessment.status === newValue ? 'to_do' : newValue;
@@ -466,9 +466,9 @@
 										possibleOptions={result_options}
 										key="id"
 										labelKey="label"
-										inputName="result"
+										field="result"
 										colorMap={complianceResultTailwindColorMap}
-										value={requirementAssessment.result}
+										initialValue={requirementAssessment.result}
 										onChange={(newValue) => {
 											const newResult =
 												requirementAssessment.result === newValue ? 'to_do' : newValue;
@@ -509,10 +509,10 @@
 										{:else if question.type === 'unique_choice'}
 											<RadioGroup
 												possibleOptions={question.choices}
-												value={requirementAssessment.answers[urn]}
+												initialValue={requirementAssessment.answers[urn]}
 												key="urn"
 												labelKey="value"
-												inputName="answers"
+												field="answers"
 												onChange={(newValue) => {
 													const newAnswer =
 														requirementAssessment.answers[urn] === newValue ? null : newValue;

@@ -6,7 +6,7 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	interface Props {
 		form: SuperForm<any>;
@@ -21,6 +21,7 @@
 	const formStore = form.form;
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
+
 	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
 	let yAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'impact' : 'probability');
 	let xAxisLabel = $derived(safeTranslate(`${xAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`));
@@ -102,14 +103,15 @@
 						helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
 						bind:cachedValue={formDataCache['risk_matrix_flip_vertical']}
 					/>
-					<RadioGroupInput
-						{form}
-						label={m.settingsRiskMatrixLabels()}
-						field="risk_matrix_labels"
-						options={[
+					<RadioGroup
+						possibleOptions={[
 							{ label: m.iso27005(), value: 'ISO' },
 							{ label: m.ebiosRM(), value: 'EBIOS' }
 						]}
+						{form}
+						key="value"
+						labelKey="label"
+						field="risk_matrix_labels"
 					/>
 				</div>
 				<div class="flex-1">

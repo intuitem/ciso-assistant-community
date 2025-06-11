@@ -1,13 +1,12 @@
-<!-- <script lang="ts">
-  /* This component must be deleted as the skeleton RadioGroup is outdated */
-  /* Or the RadioGroup component must be replaced by the Segment component */
+<script lang="ts">
+	/* This component must be deleted as the skeleton RadioGroup is outdated */
+	/* Or the RadioGroup component must be replaced by the Segment component */
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { RadioGroup } from '@skeletonlabs/skeleton';
-	import RadioItem from '$lib/components/Forms/RadioItem.svelte';
+	import { Segment } from '@skeletonlabs/skeleton-svelte';
 
 	interface Option {
 		label: string;
@@ -63,10 +62,10 @@
 	{/if}
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		{#if options.length > 0}
-			<RadioGroup>
+			<Segment>
 				{#each options as option, index}
 					{#if option.label}
-						<RadioItem
+						<Segment.Item
 							bind:group={$value}
 							name={field}
 							value={option.value}
@@ -75,14 +74,16 @@
 								!options[index + 1].label) ||
 								undefined}
 							{disabled}
-							>{translateOptions === true ? safeTranslate(option.label) : option.label}</RadioItem
+							>{translateOptions === true
+								? safeTranslate(option.label)
+								: option.label}</Segment.Item
 						>
 					{/if}
 				{/each}
-			</RadioGroup>
+			</Segment>
 		{/if}
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>
 	{/if}
-</div> -->
+</div>
