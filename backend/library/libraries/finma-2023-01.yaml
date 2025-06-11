@@ -38,6 +38,18 @@ translations:
       \ 1\n                     LBCR art. 1b cpv. 3 lett. b, art. 3 cpv. 2 lett. a\
       \ e art. 3f\n                     OBCR artt. 12 e 14e\n                    \
       \ LIsFi artt. 9 e 49\n                     OIsFi artt. 12 e 68"
+  de:
+    name: FINMA - Rundschreiben 2023/01 - Operationelle Risiken und Resilienz - Banken
+    description: "Management der operationellen Risiken und Sicherstellung der operationellen\
+      \ Resilienz\nReferenz: FINMA-RS 23/1 \u201EOperationelle Risiken und Resilienz\
+      \ \u2013 Banken\u201C\nErlass: 7. Dezember 2022\nInkraftsetzung: 1. Januar 2024\n\
+      Konkordanz: vormals FINMA-RS 08/21 \u201EOperationelle Risiken \u2013 Banken\u201C\
+      \ vom 20. November 2008\nRechtliche Grundlagen: FINMAG Art. 7 Abs. 1 Bst. b\
+      \ und 29 Abs. 1\n                                           BankG Art. 1b Abs.\
+      \ 3 Bst. b, Art. 3 Abs. 2 Bst. a und 3f\n                                  \
+      \         BankV Art. 12 und 14e\n                                          \
+      \ FINIG Art. 9 und 49\n                                           FINIV Art.\
+      \ 12 und 68"
 objects:
   framework:
     urn: urn:intuitem:risk:framework:finma-2023-01
@@ -77,6 +89,19 @@ objects:
           \ b, art. 3 cpv. 2 lett. a e art. 3f\n                     OBCR artt. 12\
           \ e 14e\n                     LIsFi artt. 9 e 49\n                     OIsFi\
           \ artt. 12 e 68"
+      de:
+        name: FINMA - Rundschreiben 2023/01 - Operationelle Risiken und Resilienz
+          - Banken
+        description: "Management der operationellen Risiken und Sicherstellung der\
+          \ operationellen Resilienz\nReferenz: FINMA-RS 23/1 \u201EOperationelle\
+          \ Risiken und Resilienz \u2013 Banken\u201C\nErlass: 7. Dezember 2022\n\
+          Inkraftsetzung: 1. Januar 2024\nKonkordanz: vormals FINMA-RS 08/21 \u201E\
+          Operationelle Risiken \u2013 Banken\u201C vom 20. November 2008\nRechtliche\
+          \ Grundlagen: FINMAG Art. 7 Abs. 1 Bst. b und 29 Abs. 1\n              \
+          \                             BankG Art. 1b Abs. 3 Bst. b, Art. 3 Abs. 2\
+          \ Bst. a und 3f\n                                           BankV Art. 12\
+          \ und 14e\n                                           FINIG Art. 9 und 49\n\
+          \                                           FINIV Art. 12 und 68"
     requirement_nodes:
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application"
       assessable: false
@@ -87,6 +112,8 @@ objects:
           name: I. Subject and scope of application
         it:
           name: I. Oggetto e campo di applicazione
+        de:
+          name: I. Gegenstand und Geltungsbereich
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application:1"
       assessable: false
       depth: 2
@@ -130,6 +157,18 @@ objects:
             of Operational Risk (31 marzo 2021).
 
             [2] BCBS Principles for Operational Resilience (31 marzo 2021).'
+        de:
+          name: Rz 1
+          description: "Dieses Rundschreiben bezieht sich auf die Vorschriften \xFC\
+            ber die Funktionentrennung, das Risikomanagement und die interne Kontrolle\
+            \ der Bankenverordnung (Art. 12 und 14e BankV; SR 952.02) und der Finanzinstitutsverordnung\
+            \ (Art. 12 und 68 FINIV; SR 954.11) und konkretisiert die entsprechende\
+            \ Aufsichtspraxis. Es ber\xFCcksichtigt die Basler Grunds\xE4tze zum einwandfreien\
+            \ Management der operationellen Risiken1 und der operationellen Resilienz2."
+          annotation: '[1] BCBS Revisions to the Principles for the Sound Management
+            of Operational Risk (31 March 2021)
+
+            [2] BCBS Principles for Operational Resilience (31 March 2021)'
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:i.-objet-et-champ-d\u2019application:2"
       assessable: false
       depth: 2
@@ -166,6 +205,15 @@ objects:
             \ le persone secondo l\u2019art. 1b LBCR, le societ\xE0 di intermediazione\
             \ mobiliare, i gruppi finanziari e i conglomerati finanziari vengono denominati\
             \ congiuntamente \xABistituti\xBB."
+        de:
+          name: Rz 2
+          description: "Das Rundschreiben richtet sich an Banken nach Art. 1a und\
+            \ Personen nach Art. 1b Bankengesetz (BankG; SR 952.0), Wertpapierh\xE4\
+            user nach Art. 2 Abs. 1 Bst. e und Art. 41 des Finanzinstitutsgesetzes\
+            \ (FINIG; SR 954.1) sowie an Finanzgruppen und Finanzkonglomerate nach\
+            \ Art. 3c BankG und Art. 49 FINIG. Im Folgenden werden Banken, Personen\
+            \ nach Art. 1b BankG, Wertpapierh\xE4user, Finanzgruppen und Finanzkonglomerate\
+            \ unter dem Begriff \u201EInstitute\u201C zusammengefasst."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions"
       assessable: false
       depth: 1
@@ -175,6 +223,8 @@ objects:
           name: II. Definition of terms
         it:
           name: II. Definizioni
+        de:
+          name: II. Begriffe
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:1"
       assessable: false
       depth: 2
@@ -223,6 +273,22 @@ objects:
           annotation: '[3] Per esempio effetti negativi sulla reputazione, possibile
             perdita di fiducia e di clienti, effetti negativi sul mercato, effetti
             regolatori negativi (p. es. possibile perdita della licenza).'
+        de:
+          name: Rz 3
+          description: "Operationelle Risiken sind in Art. 89 ERV definiert. Es handelt\
+            \ sich um die Gefahr von finanziellen Verlusten, die in Folge der Unangemessenheit\
+            \ oder des Versagens von internen Prozessen oder Systemen, des unangemessenen\
+            \ Handelns von Menschen oder durch sie begangene Fehler, oder in Folge\
+            \ von externen Ereignissen eintreten. Dies beinhaltet die finanziellen\
+            \ Verluste, die aus Rechts- oder Compliance-Risiken entstehen k\xF6nnen.\
+            \ Das Management der operationellen Risiken ber\xFCcksichtigt typischerweise\
+            \ auch andere Schadensdimensionen3, sofern diese letztendlich auch in\
+            \ finanziellen Verlusten resultieren k\xF6nnen. Dabei ausgeschlossen sind\
+            \ die strategischen Risiken."
+          annotation: "[3] Bspw. negative Auswirkungen auf die Reputation, m\xF6glicher\
+            \ Vertrauensverlust und Verlust von Kundinnen und Kun- den, negative Auswirkungen\
+            \ auf den Markt, negative regulatorische Auswirkungen (z. Bsp. m\xF6glicher\
+            \ Verlust der Lizenz)."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:2"
       assessable: false
       depth: 2
@@ -243,6 +309,11 @@ objects:
           description: "I rischi inerenti sono rischi operativi a cui l\u2019istituto\
             \ \xE8 esposto a causa dei suoi prodotti, processi e sistemi e delle sue\
             \ attivit\xE0 senza considerare le misure di controllo e di attenuazione."
+        de:
+          name: Rz 4
+          description: "Inh\xE4rente Risiken sind operationelle Risiken, denen das\
+            \ Institut durch seine Produkte, Aktivit\xE4ten, Prozesse und Systeme\
+            \ ausgesetzt ist, ohne Ber\xFCcksichtigung von Kontroll- und Minderungsmassnahmen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:3"
       assessable: false
       depth: 2
@@ -260,6 +331,11 @@ objects:
           name: nm. 5
           description: "I rischi residui sono rischi operativi a cui l\u2019istituto\
             \ \xE8 esposto dopo aver considerato le misure di controllo e di attenuazione."
+        de:
+          name: Rz 5
+          description: "Residuale Risiken sind operationelle Risiken, denen das Institut\
+            \ nach der Ber\xFCcksichtigung von Kontroll- und Minderungsmassnahmen\
+            \ ausgesetzt ist."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:4"
       assessable: false
       depth: 2
@@ -283,6 +359,11 @@ objects:
             designano la struttura fisica e logica (elettronica) dei sistemi informatici
             e di comunicazione, le singoli componenti hardware e software, le reti,
             i dati e gli ambienti operativi.
+        de:
+          name: Rz 6
+          description: Die Informations- und Kommunikationstechnologie (IKT) bezeichnet
+            den physischen und logischen (elektronischen) Aufbau von IT- und Kommunikationssystemen,
+            die einzelnen Hard- und Softwarekomponenten, Netzwerke, Daten und Betriebsumgebungen.
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:5"
       assessable: false
       depth: 2
@@ -322,6 +403,18 @@ objects:
             \ la criticit\xE0 dei dati \xE8 necessario considerarne sia la confidenzialit\xE0\
             \ sia l\u2019integrit\xE0 e la disponibilit\xE0. Ognuno di questi tre\
             \ aspetti pu\xF2 essere determinante per classificare i dati come critici."
+        de:
+          name: Rz 7
+          description: "Kritische Daten sind Daten, die in Anbetracht der Gr\xF6sse,\
+            \ der Komplexit\xE4t, der Struktur, des Risikoprofils sowie des Gesch\xE4\
+            ftsmodells des Instituts von so wesentlicher Bedeutung sind, dass sie\
+            \ einen erh\xF6hten Sicherheitsanspruch erfordern. Dabei handelt es sich\
+            \ um Daten, die f\xFCr die erfolgreiche und nachhaltige Erbringung der\
+            \ Dienstleistungen des Instituts oder f\xFCr regulatorische Zwecke wesentlich\
+            \ sind. Bei der Beurteilung und Festlegung der Kritikalit\xE4t von Daten\
+            \ sind sowohl die Vertraulichkeit als auch die Integrit\xE4t und Verf\xFC\
+            gbarkeit zu ber\xFCcksichtigen. Jeder dieser drei Aspekte kann ausschlaggebend\
+            \ daf\xFCr sein, dass Daten als kritisch klassifiziert werden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:6"
       assessable: false
       depth: 2
@@ -341,6 +434,11 @@ objects:
           description: I processi critici sono processi la cui perturbazione importante
             o interruzione compromette lo svolgimento delle funzioni critiche, di
             cui sono parte.
+        de:
+          name: Rz 8
+          description: "Kritische Prozesse sind Prozesse, deren bedeutende St\xF6\
+            rung oder Unterbrechung die Erbringung kritischer Funktionen gef\xE4hrden.\
+            \ Sie sind ein Bestandteil der kritischen Funktionen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:7"
       assessable: false
       depth: 2
@@ -369,6 +467,15 @@ objects:
             \ della gestione degli incidenti. Definisce dunque la reazione a perturbazioni\
             \ importanti o interruzioni. Un BCM efficace riduce i rischi residui correlati\
             \ a perturbazioni importanti o interruzioni."
+        de:
+          name: Rz 9
+          description: "Das Business Continuity Management (BCM) bezeichnet den institutsweiten\
+            \ Ansatz, um im Falle einer \xFCber das Vorfallmanagement hinausgehenden,\
+            \ bedeutenden St\xF6rung oder Unterbrechung den Betrieb der kritischen\
+            \ Prozesse wiederherzustellen. Es definiert die Reaktion auf bedeutende\
+            \ St\xF6rungen oder Unterbrechungen. Ein effektives BCM vermindert die\
+            \ residualen Risiken im Zusammenhang mit bedeutenden St\xF6rungen oder\
+            \ Unterbrechungen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:8"
       assessable: false
       depth: 2
@@ -391,6 +498,11 @@ objects:
             \ per ripristinare un\u2019applicazione, un sistema e/o un processo. Il\
             \ recovery point objective (RPO) \xE8 la durata massima tollerabile di\
             \ una perdita di dati."
+        de:
+          name: Rz 10
+          description: Die Recovery Time Objective (RTO) ist die Zeit bis zur Wiederherstellung
+            einer Anwendung, eines Systems und/oder eines Prozesses. Die Recovery
+            Point Objective (RPO) ist die maximal tolerierbare Zeitspanne eines Datenverlusts.
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:9"
       assessable: false
       depth: 2
@@ -413,6 +525,13 @@ objects:
             \ che definisce le procedure, le opzioni di ripristino e le risorse sostitutive\
             \ necessarie (i processi di ripristino) per garantire la continuit\xE0\
             \ e il ripristino dei processi critici."
+        de:
+          name: Rz 11
+          description: "Der Business Continuity Plan (BCP) ist ein vorausschauender\
+            \ Plan, der die notwendigen Vorgehensweisen, Wiederherstellungsoptionen\
+            \ und Ersatzressourcen (die Wiederherstellungsprozesse) zur Sicherstellung\
+            \ der Kontinuit\xE4t und zur Wiederherstellung der kritischen Prozesse\
+            \ festlegt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:10"
       assessable: false
       depth: 2
@@ -436,6 +555,12 @@ objects:
             \ grave o di distruzione delle tecnologie dell\u2019informazione e della\
             \ comunicazione (TIC) e in considerazione dell\u2019eventuale assenza\
             \ di persone chiave."
+        de:
+          name: Rz 12
+          description: "Der Disaster Recovery Plan (DRP) definiert die Wiederherstellungsprozesse,\
+            \ um im Fall eines schwerwiegenden Ausfalls oder einer Zerst\xF6rung der\
+            \ IKT und unter Ber\xFCcksichtigung des m\xF6glichen Ausfalls von Schl\xFC\
+            sselpersonen, die Wiederherstellungsziele zu erreichen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:11"
       assessable: false
       depth: 2
@@ -464,6 +589,14 @@ objects:
             \ distinguono dagli incidenti (incidents) e dalle perturbazioni o dalle\
             \ interruzioni importanti che possono essere fronteggiate con la gestione\
             \ degli incidenti nell\u2019esercizio normale o con i BCP e i DRP stabiliti."
+        de:
+          name: Rz 13
+          description: "Krisensituationen sind ausserordentliche, potenziell existenzbedrohende\
+            \ Situationen, welche nicht mit ordentlichen Massnahmen und Entscheidungskompetenzen\
+            \ bew\xE4ltigt werden k\xF6nnen. Sie unterscheiden sich von Vorf\xE4llen\
+            \ (Incidents bzw. St\xF6rungen) und bedeutenden St\xF6rungen oder Unterbrechungen,\
+            \ welche mit dem Vorfallmanagement im Normalbetrieb oder den festgelegten\
+            \ BCPs und DRPs bew\xE4ltigt werden k\xF6nnen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:12"
       assessable: false
       depth: 2
@@ -477,6 +610,9 @@ objects:
         it:
           name: nm. 14
           description: 'Le funzioni critiche comprendono:'
+        de:
+          name: Rz 14
+          description: 'Kritische Funktionen beinhalten:'
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:13"
       assessable: false
       depth: 2
@@ -502,6 +638,13 @@ objects:
             \ il mantenimento dell\u2019attivit\xE0 dell\u2019istituto o il suo ruolo\
             \ sul mercato finanziario, quindi anche la funzionalit\xE0 dei mercati\
             \ finanziari; e"
+        de:
+          name: Rz 15
+          description: "a. die Aktivit\xE4ten, Prozesse und Dienstleistungen, inklusive\
+            \ die f\xFCr ihre Erbringung notwendigen zugrundeliegenden Ressourcen,\
+            \ deren Unterbrechung die Weiterf\xFChrung des Instituts oder seine Rolle\
+            \ im Finanzmarkt und damit die Funktionsf\xE4higkeit der Finanzm\xE4rkte\
+            \ gef\xE4hrden w\xFCrde; und"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:14"
       assessable: false
       depth: 2
@@ -517,6 +660,9 @@ objects:
           name: nm. 16
           description: "b. le funzioni di rilevanza sistemica secondo l\u2019art.\
             \ 8 LBCR."
+        de:
+          name: Rz 16
+          description: b. die systemrelevanten Funktionen nach Art. 8 BankG.
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:15"
       assessable: false
       depth: 2
@@ -542,6 +688,13 @@ objects:
             \ l\u2019istituto \xE8 disposto ad accettare considerando scenari gravi,\
             \ ma plausibili. Per ogni funzione critica deve essere definita una tolleranza\
             \ alle interruzioni."
+        de:
+          name: Rz 17
+          description: "Die Unterbrechungstoleranz ist das Ausmass (bspw. Dauer oder\
+            \ erwarteter Schaden) der Unterbrechung einer kritischen Funktion, das\
+            \ das Institut unter Ber\xFCcksichtigung von schwerwiegenden, aber plausiblen\
+            \ Szenarien zu akzeptieren bereit ist. F\xFCr jede kritische Funktion\
+            \ ist eine Unterbrechungstoleranz zu definieren."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:ii.-d\xE9finitions:16"
       assessable: false
       depth: 2
@@ -596,6 +749,23 @@ objects:
             \ si verifichino interruzioni. Una gestione efficace dei rischi operativi\
             \ contribuisce a rafforzare la resilienza operativa dell\u2019istituto."
           annotation: '[4] Spesso chiamato anche resilience by design.'
+        de:
+          name: Rz 18
+          description: "Operationelle Resilienz bezeichnet die F\xE4higkeit des Instituts,\
+            \ seine kritischen Funktionen bei Unterbrechungen innerhalb der Unterbrechungstoleranz\
+            \ wiederherstellen zu k\xF6nnen. D. h., die F\xE4higkeit des Instituts,\
+            \ Bedrohungen und m\xF6gliche Ausf\xE4lle zu identifizieren, sich davor\
+            \ zu sch\xFCtzen und darauf zu reagieren, bei Unterbrechungen den ordentlichen\
+            \ Gesch\xE4ftsbetrieb wiederherzustellen und daraus zu lernen, um die\
+            \ Auswirkungen von Unterbrechungen auf die Erbringung der kritischen Funktionen\
+            \ zu minimieren. Ein operationell resilientes Institut hat sein Betriebsmodell\
+            \ so aufgebaut4, dass es in Bezug auf seine kritischen Funktionen dem\
+            \ Risiko von Unterbrechungen weniger ausgesetzt ist. Die operationelle\
+            \ Resilienz verringert somit nicht nur die residualen Risiken von Unterbrechungen,\
+            \ sondern auch das inh\xE4rente Risiko, dass es zu Unterbrechungen kommt.\
+            \ Ein effektives Management der operationellen Risiken tr\xE4gt dazu bei,\
+            \ die operationelle Resilienz des Instituts zu st\xE4rken."
+          annotation: "[4] H\xE4ufig auch Resilience by Design genannt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9"
       assessable: false
       depth: 1
@@ -605,6 +775,8 @@ objects:
           name: III. Principle of proportionality
         it:
           name: "III. Principio di proporzionalit\xE0"
+        de:
+          name: "III. Proportionalit\xE4tsprinzip"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9\
         :1"
       assessable: false
@@ -630,6 +802,13 @@ objects:
             \ si differenziano in funzione delle dimensioni, della complessit\xE0\
             , della struttura e del profilo di rischio dell\u2019istituto. Nel singolo\
             \ caso, la FINMA pu\xF2 ordinare facilitazioni o inasprimenti."
+        de:
+          name: Rz 19
+          description: "Dieses Rundschreiben gilt grunds\xE4tzlich f\xFCr alle seiner\
+            \ Adressaten. Die Anforderungen sind jedoch im Einzelfall abh\xE4ngig\
+            \ von der Gr\xF6sse, der Komplexit\xE4t, der Struktur und des Risikoprofils\
+            \ des Instituts umzusetzen. Die FINMA ordnet im Einzelfall Erleichterungen\
+            \ oder Versch\xE4rfungen an."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9\
         :2"
       assessable: false
@@ -651,6 +830,11 @@ objects:
             \ categorie FINMA 4 e 5 sono esentate dall\u2019adempimento dei numeri\
             \ marginali 33\u201338, 41\u201346, 48, 51, 57, 73, 74, 76\u201378, 80,\
             \ 87, 92, 93, 96, 103, 104 e 110\u2013112."
+        de:
+          name: Rz 20
+          description: "Banken und Wertpapierh\xE4user der FINMA-Kategorien 4 und\
+            \ 5 sind von der Erf\xFCllung der Rz 33\u201338, 41\u201346, 48, 51, 57,\
+            \ 73, 74, 76\u201378, 80, 87, 92, 93, 96, 103, 104 und 110\u2013112 ausgenommen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iii.-principe-de-proportionnalit\xE9\
         :3"
       assessable: false
@@ -674,6 +858,11 @@ objects:
             \ secondo l\u2019art. 1b LBCR e le societ\xE0 di intermediazione mobiliare\
             \ che non tengono conti sono inoltre esentate dall\u2019adempimento dei\
             \ numeri marginali 72, 75, 79 e 105\u2013109."
+        de:
+          name: Rz 21
+          description: "Institute nach Art. 47a\u201347e ERV, Personen gem\xE4ss Art.\
+            \ 1b BankG, sowie nicht-kontof\xFChrende Wertpapierh\xE4user sind zus\xE4\
+            tzlich von der Erf\xFCllung der Rz 72, 75, 79 und 105\u2013109 ausgenommen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels"
       assessable: false
@@ -684,6 +873,8 @@ objects:
           name: IV. Operational risk management
         it:
           name: IV. Gestione dei rischi operativi
+        de:
+          name: IV. Management der operationellen Risiken
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1"
       assessable: false
@@ -696,6 +887,8 @@ objects:
           name: A. Overarching operational risk management
         it:
           name: A. Gestione trasversale dei rischi operativi
+        de:
+          name: "A. \xDCbergreifendes Management der operationellen Risiken"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:1"
       assessable: false
@@ -718,6 +911,11 @@ objects:
           description: "La gestione dei rischi operativi rientra nella gestione del\
             \ rischio a livello di istituto conformemente alla Circolare FINMA 17/1\
             \ \xABCorporate governance \u2013 banche\xBB."
+        de:
+          name: Rz 22
+          description: "Das Management der operationellen Risiken ist Teil des institutsweiten\
+            \ Risikomanagements nach FINMA-Rundschreiben 2017/1 \u201ECorporate Governance\
+            \ \u2013 Banken\u201C."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:2"
       assessable: true
@@ -773,6 +971,22 @@ objects:
             \ da parte dell\u2019istituto oppure decide un adeguamento della tolleranza\
             \ al rischio e i necessari cambiamenti a livello strategico5."
           annotation: '[5] Per esempio un cambiamento del modello commerciale.'
+        de:
+          name: Rz 23
+          description: "Das Oberleitungsorgan genehmigt die Grundz\xFCge des Managements\
+            \ der operationellen Risiken, die f\xFCr das Institut relevant sind, und\
+            \ \xFCberwacht deren Einhaltung. Darunter fallen unter anderem die IKT-Risiken,\
+            \ die Cyber-Risiken, die Risiken hinsichtlich kritischer Daten, die Risiken\
+            \ aus der Ausgestaltung und Implementierung des BCM und gegebenenfalls\
+            \ die Risiken aus dem grenz\xFCberschreitenden Dienstleistungsgesch\xE4\
+            ft. Es genehmigt mindestens j\xE4hrlich die Risikotoleranz f\xFCr operationelle\
+            \ Risiken nach Massgabe der Risikopolitik in Anbetracht der strategischen\
+            \ und finanziellen Ziele des Instituts. Dabei ber\xFCcksichtigt es die\
+            \ Ergebnisse aus den Risiko- und Kontrollbeurteilungen nach Rz 30. Es\
+            \ akzeptiert entweder das Ausmass, in dem das Institut den operationellen\
+            \ Risiken ausgesetzt ist, oder entscheidet \xFCber eine Anpassung der\
+            \ Risikotoleranz und die daf\xFCr notwendigen, strategischen \xC4nderungen5."
+          annotation: "[5] Zum Beispiel eine \xC4nderung des Gesch\xE4ftsmodells"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:3"
       assessable: true
@@ -793,6 +1007,11 @@ objects:
           description: "L\u2019organo preposto all\u2019alta direzione approva periodicamente\
             \ le strategie di gestione delle TIC, dei cyber-rischi, dei dati critici\
             \ e del BCM e vigila sulla loro osservanza."
+        de:
+          name: Rz 24
+          description: "Das Oberleitungsorgan genehmigt regelm\xE4ssig Strategien\
+            \ f\xFCr den Umgang mit der IKT, den Cyber-Risiken, den kritischen Daten\
+            \ und dem BCM, und \xFCberwacht deren Einhaltung."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:4"
       assessable: true
@@ -828,6 +1047,17 @@ objects:
             \ inerenti considerati essenziali6 adotta misure integrative o inasprimenti\
             \ in funzione del rischio specifico."
           annotation: '[6] Spesso chiamati rischi chiave (key risks).'
+        de:
+          name: Rz 25
+          description: "Die Gesch\xE4ftsleitung stellt nachvollziehbar sicher, dass\
+            \ die operationellen Risiken identifiziert, beurteilt, begrenzt und \xFC\
+            berwacht werden, und dass die Effektivit\xE4t sowohl der Ausgestaltung\
+            \ als auch der Implementierung dieses Managements der operationellen Risiken\
+            \ regelm\xE4ssig \xFCberpr\xFCft wird. F\xFCr die Begrenzung der als wesentlich\
+            \ beurteilten, inh\xE4renten Risiken6 ergreift sie situativ risikospezifische\
+            \ erg\xE4nzende oder versch\xE4rfende Massnahmen."
+          annotation: "[6] H\xE4ufig Top-Risiken oder Schl\xFCsselrisiken (Key Risks)\
+            \ genannt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:5"
       assessable: true
@@ -867,6 +1097,17 @@ objects:
           annotation: "[7] Ci\xF2 implica, tra l\u2019altro, la selezione accurata\
             \ e la qualificazione del personale per i CCR e la formazione continua\
             \ nel quadro delle sue attivit\xE0."
+        de:
+          name: Rz 26
+          description: "Zur St\xE4rkung des Bewusstseins der Mitarbeitenden zur Reduktion\
+            \ von relevanten operationellen Risiken, insbesondere der IKT-Risiken,\
+            \ der Cyber-Risiken, der Risiken hinsichtlich kritischer Daten und der\
+            \ Risiken aus der Ausgestaltung und Implementierung des BCM, sind unter\
+            \ Ber\xFCcksichtigung ihrer Aufgaben, Kompetenzen und Verantwortlichkeiten\
+            \ (AKV) Massnahmen zu implementieren7."
+          annotation: "[7] Dies beinhaltet unter anderem die sorgf\xE4ltige Auswahl\
+            \ und Qualifikation von Mitarbeitenden f\xFCr ihre AKV und ihre kontinuierliche\
+            \ Weiterbildung im Rahmen ihrer Aktivit\xE4ten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:6"
       assessable: true
@@ -891,6 +1132,12 @@ objects:
             \ FINMA definisce ulteriori requisiti in materia di gestione dei rischi\
             \ operativi per temi specifici. Ci\xF2 avviene con moderazione e applicando\
             \ il principio di proporzionalit\xE0."
+        de:
+          name: Rz 27
+          description: "Falls notwendig, definiert die FINMA im Rahmen der laufenden\
+            \ Aufsicht f\xFCr spezifische Themen weitergehende Anforderungen an das\
+            \ Management der operationellen Risiken. Dies geschieht zur\xFCckhaltend\
+            \ und unter Anwendung des Proportionalit\xE4tsprinzips."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:7"
       assessable: true
@@ -925,6 +1172,15 @@ objects:
             \ una tassonomia interna. Essa deve essere applicata in modo sistematico\
             \ in tutti i settori dell\u2019istituto e in tutte le componenti della\
             \ gestione dei rischi operativi."
+        de:
+          name: Rz 28
+          description: "Die operationellen Risiken sind institutsweit einheitlich\
+            \ zu kategorisieren und in einem Inventar aufzuf\xFChren. Diese Kategorisierung\
+            \ kann in Anlehnung an die f\xFCr die Berechnung der Mindesteigenmittel\
+            \ f\xFCr operationelle Risiken verwendete Kategorisierung der Ereignistypen\
+            \ oder mittels einer internen Taxonomie erfolgen. Die Kategorisierung\
+            \ ist in allen Bereichen des Instituts und in allen Komponenten des Managements\
+            \ der operationellen Risiken konsistent anzuwenden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:8"
       assessable: true
@@ -971,6 +1227,18 @@ objects:
             \ che generano perdite in altri istituti, i cambiamenti sul piano della\
             \ sicurezza (p. es. dovuti a impatti ambientali, cyber-attacchi o terrorismo)\
             \ o gli adeguamenti ai requisiti normativi."
+        de:
+          name: Rz 29
+          description: "F\xFCr die Identifikation der operationellen Risiken werden\
+            \ interne8 und externe9 Faktoren ber\xFCcksichtigt. Die identifizierten\
+            \ operationellen Risiken werden sowohl aus Sicht der inh\xE4renten als\
+            \ auch der residualen Risiken nachvollziehbar beurteilt."
+          annotation: "[8] Interne Faktoren sind beispielsweise \xC4nderungen in den\
+            \ Produkten, Aktivit\xE4ten, Prozessen und Systemen, Pr\xFCfer- gebnisse\
+            \ und interne Verluste aus operationellen Risiken.\n[9] Externe Faktoren\
+            \ sind beispielsweise erkannte Verlustereignisse anderer Institute, \xC4\
+            nderungen in der Sicherheits- lage (bspw. durch Umwelteinfl\xFCsse, Cyber-Attacken\
+            \ oder Terrorismus) oder \xC4nderungen in den regulatorischen An- forderungen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:9"
       assessable: true
@@ -1014,6 +1282,19 @@ objects:
             \ se disponibili, nonch\xE9 i risultati delle verifiche svolte, per esempio,\
             \ dalle divisioni commerciali e organizzative, dal con- trollo del rischio,\
             \ dalla funzione preposta alla compliance o dalle autorit\xE0 di vigilanza."
+        de:
+          name: Rz 30
+          description: "Die Identifikation und Beurteilung der operationellen Risiken\
+            \ st\xFCtzt sich mindestens auf Pr\xFCfergebnisse10 und regelm\xE4ssig\
+            \ durchzuf\xFChrende Risiko- und Kontrollbeurteilungen. Die Risiko- und\
+            \ Kontrollbeurteilungen ber\xFCcksichtigen die inh\xE4renten Risiken,\
+            \ die Effektivit\xE4t der bestehenden Kontroll- und Minderungsmassnahmen\
+            \ und die residualen Risiken."
+          annotation: "[10] Pr\xFCfergebnisse umfassen hier Resultate der internen\
+            \ Revision und der externen Pr\xFCfgesellschaft, sofern vorhanden, sowie\
+            \ Ergebnisse von \xDCberpr\xFCfungen durch bspw. die Gesch\xE4fts- und\
+            \ Organisationsbereiche, die Risikokontrolle, die Compliance-Funktion\
+            \ oder Aufsichtsbeh\xF6rden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:10"
       assessable: true
@@ -1050,6 +1331,17 @@ objects:
             \ che minimizzano i rischi inerenti considerati essenziali. Anche la separazione\
             \ dei CCR per garantire l\u2019indipendenza e prevenire i conflitti di\
             \ interessi \xE8 oggetto di valutazioni periodiche."
+        de:
+          name: Rz 31
+          description: "F\xFCr die Beurteilung der bestehenden Kontroll- und Minderungsmassnahmen\
+            \ wird insbesondere eine regelm\xE4ssige Beurteilung der Effektivit\xE4\
+            t der Schl\xFCsselkontrollen durch eine unabh\xE4ngige Kontrollinstanz\
+            \ vorgenommen und dokumentiert (Design Effectiveness und Operating Effectiveness\
+            \ Testing). Dabei sind Schl\xFCsselkontrollen diejenigen Kontroll- und\
+            \ Minderungsmassnahmen, die die als wesentlich beurteilten, inh\xE4renten\
+            \ Risiken minimieren. Auch wird die Trennung der AKV zur Sicherstellung\
+            \ der Unabh\xE4ngigkeit und Vorbeugung vor Interessenskonflikten regelm\xE4\
+            ssig beurteilt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:11"
       assessable: true
@@ -1081,6 +1373,14 @@ objects:
             \ rischi operativi derivanti dal processo di cambiamento e i rischi operativi\
             \ delle condizioni target. Ove necessario, vengono adeguati i limiti di\
             \ tolleranza al rischio e attuate misure di controllo e di attenuazione."
+        de:
+          name: Rz 32
+          description: "Vor wesentlichen \xC4nderungen in den Produkten, Aktivit\xE4\
+            ten, Prozessen und Systemen sind ad hoc Risiko- und Kontrollbeurteilungen\
+            \ durchzuf\xFChren. Diese ber\xFCcksichtigen die mit dem \xC4nderungsprozess\
+            \ einhergehenden operationellen Risiken und die operationellen Risiken\
+            \ des Zielzustands. Bei Bedarf werden die Risikotoleranz angepasst und\
+            \ Kontroll- und Minderungsmassnahmen implementiert."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:12"
       assessable: true
@@ -1104,6 +1404,11 @@ objects:
             \ e del rischio dei prodotti, delle attivit\xE0, dei processi e dei sistemi\
             \ specifici all\u2019istituto, devono essere applicati gli ulteriori strumenti\
             \ e metodi seguenti:"
+        de:
+          name: Rz 33
+          description: "In Abh\xE4ngigkeit von Art, Umfang, Komplexit\xE4t und Risiko\
+            \ der institutsspezifischen Produkte, Aktivit\xE4ten, Prozesse und Systeme\
+            \ sind folgende weiteren Instrumente und Methoden anzuwenden:"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:13"
       assessable: true
@@ -1123,6 +1428,11 @@ objects:
           name: nm. 34
           description: a. raccolta e analisi sistematiche dei dati interni di perdita
             e degli eventi esterni rilevanti correlati a rischi operativi;
+        de:
+          name: Rz 34
+          description: a. Systematische Erhebung und Analyse interner Verlustdaten
+            und relevanter externer Ereignisse, die mit operationellen Risiken verbunden
+            sind;
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:14"
       assessable: true
@@ -1143,6 +1453,11 @@ objects:
           description: b. indicatori di rischio e di controllo per il monitoraggio
             dei rischi operativi e la tempestiva identificazione degli aumenti rilevanti
             dei rischi;
+        de:
+          name: Rz 35
+          description: "b. Risiko- und Kontrollindikatoren f\xFCr die \xDCberwachung\
+            \ der operationellen Risiken und zeitnahe Identifikation von relevanten\
+            \ Risikoerh\xF6hungen;"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:15"
       assessable: true
@@ -1163,6 +1478,11 @@ objects:
           name: nm. 36
           description: c. analisi di scenario e/o stima del potenziale di perdita
             in considerazione dei o rispetto ai fondi propri minimi per i rischi operativi;
+        de:
+          name: Rz 36
+          description: "c. Szenarioanalysen und/oder Absch\xE4tzung des Verlustpotenzials\
+            \ in Anbetracht der bzw. in Gegen\xFCberstellung mit den Mindesteigenmitteln\
+            \ f\xFCr operationelle Risiken;"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:16"
       assessable: true
@@ -1188,6 +1508,12 @@ objects:
             \ della rilevanza dei risultati dell\u2019audit in altri settori dell\u2019\
             istituto o confronti tra i risultati delle valutazioni del rischio e dei\
             \ controlli di diversi settori."
+        de:
+          name: Rz 37
+          description: "d. Vergleichende Analysen (Read-across), beispielsweise Analysen\
+            \ der Relevanz von Pr\xFCfergebnissen f\xFCr andere Bereiche des Instituts\
+            \ oder Vergleiche zwischen den Ergebnissen der Risiko- und Kontrollbeurteilungen\
+            \ verschiedener Bereiche."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:17"
       assessable: true
@@ -1232,6 +1558,19 @@ objects:
             \ di processi prevalentemente ma- nuali, dall\u2019utilizzo di un\u2019\
             infrastruttura informatica complessa o da determinate esternalizzazioni\
             \ (outsourcing)."
+        de:
+          name: Rz 38
+          description: "Die Risikotoleranz f\xFCr operationelle Risiken ber\xFCcksichtigt\
+            \ sowohl die Toleranz in Bezug auf inh\xE4rente11 als auch auf residuale\
+            \ operationelle Risiken und wird anhand von Risikooder Kontrollindikatoren\
+            \ \xFCberwacht."
+          annotation: "[11] Die Risikotoleranz in Bezug auf inh\xE4rente Risiken ber\xFC\
+            cksichtigt strategische Entscheidungen in Bezug auf das Ge- sch\xE4fts-\
+            \ oder Betriebsmodell, bspw. Toleranz f\xFCr die inh\xE4renten Risiken,\
+            \ die mit der Bedienung gewisser Kundenseg- mente oder L\xE4nder einhergehen,\
+            \ mit dem Angebot gewisser Produkte, mit der Anwendung vorwiegend manueller\
+            \ Prozesse, mit der Abst\xFCtzung auf eine komplexe IT-Infrastruktur oder\
+            \ mit gewissen Auslagerungen (Outsourcing)."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:18"
       assessable: true
@@ -1272,6 +1611,17 @@ objects:
           annotation: "[12] Il massimo livello della categorizzazione viene spesso\
             \ chiamato livello 1 o level 1. Il rapporto pu\xF2 essere effettuato anche\
             \ a un livello pi\xF9 dettagliato."
+        de:
+          name: Rz 39
+          description: "Die Risikokontrolle erstattet dem Oberleitungsorgan mindestens\
+            \ j\xE4hrlich und der Gesch\xE4ftsleitung mindestens halbj\xE4hrlich nach\
+            \ Rz 75\u201376 FINMA-RS 17/1 Bericht \xFCber die operationellen Risiken\
+            \ entlang der obersten Stufe12 der nach Rz 28 definierten Kategorisierung,\
+            \ \xFCber deren Vergleich mit der festgelegten Risikotoleranz, sowie \xFC\
+            ber Einzelheiten zu wesentlichen internen Verlusten."
+          annotation: "[12] Die oberste Stufe der Kategorisierung wird h\xE4ufig Stufe\
+            \ 1 oder Level 1 genannt. Die Berichterstattung kann auch auf einer detaillierteren\
+            \ Stufe erfolgen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:19"
       assessable: true
@@ -1299,6 +1649,13 @@ objects:
             anno contiene inoltre informazioni sull\u2019evoluzione di tali rischi,\
             \ sull\u2019efficacia dei relativi controlli chiave e su importanti eventi\
             \ interni ed esterni in relazione a tali rischi."
+        de:
+          name: Rz 40
+          description: "In Bezug auf die relevanten IKT- und Cyber-Risiken beinhaltet\
+            \ die mindestens j\xE4hrlich erfolgende Berichterstattung an die Gesch\xE4\
+            ftsleitung zudem Informationen zur Entwicklung dieser Risiken, zur Effektivit\xE4\
+            t der entsprechenden Schl\xFCsselkontrollen und zu wesentlichen internen\
+            \ und externen Ereignissen im Zusammenhang mit diesen Risiken."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:20"
       assessable: true
@@ -1317,6 +1674,10 @@ objects:
           name: nm. 41
           description: 'Il rapporto interno di cui al nm. 39 contiene a titolo complementare
             le seguenti informazioni:'
+        de:
+          name: Rz 41
+          description: "Die interne Berichterstattung nach Rz 39 enth\xE4lt erg\xE4\
+            nzend folgende Informationen:"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:21"
       assessable: true
@@ -1334,6 +1695,9 @@ objects:
         it:
           name: nm. 42
           description: "\u2022 i fattori esterni rilevanti secondo la nota 9,"
+        de:
+          name: Rz 42
+          description: "\u2022 relevante, externe Faktoren nach Fussnote 9,"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:22"
       assessable: true
@@ -1352,6 +1716,10 @@ objects:
           name: nm. 43
           description: "\u2022 una panoramica ricapitolativa sull\u2019efficacia dei\
             \ controlli chiave secondo il nm. 31,"
+        de:
+          name: Rz 43
+          description: "\u2022 zusammenfassende Gesamt\xFCbersicht \xFCber die Effektivit\xE4\
+            t der Schl\xFCsselkontrollen nach Rz 31,"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:23"
       assessable: true
@@ -1367,6 +1735,9 @@ objects:
         it:
           name: nm. 44
           description: "\u2022 i rischi operativi emergenti,"
+        de:
+          name: Rz 44
+          description: "\u2022 neu aufkommende operationelle Risiken,"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:24"
       assessable: true
@@ -1385,6 +1756,10 @@ objects:
           name: nm. 45
           description: "\u2022 i risultati derivanti dall\u2019applicazione degli\
             \ ulteriori strumenti e metodi secondo il nm. 33."
+        de:
+          name: Rz 45
+          description: "\u2022 Ergebnisse aus der Anwendung zus\xE4tzlicher Instrumente\
+            \ und Methoden nach Rz 33."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:1:25"
       assessable: true
@@ -1410,6 +1785,13 @@ objects:
             \ di rilevanza sistemica viene presentato un resoconto periodico sui rischi\
             \ operativi anche al livello delle divisioni commerciali e organizzative\
             \ esposte a rischi operativi rilevanti o essenziali."
+        de:
+          name: Rz 46
+          description: "Entsprechend dem Proportionalit\xE4tsprinzip wird f\xFCr die\
+            \ systemrelevanten Banken auch auf Ebene der Gesch\xE4fts- oder Organisationsbereiche,\
+            \ die relevanten oder wesentlichen operationellen Risiken ausgesetzt sind,\
+            \ eine regelm\xE4ssige Berichterstattung zu den operationellen Risiken\
+            \ vorgenommen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2"
       assessable: false
@@ -1422,6 +1804,8 @@ objects:
           name: B. ICT risk management
         it:
           name: B. Gestione dei rischi TIC
+        de:
+          name: B. Management der IKT-Risiken
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:1"
       assessable: false
@@ -1434,6 +1818,8 @@ objects:
           name: a) ICT strategy and governance
         it:
           name: a) Strategia TIC e governance
+        de:
+          name: a) IKT-Strategie und Governance
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:1:1"
       assessable: true
@@ -1455,6 +1841,11 @@ objects:
           description: "Le aspettative fondamentali poste alla strategia, alla governance\
             \ e al rafforzamento della consapevolezza in riferimento alle TIC sono\
             \ enunciate nei nm. 23\u201326 e 40."
+        de:
+          name: Rz 47
+          description: "Die grunds\xE4tzlichen Erwartungen an die Strategie, Governance\
+            \ und St\xE4rkung des Bewusstseins in Bezug auf die IKT sind in Rz 23\u2013\
+            26 und 40 festgehalten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:1:2"
       assessable: true
@@ -1477,6 +1868,11 @@ objects:
           description: "La gestione dei rischi TIC considera standard e pratiche rilevanti\
             \ riconosciuti a livello internazionale, nonch\xE9 l\u2019impatto di nuovi\
             \ sviluppi tecnologici sui rischi TIC."
+        de:
+          name: Rz 48
+          description: "Das Management der IKT-Risiken ber\xFCcksichtigt relevante\
+            \ international anerkannte Standards und Practices sowie den Einfluss\
+            \ von neuen technologischen Entwicklungen auf die IKT-Risiken."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:1:3"
       assessable: true
@@ -1502,6 +1898,13 @@ objects:
             \ (change management) sia per l\u2019esercizio delle TIC (run, maintenance),\
             \ l\u2019implementazione e la documentazione di procedure, processi, controlli\
             \ e CCR, a cui sono assegnate risorse qualificate e appropriate."
+        de:
+          name: Rz 49
+          description: "Die Gesch\xE4ftsleitung stellt sicher, dass sowohl f\xFCr\
+            \ das \xC4nderungsmanagement (Change Management) als auch f\xFCr den IKT-Betrieb\
+            \ (Run, Maintenance) Verfahren, Prozesse und Kontrollen sowie AKV implementiert\
+            \ und dokumentiert sind. Diese sind mit qualifizierten und angemessenen\
+            \ Ressourcen ausgestattet."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:2"
       assessable: false
@@ -1514,6 +1917,8 @@ objects:
           name: b) Change management
         it:
           name: b) Gestione del cambiamento (change management)
+        de:
+          name: "b) \xC4nderungsmanagement (Change Management)"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:2:1"
       assessable: true
@@ -1542,6 +1947,14 @@ objects:
             \ TIC e, in ognuna di queste fasi, considera l\u2019impatto del cambiamento\
             \ sui rischi TIC, focalizzandosi sui requisiti in materia di confidenzialit\xE0\
             , integrit\xE0 e disponibilit\xE0."
+        de:
+          name: Rz 50
+          description: "F\xFCr alle Phasen der Entwicklung oder Beschaffung von IKT\
+            \ definiert das \xC4nderungsmanagement Verfahren, Prozesse, und Kontrollen.\
+            \ In jeder dieser Phasen ber\xFCcksichtigt es die Auswirkungen der \xC4\
+            nderung auf die IKT-Risiken. Dabei stehen insbesondere auch die Anforderungen\
+            \ hinsichtlich Vertraulichkeit, Integrit\xE4t und Verf\xFCgbarkeit im\
+            \ Fokus."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:2:2"
       assessable: true
@@ -1567,6 +1980,12 @@ objects:
             \ o di test delle TIC e l\u2019ambiente della loro produzione. Ci\xF2\
             \ comprende anche una chiara attribuzione dei CCR e la regolamentazione\
             \ dei conseguenti diritti di accesso."
+        de:
+          name: Rz 51
+          description: "Es ist eine Trennung zwischen den Umgebungen f\xFCr die Entwicklung\
+            \ oder das Testen und der Umgebung f\xFCr die IKT-Produktion sicherzustellen.\
+            \ Dies umfasst auch eine eindeutige Zuweisung von AKV und eine Regelung\
+            \ der damit einhergehenden Zugangsberechtigungen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:2:3"
       assessable: true
@@ -1595,6 +2014,13 @@ objects:
             \ quindi testate e convalidate in funzione della loro criticit\xE0."
           annotation: "[13] P. es. per quanto attiene all\u2019architettura o ai requisiti\
             \ di sicurezza delle informazioni."
+        de:
+          name: Rz 52
+          description: "Bei Entwicklung und Beschaffung von IKT werden funktionale\
+            \ und nicht-funktionale Anforderungen13 klar definiert und genehmigt und\
+            \ gem\xE4ss ihrer Kritikalit\xE4t getestet und validiert."
+          annotation: '[13] Bspw. im Hinblick auf die Architektur oder die Anforderungen
+            an die Informationssicherheit.'
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:3"
       assessable: false
@@ -1607,6 +2033,8 @@ objects:
           name: c) ICT operations (run, maintenance)
         it:
           name: c) Esercizio delle TIC (run, maintenance)
+        de:
+          name: c) IKT-Betrieb (Run, Maintenance)
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:3:1"
       assessable: true
@@ -1634,6 +2062,13 @@ objects:
             \ i luoghi di archiviazione di dati critici. Tiene conto delle dipendenze\
             \ all\u2019interno dell\u2019istituto e delle interfacce con importanti\
             \ fornitori esterni di servizi."
+        de:
+          name: Rz 53
+          description: "Das Institut f\xFChrt ein oder mehrere Inventar(-e) der Bestandteile\
+            \ der IKT. Das Inventar umfasst Hardware- und Software-Komponenten sowie\
+            \ Ablageorte kritischer Daten. Dabei werden sowohl Abh\xE4ngigkeiten innerhalb\
+            \ des Instituts als auch Schnittstellen zu wesentlichen externen Dienstleistern\
+            \ ber\xFCcksichtigt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:3:2"
       assessable: true
@@ -1653,6 +2088,11 @@ objects:
           name: nm. 54
           description: "L\u2019inventario, disponibile in tempi brevi, viene regolarmente\
             \ verificato in termini di completezza ed esattezza e aggiornato."
+        de:
+          name: Rz 54
+          description: "Das Inventar ist zeitnah verf\xFCgbar und wird regelm\xE4\
+            ssig hinsichtlich Vollst\xE4ndigkeit und Richtigkeit \xFCberpr\xFCft und\
+            \ aktualisiert."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:3:3"
       assessable: true
@@ -1677,6 +2117,11 @@ objects:
             \ che garantiscono la confidenzialit\xE0, l\u2019integrit\xE0 e la disponibilit\xE0\
             \ dell\u2019ambiente di produzione delle TIC considerando la rispettiva\
             \ tolleranza al rischio."
+        de:
+          name: Rz 55
+          description: "Das Institut verf\xFCgt \xFCber Verfahren, Prozesse, und Kontrollen,\
+            \ die die Vertraulichkeit, Integrit\xE4t und Verf\xFCgbarkeit der IKT-Produktionsumgebung\
+            \ unter Ber\xFCcksichtigung der jeweiligen Risikotoleranz sicherstellen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:3:4"
       assessable: true
@@ -1702,6 +2147,13 @@ objects:
             \ dall\u2019esercizio delle TIC ai suoi processi BCP e DRP in caso di\
             \ perturbazioni importanti o interruzioni. Implementa opportuni processi\
             \ di backup e di ripristino, che sono regolarmente testati e convalidati."
+        de:
+          name: Rz 56
+          description: "Das Institut stellt sicher, dass es bei bedeutenden St\xF6\
+            rungen oder Unterbrechungen reibungslos vom IKT-Betrieb in seine BCP-\
+            \ und DRP-Prozesse \xFCbergehen kann. Es implementiert angemessene Back-up-Prozesse\
+            \ und Wiederherstellungsprozesse, die regelm\xE4ssig getestet und validiert\
+            \ werden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:3:5"
       assessable: true
@@ -1726,6 +2178,11 @@ objects:
             \ che garantiscono una gestione orientata al rischio delle TIC la cui\
             \ vita operativa volge al termine o che hanno superato il periodo di disattivazione\
             \ previsto."
+        de:
+          name: Rz 57
+          description: "Das Institut verf\xFCgt \xFCber Verfahren, Prozesse und Kontrollen,\
+            \ die einen risikoorientierten Umgang mit IKT, deren Betriebsende naht\
+            \ oder deren geplante Dekommissionierung \xFCberschritten wurde, sicherstellt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:4"
       assessable: false
@@ -1738,6 +2195,8 @@ objects:
           name: d) Incident management
         it:
           name: d) Gestione degli incidenti (incident management)
+        de:
+          name: d) Vorfallmanagement (Incident Management)
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:4:1"
       assessable: true
@@ -1769,6 +2228,14 @@ objects:
             \ in seno al gruppo. Al riguardo \xE8 necessario considerare l\u2019intero\
             \ ciclo di vita degli incidenti TIC importanti e definire i CCR per trattare\
             \ questi incidenti."
+        de:
+          name: Rz 58
+          description: "Das Institut verf\xFCgt \xFCber Verfahren, Prozesse und Kontrollen\
+            \ zur Behandlung wesentlicher IKT-Vorf\xE4lle, einschliesslich solcher,\
+            \ die auf Abh\xE4ngigkeiten von wesentlichen externen Dienstleistern und\
+            \ konzerninternen Auslagerungen zur\xFCckzuf\xFChren sind. Dabei ist der\
+            \ gesamte Lebenszyklus von wesentlichen IKT-Vorf\xE4llen zu ber\xFCcksichtigen\
+            \ und AKV zur Behandlung dieser Vorf\xE4lle sind zu definieren."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:4:2"
       assessable: true
@@ -1787,6 +2254,10 @@ objects:
           name: nm. 59
           description: Il trattamento degli incidenti TIC importanti deve essere coordinato
             e collegato ai processi BCM e DRP.
+        de:
+          name: Rz 59
+          description: "Die Behandlung wesentlicher IKT-Vorf\xE4lle ist mit den Prozessen\
+            \ zum BCM und dem DRP abzustimmen und zu verkn\xFCpfen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:2:4:3"
       assessable: true
@@ -1810,6 +2281,12 @@ objects:
             \ perturbazione importante per lo svolgimento dei suoi processi critici\
             \ e rilevanti ai fini della vigilanza devono essere notificati senza indugio\
             \ alla FINMA."
+        de:
+          name: Rz 60
+          description: "IKT-Vorf\xE4lle, die vom Institut als wesentliche St\xF6rung\
+            \ bei der Erbringung seiner kritischen Prozesse erachtet werden und f\xFC\
+            r die Aufsicht von wesentlicher Bedeutung sind, m\xFCssen der FINMA unverz\xFC\
+            glich gemeldet werden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3"
       assessable: false
@@ -1822,6 +2299,8 @@ objects:
           name: C. Cyber risk management
         it:
           name: C. Gestione dei cyber-rischi
+        de:
+          name: C. Management der Cyber-Risiken
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:1"
       assessable: true
@@ -1843,6 +2322,11 @@ objects:
           description: "Le aspettative fondamentali poste alla strategia, alla governance\
             \ e al rafforzamento della consapevolezza in riferimento ai cyber-rischi\
             \ sono enunciate nei nm. 23\u201326 e 40."
+        de:
+          name: Rz 61
+          description: "Die grunds\xE4tzlichen Erwartungen an die Strategie, Governance\
+            \ und St\xE4rkung des Bewusstseins in Bezug auf die Cyber-Risiken sind\
+            \ in Rz 23\u201326 und 40 festgehalten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:2"
       assessable: true
@@ -1871,6 +2355,13 @@ objects:
             \ internazionale e garantire, sviluppare e migliorare conti- nuamente\
             \ la loro effettiva attuazione mediante procedure, processi e controlli\
             \ adeguati:"
+        de:
+          name: Rz 62
+          description: "Das Institut definiert eindeutige AKV. Es hat mindestens die\
+            \ folgenden Aspekte nach international anerkannten Standards und Practices\
+            \ abzudecken und deren effektive Umsetzung durch geeignete Verfahren,\
+            \ Prozesse und Kontrollen zu gew\xE4hrleisten und kontinuierlich weiter\
+            \ zu entwickeln und zu verbessern:"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:3"
       assessable: true
@@ -1911,6 +2402,17 @@ objects:
             \ che si verificano mediante lo sfruttamento delle vulnerabilit\xE0 o\
             \ l\u2019elusione delle misure di protezione da parte di aggressori esterni\
             \ o interni."
+        de:
+          name: Rz 63
+          description: "a. Identifikation der institutsspezifischen Bedrohungspotenziale\
+            \ durch Cyber-Attacken14 und Beurteilung der m\xF6glichen Auswirkungen\
+            \ der Ausn\xFCtzung von Schwachstellen bez\xFCglich der inventarisierten\
+            \ Bestandteile der IKT und der elektronischen kritischen Daten (gem\xE4\
+            ss Rz 53, 54 und 7);"
+          annotation: "[14] Angriffe auf die Vertraulichkeit, die Integrit\xE4t und\
+            \ die Verf\xFCgbarkeit von IKT sowie auf die elektronischen kritischen\
+            \ Daten, welche durch die Ausnutzung von Schwachstellen oder Umgehung\
+            \ von Schutzmassnahmen durch externe oder interne Angreifende stattfinden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:4"
       assessable: true
@@ -1936,6 +2438,12 @@ objects:
             \ dati elettronici critici contro i cyber-attacchi mediante l\u2019attuazione\
             \ di misure di protezione adeguate, in particolare in riferimento alla\
             \ confidenzialit\xE0, all\u2019integrit\xE0 e alla disponibilit\xE0;"
+        de:
+          name: Rz 64
+          description: "b. Schutz der inventarisierten Bestandteile der IKT und der\
+            \ elektronischen kritischen Daten vor Cyber-Attacken durch die Implementierung\
+            \ angemessener Schutzmassnahmen, insbesondere im Hinblick auf die Vertraulichkeit,\
+            \ Integrit\xE4t und Verf\xFCgbarkeit;"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:5"
       assessable: true
@@ -1958,6 +2466,12 @@ objects:
           description: c. individuazione e registrazione tempestive dei cyber-attacchi
             sulla base di un processo di monitoraggio sistematico e continuo delle
             componenti inventariate delle TIC e dei dati elettronici critici;
+        de:
+          name: Rz 65
+          description: "c. Zeitnahe Aufzeichnung und Erkennung von Cyber-Attacken\
+            \ auf Basis eines Prozesses zur systematischen und durchg\xE4ngigen \xDC\
+            berwachung der inventarisierten Bestandteile der IKT und der elektronischen\
+            \ kritischen Daten;"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:6"
       assessable: true
@@ -1981,6 +2495,12 @@ objects:
             \ mediante lo sviluppo e l\u2019implementazione di processi appropriati,\
             \ che consentono di adottare tempestivamente misure di attenuazione e\
             \ di eliminazione; e"
+        de:
+          name: Rz 66
+          description: "d. Reaktion auf identifizierte Schwachstellen und Cyber-Attacken\
+            \ durch die Entwicklung und Implementierung angemessener Prozesse, um\
+            \ zeitnah Massnahmen f\xFCr die Eind\xE4mmung und Beseitigung einzuleiten;\
+            \ und"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:7"
       assessable: true
@@ -2000,6 +2520,10 @@ objects:
           name: nm. 67
           description: e. garanzia di un rapido ripristino del normale esercizio in
             seguito a cyber-attacchi con misure appropriate.
+        de:
+          name: Rz 67
+          description: "e. Sicherstellung einer zeitnahen Wiederherstellung des ordentlichen\
+            \ Gesch\xE4ftsbetriebs nach Cyber-Attacken durch geeignete Massnahmen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:8"
       assessable: true
@@ -2051,6 +2575,20 @@ objects:
             \ che l\u2019istituto ha concluso la trattazione del caso, deve essere\
             \ presentato al servizio competente della FINMA un rapporto conclusivo\
             \ sulle cause commisurato al grado di gravit\xE0."
+        de:
+          name: Rz 68
+          description: "Das Management der Cyber-Risiken hat sicherzustellen, dass\
+            \ eine erfolgreiche oder teilweise erfolgreiche Cyber-Attacke nach seiner\
+            \ Wesentlichkeit f\xFCr kritische inventarisierte IKT-Bestandteile bzw.\
+            \ elektronische kritische Daten sowie kritische Prozesse (inkl. ausgelagerte\
+            \ Dienstleistungen und Funktionen) analysiert wird und die Meldepflicht\
+            \ nach FINMAG eingehalten wird. Nach erfolgter Erstbeurteilung und der\
+            \ Vororientierung an die zust\xE4ndige Stelle bei der FINMA innerhalb\
+            \ von 24 Stunden ist die Meldung gem\xE4ss dem Anforderungskatalog der\
+            \ Erhebungsplattform EHP (Pflichtfelder) innerhalb von 72 Stunden zu \xFC\
+            bermitteln. Nach Abschluss der institutsseitigen Fallbearbeitung ist ein\
+            \ dem Schweregrad entsprechender abschliessender Ursachenbericht an die\
+            \ zust\xE4ndige Stelle bei der FINMA einzureichen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:9"
       assessable: true
@@ -2103,6 +2641,20 @@ objects:
             \ IT nei confronti di cyber-attacchi.\n[16] Esame mirato e sfruttamento\
             \ delle vulnerabilit\xE0 a livello di software e delle falle di sicurezza\
             \ nelle TIC."
+        de:
+          name: Rz 69
+          description: "Die Gesch\xE4ftsleitung l\xE4sst regelm\xE4ssig Verwundbarkeitsanalysen15\
+            \ und Penetrationstests16 durchf\xFChren. Diese m\xFCssen durch qualifiziertes\
+            \ Personal mit angemessenen Ressourcen ausgef\xFChrt werden. Dabei sind\
+            \ alle inventarisierten Bestandteile der IKT, die \xFCber das Internet\
+            \ erreichbar sind, zu ber\xFCcksichtigen. Zudem sind inventarisierte Bestandteile\
+            \ der IKT, welche nicht \xFCber das Internet erreichbar, aber f\xFCr die\
+            \ Erbringung von kritischen Prozessen notwendig sind, oder welche elektronische\
+            \ kritische Daten beinhalten, zu ber\xFCcksichtigen."
+          annotation: "[15] Analyse zur Identifikation von derzeit bestehenden Software-Schwachstellen\
+            \ und Sicherheitsl\xFCcken in der IT-Infra- struktur gegen\xFCber Cyber-Attacken\n\
+            [16] Gezielte Pr\xFCfung und das Ausn\xFCtzen von Software-Schwachstellen\
+            \ und Sicherheitsl\xFCcken in der IKT"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:3:10"
       assessable: true
@@ -2134,6 +2686,15 @@ objects:
           annotation: '[17] Considerando il nm. 19, questi cyber-esercizi potrebbero
             includere, per esempio, esercizi di simulazione (table-top exercises),
             red teaming ecc.'
+        de:
+          name: Rz 70
+          description: "Auf Basis der institutsspezifischen Bedrohungspotenziale m\xFC\
+            ssen risikobasiert szenariobezogene Cyber-\xDCbungen17 durchgef\xFChrt\
+            \ werden. Das Ergebnis der \xDCbungen ist in geeigneter Form zu dokumentieren\
+            \ und zu rapportieren."
+          annotation: "[17] Unter Ber\xFCcksichtigung der Rz 19 k\xF6nnten solche\
+            \ Cyber-\xDCbungen beispielsweise beinhalten, Table-Top-, Red Teaming-\xDC\
+            bungen usw."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4"
       assessable: false
@@ -2146,6 +2707,8 @@ objects:
           name: D. Critical data risk management
         it:
           name: D. Gestione dei rischi dei dati critici
+        de:
+          name: D. Management der Risiken kritischer Daten
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:1"
       assessable: true
@@ -2168,6 +2731,11 @@ objects:
           description: "Le aspettative fondamentali poste alla strategia, alla governance\
             \ e al rafforzamento della consapevolezza in riferimento ai rischi dei\
             \ dati critici sono enunciate nei nm. 23\u201326."
+        de:
+          name: Rz 71
+          description: "Die grunds\xE4tzlichen Erwartungen an die Strategie, Governance\
+            \ und St\xE4rkung des Bewusstseins in Bezug auf die Risiken kritischer\
+            \ Daten sind in Rz 23\u201326 festgehalten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:2"
       assessable: true
@@ -2199,6 +2767,14 @@ objects:
             \ alla creazione di condizioni quadro che garantiscano la confidenzialit\xE0\
             , l\u2019integrit\xE0 e la disponibilit\xE0 di dati critici e al controllo\
             \ del loro rispetto."
+        de:
+          name: Rz 72
+          description: "Die Gesch\xE4ftsleitung definiert geeignete Prozesse, Verfahren\
+            \ und Kontrollen sowie eindeutige AKV zum Umgang mit den vom Institut\
+            \ identifizierten kritischen Daten. Dar\xFCber hinaus beauftragt die Gesch\xE4\
+            ftsleitung eine Einheit, um Rahmenbedingungen zur Sicherstellung der Vertraulichkeit,\
+            \ Integrit\xE4t und Verf\xFCgbarkeit von kritischen Daten zu schaffen\
+            \ und ihre Einhaltung zu \xFCberwachen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:3"
       assessable: true
@@ -2220,6 +2796,11 @@ objects:
           description: "L\u2019istituto individua i suoi dati critici in modo sistematico\
             \ ed esaustivo, li categorizza in funzione del loro grado di criticit\xE0\
             \ e definisce chiare responsabilit\xE0 in materia di dati."
+        de:
+          name: Rz 73
+          description: "Das Institut identifiziert seine kritischen Daten systematisch\
+            \ und vollst\xE4ndig, kategorisiert diese nach ihrer Kritikalit\xE4t und\
+            \ definiert eindeutige Datenverantwortlichkeiten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:4"
       assessable: true
@@ -2238,6 +2819,10 @@ objects:
           name: nm. 74
           description: "I dati critici definiti dall\u2019istituto sono gestiti lungo\
             \ il loro intero ciclo di vita."
+        de:
+          name: Rz 74
+          description: Die vom Institut definierten kritischen Daten werden entlang
+            ihres gesamten Lebenszyklus verwaltet.
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:5"
       assessable: true
@@ -2260,6 +2845,11 @@ objects:
           description: "Al riguardo, il rispetto della confidenzialit\xE0, dell\u2019\
             integrit\xE0 e della disponibilit\xE0 nella gestione di dati critici \xE8\
             \ garantito mediante processi, procedure e controlli adeguati."
+        de:
+          name: Rz 75
+          description: "Dabei wird insbesondere die Einhaltung der Vertraulichkeit,\
+            \ Integrit\xE4t und Verf\xFCgbarkeit bei der Verwaltung von kritischen\
+            \ Daten durch geeignete Prozesse, Verfahren und Kontrollen gew\xE4hrleistet."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:6"
       assessable: true
@@ -2285,6 +2875,12 @@ objects:
             \ e la migrazione delle TIC, i dati critici devono essere protetti dall\u2019\
             accesso e dall\u2019utilizzo da parte di soggetti non autorizzati. Questo\
             \ vale anche per i dati critici in ambienti di test."
+        de:
+          name: Rz 76
+          description: "Kritische Daten sind im Betrieb und w\xE4hrend der Entwicklung,\
+            \ Ver\xE4nderung und Migration von IKT vor dem Zugriff und der Nutzung\
+            \ durch Unberechtigte angemessen zu sch\xFCtzen. Dies gilt auch f\xFC\
+            r kritische Daten in Testumgebungen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:7"
       assessable: true
@@ -2308,6 +2904,11 @@ objects:
             \ TIC in cui sono archiviati o trattati dati critici. \xC8 necessario\
             \ regolamentare sistematicamente e monitorare continuamente l\u2019accesso\
             \ a questi dati."
+        de:
+          name: Rz 77
+          description: "Die Bestandteile der IKT, die kritische Daten speichern oder\
+            \ verarbeiten, sind besonders zu sch\xFCtzen. Dabei ist der Zugriff auf\
+            \ diese Daten systematisch zu regeln und laufend zu \xFCberwachen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:8"
       assessable: true
@@ -2343,6 +2944,15 @@ objects:
             \ Le autorizzazioni contenute nel sistema devono essere verificate regolarmente."
           annotation: '[18] P. es. principio del need-to-know e del privilegio minimo
             (least privilege).'
+        de:
+          name: Rz 78
+          description: "Der Zugriff auf kritische Daten und verarbeitende Funktionalit\xE4\
+            ten ist auf Personen beschr\xE4nkt, welche diesen zur Erf\xFCllung ihrer\
+            \ Aufgaben ben\xF6tigen18. Dabei muss das Institut \xFCber ein Autorisierungssystem\
+            \ verf\xFCgen. Der Zugang zu diesem Autorisierungssystem ist besonders\
+            \ zu sch\xFCtzen und regelm\xE4ssig zu \xFCberpr\xFCfen. Die im Autorisierungssystem\
+            \ enthaltenen Berechtigungen sind regelm\xE4ssig zu \xFCberpr\xFCfen."
+          annotation: '[18] Bspw. Need-to-know- und Least Privilege-Prinzip'
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:9"
       assessable: true
@@ -2371,6 +2981,13 @@ objects:
             \ i rischi superiori che ne derivano e monitorarli mediante misure adeguate,\
             \ nonch\xE9 proteggere i dati in modo particolare."
           annotation: '[19] P. es. mediante soluzioni di cloud o di hosting.'
+        de:
+          name: Rz 79
+          description: "Falls kritische Daten ausserhalb der Schweiz gespeichert werden19\
+            \ oder vom Ausland aus auf sie zugegriffen werden kann, sind die damit\
+            \ verbundenen erh\xF6hten Risiken angemessen zu begrenzen und mit geeigneten\
+            \ Massnahmen zu \xFCberwachen sowie die Daten besonders zu sch\xFCtzen."
+          annotation: "[19] Bspw. im Rahmen von Cloud- oder Hosting-L\xF6sungen"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:10"
       assessable: true
@@ -2416,6 +3033,19 @@ objects:
           annotation: "[20] P. es. valutazione di file log, principio del doppio controllo\
             \ ecc.\n[21] P. es. persone con diritti di amministratore, utenti con\
             \ accesso funzionale a una grossa quantit\xE0 di dati critici ecc."
+        de:
+          name: Rz 80
+          description: "Sowohl interne wie externe Personen, die auf kritische Daten\
+            \ zugreifen oder diese ver\xE4ndern k\xF6nnen, sind sorgf\xE4ltig auszuw\xE4\
+            hlen. Diese Personen sind mit geeigneten Massnahmen zu \xFCberwachen20\
+            \ und regelm\xE4ssig im Umgang mit diesen Daten zu schulen. F\xFCr Personen\
+            \ mit erh\xF6hten Privilegien21 gelten erh\xF6hte Sicherheitsanforderungen.\
+            \ Es ist zudem eine Liste aller Personen mit erh\xF6hten Privilegien zu\
+            \ f\xFChren und laufend zu aktualisieren."
+          annotation: '[20] Bspw. Auswertung von Log-Dateien, Vier-Augen-Prinzip usw.
+
+            [21] Bspw. Personen mit Administratorenrechten, Anwender mit funktionalem
+            Zugriff auf eine grosse Menge an kritischen Daten usw.'
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:11"
       assessable: true
@@ -2436,6 +3066,11 @@ objects:
           description: "Gli incidenti che compromettono in misura significativa la\
             \ confidenzialit\xE0, l\u2019integrit\xE0 o la disponibilit\xE0 di dati\
             \ critici devono essere notificati senza indugio alla FINMA."
+        de:
+          name: Rz 81
+          description: "Vorf\xE4lle, die die Vertraulichkeit, Integrit\xE4t oder Verf\xFC\
+            gbarkeit von kritischen Daten wesentlich beeintr\xE4chtigen, m\xFCssen\
+            \ der FINMA unverz\xFCglich gemeldet werden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:4:12"
       assessable: true
@@ -2484,6 +3119,19 @@ objects:
             acquisizione, il salvataggio, la custodia, l\u2019utilizzo, la modifica,\
             \ la divulgazione, l\u2019archiviazione, la cancellazione o l\u2019eliminazione\
             \ dei dati."
+        de:
+          name: Rz 82
+          description: "Bei der Auswahl von Dienstleistern, die kritische Daten bearbeiten22\
+            \ oder einsehen k\xF6nnen, ist der Sorgfaltspr\xFCfung (Due Diligence)\
+            \ eine hohe Bedeutung beizumessen. Es sind klare Kriterien f\xFCr die\
+            \ Beurteilung des Umgangs der Dienstleister mit kritischen Daten zu definieren\
+            \ und vor Vertragsvereinbarung zu pr\xFCfen. Die Dienstleister sind im\
+            \ Rahmen des internen Kontrollsystems des Instituts risikoorientiert periodisch\
+            \ zu \xFCberwachen und zu kontrollieren."
+          annotation: "[22] Bearbeiten: jeder Umgang mit kritischen Daten, unabh\xE4\
+            ngig von den angewandten Mitteln und Verfahren, insbeson- dere das Beschaffen,\
+            \ Speichern, Aufbewahren, Verwenden, Ver\xE4ndern, Bekanntgeben, Archivieren,\
+            \ L\xF6schen oder Vernichten von Daten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5"
       assessable: false
@@ -2496,6 +3144,8 @@ objects:
           name: E. Business continuity management (BCM)
         it:
           name: E. Business continuity management (BCM)
+        de:
+          name: E. Business Continuity Management (BCM)
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:1"
       assessable: true
@@ -2519,6 +3169,11 @@ objects:
             \ e al rafforzamento della consapevolezza in riferimento ai rischi che\
             \ derivano dalla configurazione e dall\u2019implementazione del BCM sono\
             \ enunciate nei nm. 23\u201326."
+        de:
+          name: Rz 83
+          description: "Die grunds\xE4tzlichen Erwartungen an die Strategie, Governance\
+            \ und St\xE4rkung des Bewusstseins in Bezug auf Risiken aus der Ausgestaltung\
+            \ und Implementierung des BCM sind in Rz 23\u201326 festgehalten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:2"
       assessable: true
@@ -2555,6 +3210,16 @@ objects:
             \ i sistemi di comunicazione), dipendenze da altri settori dell\u2019\
             istituto e da terzi, p. es. erogatori di servizi e fornitori esterni (outsourcing),\
             \ banche centrali o stanze di compensazione."
+        de:
+          name: Rz 84
+          description: "Jeder relevante Gesch\xE4fts- und Organisationsbereich hat\
+            \ im Rahmen der Business Impact Analyse (BIA) seine kritischen Prozesse\
+            \ und die daf\xFCr ben\xF6tigten Ressourcen23 zu identifizieren."
+          annotation: "[23] Personal, Einrichtungen (bspw. Geb\xE4ude, Arbeitsplatzinfrastruktur),\
+            \ Informationen, IT-Systeme oder IT-Infrastruktur (inkl. Kommunikationssysteme),\
+            \ Abh\xE4ngigkeiten zu andern Bereichen des Instituts und zu Drittparteien,\
+            \ bspw. exter- nen Dienstleistern und Lieferanten (Outsourcing), Zentralbanken\
+            \ oder Clearingh\xE4usern."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:3"
       assessable: true
@@ -2588,6 +3253,15 @@ objects:
             \ e controlli appropriati."
           annotation: "[24] P. es. con la sezione IT, altre divisioni dell\u2019istituto\
             \ o esterni."
+        de:
+          name: Rz 85
+          description: "F\xFCr die kritischen Prozesse definiert das Institut die\
+            \ RTO und RPO nach Rz 10. Diese sind mit den daf\xFCr erforderlichen Leistungserbringern24\
+            \ abgestimmt und die Einhaltung der RTO und RPO wird durch Service Level\
+            \ Agreements oder Vertr\xE4ge geregelt oder durch andere geeignete Verfahren,\
+            \ Prozesse und Kontrollen sichergestellt."
+          annotation: '[24] Bspw. mit der IT-Abteilung, anderen Bereichen des Instituts
+            oder Externen'
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:4"
       assessable: true
@@ -2615,6 +3289,12 @@ objects:
             \ piano e i processi decisionali e tiene conto della perdita di risorse\
             \ secondo il nm. 84. I rischi residui accettati sono documentati in maniera\
             \ adeguata."
+        de:
+          name: Rz 86
+          description: "Das Institut definiert mindestens einen BCP nach Rz 11, der\
+            \ auch die den Plan ausl\xF6senden Gegebenheiten und Entscheidungsprozesse\
+            \ beschreibt und den Verlust der Ressourcen nach Rz 84 ber\xFCcksichtigt.\
+            \ Die Akzeptanz von residualen Risiken wird angemessen dokumentiert."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:5"
       assessable: true
@@ -2642,6 +3322,13 @@ objects:
             \ verificati e aggiornati ogni anno e ad hoc in caso di cambiamenti sostanziali\
             \ nell\u2019attivit\xE0 (riorganizzazioni, creazione di un nuovo campo\
             \ di attivit\xE0 ecc.)."
+        de:
+          name: Rz 87
+          description: "Die BIA und BCP werden einer institutsweiten Vorgabe folgend\
+            \ auf konsistente Art erstellt und dokumentiert. Sie sind j\xE4hrlich\
+            \ sowie ad hoc im Falle wesentlicher \xC4nderungen im Gesch\xE4ftsbetrieb\
+            \ (Reorganisationen, Aufbau eines neuen Gesch\xE4ftsfelds, usw.) zu \xFC\
+            berpr\xFCfen und zu aktualisieren."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:6"
       assessable: true
@@ -2671,6 +3358,13 @@ objects:
             \ contrattuali nonch\xE9 di soluzioni alternative. Il DRP \xE8 verificato\
             \ e aggiornato ad hoc in caso di cambiamenti sostanziali, ma almeno una\
             \ volta all\u2019anno."
+        de:
+          name: Rz 88
+          description: "Das Institut definiert als Teil des BCP mindestens einen DRP.\
+            \ Wenn kritische Prozesse oder Teile davon ausgelagert sind, ber\xFCcksichtigt\
+            \ der DRP die externen Abh\xE4ngigkeiten und vertraglichen Regelungen\
+            \ sowie alternative L\xF6sungen. Der DRP wird ad hoc im Falle wesentlicher\
+            \ \xC4nderungen und mindestens j\xE4hrlich \xFCberpr\xFCft und aktualisiert."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:7"
       assessable: true
@@ -2704,6 +3398,15 @@ objects:
             \ deve essere incentrata sull\u2019attivit\xE0 commerciale e la struttura\
             \ geografica dell\u2019istituto. Nelle situazioni di crisi deve essere\
             \ garantita la reperibilit\xE0 dei responsabili."
+        de:
+          name: Rz 89
+          description: "In Krisensituationen hat ein Krisenstab die Aufgabe der Krisenbew\xE4\
+            ltigung bis zur Wiederherstellung eines ordnungsgem\xE4ssen Zustands zu\
+            \ \xFCbernehmen. Die eine Krise ausl\xF6senden Gegebenheiten und die AKV\
+            \ des Krisenstabs sind vorg\xE4ngig zu regeln, und die Krisenorganisation\
+            \ auf die Gesch\xE4ftst\xE4tigkeit und geographische Struktur des Instituts\
+            \ auszurichten. Die Erreichbarkeit der Verantwortungstr\xE4ger in Krisensituationen\
+            \ ist sicherzustellen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:8"
       assessable: true
@@ -2722,6 +3425,10 @@ objects:
           name: nm. 90
           description: "L\u2019istituto definisce una strategia di comunicazione interna\
             \ ed esterna nelle situazioni di crisi."
+        de:
+          name: Rz 90
+          description: "Das Institut definiert eine Kommunikationsstrategie f\xFC\
+            r die interne und externe Kommunikation in Krisensituationen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:9"
       assessable: true
@@ -2752,6 +3459,14 @@ objects:
             \ la copertura regolare. \xC8 possibile scegliere diverse modalit\xE0\
             \ di test con gradi di intensit\xE0 e di efficacia variabile, per esempio\
             \ gli esercizi table-top."
+        de:
+          name: Rz 91
+          description: "Mit Tests wird die Umsetzung der BCP und des DRP sowie die\
+            \ Funktionsf\xE4higkeit der Krisenorganisation regelm\xE4ssig beurteilt.\
+            \ Daf\xFCr wird eine systematische Planung erstellt, die die regelm\xE4\
+            ssige Abdeckung sicherstellt. Es k\xF6nnen verschiedene Vorgehen zum Testen\
+            \ von unterschiedlicher Intensit\xE4t und Effektivit\xE4t gew\xE4hlt werden,\
+            \ so auch bspw. Table-Top-\xDCbungen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:10"
       assessable: true
@@ -2770,6 +3485,10 @@ objects:
           name: nm. 92
           description: "Le principali misure in conformit\xE0 al BCP e al DRP e l\u2019\
             organizzazione di crisi sono testate almeno una volta all\u2019anno."
+        de:
+          name: Rz 92
+          description: "Die gem\xE4ss BCP und DRP wichtigsten Massnahmen und die Krisenorganisation\
+            \ werden mindestens einmal j\xE4hrlich getestet."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:11"
       assessable: true
@@ -2791,6 +3510,11 @@ objects:
           description: I principali stakeholder, compresi quelli che svolgono funzioni
             specialistiche e IT, partecipano ai test per acquisire dimestichezza con
             i processi di ripristino.
+        de:
+          name: Rz 93
+          description: Relevante Anspruchsgruppen, einschliesslich diejenigen in Fach-
+            und IT-Funktionen, nehmen an den Tests teil, um sich mit den Wiederherstellungsprozessen
+            vertraut zu machen.
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:12"
       assessable: true
@@ -2813,6 +3537,12 @@ objects:
           description: "I test comprendono scenari di diversa gravit\xE0, ma plausibili\
             \ e considerano le dipendenze ai fini del ripristino, comprese quelle\
             \ nei confronti di terzi interni o esterni."
+        de:
+          name: Rz 94
+          description: "Die Tests umfassen verschiedene schwerwiegende, aber plausible\
+            \ Szenarien und ber\xFCcksichtigen Wiederherstellungsabh\xE4ngigkeiten,\
+            \ einschliesslich solcher, die zu internen oder externen Drittparteien\
+            \ bestehen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:13"
       assessable: true
@@ -2845,6 +3575,15 @@ objects:
             \ critici necessari per l\u2019esecuzione delle funzioni critiche secondo\
             \ il nm. 14) e le lacune individuate nella copertura di altri processi\
             \ critici."
+        de:
+          name: Rz 95
+          description: "Eine regelm\xE4ssige Berichterstattung an das Oberleitungsorgan\
+            \ und die Gesch\xE4ftsleitung informiert \xFCber die durchgef\xFChrten\
+            \ Test- und \xDCberpr\xFCfungsaktivit\xE4ten und deren Ergebnisse. Sie\
+            \ zeigt vorgenommene Priorisierungen (bspw. Priorisierung der f\xFCr die\
+            \ Erbringung der kritischen Funktionen nach Rz 14 ben\xF6tigten kritischen\
+            \ Prozesse) und erkannte L\xFCcken in der Abdeckung anderer kritischer\
+            \ Prozesse klar auf."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:5:14"
       assessable: true
@@ -2871,6 +3610,12 @@ objects:
             \ sono adeguatamente preparati riguardo ai loro CCR riconducibili alle\
             \ diverse attivit\xE0 di BCM sia al momento dell\u2019entrata in servizio\
             \ sia nel corso delle formazioni periodiche."
+        de:
+          name: Rz 96
+          description: "Die Mitarbeitenden sowie die Mitglieder der Krisenorganisation\
+            \ werden hinsichtlich ihrer AKV, die sich aus den diversen BCM Aktivit\xE4\
+            ten ergeben, ausreichend geschult, sowohl bei Neueintritt von Mitarbeitenden\
+            \ als auch als Teil regelm\xE4ssiger Schulungen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:6"
       assessable: false
@@ -2884,6 +3629,9 @@ objects:
           name: F. Management of risks from cross-border service business
         it:
           name: F. Gestione dei rischi afferenti alle prestazioni di servizio transfrontaliere
+        de:
+          name: "F. Management der Risiken aus dem grenz\xFCberschreitenden Dienstleistungsgesch\xE4\
+            ft"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:6:1"
       assessable: true
@@ -2912,6 +3660,13 @@ objects:
             \ risultanti dall\u2019applicazione delle normative estere (diritto fiscale,\
             \ penale, in materia di riciclaggio di denaro ecc.) devono essere adeguatamente\
             \ rilevati, limitati e controllati."
+        de:
+          name: Rz 97
+          description: "Wenn Institute oder ihre Gruppengesellschaften grenz\xFCberschreitend\
+            \ Dienstleistungen erbringen oder Finanzprodukte vertreiben, sind auch\
+            \ die aus einer Anwendung ausl\xE4ndischer Rechtsvorschriften (Steuer-,\
+            \ Straf-, Geldw\xE4schereirecht usw.) resultierenden Risiken angemessen\
+            \ zu erfassen, begrenzen und kontrollieren."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:6:2"
       assessable: true
@@ -2957,6 +3712,19 @@ objects:
             \ di servizi per i Paesi in cui li erogano, formano i collaboratori e\
             \ garantiscono l\u2019osservanza delle prescrizioni mediante misure organizzative,\
             \ direttive, modelli retributivi e sanzionatori."
+        de:
+          name: Rz 98
+          description: "Die Institute unterziehen ihr grenz\xFCberschreitendes Dienstleistungsgesch\xE4\
+            ft sowie den grenz\xFCberschreitenden Vertrieb von Finanzprodukten einer\
+            \ vertieften Analyse der rechtlichen Rahmenbedingungen und der damit verbundenen\
+            \ Risiken. Gest\xFCtzt auf diese Analyse treffen die Institute die erforderlichen\
+            \ strategischen und organisatorischen Massnahmen zur Risikoeliminierung\
+            \ und -minimierung und passen diese laufend ge\xE4nderten Bedingungen\
+            \ an. Insbesondere verf\xFCgen sie \xFCber das notwendige l\xE4nderspezifische\
+            \ Fachwissen, definieren spezifische Dienstleistungsmodelle f\xFCr die\
+            \ bedienten L\xE4nder, schulen die Mitarbeitenden und stellen durch entsprechende\
+            \ organisatorische Massnahmen, Weisungen, Verg\xFCtungs- und Sanktionsmodelle\
+            \ die Einhaltung der Vorgaben sicher."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:6:3"
       assessable: true
@@ -2980,6 +3748,12 @@ objects:
           description: "\xC8 necessario considerare anche i rischi generati da gestori\
             \ patrimoniali indipendenti, intermediari e altri fornitori di servizi.\
             \ I partner devono essere scelti e formati con l\u2019opportuna accuratezza."
+        de:
+          name: Rz 99
+          description: "Auch die durch externe Verm\xF6gensverwalter, Vermittler und\
+            \ andere Dienstleister generierten Risiken sind zu ber\xFCcksichtigen.\
+            \ Entsprechend ist bei der Auswahl und Instruktion dieser Partner sorgf\xE4\
+            ltig vorzugehen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-op\xE9\
         rationnels:6:4"
       assessable: true
@@ -3003,6 +3777,12 @@ objects:
             \ filiale, una succursale o un\u2019entit\xE0 simile con sede all\u2019\
             estero di un istituto finanziario svizzero fornisce servizi transfrontalieri\
             \ ai clienti."
+        de:
+          name: Rz 100
+          description: "Von diesem Grundsatz werden auch Konstellationen erfasst,\
+            \ in denen eine im Ausland ans\xE4ssige Tochtergesellschaft, Zweigniederlassung\
+            \ oder dergleichen eines Schweizer Finanzinstituts Kunden grenz\xFCberschreitend\
+            \ bedient."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle"
       assessable: false
@@ -3013,6 +3793,8 @@ objects:
           name: V. Ensuring operational resilience
         it:
           name: V. Garanzia della resilienza operativa
+        de:
+          name: V. Sicherstellung der operationellen Resilienz
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:1"
       assessable: true
@@ -3039,6 +3821,12 @@ objects:
             organo preposto all\u2019alta direzione. Inoltre, l\u2019organo preposto\
             \ all\u2019alta direzione approva e sorveglia regolarmente la procedura\
             \ volta a garantire la resilienza operativa."
+        de:
+          name: Rz 101
+          description: "Das Institut identifiziert seine kritischen Funktionen und\
+            \ deren Unterbrechungstoleranzen. Diese werden vom Oberleitungsorgan genehmigt.\
+            \ Ausserdem genehmigt und \xFCberwacht das Oberleitungsorgan regelm\xE4\
+            ssig das Vorgehen zur Sicherstellung der operationellen Resilienz."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:2"
       assessable: true
@@ -3074,6 +3862,17 @@ objects:
             \ deve svolgere lavori preliminari volti a raffor- zare la sua resilienza\
             \ operativa nei confronti di questi scenari nell\u2019ambito delle sue\
             \ possibilit\xE0."
+        de:
+          name: Rz 102
+          description: "Das Institut trifft Massnahmen zur Sicherstellung der operationellen\
+            \ Resilienz unter Ber\xFCcksichtigung schwerwiegender, aber plausibler\
+            \ Szenarien25."
+          annotation: "[25] Es kann nicht ausgeschlossen werden, dass manche Szenarien\
+            \ nicht ohne Einbezug des Staates bew\xE4ltigt werden k\xF6nnen (bspw.\
+            \ Pandemien, Kriege, langanhaltende Strommangellage). F\xFCr solche Szenarien\
+            \ sind durch das Institut Vorarbeiten zwecks St\xE4rkung seiner operationellen\
+            \ Resilienz gegen\xFCber diesen Szenarien im Rahmen seiner M\xF6g- lichkeiten\
+            \ zu leisten."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:3"
       assessable: true
@@ -3095,6 +3894,11 @@ objects:
           description: "Le funzioni critiche e i correlati limiti di tolleranza alle\
             \ interruzioni secondo il nm. 14 devono essere approvati dall\u2019organo\
             \ preposto all\u2019alta direzione almeno una volta all\u2019anno."
+        de:
+          name: Rz 103
+          description: "Die kritischen Funktionen und die damit verbundenen Unterbrechungstoleranzen\
+            \ nach Rz 14 sind mindestens j\xE4hrlich durch das Oberleitungsorgan zu\
+            \ genehmigen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:4"
       assessable: true
@@ -3131,6 +3935,17 @@ objects:
             \ (capitolo VI), affinch\xE9 contribuiscano a rafforzare la resilienza\
             \ operativa dell\u2019istituto. Ci\xF2 include uno scambio adeguato delle\
             \ informazioni rilevanti tra i diversi ambiti."
+        de:
+          name: Rz 104
+          description: "Das Institut koordiniert die relevanten Bestandteile eines\
+            \ umfassenden Risikomanagements wie beispielsweise das Management der\
+            \ operationellen Risiken, inklusive das Management der IKT- und Cyber-Risiken,\
+            \ das Business Continuity Management, das Management von Auslagerungen\
+            \ (Outsourcing; vgl. das FINMA-Rundschreiben 2018/3 \u201EOutsourcing\u201C\
+            ), und die Notfallplanung (Kapitel VI) dahingehend, dass diese zu einer\
+            \ St\xE4rkung der operationellen Resilienz des Instituts beitragen. Dies\
+            \ beinhaltet einen angemessenen Austausch relevanter Informationen zwischen\
+            \ diesen verschiedenen Bereichen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:5"
       assessable: true
@@ -3154,6 +3969,12 @@ objects:
             \ devono ricevere almeno una volta all\u2019anno un resoconto sulla resilienza\
             \ operativa, nonch\xE9 in caso di lacune sostanziali nei controlli o di\
             \ incidenti che compromettono la resilienza operativa."
+        de:
+          name: Rz 105
+          description: "Zur operationellen Resilienz hat mindestens j\xE4hrlich eine\
+            \ Berichterstattung an das Oberleitungsorgan und die Gesch\xE4ftsleitung\
+            \ zu erfolgen, sowie bei wesentlichen Kontrollschw\xE4chen oder Vorf\xE4\
+            llen, die die operationelle Resilienz gef\xE4hrden."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:6"
       assessable: true
@@ -3179,6 +4000,13 @@ objects:
             \ le minacce interne ed esterne come pure lo sfruttamento delle vulnerabilit\xE0\
             . I risultanti rischi operativi sono identificati, valutati, limitati\
             \ e monitorati nell\u2019ambito della loro gestione."
+        de:
+          name: Rz 106
+          description: "F\xFCr die kritischen Funktionen werden interne und externe\
+            \ Bedrohungen sowie die entsprechende Ausn\xFCtzung von Verwundbarkeiten\
+            \ identifiziert und beurteilt. Die daraus resultierenden operationellen\
+            \ Risiken werden im Rahmen des Managements der operationellen Risiken\
+            \ identifiziert, beurteilt, begrenzt und \xFCberwacht."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:7"
       assessable: true
@@ -3213,6 +4041,16 @@ objects:
             \ relative risorse26 per svolgere le funzioni critiche."
           annotation: "[26] Incluse le componenti dell\u2019inventario rilevanti per\
             \ le funzioni critiche secondo il nm. 53."
+        de:
+          name: Rz 107
+          description: "Das Institut f\xFChrt ein Inventar seiner kritischen Funktionen,\
+            \ das mindestens j\xE4hrlich \xFCberpr\xFCft und aktualisiert wird. Dieses\
+            \ Inventar beinhaltet die Unterbrechungstoleranzen der kritischen Funktionen,\
+            \ sowie die Verbindungen und Abh\xE4ngigkeiten zwischen den ben\xF6tigten\
+            \ kritischen Prozessen und deren Ressourcen26 zur Erbringung der kritischen\
+            \ Funktionen."
+          annotation: "[26] Inklusive die f\xFCr die kritischen Funktionen relevanten\
+            \ Bestandteile des Inventars nach Rz 53"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:8"
       assessable: true
@@ -3232,6 +4070,10 @@ objects:
           name: nm. 108
           description: Per le funzioni critiche sono documentati almeno i rischi operativi
             essenziali e i controlli chiave.
+        de:
+          name: Rz 108
+          description: "F\xFCr die kritischen Funktionen werden mindestens die wesentlichen\
+            \ operationellen Risiken und die Schl\xFCsselkontrollen dokumentiert."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:9"
       assessable: true
@@ -3252,6 +4094,10 @@ objects:
           description: "Le funzioni critiche nonch\xE9 le risorse e i processi critici\
             \ necessari alla loro esecuzione sono coperti dai BCP secondo il capitolo\
             \ IV. lettera e."
+        de:
+          name: Rz 109
+          description: "Die kritischen Funktionen und die daf\xFCr ben\xF6tigten kritischen\
+            \ Prozesse und Ressourcen sind durch BCPs nach Kapitel IV Bst. E abgedeckt."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:10"
       assessable: true
@@ -3305,6 +4151,22 @@ objects:
             \ in base al quale i fornitori di servizi cloud o altri fornitori di servizi\
             \ con sede all\u2019estero non sono pi\xF9 autorizzati a erogare servizi\
             \ alle societ\xE0 svizzere."
+        de:
+          name: Rz 110
+          description: "Die F\xE4higkeit, kritische Funktionen innerhalb ihrer Unterbrechungstoleranz\
+            \ unter schwerwiegenden, aber plausiblen Szenarien erbringen zu k\xF6\
+            nnen, wird regelm\xE4ssig getestet oder ge\xFCbt. Dazu geh\xF6ren auch\
+            \ Szenarien, die sich von k\xFCrzeren und eher begrenzt wirkenden Unterbrechungen\
+            \ unterscheiden und sich durch eine l\xE4ngere Zeitdauer (bspw. \xFCber\
+            \ Monate hinweg) und einen Ausfall grundlegender Ressourcen auszeichnen27.\
+            \ Die Tests bzw. \xDCbungen werden dabei so gestaltet sein, dass sie das\
+            \ Institut nicht grundlegend gef\xE4hrden."
+          annotation: "[27] Beispiele sind eine Pandemie, eine Strommangellage, ein\
+            \ l\xE4ngerer Ausfall durch die Insolvenz eines wichtigen Dienstleisters\
+            \ (als Beispiel f\xFCr einen Stressed Exit eines Dienstleisters) oder\
+            \ ein l\xE4ngeranhaltendes Verbot ausl\xE4ndi- scher Regierungen, gem\xE4\
+            ss dem auslandsbasierte Cloud-Anbieter oder andere Dienstleister schweizerische\
+            \ Firmen nicht mehr bedienen d\xFCrfen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-r\xE9silience-op\xE9\
         rationnelle:11"
       assessable: true
@@ -3332,6 +4194,12 @@ objects:
             \ per il mantenimento delle funzioni critiche secondo il nm. 14, devono\
             \ essere coordinati con la pianificazione d\u2019emergenza in conformit\xE0\
             \ al capitolo VI."
+        de:
+          name: Rz 111
+          description: "F\xFCr systemrelevante Banken sind die f\xFCr die Weiterf\xFC\
+            hrung der kritischen Funktionen nach Rz 14 relevanten BCP, DRP und die\
+            \ Krisenorganisation nach Kapitel IV Bst. E. mit der Notfallplanung nach\
+            \ Kapitel VI abzustimmen."
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
         assainissement-des-banques-d\u2019importance-syst\xE9mique"
       assessable: false
@@ -3345,6 +4213,9 @@ objects:
         it:
           name: VI. Mantenimento dei servizi critici in caso di liquidazione o risanamento
             delle banche di rilevanza sistemica
+        de:
+          name: "VI. Weiterf\xFChrung von kritischen Dienstleistungen bei der Abwicklung\
+            \ und Sanierung von systemrelevanten Banken"
     - urn: "urn:intuitem:risk:req_node:finma-2023-01:vi.-maintien-des-prestations-critiques-lors-de-la-liquidation-et-de-l\u2019\
         assainissement-des-banques-d\u2019importance-syst\xE9mique:1"
       assessable: true
@@ -3384,6 +4255,17 @@ objects:
             \ o ristrutturazione (\xABservizi critici\xBB) e adottano le misure necessarie\
             \ a tale scopo. Al riguardo tengono conto delle disposizioni emanate in\
             \ materia dagli organismi internazionali di standardizzazione."
+        de:
+          name: Rz 112
+          description: "Systemrelevante Banken treffen im Rahmen ihrer Notfallplanung\
+            \ die f\xFCr die unterbruchsfreie Weiterf\xFChrung von systemrelevanten\
+            \ Funktionen n\xF6tigen Massnahmen (Art. 9 Abs. 2 Bst. d BankG i.V.m.\
+            \ Art. 60 ff. BankV). Sie identifizieren die zur Fortf\xFChrung der systemrelevanten\
+            \ Funktionen im Fall der Abwicklung, Sanierung oder Restrukturierung notwendigen\
+            \ Dienstleistungen (\u201Ekritische Dienstleistungen\u201C) und ergreifen\
+            \ die f\xFCr deren Weiterf\xFChrung n\xF6tigen Massnahmen. Dabei ber\xFC\
+            cksichtigen sie die in diesem Zusammenhang von internationalen Standardsettern\
+            \ erlassenen Vorgaben."
     - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires
       assessable: false
       depth: 1
@@ -3393,6 +4275,8 @@ objects:
           name: VII. Transitional provisions
         it:
           name: VII. Disposizioni transitorie
+        de:
+          name: "VII. \xDCbergangsbestimmungen"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:1
       assessable: false
       depth: 2
@@ -3403,6 +4287,8 @@ objects:
           name: A. Concerning ensuring operational resilience
         it:
           name: A. Concernenti la garanzia della resilienza operativa
+        de:
+          name: A. Betreffend die Sicherstellung der operationellen Resilienz
     - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:1:1
       assessable: false
       depth: 3
@@ -3443,6 +4329,17 @@ objects:
             \ operativa in conformit\xE0 al nm. 102 e l\u2019adempimento dei requisiti\
             \ di cui ai nm. 104 e 111 sono attesi entro un termine transitorio di\
             \ due anni."
+        de:
+          name: Rz 113
+          description: "Die Identifikation der kritischen Funktionen, die Definition\
+            \ der Unterbrechungstoleranzen und erste Genehmigungen nach Rz 101 und\
+            \ 103, sowie eine erste Berichterstattung nach Rz 105, werden ab Inkrafttreten\
+            \ des Rundschreibens erwartet. F\xFCr die Erf\xFCllung der Anforderungen\
+            \ nach den Rz 106\u2013109 sowie erste Tests nach Rz 110 gilt eine \xDC\
+            bergangsfrist von einem Jahr ab Inkrafttreten. Die Sicherstellung der\
+            \ operationellen Resilienz nach Rz 102 sowie die Erf\xFCllung der Anforderungen\
+            \ nach den Rz 104 und 111 werden innert einer \xDCbergangsfrist von zwei\
+            \ Jahren erwartet."
     - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:2
       assessable: false
       depth: 2
@@ -3455,6 +4352,8 @@ objects:
         it:
           name: B. Concernenti le esigenze in materia di fondi propri per la copertura
             dei rischi operativi
+        de:
+          name: "B. Betreffend die Eigenmittelanforderungen f\xFCr operationelle Risiken"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:vii.-dispositions-transitoires:2:1
       assessable: false
       depth: 3
@@ -3482,3 +4381,11 @@ objects:
             entrata in vigore dell\u2019OFoP riveduta nel quadro del pacchetto di\
             \ revisioni \xABBasilea III finale\xBB e della relativa ordinanza esecutiva\
             \ della FINMA."
+        de:
+          name: Rz 114
+          description: "Die Eigenmittelanforderungen f\xFCr operationelle Risiken\
+            \ nach Art. 89 ff. ERV richten sich bis zum Inkrafttreten der im Rahmen\
+            \ des Revisionspakets \u201EBasel III final\u201C revidierten ERV und\
+            \ der ausf\xFChrenden FINMA-Verordnung dazu nach den Rz 3\u2013116 des\
+            \ FINMA-Rundschreibens 2008/21 \u201EOperationelle Risiken \u2013 Banken\u201C\
+            ."

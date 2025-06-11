@@ -21,7 +21,7 @@ import fitz
 import re
 from openpyxl import Workbook
 
-REF_ID_PREFIX = 'nm.'
+REF_ID_PREFIX = 'Rz'
 
 def is_chapter(line): return re.match(r"^[IVX]+\.$", line.strip())
 def is_subchapter(line): return re.match(r"^[A-Z]\.$", line.strip())
@@ -95,12 +95,12 @@ in_chapter_IV = False
 paragraph_counter = 1
 previous_paragraph_row = None
 
-pdf_path = "finma_rs_2023_01_20221207_it.pdf"
+pdf_path = "finma_rs_2023_01_20221207_de.pdf"
 doc = fitz.open(pdf_path)
 full_text = "\n".join(page.get_text() for page in doc)
 annotations = extract_annotations(full_text)
 
-for i in range(2, 14):
+for i in range(2, 15):
     page = doc.load_page(i)
     blocks = page.get_text("blocks")
     blocks.sort(key=lambda b: (round(b[1]), round(b[0])))
@@ -243,4 +243,4 @@ if paragraph_lines:
     annotation_str = "\n".join(sorted(annotation_set))
     ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
 
-wb.save("finma_framework_final_IT.xlsx")
+wb.save("finma_framework_final_DE.xlsx")
