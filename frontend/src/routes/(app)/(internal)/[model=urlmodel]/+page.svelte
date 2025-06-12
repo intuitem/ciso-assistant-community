@@ -104,7 +104,7 @@
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
 					<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-						{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
+						{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 							<button
 								class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
