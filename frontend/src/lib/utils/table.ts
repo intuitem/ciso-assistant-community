@@ -1080,6 +1080,10 @@ export const listViewFields = {
 			status: TASK_STATUS_FILTER
 		}
 	},
+	qualifications: {
+		head: ['name', 'abbreviation'],
+		body: ['name', 'abbreviation']
+	},
 	extra: {
 		filters: {
 			risk: undefined,
