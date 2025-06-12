@@ -3,10 +3,10 @@ locale: en
 ref_id: mapping-nist-csf-2.0-to-iso27001-2022
 name: NIST-CSF-2.0 -> ISO/IEC 27001:2022
 description: Mapping from NIST CSF v2.0 to International standard ISO/IEC 27001:2022
-copyright: intuitem
+copyright: NIST
 version: 1
-publication_date: 2025-05-27
-provider: intuitem
+publication_date: 2025-06-13
+provider: NIST
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:nist-csf-2.0
