@@ -32,9 +32,11 @@ Notes:
 """
 
 
+from ast import Tuple
 import re
 import sys
 import os
+from typing import List
 from openpyxl import load_workbook
 from openpyxl.cell.cell import Cell
 
@@ -51,7 +53,7 @@ SPECIFIC_COLUMNS = []              # Specific column names to process
 REGEX = re.compile(r"([^\W\d_]+)(\d+)(?!\w)|(\([^)]+\))(\d+)(?!\w)", re.UNICODE)
 
 
-def process_cell_text(text: str) -> str:
+def process_cell_text(text: str) -> Tuple[str, List[Tuple[str, str]]]:
     """
     Apply transformation rules to cell text and return modified text plus list of changes.
 
