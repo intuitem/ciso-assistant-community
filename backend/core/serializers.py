@@ -962,7 +962,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
-    findings_assessment = serializers.PrimaryKeyRelatedField(
+    findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
     )
 

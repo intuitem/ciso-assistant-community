@@ -329,7 +329,7 @@ export const EvidenceSchema = z.object({
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	findings: z.string().optional().array().optional(),
-	findings_assessments: z.string().optional().array().optional(),
+	findings_assessment: z.string().optional().array().optional(),
 
 	link: z
 		.string()
