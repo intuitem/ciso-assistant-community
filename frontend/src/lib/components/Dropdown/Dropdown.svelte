@@ -1,27 +1,28 @@
 <script lang="ts">
-	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 
-	export let header: string;
-	export let open = false;
-	export let icon: string;
-	export let style: string;
+	interface Props {
+		header: string;
+		open?: boolean;
+		icon: string;
+		style: string;
+		children?: import('svelte').Snippet;
+	}
+
+	let { header, open = false, icon, style, children }: Props = $props();
+	let value = $derived([open.toString()]);
 </script>
 
-<TreeView hover={style} caretClosed="-rotate-90" caretOpen="">
-	{#if icon}
-		<TreeViewItem {open}>
-			<svelte:fragment slot="lead"><i class={icon} /></svelte:fragment>
+<Accordion {value} onValueChange={(e) => (value = e.value)} collapsible>
+	<Accordion.Item value="true">
+		{#snippet lead()}
+			<i class={icon}></i>
+		{/snippet}
+		{#snippet control()}
 			<p class="font-medium">{header}</p>
-			<svelte:fragment slot="children">
-				<slot />
-			</svelte:fragment>
-		</TreeViewItem>
-	{:else}
-		<TreeViewItem {open}>
-			<p class="font-medium">{header}</p>
-			<svelte:fragment slot="children">
-				<slot />
-			</svelte:fragment>
-		</TreeViewItem>
-	{/if}
-</TreeView>
+		{/snippet}
+		{#snippet panel()}
+			{@render children?.()}
+		{/snippet}
+	</Accordion.Item>
+</Accordion>

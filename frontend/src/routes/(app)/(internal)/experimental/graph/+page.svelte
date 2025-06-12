@@ -2,7 +2,11 @@
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
 	import { GraphLayoutType, GraphNodeShape, Graph } from '@unovis/ts';
 	import type { PageData } from './$types';
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	type NodeDatum = {
 		id: string;
@@ -42,8 +46,8 @@
 		charge: -800
 	};
 
-	let containerHeight = '80vh';
-	let selectedNodeId: string | undefined;
+	let containerHeight = $state('80vh');
+	let selectedNodeId: string | undefined = $state();
 
 	function handleNodeClick(node: NodeDatum) {
 		selectedNodeId = node.id;

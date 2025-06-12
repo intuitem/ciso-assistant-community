@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Command } from 'cmdk-sv';
 	import { onMount, onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -35,9 +37,11 @@
 	}));
 
 	// Close command palette on route change
-	$: if ($page.url.pathname) {
-		commandPaletteOpen.set(false);
-	}
+	run(() => {
+		if (page.url.pathname) {
+			commandPaletteOpen.set(false);
+		}
+	});
 
 	// Add global event listener
 	onMount(() => {
@@ -72,8 +76,9 @@
 
 <style lang="postcss">
 	/* Global styles for the command palette */
+	/*
 	:global([data-cmdk-dialog]) {
-		@apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2;
+		@apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-2;
 	}
 
 	:global([data-cmdk-root]) {
@@ -100,4 +105,5 @@
 	:global([data-cmdk-group-heading]) {
 		@apply px-4 py-2 text-xs text-gray-500 uppercase;
 	}
+  */
 </style>

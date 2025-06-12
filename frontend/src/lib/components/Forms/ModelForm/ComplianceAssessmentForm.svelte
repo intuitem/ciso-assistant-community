@@ -9,15 +9,27 @@
 	import Checkbox from '../Checkbox.svelte';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let object: any = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: any;
+		context: string;
+	}
 
-	let suggestions = false;
+	let {
+		form,
+		model = $bindable(),
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {},
+		context
+	}: Props = $props();
+
+	let suggestions = $state(false);
 
 	async function handleFrameworkChange(id: string) {
 		if (id) {

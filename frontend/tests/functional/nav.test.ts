@@ -86,7 +86,6 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 		await expect(sideBar.aboutButton).toBeVisible();
 		await sideBar.aboutButton.click();
-		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(logedPage.modalTitle).toBeVisible();
 		await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
 

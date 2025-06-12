@@ -1,31 +1,30 @@
 <script lang="ts">
-	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
 	import { m } from '$paraglide/messages';
 
-	const modalStore: ModalStore = getModalStore();
-
-	export let totp;
-	export let _form;
-	export let formAction: string;
-
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-
-	// Base Classes
-	const cBase = 'card p-4 w-fit shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
-	const cForm = 'p-4 space-y-4 rounded-container-token';
 
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../utils/schemas';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+
+	// Base Classes
+	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
+	const cHeader = 'text-2xl font-bold';
+	const cForm = 'p-4 space-y-4 rounded-container';
+
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		totp: any;
+		_form: any;
+		formAction: string;
+	}
+
+	let { parent, totp, _form, formAction }: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
 </script>
 
 {#if $modalStore[0]}
@@ -55,7 +54,7 @@
 				</div>
 			</div>
 
-			<span class="divider-vertical" />
+			<span class="divider-vertical"></span>
 
 			<div class="flex flex-col space-y-4 items-center self-center">
 				<h4 class="h4">{m.step({ number: 2 })}</h4>
@@ -66,19 +65,20 @@
 					action={formAction}
 					data={_form}
 					validators={zod(activateTOTPSchema)}
-					let:form
 					class="modal-form {cForm}"
 					validationMethod="onsubmit"
 				>
-					<!-- prettier-ignore -->
-					<OTPInput {form} field="code" />
-					<footer class="modal-footer {parent.regionFooter}">
-						<button
-							class="btn variant-filled-primary w-full"
-							data-testid="activate-totp-confirm-button"
-							type="submit">{m.enableTOTP()}</button
-						>
-					</footer>
+					{#snippet children({ form })}
+						<!-- prettier-ignore -->
+						<OTPInput {form} field="code" />
+						<footer class="modal-footer {parent.regionFooter}">
+							<button
+								class="btn preset-filled-primary-500 w-full"
+								data-testid="activate-totp-confirm-button"
+								type="submit">{m.enableTOTP()}</button
+							>
+						</footer>
+					{/snippet}
 				</SuperForm>
 			</div>
 		</article>

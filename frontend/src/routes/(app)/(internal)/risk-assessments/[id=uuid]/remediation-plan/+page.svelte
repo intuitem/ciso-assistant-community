@@ -5,7 +5,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 
-	export let data;
+	let { data } = $props();
 
 	const scenarioTreatmentColorMap = (status: string) => {
 		const map: Record<string, string> = {
@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="bg-white p-2 m-2 shadow rounded-lg space-x-2 flex flex-row justify-center">
+<div class="bg-white p-2 m-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center">
 	<p class="font-semibold text-lg">
 		{m.perimeter()}:
 		<a
@@ -67,7 +67,7 @@
 
 <p class="p-2 m-2 text-lg font-semibold">{m.associatedRiskScenarios()}:</p>
 
-<div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-col">
+<div class="bg-white p-2 m-2 shadow-sm overflow-hidden rounded-lg flex flex-col">
 	{#each data.risk_assessment.risk_scenarios.sort( (a, b) => String(a?.ref_id).localeCompare(String(b?.ref_id)) ) as scenario}
 		<tr class="bg-gray-100">
 			<td class="text-lg p-3" colspan="9">
@@ -111,7 +111,7 @@
 		{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 			<tr>
 				<td colspan="9" class="p-2 text-left">
-					<i class="fas fa-exclamation-circle" />
+					<i class="fas fa-exclamation-circle"></i>
 					{m.noAppliedControlYet()}
 				</td>
 			</tr>
