@@ -125,8 +125,8 @@ objects:
         \ OB ; RS 952.02) et de l\u2019ordonnance sur les \xE9tablissements financiers\
         \ (art. 12 et 68 OEFin ; RS 954.11) et concr\xE9tise la pratique prudentielle\
         \ correspondante. Elle tient compte des principes du Comit\xE9 de B\xE2le\
-        \ pour une gestion irr\xE9prochable des risques op\xE9rationnels1 et de la\
-        \ r\xE9silience op\xE9rationnelle2."
+        \ pour une gestion irr\xE9prochable des risques op\xE9rationnels[1] et de\
+        \ la r\xE9silience op\xE9rationnelle[2]."
       annotation: "[1] CBCB, \xAB Revisions to the Principles for the Sound Management\
         \ of Operational Risk \xBB (31 mars 2021)\n[2] CBCB, \xAB Principles for Operational\
         \ Resilience \xBB (31 mars 2021)"
@@ -137,7 +137,7 @@ objects:
             \ (Arts. 12 and 14e BO, SR 952.02) and the Financial Institutions Ordinance\
             \ (Arts. 12 and 68 FinIO; SR 954.11) and sets out the corresponding supervisory\
             \ practice. It takes account of the Basel Committee\u2019s principles\
-            \ for the sound management of operational risk1 and operational resilience2."
+            \ for the sound management of operational risk[1] and operational resilience[2]."
           annotation: '[1] BCBS Revisions to the Principles for the Sound Management
             of Operational Risk (31 March 2021).
 
@@ -149,7 +149,7 @@ objects:
             \ la separazione delle funzioni, la gestione dei rischi e il controllo\
             \ interno e concretizza la prassi di vigilanza in materia. Tiene conto\
             \ dei Principi del Comitato di Basilea sulla sana gestione dei rischi\
-            \ operativi1 e sulla resilienza operativa2."
+            \ operativi[1] e sulla resilienza operativa[2]."
           annotation: '[1] BCBS Revisions to the Principles for the Sound Management
             of Operational Risk (31 marzo 2021).
 
@@ -160,7 +160,7 @@ objects:
             \ der Bankenverordnung (Art. 12 und 14e BankV; SR 952.02) und der Finanzinstitutsverordnung\
             \ (Art. 12 und 68 FINIV; SR 954.11) und konkretisiert die entsprechende\
             \ Aufsichtspraxis. Es ber\xFCcksichtigt die Basler Grunds\xE4tze zum einwandfreien\
-            \ Management der operationellen Risiken1 und der operationellen Resilienz2."
+            \ Management der operationellen Risiken[1] und der operationellen Resilienz[2]."
           annotation: '[1] BCBS Revisions to the Principles for the Sound Management
             of Operational Risk (31 March 2021)
 
@@ -229,7 +229,7 @@ objects:
         elles ont commises ou encore d'\xE9v\xE9nements externes. Sont comprises les\
         \ pertes financi\xE8res qui peuvent d\xE9couler des risques juridiques ou\
         \ des risques de compliance. La gestion des risques op\xE9rationnels prend\
-        \ typiquement \xE9galement en compte d\u2019autres types de dommages3, dans\
+        \ typiquement \xE9galement en compte d\u2019autres types de dommages[3], dans\
         \ la mesure o\xF9 ceux-ci peuvent aussi aboutir \xE0 des pertes financi\xE8\
         res. Les risques strat\xE9giques en sont exclus."
       annotation: "[3] Par ex. r\xE9percussions n\xE9gatives sur la r\xE9putation,\
@@ -243,7 +243,7 @@ objects:
             processes or systems, inappropriate actions taken by people or mistakes
             made by them, or from external events. This includes the financial losses
             that can result from legal or compliance risks. Operational risk management
-            typically also takes other types of damage into account3, provided that
+            typically also takes other types of damage into account[3], provided that
             these can ultimately also result in financial loss. It does not include
             strategic risk.
           annotation: '[3] For example, negative impact on reputation, possible loss
@@ -258,8 +258,8 @@ objects:
             \ causate da eventi esterni. Essi comprendono le perdite finanziarie che\
             \ possono insorgere da rischi legali o di compliance. La gestione dei\
             \ rischi operativi tiene tipicamente conto anche di altre dimensioni del\
-            \ danno3, nella misura in cui esse possano causare tra l\u2019altro perdite\
-            \ finanziarie. Sono esclusi i rischi strategici."
+            \ danno[3], nella misura in cui esse possano causare tra l\u2019altro\
+            \ perdite finanziarie. Sono esclusi i rischi strategici."
           annotation: '[3] Per esempio effetti negativi sulla reputazione, possibile
             perdita di fiducia e di clienti, effetti negativi sul mercato, effetti
             regolatori negativi (p. es. possibile perdita della licenza).'
@@ -271,7 +271,7 @@ objects:
             \ von externen Ereignissen eintreten. Dies beinhaltet die finanziellen\
             \ Verluste, die aus Rechts- oder Compliance-Risiken entstehen k\xF6nnen.\
             \ Das Management der operationellen Risiken ber\xFCcksichtigt typischerweise\
-            \ auch andere Schadensdimensionen3, sofern diese letztendlich auch in\
+            \ auch andere Schadensdimensionen[3], sofern diese letztendlich auch in\
             \ finanziellen Verlusten resultieren k\xF6nnen. Dabei ausgeschlossen sind\
             \ die strategischen Risiken."
           annotation: "[3] Bspw. negative Auswirkungen auf die Reputation, m\xF6glicher\
@@ -656,7 +656,7 @@ objects:
         \ cas d\u2019interruptions et \xE0 en tirer des enseignements pour minimiser\
         \ les cons\xE9quences sur l\u2019ex\xE9cution des fonctions critiques. Un\
         \ \xE9tablissement r\xE9silient sur le plan op\xE9rationnel a \xE9tabli son\
-        \ mod\xE8le d\u2019exploitation4 de mani\xE8re \xE0 \xEAtre moins expos\xE9\
+        \ mod\xE8le d\u2019exploitation[4] de mani\xE8re \xE0 \xEAtre moins expos\xE9\
         \ au risque d\u2019interruptions de ses fonctions critiques. La r\xE9silience\
         \ op\xE9rationnelle diminue non seulement les risques r\xE9siduels des interruptions,\
         \ mais aussi le risque inh\xE9rent d\u2019\xEAtre soumis \xE0 une interruption.\
@@ -672,7 +672,7 @@ objects:
             \ and to respond to them, to restore normal business operations in the\
             \ event of disruptions and to learn from them, so as to minimise the impact\
             \ of disruptions on the provision of critical functions. An operationally\
-            \ resilient institution has designed its operating model in such a way4\
+            \ resilient institution has designed its operating model in such a way[4]\
             \ that it is less exposed to the risk of disruptions in relation to its\
             \ critical functions. Operational resilience thus reduces not only the\
             \ residual risks of disruptions, but also the inherent risk of disruptions\
@@ -687,7 +687,7 @@ objects:
             \ da esse e reagire, ripristinare l\u2019attivit\xE0 ordinaria in caso\
             \ di interruzioni e trarne insegnamenti per minimizzare le conseguenze\
             \ sullo svolgimento delle funzioni critiche. Un istituto operativamente\
-            \ resiliente ha strutturato il suo modello operativo4 in modo tale da\
+            \ resiliente ha strutturato il suo modello operativo[4] in modo tale da\
             \ essere meno esposto al rischio di interruzioni in riferimento alle sue\
             \ funzioni critiche. La resilienza operativa riduce quindi non solo i\
             \ rischi residui delle interruzioni, ma anche il rischio inerente che\
@@ -703,7 +703,7 @@ objects:
             \ Gesch\xE4ftsbetrieb wiederherzustellen und daraus zu lernen, um die\
             \ Auswirkungen von Unterbrechungen auf die Erbringung der kritischen Funktionen\
             \ zu minimieren. Ein operationell resilientes Institut hat sein Betriebsmodell\
-            \ so aufgebaut4, dass es in Bezug auf seine kritischen Funktionen dem\
+            \ so aufgebaut[4], dass es in Bezug auf seine kritischen Funktionen dem\
             \ Risiko von Unterbrechungen weniger ausgesetzt ist. Die operationelle\
             \ Resilienz verringert somit nicht nur die residualen Risiken von Unterbrechungen,\
             \ sondern auch das inh\xE4rente Risiko, dass es zu Unterbrechungen kommt.\
@@ -858,7 +858,7 @@ objects:
         valuations de risques et de contr\xF4le selon le Cm 30. Soit il accepte le\
         \ degr\xE9 d\u2019exposition aux risques op\xE9rationnels de l\u2019\xE9tablissement,\
         \ soit il d\xE9cide d\u2019une adaptation de la tol\xE9rance au risque et\
-        \ des modifications strat\xE9giques n\xE9cessaires \xE0 cet effet5."
+        \ des modifications strat\xE9giques n\xE9cessaires \xE0 cet effet[5]."
       annotation: "[5] Par exemple un changement de mod\xE8le d\u2019affaires"
       translations:
         en:
@@ -874,7 +874,7 @@ objects:
             \ and control assessments under margin no. 30. It accepts either the extent\
             \ to which the institution is exposed to operational risk, or decides\
             \ to adjust the risk tolerance and make the strategic changes necessary\
-            \ for this5."
+            \ for this[5]."
           annotation: '[5] For example, a change to the business model.'
         it:
           description: "L\u2019organo preposto all\u2019alta direzione approva i principi\
@@ -889,7 +889,7 @@ objects:
             \ i risultati delle valutazioni del rischio e dei controlli secondo il\
             \ nm. 30. Accetta la misura dell\u2019esposizione ai rischi operativi\
             \ da parte dell\u2019istituto oppure decide un adeguamento della tolleranza\
-            \ al rischio e i necessari cambiamenti a livello strategico5."
+            \ al rischio e i necessari cambiamenti a livello strategico[5]."
           annotation: '[5] Per esempio un cambiamento del modello commerciale.'
         de:
           description: "Das Oberleitungsorgan genehmigt die Grundz\xFCge des Managements\
@@ -904,7 +904,7 @@ objects:
             \ Ergebnisse aus den Risiko- und Kontrollbeurteilungen nach Rz 30. Es\
             \ akzeptiert entweder das Ausmass, in dem das Institut den operationellen\
             \ Risiken ausgesetzt ist, oder entscheidet \xFCber eine Anpassung der\
-            \ Risikotoleranz und die daf\xFCr notwendigen, strategischen \xC4nderungen5."
+            \ Risikotoleranz und die daf\xFCr notwendigen, strategischen \xC4nderungen[5]."
           annotation: "[5] Zum Beispiel eine \xC4nderung des Gesch\xE4ftsmodells"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:24
       assessable: true
@@ -936,7 +936,7 @@ objects:
         s et surveill\xE9s et que l\u2019efficacit\xE9 tant de la conception que de\
         \ la mise en \u0153uvre de cette gestion des risques op\xE9rationnels est\
         \ r\xE9guli\xE8rement v\xE9rifi\xE9e. Pour limiter les risques inh\xE9rents\
-        \ jug\xE9s importants6, elle prend, en fonction de la situation, des mesures\
+        \ jug\xE9s importants[6], elle prend, en fonction de la situation, des mesures\
         \ compl\xE9mentaires sp\xE9cifiques au risque ou renforce les mesures existantes."
       annotation: "[6] Appel\xE9s aussi risques principaux ou risques cl\xE9s (key\
         \ risks)"
@@ -947,14 +947,14 @@ objects:
             that the effectiveness of both the design and also of the implementation
             of this operational risk management is regularly reviewed. It takes risk-specific
             supplementary or intensified measures in order to limit the inherent risks
-            deemed to be material6 as the situation demands.
+            deemed to be material[6] as the situation demands.
           annotation: '[6] Often called top risks or key risks.'
         it:
           description: "La direzione assicura in modo attendibile che i rischi operativi\
             \ siano identificati, valutati, limitati e monitorati e che l\u2019efficacia\
             \ sia della configurazione sia dell\u2019attuazione di tale gestione dei\
             \ rischi operativi sia periodicamente verificata. Per limitare i rischi\
-            \ inerenti considerati essenziali6 adotta misure integrative o inasprimenti\
+            \ inerenti considerati essenziali[6] adotta misure integrative o inasprimenti\
             \ in funzione del rischio specifico."
           annotation: '[6] Spesso chiamati rischi chiave (key risks).'
         de:
@@ -963,7 +963,7 @@ objects:
             berwacht werden, und dass die Effektivit\xE4t sowohl der Ausgestaltung\
             \ als auch der Implementierung dieses Managements der operationellen Risiken\
             \ regelm\xE4ssig \xFCberpr\xFCft wird. F\xFCr die Begrenzung der als wesentlich\
-            \ beurteilten, inh\xE4renten Risiken6 ergreift sie situativ risikospezifische\
+            \ beurteilten, inh\xE4renten Risiken[6] ergreift sie situativ risikospezifische\
             \ erg\xE4nzende oder versch\xE4rfende Massnahmen."
           annotation: "[6] H\xE4ufig Top-Risiken oder Schl\xFCsselrisiken (Key Risks)\
             \ genannt."
@@ -972,7 +972,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '26'
-      description: "Des mesures doivent \xEAtre mises en \u0153uvre7 pour sensibiliser\
+      description: "Des mesures doivent \xEAtre mises en \u0153uvre[7] pour sensibiliser\
         \ le personnel \xE0 la r\xE9duction des risques op\xE9rationnels pertinents,\
         \ en particulier les risques TIC, les cyberrisques, les risques des donn\xE9\
         es critiques et les risques d\xE9coulant de la conception et de la mise en\
@@ -987,7 +987,7 @@ objects:
             risks, particularly ICT risks, cyber risks, risks with regard to critical
             data and the risks resulting from the design and implementation of BCM,
             measures are to be implemented and carried out taking into account their
-            tasks, competencies and responsibilities7.
+            tasks, competencies and responsibilities[7].
           annotation: '[7] Among other things, this includes carefully selecting employees,
             ensuring that they are suitably qualified for their tasks, competencies
             and responsibilities and providing them with continuing education within
@@ -998,7 +998,7 @@ objects:
             \ TIC, i cyber-rischi, i rischi concernenti i dati critici e i rischi\
             \ derivanti dalla configurazione e dall\u2019implementazione del BCM,\
             \ \xE8 necessario implementare misure tenendo in considerazione i loro\
-            \ compiti, le competenze e le responsabilit\xE0 (CCR)7."
+            \ compiti, le competenze e le responsabilit\xE0 (CCR)[7]."
           annotation: "[7] Ci\xF2 implica, tra l\u2019altro, la selezione accurata\
             \ e la qualificazione del personale per i CCR e la formazione continua\
             \ nel quadro delle sue attivit\xE0."
@@ -1008,7 +1008,7 @@ objects:
             \ der Cyber-Risiken, der Risiken hinsichtlich kritischer Daten und der\
             \ Risiken aus der Ausgestaltung und Implementierung des BCM, sind unter\
             \ Ber\xFCcksichtigung ihrer Aufgaben, Kompetenzen und Verantwortlichkeiten\
-            \ (AKV) Massnahmen zu implementieren7."
+            \ (AKV) Massnahmen zu implementieren[7]."
           annotation: "[7] Dies beinhaltet unter anderem die sorgf\xE4ltige Auswahl\
             \ und Qualifikation von Mitarbeitenden f\xFCr ihre AKV und ihre kontinuierliche\
             \ Weiterbildung im Rahmen ihrer Aktivit\xE4ten."
@@ -1080,8 +1080,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '29'
-      description: "Des facteurs internes8 et externes9 sont pris en compte dans l\u2019\
-        identification des risques op\xE9rationnels. Les risques op\xE9rationnels\
+      description: "Des facteurs internes[8] et externes[9] sont pris en compte dans\
+        \ l\u2019identification des risques op\xE9rationnels. Les risques op\xE9rationnels\
         \ identifi\xE9s sont \xE9valu\xE9s de mani\xE8re compr\xE9hensible tant du\
         \ point de vue des risques inh\xE9rents que des risques r\xE9siduels."
       annotation: "[8] Sont consid\xE9r\xE9s comme facteurs internes par ex. les changements\
@@ -1094,7 +1094,7 @@ objects:
         \ en mati\xE8re d\u2019exigences r\xE9glementaires."
       translations:
         en:
-          description: Internal8 and external9 factors shall be taken into account
+          description: Internal[8] and external[9] factors shall be taken into account
             for identifying operational risks. The identified operational risks shall
             be assessed in a comprehensible way both from the perspective of inherent
             as well as residual risks.
@@ -1107,9 +1107,9 @@ objects:
             cyber attacks or terrorism) or changes to the regulatory requirements.'
         it:
           description: "Per identificare i rischi operativi vengono considerati fattori\
-            \ interni8 ed esterni9. I rischi operativi individuati sono valutati in\
-            \ modo attendibile nell\u2019ottica sia dei rischi inerenti sia di quelli\
-            \ residui."
+            \ interni[8] ed esterni[9]. I rischi operativi individuati sono valutati\
+            \ in modo attendibile nell\u2019ottica sia dei rischi inerenti sia di\
+            \ quelli residui."
           annotation: "[8] Sono considerati fattori interni, per esempio, i cambiamenti\
             \ apportati ai prodotti, alle attivit\xE0, ai processi e ai sistemi, i\
             \ risultati dell\u2019audit e le perdite interne derivanti dai rischi\
@@ -1119,7 +1119,7 @@ objects:
             \ o gli adeguamenti ai requisiti normativi."
         de:
           description: "F\xFCr die Identifikation der operationellen Risiken werden\
-            \ interne8 und externe9 Faktoren ber\xFCcksichtigt. Die identifizierten\
+            \ interne[8] und externe[9] Faktoren ber\xFCcksichtigt. Die identifizierten\
             \ operationellen Risiken werden sowohl aus Sicht der inh\xE4renten als\
             \ auch der residualen Risiken nachvollziehbar beurteilt."
           annotation: "[8] Interne Faktoren sind beispielsweise \xC4nderungen in den\
@@ -1134,8 +1134,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '30'
       description: "L\u2019identification et l\u2019\xE9valuation des risques op\xE9\
-        rationnels s\u2019appuient au moins sur les r\xE9sultats d\u2019audit10 et\
-        \ les \xE9valuations des risques et des contr\xF4les \xE0 effectuer r\xE9\
+        rationnels s\u2019appuient au moins sur les r\xE9sultats d\u2019audit[10]\
+        \ et les \xE9valuations des risques et des contr\xF4les \xE0 effectuer r\xE9\
         guli\xE8rement. Les \xE9valuations des risques et des contr\xF4les tiennent\
         \ compte des risques inh\xE9rents, de l\u2019efficacit\xE9 des mesures de\
         \ contr\xF4le et d\u2019att\xE9nuation existantes ainsi que des risques r\xE9\
@@ -1148,7 +1148,7 @@ objects:
       translations:
         en:
           description: The identification and assessment of operational risks shall
-            be based on at least review results10 and regularly conducted risk and
+            be based on at least review results[10] and regularly conducted risk and
             control assessments. The risk and control assessments shall take into
             account the inherent risks, the effectiveness of the existing control
             and mitigation measures and the residual risks.
@@ -1158,7 +1158,7 @@ objects:
             and compliance functions or supervisory authorities.'
         it:
           description: "L\u2019identificazione e la valutazione dei rischi operativi\
-            \ si basano almeno sui risultati dell\u2019audit10 e sulle valutazioni\
+            \ si basano almeno sui risultati dell\u2019audit[10] e sulle valutazioni\
             \ dei rischi e dei controlli da effettuare regolarmente. Tali valutazioni\
             \ tengono conto dei rischi inerenti, dell\u2019efficacia delle misure\
             \ di controllo e di attenuazione esistenti e dei rischi residui."
@@ -1169,7 +1169,7 @@ objects:
             \ dalla funzione preposta alla compliance o dalle autorit\xE0 di vigilanza."
         de:
           description: "Die Identifikation und Beurteilung der operationellen Risiken\
-            \ st\xFCtzt sich mindestens auf Pr\xFCfergebnisse10 und regelm\xE4ssig\
+            \ st\xFCtzt sich mindestens auf Pr\xFCfergebnisse[10] und regelm\xE4ssig\
             \ durchzuf\xFChrende Risiko- und Kontrollbeurteilungen. Die Risiko- und\
             \ Kontrollbeurteilungen ber\xFCcksichtigen die inh\xE4renten Risiken,\
             \ die Effektivit\xE4t der bestehenden Kontroll- und Minderungsmassnahmen\
@@ -1369,9 +1369,10 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '38'
       description: "La tol\xE9rance au risque pour les risques op\xE9rationnels tient\
-        \ compte de la tol\xE9rance en lien tant avec les risques inh\xE9rents11 qu\u2019\
-        avec les risques op\xE9rationnels r\xE9siduels. Elle fait l\u2019objet d\u2019\
-        une surveillance au moyen d\u2019indicateurs de risque ou de contr\xF4le."
+        \ compte de la tol\xE9rance en lien tant avec les risques inh\xE9rents[11]\
+        \ qu\u2019avec les risques op\xE9rationnels r\xE9siduels. Elle fait l\u2019\
+        objet d\u2019une surveillance au moyen d\u2019indicateurs de risque ou de\
+        \ contr\xF4le."
       annotation: "[11] La tol\xE9rance au risque par rapport aux risques inh\xE9\
         rents tient compte de d\xE9cisions strat\xE9giques en lien avec le mo- d\xE8\
         le d\u2019affaires ou d\u2019exploitation, par ex. la tol\xE9rance aux risques\
@@ -1383,7 +1384,7 @@ objects:
       translations:
         en:
           description: The risk tolerance for operational risk takes account of both
-            the tolerance in relation to inherent11 as well as residual operational
+            the tolerance in relation to inherent[11] as well as residual operational
             risk and is monitored using risk or control indicators.
           annotation: '[11] The risk tolerance in relation to inherent risk takes
             account of strategic decisions in relation to the business or operating
@@ -1393,7 +1394,7 @@ objects:
             or with outsourcing certain operations.'
         it:
           description: "La tolleranza al rischio per i rischi operativi tiene conto\
-            \ della tolleranza in rapporto ai rischi operativi inerenti11 e a quelli\
+            \ della tolleranza in rapporto ai rischi operativi inerenti[11] e a quelli\
             \ residui ed \xE8 monitorata mediante indicatori di rischio o di controllo."
           annotation: "[11] La tolleranza al rischio in riferimento ai rischi inerenti\
             \ considera decisioni strategiche che concernono il modello com- merciale\
@@ -1405,7 +1406,7 @@ objects:
             \ (outsourcing)."
         de:
           description: "Die Risikotoleranz f\xFCr operationelle Risiken ber\xFCcksichtigt\
-            \ sowohl die Toleranz in Bezug auf inh\xE4rente11 als auch auf residuale\
+            \ sowohl die Toleranz in Bezug auf inh\xE4rente[11] als auch auf residuale\
             \ operationelle Risiken und wird anhand von Risikooder Kontrollindikatoren\
             \ \xFCberwacht."
           annotation: "[11] Die Risikotoleranz in Bezug auf inh\xE4rente Risiken ber\xFC\
@@ -1424,8 +1425,8 @@ objects:
         \ par ann\xE9e \xE0 l\u2019organe responsable de la haute direction et au\
         \ moins une fois par semestre \xE0 la direction selon les Cm 75 et 76 de la\
         \ Circ.-FINMA 17/1 rend compte des risques op\xE9rationnels selon le niveau\
-        \ sup\xE9rieur12 de leur cat\xE9gorisation d\xE9finie conform\xE9ment au Cm\
-        \ 28, de leur comparaison avec la tol\xE9rance aux risques fix\xE9e ainsi\
+        \ sup\xE9rieur[12] de leur cat\xE9gorisation d\xE9finie conform\xE9ment au\
+        \ Cm 28, de leur comparaison avec la tol\xE9rance aux risques fix\xE9e ainsi\
         \ que des d\xE9tails concernant les pertes internes importantes."
       annotation: "[12] Le niveau sup\xE9rieur de la cat\xE9gorisation est souvent\
         \ appel\xE9 niveau 1 ou level 1. Le rapport peut aussi \xEAtre effectu\xE9\
@@ -1435,8 +1436,8 @@ objects:
           description: "The risk control function reports to the board of directors\
             \ at least annually and to the executive board at least every six months\
             \ in accordance with margin nos. 75\u201376 of FINMA Circ. 17/1 on the\
-            \ operational risks at the top level12 of the categorisation defined in\
-            \ accordance with margin no. 28, on their comparison with the defined\
+            \ operational risks at the top level[12] of the categorisation defined\
+            \ in accordance with margin no. 28, on their comparison with the defined\
             \ risk tolerance, and on details of material internal losses."
           annotation: '[12] The top level of the categorisation is often referred
             to as level 1. The reporting can also take place on a more detailed level.'
@@ -1444,7 +1445,7 @@ objects:
           description: "Il controllo dei rischi presenta all\u2019organo preposto\
             \ all\u2019alta direzione almeno una volta all\u2019anno e alla direzione\
             \ almeno a ritmo semestrale in conformit\xE0 ai nm. 75\u201376 della Circolare\
-            \ FINMA 17/1 un rapporto sui rischi operativi al massimo livello12 della\
+            \ FINMA 17/1 un rapporto sui rischi operativi al massimo livello[12] della\
             \ categorizzazione definita secondo il nm. 28, sul loro confronto con\
             \ la tolleranza al rischio stabilita e sui dettagli concernenti le perdite\
             \ interne sostanziali."
@@ -1455,7 +1456,7 @@ objects:
           description: "Die Risikokontrolle erstattet dem Oberleitungsorgan mindestens\
             \ j\xE4hrlich und der Gesch\xE4ftsleitung mindestens halbj\xE4hrlich nach\
             \ Rz 75\u201376 FINMA-RS 17/1 Bericht \xFCber die operationellen Risiken\
-            \ entlang der obersten Stufe12 der nach Rz 28 definierten Kategorisierung,\
+            \ entlang der obersten Stufe[12] der nach Rz 28 definierten Kategorisierung,\
             \ \xFCber deren Vergleich mit der festgelegten Risikotoleranz, sowie \xFC\
             ber Einzelheiten zu wesentlichen internen Verlusten."
           annotation: "[12] Die oberste Stufe der Kategorisierung wird h\xE4ufig Stufe\
@@ -1765,28 +1766,28 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:2
       ref_id: '52'
       description: "Lors du d\xE9veloppement et de l\u2019acquisition de TIC, les\
-        \ exigences fonctionnelles et non fonctionnelles13 sont clairement d\xE9finies\
-        \ et approuv\xE9es, puis test\xE9es et valid\xE9es selon leur criticit\xE9\
+        \ exigences fonctionnelles et non fonctionnelles[13] sont clairement d\xE9\
+        finies et approuv\xE9es, puis test\xE9es et valid\xE9es selon leur criticit\xE9\
         ."
       annotation: "[13] Par ex. en ce qui concerne l\u2019architecture ou les exigences\
         \ \xE0 l\u2019\xE9gard de la s\xE9curit\xE9 de l\u2019information"
       translations:
         en:
           description: When developing and procuring ICT, functional and non-functional
-            requirements13 shall be clearly defined and approved; they shall be tested
-            and validated based on their criticality.
+            requirements[13] shall be clearly defined and approved; they shall be
+            tested and validated based on their criticality.
           annotation: '[13] E.g. with regard to architecture or information security
             requirements.'
         it:
           description: "Nelle fasi di sviluppo e di acquisto delle TIC le esigenze\
-            \ funzionali e non funzionali13 sono definite chiaramente e approvate,\
+            \ funzionali e non funzionali[13] sono definite chiaramente e approvate,\
             \ quindi testate e convalidate in funzione della loro criticit\xE0."
           annotation: "[13] P. es. per quanto attiene all\u2019architettura o ai requisiti\
             \ di sicurezza delle informazioni."
         de:
           description: "Bei Entwicklung und Beschaffung von IKT werden funktionale\
-            \ und nicht-funktionale Anforderungen13 klar definiert und genehmigt und\
-            \ gem\xE4ss ihrer Kritikalit\xE4t getestet und validiert."
+            \ und nicht-funktionale Anforderungen[13] klar definiert und genehmigt\
+            \ und gem\xE4ss ihrer Kritikalit\xE4t getestet und validiert."
           annotation: '[13] Bspw. im Hinblick auf die Architektur oder die Anforderungen
             an die Informationssicherheit.'
     - urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:2:3
@@ -2079,7 +2080,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '63'
-      description: "a. identification des menaces potentielles li\xE9es aux cyberattaques14\
+      description: "a. identification des menaces potentielles li\xE9es aux cyberattaques[14]\
         \ sp\xE9cifiques \xE0 l\u2019\xE9tablissement et \xE9valuation des cons\xE9\
         quences possibles li\xE9es \xE0 l\u2019exploitation des vuln\xE9rabilit\xE9\
         s relatives aux composantes TIC r\xE9pertori\xE9es et des donn\xE9es \xE9\
@@ -2092,7 +2093,7 @@ objects:
       translations:
         en:
           description: a. Identification of the institution-specific threat landscape
-            from cyber attacks14 and assessment of the possible impacts of exploiting
+            from cyber attacks[14] and assessment of the possible impacts of exploiting
             vulnerabilities with regard to the inventoried ICT assets and the electronic
             critical data (in accordance with margin nos. 53, 54 and 7);
           annotation: '[14] Attacks on the confidentiality, integrity and availability
@@ -2100,7 +2101,7 @@ objects:
             of external or internal attackers exploiting vulnerabilities or circumventing
             protective measures.'
         it:
-          description: "a. identificazione delle potenziali minacce dovute a cyber-attacchi14\
+          description: "a. identificazione delle potenziali minacce dovute a cyber-attacchi[14]\
             \ specifiche all\u2019istituto e valutazione delle possibili conseguenze\
             \ dello sfruttamento delle vulnerabilit\xE0 relative alle componenti inventariate\
             \ delle TIC e ai dati elettronici critici (in conformit\xE0 al nm. 53,\
@@ -2112,7 +2113,7 @@ objects:
             \ o interni."
         de:
           description: "a. Identifikation der institutsspezifischen Bedrohungspotenziale\
-            \ durch Cyber-Attacken14 und Beurteilung der m\xF6glichen Auswirkungen\
+            \ durch Cyber-Attacken[14] und Beurteilung der m\xF6glichen Auswirkungen\
             \ der Ausn\xFCtzung von Schwachstellen bez\xFCglich der inventarisierten\
             \ Bestandteile der IKT und der elektronischen kritischen Daten (gem\xE4\
             ss Rz 53, 54 und 7);"
@@ -2229,9 +2230,6 @@ objects:
         \ par l\u2019\xE9tablissement, un rapport conclusif sur les causes conforme\
         \ au degr\xE9 de gravit\xE9 doit \xEAtre remis au service comp\xE9tent de\
         \ la FINMA."
-      annotation: "[15] Analyse visant \xE0 identifier les vuln\xE9rabilit\xE9s actuelles\
-        \ des logiciels ainsi que les failles de s\xE9curit\xE9 de l\u2019infrastructure\
-        \ IT par rapport aux cyberattaques"
       translations:
         en:
           description: Cyber risk management must ensure that a successful or partially
@@ -2277,24 +2275,23 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
       ref_id: '69'
       description: "La direction fait r\xE9guli\xE8rement proc\xE9der \xE0 des analyses\
-        \ de vuln\xE9rabilit\xE915 et \xE0 des tests d\u2019intrusion16. Ces derniers\
+        \ de vuln\xE9rabilit\xE9[15] et \xE0 des tests d\u2019intrusion[16]. Ces derniers\
         \ doivent \xEAtre effectu\xE9s par du personnel qualifi\xE9 disposant de ressources\
         \ ad\xE9quates. Ce faisant, toutes les composantes TIC r\xE9pertori\xE9es\
         \ et accessibles par Internet doivent \xEAtre prises en compte. En outre,\
         \ les composantes TIC r\xE9pertori\xE9es et non accessibles par Internet mais\
         \ qui sont n\xE9cessaires \xE0 l\u2019ex\xE9cution de processus critiques\
         \ ou qui contiennent des donn\xE9es \xE9lectroniques critiques, doivent \xEA\
-        tre prises en compte. Sur la base des menaces potentielles sp\xE9cifiques\
-        \ \xE0 l\u2019\xE9tablissement, il y a lieu d\u2019effectuer, en fonction\
-        \ des risques, des cyberexercices17 fond\xE9s sur des sc\xE9narios. Le r\xE9\
-        sultat des exercices doit \xEAtre document\xE9 et rapport\xE9 en forme appropri\xE9\
-        e."
-      annotation: "[16] \xC9valuation cibl\xE9e et exploitation des vuln\xE9rabilit\xE9\
-        s des logiciels et des failles de s\xE9curit\xE9 des TIC"
+        tre prises en compte."
+      annotation: "[15] Analyse visant \xE0 identifier les vuln\xE9rabilit\xE9s actuelles\
+        \ des logiciels ainsi que les failles de s\xE9curit\xE9 de l\u2019infrastructure\
+        \ IT par rapport aux cyberattaques\n[16] \xC9valuation cibl\xE9e et exploitation\
+        \ des vuln\xE9rabilit\xE9s des logiciels et des failles de s\xE9curit\xE9\
+        \ des TIC"
       translations:
         en:
-          description: The executive board shall arrange for vulnerability assessments15
-            and penetration tests16 to be conducted regularly. These must be performed
+          description: The executive board shall arrange for vulnerability assessments[15]
+            and penetration tests[16] to be conducted regularly. These must be performed
             by qualified staff with adequate resources. All inventoried ICT assets
             that are accessible over the internet must be taken into account. In addition,
             inventoried ICT assets that are not accessible over the internet, but
@@ -2307,8 +2304,8 @@ objects:
             gaps in the ICT.'
         it:
           description: "La direzione dispone regolarmente lo svolgimento di analisi\
-            \ di vulnerabilit\xE015 e test di intrusione (penetration test)16, che\
-            \ devono essere eseguiti da personale qualificato con risorse adeguate.\
+            \ di vulnerabilit\xE0[15] e test di intrusione (penetration test)[16],\
+            \ che devono essere eseguiti da personale qualificato con risorse adeguate.\
             \ In proposito occorre considerare tutte le componenti inventariate delle\
             \ TIC accessibili tramite internet. Inoltre, devono essere considerate\
             \ le componenti inventariate delle TIC non accessibili tramite internet,\
@@ -2320,8 +2317,8 @@ objects:
             \ delle vulnerabilit\xE0 a livello di software e delle falle di sicurezza\
             \ nelle TIC."
         de:
-          description: "Die Gesch\xE4ftsleitung l\xE4sst regelm\xE4ssig Verwundbarkeitsanalysen15\
-            \ und Penetrationstests16 durchf\xFChren. Diese m\xFCssen durch qualifiziertes\
+          description: "Die Gesch\xE4ftsleitung l\xE4sst regelm\xE4ssig Verwundbarkeitsanalysen[15]\
+            \ und Penetrationstests[16] durchf\xFChren. Diese m\xFCssen durch qualifiziertes\
             \ Personal mit angemessenen Ressourcen ausgef\xFChrt werden. Dabei sind\
             \ alle inventarisierten Bestandteile der IKT, die \xFCber das Internet\
             \ erreichbar sind, zu ber\xFCcksichtigen. Zudem sind inventarisierte Bestandteile\
@@ -2339,13 +2336,13 @@ objects:
       ref_id: '70'
       description: "Sur la base des menaces potentielles sp\xE9cifiques \xE0 l\u2019\
         \xE9tablissement, il y a lieu d\u2019effectuer, en fonction des risques, des\
-        \ cyberexercices17 fond\xE9s sur des sc\xE9narios. Le r\xE9sultat des exercices\
+        \ cyberexercices[17] fond\xE9s sur des sc\xE9narios. Le r\xE9sultat des exercices\
         \ doit \xEAtre document\xE9 et rapport\xE9 en forme appropri\xE9e."
       annotation: '[17] En tenant compte du Cm 19, ces cyberexercices pourraient par
         ex. inclure des exercices table-top, red teaming, etc.'
       translations:
         en:
-          description: Risk-based, threat intelligence-related scenario cyber exercises17
+          description: Risk-based, threat intelligence-related scenario cyber exercises[17]
             must be conducted on the basis of the institution-specific threat landscape.
             The result of the exercises must be documented and reported in an appropriate
             form.
@@ -2354,15 +2351,15 @@ objects:
         it:
           description: "Sulla base delle minacce potenziali specifiche all\u2019istituto,\
             \ devono essere svolti cyberesercizi in funzione dei rischi e riferiti\
-            \ allo scenario in questione17. Il risultato degli esercizi deve essere\
+            \ allo scenario in questione[17]. Il risultato degli esercizi deve essere\
             \ documentato facendone rapporto in forma adeguata."
           annotation: '[17] Considerando il nm. 19, questi cyber-esercizi potrebbero
             includere, per esempio, esercizi di simulazione (table-top exercises),
             red teaming ecc.'
         de:
           description: "Auf Basis der institutsspezifischen Bedrohungspotenziale m\xFC\
-            ssen risikobasiert szenariobezogene Cyber-\xDCbungen17 durchgef\xFChrt\
-            \ werden. Das Ergebnis der \xDCbungen ist in geeigneter Form zu dokumentieren\
+            ssen risikobasiert szenariobezogene Cyber-\xDCbungen[17] durchgef\xFC\
+            hrt werden. Das Ergebnis der \xDCbungen ist in geeigneter Form zu dokumentieren\
             \ und zu rapportieren."
           annotation: "[17] Unter Ber\xFCcksichtigung der Rz 19 k\xF6nnten solche\
             \ Cyber-\xDCbungen beispielsweise beinhalten, Table-Top-, Red Teaming-\xDC\
@@ -2551,7 +2548,7 @@ objects:
       ref_id: '78'
       description: "L\u2019acc\xE8s aux donn\xE9es critiques et aux fonctionnalit\xE9\
         s de traitement de ces donn\xE9es est limit\xE9 aux personnes qui en ont besoin\
-        \ pour accomplir leurs t\xE2ches18. \xC0 cet \xE9gard, l\u2019\xE9tablissement\
+        \ pour accomplir leurs t\xE2ches[18]. \xC0 cet \xE9gard, l\u2019\xE9tablissement\
         \ doit disposer d\u2019un syst\xE8me d\u2019autorisation. L\u2019acc\xE8s\
         \ \xE0 ce syst\xE8me doit \xEAtre particuli\xE8rement prot\xE9g\xE9 et r\xE9\
         guli\xE8rement v\xE9rifi\xE9. Les autorisations contenues dans ce syst\xE8\
@@ -2560,7 +2557,7 @@ objects:
       translations:
         en:
           description: Access to critical data and processing functionalities shall
-            be restricted to persons who require this to carry out their tasks18.
+            be restricted to persons who require this to carry out their tasks[18].
             The institution must have an authorisation system in place. Access to
             this authorisation system must be afforded particular protection and reviewed
             on a regular basis. The authorisations included in the authorisation system
@@ -2569,7 +2566,7 @@ objects:
         it:
           description: "L\u2019accesso ai dati critici e alle funzioni legate al trattamento\
             \ di questi dati \xE8 limitato alle persone che necessitano dei dati per\
-            \ svolgere i propri compiti18. Al riguardo l\u2019istituto deve disporre\
+            \ svolgere i propri compiti[18]. Al riguardo l\u2019istituto deve disporre\
             \ di un sistema di autorizzazione. L\u2019accesso a tale sistema di autorizzazione\
             \ deve essere protetto in modo particolare e verificato regolarmente.\
             \ Le autorizzazioni contenute nel sistema devono essere verificate regolarmente."
@@ -2578,7 +2575,7 @@ objects:
         de:
           description: "Der Zugriff auf kritische Daten und verarbeitende Funktionalit\xE4\
             ten ist auf Personen beschr\xE4nkt, welche diesen zur Erf\xFCllung ihrer\
-            \ Aufgaben ben\xF6tigen18. Dabei muss das Institut \xFCber ein Autorisierungssystem\
+            \ Aufgaben ben\xF6tigen[18]. Dabei muss das Institut \xFCber ein Autorisierungssystem\
             \ verf\xFCgen. Der Zugang zu diesem Autorisierungssystem ist besonders\
             \ zu sch\xFCtzen und regelm\xE4ssig zu \xFCberpr\xFCfen. Die im Autorisierungssystem\
             \ enthaltenen Berechtigungen sind regelm\xE4ssig zu \xFCberpr\xFCfen."
@@ -2588,7 +2585,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:4
       ref_id: '79'
-      description: "Lorsque les donn\xE9es critiques sont stock\xE9es hors de Suisse19\
+      description: "Lorsque les donn\xE9es critiques sont stock\xE9es hors de Suisse[19]\
         \ ou qu\u2019elles sont accessibles depuis l\u2019\xE9tranger, les risques\
         \ accrus qui en r\xE9sultent doivent \xEAtre limit\xE9s de mani\xE8re appropri\xE9\
         e et surveill\xE9s au moyen de mesures appropri\xE9es et les donn\xE9es doivent\
@@ -2596,19 +2593,19 @@ objects:
       annotation: "[19] Par ex. \xE0 l\u2019aide de solutions de cloud ou de hosting"
       translations:
         en:
-          description: If critical data is stored outside of Switzerland19 or if it
-            can be accessed from abroad, increased risks associated with this must
+          description: If critical data is stored outside of Switzerland[19] or if
+            it can be accessed from abroad, increased risks associated with this must
             be adequately mitigated and monitored via suitable means and the data
             afforded particular protection.
           annotation: '[19] For example, in the context of cloud or hosting solutions.'
         it:
-          description: "Se i dati critici sono archiviati al di fuori della Svizzera19\
+          description: "Se i dati critici sono archiviati al di fuori della Svizzera[19]\
             \ o sono accessibili dall\u2019estero, \xE8 necessario limitare adeguatamente\
             \ i rischi superiori che ne derivano e monitorarli mediante misure adeguate,\
             \ nonch\xE9 proteggere i dati in modo particolare."
           annotation: '[19] P. es. mediante soluzioni di cloud o di hosting.'
         de:
-          description: "Falls kritische Daten ausserhalb der Schweiz gespeichert werden19\
+          description: "Falls kritische Daten ausserhalb der Schweiz gespeichert werden[19]\
             \ oder vom Ausland aus auf sie zugegriffen werden kann, sind die damit\
             \ verbundenen erh\xF6hten Risiken angemessen zu begrenzen und mit geeigneten\
             \ Massnahmen zu \xFCberwachen sowie die Daten besonders zu sch\xFCtzen."
@@ -2621,10 +2618,10 @@ objects:
       description: "Tant les personnes internes qu\u2019externes qui peuvent acc\xE9\
         der aux donn\xE9es critiques ou les modifier doivent \xEAtre soigneusement\
         \ s\xE9lectionn\xE9es. Ces personnes doivent \xEAtre surveill\xE9es \xE0 l\u2019\
-        aide des mesures appropri\xE9es20 et form\xE9es r\xE9guli\xE8rement sur le\
-        \ traitement de ces donn\xE9es. Des exigences accrues en mati\xE8re de s\xE9\
-        curit\xE9 s\u2019appliquent aux personnes b\xE9n\xE9ficiant de privil\xE8\
-        ges accrus21. Il convient en outre de tenir une liste de ces personnes et\
+        aide des mesures appropri\xE9es[20] et form\xE9es r\xE9guli\xE8rement sur\
+        \ le traitement de ces donn\xE9es. Des exigences accrues en mati\xE8re de\
+        \ s\xE9curit\xE9 s\u2019appliquent aux personnes b\xE9n\xE9ficiant de privil\xE8\
+        ges accrus[21]. Il convient en outre de tenir une liste de ces personnes et\
         \ de la mettre continuellement \xE0 jour."
       annotation: "[20] Par ex. \xE9valuation des fichiers journaux, principe des\
         \ quatre yeux, etc.\n[21] Par ex. les personnes qui b\xE9n\xE9ficient de droits\
@@ -2635,9 +2632,9 @@ objects:
         en:
           description: Both internal and external persons who can access critical
             data or who can change these must be selected carefully. These persons
-            must be monitored with the help of appropriate measures20 and given regular
-            training in the handling of these data. Increased security requirements
-            shall apply to persons with increased privileges21. In addition, a list
+            must be monitored with the help of appropriate measures[20] and given
+            regular training in the handling of these data. Increased security requirements
+            shall apply to persons with increased privileges[21]. In addition, a list
             of all persons with privileged access rights must be kept and updated
             on a regular basis.
           annotation: "[20] For example, analysis of log files, \u201Cfour eyes principle\u201D\
@@ -2646,20 +2643,20 @@ objects:
         it:
           description: "Occorre scegliere accuratamente le persone interne e quelle\
             \ esterne che possono accedere ai dati critici o modificarli. Tali persone\
-            \ devono essere sorvegliate mediante misure appropriate20 e formate regolarmente\
-            \ sulla gestione di questi dati. Alle persone che beneficiano di maggiori\
-            \ privilegi21 si applicano requisiti di sicurezza pi\xF9 rigorosi. Inoltre,\
-            \ deve essere tenuto un elenco di tutte le persone che beneficiano di\
-            \ maggiori privilegi e aggiornato continuamente."
+            \ devono essere sorvegliate mediante misure appropriate[20] e formate\
+            \ regolarmente sulla gestione di questi dati. Alle persone che beneficiano\
+            \ di maggiori privilegi[21] si applicano requisiti di sicurezza pi\xF9\
+            \ rigorosi. Inoltre, deve essere tenuto un elenco di tutte le persone\
+            \ che beneficiano di maggiori privilegi e aggiornato continuamente."
           annotation: "[20] P. es. valutazione di file log, principio del doppio controllo\
             \ ecc.\n[21] P. es. persone con diritti di amministratore, utenti con\
             \ accesso funzionale a una grossa quantit\xE0 di dati critici ecc."
         de:
           description: "Sowohl interne wie externe Personen, die auf kritische Daten\
             \ zugreifen oder diese ver\xE4ndern k\xF6nnen, sind sorgf\xE4ltig auszuw\xE4\
-            hlen. Diese Personen sind mit geeigneten Massnahmen zu \xFCberwachen20\
+            hlen. Diese Personen sind mit geeigneten Massnahmen zu \xFCberwachen[20]\
             \ und regelm\xE4ssig im Umgang mit diesen Daten zu schulen. F\xFCr Personen\
-            \ mit erh\xF6hten Privilegien21 gelten erh\xF6hte Sicherheitsanforderungen.\
+            \ mit erh\xF6hten Privilegien[21] gelten erh\xF6hte Sicherheitsanforderungen.\
             \ Es ist zudem eine Liste aller Personen mit erh\xF6hten Privilegien zu\
             \ f\xFChren und laufend zu aktualisieren."
           annotation: '[20] Bspw. Auswertung von Log-Dateien, Vier-Augen-Prinzip usw.
@@ -2693,7 +2690,7 @@ objects:
       ref_id: '82'
       description: "Une grande importance doit \xEAtre accord\xE9e \xE0 l\u2019examen\
         \ de diligence (due diligence) lors du choix des prestataires qui peuvent\
-        \ acc\xE9der aux donn\xE9es critiques ou les traiter22. Il faut d\xE9finir\
+        \ acc\xE9der aux donn\xE9es critiques ou les traiter[22]. Il faut d\xE9finir\
         \ des crit\xE8res clairs pour \xE9valuer la mani\xE8re dont les prestataires\
         \ g\xE8rent les donn\xE9es critiques et les v\xE9rifier avant de signer des\
         \ contrats. En fonction du risque, les prestataires doivent \xEAtre soumis\
@@ -2706,7 +2703,7 @@ objects:
         \ ou la destruction de donn\xE9es"
       translations:
         en:
-          description: "When selecting service providers that can process22 or view\
+          description: "When selecting service providers that can process[22] or view\
             \ critical data, due diligence must be particularly thorough. Clear criteria\
             \ for assessing how service providers handle critical data must be defined\
             \ and checked before entering into a contractual agreement. The service\
@@ -2717,7 +2714,7 @@ objects:
             storage, use, changing, disclosing, archiving, deletion or destruction
             of data.'
         it:
-          description: "Nella scelta dei fornitori di servizi che trattano dati critici22\
+          description: "Nella scelta dei fornitori di servizi che trattano dati critici[22]\
             \ o possono consultarli deve essere attribuita una notevole importanza\
             \ alla verifica della diligenza (due diligence). Occorre definire criteri\
             \ chiari per valutare il modo in cui i fornitori di servizi gestiscono\
@@ -2731,7 +2728,7 @@ objects:
             \ la divulgazione, l\u2019archiviazione, la cancellazione o l\u2019eliminazione\
             \ dei dati."
         de:
-          description: "Bei der Auswahl von Dienstleistern, die kritische Daten bearbeiten22\
+          description: "Bei der Auswahl von Dienstleistern, die kritische Daten bearbeiten[22]\
             \ oder einsehen k\xF6nnen, ist der Sorgfaltspr\xFCfung (Due Diligence)\
             \ eine hohe Bedeutung beizumessen. Es sind klare Kriterien f\xFCr die\
             \ Beurteilung des Umgangs der Dienstleister mit kritischen Daten zu definieren\
@@ -2784,7 +2781,7 @@ objects:
       ref_id: '84'
       description: "Chaque domaine d\u2019activit\xE9 ou d\u2019organisation pertinent\
         \ doit identifier ses processus critiques et les ressources correspondantes\
-        \ n\xE9cessaires23 dans le cadre de la business impact analysis (BIA)."
+        \ n\xE9cessaires[23] dans le cadre de la business impact analysis (BIA)."
       annotation: "[23] Personnel, infrastructure (par ex. immeubles, infrastructure\
         \ des postes de travail), syst\xE8mes IT ou infrastructure IT (y compris syst\xE8\
         mes de communication), d\xE9pendances vis-\xE0-vis d\u2019autres domaines\
@@ -2793,7 +2790,7 @@ objects:
       translations:
         en:
           description: Every relevant business and organisational area must identify
-            its critical processes and the resources required for these23 in a business
+            its critical processes and the resources required for these[23] in a business
             impact analysis (BIA).
           annotation: '[23] Staff, facilities (e.g. building, workplace infrastructure),
             information, IT systems or IT infrastructure (including communication
@@ -2802,8 +2799,8 @@ objects:
             central banks or clearing houses.'
         it:
           description: "Ogni divisione operativa e organizzativa rilevante deve individuare\
-            \ i suoi processi critici e le risorse necessarie23 nell\u2019ambito della\
-            \ business impact analysis (BIA)."
+            \ i suoi processi critici e le risorse necessarie[23] nell\u2019ambito\
+            \ della business impact analysis (BIA)."
           annotation: "[23] Personale, infrastrutture (p. es. immobili, infrastruttura\
             \ dei posti di lavoro), informazioni, sistemi IT o infrastruttura IT (compresi\
             \ i sistemi di comunicazione), dipendenze da altri settori dell\u2019\
@@ -2812,7 +2809,7 @@ objects:
         de:
           description: "Jeder relevante Gesch\xE4fts- und Organisationsbereich hat\
             \ im Rahmen der Business Impact Analyse (BIA) seine kritischen Prozesse\
-            \ und die daf\xFCr ben\xF6tigten Ressourcen23 zu identifizieren."
+            \ und die daf\xFCr ben\xF6tigten Ressourcen[23] zu identifizieren."
           annotation: "[23] Personal, Einrichtungen (bspw. Geb\xE4ude, Arbeitsplatzinfrastruktur),\
             \ Informationen, IT-Systeme oder IT-Infrastruktur (inkl. Kommunikationssysteme),\
             \ Abh\xE4ngigkeiten zu andern Bereichen des Instituts und zu Drittparteien,\
@@ -2825,7 +2822,7 @@ objects:
       ref_id: '85'
       description: "Pour les processus critiques, l\u2019\xE9tablissement d\xE9finit\
         \ le RTO et le RPO conform\xE9ment au Cm 10. Ceux-ci sont coordonn\xE9s avec\
-        \ les fournisseurs de prestations24 requis \xE0 cet effet et leur respect\
+        \ les fournisseurs de prestations[24] requis \xE0 cet effet et leur respect\
         \ est r\xE9gi par des service level agreements ou des contrats, ou garantis\
         \ par d\u2019autres proc\xE9dures et contr\xF4les appropri\xE9s."
       annotation: "[24] Par ex. avec le d\xE9partement IT, d\u2019autres domaines\
@@ -2834,22 +2831,22 @@ objects:
         en:
           description: The institution shall define the RTO and RPO for the critical
             processes in accordance with margin no. 10. These shall be coordinated
-            with the necessary service providers24 and adherence to the RTO and RPO
-            shall be regulated by service level agreements or contracts or by other
-            appropriate procedures, processes and controls.
+            with the necessary service providers[24] and adherence to the RTO and
+            RPO shall be regulated by service level agreements or contracts or by
+            other appropriate procedures, processes and controls.
           annotation: '[24] For example, with the IT department, other units of the
             institution or external parties.'
         it:
           description: "Per i processi critici, l\u2019istituto definisce il RTO e\
             \ il RPO secondo il nm. 10, coordinandoli con i necessari fornitori di\
-            \ servizi24. La loro osservanza \xE8 disciplinata mediante service level\
+            \ servizi[24]. La loro osservanza \xE8 disciplinata mediante service level\
             \ agreement o contratti, oppure \xE8 garantita mediante procedure, processi\
             \ e controlli appropriati."
           annotation: "[24] P. es. con la sezione IT, altre divisioni dell\u2019istituto\
             \ o esterni."
         de:
           description: "F\xFCr die kritischen Prozesse definiert das Institut die\
-            \ RTO und RPO nach Rz 10. Diese sind mit den daf\xFCr erforderlichen Leistungserbringern24\
+            \ RTO und RPO nach Rz 10. Diese sind mit den daf\xFCr erforderlichen Leistungserbringern[24]\
             \ abgestimmt und die Einhaltung der RTO und RPO wird durch Service Level\
             \ Agreements oder Vertr\xE4ge geregelt oder durch andere geeignete Verfahren,\
             \ Prozesse und Kontrollen sichergestellt."
@@ -3343,7 +3340,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:v.-garantie-de-la-resilience-operationnelle
       ref_id: '102'
       description: "L\u2019\xE9tablissement prend des mesures pour garantir la r\xE9\
-        silience op\xE9rationnelle en tenant compte de sc\xE9narios graves, mais plausibles25."
+        silience op\xE9rationnelle en tenant compte de sc\xE9narios graves, mais plausibles[25]."
       annotation: "[25] Il ne peut \xEAtre exclu que certains sc\xE9narios ne puissent\
         \ pas \xEAtre g\xE9r\xE9s sans intervention de l\u2019\xC9tat (par ex. pand\xE9\
         - mies, guerres, p\xE9nuries d\u2019\xE9lectricit\xE9 durables). Pour de tels\
@@ -3353,7 +3350,7 @@ objects:
       translations:
         en:
           description: The institution shall take measures to ensure operational resilience,
-            taking into account severe but plausible scenarios25.
+            taking into account severe but plausible scenarios[25].
           annotation: '[25] It cannot be ruled out that some scenarios cannot be managed
             without state involvement (e.g. pandemics, wars, long-term power shortages).
             For such scenarios, preliminary work must be carried out by the institution
@@ -3361,7 +3358,7 @@ objects:
             in so far as its means allow.'
         it:
           description: "L\u2019istituto adotta misure per garantire la resilienza\
-            \ operativa considerando scenari gravi, ma plausibili25."
+            \ operativa considerando scenari gravi, ma plausibili[25]."
           annotation: "[25] Non si pu\xF2 escludere che alcuni scenari non possano\
             \ essere fronteggiati senza il coinvolgimento dello Stato (p. es. pandemie,\
             \ guerre, persistente penuria di energia). In tali casi l\u2019istituto\
@@ -3371,7 +3368,7 @@ objects:
         de:
           description: "Das Institut trifft Massnahmen zur Sicherstellung der operationellen\
             \ Resilienz unter Ber\xFCcksichtigung schwerwiegender, aber plausibler\
-            \ Szenarien25."
+            \ Szenarien[25]."
           annotation: "[25] Es kann nicht ausgeschlossen werden, dass manche Szenarien\
             \ nicht ohne Einbezug des Staates bew\xE4ltigt werden k\xF6nnen (bspw.\
             \ Pandemien, Kriege, langanhaltende Strommangellage). F\xFCr solche Szenarien\
@@ -3501,7 +3498,7 @@ objects:
         \ critiques, qui doit \xEAtre revu et mis \xE0 jour au moins une fois par\
         \ ann\xE9e. Cet inventaire comporte les tol\xE9rances aux interruptions des\
         \ fonctions critiques ainsi que les connexions et les d\xE9pendances entre\
-        \ les processus critiques n\xE9cessaires et leurs ressources26 pour ex\xE9\
+        \ les processus critiques n\xE9cessaires et leurs ressources[26] pour ex\xE9\
         cuter les fonctions critiques."
       annotation: "[26] Y compris les composantes de l\u2019inventaire pertinentes\
         \ pour les fonctions critiques selon le Cm 53"
@@ -3511,7 +3508,7 @@ objects:
             which is reviewed and updated at least annually. This inventory shall
             contain the tolerances for disruption of the critical functions, as well
             as connections and dependencies between the necessary critical processes
-            and their resources26 for providing the critical functions.
+            and their resources[26] for providing the critical functions.
           annotation: '[26] Including the ICT assets of the inventory in accordance
             with margin no. 53 relevant to the critical functions.'
         it:
@@ -3519,7 +3516,7 @@ objects:
             \ da verificare e aggiornare almeno una volta all\u2019anno. Tale inventario\
             \ contiene le tolleranze alle interruzioni delle funzioni critiche, nonch\xE9\
             \ i collegamenti e le dipendenze tra i processi critici necessari e le\
-            \ relative risorse26 per svolgere le funzioni critiche."
+            \ relative risorse[26] per svolgere le funzioni critiche."
           annotation: "[26] Incluse le componenti dell\u2019inventario rilevanti per\
             \ le funzioni critiche secondo il nm. 53."
         de:
@@ -3527,7 +3524,7 @@ objects:
             \ das mindestens j\xE4hrlich \xFCberpr\xFCft und aktualisiert wird. Dieses\
             \ Inventar beinhaltet die Unterbrechungstoleranzen der kritischen Funktionen,\
             \ sowie die Verbindungen und Abh\xE4ngigkeiten zwischen den ben\xF6tigten\
-            \ kritischen Prozessen und deren Ressourcen26 zur Erbringung der kritischen\
+            \ kritischen Prozessen und deren Ressourcen[26] zur Erbringung der kritischen\
             \ Funktionen."
           annotation: "[26] Inklusive die f\xFCr die kritischen Funktionen relevanten\
             \ Bestandteile des Inventars nach Rz 53"
@@ -3579,7 +3576,7 @@ objects:
         \ Il s\u2019agit notamment de sc\xE9narios qui se distinguent des interruptions\
         \ br\xE8ves et plut\xF4t limit\xE9es en se d\xE9marquant par des interruptions\
         \ de longue dur\xE9e (par ex. plusieurs mois) et la d\xE9faillance de ressources\
-        \ fondamentales27. Les tests ou exercices sont con\xE7us de sorte \xE0 ne\
+        \ fondamentales[27]. Les tests ou exercices sont con\xE7us de sorte \xE0 ne\
         \ pas menacer fondamentalement l\u2019\xE9tablissement."
       annotation: "[27] Par ex. pand\xE9mie, p\xE9nurie d\u2019\xE9lectricit\xE9,\
         \ d\xE9faillance prolong\xE9e en raison de l\u2019insolvabilit\xE9 d\u2019\
@@ -3593,7 +3590,7 @@ objects:
             for disruption in severe but plausible scenarios shall be tested or exercised
             regularly. These also include scenarios that differ from shorter and more
             limited interruptions and that are characterised by a longer duration
-            (e.g. over several months) and a lack of basic resources27. The tests
+            (e.g. over several months) and a lack of basic resources[27]. The tests
             or exercises must be designed in such a way that they do not fundamentally
             endanger the institution.
           annotation: '[27] Examples include a pandemic, a power shortage, a prolonged
@@ -3607,7 +3604,7 @@ objects:
             \ \xE8 regolarmente testata o esercitata. Ci\xF2 comprende anche gli scenari\
             \ che si differenziano dalle interruzioni brevi e con un effetto piuttosto\
             \ limitato e sono caratterizzati da una durata prolungata (p. es. diversi\
-            \ mesi) e dall\u2019insufficienza delle risorse fondamentali27. I test\
+            \ mesi) e dall\u2019insufficienza delle risorse fondamentali[27]. I test\
             \ e gli esercizi sono configurati in modo tale da non costituire una minaccia\
             \ sostanziale per l\u2019istituto."
           annotation: "[27] Tra gli altri, una pandemia, una penuria di energia, un\u2019\
@@ -3623,7 +3620,7 @@ objects:
             nnen, wird regelm\xE4ssig getestet oder ge\xFCbt. Dazu geh\xF6ren auch\
             \ Szenarien, die sich von k\xFCrzeren und eher begrenzt wirkenden Unterbrechungen\
             \ unterscheiden und sich durch eine l\xE4ngere Zeitdauer (bspw. \xFCber\
-            \ Monate hinweg) und einen Ausfall grundlegender Ressourcen auszeichnen27.\
+            \ Monate hinweg) und einen Ausfall grundlegender Ressourcen auszeichnen[27].\
             \ Die Tests bzw. \xDCbungen werden dabei so gestaltet sein, dass sie das\
             \ Institut nicht grundlegend gef\xE4hrden."
           annotation: "[27] Beispiele sind eine Pandemie, eine Strommangellage, ein\
