@@ -1,12 +1,14 @@
 urn: urn:intuitem:risk:library:mapping-nist-sp-800-66-rev2-to-nist-csf-2.0
 locale: en
 ref_id: mapping-nist-sp-800-66-rev2-to-nist-csf-2.0
-name: nist-sp-800-66-rev2 -> NIST-CSF-2.0
-description: Mapping from NIST SP-800-66 rev2 (HIPAA) to NIST CSF v2.0
-copyright: intuitem
+name: nist-sp-800-66-rev2 <--> NIST-CSF-2.0
+description: 'Mapping from NIST SP-800-66 rev2 (HIPAA) from/to NIST CSF v2.0
+
+  Based on NIST mapping between NIST SP-800-66 rev2 (HIPAA) from/to NIST CSF v1.1'
+copyright: NIST
 version: 1
-publication_date: 2025-05-27
-provider: intuitem
+publication_date: 2025-06-13
+provider: NIST
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:nist-sp-800-66-rev2

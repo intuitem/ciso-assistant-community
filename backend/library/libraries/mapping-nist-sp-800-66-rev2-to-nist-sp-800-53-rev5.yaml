@@ -2,11 +2,14 @@ urn: urn:intuitem:risk:library:mapping-nist-sp-800-66-rev2-to-nist-sp-800-53-rev
 locale: en
 ref_id: mapping-nist-sp-800-66-rev2-to-nist-sp-800-53-rev5
 name: nist-sp-800-66-rev2 -> NIST-SP-800-53-rev5
-description: Mapping from NIST SP-800-66 rev2 (HIPAA) to NIST SP 800-53 revision 5
-copyright: intuitem
+description: 'Mapping from NIST SP-800-66 rev2 (HIPAA) to NIST SP 800-53 revision
+  5
+
+  Based on NIST Cybersecurity and Privacy Reference Tool (CPRT): https://csrc.nist.gov/Projects/cprt/catalog#/cprt/framework/version/SP800_66_2_0_0/home'
+copyright: NIST
 version: 1
-publication_date: 2025-05-27
-provider: intuitem
+publication_date: 2025-06-13
+provider: NIST
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:nist-sp-800-66-rev2
