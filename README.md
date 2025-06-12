@@ -9,7 +9,7 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
-    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    <a href="https://intuitem.releasedhub.com/ciso-assistant-public/roadmap/d738f2fd">Roadmap</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
@@ -29,6 +29,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
