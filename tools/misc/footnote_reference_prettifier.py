@@ -32,11 +32,10 @@ Notes:
 """
 
 
-from ast import Tuple
 import re
 import sys
 import os
-from typing import List
+from typing import List, Tuple
 from openpyxl import load_workbook
 from openpyxl.cell.cell import Cell
 
