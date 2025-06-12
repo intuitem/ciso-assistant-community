@@ -604,6 +604,7 @@ export const fearedEventsSchema = z.object({
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
 	ebios_rm_study: z.string(),
+	folder: z.string(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().optional().array().optional()
 });
