@@ -78,3 +78,7 @@
 ## Integration
 
 * [API documentation](integration/api-documentation.md)
+
+## Presentations
+
+* [Prowler x CISO Assistant](presentations/prowler-x-ciso-assistant.md)
