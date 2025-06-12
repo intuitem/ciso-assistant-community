@@ -3462,7 +3462,7 @@ class RiskScenario(NameDescriptionMixin):
         """return associated risk assessment id"""
         scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
+        candidates = [f"R.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
     def parent_perimeter(self):
