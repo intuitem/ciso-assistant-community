@@ -18,20 +18,20 @@
 * [Glossary](guide/glossary.md)
 * [Data import wizard](guide/data-import-wizard.md)
 
-## Features highlight
+## Features focus
 
-* [Controls autosuggestion](features-highlight/controls-autosuggestion.md)
-* [Multi-level support](features-highlight/multi-level-support.md)
-* [Flash mode](features-highlight/flash-mode.md)
-* [Evidences from clipboard](features-highlight/evidences-from-clipboard.md)
-* [Library upgrade](features-highlight/library-upgrade.md)
-* [Mapping explorer](features-highlight/graph-explorer.md)
-* [SSO](features-highlight/sso/README.md)
-  * [Microsoft Entra ID](features-highlight/sso/microsoft-entra-id.md)
-  * [Okta](features-highlight/sso/okta.md)
-  * [Keycloak](features-highlight/sso/keycloak.md)
-  * [Google Workplace](features-highlight/sso/google-workplace.md)
-* [Setting up Multi-Factor Authentication (MFA)](features-highlight/setting-up-multi-factor-authentication-mfa.md)
+* [Controls autosuggestion](features-focus/controls-autosuggestion.md)
+* [Multi-level support](features-focus/multi-level-support.md)
+* [Flash mode](features-focus/flash-mode.md)
+* [Evidences from clipboard](features-focus/evidences-from-clipboard.md)
+* [Library upgrade](features-focus/library-upgrade.md)
+* [Mapping explorer](features-focus/graph-explorer.md)
+* [SSO](features-focus/sso/README.md)
+  * [Microsoft Entra ID](features-focus/sso/microsoft-entra-id.md)
+  * [Okta](features-focus/sso/okta.md)
+  * [Keycloak](features-focus/sso/keycloak.md)
+  * [Google Workplace](features-focus/sso/google-workplace.md)
+* [Setting up Multi-Factor Authentication (MFA)](features-focus/setting-up-multi-factor-authentication-mfa.md)
 
 ## Model
 
@@ -74,3 +74,7 @@
 * [Overview](academy/overview.md)
 * [Third Parties Risk Management](academy/third-parties-risk-management.md)
 * [Etude EBIOS RM](academy/etude-ebios-rm.md)
+
+## Integration
+
+* [API documentation](integration/api-documentation.md)
