@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import pandas as pd
 from collections import defaultdict
+from icecream import ic
 
 
 def prowler_scan_k8s(config_path) -> str:
@@ -68,7 +69,9 @@ def parse_and_pass(filename) -> dict:
         df = df[df["COMPLIANCE"].str.strip() != ""]
 
         result = defaultdict(
-            lambda: defaultdict(lambda: {"aggregated_status": None, "checks": {}})
+            lambda: defaultdict(
+                lambda: {"aggregated_status": None, "checks": {}, "observation": ""}
+            )
         )
 
         # Process each row
@@ -99,6 +102,9 @@ def parse_and_pass(filename) -> dict:
                         result[framework][requirement_ref]["checks"][check_id] = status
                         current_checks = result[framework][requirement_ref]["checks"]
 
+                        observation = "\n".join(
+                            [f"{k}:{v}" for k, v in current_checks.items()]
+                        )
                         # Determine aggregated status based on all checks for this requirement
                         statuses = list(current_checks.values())
                         aggregated_status = calculate_aggregated_status(statuses)
@@ -106,6 +112,7 @@ def parse_and_pass(filename) -> dict:
                         result[framework][requirement_ref]["aggregated_status"] = (
                             aggregated_status
                         )
+                        result[framework][requirement_ref]["observation"] = observation
                 else:
                     print(f"Invalid compliance format: {compliance_item}")
 

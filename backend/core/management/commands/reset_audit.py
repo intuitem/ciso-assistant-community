@@ -36,7 +36,7 @@ class Command(BaseCommand):
             )
 
             with transaction.atomic():
-                requirements.update(result="not_assessed")
+                requirements.update(result="not_assessed", observation="")
 
         except (
             ComplianceAssessment.DoesNotExist

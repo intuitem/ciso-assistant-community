@@ -111,6 +111,7 @@ def update_audit(audit_id, prepared_data, mode="std"):
             payload = {
                 "ref_id": ref_id,
                 "result": decision_mapping[check_status.get("aggregated_status")],
+                "observation": check_status.get("observation"),
             }
             response = client.post(
                 f"{api_url}/compliance-assessments/{audit_id}/update_requirement/",
@@ -160,15 +161,15 @@ def scan_etl_pipeline():
                     scan_output_path = run_prowler_scan(config_path)
                     transformed = transform_results(scan_output_path)
 
-                    for audit_id in feed["scoped_audits"]:
-                        prowler_key = match_framework_urn(audit_id)
+                    for audit_uuid in feed["scoped_audits"]:
+                        prowler_key = match_framework_urn(audit_uuid)
                         checks_results = transformed[prowler_key]
                         if checks_results is None:
                             print(
                                 "couldn't find a match for this framework on the checks data"
                             )
                             continue
-                        update_audit(audit_id, checks_results)
+                        update_audit(audit_uuid, checks_results)
                 else:
                     print(f"the scanner on {name} is not supported yet. Moving on")
 
