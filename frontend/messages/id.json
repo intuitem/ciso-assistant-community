@@ -1114,6 +1114,7 @@
 	"mappingSuggested": "Pemetaan disarankan",
 	"mappingSuggestedHelpText": "Saran pemetaan berdasarkan kerangka kerja yang dimuat",
 	"mappingSuggestionTeasing": "Pemetaan sekarang disarankan! Anda dapat menggunakan filter untuk menjelajahi saran berdasarkan kerangka kerja yang dimuat.",
+	"associatedFindingsAssessments": "Tindak lanjut terkait",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
