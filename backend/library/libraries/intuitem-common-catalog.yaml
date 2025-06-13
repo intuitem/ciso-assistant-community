@@ -1,13 +1,19 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:intuitem-common-catalog
 locale: en
 ref_id: intuitem-common-catalog
 name: INTUITEM Common Catalog
 description: INTUITEM Common Catalog - Threats
 copyright: "\xA9 intuitem - 2025"
-version: 1
-publication_date: 2025-02-25
+version: 2
+publication_date: 2025-06-14
 provider: intuitem
 packager: intuitem
+translations:
+  fr:
+    name: Catalogue commun INTUITEM
+    description: Catalogue commun INTUITEM - Menaces
 objects:
   threats:
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
