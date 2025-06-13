@@ -930,6 +930,7 @@
 	"mappingSuggested": "Sugerencia de mapeo",
 	"mappingSuggestedHelpText": "Sugerencias de mapeo basadas en marcos cargados",
 	"mappingSuggestionTeasing": "¡Ahora se sugieren mapeos! Puede usar los filtros para explorar sugerencias basadas en marcos cargados.",
+	"associatedFindingsAssessments": "Seguimientos asociados",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

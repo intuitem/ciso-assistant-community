@@ -925,6 +925,7 @@
 	"mappingSuggested": "Leképezés javasolt",
 	"mappingSuggestedHelpText": "Leképezési javaslatok a betöltött keretek alapján",
 	"mappingSuggestionTeasing": "A leképezések most javasoltak! A szűrők segítségével felfedezheti a betöltött keretek alapján történő javaslatokat.",
+	"associatedFindingsAssessments": "Kapcsolódó követő értékelések",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

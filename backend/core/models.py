@@ -4556,6 +4556,14 @@ class FindingsAssessment(Assessment):
         default=Category.UNDEFINED,
     )
 
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the follow-up",
+        related_name="findings_assessments",
+        verbose_name=_("Evidences"),
+    )
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -4666,6 +4674,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         null=False,
         default=Status.UNDEFINED,
         max_length=32,
+    )
+
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the follow-up",
+        related_name="findings",
+        verbose_name=_("Evidences"),
     )
 
     class Meta:
