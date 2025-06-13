@@ -3843,6 +3843,7 @@ class ComplianceAssessment(Assessment):
             or not self.selected_implementation_groups
         ):
             return []
+
         return [
             group.get("name")
             for group in framework.implementation_groups_definition
