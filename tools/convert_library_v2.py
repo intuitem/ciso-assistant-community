@@ -882,7 +882,7 @@ def main():
     if compat_mode not in COMPATIBILITY_MODES:
         print(f"❌ [ERROR] Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}")
     
-    output_path = input_path.with_suffix(".yaml")
+    output_path = Path(input_path.stem + ".yaml")
     
     try:
         create_library(str(input_path), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
