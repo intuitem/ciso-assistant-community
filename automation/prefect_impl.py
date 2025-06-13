@@ -89,7 +89,8 @@ def transform_results(scan_output_path):
 
 @task(retries=3, log_prints=True)
 def update_audit(audit_id, prepared_data, mode="std"):
-    mode = "lax"  # "std"
+    # mode = "std" #"lax"
+    mode = "lax"
 
     decision_mapping = {
         "UNKNOWN": "not_assessed",
