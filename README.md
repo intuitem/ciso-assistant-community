@@ -207,7 +207,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
-77. Vehicle CyberSecurity Audit (VCSA) v1.1 🚘
+77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 
