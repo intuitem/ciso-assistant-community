@@ -9,6 +9,7 @@
 	const sort = handler.getSort();
 	const update = () => {
 		handler.sort(orderBy);
+		// console.log('4');
 		handler.invalidate();
 	};
 </script>

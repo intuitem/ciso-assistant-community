@@ -15,59 +15,39 @@
 	$: lastRowsPerPage = $rowsPerPage ?? 10;
 
 	const setRowsPerPage = () => {
-		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
-			localStorage.getItem('pageNumberCache') ?? '{}'
+		const paginationSettingsCache: { [key: string]: [number, number] } = JSON.parse(
+			localStorage.getItem('paginationSettingsCache') ?? '{}'
 		);
 
 		if ($rowsPerPage !== null) {
-			pageNumberCache[endpoint] = [pageNumberCache[endpoint][0], $rowsPerPage];
+			paginationSettingsCache[endpoint] = [paginationSettingsCache[endpoint][0], $rowsPerPage];
 		}
 
-		localStorage.setItem('pageNumberCache', JSON.stringify(pageNumberCache));
+		localStorage.setItem('paginationSettingsCache', JSON.stringify(paginationSettingsCache));
 
 		const itemNumber = ($pageNumber - 1) * lastRowsPerPage + 1;
 		const newPageNumber = Math.ceil(itemNumber / ($rowsPerPage ?? 10));
 		handler.setPage(newPageNumber);
+		// console.log('2');
 		handler.invalidate();
 	};
 
-	// const updatetRowsPerPage = () => {
-	// 	if ($rowsPerPage !== null) {
-	// 		const endpoint = $page.url.pathname;
-	// 		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
-	// 			localStorage.getItem('pageNumberCache') ?? '{}'
-	// 		);
-	// 		if (pageNumberCache[endpoint]) {
-	// 			pageNumberCache[endpoint] = [pageNumberCache[endpoint][0], $rowsPerPage];
-	// 			localStorage.setItem('pageNumberCache', JSON.stringify(pageNumberCache));
-	// 		}
-	// 	}
-	//
-	// 	// localStorage.setItem('pageNumberCache', JSON.stringify(pageNumberCache));
-	// 	//
-	// 	// const itemNumber = ($pageNumber - 1) * lastRowsPerPage + 1;
-	// 	// const newPageNumber = Math.ceil(itemNumber / ($rowsPerPage ?? 10));
-	// 	// handler.setPage(newPageNumber);
-	// 	// handler.invalidate();
-	// };
-	//
 	$: if ($rowsPerPage && $rowCount?.start >= $rowCount?.total) {
 		handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
 	}
 
 	onMount(() => {
-		//TODO: Add endpoint validation, rename pageNumberCache to something more generic
 		let cachedValue = 10;
-		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
-			localStorage.getItem('pageNumberCache') ?? '{}'
+		const paginationSettingsCache: { [key: string]: [number, number] } = JSON.parse(
+			localStorage.getItem('paginationSettingsCache') ?? '{}'
 		);
-		if (pageNumberCache[endpoint] !== undefined) {
-			cachedValue = Number(pageNumberCache[endpoint][1] ?? '10');
+		if (paginationSettingsCache[endpoint] !== undefined) {
+			cachedValue = Number(paginationSettingsCache[endpoint][1] ?? '10');
 		}
-		console.log(cachedValue);
 
 		if ($rowsPerPage !== cachedValue) {
 			rowsPerPage.set(cachedValue); // will trigger reactivity
+			// console.log('3');
 			handler.invalidate(); // refetch with updated rowsPerPage
 		}
 	});

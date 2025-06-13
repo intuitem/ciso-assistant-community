@@ -20,6 +20,7 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 	url.search = params.toString();
 
 	const response = await fetch(url.toString()).then((res) => res.json());
+	// console.log('Fetch:', state, url.toString());
 	state.setTotalRows(response.count);
 
 	const fieldsToUse =
