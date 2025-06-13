@@ -328,6 +328,9 @@ export const EvidenceSchema = z.object({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
+	findings: z.string().optional().array().optional(),
+	findings_assessment: z.string().optional().array().optional(),
+
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -604,6 +607,7 @@ export const fearedEventsSchema = z.object({
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
 	ebios_rm_study: z.string(),
+	folder: z.string(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().optional().array().optional()
 });
@@ -688,6 +692,7 @@ export const FindingSchema = z.object({
 	findings_assessment: z.string(),
 	severity: z.number().default(-1),
 	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
@@ -704,7 +709,8 @@ export const FindingsAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	category: z.string().default('--')
+	category: z.string().default('--'),
+	evidences: z.string().uuid().optional().array().optional()
 });
 
 export const IncidentSchema = z.object({

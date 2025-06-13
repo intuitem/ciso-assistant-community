@@ -115,6 +115,7 @@
 	"provider": "Szolgáltató",
 	"providerColon": "Szolgáltató:",
 	"domain": "Tartomány",
+	"domainSemiColon": "Tartomány:",
 	"urn": "URN",
 	"treatmentStatus": "Kockázat kezelésének módja",
 	"qualification": "Minősítés",
@@ -923,5 +924,36 @@
 	"forceSSOLoginHelpText2": "Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót.",
 	"mappingSuggested": "Leképezés javasolt",
 	"mappingSuggestedHelpText": "Leképezési javaslatok a betöltött keretek alapján",
-	"mappingSuggestionTeasing": "A leképezések most javasoltak! A szűrők segítségével felfedezheti a betöltött keretek alapján történő javaslatokat."
+	"mappingSuggestionTeasing": "A leképezések most javasoltak! A szűrők segítségével felfedezheti a betöltött keretek alapján történő javaslatokat.",
+	"associatedFindingsAssessments": "Kapcsolódó követő értékelések",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Óra",
+				"countPlural=other": "{count} Óra"
+			}
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Perc",
+				"countPlural=other": "{count} Perc"
+			}
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Nap",
+				"countPlural=other": "{count} Nap"
+			}
+		}
+	]
 }

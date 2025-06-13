@@ -9,7 +9,7 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
-    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    <a href="https://intuitem.releasedhub.com/ciso-assistant-public/roadmap/d738f2fd">Roadmap</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
@@ -29,6 +29,10 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
+<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
+
+
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
@@ -145,7 +149,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
+19. OWASP Application Security Verification Standard (ASVS) 4 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -184,7 +188,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
-58. Adobe Common Controls Framework (CCF) 🌐
+58. Adobe Common Controls Framework (CCF) v5 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
@@ -204,7 +208,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
 77. Vehicle CyberSecurity Audit (VCSA) v1.1 🚘
-78. Cisco Cloud Controls Framework (CCF) v3.0 🇺🇸
+78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 
 ### Community contributions
@@ -229,6 +233,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 18. Recommandations de sécurité relatives à IPsec pour la protection des flux réseau 🇫🇷
 19. Recommandations relatives à l'interconnexion d'un système d'information à internet 🇫🇷
 20. Guides des mécanismes cryptographiques 🇫🇷
+21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
+22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 
 <br/>
 
