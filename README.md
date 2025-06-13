@@ -131,7 +131,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2022 🌐
+1. ISO 27001:2013 & 27001:2022 🌐
 2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
@@ -207,8 +207,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
-77. Vehicle Cyber Security Audit (VCS) v1.1 🚘
+77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
+79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 
 ### Community contributions
 
