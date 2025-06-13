@@ -32,7 +32,7 @@ SCRIPT_VERSION = '2.1'
 COMPATIBILITY_MODES = {
     0: f"[v{SCRIPT_VERSION}] (DEFAULT) D'ont use any Compatibility Mode",
     1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
-    2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces \" \" are replaced with hyphen \"-\" and the URN is lower-cased)"
+    2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)"
     # Future modes can be added here with an integer key and description
 }
 
@@ -427,7 +427,10 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
         
         library_urn = library_urn_clean
         
+    convert_library_version = f"v2 ; Compat Mode: [{compat_mode}] {'{'+COMPATIBILITY_MODES[compat_mode]+'}'}"
+        
     library = {
+        "convert_library_version": convert_library_version,
         "urn": library_urn,
         "locale": library_meta.get("locale"),
         "ref_id": library_meta.get("ref_id"),
