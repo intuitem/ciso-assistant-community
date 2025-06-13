@@ -1021,7 +1021,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
-			{ field: 'findings_assessment', urlModel: 'evidences' }
+			{ field: 'findings_assessments', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }]
 	},
