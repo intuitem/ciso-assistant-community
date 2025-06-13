@@ -919,6 +919,7 @@
 	"mappingSuggested": "Sugestia mapowania",
 	"mappingSuggestedHelpText": "Sugestie mapowania oparte na załadowanych ramach",
 	"mappingSuggestionTeasing": "Mapowania są teraz sugerowane! Możesz użyć filtrów, aby eksplorować sugestie oparte na załadowanych ramach.",
+	"associatedFindingsAssessments": "Powiązane dalsze działania",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
