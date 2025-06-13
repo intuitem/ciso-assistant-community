@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:finma-2023-01
 locale: fr
 ref_id: finma-2023-01
@@ -819,7 +821,7 @@ objects:
         de:
           name: "A. \xDCbergreifendes Management der operationellen Risiken"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:22
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '22'
@@ -1256,7 +1258,7 @@ objects:
             \ des Zielzustands. Bei Bedarf werden die Risikotoleranz angepasst und\
             \ Kontroll- und Minderungsmassnahmen implementiert."
     - urn: urn:intuitem:risk:req_node:finma-2023-01:33
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '33'
@@ -1280,8 +1282,8 @@ objects:
             \ sind folgende weiteren Instrumente und Methoden anzuwenden:"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:34
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:33
       ref_id: '34'
       description: "a. la collecte et l\u2019analyse syst\xE9matiques des donn\xE9\
         es de pertes internes et des \xE9v\xE9nements externes pertinents li\xE9s\
@@ -1299,8 +1301,8 @@ objects:
             sind;
     - urn: urn:intuitem:risk:req_node:finma-2023-01:35
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:33
       ref_id: '35'
       description: "b. les indicateurs de risque et de contr\xF4le pour la surveillance\
         \ des risques op\xE9rationnels et l\u2019identification rapide des hausses\
@@ -1319,8 +1321,8 @@ objects:
             \ Risikoerh\xF6hungen;"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:36
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:33
       ref_id: '36'
       description: "c. les analyses de sc\xE9nario et/ou l\u2019estimation du potentiel\
         \ de perte compte tenu ou vis\xE0-vis des fonds propres minimaux pour les\
@@ -1339,8 +1341,8 @@ objects:
             \ f\xFCr operationelle Risiken;"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:37
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:33
       ref_id: '37'
       description: "d. les analyses comparatives (read across), comme les analyses\
         \ de pertinence des r\xE9sultats d\u2019audit pour d\u2019autres domaines\
@@ -1492,7 +1494,7 @@ objects:
             t der entsprechenden Schl\xFCsselkontrollen und zu wesentlichen internen\
             \ und externen Ereignissen im Zusammenhang mit diesen Risiken."
     - urn: urn:intuitem:risk:req_node:finma-2023-01:41
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
       ref_id: '41'
@@ -1510,8 +1512,8 @@ objects:
             nzend folgende Informationen:"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:42
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:41
       ref_id: '42'
       description: "\u2022 les facteurs externes pertinents selon la note de bas de\
         \ page 9,"
@@ -1525,8 +1527,8 @@ objects:
           description: "\u2022 relevante, externe Faktoren nach Fussnote 9,"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:43
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:41
       ref_id: '43'
       description: "\u2022 la vue d\u2019ensemble r\xE9capitulative sur l\u2019efficacit\xE9\
         \ des contr\xF4les cl\xE9s selon le Cm 31,"
@@ -1542,8 +1544,8 @@ objects:
             t der Schl\xFCsselkontrollen nach Rz 31,"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:44
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:41
       ref_id: '44'
       description: "\u2022 les risques op\xE9rationnels \xE9mergents,"
       translations:
@@ -1555,8 +1557,8 @@ objects:
           description: "\u2022 neu aufkommende operationelle Risiken,"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:45
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:1
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:41
       ref_id: '45'
       description: "\u2022 les r\xE9sultats d\xE9coulant de l\u2019application des\
         \ instruments et des m\xE9thodes suppl\xE9mentaires selon le Cm 33."
@@ -2077,8 +2079,8 @@ objects:
             \ zu entwickeln und zu verbessern:"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:63
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:62
       ref_id: '63'
       description: "a. identification des menaces potentielles li\xE9es aux cyberattaques[14]\
         \ sp\xE9cifiques \xE0 l\u2019\xE9tablissement et \xE9valuation des cons\xE9\
@@ -2123,8 +2125,8 @@ objects:
             \ von Schutzmassnahmen durch externe oder interne Angreifende stattfinden."
     - urn: urn:intuitem:risk:req_node:finma-2023-01:64
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:62
       ref_id: '64'
       description: "b. protection des composantes TIC r\xE9pertori\xE9es et des donn\xE9\
         es \xE9lectroniques critiques contre les cyberattaques par l\u2019impl\xE9\
@@ -2149,8 +2151,8 @@ objects:
             \ Integrit\xE4t und Verf\xFCgbarkeit;"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:65
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:62
       ref_id: '65'
       description: "c. enregistrement et d\xE9tection rapides des cyberattaques sur\
         \ la base d\u2019un processus de surveillance syst\xE9matique et constant\
@@ -2172,8 +2174,8 @@ objects:
             \ kritischen Daten;"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:66
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:62
       ref_id: '66'
       description: "d. r\xE9action aux vuln\xE9rabilit\xE9s et aux cyberattaques identifi\xE9\
         es par le d\xE9veloppement et l\u2019impl\xE9mentation de processus appropri\xE9\
@@ -2196,8 +2198,8 @@ objects:
             \ und"
     - urn: urn:intuitem:risk:req_node:finma-2023-01:67
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:iv.-gestion-des-risques-operationnels:3
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:finma-2023-01:62
       ref_id: '67'
       description: "e. garantie d\u2019un r\xE9tablissement rapide de la marche ordinaire\
         \ des affaires apr\xE8s des cyberattaques, gr\xE2ce \xE0 des mesures appropri\xE9\
