@@ -14,7 +14,6 @@ Note: the urn_id column can be defined to force an urn suffix. This can be usefu
     
 """
 
-from ast import Nonlocal
 import sys
 import re
 import yaml
@@ -23,11 +22,13 @@ import argparse
 import unicodedata
 import openpyxl
 from pathlib import Path
+from collections import Counter
 
 SCRIPT_VERSION = '2.1'
 
 # --- Compatibility modes definition ------------------------------------------
 # NOTE: No compatibility mode includes another (unless otherwise stated)
+# NOTE: So far, no compatibility mode has an impact on the mapping creation process.
 
 COMPATIBILITY_MODES = {
     0: f"[v{SCRIPT_VERSION}] (DEFAULT) D'ont use any Compatibility Mode",
@@ -902,12 +903,88 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
             requirement_mapping_set_revert["requirement_mappings"] = requirement_mappings_revert
             library["objects"]["requirement_mapping_sets"] = [requirement_mapping_set, requirement_mapping_set_revert]
 
+            # --- Validate source_node_id and target_node_id from mappings against Excel sheets ---
+            # NOTE: This code simply checks the validity of the "source_node_id" and "target_node_id".
+            #       It doesn't remove them from the created mapping if they aren't found in the Excel file.
+
+            source_ids = set()
+            target_ids = set()
+            source_sheet_available = "source" in sheets
+            target_sheet_available = "target" in sheets
+
+            if source_sheet_available:
+                source_sheet = wb["source"]
+                source_header = [cell.value for cell in source_sheet[1]]
+                if "node_id" in source_header:
+                    idx = source_header.index("node_id")
+                    for row in source_sheet.iter_rows(min_row=2):
+                        if idx < len(row) and row[idx].value:
+                            source_ids.add(str(row[idx].value).strip())
+                else:
+                    source_sheet_available = False
+                    if verbose:
+                        print("💬 ℹ️  \"node_id\" in \"source\" sheet header not found")
+            else:
+                if verbose:
+                    print("💬 ℹ️  Sheet \"source\" not found")
+
+            if target_sheet_available:
+                target_sheet = wb["target"]
+                target_header = [cell.value for cell in target_sheet[1]]
+                if "node_id" in target_header:
+                    idx = target_header.index("node_id")
+                    for row in target_sheet.iter_rows(min_row=2):
+                        if idx < len(row) and row[idx].value:
+                            target_ids.add(str(row[idx].value).strip())
+                else:
+                    target_sheet_available = False
+                    if verbose:
+                        print("💬 ℹ️  \"node_id\" in \"target\" sheet header not found")
+                        
+            else:
+                if verbose:
+                    print("💬 ℹ️  Sheet \"target\" not found")
+
+            # Collect all used source/target IDs from mappings (with duplicates)
+            used_source_ids = [m["source_requirement_urn"].split(":")[-1] for m in requirement_mappings]
+            used_target_ids = [m["target_requirement_urn"].split(":")[-1] for m in requirement_mappings]
+
+            source_missing_counts = Counter(id for id in used_source_ids if source_sheet_available and id not in source_ids)
+            target_missing_counts = Counter(id for id in used_target_ids if target_sheet_available and id not in target_ids)
+
+            # Print all warnings first (one per ID)
+            if source_sheet_available:
+                for sid in source_missing_counts:
+                    print(f"⚠️  [WARNING] source_node_id \"{sid}\" not found in sheet \"source\"")
+            if target_sheet_available:
+                for tid in target_missing_counts:
+                    print(f"⚠️  [WARNING] target_node_id \"{tid}\" not found in sheet \"target\"")
+
+            # Then print duplicate counts (only for missing IDs)
+            if source_sheet_available:
+                for sid, count in source_missing_counts.items():
+                    if count > 1:
+                        print(f"🔁 [DUPLICATE] source_node_id \"{sid}\" appears {count} times in mappings")
+            if target_sheet_available:
+                for tid, count in target_missing_counts.items():
+                    if count > 1:
+                        print(f"🔁 [DUPLICATE] target_node_id \"{tid}\" appears {count} times in mappings")
+
+            # Final summary
+            total_missing_sources = sum(source_missing_counts.values())
+            total_missing_targets = sum(target_missing_counts.values())
+            if total_missing_sources or total_missing_targets:
+                print(f"⚠️  [SUMMARY] Missing usage count - Source: {total_missing_sources}, Target: {total_missing_targets}")
+                print(f"ℹ️  Please note that these node IDs have been added to the mapping anyway.\
+                    \n   If you want to correct them, please do so in your Excel file.")
+
         else:
             if obj_type not in ["answers", "implementation_groups", "scores", "urn_prefix"]:
                 print("type not handled:", obj_type)
 
     # Step 6: Export to YAML
-    print(f"✅ Writing YAML to {output_file}")
+    print(f"✅ YAML saved as: \"{output_file}\"")
+    print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain behaviors.")
     with open(output_file, "w", encoding="utf-8") as f:
         yaml.dump(library, f, sort_keys=False, allow_unicode=False)
 
@@ -924,11 +1001,13 @@ def main():
     input_path = Path(args.input_file)
     if not input_path.exists():
         print(f"❌ [ERROR] File not found: {input_path}")
+        sys.exit(1)
     
     # Check compat mode
     compat_mode = args.compat if args.compat else 0
     if compat_mode not in COMPATIBILITY_MODES:
         print(f"❌ [ERROR] Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}")
+        sys.exit(1)
     
     output_path = Path(input_path.stem + ".yaml")
     
