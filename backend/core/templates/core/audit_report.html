@@ -39,16 +39,18 @@
                 {% endfor %}
             </ul>
         </div>
-        {% if compliance_assessment.get_selected_implementation_groups %}
-          <div>
-              <p class='font-semibold'>{% trans "Selected implementation groups" %}</p>
-              <ul>
-                  {% for group in compliance_assessment.get_selected_implementation_groups %}
-                      <li>{{ group }}</li>
-                  {% endfor %}
-              </ul>
-          </div>
-        {% endif %}
+        {% with selected_groups=compliance_assessment.get_selected_implementation_groups %}
+          {% if selected_groups %}
+            <div>
+                <p class='font-semibold'>{% trans "Selected implementation groups" %}</p>
+                <ul>
+                    {% for group in selected_groups %}
+                        <li>{{ group }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+          {% endif %}
+        {% endwith %}
     </div>
 
     {% for node in top_level_nodes %}
