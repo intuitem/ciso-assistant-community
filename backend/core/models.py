@@ -3702,18 +3702,16 @@ class ComplianceAssessment(Assessment):
 
     def get_selected_implementation_groups(self):
         framework = self.framework
-        igs_definition = framework.implementation_groups_definition
-        selected_ig = self.selected_implementation_groups
-
-        if not igs_definition and not selected_ig:
+        if (
+            not framework.implementation_groups_definition
+            or not self.selected_implementation_groups
+        ):
             return []
 
-        if not selected_ig:  # no selected_ig but some ig_definition -> means nothing is selected so we want every ig
-            return [group.get("name") for group in igs_definition]
         return [
             group.get("name")
-            for group in igs_definition
-            if group.get("ref_id") in selected_ig
+            for group in framework.implementation_groups_definition
+            if group.get("ref_id") in self.selected_implementation_groups
         ]
 
     def get_requirement_assessments(self, include_non_assessable: bool):
