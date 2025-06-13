@@ -14,20 +14,25 @@ Note: the urn_id column can be defined to force an urn suffix. This can be usefu
     
 """
 
-import argparse
-from pathlib import Path
+from ast import Nonlocal
 import sys
-import openpyxl
 import re
 import yaml
 import datetime
+import argparse
 import unicodedata
+import openpyxl
+from pathlib import Path
 
+SCRIPT_VERSION = '2.1'
 
 # --- Compatibility modes definition ------------------------------------------
+# NOTE: No compatibility mode includes another (unless otherwise stated)
+
 COMPATIBILITY_MODES = {
-    0: "(DEFAULT) D'ont use any Compatibility Mode",
-    1: "Use legacy URN fallback logic (for requirements without ref_id)",
+    0: f"[v{SCRIPT_VERSION}] (DEFAULT) D'ont use any Compatibility Mode",
+    1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
+    2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces \" \" are replaced with hyphen \"-\" and the URN is lower-cased)"
     # Future modes can be added here with an integer key and description
 }
 
@@ -66,18 +71,27 @@ def parse_key_value_sheet(sheet):
     return result
 
 # --- URN cleaning utility -----------------------------------------------------
-def clean_suffix(value: str):
+def clean_urn_suffix(value: str, compat_mode: int = 0):
     """
     Cleans a URN suffix by:
-    - Removing accents using Unicode normalization,
-    - Converting to lowercase and replacing spaces with hyphens,
-    - Replacing any disallowed characters with an underscore.
+        - Removing accents using Unicode normalization,
+        - Converting to lowercase and replacing spaces with hyphens,
+        - Replacing any disallowed characters with an underscore.
+    
+    Compatibility modes :
+        - 0 : Default behavior
+        - 1,2 : Replace only spaces " " with hyphens "-" sets text in lower case.
     """
-    # Normalize to separate characters from their accents (e.g., é → e + ́)
-    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    value = value.lower().replace(" ", "-")
-    # Keep only allowed characters for a URN suffix
-    value = re.sub(r"[^a-z0-9_\-\.\[\]\(\):]", "_", value)
+    # [+] Compat check
+    if 1 <= compat_mode <= 2:
+        value = value.lower().replace(" ", "-")
+    else:   # Default behavior
+        # Normalize to separate characters from their accents (e.g., é → e + ́)
+        value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+        value = value.lower().replace(" ", "-")
+        # Keep only allowed characters for a URN suffix
+        value = re.sub(r"[^a-z0-9_\-\.\[\]\(\):]", "_", value)
+        
     return value
 
 # --- urn expansion ------------------------------------------------------------
@@ -109,8 +123,9 @@ def expand_urns_from_prefixed_list(field_value: str, prefix_to_urn: str, compat_
         parts = element.split(":")
         if len(parts) >= 2:
             prefix = parts[0]
-            raw_suffix = ":".join(parts[1:]).strip()            
-            cleaned_suffix = clean_suffix(raw_suffix)
+            raw_suffix = ":".join(parts[1:]).strip()
+            # [+] Compat check
+            cleaned_suffix = clean_urn_suffix(raw_suffix, compat_mode=compat_mode)
             base = prefix_to_urn.get(prefix)
 
             if base:
@@ -398,15 +413,22 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
         lib_date = lib_date.date()
 
     # Step 3: Build library with fixed key order
+    library_urn = None
     
-    # Clean URN
-    library_urn_raw = library_meta.get("urn")
-    library_urn_clean = clean_suffix(library_urn_raw)
-    if library_urn_raw != library_urn_clean:
-        print(f"⚠️  [WARNING] (create_library) Cleaned library URN '{library_urn_raw}' → '{library_urn_clean}'")
-    
+    # [+] Compat check
+    if 1 <= compat_mode <= 2:
+        library_urn = library_meta.get("urn")
+    else: # Default behavior
+        # Clean URN
+        library_urn_raw = library_meta.get("urn")
+        library_urn_clean = clean_urn_suffix(library_urn_raw, compat_mode=0)
+        if library_urn_raw != library_urn_clean:
+            print(f"⚠️  [WARNING] (create_library) Cleaned library URN '{library_urn_raw}' → '{library_urn_clean}'")
+        
+        library_urn = library_urn_clean
+        
     library = {
-        "urn": library_urn_clean,
+        "urn": library_urn,
         "locale": library_meta.get("locale"),
         "ref_id": library_meta.get("ref_id"),
         "name": library_meta.get("name"),
@@ -499,18 +521,28 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                 if not any(cell.value for cell in row):
                     continue
                 data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+                default_ref_id = None
+                ref_id_for_urn = None
                 
-                ref_id_raw = str(data.get("ref_id", "")).strip()
-                ref_id_clean = clean_suffix(ref_id_raw)
-                if verbose and ref_id_raw != ref_id_clean:
-                    print(f"💬 ⚠️  [WARNING] (reference_controls) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'")
+                # [+] Compat check
+                if 1 <= compat_mode <= 2:
+                    default_ref_id = str(data.get("ref_id", "")).strip()
+                    ref_id_for_urn = default_ref_id.lower()
+                else:   # Default behavior
+                    ref_id_raw = str(data.get("ref_id", "")).strip()
+                    ref_id_clean = clean_urn_suffix(ref_id_raw, compat_mode=0)
+                    if verbose and ref_id_raw != ref_id_clean:
+                        print(f"💬 ⚠️  [WARNING] (reference_controls) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'")
                     
-                if not ref_id_raw:
+                    default_ref_id = ref_id_raw
+                    ref_id_for_urn = ref_id_clean
+                    
+                if not default_ref_id:
                     continue
                 
                 entry = {
-                    "urn": f"{base_urn}:{ref_id_clean}",
-                    "ref_id": ref_id_raw
+                    "urn": f"{base_urn}:{ref_id_for_urn}",
+                    "ref_id": default_ref_id
                 }
                 
                 if "name" in data and data["name"]:
@@ -715,11 +747,12 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                         else:
                             ref_id_urn = ref_id.lower().replace(" ", "-") if ref_id else f"node{counter - counter_fix}"
                         urn = f"{base_urn}:{ref_id_urn}"
-                    else:                   # If no compat mode (compat_mode = 0) 
+                    else:                   # If compat mode = {0,2} 
                         if data.get("urn_id"):
                             urn = f"{base_urn}:{data.get('urn_id').strip()}"
                         elif ref_id:
-                            ref_id_clean = clean_suffix(ref_id)
+                             # [+] Compat check
+                            ref_id_clean = clean_urn_suffix(ref_id, compat_mode=compat_mode)
                             if verbose and ref_id != ref_id_clean:
                                 print(f"💬 ⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'")
                             urn = f"{base_urn}:{ref_id_clean}"
@@ -729,7 +762,8 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                             if p:
                                 urn = f"{p}:{c}" if p else f"{base_urn}:{c}"
                             elif name:
-                                name_clean = clean_suffix(name)
+                                 # [+] Compat check
+                                name_clean = clean_urn_suffix(name, compat_mode=compat_mode)
                                 if verbose and name != name_clean:
                                     print(f"💬 ⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'")
                                 urn = f"{base_urn}:{name_clean}"
@@ -835,8 +869,10 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                 data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
                 source_node_id_raw = str(data.get("source_node_id", "")).strip()
                 target_node_id_raw = str(data.get("target_node_id", "")).strip()
-                source_node_id = clean_suffix(source_node_id_raw)
-                target_node_id = clean_suffix(target_node_id_raw)
+                
+                # [+] Compat mode set to "2" so it can be compatible with every version of mappings >=v2 without having to choose a specific compat mode
+                source_node_id = clean_urn_suffix(source_node_id_raw, compat_mode=2)
+                target_node_id = clean_urn_suffix(target_node_id_raw, compat_mode=2)
                 if verbose and source_node_id_raw != source_node_id:
                     print(f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned source_node_id '{source_node_id_raw}' → '{source_node_id}'")
                 if verbose and target_node_id_raw != target_node_id:
