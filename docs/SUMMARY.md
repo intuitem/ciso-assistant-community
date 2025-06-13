@@ -81,4 +81,5 @@
 
 ## Presentations
 
+* [GRC Summit - Luxembourg 2025](presentations/grc-summit-luxembourg-2025.md)
 * [Prowler x CISO Assistant](presentations/prowler-x-ciso-assistant.md)
