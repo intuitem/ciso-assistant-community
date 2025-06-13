@@ -21,7 +21,7 @@ export const load: PageServerLoad = async (event) => {
 	// Return the original data with the metrics added
 	return {
 		...detailData,
-		findings_metrics: metricsData
+		metrics: metricsData
 	};
 };
 export const actions: Actions = {

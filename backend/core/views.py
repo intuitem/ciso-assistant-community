@@ -4064,7 +4064,8 @@ class CampaignViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
-        return Response({"data": ""})
+        campaign = self.get_object()
+        return Response(campaign.metrics())
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
@@ -4072,7 +4073,7 @@ class CampaignViewSet(BaseModelViewSet):
         framework = serializer.instance.framework
         for perimeter in campaign.perimeters.all():
             compliance_assessment = ComplianceAssessment.objects.create(
-                name=f"{campaign.name}_{perimeter.name}_{str(perimeter.id)[:5]}",
+                name=f"{campaign.name} - {perimeter.name}",
                 campaign=campaign,
                 perimeter=perimeter,
                 framework=framework,

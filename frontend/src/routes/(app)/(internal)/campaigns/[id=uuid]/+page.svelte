@@ -18,5 +18,7 @@
 		>
 	</div>
 
-	<div slot="widgets" class="h-full flex flex-col space-y-4"></div>
+	<div slot="widgets" class="h-full flex flex-col space-y-4">
+		{JSON.stringify(data.metrics, null, 4)}
+	</div>
 </DetailView>

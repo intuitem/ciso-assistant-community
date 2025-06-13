@@ -5,6 +5,7 @@ import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Union, List
+import statistics
 
 from icecream import ic
 from auditlog.registry import auditlog
@@ -3627,7 +3628,18 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = "Campaigns"
 
     def metrics(self):
-        ic("toto")
+        avg_progress = statistics.mean(
+            [
+                ca.get_progress()
+                for ca in ComplianceAssessment.objects.filter(campaign=self)
+            ]
+        )
+        days_remaining = "--"
+        if self.due_date:
+            today = date.today()
+            days_remaining = (self.due_date - today).days
+        data = {"avg_progress": avg_progress, "days_remaining": days_remaining}
+        return data
 
 
 class ComplianceAssessment(Assessment):
