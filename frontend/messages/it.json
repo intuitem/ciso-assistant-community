@@ -1304,6 +1304,7 @@
 	"mappingSuggested": "Mappatura suggerita",
 	"mappingSuggestedHelpText": "Suggerimenti di mappatura basati sui framework caricati",
 	"mappingSuggestionTeasing": "Le mappature sono ora suggerite! Puoi usare i filtri per esplorare i suggerimenti basati sui framework caricati.",
+	"associatedFindingsAssessments": "Follow-up associati",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

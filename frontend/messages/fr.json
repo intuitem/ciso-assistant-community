@@ -1616,6 +1616,7 @@
 	"mappingSuggested": "Suggestion de mapping",
 	"mappingSuggestedHelpText": "Suggestions de mapping basées sur les référentiels chargés",
 	"mappingSuggestionTeasing": "Les mappings sont maintenant suggérés ! Vous pouvez utiliser les filtres pour explorer les suggestions basées sur les référentiels chargés.",
+	"associatedFindingsAssessments": "Suivis associés",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

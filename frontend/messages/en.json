@@ -1635,6 +1635,7 @@
 	"mappingSuggestionTeasing": "Mappings are now suggested! You can use the filters to explore suggestions based on loaded frameworks.",
 	"errorCreatingPersonalAccessToken": "An error occurred while creating the personal access token.",
 	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user.",
+	"associatedFindingsAssessments": "Associated follow-ups",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
