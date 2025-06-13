@@ -116,7 +116,7 @@ def expand_urns_from_prefixed_list(field_value: str, prefix_to_urn: str, compat_
             if base:
                 # Show a warning if the suffix had to be cleaned/renamed
                 if raw_suffix != cleaned_suffix and verbose:
-                    print(f"⚠️  [WARNING] (expand_urns_from_prefixed_list) URN suffix renamed for '{prefix}:{raw_suffix}' → '{base}:{cleaned_suffix}'")
+                    print(f"💬 ⚠️  [WARNING] (expand_urns_from_prefixed_list) URN suffix renamed for '{prefix}:{raw_suffix}' → '{base}:{cleaned_suffix}'")
                 result.append(f"{base}:{cleaned_suffix}")
             else:
                 print(f"⚠️  [WARNING] (expand_urns_from_prefixed_list) Unknown prefix '{prefix}' for element '{element}' — skipped")
@@ -503,7 +503,7 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                 ref_id_raw = str(data.get("ref_id", "")).strip()
                 ref_id_clean = clean_suffix(ref_id_raw)
                 if verbose and ref_id_raw != ref_id_clean:
-                    print(f"⚠️  [WARNING] (reference_controls) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'")
+                    print(f"💬 ⚠️  [WARNING] (reference_controls) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'")
                     
                 if not ref_id_raw:
                     continue
@@ -604,6 +604,9 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                             "type": answer_type,
                             "choices": choices
                         }
+            else:
+                if verbose:
+                    print(f"💬 ℹ️  No \"Answers Definition\" found")
 
             framework = {
                 "urn": meta.get("urn"),
@@ -615,6 +618,9 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
             translations = extract_translations_from_metadata(meta, "framework")
             if translations:
                 framework["translations"] = translations
+            else:
+                if verbose:
+                    print(f"💬 ℹ️  No \"Translation\" found")
 
             if "min_score" in meta:
                 framework["min_score"] = int(meta["min_score"])
@@ -643,6 +649,9 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                         score_entry["translations"] = translations
                     score_defs.append(score_entry)
                 framework["scores_definition"] = score_defs
+            else:
+                if verbose:
+                    print(f"💬 ℹ️  No \"Score Definition\" found")
 
             ig_name = meta.get("implementation_groups_definition")
             if ig_name and ig_name in object_blocks:
@@ -712,7 +721,7 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                         elif ref_id:
                             ref_id_clean = clean_suffix(ref_id)
                             if verbose and ref_id != ref_id_clean:
-                                print(f"⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'")
+                                print(f"💬 ⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'")
                             urn = f"{base_urn}:{ref_id_clean}"
                         else:
                             p = parent_for_depth.get(depth)
@@ -722,7 +731,7 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                             elif name:
                                 name_clean = clean_suffix(name)
                                 if verbose and name != name_clean:
-                                    print(f"⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'")
+                                    print(f"💬 ⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'")
                                 urn = f"{base_urn}:{name_clean}"
                             else:
                                 urn = f"{base_urn}:node{c}"
@@ -829,9 +838,9 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                 source_node_id = clean_suffix(source_node_id_raw)
                 target_node_id = clean_suffix(target_node_id_raw)
                 if verbose and source_node_id_raw != source_node_id:
-                    print(f"⚠️  [WARNING] (requirement_mapping_set) Cleaned source_node_id '{source_node_id_raw}' → '{source_node_id}'")
+                    print(f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned source_node_id '{source_node_id_raw}' → '{source_node_id}'")
                 if verbose and target_node_id_raw != target_node_id:
-                    print(f"⚠️  [WARNING] (requirement_mapping_set) Cleaned target_node_id '{target_node_id_raw}' → '{target_node_id}'")
+                    print(f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned target_node_id '{target_node_id_raw}' → '{target_node_id}'")
                 entry = {
                     "source_requirement_urn": source_node_base_urn + ":" + source_node_id,
                     "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
@@ -870,7 +879,7 @@ def main():
     parser.add_argument("input_file", type=str, help="Input Excel file (v2 format)")
     parser.add_argument("-c", "--compat", type=int, choices=COMPATIBILITY_MODES.keys(),
                         help="Compatibility mode number:\n    " + "\n    ".join(f"{k} = {v}" for k,v in COMPATIBILITY_MODES.items()))
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output for URN transformations")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.")
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
@@ -888,6 +897,7 @@ def main():
         create_library(str(input_path), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
     except Exception as e:
         print(f"❌ [ERROR] {e}")
+        print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
         sys.exit(1)
 
 if __name__ == "__main__":
