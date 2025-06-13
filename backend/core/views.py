@@ -4057,7 +4057,14 @@ class CampaignViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
-        return Response({})
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Campaign
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        return Response({"data": ""})
 
     def perform_create(self, serializer):
         super().perform_create(serializer)

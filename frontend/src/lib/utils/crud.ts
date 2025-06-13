@@ -1117,6 +1117,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
 			{ field: 'campaigns', urlModel: 'perimeters', disableAddDeleteButtons: true }
 		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'status' },
+			{ field: 'start_date' },
+			{ field: 'due_date' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
 		filters: [
 			{ field: 'status' },
 			{ field: 'framework' },

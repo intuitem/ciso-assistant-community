@@ -3627,7 +3627,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = "Campaigns"
 
     def metrics(self):
-        pass
+        ic("toto")
 
 
 class ComplianceAssessment(Assessment):
