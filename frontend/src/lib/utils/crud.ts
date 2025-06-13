@@ -165,7 +165,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'entity-assessments' },
 			{ field: 'perimeters', urlModel: 'campaigns' }
 		],
-		filters: [{ field: 'lc_status' }, { field: 'folder' }, {field: 'campaigns'}]
+		filters: [{ field: 'lc_status' }, { field: 'folder' }, { field: 'campaigns' }]
 	},
 	'risk-matrices': {
 		name: 'riskmatrix',
