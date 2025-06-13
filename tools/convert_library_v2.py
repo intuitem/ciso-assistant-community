@@ -16,11 +16,20 @@ Note: the urn_id column can be defined to force an urn suffix. This can be usefu
 
 import argparse
 from pathlib import Path
+import sys
 import openpyxl
 import re
 import yaml
 import datetime
 import unicodedata
+
+
+# --- Compatibility modes definition ------------------------------------------
+COMPATIBILITY_MODES = {
+    0: "(DEFAULT) D'ont use any Compatibility Mode",
+    1: "Use legacy URN fallback logic (for requirements without ref_id)",
+    # Future modes can be added here with an integer key and description
+}
 
 # --- Translation helpers ------------------------------------------------------
 
@@ -73,7 +82,7 @@ def clean_suffix(value: str):
 
 # --- urn expansion ------------------------------------------------------------
 
-def expand_urns_from_prefixed_list(field_value: str, prefix_to_urn: str, verbose: bool = False):
+def expand_urns_from_prefixed_list(field_value: str, prefix_to_urn: str, compat_mode: int = 0, verbose: bool = False):
     """
     Convert a prefixed list like 'abc:xyz, def:uvw' into a list of full URNs,
     using a prefix mapping. Fully qualified URNs (starting with 'urn:') are left untouched.
@@ -362,7 +371,7 @@ def revert_relationship(relation: str):
 
 # --- Main logic ---------------------------------------------------------------
 
-def create_library(input_file: str, output_file: str, compat: bool = False, verbose : bool = False):
+def create_library(input_file: str, output_file: str, compat_mode: int = 0, verbose : bool = False):
     wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}
@@ -564,7 +573,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
             answers_block_name = meta.get("answers_definition")
             if answers_block_name:
                 if answers_block_name not in object_blocks:
-                    raise ValueError(f"❌ Missing answers sheet: '{answers_block_name}'")
+                    raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
 
                 answers_sheet = object_blocks[answers_block_name]["content_sheet"]
                 rows = list(answers_sheet.iter_rows())
@@ -689,7 +698,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
                         raise ValueError(f"Invalid depth jump from {previous_depth} to {depth} at row {counter}")
 
                     # calculate urn
-                    if compat:
+                    if compat_mode == 1:    # Use legacy URN fallback logic (for requirements without ref_id)
                         skip_count = str(data.get("skip_count", "")).strip().lower() in ("1", "true", "yes", "x")
                         if skip_count:
                             counter_fix += 1
@@ -697,7 +706,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
                         else:
                             ref_id_urn = ref_id.lower().replace(" ", "-") if ref_id else f"node{counter - counter_fix}"
                         urn = f"{base_urn}:{ref_id_urn}"
-                    else:
+                    else:                   # If no compat mode (compat_mode = 0) 
                         if data.get("urn_id"):
                             urn = f"{base_urn}:{data.get('urn_id').strip()}"
                         elif ref_id:
@@ -743,11 +752,11 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
                             s.strip() for s in str(data["implementation_groups"]).split(",")
                         ]
                     if "threats" in data and data["threats"]:
-                        threats = expand_urns_from_prefixed_list(data["threats"], prefix_to_urn, verbose=verbose)
+                        threats = expand_urns_from_prefixed_list(data["threats"], prefix_to_urn, compat_mode=compat_mode, verbose=verbose)
                         if threats:
                             node["threats"] = threats
                     if "reference_controls" in data and data["reference_controls"]:
-                        rc = expand_urns_from_prefixed_list(data["reference_controls"], prefix_to_urn, verbose=verbose)
+                        rc = expand_urns_from_prefixed_list(data["reference_controls"], prefix_to_urn, compat_mode=compat_mode, verbose=verbose)
                         if rc:
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
@@ -857,17 +866,29 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
 # --- CLI interface ------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Create a YAML library from a v2 Excel file.")
+    parser = argparse.ArgumentParser(description="Create a YAML library from a v2 Excel file.", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("input_file", type=str, help="Input Excel file (v2 format)")
-    parser.add_argument("--compat", action="store_true", help="Use legacy URN fallback generation logic")
+    parser.add_argument("-c", "--compat", type=int, choices=COMPATIBILITY_MODES.keys(),
+                        help="Compatibility mode number:\n    " + "\n    ".join(f"{k} = {v}" for k,v in COMPATIBILITY_MODES.items()))
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output for URN transformations")
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
     if not input_path.exists():
-        raise FileNotFoundError(f"File not found: {input_path}")
+        print(f"❌ [ERROR] File not found: {input_path}")
+    
+    # Check compat mode
+    compat_mode = args.compat if args.compat else 0
+    if compat_mode not in COMPATIBILITY_MODES:
+        print(f"❌ [ERROR] Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}")
+    
     output_path = input_path.with_suffix(".yaml")
-    create_library(str(input_path), str(output_path), compat=args.compat, verbose=args.verbose)
+    
+    try:
+        create_library(str(input_path), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
+    except Exception as e:
+        print(f"❌ [ERROR] {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
