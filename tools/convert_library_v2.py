@@ -695,10 +695,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False, verb
                             counter_fix += 1
                             ref_id_urn = f"node{counter - counter_fix}-{counter_fix}"
                         else:
-                            ref_id_urn_raw = ref_id if ref_id else f"node{counter - counter_fix}"
-                            ref_id_urn = clean_suffix(ref_id_urn_raw)
-                            if verbose and ref_id != ref_id_urn:
-                                print(f"⚠️  [WARNING] (calculate urn [compat]) Cleaned fallback ref_id (for use in URN) '{ref_id}' → '{ref_id_urn}'")
+                            ref_id_urn = ref_id.lower().replace(" ", "-") if ref_id else f"node{counter - counter_fix}"
                         urn = f"{base_urn}:{ref_id_urn}"
                     else:
                         if data.get("urn_id"):
