@@ -16,15 +16,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--test',
-            action='store_true',
-            help='Utilise des données de test simulées (1000 frameworks, pivots, etc.)'
+            "--test",
+            action="store_true",
+            help="Utilise des données de test simulées (1000 frameworks, pivots, etc.)",
         )
         parser.add_argument(
-            '--depth',
+            "--depth",
             type=int,
             default=None,
-            help='Profondeur maximale des chemins à explorer (optionnel)'
+            help="Profondeur maximale des chemins à explorer (optionnel)",
         )
 
     def all_paths_from(self, source_urn, max_depth=None):
@@ -57,7 +57,9 @@ class Command(BaseCommand):
                 next_length = length + 1
 
                 # added if never seen, or we explore a new minimal length to this node
-                if neighbor not in shortest_lengths or next_length <= min(shortest_lengths[neighbor]):
+                if neighbor not in shortest_lengths or next_length <= min(
+                    shortest_lengths[neighbor]
+                ):
                     shortest_lengths[neighbor].add(next_length)
                     queue.append((path + [neighbor], visited | {neighbor}))
 
@@ -93,13 +95,17 @@ class Command(BaseCommand):
                     continue
 
                 next_length = len(path) + 1
-                if neighbor not in shortest_lengths or next_length <= min(shortest_lengths[neighbor]):
+                if neighbor not in shortest_lengths or next_length <= min(
+                    shortest_lengths[neighbor]
+                ):
                     shortest_lengths[neighbor].add(next_length)
                     queue.append((path + [neighbor], visited | {neighbor}))
 
         return found_paths
 
-    def best_mapping_results(self, source_audit_results, source_urn, dest_urn, max_depth=None):
+    def best_mapping_results(
+        self, source_audit_results, source_urn, dest_urn, max_depth=None
+    ):
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
         results = {}
         best_path = []
@@ -124,7 +130,6 @@ class Command(BaseCommand):
 
         return results, best_path
 
-
     def load_audit_results(self, audit):
         all_ra = audit.get_requirement_assessments(include_non_assessable=False)
         audit_results = {}
@@ -142,27 +147,28 @@ class Command(BaseCommand):
         if not source_audit_results:
             return {}
         target_audit_results = {}
-        for mapping in rms['requirement_mappings']:
+        for mapping in rms["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
             relationship = mapping["relationship"]
-            if relationship in ('equal', 'superset'):
+            if relationship in ("equal", "superset"):
                 if src in source_audit_results:
                     target_audit_results[dst] = source_audit_results[src]
-            elif relationship in ('subset', 'intersect'):
+            elif relationship in ("subset", "intersect"):
                 if src in source_audit_results:
                     r = source_audit_results[src]
-                    if r in ('not_assessed', 'non_compliant'):
+                    if r in ("not_assessed", "non_compliant"):
                         target_audit_results[dst] = r
-                    elif r in ('compliant', 'partially_compliant'):
-                        target_audit_results[dst] = 'partially_compliant'
+                    elif r in ("compliant", "partially_compliant"):
+                        target_audit_results[dst] = "partially_compliant"
         return target_audit_results
-
 
     def generate_test_data(self):
         random.seed(42)  # Fixed seed for reproducibility
         all_rms = {}
-        non_pivot_frameworks = [f"urn:framework:{i}" for i in range(NUM_FRAMEWORKS - NUM_PIVOTS)]
+        non_pivot_frameworks = [
+            f"urn:framework:{i}" for i in range(NUM_FRAMEWORKS - NUM_PIVOTS)
+        ]
         pivots = [f"urn:framework:pivot{i}" for i in range(NUM_PIVOTS)]
         frameworks = non_pivot_frameworks + pivots
 
@@ -174,19 +180,21 @@ class Command(BaseCommand):
                 "urn": urn,
                 "library_urn": "urn:library:test",
                 "source_framework_urn": source,
-                "target_framework_urn": target
+                "target_framework_urn": target,
             }
 
         # 2. pivots have mapping to 60% of other frameworks
         for pivot in pivots:
-            targets = random.sample(non_pivot_frameworks, int(0.6 * len(non_pivot_frameworks)))
+            targets = random.sample(
+                non_pivot_frameworks, int(0.6 * len(non_pivot_frameworks))
+            )
             for target in targets:
                 urn = f"urn:rms:{uuid.uuid4()}"
                 all_rms[(pivot, target)] = {
                     "urn": urn,
                     "library_urn": "urn:library:test",
                     "source_framework_urn": pivot,
-                    "target_framework_urn": target
+                    "target_framework_urn": target,
                 }
 
         return all_rms
@@ -200,27 +208,30 @@ class Command(BaseCommand):
             "partially_compliant": "🟡",
             "non_compliant": "❌",
             "not_applicable": "🚫",
-            "not_assessed": "❓"
+            "not_assessed": "❓",
         }
 
         ordered_keys = [
-            "compliant", "partially_compliant", "non_compliant",
-            "not_applicable", "not_assessed"
+            "compliant",
+            "partially_compliant",
+            "non_compliant",
+            "not_applicable",
+            "not_assessed",
         ]
 
         parts = [
             f"{status_labels[k]} {summary.get(k, 0)}"
-            for k in ordered_keys if summary.get(k, 0) > 0
+            for k in ordered_keys
+            if summary.get(k, 0) > 0
         ]
 
         return " | ".join(parts) if parts else "No results"
 
-
     def handle(self, *args, **options):
-        test_mode = options.get('test')
-        max_depth = options.get('depth')
+        test_mode = options.get("test")
+        max_depth = options.get("depth")
         self.framework_mappings = defaultdict(list)
-        self.all_rms = {} # all rms indexed by (source_urn, dest_urn)
+        self.all_rms = {}  # all rms indexed by (source_urn, dest_urn)
 
         if test_mode:
             print("🔧 Test mode enabled: generating simulated data...")
@@ -261,23 +272,25 @@ class Command(BaseCommand):
             for lib in StoredLibrary.objects.all():
                 library_urn = lib.urn
                 if isinstance(lib.content, dict):
-                    if 'requirement_mapping_set' in lib.content:
-                        obj = lib.content['requirement_mapping_set']
-                        index = obj['source_framework_urn'], obj['target_framework_urn']
+                    if "requirement_mapping_set" in lib.content:
+                        obj = lib.content["requirement_mapping_set"]
+                        index = obj["source_framework_urn"], obj["target_framework_urn"]
                         self.all_rms[index] = obj
-                        self.all_rms[index]['library_urn'] = library_urn
-                    if 'requirement_mapping_sets' in lib.content:
-                        for obj in lib.content['requirement_mapping_sets']:
-                            index = obj['source_framework_urn'], obj['target_framework_urn']
+                        self.all_rms[index]["library_urn"] = library_urn
+                    if "requirement_mapping_sets" in lib.content:
+                        for obj in lib.content["requirement_mapping_sets"]:
+                            index = (
+                                obj["source_framework_urn"],
+                                obj["target_framework_urn"],
+                            )
                             self.all_rms[index] = obj
-                            self.all_rms[index]['library_urn'] = library_urn
+                            self.all_rms[index]["library_urn"] = library_urn
 
             for (src, tgt), rms in self.all_rms.items():
                 self.framework_mappings[src].append(tgt)
 
             load_duration = time.time() - start_load
             print(f"⏱️ Load time: {load_duration * 1000:.2f} ms")
-
 
             # Get all unique frameworks from the mappings
             frameworks_in_mappings = set()
