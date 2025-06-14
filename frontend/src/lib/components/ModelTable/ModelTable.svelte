@@ -131,9 +131,10 @@
 	const rows = handler.getRows();
 	let invalidateTable = false;
 
-	handler.onChange((state: State) =>
-		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
-	);
+	handler.onChange((state: State) => {
+		// console.info('MODELTABLE', state, fields);
+		return loadTableData({ state, URLModel, endpoint: baseEndpoint, fields });
+	});
 
 	onMount(() => {
 		if (orderBy) {
@@ -212,6 +213,7 @@
 			}
 		}
 		if (browser || invalidateTable) {
+			// console.log('1');
 			handler.invalidate();
 			_goto($page.url);
 			invalidateTable = false;

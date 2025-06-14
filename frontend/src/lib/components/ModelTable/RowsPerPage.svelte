@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
 	export let handler: DataHandler;
+
+	const endpoint = $page.url.pathname;
 
 	const pageNumber = handler.getPageNumber();
 	const rowsPerPage = handler.getRowsPerPage();
@@ -12,25 +15,20 @@
 	$: lastRowsPerPage = $rowsPerPage ?? 10;
 
 	const setRowsPerPage = () => {
-		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
-			localStorage.getItem('pageNumberCache') ?? '{}'
+		const paginationSettingsCache: { [key: string]: [number, number] } = JSON.parse(
+			localStorage.getItem('paginationSettingsCache') ?? '{}'
 		);
 
-		for (const [endpoint, [savedPageNumber, savedRowsPerPage]] of Object.entries(pageNumberCache)) {
-			if ($rowsPerPage === null) {
-				break;
-			}
-			const itemNumber = (savedPageNumber - 1) * savedRowsPerPage + 1;
-			const newPageNumber = Math.ceil(itemNumber / $rowsPerPage);
-			pageNumberCache[endpoint] = [newPageNumber, $rowsPerPage];
+		if ($rowsPerPage !== null) {
+			paginationSettingsCache[endpoint] = [paginationSettingsCache[endpoint][0], $rowsPerPage];
 		}
 
-		localStorage.setItem('pageNumberCache', JSON.stringify(pageNumberCache));
-		localStorage.setItem('rowsPerPageCache', `${$rowsPerPage}`);
+		localStorage.setItem('paginationSettingsCache', JSON.stringify(paginationSettingsCache));
 
 		const itemNumber = ($pageNumber - 1) * lastRowsPerPage + 1;
 		const newPageNumber = Math.ceil(itemNumber / ($rowsPerPage ?? 10));
 		handler.setPage(newPageNumber);
+		// console.log('2');
 		handler.invalidate();
 	};
 
@@ -39,10 +37,17 @@
 	}
 
 	onMount(() => {
-		const cachedValue = Number(localStorage.getItem('rowsPerPageCache') ?? '10');
+		let cachedValue = 10;
+		const paginationSettingsCache: { [key: string]: [number, number] } = JSON.parse(
+			localStorage.getItem('paginationSettingsCache') ?? '{}'
+		);
+		if (paginationSettingsCache[endpoint] !== undefined) {
+			cachedValue = Number(paginationSettingsCache[endpoint][1] ?? '10');
+		}
 
 		if ($rowsPerPage !== cachedValue) {
 			rowsPerPage.set(cachedValue); // will trigger reactivity
+			// console.log('3');
 			handler.invalidate(); // refetch with updated rowsPerPage
 		}
 	});
