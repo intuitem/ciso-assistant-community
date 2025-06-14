@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
-from core.models import ComplianceAssessment, Framework
+from core.models import ComplianceAssessment, Framework, Perimeter
 
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
@@ -92,19 +92,22 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                     {"framework": [_("Framework required")]}
                 )
 
+            enclave = Folder.objects.create(
+                content_type=Folder.ContentType.ENCLAVE,
+                name=f"{instance.perimeter.name}/{instance.entity.name}",
+                parent_folder=instance.folder,
+            )
+            perimeter = Perimeter.objects.create(
+                name=f"{instance.name}",
+                folder=enclave,
+            )
             audit = ComplianceAssessment.objects.create(
                 name=instance.name,
                 framework=audit_data["framework"],
-                perimeter=instance.perimeter,
+                perimeter=perimeter,
                 selected_implementation_groups=audit_data[
                     "selected_implementation_groups"
                 ],
-            )
-
-            enclave = Folder.objects.create(
-                content_type=Folder.ContentType.ENCLAVE,
-                name=f"{instance.perimeter.name}/{instance.name}",
-                parent_folder=instance.folder,
             )
             audit.folder = enclave
             audit.save()
