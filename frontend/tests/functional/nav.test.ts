@@ -110,6 +110,7 @@ import { test as testV2, expect as expectV2 } from '../utilsv2/core/base';
 testV2('sidebar component tests', async ({ loginPage }) => {
 	await test.step('sidebar can be collapsed and expanded', async () => {
 		await loginPage.gotoSelf();
+		await loginPage.waitUntilLoaded();
 		const analyticsPage = await loginPage.doLoginAdminP();
 		await analyticsPage.checkSelf(expectV2);
 		await analyticsPage.doCloseModal();
