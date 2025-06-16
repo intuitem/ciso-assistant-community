@@ -10,13 +10,13 @@
 
 <DetailView {data}>
 	<div slot="actions" class="flex flex-col space-y-2">
-		<Anchor
-			href={`${$page.url.pathname}/action-plan`}
-			class="btn variant-filled-primary h-fit"
-			breadcrumbAction="push"
-		>
-			<i class="fa-solid fa-heart-pulse mr-2" />Advanced analytics
-		</Anchor>
+		<!-- <Anchor -->
+		<!-- 	href={`${$page.url.pathname}/action-plan`} -->
+		<!-- 	class="btn variant-filled-primary h-fit" -->
+		<!-- 	breadcrumbAction="push" -->
+		<!-- > -->
+		<!-- 	<i class="fa-solid fa-heart-pulse mr-2" />Advanced analytics -->
+		<!-- </Anchor> -->
 	</div>
 	<div slot="widgets" class="h-full flex flex-col space-y-6 p-4">
 		<div class="grid grid-cols-3 gap-4">
@@ -43,7 +43,7 @@
 					</h3>
 					<p class="text-3xl font-bold text-gray-900">
 						{data.metrics.days_remaining}
-						<span class="text-sm font-normal text-gray-500 ml-1">days</span>
+						<span class="text-sm font-normal text-gray-500 ml-1">{m.days()}</span>
 					</p>
 				</div>
 			</div>
