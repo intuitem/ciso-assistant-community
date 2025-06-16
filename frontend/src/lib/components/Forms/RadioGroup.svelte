@@ -55,7 +55,6 @@
 
 	$effect(() => {
 		cacheLock.promise.then((cacheResult) => {
-			console.log('CACHELOCK =', cacheResult);
 			if (cacheResult) $value = cacheResult;
 		});
 	});
