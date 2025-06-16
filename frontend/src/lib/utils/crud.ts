@@ -496,12 +496,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'findings', urlModel: 'findings' },
+			{ field: 'findings_assessments', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
 			{ field: 'evidences', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true }
+			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'findings-assessments', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'findings', disableAddDeleteButtons: true }
 		]
 	},
 	'compliance-assessments': {
@@ -1014,9 +1018,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
+		reverseForeignKeyFields: [
+			{ field: 'findings_assessment', urlModel: 'findings' },
+			{ field: 'findings_assessments', urlModel: 'evidences' }
+		],
 		selectFields: [{ field: 'status' }, { field: 'category' }]
 	},
 	findings: {
@@ -1027,11 +1035,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
+			{ field: 'findings', urlModel: 'evidences' },
 			{ field: 'findings', urlModel: 'applied-controls' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]

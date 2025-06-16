@@ -1621,6 +1621,7 @@
 	"addCampaign": "Démarrer une campagne",
   "averageProgress": "Progression moyenne",
   "daysRemaining": "Jours restants",
+	"associatedFindingsAssessments": "Suivis associés",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

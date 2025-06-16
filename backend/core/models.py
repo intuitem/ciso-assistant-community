@@ -3463,7 +3463,7 @@ class RiskScenario(NameDescriptionMixin):
         """return associated risk assessment id"""
         scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
+        candidates = [f"R.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
     def parent_perimeter(self):
@@ -3901,6 +3901,7 @@ class ComplianceAssessment(Assessment):
             or not self.selected_implementation_groups
         ):
             return []
+
         return [
             group.get("name")
             for group in framework.implementation_groups_definition
@@ -4613,6 +4614,14 @@ class FindingsAssessment(Assessment):
         default=Category.UNDEFINED,
     )
 
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the follow-up",
+        related_name="findings_assessments",
+        verbose_name=_("Evidences"),
+    )
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -4723,6 +4732,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         null=False,
         default=Status.UNDEFINED,
         max_length=32,
+    )
+
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the follow-up",
+        related_name="findings",
+        verbose_name=_("Evidences"),
     )
 
     class Meta:

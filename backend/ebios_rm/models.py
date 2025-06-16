@@ -255,6 +255,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
+        # Ensure the folder is set to the study's folder
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 

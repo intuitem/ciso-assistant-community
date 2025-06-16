@@ -1,5 +1,5 @@
 """
-convert@_library_v2.py — Build a CISO Assistant YAML library from a v2 Excel file
+convert_library_v2.py — Build a CISO Assistant YAML library from a v2 Excel file
 
 This script processes an Excel file in v2 format (with *_meta and *_content tabs),
 extracts all declared objects, and generates a fully structured YAML library.
@@ -14,12 +14,28 @@ Note: the urn_id column can be defined to force an urn suffix. This can be usefu
     
 """
 
-import argparse
-from pathlib import Path
-import openpyxl
+import sys
 import re
 import yaml
 import datetime
+import argparse
+import unicodedata
+import openpyxl
+from pathlib import Path
+from collections import Counter
+
+SCRIPT_VERSION = '2.1'
+
+# --- Compatibility modes definition ------------------------------------------
+# NOTE: No compatibility mode includes another (unless otherwise stated)
+# NOTE: So far, no compatibility mode has an impact on the mapping creation process.
+
+COMPATIBILITY_MODES = {
+    0: f"[v{SCRIPT_VERSION}] (DEFAULT) D'ont use any Compatibility Mode",
+    1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
+    2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)"
+    # Future modes can be added here with an integer key and description
+}
 
 # --- Translation helpers ------------------------------------------------------
 
@@ -55,9 +71,33 @@ def parse_key_value_sheet(sheet):
             result[key] = val
     return result
 
+# --- URN cleaning utility -----------------------------------------------------
+def clean_urn_suffix(value: str, compat_mode: int = 0):
+    """
+    Cleans a URN suffix by:
+        - Removing accents using Unicode normalization,
+        - Converting to lowercase and replacing spaces with hyphens,
+        - Replacing any disallowed characters with an underscore.
+    
+    Compatibility modes :
+        - 0 : Default behavior
+        - 1,2 : Replace only spaces " " with hyphens "-" sets text in lower case.
+    """
+    # [+] Compat check
+    if 1 <= compat_mode <= 2:
+        value = value.lower().replace(" ", "-")
+    else:   # Default behavior
+        # Normalize to separate characters from their accents (e.g., é → e + ́)
+        value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+        value = value.lower().replace(" ", "-")
+        # Keep only allowed characters for a URN suffix
+        value = re.sub(r"[^a-z0-9_\-\.\[\]\(\):]", "_", value)
+        
+    return value
+
 # --- urn expansion ------------------------------------------------------------
 
-def expand_urns_from_prefixed_list(field_value, prefix_to_urn):
+def expand_urns_from_prefixed_list(field_value: str, prefix_to_urn: str, compat_mode: int = 0, verbose: bool = False):
     """
     Convert a prefixed list like 'abc:xyz, def:uvw' into a list of full URNs,
     using a prefix mapping. Fully qualified URNs (starting with 'urn:') are left untouched.
@@ -65,6 +105,7 @@ def expand_urns_from_prefixed_list(field_value, prefix_to_urn):
     Args:
         field_value (str): Raw string field value from the sheet (e.g., 'abc:id1, urn:...').
         prefix_to_urn (dict): Mapping from prefix (e.g., 'abc') to full base URN.
+        verbose (bool): If True, prints a warning when a suffix is modified.
 
     Returns:
         list[str]: Fully qualified URNs
@@ -75,20 +116,28 @@ def expand_urns_from_prefixed_list(field_value, prefix_to_urn):
         element = element.strip()
         if not element:
             continue
+
         if element.startswith("urn:"):
             result.append(element)
             continue
+
         parts = element.split(":")
         if len(parts) >= 2:
             prefix = parts[0]
-            suffix = ":".join(parts[1:]).strip().lower().replace(" ", "-")
+            raw_suffix = ":".join(parts[1:]).strip()
+            # [+] Compat check
+            cleaned_suffix = clean_urn_suffix(raw_suffix, compat_mode=compat_mode)
             base = prefix_to_urn.get(prefix)
+
             if base:
-                result.append(f"{base}:{suffix}")
+                # Show a warning if the suffix had to be cleaned/renamed
+                if raw_suffix != cleaned_suffix and verbose:
+                    print(f"💬 ⚠️  [WARNING] (expand_urns_from_prefixed_list) URN suffix renamed for '{prefix}:{raw_suffix}' → '{base}:{cleaned_suffix}'")
+                result.append(f"{base}:{cleaned_suffix}")
             else:
-                print(f"⚠️ Unknown prefix '{prefix}' for element '{element}' — skipped")
+                print(f"⚠️  [WARNING] (expand_urns_from_prefixed_list) Unknown prefix '{prefix}' for element '{element}' — skipped")
         else:
-            print(f"⚠️ Malformed element '{element}' — skipped")
+            print(f"⚠️  [WARNING] (expand_urns_from_prefixed_list) Malformed element '{element}' — skipped")
     return result
 
 # --- question management ------------------------------------------------------------
@@ -338,7 +387,7 @@ def revert_relationship(relation: str):
 
 # --- Main logic ---------------------------------------------------------------
 
-def create_library(input_file: str, output_file: str, compat: bool = False):
+def create_library(input_file: str, output_file: str, compat_mode: int = 0, verbose : bool = False):
     wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}
@@ -365,8 +414,25 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
         lib_date = lib_date.date()
 
     # Step 3: Build library with fixed key order
+    library_urn = None
+    
+    # [+] Compat check
+    if 1 <= compat_mode <= 2:
+        library_urn = library_meta.get("urn")
+    else: # Default behavior
+        # Clean URN
+        library_urn_raw = library_meta.get("urn")
+        library_urn_clean = clean_urn_suffix(library_urn_raw, compat_mode=0)
+        if library_urn_raw != library_urn_clean:
+            print(f"⚠️  [WARNING] (create_library) Cleaned library URN '{library_urn_raw}' → '{library_urn_clean}'")
+        
+        library_urn = library_urn_clean
+        
+    convert_library_version = f"v2 ; Compat Mode: [{compat_mode}] {'{'+COMPATIBILITY_MODES[compat_mode]+'}'}"
+        
     library = {
-        "urn": library_meta.get("urn"),
+        "convert_library_version": convert_library_version,
+        "urn": library_urn,
         "locale": library_meta.get("locale"),
         "ref_id": library_meta.get("ref_id"),
         "name": library_meta.get("name"),
@@ -397,7 +463,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             prefix = sheet_name[:-5]
             content_name = f"{prefix}_content"
             if content_name not in sheets:
-                print(f"⚠️ Missing content for {prefix}")
+                print(f"⚠️  [WARNING] Missing content for {prefix}")
                 continue
 
             meta_sheet = wb[sheet_name]
@@ -459,13 +525,30 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 if not any(cell.value for cell in row):
                     continue
                 data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
-                ref_id = str(data.get("ref_id", "")).strip()
-                if not ref_id:
+                default_ref_id = None
+                ref_id_for_urn = None
+                
+                # [+] Compat check
+                if 1 <= compat_mode <= 2:
+                    default_ref_id = str(data.get("ref_id", "")).strip()
+                    ref_id_for_urn = default_ref_id.lower()
+                else:   # Default behavior
+                    ref_id_raw = str(data.get("ref_id", "")).strip()
+                    ref_id_clean = clean_urn_suffix(ref_id_raw, compat_mode=0)
+                    if verbose and ref_id_raw != ref_id_clean:
+                        print(f"💬 ⚠️  [WARNING] (reference_controls) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'")
+                    
+                    default_ref_id = ref_id_raw
+                    ref_id_for_urn = ref_id_clean
+                    
+                if not default_ref_id:
                     continue
+                
                 entry = {
-                    "urn": f"{base_urn}:{ref_id.lower()}",
-                    "ref_id": ref_id
+                    "urn": f"{base_urn}:{ref_id_for_urn}",
+                    "ref_id": default_ref_id
                 }
+                
                 if "name" in data and data["name"]:
                     entry["name"] = str(data["name"]).strip()
                 if "category" in data and data["category"]:
@@ -526,7 +609,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             answers_block_name = meta.get("answers_definition")
             if answers_block_name:
                 if answers_block_name not in object_blocks:
-                    raise ValueError(f"❌ Missing answers sheet: '{answers_block_name}'")
+                    raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
 
                 answers_sheet = object_blocks[answers_block_name]["content_sheet"]
                 rows = list(answers_sheet.iter_rows())
@@ -557,6 +640,9 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                             "type": answer_type,
                             "choices": choices
                         }
+            else:
+                if verbose:
+                    print(f"💬 ℹ️  No \"Answers Definition\" found")
 
             framework = {
                 "urn": meta.get("urn"),
@@ -568,6 +654,9 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             translations = extract_translations_from_metadata(meta, "framework")
             if translations:
                 framework["translations"] = translations
+            else:
+                if verbose:
+                    print(f"💬 ℹ️  No \"Translation\" found")
 
             if "min_score" in meta:
                 framework["min_score"] = int(meta["min_score"])
@@ -596,6 +685,9 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                         score_entry["translations"] = translations
                     score_defs.append(score_entry)
                 framework["scores_definition"] = score_defs
+            else:
+                if verbose:
+                    print(f"💬 ℹ️  No \"Score Definition\" found")
 
             ig_name = meta.get("implementation_groups_definition")
             if ig_name and ig_name in object_blocks:
@@ -651,7 +743,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                         raise ValueError(f"Invalid depth jump from {previous_depth} to {depth} at row {counter}")
 
                     # calculate urn
-                    if compat:
+                    if compat_mode == 1:    # Use legacy URN fallback logic (for requirements without ref_id)
                         skip_count = str(data.get("skip_count", "")).strip().lower() in ("1", "true", "yes", "x")
                         if skip_count:
                             counter_fix += 1
@@ -659,18 +751,26 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                         else:
                             ref_id_urn = ref_id.lower().replace(" ", "-") if ref_id else f"node{counter - counter_fix}"
                         urn = f"{base_urn}:{ref_id_urn}"
-                    else:
+                    else:                   # If compat mode = {0,2} 
                         if data.get("urn_id"):
                             urn = f"{base_urn}:{data.get('urn_id').strip()}"
                         elif ref_id:
-                            urn = f"{base_urn}:{ref_id.lower().replace(' ', '-')}"
+                             # [+] Compat check
+                            ref_id_clean = clean_urn_suffix(ref_id, compat_mode=compat_mode)
+                            if verbose and ref_id != ref_id_clean:
+                                print(f"💬 ⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'")
+                            urn = f"{base_urn}:{ref_id_clean}"
                         else:
                             p = parent_for_depth.get(depth)
                             c = count_for_depth.get(depth, 1)
                             if p:
                                 urn = f"{p}:{c}" if p else f"{base_urn}:{c}"
                             elif name:
-                                urn = f"{base_urn}:{name.lower().replace(' ', '-')}"
+                                 # [+] Compat check
+                                name_clean = clean_urn_suffix(name, compat_mode=compat_mode)
+                                if verbose and name != name_clean:
+                                    print(f"💬 ⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'")
+                                urn = f"{base_urn}:{name_clean}"
                             else:
                                 urn = f"{base_urn}:node{c}"
                             count_for_depth[depth] = c + 1
@@ -699,11 +799,11 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                             s.strip() for s in str(data["implementation_groups"]).split(",")
                         ]
                     if "threats" in data and data["threats"]:
-                        threats = expand_urns_from_prefixed_list(data["threats"], prefix_to_urn)
+                        threats = expand_urns_from_prefixed_list(data["threats"], prefix_to_urn, compat_mode=compat_mode, verbose=verbose)
                         if threats:
                             node["threats"] = threats
                     if "reference_controls" in data and data["reference_controls"]:
-                        rc = expand_urns_from_prefixed_list(data["reference_controls"], prefix_to_urn)
+                        rc = expand_urns_from_prefixed_list(data["reference_controls"], prefix_to_urn, compat_mode=compat_mode, verbose=verbose)
                         if rc:
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
@@ -771,16 +871,24 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 if not any(cell.value for cell in row):
                     continue
                 data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
-                source_node_id = str(data.get("source_node_id", "")).strip()
-                target_node_id = str(data.get("target_node_id", "")).strip()
+                source_node_id_raw = str(data.get("source_node_id", "")).strip()
+                target_node_id_raw = str(data.get("target_node_id", "")).strip()
+                
+                # [+] Compat mode set to "2" so it can be compatible with every version of mappings >=v2 without having to choose a specific compat mode
+                source_node_id = clean_urn_suffix(source_node_id_raw, compat_mode=2)
+                target_node_id = clean_urn_suffix(target_node_id_raw, compat_mode=2)
+                if verbose and source_node_id_raw != source_node_id:
+                    print(f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned source_node_id '{source_node_id_raw}' → '{source_node_id}'")
+                if verbose and target_node_id_raw != target_node_id:
+                    print(f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned target_node_id '{target_node_id_raw}' → '{target_node_id}'")
                 entry = {
-                    "source_requirement_urn": source_node_base_urn + ":" + source_node_id.lower().replace(" ", "-"),
-                    "target_requirement_urn": target_node_base_urn + ":" + target_node_id.lower().replace(" ", "-"),
+                    "source_requirement_urn": source_node_base_urn + ":" + source_node_id,
+                    "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
                     "relationship": data.get("relationship").strip(),
                 }
                 entry_revert = {
-                    "source_requirement_urn": target_node_base_urn + ":" + target_node_id.lower().replace(" ", "-"),
-                    "target_requirement_urn": source_node_base_urn + ":" + source_node_id.lower().replace(" ", "-"),
+                    "source_requirement_urn": target_node_base_urn + ":" + target_node_id,
+                    "target_requirement_urn": source_node_base_urn + ":" + source_node_id,
                     "relationship": revert_relationship(data.get("relationship").strip()),
                 }
                 if "rationale" in data and data["rationale"]:
@@ -795,29 +903,120 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             requirement_mapping_set_revert["requirement_mappings"] = requirement_mappings_revert
             library["objects"]["requirement_mapping_sets"] = [requirement_mapping_set, requirement_mapping_set_revert]
 
+            # --- Validate source_node_id and target_node_id from mappings against Excel sheets ---
+            # NOTE: This code simply checks the validity of the "source_node_id" and "target_node_id".
+            #       It doesn't remove them from the created mapping if they aren't found in the Excel file.
+
+            source_ids = set()
+            target_ids = set()
+            source_sheet_available = "source" in sheets
+            target_sheet_available = "target" in sheets
+
+            if source_sheet_available:
+                source_sheet = wb["source"]
+                source_header = [cell.value for cell in source_sheet[1]]
+                if "node_id" in source_header:
+                    idx = source_header.index("node_id")
+                    for row in source_sheet.iter_rows(min_row=2):
+                        if idx < len(row) and row[idx].value:
+                            source_ids.add(str(row[idx].value).strip())
+                else:
+                    source_sheet_available = False
+                    if verbose:
+                        print("💬 ℹ️  \"node_id\" in \"source\" sheet header not found")
+            else:
+                if verbose:
+                    print("💬 ℹ️  Sheet \"source\" not found")
+
+            if target_sheet_available:
+                target_sheet = wb["target"]
+                target_header = [cell.value for cell in target_sheet[1]]
+                if "node_id" in target_header:
+                    idx = target_header.index("node_id")
+                    for row in target_sheet.iter_rows(min_row=2):
+                        if idx < len(row) and row[idx].value:
+                            target_ids.add(str(row[idx].value).strip())
+                else:
+                    target_sheet_available = False
+                    if verbose:
+                        print("💬 ℹ️  \"node_id\" in \"target\" sheet header not found")
+                        
+            else:
+                if verbose:
+                    print("💬 ℹ️  Sheet \"target\" not found")
+
+            # Collect all used source/target IDs from mappings (with duplicates)
+            used_source_ids = [m["source_requirement_urn"].split(":")[-1] for m in requirement_mappings]
+            used_target_ids = [m["target_requirement_urn"].split(":")[-1] for m in requirement_mappings]
+
+            source_missing_counts = Counter(id for id in used_source_ids if source_sheet_available and id not in source_ids)
+            target_missing_counts = Counter(id for id in used_target_ids if target_sheet_available and id not in target_ids)
+
+            # Print all warnings first (one per ID)
+            if source_sheet_available:
+                for sid in source_missing_counts:
+                    print(f"⚠️  [WARNING] source_node_id \"{sid}\" not found in sheet \"source\"")
+            if target_sheet_available:
+                for tid in target_missing_counts:
+                    print(f"⚠️  [WARNING] target_node_id \"{tid}\" not found in sheet \"target\"")
+
+            # Then print duplicate counts (only for missing IDs)
+            if source_sheet_available:
+                for sid, count in source_missing_counts.items():
+                    if count > 1:
+                        print(f"🔁 [DUPLICATE] source_node_id \"{sid}\" appears {count} times in mappings")
+            if target_sheet_available:
+                for tid, count in target_missing_counts.items():
+                    if count > 1:
+                        print(f"🔁 [DUPLICATE] target_node_id \"{tid}\" appears {count} times in mappings")
+
+            # Final summary
+            total_missing_sources = sum(source_missing_counts.values())
+            total_missing_targets = sum(target_missing_counts.values())
+            if total_missing_sources or total_missing_targets:
+                print(f"⚠️  [SUMMARY] Missing usage count - Source: {total_missing_sources}, Target: {total_missing_targets}")
+                print(f"ℹ️  Please note that these node IDs have been added to the mapping anyway.\
+                    \n   If you want to correct them, please do so in your Excel file.")
+
         else:
             if obj_type not in ["answers", "implementation_groups", "scores", "urn_prefix"]:
                 print("type not handled:", obj_type)
 
     # Step 6: Export to YAML
-    print(f"✅ Writing YAML to {output_file}")
+    print(f"✅ YAML saved as: \"{output_file}\"")
+    print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain behaviors.")
     with open(output_file, "w", encoding="utf-8") as f:
         yaml.dump(library, f, sort_keys=False, allow_unicode=False)
 
 # --- CLI interface ------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Create a YAML library from a v2 Excel file.")
+    parser = argparse.ArgumentParser(description="Create a YAML library from a v2 Excel file.", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("input_file", type=str, help="Input Excel file (v2 format)")
-    parser.add_argument("--compat", action="store_true", help="Use legacy URN fallback generation logic")
+    parser.add_argument("-c", "--compat", type=int, choices=COMPATIBILITY_MODES.keys(),
+                        help="Compatibility mode number:\n    " + "\n    ".join(f"{k} = {v}" for k,v in COMPATIBILITY_MODES.items()))
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.")
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
     if not input_path.exists():
-        raise FileNotFoundError(f"File not found: {input_path}")
-
-    output_path = input_path.with_suffix(".yaml")
-    create_library(str(input_path), str(output_path), compat=args.compat)
+        print(f"❌ [ERROR] File not found: {input_path}")
+        sys.exit(1)
+    
+    # Check compat mode
+    compat_mode = args.compat if args.compat else 0
+    if compat_mode not in COMPATIBILITY_MODES:
+        print(f"❌ [ERROR] Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}")
+        sys.exit(1)
+    
+    output_path = Path(input_path.stem + ".yaml")
+    
+    try:
+        create_library(str(input_path), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
+    except Exception as e:
+        print(f"❌ [ERROR] {e}")
+        print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
