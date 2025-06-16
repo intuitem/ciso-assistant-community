@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
@@ -14,7 +13,9 @@
 		hidden?: boolean;
 		disabled?: boolean;
 		checkboxComponent?: 'checkbox' | 'switch';
+		classes?: string;
 		classesContainer?: string;
+		onChange?: (event: boolean) => void;
 		[key: string]: any;
 	}
 
@@ -28,19 +29,18 @@
 		hidden = false,
 		disabled = false,
 		checkboxComponent = 'checkbox',
+		classes = '',
 		classesContainer = '',
+		onChange = () => {},
 		...rest
 	}: Props = $props();
 
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
-
-	const dispatch = createEventDispatcher();
-
-	function handleChange() {
-		dispatch('change', $value);
-	}
+	$effect(() => {
+		cachedValue = $value;
+	});
 
 	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));
 	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
@@ -68,7 +68,7 @@
 					class="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					bind:checked={$value}
-					onchange={handleChange}
+					onchange={() => onChange($value)}
 					{...$constraints}
 					{...rest}
 					{disabled}
@@ -76,10 +76,13 @@
 			{:else if checkboxComponent === 'switch'}
 				<Switch
 					name={field}
+					{classes}
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					checked={Boolean($value)}
-					onCheckedChange={(e) => ($value = e.checked)}
-					onchange={handleChange}
+					onCheckedChange={(e) => {
+						$value = e.checked;
+						onChange($value);
+					}}
 					{...$constraints}
 					{...rest}
 					{disabled}

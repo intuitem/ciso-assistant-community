@@ -50,7 +50,7 @@
 		},
 		{
 			id: 3,
-			element: '#organization',
+			element: 'button[type="button"][id$="organization"]',
 			popover: {
 				title: m.tourOrganizationTitle(),
 				description: m.tourOrganizationDescription()
@@ -86,7 +86,7 @@
 		},
 		{
 			id: 8,
-			element: '#catalog-step',
+			element: 'catalog-step',
 			popover: {
 				title: m.tourCatalogTitle(),
 				description: m.tourCatalogDescription()
@@ -94,7 +94,7 @@
 		},
 		{
 			id: 9,
-			element: '#catalog',
+			element: 'button[type="button"][id$="catalog"]',
 			popover: {
 				description: m.tourCatalogBrowseDescription()
 			}
@@ -131,7 +131,7 @@
 		},
 		{
 			id: 14,
-			element: '#compliance',
+			element: 'button[type="button"][id$="compliance"]',
 			popover: {
 				description: m.tourComplianceDescription()
 			}
@@ -146,7 +146,7 @@
 		},
 		{
 			id: 16,
-			element: '#risk',
+			element: 'button[type="button"][id$="risk"]',
 			popover: {
 				description: m.tourRiskDescription()
 			}
@@ -161,7 +161,7 @@
 		},
 		{
 			id: 18,
-			element: '#overview',
+			element: 'button[type="button"][id$="overview"]',
 			popover: {
 				title: m.tourAnalyticsTitle(),
 				description: m.tourAnalyticsDescription()

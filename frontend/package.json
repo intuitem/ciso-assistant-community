@@ -82,7 +82,6 @@
 		"@unovis/svelte": "1.4.3-beta.0",
 		"@unovis/ts": "1.4.3-beta.0",
 		"bits-ui": "^0.22.0",
-		"cmdk-sv": "^0.0.18",
 		"dotenv": "^16.4.7",
 		"driver.js": "^1.3.1",
 		"echarts": "^5.6.0",
@@ -92,5 +91,5 @@
 		"svelte-multiselect": "^11.1.0",
 		"svelte-persisted-store": "^0.11.0"
 	},
-	"packageManager": "pnpm@10.10.0"
+	"packageManager": "pnpm@10.12.1"
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import { m } from '$paraglide/messages';
-	import { Segment } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -59,11 +59,16 @@
 		}
 	}
 
-	let result = $derived(currentRequirementAssessment.result);
+	// svelte-ignore state_referenced_locally
+	let result = $state(currentRequirementAssessment.result);
+	$effect(() => {
+		result = currentRequirementAssessment.result;
+	});
 
 	// Function to update the result of the current item
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;
+		result = newResult;
 		const form = document.getElementById('flashModeForm');
 		const formData = {
 			id: currentRequirementAssessment.id,
@@ -118,25 +123,18 @@
 						<ul
 							class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
 						>
-							<Segment class="w-full flex-wrap items-center">
-								{#each possible_options as option}
-									<Segment.Item
-										class="h-full"
-										active={color}
-										id={option.id}
-										value={option.id}
-										bind:group={result}
-										name="result"
-										style="border-color: {color}"
-										on:click={() => {
-											const newResult = result === option.id ? 'not_assessed' : option.id;
-											updateResult(newResult);
-										}}
-									>
-										{option.label}
-									</Segment.Item>
-								{/each}
-							</Segment>
+							<RadioGroup
+								possibleOptions={possible_options}
+								initialValue={currentRequirementAssessment.result}
+								colorMap={complianceResultTailwindColorMap}
+								field="result"
+								onChange={(newValue) => {
+									const newResult = result === newValue ? 'not_assessed' : newValue;
+									updateResult(newResult);
+								}}
+								key="id"
+								labelKey="label"
+							/>
 						</ul>
 					</form>
 				</div>

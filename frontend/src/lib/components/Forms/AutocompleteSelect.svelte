@@ -43,6 +43,7 @@
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
 		allowUserOptions?: boolean | 'append';
+		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
 	}
@@ -72,6 +73,7 @@
 		optionsSelf = null,
 		optionsSelfSelect = false,
 		allowUserOptions = false,
+		onChange = () => {},
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
@@ -89,7 +91,7 @@
 		selected.map((item) => item.value || item.label || item)
 	);
 	let isInternalUpdate = false;
-	let optionsLoaded = Boolean(options.length);
+	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : selectedValues[0];
 
@@ -228,7 +230,8 @@
 			}
 		}
 
-		dispatch('change', $value);
+		// dispatch('change', $value);
+		$effect(() => onChange($value));
 		dispatch('cache', selected);
 	}
 
@@ -268,8 +271,6 @@
 	});
 
 	run(() => {
-		console.log('selected', selected);
-		console.log('selectedValues', selectedValues);
 		// Only update value after options are loaded
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;

@@ -81,8 +81,8 @@
 						{#if compliance_assessment.globalScore.score >= 0}
 							<div class="justify-center flex items-center">
 								<ProgressRing
-									stroke={100}
-									meter={displayScoreColor(
+									strokeWidth="20px"
+									meterStroke={displayScoreColor(
 										compliance_assessment.globalScore.score,
 										compliance_assessment.globalScore.max_score
 									)}
@@ -90,8 +90,10 @@
 										compliance_assessment.globalScore.score,
 										compliance_assessment.globalScore.max_score
 									)}
-									font={150}
-									width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRing
+									size="size-24"
+									><p class="font-semibold text-2xl">
+										{compliance_assessment.globalScore.score}
+									</p></ProgressRing
 								>
 							</div>
 						{/if}

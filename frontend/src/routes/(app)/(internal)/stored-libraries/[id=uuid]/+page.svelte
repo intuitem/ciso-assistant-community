@@ -108,7 +108,7 @@
 			<div>
 				{#if displayImportButton}
 					{#if loading.form}
-						<ProgressRing width="w-6" meter="stroke-primary-500" />
+						<ProgressRing size="size-6" meterStroke="stroke-primary-500" />
 					{:else}
 						<form
 							method="post"

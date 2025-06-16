@@ -45,19 +45,17 @@
 		</span>
 		{#if resultI18n !== 'notApplicable' && isScored}
 			<ProgressRing
-				stroke={100}
-				meter={displayScoreColor(score, max_score)}
-				font={150}
+				strokeWidth="20px"
+				meterStroke={displayScoreColor(score, max_score)}
 				value={(score * 100) / max_score}
-				width={'w-10'}>{score}</ProgressRing
+				size="size-12">{score}</ProgressRing
 			>
 			{#if showDocumentationScore}
 				<ProgressRing
-					stroke={100}
-					meter={displayScoreColor(documentationScore, max_score)}
-					font={150}
+					strokeWidth="20px"
+					meterStroke={displayScoreColor(documentationScore, max_score)}
 					value={(documentationScore * 100) / max_score}
-					width={'w-10'}>{documentationScore}</ProgressRing
+					size="size-12">{documentationScore}</ProgressRing
 				>
 			{/if}
 		{/if}

@@ -414,13 +414,12 @@
 					<div class="absolute font-bold text-sm">{m.maturity()}</div>
 					<div class="flex justify-center items-center w-full">
 						<ProgressRing
-							stroke={100}
-							meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
-							font={125}
+							strokeWidth="20px"
+							meterStroke={displayScoreColor(data.global_score.score, data.global_score.max_score)}
 							value={(data.global_score.score * 100) / data.global_score.max_score}
-							width={'w-52'}
+							size="size-52"
 						>
-							{data.global_score.score}
+							<p class="font-semibold text-4xl">{data.global_score.score}</p>
 						</ProgressRing>
 					</div>
 				{/if}
@@ -555,7 +554,12 @@
 			>
 				<span class="mr-2">
 					{#if syncingToActionsIsLoading}
-						<ProgressRing class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+						<ProgressRing
+							strokeWidth="16px"
+							meterStroke="stroke-white"
+							size="size-6"
+							classes="-ml-2"
+						/>
 					{:else}
 						<i class="fa-solid fa-arrows-rotate mr-2"></i>
 					{/if}
@@ -576,7 +580,12 @@
 				>
 					<span class="mr-2">
 						{#if createAppliedControlsLoading}
-							<ProgressRing class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+							<ProgressRing
+								strokeWidth="16px"
+								meterStroke="stroke-white"
+								classes="-ml-2"
+								size="size-6"
+							/>
 						{:else}
 							<i class="fa-solid fa-wand-magic-sparkles"></i>
 						{/if}

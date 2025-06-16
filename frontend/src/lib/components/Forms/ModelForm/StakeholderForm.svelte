@@ -6,7 +6,7 @@
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import RadioGroup from '../RadioGroup.svelte';
 	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
@@ -127,9 +127,9 @@
 			<div class="flex flex-row items-center space-x-4">
 				<div class="flex flex-col space-y-4 w-fit items-center">
 					<span class="flex flex-row items-center space-x-4">
-						<RadioGroupInput
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '0', value: 0 },
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
@@ -138,22 +138,26 @@
 							]}
 							label={m.dependency()}
 							field="current_dependency"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_dependency']}
 							bind:cachedValue={formDataCache['current_dependency']}
 							helpText={m.dependencyHelpText()}
 						/>
 						<i class="fa-solid fa-times"></i>
-						<RadioGroupInput
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '0', value: 0 },
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
 								{ label: '3', value: 3 },
 								{ label: '4', value: 4 }
 							]}
-							field="current_penetration"
 							label={m.penetration()}
+							field="current_penetration"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_penetration']}
 							bind:cachedValue={formDataCache['current_penetration']}
 							helpText={m.penetrationHelpText()}
@@ -163,31 +167,35 @@
 					<hr class="border-t-2! border-surface-900! self-stretch" />
 
 					<span class="flex flex-row items-center space-x-4">
-						<RadioGroupInput
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
 								{ label: '3', value: 3 },
 								{ label: '4', value: 4 }
 							]}
-							field="current_maturity"
 							label={m.maturity()}
+							field="current_maturity"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_maturity']}
 							bind:cachedValue={formDataCache['current_maturity']}
 							helpText={m.maturityHelpText()}
 						/>
 						<i class="fa-solid fa-times"></i>
-						<RadioGroupInput
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
 								{ label: '3', value: 3 },
 								{ label: '4', value: 4 }
 							]}
-							field="current_trust"
 							label={m.trust()}
+							field="current_trust"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_trust']}
 							bind:cachedValue={formDataCache['current_trust']}
 							helpText={m.trustHelpText()}
@@ -258,9 +266,9 @@
 		<div class="flex flex-row items-center space-x-4">
 			<div class="flex flex-col space-y-4 w-fit items-center">
 				<span class="flex flex-row items-center space-x-4">
-					<RadioGroupInput
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '0', value: 0 },
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
@@ -269,21 +277,25 @@
 						]}
 						label={m.dependency()}
 						field="residual_dependency"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_dependency']}
 						bind:cachedValue={formDataCache['residual_dependency']}
 					/>
 					<i class="fa-solid fa-times"></i>
-					<RadioGroupInput
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '0', value: 0 },
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
 							{ label: '3', value: 3 },
 							{ label: '4', value: 4 }
 						]}
-						field="residual_penetration"
 						label={m.penetration()}
+						field="residual_penetration"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_penetration']}
 						bind:cachedValue={formDataCache['residual_penetration']}
 					/>
@@ -292,30 +304,34 @@
 				<hr class="border-t-2! border-surface-900! self-stretch" />
 
 				<span class="flex flex-row items-center space-x-4">
-					<RadioGroupInput
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
 							{ label: '3', value: 3 },
 							{ label: '4', value: 4 }
 						]}
-						field="residual_maturity"
 						label={m.maturity()}
+						field="residual_maturity"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_maturity']}
 						bind:cachedValue={formDataCache['residual_maturity']}
 					/>
 					<i class="fa-solid fa-times"></i>
-					<RadioGroupInput
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
 							{ label: '3', value: 3 },
 							{ label: '4', value: 4 }
 						]}
-						field="residual_trust"
 						label={m.trust()}
+						field="residual_trust"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_trust']}
 						bind:cachedValue={formDataCache['residual_trust']}
 					/></span

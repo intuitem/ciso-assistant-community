@@ -213,8 +213,8 @@
 													{#if requirementAssessment.is_scored}
 														<div class="flex flex-row space-x-2">
 															<ProgressRing
-																stroke={100}
-																meter={displayScoreColor(
+																strokeWidth="20px"
+																meterStroke={displayScoreColor(
 																	requirementAssessment.score,
 																	assessment.max_score
 																)}
@@ -222,17 +222,16 @@
 																	requirementAssessment.score,
 																	assessment.max_score
 																)}
-																font={150}
-																class="shrink-0"
-																width={'w-10'}
+																classes="shrink-0"
+																size="size-10"
 															>
 																{requirementAssessment.score}
 															</ProgressRing>
 
 															{#if assessment.show_documentation_score}
 																<ProgressRing
-																	stroke={100}
-																	meter={displayScoreColor(
+																	strokeWidth="20px"
+																	meterStroke={displayScoreColor(
 																		requirementAssessment.documentation_score,
 																		assessment.max_score
 																	)}
@@ -240,9 +239,8 @@
 																		requirementAssessment.documentation_score,
 																		assessment.max_score
 																	)}
-																	font={150}
-																	class="shrink-0"
-																	width={'w-10'}
+																	classes="shrink-0"
+																	size="size-10"
 																>
 																	{requirementAssessment.documentation_score}
 																</ProgressRing>
