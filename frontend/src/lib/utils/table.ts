@@ -602,8 +602,8 @@ export const listViewFields = {
 		}
 	},
 	'risk-acceptances': {
-		head: ['name', 'description', 'riskScenarios'],
-		body: ['name', 'description', 'risk_scenarios'],
+		head: ['name', 'description', 'riskScenarios', 'state'],
+		body: ['name', 'description', 'risk_scenarios', 'state'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			state: STATE_FILTER,
