@@ -108,7 +108,7 @@
 							<div class="flex flex-row lg:flex-col space-x-1 lg:space-x-0 lg:space-y-1">
 								{#if canEditObject(perimeter)}
 									<Anchor
-										href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
+										href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=compliance"
 										prefixCrumbs={[
 											{
 												label: compliance_assessment.name,

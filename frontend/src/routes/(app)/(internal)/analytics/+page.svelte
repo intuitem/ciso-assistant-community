@@ -262,7 +262,7 @@
 							<Card
 								count={metrics.risk.threats}
 								label={m.sumpageMappedThreats()}
-								href="/analytics?tab=2"
+								href="/analytics?tab=risk"
 								icon="fa-solid fa-biohazard"
 								section={m.sumpageSectionRisk()}
 								customClass="col-span-3 lg:col-span-1"
