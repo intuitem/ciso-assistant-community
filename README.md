@@ -9,7 +9,7 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
-    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    <a href="https://intuitem.releasedhub.com/ciso-assistant-public/roadmap/d738f2fd">Roadmap</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
@@ -29,6 +29,10 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
+<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
+
+
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
@@ -127,7 +131,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2022 🌐
+1. ISO 27001:2013 & 27001:2022 🌐
 2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
@@ -203,8 +207,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
-77. Vehicle Cyber Security Audit (VCS) v1.1 🚘
+77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
+79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 
 ### Community contributions
 
