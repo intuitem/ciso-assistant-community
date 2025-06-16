@@ -14,7 +14,7 @@ def update_audits_perimeter(apps, schema_editor):
         enclave = audit.folder
         enclave.name = f"{instance.perimeter.name}/{instance.name}"
         enclave.save()
-        perimeter = Perimeter.objects.create(
+        perimeter, created = Perimeter.objects.get_or_create(
             name=f"{instance.name}",
             folder=enclave,
         )
@@ -28,5 +28,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(update_audits_perimeter),
+        migrations.RunPython(
+            update_audits_perimeter, reverse_code=migrations.RunPython.noop
+        ),
     ]
