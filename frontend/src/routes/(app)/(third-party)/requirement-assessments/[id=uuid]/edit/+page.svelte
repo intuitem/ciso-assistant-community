@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
 	import type { ActionData, PageData } from './$types';
@@ -166,10 +164,6 @@
 		validationMethod: 'auto'
 	});
 
-	run(() => {
-		if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
-	});
-
 	let mappingInference = $derived({
 		sourceRequirementAssessment:
 			data.requirementAssessment.mapping_inference.source_requirement_assessment,
@@ -206,7 +200,7 @@
 
 	let formStore = $derived(requirementAssessmentForm.form);
 
-	run(() => {
+	$effect(() => {
 		if (form?.newControls) {
 			refreshKey = !refreshKey;
 			requirementAssessmentForm.form.update(
@@ -216,11 +210,12 @@
 				}),
 				{ taint: false }
 			);
+			form.newControls = undefined;
 			console.debug('formStore', $formStore);
 		}
 	});
 
-	run(() => {
+	$effect(() => {
 		if (form?.newEvidence) {
 			refreshKey = !refreshKey;
 			requirementAssessmentForm.form.update(
@@ -230,11 +225,12 @@
 				}),
 				{ taint: false }
 			);
+			form.newEvidence = undefined;
 			console.debug('formStore', $formStore);
 		}
 	});
 
-	run(() => {
+	$effect(() => {
 		if (form?.newSecurityException) {
 			refreshKey = !refreshKey;
 			requirementAssessmentForm.form.update(
@@ -244,16 +240,23 @@
 				}),
 				{ taint: false }
 			);
+			form.newSecurityException = undefined;
 			console.debug('formStore', $formStore);
 		}
+	});
+
+	$effect(() => {
+		if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 	});
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
 		<span class="code left h-min">{data.requirement.urn}</span>
-		<a class="text-pink-500 hover:text-pink-400" href={complianceAssessmentURL}
-			><i class="fa-solid fa-turn-up"></i></a
+		<a
+			class="text-pink-500 hover:text-pink-400"
+			href={complianceAssessmentURL}
+			aria-label="Go to compliance assessment"><i class="fa-solid fa-turn-up"></i></a
 		>
 	</div>
 	{#if data.requirement.description}
