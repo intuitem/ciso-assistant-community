@@ -41,6 +41,7 @@
 	const { value } = form ? formFieldProxy(form, valuePath) : {};
 
 	let internalValue = $state(value ? $value : initialValue);
+
 	$effect(() => {
 		if (initialValue) {
 			internalValue = initialValue;
@@ -51,6 +52,8 @@
 		if (value) {
 			$value = internalValue;
 		}
+		const input = radioInputs[internalValue];
+		if (input) input.checked = true;
 	});
 
 	$effect(() => {
@@ -63,6 +66,7 @@
 
 	let disabledClasses = $derived(disabled ? 'opacity-50 cursor-not-allowed' : '');
 	let labeledOptions = $derived(possibleOptions.filter((option) => option[labelKey]));
+	let radioInputs: { [key: string]: HTMLInputElement } = {};
 </script>
 
 <div class="control overflow-x-clip">
@@ -82,6 +86,7 @@
 							name={field}
 							class="invisible"
 							id={option.id}
+							bind:this={radioInputs[option[key]]}
 							onchange={(e) => {
 								internalValue = option[key];
 								onChange(internalValue);
