@@ -1,32 +1,51 @@
-<!-- @migration-task Error while migrating Svelte code: Can't migrate code with afterUpdate. Please migrate by hand. -->
 <script lang="ts">
-	import { afterUpdate } from 'svelte';
+	import { run } from 'svelte/legacy';
+
 	import OTPItem from './OTPItem.svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let field = 'code';
-	export let form: SuperForm<Record<string, string>>;
-	export let numOfInputs: number = 6;
-	export let separator = '';
-	export let inputClass = '';
-	export let wrapperClass = '';
-	export let separatorClass = '';
-	export let inputStyle = '';
-	export let wrapperStyle = '';
-	export let separatorStyle = '';
-	export let numberOnly = true;
-	export let placeholder = '';
-	export let onlyShowMiddleSeparator = false;
-	export let clearOnError = true;
+	interface Props {
+		field?: string;
+		form: SuperForm<Record<string, string>>;
+		numOfInputs?: number;
+		separator?: string;
+		inputClass?: string;
+		wrapperClass?: string;
+		separatorClass?: string;
+		inputStyle?: string;
+		wrapperStyle?: string;
+		separatorStyle?: string;
+		numberOnly?: boolean;
+		placeholder?: string;
+		onlyShowMiddleSeparator?: boolean;
+		clearOnError?: boolean;
+	}
+
+	let {
+		field = 'code',
+		form,
+		numOfInputs = 6,
+		separator = '',
+		inputClass = '',
+		wrapperClass = '',
+		separatorClass = '',
+		inputStyle = '',
+		wrapperStyle = '',
+		separatorStyle = '',
+		numberOnly = true,
+		placeholder = '',
+		onlyShowMiddleSeparator = false,
+		clearOnError = true
+	}: Props = $props();
 
 	const { value, errors } = formFieldProxy(form, field);
 
-	let codes: string[] = [
+	let codes: string[] = $state([
 		...$value.slice(0, numOfInputs).split(''),
 		...Array(numOfInputs <= $value.length ? 0 : numOfInputs - $value.length).fill('')
-	];
-	let inputs: (null | HTMLInputElement)[] = Array(numOfInputs).fill(null);
+	]);
+	let inputs: (null | HTMLInputElement)[] = $state(Array(numOfInputs).fill(null));
 
 	function reset() {
 		$value = '';
@@ -41,24 +60,29 @@
 		}
 	}
 
-	$: if ($errors && clearOnError) {
-		console.log('clearing');
-		reset();
-	}
-
-	afterUpdate(() => {
+	$effect(() => {
 		codes = [
 			...$value.slice(0, numOfInputs).split(''),
 			...Array(numOfInputs <= $value.length ? 0 : numOfInputs - $value.length).fill('')
 		];
 	});
 
-	$: placeholders =
+	run(() => {
+		if ($errors && clearOnError) {
+			console.log('clearing');
+			reset();
+		}
+	});
+
+	let placeholders = $derived(
 		placeholder.length < numOfInputs
 			? [...placeholder.split(''), ...Array(numOfInputs - placeholder.length).fill('')]
-			: placeholder.split('');
+			: placeholder.split('')
+	);
 
-	$: $value = codes.join('');
+	run(() => {
+		$value = codes.join('');
+	});
 </script>
 
 {#if $errors}
@@ -68,12 +92,12 @@
 		{/each}
 	</div>
 {/if}
-<div class={`wrapper ${wrapperClass}`} style={wrapperStyle} on:keyup={keyUpHandler}>
+<div class={`wrapper ${wrapperClass}`} style={wrapperStyle} onkeyup={keyUpHandler}>
 	{#each codes as value, i (i)}
 		<OTPItem
 			num={numberOnly}
 			bind:input={inputs[i]}
-			bind:value
+			bind:value={codes[i]}
 			index={i}
 			bind:codes
 			{inputs}
