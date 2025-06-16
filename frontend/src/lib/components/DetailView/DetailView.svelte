@@ -218,7 +218,7 @@
 	});
 
 	let relatedModels = $derived(
-		Object.entries(data.relatedModels).sort((a: [string, any], b: [string, any]) => {
+		Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
 		})
 	);

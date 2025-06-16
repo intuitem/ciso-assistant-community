@@ -424,7 +424,7 @@
 															{#each value as val}
 																<li>
 																	{#if val.str && val.id}
-																		{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																		{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 																		<Anchor href={itemHref} class="anchor" stopPropagation
 																			>{val.str}</Anchor
 																		>
@@ -443,7 +443,7 @@
 														</ul>
 													{:else if value && value.str}
 														{#if value.id}
-															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
 															{#if key === 'ro_to_couple'}
 																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
