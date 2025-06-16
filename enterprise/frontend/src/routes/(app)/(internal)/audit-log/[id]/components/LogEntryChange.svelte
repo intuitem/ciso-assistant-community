@@ -3,9 +3,13 @@
 
   type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
-  export let field: string;
-  export let before: ProcessedValue;
-  export let after: ProcessedValue;
+  interface Props {
+    field: string;
+    before: ProcessedValue;
+    after: ProcessedValue;
+  }
+
+  let { field, before, after }: Props = $props();
 </script>
 
 <div class="px-4 grid grid-cols-6">
@@ -20,7 +24,7 @@
         {before}
       </span>
   </dd>
-  <i class="fa-solid fa-arrow-right my-auto" />
+  <i class="fa-solid fa-arrow-right my-auto"></i>
   <dd class="px-2 text-gray-700 col-span-2 whitespace-pre-line">
       <span>
         {after}
