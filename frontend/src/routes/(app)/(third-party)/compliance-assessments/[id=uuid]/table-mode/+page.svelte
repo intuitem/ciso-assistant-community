@@ -1,31 +1,30 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import Score from '$lib/components/Forms/Score.svelte';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import {
-		complianceResultTailwindColorMap,
-		complianceStatusTailwindColorMap
-	} from '$lib/utils/constants';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { Accordion, Segment, Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
-	import { superForm } from 'sveltekit-superforms';
-	import type { Actions, PageData } from './$types';
-	import {} from '@skeletonlabs/skeleton-svelte';
-	import { displayScoreColor } from '$lib/utils/helpers';
-	import { complianceResultColorMap } from '$lib/utils/constants';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
+	import {
+		complianceResultColorMap,
+		complianceResultTailwindColorMap,
+		complianceStatusTailwindColorMap
+	} from '$lib/utils/constants';
+	import { displayScoreColor } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
+	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
+	import { superForm, type SuperForm } from 'sveltekit-superforms';
+	import type { Actions, PageData } from './$types';
 
 	interface Props {
 		data: PageData;
@@ -46,8 +45,7 @@
 		actionPath = '',
 		questionnaireOnly = false,
 		assessmentOnly = false,
-		invalidateAll = true,
-		...rest
+		invalidateAll = true
 	}: Props = $props();
 
 	const result_options = [
@@ -65,13 +63,15 @@
 	];
 
 	const requirementHashmap = Object.fromEntries(
-		data.requirements.map((requirement) => [requirement.id, requirement])
+		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
 	);
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	const requirementAssessments = $state(data.requirement_assessments);
+	const requirementAssessments = $derived(data.requirement_assessments);
 	const complianceAssessment = $state(data.compliance_assessment);
+
+	// svelte-ignore state_referenced_locally
 	requirementAssessments.forEach((ra) => {
 		hideSuggestionHashmap[ra.id] = true;
 	});
@@ -80,7 +80,7 @@
 
 	// Memoized title function
 	const titleMap = new Map();
-	function getTitle(requirementAssessment) {
+	function getTitle(requirementAssessment: Record<string, any>) {
 		if (titleMap.has(requirementAssessment.id)) {
 			return titleMap.get(requirementAssessment.id);
 		}
@@ -93,10 +93,12 @@
 
 	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
 	async function updateBulk(
-		requirementAssessment,
+		requirementAssessment: Record<string, any>,
 		data: { [key: string]: string | number | boolean | null }
 	) {
-		const form = document.getElementById(`tableModeForm-${requirementAssessment.id}`);
+		const form = document.getElementById(
+			`tableModeForm-${requirementAssessment.id}`
+		) as HTMLFormElement;
 		const formData = {
 			...data,
 			id: requirementAssessment.id
@@ -110,7 +112,7 @@
 
 	// Function to update requirement assessments
 	async function update(
-		requirementAssessment,
+		requirementAssessment: Record<string, any>,
 		field: string,
 		answers: {
 			urn: { value: string | string[] };
@@ -129,6 +131,7 @@
 
 	// Memoized color function
 	const colorCache = new Map();
+
 	function addColor(result: string, map: Record<string, string>) {
 		const cacheKey = `${result}-${JSON.stringify(map)}`;
 		if (colorCache.has(cacheKey)) {
@@ -140,18 +143,12 @@
 	}
 
 	let questionnaireMode = $state(
-		questionnaireOnly
-			? true
-			: assessmentOnly
-				? false
-				: $page.data.user.is_third_party
-					? true
-					: false
+		questionnaireOnly ? true : assessmentOnly ? false : page.data.user.is_third_party ? true : false
 	);
 
 	const modalStore: ModalStore = getModalStore();
 
-	function modalEvidenceCreateForm(createform): void {
+	function modalEvidenceCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -187,12 +184,13 @@
 	});
 
 	const requirementAssessmentScores = Object.fromEntries(
+		// svelte-ignore state_referenced_locally
 		requirementAssessments.map((requirement) => {
 			return [requirement.id, [requirement.is_scored, requirement.score]];
 		})
 	);
 
-	async function updateScore(requirementAssessment) {
+	async function updateScore(requirementAssessment: Record<string, any>) {
 		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
@@ -213,7 +211,7 @@
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
 	}
 
-	function modalUpdateForm(requirementAssessment): void {
+	function modalUpdateForm(requirementAssessment: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
@@ -232,18 +230,19 @@
 		modalStore.trigger(modal);
 	}
 
-	function toggleSuggestion(requirementAssessmentId) {
+	function toggleSuggestion(requirementAssessmentId: string) {
 		hideSuggestionHashmap[requirementAssessmentId] =
 			!hideSuggestionHashmap[requirementAssessmentId];
 	}
 
-	function getClassesText(mappingInferenceResult) {
+	function getClassesText(mappingInferenceResult: string) {
 		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
 	}
 	// Create separate superForm instances for each requirement assessment
 	let scoreForms = $state({});
 	let docScoreForms = $state({});
 	let isScoredForms = $state({});
+
 	run(() => {
 		// Initialize the form instances
 		requirementAssessments.forEach((requirementAssessment, index) => {
@@ -267,6 +266,7 @@
 	});
 
 	const accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
+		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce((acc, requirementAssessment) => {
 			const requirement =
 				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
@@ -302,8 +302,8 @@
 					<Switch
 						name="questionnaireToggle"
 						classes="flex flex-row items-center justify-center"
-						active="bg-primary-500"
-						background="bg-green-500"
+						controlActive="bg-primary-500"
+						controlInactive="bg-green-500"
 						onCheckedChange={(e) => {
 							questionnaireMode = e.checked;
 						}}
@@ -325,7 +325,7 @@
 					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 				></div>
 
-				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl z-auto">
+				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
 					{getTitle(requirementAssessment)}
 				</span>
 			</span>
@@ -370,7 +370,7 @@
 								{#if data.requirements[i].typical_evidence}
 									<div class="my-2">
 										<p class="font-medium">
-											<i class="fa-solid fa-pencil" />
+											<i class="fa-solid fa-pencil"></i>
 											{m.typicalEvidence()}
 										</p>
 										<p class="whitespace-pre-line py-1">
@@ -635,6 +635,7 @@
 																requirementAssessment.observation;
 														}}
 														type="button"
+														aria-label="Save observation"
 													>
 														<i class="fa-solid fa-check opacity-70"></i>
 													</button>
@@ -644,6 +645,7 @@
 															(requirementAssessment.observation =
 																requirementAssessment.observationBuffer)}
 														type="button"
+														aria-label="Reset observation"
 													>
 														<i class="fa-solid fa-xmark opacity-70"></i>
 													</button>
