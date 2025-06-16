@@ -126,6 +126,7 @@
 							<RadioGroup
 								possibleOptions={possible_options}
 								initialValue={currentRequirementAssessment.result}
+								classes="w-full"
 								colorMap={complianceResultTailwindColorMap}
 								field="result"
 								onChange={(newValue) => {

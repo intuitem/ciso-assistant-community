@@ -4,6 +4,7 @@
 
 	interface Props {
 		possibleOptions: { id: string; label: string }[];
+		classes?: string;
 		colorMap?: { [key: string]: string };
 		label?: string;
 		helpText?: string;
@@ -12,7 +13,7 @@
 		initialValue?: any;
 		onChange?: (value: string) => void;
 		cacheLock?: CacheLock;
-		cachedValue: any;
+		cachedValue?: any;
 		field: string;
 		valuePath?: string;
 		key: string;
@@ -20,6 +21,7 @@
 	}
 	let {
 		possibleOptions,
+		classes = '',
 		colorMap = {},
 		label,
 		helpText,
@@ -69,12 +71,12 @@
 	let radioInputs: { [key: string]: HTMLInputElement } = {};
 </script>
 
-<div class="control overflow-x-clip">
+<div class="control overflow-x-clip grow">
 	{#if label}
 		<label class="text-sm font-semibold" for={field}>{label}</label><br />
 	{/if}
 	<div
-		class="p-1 inline-flex gap-1 flex-wrap items-center bg-gray-200 border border-gray-400 rounded-md {disabledClasses}"
+		class="p-1 inline-flex gap-1 grow flex-wrap items-center bg-gray-200 border border-gray-400 rounded-md {classes} {disabledClasses}"
 	>
 		{#each labeledOptions as option}
 			{@const color = colorMap[option.id] ?? 'preset-filled-primary-500'}
