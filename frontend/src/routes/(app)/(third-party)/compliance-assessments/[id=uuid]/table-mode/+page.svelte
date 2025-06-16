@@ -499,9 +499,7 @@
 									initialValue={requirementAssessment.answers}
 									field="answers"
 									{shallow}
-									onChange={(urn, newValue) => {
-										const newAnswer =
-											requirementAssessment.answers[urn] === newValue ? null : newValue;
+									onChange={(urn, newAnswer) => {
 										requirementAssessment.answers[urn] = newAnswer;
 										update(requirementAssessment, 'answers', requirementAssessment.answers);
 									}}

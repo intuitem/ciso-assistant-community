@@ -25,8 +25,10 @@
 		<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 			<TreeView>
 				<TreeViewItem
-					on:toggle={async (e) => {
-						e.preventDefault();
+					alwaysDisplayCaret={true}
+					caretOpen=""
+					caretClosed="-rotate-90"
+					onToggle={async () => {
 						const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
 						const result = await preloadData(href);
 						if (result.type === 'loaded' && result.status === 200) {

@@ -89,7 +89,10 @@
 						key="urn"
 						labelKey="value"
 						field="answers"
-						onChange={(newValue) => onChange(urn, newValue)}
+						onChange={(newValue) => {
+							internalAnswers[urn] = newValue;
+							onChange(urn, newValue);
+						}}
 					/>
 				{:else if question.type === 'multiple_choice'}
 					<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">

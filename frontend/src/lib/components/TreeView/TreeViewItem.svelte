@@ -35,9 +35,11 @@
 		regionSymbol?: string;
 		regionChildren?: string;
 		// Props (work-around)
+		alwaysDisplayCaret?: boolean;
 		hideLead?: boolean;
 		hideChildren?: boolean;
 		classProp?: string; // Replacing $$props.class
+		onToggle?: (isOpened: boolean) => void;
 		children?: import('svelte').Snippet;
 		lead?: import('svelte').Snippet;
 		childrenSlot?: import('svelte').Snippet;
@@ -66,8 +68,10 @@
 		regionSummary = getContext('regionSummary'),
 		regionSymbol = getContext('regionSymbol'),
 		regionChildren = getContext('regionChildren'),
+		alwaysDisplayCaret = false,
 		hideLead = false,
 		hideChildren = false,
+		onToggle = () => {},
 		children,
 		classProp = '',
 		lead,
@@ -84,7 +88,9 @@
 	const cChildren = 'space-y-1';
 	const cDisabled = 'opacity-50 cursor-not-allowed!';
 
-	let classesCaretState = $derived(open && childrenProp && !hideChildren ? caretOpen : caretClosed);
+	let classesCaretState = $derived(
+		open && ((childrenProp && !hideChildren) || alwaysDisplayCaret) ? caretOpen : caretClosed
+	);
 	let classesDisabled = $derived(disabled ? cDisabled : '');
 	let classesBase = $derived(`${cBase} ${classProp}`);
 	let classesSummary = $derived(
@@ -291,9 +297,8 @@
 			}
 		}
 	});
-	run(() => {
-		dispatch('toggle', { open });
-	});
+
+	$effect(() => onToggle(open));
 	run(() => {
 		childrenProp?.forEach((child) => {
 			if (child)
@@ -350,7 +355,7 @@
 	>
 		<!-- Symbol -->
 		<div class="tree-summary-symbol {classesSymbol}">
-			{#if childrenProp && !hideChildren}
+			{#if (childrenProp && !hideChildren) || alwaysDisplayCaret}
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
 					<path
 						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"

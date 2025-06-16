@@ -12,7 +12,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Duration from '../Duration.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
 
 	interface Props {
@@ -170,15 +170,17 @@
 						class="h-full flex flex-row items-center justify-center my-1"
 						classesContainer="h-full"
 					/>
-					<RadioGroupInput
+					<RadioGroup
+						possibleOptions={securityObjectiveOptions}
 						{form}
 						label={safeTranslate(objective)}
+						labelKey="label"
+						key="value"
 						field={objective}
 						valuePath="security_objectives.objectives.{objective}.value"
-						options={securityObjectiveOptions}
 						disabled={objectiveFormData && objectiveFormData.is_enabled === false}
-					/></span
-				>
+					/>
+				</span>
 			{/each}
 		</div>
 	</Dropdown>

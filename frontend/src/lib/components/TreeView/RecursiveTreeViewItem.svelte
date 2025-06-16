@@ -166,17 +166,17 @@
 			disabled={disabledNodes.includes(node.id)}
 			checked={checkedNodes.includes(node.id)}
 			indeterminate={indeterminateNodes.includes(node.id)}
-			on:toggle={(e) => toggleNode(node, e.detail.open)}
+			onToggle={(isOpened) => {
+				toggleNode(node, isOpened);
+				dispatch('toggle', {
+					id: node.id
+				});
+			}}
 			on:groupChange={(e) => checkNode(node, e.detail.checked, e.detail.indeterminate)}
 			on:click={() =>
 				dispatch('click', {
 					id: node.id
 				})}
-			on:toggle={() => {
-				dispatch('toggle', {
-					id: node.id
-				});
-			}}
 		>
 			{#if typeof node.content === 'string'}
 				{node.content}
