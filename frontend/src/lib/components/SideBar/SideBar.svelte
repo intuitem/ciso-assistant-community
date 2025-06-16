@@ -1,4 +1,4 @@
-<script lang="ts" type="module">
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import SideBarFooter from './SideBarFooter.svelte';
 	import SideBarHeader from './SideBarHeader.svelte';
@@ -14,12 +14,16 @@
 	import { page } from '$app/stores';
 	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
 	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
 	import './driver-custom.css';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		open: boolean;
@@ -191,7 +195,7 @@
 		}
 	];
 
-	// const modalStore = getModalStore();
+	const modalStore = getModalStore();
 	const flash = getFlash(page);
 
 	function modalFirstLogin(): void {
@@ -222,7 +226,7 @@
 			title: m.firstTimeLoginModalTitle(),
 			body: m.firstTimeLoginModalDescription()
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	const loading = writable(false);
