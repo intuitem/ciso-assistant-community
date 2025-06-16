@@ -6,6 +6,7 @@
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { m } from '$paraglide/messages';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import { superForm } from 'sveltekit-superforms';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -24,6 +25,17 @@
 	let { parent, _form, formAction }: Props = $props();
 
 	let useRecoveryCode = $state(false);
+
+	const form = superForm(_form, {
+		dataType: 'json',
+		validators: zod(mfaAuthenticateSchema),
+		validationMethod: 'onsubmit',
+		onUpdated: async ({ form }) => {
+			if (form.valid && parent && typeof parent.onConfirm === 'function') {
+				parent.onConfirm();
+			}
+		}
+	});
 </script>
 
 {#if $modalStore[0]}
@@ -36,6 +48,7 @@
 				dataType="json"
 				action={formAction}
 				data={_form}
+				_form={form}
 				validators={zod(mfaAuthenticateSchema)}
 				class="modal-form {cForm}"
 				validationMethod="onsubmit"

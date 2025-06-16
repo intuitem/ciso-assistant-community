@@ -8,6 +8,8 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../utils/schemas';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { superForm } from 'sveltekit-superforms';
+	import { goto } from '$app/navigation';
 
 	// Base Classes
 	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
@@ -25,6 +27,17 @@
 	let { parent, totp, _form, formAction }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+
+	const form = superForm(_form, {
+		dataType: 'json',
+		validators: zod(activateTOTPSchema),
+		validationMethod: 'onsubmit',
+		onUpdated: async ({ form }) => {
+			if (form.valid && parent && typeof parent.onConfirm === 'function') {
+				parent.onConfirm();
+			}
+		}
+	});
 </script>
 
 {#if $modalStore[0]}
@@ -64,6 +77,7 @@
 					dataType="json"
 					action={formAction}
 					data={_form}
+					_form={form}
 					validators={zod(activateTOTPSchema)}
 					class="modal-form {cForm}"
 					validationMethod="onsubmit"
