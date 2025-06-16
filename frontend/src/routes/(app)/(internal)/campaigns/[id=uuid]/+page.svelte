@@ -5,8 +5,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
 	export let data: PageData;
-	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
 </script>
 
 <DetailView {data}>
@@ -14,11 +13,42 @@
 		<Anchor
 			href={`${$page.url.pathname}/action-plan`}
 			class="btn variant-filled-primary h-fit"
-			breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />Advanced analytics</Anchor
+			breadcrumbAction="push"
 		>
+			<i class="fa-solid fa-heart-pulse mr-2" />Advanced analytics
+		</Anchor>
 	</div>
 
-	<div slot="widgets" class="h-full flex flex-col space-y-4">
-		{JSON.stringify(data.metrics, null, 4)}
+	<div slot="widgets" class="h-full flex flex-col space-y-6 p-4">
+		<!-- Progress Widget -->
+		<div class="bg-white rounded-lg shadow-sm border p-6">
+			<div class="flex flex-col items-center">
+				<h3 class="text-lg font-semibold text-gray-800 mb-4">
+					{m.averageProgress()}
+				</h3>
+				<RingProgress
+					value={data.metrics.avg_progress}
+					max={100}
+					isPercentage={true}
+					classesContainer="w-32 h-32"
+				/>
+			</div>
+		</div>
+
+		<!-- Days Remaining Widget -->
+		<div class="bg-white rounded-lg shadow-sm border p-6">
+			<div class="flex flex-col items-center">
+				<div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+					<i class="fa-solid fa-calendar-days text-blue-600 text-xl"></i>
+				</div>
+				<h3 class="text-lg font-semibold text-gray-800 mb-2">
+					{m.daysRemaining()}
+				</h3>
+				<p class="text-3xl font-bold text-gray-900">
+					{data.metrics.days_remaining}
+					<span class="text-sm font-normal text-gray-500 ml-1">days</span>
+				</p>
+			</div>
+		</div>
 	</div>
 </DetailView>

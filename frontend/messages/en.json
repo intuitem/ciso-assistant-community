@@ -1638,6 +1638,8 @@
 	"campaign": "Campaign",
 	"campaigns": "Campaigns",
 	"addCampaign": "Start a campaign",
+  "averageProgress": "Average progress",
+  "daysRemaining": "Days remaining",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
