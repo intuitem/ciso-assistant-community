@@ -94,7 +94,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
             enclave = Folder.objects.create(
                 content_type=Folder.ContentType.ENCLAVE,
-                name=f"{instance.perimeter.name}/{instance.entity.name}",
+                name=f"{instance.perimeter.name}/{instance.name}",
                 parent_folder=instance.folder,
             )
             perimeter = Perimeter.objects.create(
