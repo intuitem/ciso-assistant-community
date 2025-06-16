@@ -7,14 +7,14 @@ def update_audits_perimeter(apps, schema_editor):
     Perimeter = apps.get_model("core", "Perimeter")
     EntityAssessment = apps.get_model("tprm", "EntityAssessment")
 
-    for instance in EntityAssessment.objects.all():
+    for instance in EntityAssessment.objects.all().iterator():
         audit = instance.compliance_assessment
         if not audit:
             continue
         enclave = audit.folder
         enclave.name = f"{instance.perimeter.name}/{instance.name}"
         enclave.save()
-        perimeter, created = Perimeter.objects.get_or_create(
+        perimeter, _ = Perimeter.objects.get_or_create(
             name=f"{instance.name}",
             folder=enclave,
         )
