@@ -41,7 +41,6 @@
 	interface Props {
 		data: PageData;
 		form: ActionData;
-		actionsBody?: import('svelte').Snippet<[any]>;
 		[key: string]: any;
 	}
 
@@ -106,7 +105,7 @@
 		})
 	);
 
-	let invalidateTable = $state(false);
+	let invalidateTable = $state(true);
 
 	$effect(() => {
 		if (page.form?.form?.posted && page.form?.form?.valid) {
@@ -306,7 +305,6 @@
 								detailURL={`/${actionsURLModel}/${meta.id}`}
 								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								{row}
-								hasBody={actionsBody}
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
