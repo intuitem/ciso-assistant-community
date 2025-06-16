@@ -36,6 +36,7 @@
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.
+	// NOTE: .svelte.ts files might help here https://svelte.dev/docs/svelte/svelte-js-files
 	const steps = [
 		{
 			id: 1,
