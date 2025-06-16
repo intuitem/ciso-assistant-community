@@ -84,12 +84,12 @@
 </script>
 
 <!-- App Shell -->
-<div>
+<div class="overflow-x-hidden">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
 		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
 		background="bg-white"
-		padding="py-2 px-4"
+		padding="pb-2 px-4"
 	>
 		{#snippet headline()}
 			<span
@@ -116,7 +116,7 @@
 	<!-- Router Slot -->
 	<CommandPalette />
 	<main
-		class="h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>
