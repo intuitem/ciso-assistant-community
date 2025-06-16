@@ -121,7 +121,7 @@
 				<div>
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						<ul
-							class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+							class="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
 						>
 							<RadioGroup
 								possibleOptions={possible_options}
