@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
+	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import '../../app.css';
@@ -90,7 +91,7 @@
 </script>
 
 <!-- App Shell -->
-<div>
+<div class="overflow-x-hidden">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
   {#if data.licenseStatus.status === 'expired'}
     <aside class="preset-tonal-warning text-center w-full items-center py-2">
@@ -129,9 +130,9 @@
 		{/snippet}
 	</AppBar>
 	<!-- Router Slot -->
-	<!-- <CommandPalette /> -->
+	<CommandPalette />
 	<main
-		class="h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>
