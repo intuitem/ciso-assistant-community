@@ -153,7 +153,11 @@
 					<i class="fas fa-calendar-day"></i>
 					{m.today()}
 				</a>
-				<Switch name="tasks-toggle" bind:checked={$showAllEvents} active="bg-green-500"
+				<Switch
+					name="tasks-toggle"
+					checked={$showAllEvents}
+					onCheckedChange={(e) => ($showAllEvents = e.checked)}
+					active="bg-green-500"
 					><span class="text-white font-light text-lg">{m.showAllEvents()}</span></Switch
 				>
 			</div>
