@@ -2,12 +2,15 @@
 
 from django.db import migrations
 
+
 def update_audits_perimeter(apps, schema_editor):
-    Perimeter = apps.get_model('core', 'Perimeter')
-    EntityAssessment = apps.get_model('tprm', 'EntityAssessment')
+    Perimeter = apps.get_model("core", "Perimeter")
+    EntityAssessment = apps.get_model("tprm", "EntityAssessment")
 
     for instance in EntityAssessment.objects.all():
         audit = instance.compliance_assessment
+        if not audit:
+            continue
         enclave = audit.folder
         enclave.name = f"{instance.perimeter.name}/{instance.name}"
         enclave.save()
@@ -18,10 +21,10 @@ def update_audits_perimeter(apps, schema_editor):
         audit.perimeter = perimeter
         audit.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('tprm', '0005_solution_assets'),
+        ("tprm", "0005_solution_assets"),
     ]
 
     operations = [
