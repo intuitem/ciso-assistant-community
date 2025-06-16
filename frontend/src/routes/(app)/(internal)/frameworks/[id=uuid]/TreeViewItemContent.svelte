@@ -10,6 +10,7 @@
 		reference_controls?: Record<string, unknown>[];
 		children: Record<string, unknown>[];
 		assessable: boolean;
+		questions?: Record<string, { text: string }>;
 		[key: string]: any;
 	}
 
@@ -21,6 +22,7 @@
 		reference_controls = [],
 		children,
 		assessable,
+		questions = {},
 		...rest
 	}: Props = $props();
 
@@ -32,8 +34,9 @@
 		reference_controls,
 		children,
 		assessable,
+		questions,
 		...rest
-	} as const;
+	};
 
 	type TreeViewItemNode = typeof node;
 
@@ -62,7 +65,7 @@
 
 <div>
 	<span class="whitespace-pre-line" style="font-weight: 300;">
-		<p class="max-w-[80ch]">
+		<span class="max-w-[80ch]">
 			{#if title || description}
 				{#if title}
 					<span style="font-weight: 600;">{title}</span>
@@ -70,11 +73,11 @@
 				{#if description}
 					<p>{description}</p>
 				{/if}
-			{:else if Object.keys(node.questions).length > 0}
+			{:else if node?.questions && Object.keys(node.questions).length > 0}
 				<!-- This displays the first question's text -->
-				{Object.entries(node.questions)[0][1].text}
+				{Object.entries(node?.questions)[0][1].text}
 			{/if}
-		</p>
+		</span>
 	</span>
 	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 		<div
@@ -109,7 +112,6 @@
 				{:else}
 					<ul class="list-disc ml-4">
 						{#each getOptions( { objects: reference_controls, extra_fields: [['folder', 'str']], label: 'auto' } ) as func}
-							// convention for automatic label calculation
 							<li>
 								<p>{func.label}</p>
 							</li>
