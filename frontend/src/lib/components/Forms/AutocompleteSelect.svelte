@@ -343,7 +343,11 @@
 				<span class="text-indigo-600">{option.label}</span>
 				<span class="text-sm text-gray-500"> (suggested)</span>
 			{:else if translateOptions && option.label}
-				{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
+				{#if field === 'ro_to_couple'}
+					{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split('-')[1]}
+				{:else}
+					{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
+				{/if}
 			{:else}
 				{option.label || option}
 			{/if}
