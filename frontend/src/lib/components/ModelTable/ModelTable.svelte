@@ -74,6 +74,8 @@
 	export let detailQueryParameter: string | undefined = undefined;
 	export let fields: string[] = [];
 	export let canSelectObject = false;
+	export let forcePreventDelete = false;
+	export let forcePreventEdit = false;
 
 	export let hideFilters = false;
 
@@ -148,7 +150,10 @@
 		(row?.meta?.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
-		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type);
+		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
+		forcePreventDelete;
+	const preventEdit = (row: TableSource) =>
+		forcePreventEdit;
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
@@ -456,6 +461,7 @@
 												hasBody={$$slots.actionsBody}
 												{identifierField}
 												preventDelete={preventDelete(row)}
+												preventEdit={preventEdit(row)}
 											>
 												<svelte:fragment slot="head">
 													{#if $$slots.actionsHead}

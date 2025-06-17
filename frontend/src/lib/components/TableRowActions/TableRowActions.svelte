@@ -24,6 +24,7 @@
 	export let URLModel: urlModel | string | undefined;
 	export let identifierField = 'id';
 	export let preventDelete = false;
+	export let preventEdit = false;
 	export let baseClass =
 		'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end';
 
@@ -113,7 +114,9 @@
 					})
 				: Object.hasOwn(user.permissions, `delete_${model.name}`)
 			: false);
-	$: canEditObject = model
+	$: canEditObject = 
+	  	!preventEdit &&
+		(model
 		? $page.params.id
 			? canPerformAction({
 					user,
@@ -125,7 +128,7 @@
 							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
 				})
 			: Object.hasOwn(user.permissions, `change_${model.name}`)
-		: false;
+		: false);
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
