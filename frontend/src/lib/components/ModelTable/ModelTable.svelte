@@ -90,7 +90,11 @@
 		if (!rowMetaData[identifierField] || !URLModel) return;
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
 			label:
-				rowMetaData.str ?? rowMetaData.name ?? rowMetaData.email ?? rowMetaData[identifierField],
+				rowMetaData.str ??
+				rowMetaData.name ??
+				rowMetaData.email ??
+				rowMetaData.label ??
+				rowMetaData[identifierField],
 			breadcrumbAction: 'push'
 		});
 	}
