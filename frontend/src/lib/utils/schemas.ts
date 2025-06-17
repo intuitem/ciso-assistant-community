@@ -106,7 +106,7 @@ export const LibraryUploadSchema = z.object({
 
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
-	version: z.string().optional().default('0.1'),
+	version: z.string().optional().default('1.0'),
 	perimeter: z.string(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
@@ -304,6 +304,7 @@ export const SetPasswordSchema = z.object({
 
 export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
 	perimeter: z.string(),
 	status: z.string().optional().nullable(),
