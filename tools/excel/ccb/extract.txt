@@ -2441,7 +2441,7 @@ packet sniffers en laptops omvatten.
 --- Page 52 ---
 CyberFundamentals 
 Beschermen (PR) 
-Beschermingstechnologie (PR.PT)
+Beschermingstechnologie (PR.MA)
 ESSENTIEEL
 Onderhoudsinstrumenten en draagbare opslagapparaten moeten worden geïnspecteerd 
 wanneer zij de faciliteit worden binnengebracht en moeten worden beschermd door anti-

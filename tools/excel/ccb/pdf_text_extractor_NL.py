@@ -1,3 +1,6 @@
+"""
+WARNING: The exported text must be modified before it can be used with ccb-cff-2023-03-01_framework_NL.py
+"""
 import fitz  # pymupdf
 
 def is_footer(text):
