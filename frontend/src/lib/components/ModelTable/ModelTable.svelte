@@ -214,12 +214,18 @@
 			? listViewFields[tableURLModel].filters
 			: {};
 
-	const filteredFields = Object.keys(filters);
-	const filterValues: { [key: string]: any } = $state({});
+	console.log(tableURLModel, filters);
 
-	// Initialize filter values from URL search params
-	for (const field of filteredFields)
-		filterValues[field] = page.url.searchParams.getAll(field).map((value) => ({ value }));
+	const filteredFields = Object.keys(filters);
+	const filterValues: { [key: string]: any } = $state(
+		Object.fromEntries(
+			filteredFields.map((field: string) => [
+				field,
+				page.url.searchParams.getAll(field).map((value) => ({ value }))
+			])
+		)
+	);
+	$inspect('filterValues', filterValues);
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
@@ -317,7 +323,7 @@
 				onOpenChange={(e) => (openState = e.open)}
 				positioning={{ placement: 'bottom-start' }}
 				triggerBase="btn preset-filled-primary-500 self-end relative"
-				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+				contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				zIndex="1000"
 				autoFocus={false}
 			>
@@ -331,8 +337,8 @@
 					</div>
 				{/snippet}
 				{#snippet content()}
-					<div class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200">
-						<SuperForm {_form} validators={zod(z.object({}))}>
+					<div>
+						<SuperForm {_form} debug validators={zod(z.object({}))}>
 							{#snippet children({ form })}
 								{#each filteredFields as field}
 									{#if filters[field]?.component}
