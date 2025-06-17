@@ -95,7 +95,7 @@
 		regionHead = '',
 		regionHeadCell = 'uppercase bg-white text-gray-700',
 		regionBody = 'bg-white',
-		regionCell = '',
+		regionCell = 'max-w-[65ch] text-ellipsis',
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
@@ -309,7 +309,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-container {classesBase}">
+<div class="table-wrap {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -376,7 +376,7 @@
 	</header>
 	<!-- Table -->
 	<table
-		class="w-full {classesTable}"
+		class="table caption-bottom {classesTable}"
 		class:table-interactive={interactive}
 		role="grid"
 		use:tableA11y
