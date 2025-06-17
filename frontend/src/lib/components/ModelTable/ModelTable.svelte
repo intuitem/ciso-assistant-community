@@ -214,8 +214,6 @@
 			? listViewFields[tableURLModel].filters
 			: {};
 
-	console.log(tableURLModel, filters);
-
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
@@ -225,7 +223,6 @@
 			])
 		)
 	);
-	$inspect('filterValues', filterValues);
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
