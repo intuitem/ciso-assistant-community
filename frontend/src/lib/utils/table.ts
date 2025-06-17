@@ -35,8 +35,6 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
-const YES_OPTION = [{ label: 'yes', value: 'true' }];
-
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -482,7 +480,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
-		options: YES_OPTION,
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -491,7 +489,7 @@ const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'mappingSuggested',
-		options: YES_OPTION,
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
