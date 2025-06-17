@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import { ProgressRing, Slider } from '@skeletonlabs/skeleton-svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { displayScoreColor } from '$lib/utils/helpers';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface ScoresDefinition {
@@ -35,7 +34,6 @@
 		label = undefined,
 		field,
 		isDoc = false,
-		fullDonut = false,
 		inversedColors = false,
 		styles = '',
 		min_score = 0,
@@ -45,13 +43,11 @@
 		disabled = false,
 		scores_definition = [],
 		form,
-		score = $bindable(),
 		onChange = () => {},
 		left
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	const dispatch = createEventDispatcher();
 	let previous = $state($value);
 
 	$effect(() => {
@@ -91,7 +87,7 @@
 					data-testid="range-slider-input"
 					name={field}
 					type="range"
-					class="input"
+					class="input px-0"
 					bind:value={$value}
 					min={min_score}
 					max={max_score}
