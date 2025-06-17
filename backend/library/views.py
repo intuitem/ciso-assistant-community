@@ -361,10 +361,12 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
 
     def filter_object_type(self, queryset, name, value: list[str]):
         # For backward compatibility
-        if "risk_matrix" in value:
-            value.append("risk_matrices")
-        if "requirement_mapping_set" in value:
-            value.append("requirement_mapping_sets")
+        if "risk_matrices" in value:
+            value.append("risk_matrix")
+        if "requirement_mapping_sets" in value:
+            value.append("requirement_mapping_set")
+        if "frameworks" in value:
+            value.append("framework")
         union_qs = Q()
         _value = {
             k: v
