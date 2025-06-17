@@ -319,6 +319,7 @@
 				triggerBase="btn preset-filled-primary-500 self-end relative"
 				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 				zIndex="1000"
+				autoFocus={false}
 			>
 				{#snippet trigger()}
 					<div id="filters">
@@ -330,10 +331,7 @@
 					</div>
 				{/snippet}
 				{#snippet content()}
-					<div
-						class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-						data-popup="popupFilter"
-					>
+					<div class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200">
 						<SuperForm {_form} validators={zod(z.object({}))}>
 							{#snippet children({ form })}
 								{#each filteredFields as field}
