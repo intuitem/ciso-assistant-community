@@ -323,39 +323,37 @@
 				contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				zIndex="1000"
 				autoFocus={false}
+				onPointerDownOutside={() => (openState = false)}
+				closeOnInteractOutside={false}
 			>
 				{#snippet trigger()}
-					<div id="filters">
-						<i class="fa-solid fa-filter mr-2"></i>
-						{m.filters()}
-						{#if filterCount}
-							<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
-						{/if}
-					</div>
+					<i class="fa-solid fa-filter mr-2"></i>
+					{m.filters()}
+					{#if filterCount}
+						<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+					{/if}
 				{/snippet}
 				{#snippet content()}
-					<div>
-						<SuperForm {_form} debug validators={zod(z.object({}))}>
-							{#snippet children({ form })}
-								{#each filteredFields as field}
-									{#if filters[field]?.component}
-										{@const SvelteComponent = filters[field].component}
-										<SvelteComponent
-											{form}
-											{field}
-											{...filters[field].props}
-											fieldContext="filter"
-											label={safeTranslate(filters[field].props?.label)}
-											onChange={(value) => {
-												filterValues[field] = value.map((v) => ({ value: v }));
-												invalidateTable = true;
-											}}
-										/>
-									{/if}
-								{/each}
-							{/snippet}
-						</SuperForm>
-					</div>
+					<SuperForm {_form} debug validators={zod(z.object({}))}>
+						{#snippet children({ form })}
+							{#each filteredFields as field}
+								{#if filters[field]?.component}
+									{@const SvelteComponent = filters[field].component}
+									<SvelteComponent
+										{form}
+										{field}
+										{...filters[field].props}
+										fieldContext="filter"
+										label={safeTranslate(filters[field].props?.label)}
+										onChange={(value) => {
+											filterValues[field] = value.map((v) => ({ value: v }));
+											invalidateTable = true;
+										}}
+									/>
+								{/if}
+							{/each}
+						{/snippet}
+					</SuperForm>
 				{/snippet}
 			</Popover>
 		{/if}
