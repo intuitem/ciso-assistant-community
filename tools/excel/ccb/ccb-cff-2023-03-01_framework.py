@@ -68,14 +68,26 @@ while i < n:
                 data.append({"name": header2.upper(), "description": "", "annotation": ""})
 
             if header3 not in seen_third_headers_per_second[current_second_header]:
-                data.append({"name": header3, "description": "", "annotation": ""})
+                # 🔽 Stocke temporairement l'entrée
+                temp_entry = {"name": header3, "description": "", "annotation": ""}
                 seen_third_headers_per_second[current_second_header].add(header3)
                 current_third_header = header3
             else:
                 current_third_header = None
+                temp_entry = None
 
+            # Gérer "ESSENTIEEL"
             if i < n and lines[i].strip().upper() == "ESSENTIEEL":
                 i += 1
+
+            # 🔽 Récupérer paragraphe qui suit ESSENTIEEL pour l’ajouter à l’entrée précédente
+            if temp_entry:
+                paragraph_lines = []
+                while i < n and lines[i].strip() and not lines[i].strip().startswith("Richtlijnen") and not is_reference_line(lines[i]) and not lines[i].strip().startswith("--- Page "):
+                    paragraph_lines.append(lines[i].strip())
+                    i += 1
+                temp_entry["description"] = " ".join(paragraph_lines)
+                data.append(temp_entry)
 
     # 🔁 Traiter tous les blocs paragraphes + Richtlijnen tant qu'on ne tombe pas sur une référence
     while i < n:
