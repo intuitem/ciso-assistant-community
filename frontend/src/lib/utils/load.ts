@@ -132,7 +132,7 @@ export const loadDetail = async ({ event, model, id }) => {
 	}
 	return {
 		data,
-		title: data.str || data.name || data.email || data.id,
+		title: data.str || data.name || data.email || data.label || data.id,
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,
