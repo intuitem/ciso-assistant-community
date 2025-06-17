@@ -92,6 +92,7 @@ Richtlijnen
 pakken; de organisatie kan ervoor kiezen het bedrijfsmiddel (asset) van het netwerk te verwijderen, 
 het bedrijfsmiddel (asset) te verbieden op afstand verbinding te maken met het netwerk, of het 
 bedrijfsmiddel (asset) in quarantaine te plaatsen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1 
 IEC 62443-2-1:2010, clausule 4.2.3.4 
@@ -151,6 +152,7 @@ aangemerkt.
 • 
 Niet-geautoriseerde software kan worden opgespoord tijdens inventarisatie, verzoeken om 
 ondersteuning door de gebruiker of andere middelen. 
+
 De mechanismen voor het opsporen van de aanwezigheid van niet-geautoriseerde software 
 in de ICT/OT-omgeving van de organisatie moeten worden geïdentificeerd.
 Richtlijnen
@@ -159,7 +161,7 @@ Richtlijnen
 pakken; de organisatie kan ervoor kiezen het bedrijfsmiddel (activa) van het netwerk te verwijderen, 
 het bedrijfsmiddel (activa) te verbieden op afstand verbinding te maken met het netwerk, of het 
 bedrijfsmiddel (activa) in quarantaine te plaatsen. 
- 
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 2. 
 IEC 62443-2-1:2010, clausule 4.2.3.4 
@@ -182,6 +184,7 @@ informatie.
 Overweeg deze informatie in kaart te brengen met de bijbehorende activa die zijn geïdentificeerd in 
 de inventarissen van fysieke apparaten, systemen, softwareplatforms en toepassingen die binnen de 
 organisatie worden gebruikt (zie ID.AM-1 & ID.AM-2).
+
 Alle verbindingen binnen de ICT/OT-omgeving van de organisatie en met andere interne 
 platforms van de organisatie moeten in kaart worden gebracht, gedocumenteerd, 
 goedgekeurd en zo nodig bijgewerkt.
@@ -222,6 +225,7 @@ kritische operaties en activa van de organisatie.
 o 
 Bescherming van het systeem tegen informatielekken als gevolg van elektromagnetische 
 signalen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 12. 
 IEC 62443-2-1:2010, clausule 4.2.3.4 
@@ -252,6 +256,7 @@ voordoen.
 Richtlijnen
 Overweeg van externe dienstverleners te verlangen dat zij de functies, poorten, protocollen en diensten die 
 nodig zijn voor de het verlenen van diensten om te connecteren identificeren en documenteren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 12. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), bijlage A (zie ISO 27002). 
@@ -305,6 +310,7 @@ Overweeg de implementatie van een geautomatiseerd hulpmiddel, zoals host-based D
 Prevention (DLP) om alle gevoelige gegevens te identificeren die zijn opgeslagen, verwerkt of 
 verzonden via bedrijfsmiddelen, met inbegrip van die welke zich ter plaatse of bij een externe 
 dienstverlener bevinden.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3. 
 IEC 62443-2-1:2010, clausule 4.2.3.6 
@@ -344,6 +350,7 @@ De organisatie zal een informatiebeveiligingsfunctionaris
 Richtlijnen
 De informatiebeveiligingsfunctionaris zou verantwoordelijk moeten zijn voor het toezicht op de 
 uitvoering van de informatie-/cyberbeveiligingsstrategie en -waarborgen van de organisatie
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.2.3.3  
@@ -387,6 +394,7 @@ toeleveringsketen door beveiligingswaarborgen toe te passen als onderdeel van ee
 gedocumenteerde alomvattende beveiligingsstrategie.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.19, 5.20, 5.21, 5.22 
@@ -400,6 +408,7 @@ Richtlijnen
 Organisatie die onder de NIS-wetgeving vallen, hebben de verantwoordelijkheid om de andere 
 organisaties in dezelfde sector te kennen om met hen samen te werken om de door de NIS-wetgeving 
 voor die specifieke sector vastgestelde doelstellingen te bereiken.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.2.2 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 4.1
@@ -417,6 +426,7 @@ moeten worden vastgesteld en gecommuniceerd.
 Richtlijnen
 De behoefte aan informatiebescherming moet worden vastgesteld en de desbetreffende processen 
 moeten zo nodig worden herzien.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.2.2, 4.2.3.6 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 5.2, 6.1, 7.4, bijlage A (zie ISO 27002). 
@@ -430,6 +440,7 @@ moeten als onderdeel van het risicobeoordelingsproces worden geïdentificeerd,
 gedocumenteerd en geprioriteerd op basis van hun kriticiteit.
 Richtlijnen
 Afhankelijkheden en bedrijfskritische functies moeten ondersteunende diensten omvatten.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.2.3.3 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.1, 8, bijlage A (zie ISO 27002). 
@@ -480,6 +491,7 @@ bij, bewaar er 2 op afzonderlijke locaties en bewaar één kopie op een externe 
 • 
 Overweeg mechanismen zoals hot swap, load balancing en failsafe toe te passen om de veerkracht te 
 vergroten.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 8.1, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.29, 7.5, 8.14
@@ -516,6 +528,7 @@ Beleid en procedures worden bij voorkeur ten minste jaarlijks worden herzien en 
 telkens wanneer er veranderingen zijn in de organisatie of de technologie. Telkens wanneer het 
 beleid wordt gewijzigd, is het aangewezen de werknemers op de hoogte te brengen van die 
 wijzigingen.
+
 Er 
 moet 
 een 
@@ -549,6 +562,7 @@ aspecten van de beveiliging (d.w.z. technische, fysieke, personele, cyberfysisch
 toegangscontrole, mediabescherming, kwetsbaarheidsbeheer, onderhoud, toezicht) 
 • 
 De dekking van de volledige levenscyclus van de ICT/OT-systemen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 14. 
 IEC 62443-2-1:2010, clausule 4.3.2.6 
@@ -569,6 +583,7 @@ Wettelijke en regelgevende voorschriften over informatie-/cyberbeveiliging, met 
 van privacy verplichtingen, moeten worden begrepen en uitgevoerd.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 De wet- en regelgeving inzake informatie-/cyberbeveiliging, met inbegrip van privacy 
 verplichtingen, wordt beheerd.
 Richtlijnen
@@ -577,6 +592,7 @@ Er zou regelmatig moeten worden nagegaan of voortdurend wordt voldaan aan de wet
 regelgeving inzake informatie-/cyberbeveiliging, met inbegrip van privacy verplichtingen. 
 • 
 Deze eis geldt ook voor aannemers en dienstverleners.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.4.3.7 
@@ -591,10 +607,12 @@ ontwikkeld en bijgewerkt wanneer zich veranderingen voordoen.
 Richtlijnen
 Deze strategie zou het bepalen en toewijzen moeten omvatten van de nodige middelen om de 
 bedrijfskritische activa van de organisatie te beschermen.
+
 Informatie- en cyberbeveiligingsrisico’s moeten worden gedocumenteerd, formeel 
 goedgekeurd, en bij wijzigingen bijgewerkt.
 Richtlijnen
 Overweeg het gebruik van instrumenten voor risicobeheer.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.2.3, 4.4.3.7 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 6
@@ -636,6 +654,7 @@ het testproces, moeten prestatie-/belastingstesten en penetratietesten op de sys
 de organisatie zorgvuldig worden uitgevoerd.
 Richtlijnen
 Overweeg het valideren van beveiligingsmaatregelen na elke penetratietest.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 7. 
 IEC 62443-2-1:2010, clausule 4.2.3, 4.2.3.9, 4.2.3.12. 
@@ -668,11 +687,13 @@ niet-geclassificeerde
 en 
 geclassificeerde 
 gegevensuitwisseling omvatten.
+
 Er moet worden vastgesteld waar geautomatiseerde mechanismen kunnen worden 
 toegepast om informatie over beveiligingswaarschuwingen en -adviezen ter beschikking te 
 stellen van belanghebbenden in de organisatie.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 14. 
 IEC 62443-2-1:2010, clausule 4.2.3, 4.2.3.9, 4.2.3.12. 
@@ -696,6 +717,7 @@ Herinner dat bedreigingen gebruik maken van kwetsbaarheden (“vulnerability”)
 • 
 Er zou in kaart moeten worden gebracht wat de gevolgen zijn van het verliezen van vertrouwelijkheid, 
 integriteit en beschikbaarheid voor de activa en gerelateerde bedrijfsprocessen.
+
 De organisatie moet risicobeoordelingen uitvoeren en documenteren waarin het risico 
 wordt bepaald door bedreigingen, kwetsbaarheden, gevolgen voor bedrijfsprocessen en 
 activa, en de waarschijnlijkheid dat deze zich voordoen.
@@ -708,10 +730,12 @@ en/of
 kwantitatieve 
 risicoanalysemethoden  
 (MAPGOOD, ISO27005, CIS RAM, ...) kunnen samen met softwaretooling worden gebruikt.
+
 De resultaten van risicobeoordelingen moeten aan de belanghebbenden worden 
 gecommuniceerd.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 7, 10. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 6.1, 7.4, bijlage A (zie ISO 27002). 
@@ -732,6 +756,7 @@ Het duidelijk moeten zijn wat de gevolgen zullen zijn als deze activa worden gec
 • 
 Er zou moeten worden vastgesteld hoe de uitvoering van adequate mitigerende maatregelen zal 
 worden georganiseerd.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 7, 10. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 6.1.3, bijlage A (zie ISO 27002). 
@@ -761,6 +786,7 @@ bijgewerkt wanneer zich wijzigingen voordoen.
 Richtlijnen
 Tot de externe belanghebbenden behoren klanten, investeerders, aandeelhouders, leveranciers, 
 overheidsinstanties en de gemeenschap in het algemeen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1) Kritische beveiliging Controle 7, 10  
 IEC 62443-2-1:2010, 4.3.4.2 
@@ -772,15 +798,18 @@ Richtlijnen
 De bepaling en uitdrukking van de risicotolerantie (risicobereidheid) moeten in overeenstemming zijn 
 met het beleid inzake informatiebeveiliging en cyberveiligheid, zodat de samenhang tussen beleid, 
 risicotolerantie en maatregelen gemakkelijker kan worden aangetoond.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.2.6.5 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 5.2, 6.1.3, 7.4, 8.3, 9.3.
+
 ID.RM-3:  De organisatie bepaalt haar risicotolerantie op basis van haar rol in de analyse
 van kritieke infrastructuur en sectorspecifieke risico's.
 De risicotolerantie van de organisatie wordt bepaald door haar rol in de kritische 
 infrastructuur en sectorspecifieke risicoanalyses.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 5.2, 6.1.3, 8.3, 9.3.
 
@@ -810,6 +839,7 @@ en onderling verbonden aard van de toeleveringsketens van ICT/OT-producten en -d
 ondersteunt.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.4.2 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 5.3, 8.1, bijlage A (zie ISO 27002). 
@@ -844,6 +874,7 @@ Richtlijnen
 Deze lijst zou de contactgegevens moeten bevatten van leveranciers, verkopers en partners aangevuld met 
 de diensten die zij leveren, zodat zij kunnen worden gecontacteerd voor bijstand in geval van een storing of 
 dienstonderbreking.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.2.3.1, 4.2.3.2, 4.2.3.3, 4.2.3.4, 4.2.3.6, 4.2.3.8, 4.2.3.9, 4.2.3.10, 4.2.3.12, 4.2.3.13, 4.2.3.14 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5.1, 5.3, 8.1, bijlage A (zie ISO 27002). 
@@ -867,6 +898,7 @@ partners in aanmerking mogen nemen.
 Vergeet niet dat aan de GDPR-vereisten moet worden voldaan wanneer bedrijfsinformatie 
 persoonsgegevens bevat (van toepassing op alle niveaus), d.w.z. dat in het contractuele kader 
 beveiligingsmaatregelen hieromtrent moeten worden genomen.
+
 Er moeten contractuele vereisten inzake informatie- en cyberbeveiliging voor leveranciers en 
 externe partners worden geïmplementeerd, om te zorgen dat er een controleerbaar proces is 
 voor het verhelpen van gebreken, en om te waarborgen dat gebreken worden verholpen die 
@@ -899,6 +931,7 @@ en cyberveiligheid" te evalueren.
 - kernmaatregel -
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.2.6.4, 4.3.2.6.7 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 6, 8.1, bijlage A (zie ISO 27002). 
@@ -915,12 +948,14 @@ en andere evaluaties
 Richtlijnen
 Entiteiten die niet onder de NIS-wetgeving vallen, zouden zich kunnen beperken tot bedrijfskritische 
 leveranciers en partners. 
+
 De organisatie moet de naleving van de contractuele verplichtingen door leveranciers en 
 externe partners beoordelen door regelmatig onafhankelijke audits, testresultaten en andere 
 evaluaties van derden te bekijken.
 Richtlijnen
 De diepgang van de evaluatie moet afhangen van het kritieke karakter van de geleverde producten en 
 diensten.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.2.6.7 
 IEC 62443-3-3:2013, SR 6.1 
@@ -949,6 +984,7 @@ en documenteren om hen als belanghebbenden te betrekken bij het testen en uitvoe
 de respons- en herstelplannen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 18. 
 IEC 62443-2-1:2010, clausule 4.3.2.5.7, 4.3.4.5.11  
@@ -996,6 +1032,7 @@ Alleen individuele accounts te gebruiken en nooit wachtwoorden te delen.
 Ongebruikte accounts onmiddellijk uit te schakelen 
 • 
 Rechten en privileges te beheren via gebruikersgroepen.
+
 Identiteiten en referenties (“credentials”) voor geautoriseerde apparaten en gebruikers 
 worden beheerd, waar mogelijk via geautomatiseerde mechanismen.
 Richtlijnen
@@ -1009,6 +1046,7 @@ gebruiker weet), bezit (iets wat alleen de gebruiker bezit) of inferentie (iets 
 onafhankelijk van elkaar zijn, in die zin dat het doorbreken van één ervan de betrouwbaarheid van de 
 andere niet in gevaar brengt, en zodanig is ontworpen dat de vertrouwelijkheid van de 
 authenticatiegegevens wordt beschermd.
+
 De systeemgegevens moeten na een bepaalde periode van inactiviteit worden gedeactiveerd, 
 tenzij dit de veilige werking van (kritische) processen in gevaar zou brengen.
 Richtlijnen
@@ -1045,6 +1083,7 @@ te passen.
 • 
 Het vergrendelde account zou niet toegankelijk mogen zijn totdat het opnieuw is ingesteld of de duur 
 van de accountvergrendeling is verstreken.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 3, 4, 5, 12, 13. 
 IEC 62443-2-1:2010, clausule 4.3.3.5.1, 4.3.3.7.4. 
@@ -1099,6 +1138,7 @@ Alle toegang tot servers en netwerkcomponenten kan worden vastgelegd.
 • 
 Toegangsregisters voor bezoekers zouden moeten worden bijgehouden, geëvalueerd en zo nodig 
 worden uitgebaat.
+
 De fysieke toegang tot kritieke zones moet worden gecontroleerd boven op de fysieke 
 toegang tot de faciliteit.
 Richtlijnen
@@ -1113,6 +1153,7 @@ beschermen tegen toevallige schade, verstoring en fysiek geknoei.
 • 
 Overweeg redundante en fysiek gescheiden stroomsystemen te implementeren voor de kritische 
 activiteiten van de organisatie.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.3.3.2, 4.3.3.3.8 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 8.1, bijlage A (zie ISO 27002). 
@@ -1181,6 +1222,7 @@ De beveiliging van verbindingen met externe systemen moet worden geverifieerd en
 gekaderd door gedocumenteerde overeenkomsten.
 Richtlijnen
 Toegang vanaf vooraf bepaalde IP-adressen kan worden overwogen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 5, 6, 13. 
 IEC 62443-2-1:2010, clausule 4.3.3.6.6, 4.3.3.7.4 
@@ -1236,6 +1278,7 @@ dienovereenkomstig worden toegepast.
 Richtlijnen
 Specifieke beperkingen kunnen bijvoorbeeld bestaan uit het beperken van het gebruik tot bepaalde dagen 
 van de week, tijdstippen van de dag of specifieke tijdsperioden.
+
 Er moet worden vastgesteld wie toegang moet hebben tot de bedrijfskritische informatie 
 en technologie van de organisatie, en de middelen om die toegang te krijgen. 
 - kernmaatregel -
@@ -1266,6 +1309,7 @@ homogeniseren.
 • 
 Ervoor te zorgen dat wanneer een werknemer het bedrijf verlaat, alle toegang tot de informatie of 
 systemen van het bedrijf onmiddellijk wordt geblokkeerd.
+
 Bij het beheer van de toegangsrechten wordt het principe van functiesplitsing gehanteerd 
 (Separation of Duties – SoD).
 Richtlijnen 
@@ -1281,6 +1325,7 @@ goedkeurt.
 • 
 Ervoor zorgen dat beveiligingspersoneel dat toegangscontrole functies beheert, niet ook 
 auditfuncties beheert.
+
 Niemand heeft beheerdersrechten voor dagelijkse taken. 
 - kernmaatregel -
 Richtlijnen
@@ -1293,9 +1338,11 @@ Geef gebruikersaccounts geen rechten om beheertaken uit te voeren.
 Maak unieke lokale beheerderswachtwoorden en schakel ongebruikte accounts uit. 
 • 
 Verbied het surfen op internet vanuit administratieve accounts.
+
 Geprivilegieerde gebruikers moeten worden beheerd, gemonitord en geaudit.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 4, 6, 7, 12, 13, 16. 
 IEC 62443-2-1:2010, clausule 4.3.3.7.3 
@@ -1360,6 +1407,7 @@ verkeer tussen deze zones te controleren/bewaken.
 • 
 Wanneer het netwerk "vlak" is, kan de compromittering van een vitale netwerkcomponent leiden tot 
 de compromittering van het gehele netwerk.
+
 Waar nodig moet de netwerkintegriteit van de kritieke systemen van de organisatie worden 
 beschermd door: 
 (1) 
@@ -1418,6 +1466,7 @@ De organisatie moet ervoor zorgen dat de kritieke systemen van de organisatie ve
 wanneer een grensbeschermingsvoorziening operationeel faalt.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 4, 7, 12, 16. 
 IEC 62443-2-1:2010, clausule 4.3.3.4 
@@ -1448,6 +1497,7 @@ van de organisatie; zij moet ervoor zorgen dat deze worden geverifieerd en dat u
 identificatiecodes worden vastgelegd bij het uitvoeren van systeeminteracties.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 4, 5, 6. 
 IEC 62443-2-1:2010, clausule 4.3.3.2.2, 4.3.3.5.2, 4.3.3.7.2, 4.3.3.7.3, 4.3.3.7.4. 
@@ -1465,6 +1515,7 @@ authentiseren (bv. single-factor, multifactor) in verhouding tot het risico van 
 Richtlijnen
 Overweeg voor nieuwe systemen een op beveiliging gebaseerde ontwerp (“security-by-design”); voor 
 bestaande systemen zou een afzonderlijke risicobeoordeling moeten worden gebruikt.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 4, 5, 6, 9, 12 en 13. 
 IEC 62443-2-1:2010, clausule 4.3.3.6.1, 4.3.3.6.2, 4.3.3.6.3, 4.3.3.6.4, 4.3.3.6.5, 4.3.3.6.6, 4.3.3.6.7, 4.3.3.6.8, 4.3.3.6.9. 
@@ -1523,6 +1574,7 @@ De organisatie moet een evaluatiemethode toepassen om de doeltreffendheid van de
 bewustmakingsopleidingen te meten.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 14, 16 
 IEC 62443-2-1:2010, clausule 4.3.2.4.2 
@@ -1541,6 +1593,7 @@ en deze gebruikers moeten kunnen aantonen dat zij hun taken, verantwoordelijkhed
 bevoegdheden begrijpen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 4, 14, 16  
 IEC 62443-2-1:2010, Clausule 4.3.2.4.2, 4.3.2.4.3. 
@@ -1572,6 +1625,7 @@ De organisatie auditeert bedrijfskritische externe dienstverleners op naleving v
 beveiligingsvoorschriften.
 Richtlijnen
 Auditresultaten van derden kunnen als auditbewijs worden gebruikt.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 14. 
 IEC 62443-2-1:2010, Clausule 4.3.2.4.2, 4.3.2.4.3. 
@@ -1591,6 +1645,7 @@ Richtlijnen
 Richtsnoeren voor rolprofielen en de daarbij behorende titels, opdrachten, taken, vaardigheden, kennis 
 en competenties zijn te vinden in de "European Cybersecurity Skills Framework Role Profiles" van ENISA. 
 (https://www.enisa.europa.eu/publications/european-cybersecurity-skills-framework-role-profiles )
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 14, 17 
 IEC 62443-2-1:2010, clausule 4.3.2.4.2 
@@ -1612,6 +1667,7 @@ opleiding gekwalificeerd is, voordat privileges worden verleend, en dat het zijn
 verantwoordelijkheden begrijpt.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 14. 
 IEC 62443-2-1:2010, Clausule 4.3.2.4.2, 4.3.2.4.3. 
@@ -1647,6 +1703,7 @@ wijziging van systeemgegevens en auditgegevens te voorkomen (bijvoorbeeld beperk
 dagelijkse back-ups, gegevensversleuteling, installatie van een firewall). 
 • Versleutel harde schijven, externe media, opgeslagen bestanden, configuratiebestanden en gegevens die 
 in de cloud zijn opgeslagen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3. 
 IEC 62443-3-3:2013, SR 3.4, SR 4.1 
@@ -1661,6 +1718,7 @@ Richtlijnen
 De onderstaande maatregelen kunnen worden overwogen: 
 • Wanneer de organisatie vaak gevoelige documenten of e-mails verzendt, kan worden overwogen om die 
 documenten en/of e-mails te versleutelen met geschikte, ondersteunde en toegestane softwaretools.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3. 
 IEC 62443-3-3:2013, SR 3.1, SR 3.8, SR 4.1, SR 4.2 
@@ -1711,6 +1769,7 @@ richtlijnen
 & 
 handleidingen,  
 back-ups, bijwerken van inventaris ...).
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1 
 IEC 62443-2-1:2010, Clausule 4.3.3.3.9, 4.3.4.4.1. 
@@ -1736,11 +1795,13 @@ De kritische systemen van de organisatie moeten worden beschermd tegen denial-of
 aanvallen of het effect van dergelijke aanvallen moet ten minste worden beperkt.
 Richtlijnen 
 Er zijn geen aanvullende richtsnoeren.
+
 Auditgegevens met betrekking tot de kritieke systemen van de organisatie moeten naar een 
 alternatief systeem worden overgebracht.
 Richtlijnen
 Wees ervan bewust dat logdiensten een knelpunt kunnen worden en de goede werking van de 
 bronsystemen kunnen belemmeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 2 
 IEC 62443-2-1:2010, Clausule 4.3.3.3.9, 4.3.4.4.1. 
@@ -1761,6 +1822,7 @@ gegevensversleuteling, installatie van firewalls, enz.).
 Overweeg een frequente audit van de configuratie van de centrale directory (Active Directory in een 
 Windows-omgeving), met specifieke aandacht voor de toegang tot gegevens van belangrijke 
 personen in het bedrijf.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3. 
 IEC 62443-3-3:2013 SR 5.2 
@@ -1802,6 +1864,7 @@ De organisatie moet automatische reacties met vooraf gedefinieerde veiligheidswa
 implementeren wanneer integriteitsschendingen worden ontdekt.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 2, 7 
 IEC 62443-3-3:2013, SR 3.1, SR 3.3, SR 3.4, SR 3.8 
@@ -1839,6 +1902,7 @@ verstoren.
 • 
 Overweeg het toevoegen en testen van cyberbeveiligingsfuncties al tijdens de ontwikkeling (“secure 
 development lifecycle” principes).
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 16,  
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 8.1, bijlage A (zie ISO 27002). 
@@ -1864,6 +1928,7 @@ De organisatie moet de detectie van ongeoorloofde sabotage van de hardware van h
 kritieke systemen opnemen in de incidentenbestrijdingscapaciteit van de organisatie.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.4.4.4 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), bijlage A (zie ISO 27002). 
@@ -1915,6 +1980,7 @@ De configuratie van een systeem om alleen de door de organisatie gedefinieerde e
 leveren, staat bekend als het "concept van de minste functionaliteit (“concept of least functionality”)". 
 • 
 Mogelijkheden omvatten functies, poorten, protocollen, software en/of diensten.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 7, 4, 12. 
 IEC 62443-2-1:2010, Clausule 4.3.4.3.2, 4.3.4.3.3. 
@@ -1962,6 +2028,7 @@ ontwikkeling.
 Fouten opsporen en oplossen. 
 • 
 Veiligheidstesten.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 16. 
 IEC 62443-2-1:2010, clausule 4.3.4.3.3 
@@ -1981,6 +2048,7 @@ veiligheidsimpactanalyse worden uitgevoerd in een afzonderlijke testomgeving alv
 in een operationele omgeving worden geïmplementeerd.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 4, 5, 12 
 IEC 62443-2-1:2010, Clausule 4.3.4.3.2, 4.3.4.3.3. 
@@ -2015,6 +2083,7 @@ overwogen.
 Overweeg de gegevensback-up van de organisatie niet op hetzelfde netwerk op te slaan als het 
 netwerk waarop de oorspronkelijke gegevens staan en zorg voor een offline kopie. Dit voorkomt 
 onder meer bestandsversleuteling door hackers (risico op ransomware).
+
 De betrouwbaarheid en integriteit van de back-ups moet regelmatig worden geverifieerd 
 en getest.
 Richtlijnen
@@ -2045,6 +2114,7 @@ De back-up van kritieke systemen wordt gescheiden van de back-up van kritieke in
 Richtlijnen
 De scheiding tussen de back-up van kritieke systemen en de back-up van kritieke informatie zal normaal 
 leiden tot een kortere hersteltijd.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 11. 
 IEC 62443-2-1:2010, clausule 4.3.4.3.9 
@@ -2084,6 +2154,7 @@ De organisatie moet branddetectieapparatuur implementeren die in geval van brand
 automatisch wordt geactiveerd en sleutelpersoneel verwittigt.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.3.3.1, 4.3.3.3.2, 4.3.3.3.3, 4.3.3.3.5, 4.3.3.3.6 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 4.1, 6.1, 7.1, 8.1, bijlage A (zie ISO 27002). 
@@ -2114,6 +2185,7 @@ Vernietigingsprocessen omvatten procedures en apparatuur.
 Overweeg niet-destructieve reinigingstechnieken toe te passen op draagbare opslagapparatuur. 
 • 
 Overweeg vernietigingsprocedures proportioneel tot de vertrouwelijkheidseisen.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.4.4.4 
 IEC 62443-3-3:2013, SR 4.2 
@@ -2151,6 +2223,7 @@ De organisatie moet ervoor zorgen dat het beveiligingsplan voor haar kritieke sy
 toetsing, het testen en de voortdurende verbetering van de beveiligingsprocessen faciliteert.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.4.3 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 9, 10.1, bijlage A (zie ISO 27002). 
@@ -2164,6 +2237,7 @@ kritieke systeem gerelateerde beveiligingsincidenten en risicobeperkende (mitiga
 maatregelen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 De doeltreffendheid van de toegepaste beschermingstechnologieën moet worden 
 gecommuniceerd aan de toepasselijke partijen.
 Richtlijnen
@@ -2180,9 +2254,11 @@ De organisatie moet, waar mogelijk, geautomatiseerde mechanismen toepassen om te
 helpen bij informatiedeling.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.4, bijlage A (zie ISO 27002).  
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.27
+
 PR.IP-9:  
 Responsplannen (Incident Response en Business Continuity) en herstelplannen 
 (Incident Recovery en Disaster Recovery) zijn aanwezig en worden beheerd . 
@@ -2223,6 +2299,7 @@ voor
 kritieke 
 infrastructuur, 
 reactieplannen voor cyberincidenten en noodplannen voor omwonenden.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.2.5.7, 4.3.4.5.11 
@@ -2254,6 +2331,7 @@ aanwerving, tijdens het dienstverband en bij de beëindiging van het dienstverba
 Bij achtergrondcontroles moet rekening worden gehouden met de toepasselijke wet- en regelgeving 
 en ethiek in verhouding tot de bedrijfsvereisten, de classificatie van de te raadplegen informatie en 
 de gepercipieerde risico's.
+
 Er moet een proces voor informatie- en cyberbeveiliging worden ontwikkeld en 
 gehandhaafd dat van toepassing is bij de aanwerving, tijdens het dienstverband en bij de 
 beëindiging van het dienstverband.
@@ -2261,6 +2339,7 @@ Richtlijnen
 Het proces voor informatie- en cyberbeveiliging van het personeel zou de toegang tot kritieke informatie 
 of technologie moeten omvatten; controles van de achtergrond; gedragscode; rollen, bevoegdheden en 
 verantwoordelijkheden...
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 4, 6 
 IEC 62443-2-1:2010, Clausule 4.3.3.2.1, 4.3.3.2.2, 4.3.3.2.3. 
@@ -2279,6 +2358,7 @@ componenten kunnen melden en updates kunnen verspreiden (websites van software-u
 website van het CERT, website van het ENISA). 
 • 
 De organisatie moet nagaan waar haar kritieke systemen kwetsbaar zijn voor tegenstanders.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 2, 4, 5, 16, 18. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 6, 8, bijlage A (zie ISO 27002). 
@@ -2376,10 +2456,12 @@ beveiligingscontroles nazien en de nodige maatregelen nemen.
 - kernmaatregel -
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.3.3.7 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 4.2, 7.1, 8.1, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 7.2, 7.9, 7.10, 7.13
+
 PR.MA-2:  Onderhoud op afstand van bedrijfsmiddelen van de organisatie moet worden
 goedgekeurd, geregistreerd en uitgevoerd op een wijze die ongeoorloofde 
 toegang voorkomt. 
@@ -2400,6 +2482,7 @@ De organisatie moet ervoor zorgen dat sterke authenticatie, registratie en sessi
 voor onderhoud op afstand worden toegepast.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 4, 7 
 IEC 62443-2-1:2010, clausule 4.3.3.6.5, 4.3.3.6.6, 4.3.3.6.7, 4.4.4.6.8 
@@ -2448,6 +2531,7 @@ De organisatie moet bevoegde personen in staat stellen de auditmogelijkheden uit
 wanneer gebeurtenissen dat vereisen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 3, 4, 8. 
 IEC 62443-2-1:2010, clausule 4.3.3.3.9, 4.3.3.5.8, 4.3.4.4.7, 4.4.2.1, 4.4.2.4 
@@ -2474,11 +2558,13 @@ opslag worden gecontroleerd en beschermd.
 Richtlijnen
 Bescherming en controle kan het scannen van alle draagbare opslagapparaten op kwaadaardige code 
 omvatten voordat zij op de systemen van de organisatie worden gebruikt.
+
 De organisatie moet het aansluiten van verwijderbare media technisch verbieden, tenzij 
 strikt noodzakelijk; in andere gevallen moet het uitvoeren van autoruns vanaf dergelijke 
 media worden uitgeschakeld.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 10 
 IEC 62443-3-3:2013, SR 2.3 
@@ -2510,6 +2596,7 @@ weigeren" (“deny-all”) en "toestemming per uitzondering" (“permit-by-excep
 dwingen, zodat alleen geautoriseerde softwareprogramma's kunnen worden uitgevoerd.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 4 en 7. 
 IEC 62443-2-1:2010, Clausule 4.3.3.5, 4.3.3.6, 4.3.3.7. 
@@ -2563,6 +2650,7 @@ verkeersstroombeleid (“traffic flow”) vast te stellen, dat de vertrouwelijkh
 van de verzonden informatie beschermt.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 4, 10, 12, 13. 
 IEC 62443-3-3:2013, SR 3.1, SR 3.5, SR 3.8, SR 4.1, SR 4.3, SR 5.1, SR 5.2, SR 5.3, SR 7.1, SR 7.6 
@@ -2596,6 +2684,7 @@ Overweeg uw logs te centraliseren.
 • 
 Overweeg de inzet van een Security Information and Event Management tool (SIEM) die de correlatie 
 en analyse van uw gegevens vergemakkelijkt.
+
 Referenties
 CIS Controls V8 (ETSI TR 103 305 1 V4.1.1), Critical Security Control 1, 8, 13 
 IEC 62443-2-1:2010, clausule 4.4.3.3 
@@ -2609,10 +2698,12 @@ De organisatie moet gedetecteerde events evalueren en analyseren om inzicht te k
 aanvalsdoelen en -methoden.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 De organisatie moet waar mogelijk geautomatiseerde mechanismen toepassen om 
 gedetecteerde events te beoordelen en te analyseren.
 Richtlijnen
 Overweeg uw logs regelmatig te bekijken om anomalieën of abnormale gebeurtenissen te identificeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 8, 13, 15. 
 IEC 62443-2-1:2010, artikel 4.3.4.5.6, 4.3.4.5.7, 4.3.4.5.8. 
@@ -2655,11 +2746,13 @@ kritieke systemen en de bewaking van faciliteiten om nog beter in staat te zijn 
 ongewone activiteiten op te sporen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 3, 8, 10, 13, 15. 
 IEC 62443-3-3:2013, SR 6.1 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 8.1, 9.1, 10.2, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.28, 8.15
+
 DE.AE-4: De impact van events wordt bepaald. 
  
 De negatieve gevolgen van gedetecteerde gebeurtenissen voor de activiteiten, activa en 
@@ -2667,6 +2760,7 @@ personen van de organisatie moeten worden bepaald en gecorreleerd met de resulta
 de risicobeoordeling.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controls V8 (ETSI TR 103 305 1 V4.1.1), Critical Security Control 8, 13 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 8.1, 9.1, 10.2, bijlage A (zie ISO 27002). 
@@ -2684,9 +2778,11 @@ waarschuwingen toepassen ter ondersteuning van de detectie van events en ter
 ondersteuning van de vaststelling van drempelwaarden voor beveiligingswaarschuwingen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 De organisatie moet alarmdrempels voor incidenten vaststellen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 8, 13 
 IEC 62443-2-1:2010, clausule 4.2.3.10 
@@ -2769,6 +2865,7 @@ De fysieke omgeving van de faciliteit wordt bewaakt op potentiële informatie-
 /cyberbeveiligingsincidenten.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 8, 10, 13. 
 IEC 62443-2-1:2010, clausule 4.3.3.3.8 
@@ -2790,6 +2887,7 @@ de fysieke toegangscontrole tot de faciliteit, worden verhoogd door middel van f
 inbraakalarmen, bewakingsapparatuur, onafhankelijke bewakingsteams.
 Richtlijnen
 Het is aanbevolen om alle bezoekers te loggen.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.3.3.8 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.5, 8, 9.1, 9.2, 10, bijlage A (zie ISO 27002).  
@@ -2805,6 +2903,7 @@ Er moeten instrumenten voor eindpunt- en netwerkbescherming worden toegepast om 
 gedrag van de eindgebruiker te monitoren op gevaarlijke activiteiten.
 Richtlijnen
 Overweeg de inzet van een Intrusion Detection/Prevention systeem (IDS/IPS).
+
 Eindpunt- en netwerkbeschermingsinstrumenten die het gedrag van eindgebruikers 
 monitoren op gevaarlijke activiteiten, moeten worden beheerd.
 Richtlijnen
@@ -2828,6 +2927,7 @@ Richtlijnen
 Alleen geautoriseerde software zou mogen worden gebruikt, en de toegangsrechten van gebruikers zou 
 beperkt moeten worden tot de specifieke gegevens, middelen en toepassingen die nodig zijn om een 
 vereiste taak uit te voeren (“least privilege principle”).
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 3, 8, 13, 15. 
 IEC 62443-3-3:2013, SR 6.2 
@@ -2856,6 +2956,7 @@ De organisatie moet een systeem opzetten om valse incidenten (“false positives
 detecteren bij het opsporen en uitroeien van kwaadaardige code.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 8, 10, 13 
 IEC 62443-2-1:2010, clausule 4.3.4.3.8 
@@ -2885,6 +2986,7 @@ Beslissingen over het gebruik van mobiele code in organisatiesystemen zouden geb
 zijn op de mogelijkheid dat de code bij kwaadwillig gebruik schade aan de systemen toebrengt. Voor 
 de selectie en het gebruik van geïnstalleerde mobiele code zouden gebruiksbeperkingen en 
 uitvoeringsrichtsnoeren moeten gelden.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 8, 10 
 IEC 62443-3-3:2013 SR 2.4 
@@ -2898,11 +3000,13 @@ ondersteunen, moeten worden beveiligd en actief gemonitord om ervoor te zorgen d
 tijdens de verbinding alleen toegestane handelingen plaatsvinden.
 Richtlijnen
 Dit toezicht omvat toegang door onbevoegd personeel, verbindingen, apparaten en software.
+
 Op de naleving door externe dienstverleners van het beleid en de procedures inzake 
 personeelsbeveiliging en de contractbeveiligingseisen moet toezicht worden gehouden in 
 verhouding tot hun cyberbeveiligingsrisico's.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.3.3.8 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.5, 8, 9.1, 9.2, 10, bijlage A (zie ISO 27002). 
@@ -2934,6 +3038,7 @@ Ongeoorloofde wijzigingen in de configuratie van de systemen van de organisatie 
 worden gecontroleerd en aangepakt met passende risicobeperkende (mitigatie) maatregelen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 1, 2, 8, 13, 15. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.1, 7.5, 8, 9.1, 9.2, 10, bijlage A (zie ISO 27002). 
@@ -2946,10 +3051,12 @@ voor de systeemfuncties.
 Richtlijnen
 Overweeg de uitvoering van een permanent programma voor het scannen van kwetsbaarheden; met 
 inbegrip van plannen voor rapportage en beperking.
+
 Het scannen van kwetsbaarheden moet analyse, herstel en het delen van informatie 
 omvatten.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 8, 10 
 IEC 62443-2-1:2010, clausule 4.2.3.1, 4.2.3.7 
@@ -2971,9 +3078,11 @@ toepasselijke federale en regionale wetten, industriële voorschriften en normen
 beleidslijnen en andere toepasselijke vereisten.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.3, 7.4, 8.1, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.34, 5.36, 8.8
+
 DE.DP-3:  Detectieprocessen worden getest.
 De organisatie moet valideren dat de processen gebruikt voor het detecteren van 
 abnormale events werken zoals bedoeld.
@@ -2982,6 +3091,7 @@ Richtlijnen
 Validatie omvat testen. 
 • 
 Validatie zou aantoonbaar moeten zijn.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.4.3.2 
 IEC 62443-3-3:2013, SR 3.3 
@@ -2999,6 +3109,7 @@ gebruik van onderhoudsmiddelen en niet-lokaal onderhoud, fysieke toegang, temper
 vochtigheid, levering en verwijdering van apparatuur, communicatie aan de grenzen van het 
 informatiesysteem, gebruik van mobiele code, gebruik van Voice over Internet Protocol (VoIP) en 
 openbaarmaking van malware.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.4.5.9 
 IEC 62443-3-3:2013, SR 6.1 
@@ -3024,12 +3135,14 @@ Dit resulteert in een voortdurende verbetering van de opsporingsprocessen.
 • 
 Het gebruik van onafhankelijke teams om het opsporingsproces te beoordelen zou kunnen worden 
 overwogen. 
+
 De organisatie moet gespecialiseerde beoordelingen uitvoeren, waaronder grondige (“in 
 depth”) monitoring, het scannen van kwetsbaarheden, het testen op kwaadwillende 
 gebruikers, beoordeling van bedreigingen van binnenuit, prestatie-/belastingstests en 
 verificatie- en validatietests op de kritieke systemen van de organisatie.
 Richtlijnen
 Deze activiteiten kunnen worden uitbesteed, bij voorkeur aan erkende organisaties.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.4.3.4 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.3, 7.4, 8.1, 9, 10.1, bijlage A (zie ISO 27002). 
@@ -3071,6 +3184,7 @@ de gebeurtenis zich herhaalt of zich elders voordoet (een infectie met kwaadaard
 machine heeft zich niet elders in het netwerk verspreid). De doeltreffendheid van de genomen 
 corrigerende maatregelen moet worden geëvalueerd. De corrigerende maatregelen moeten 
 afgestemd zijn op de gevolgen van het voorval op het gebied van informatie-/cyberbeveiliging.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.4.5.1 
@@ -3094,6 +3208,7 @@ een evenement begrijpt.
 Richtlijnen
 Overweeg het gebruik van de CCB Incident Management Guide als leidraad bij deze oefening en overweeg 
 zo nodig externe deskundigen in te schakelen. Test uw plan regelmatig en pas het na elk incident aan.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, artikel 4.3.4.5.2, 4.3.4.5.3, 4.3.4.5.4. 
@@ -3118,6 +3233,7 @@ aangemoedigd om dat te doen.
 Gebeurtenissen worden gerapporteerd volgens vastgestelde criteria.
 Richtlijnen
 De criteria voor rapportage zouden moeten worden opgenomen in het incidentresponseplan.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.4.5.5  
@@ -3140,6 +3256,7 @@ De organisatie deelt informatie over informatie/cyberbeveiligingsincidenten met 
 belanghebbenden zoals voorzien in het responsplan voor incidenten.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010 Clausule 4.3.4.5.2 
@@ -3158,6 +3275,7 @@ personeelsbeveiligingskantoren, juridische afdelingen, operationeel personeel en
 • 
 De coördinatie met belanghebbenden zou plaats moeten vinden in overeenstemming met de 
 incidentbestrijdingsplannen.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.4.5.5 
@@ -3184,6 +3302,7 @@ beveiligingsgroepen uit de sector... om een breder situationeel bewustzijn te be
 m.b.t. informatie/cyberbeveiliging.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.3, 7.4, 8.1, 8.3, bijlage A (zie ISO 27002). 
@@ -3213,6 +3332,7 @@ De organisatie moet geautomatiseerde mechanismen invoeren ter ondersteuning van 
 onderzoek en de analyse van informatie-/cyberbeveiligingsmeldingen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, artikel 4.3.4.5.6, 4.3.4.5.7, 4.3.4.5.8. 
@@ -3238,6 +3358,7 @@ impactanalyse van incidenten.
 Richtlijnen
 De implementatie kan variëren van een ticketingsysteem tot een Security Information and Event 
 Management (SIEM).
+
 Referenties
 IEC 62443-2-1:2010, artikel 4.3.4.5.6, 4.3.4.5.7, 4.3.4.5.8. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 4.1, 4.2, 9.1, bijlage A (zie ISO 27002). 
@@ -3255,11 +3376,13 @@ De organisatie moet op verzoek auditcontrole, analyse en rapportage verstrekken 
 onderzoeken na de feiten van informatie-/cyberbeveiligingsincidenten.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 De organisatie moet forensische analyses uitvoeren op verzamelde informatie van 
 informatie/cyberincidenten om de hoofdoorzaak (“root cause”) vast te stellen.
 Richtlijnen
 Overweeg zo nodig forensische analyse op verzamelde informatie van informatie/cyberincidenten te 
 gebruiken om de hoofdoorzaak (“root cause”) vast te kunnen stellen.
+
 Referenties
 IEC 62443-3-3:2013, SR 2.8, SR 2.9, SR 2.10, SR 2.11, SR 2.12, SR 3.9, SR 6.1 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 4.1, 4.2, 9, 10.2, bijlage A (zie ISO 27002). 
@@ -3286,6 +3409,7 @@ De doeltreffendheid van eventuele corrigerende maatregelen zou geëvalueerd moet
 • 
 De corrigerende maatregelen zouden proportioneel moeten zijn met de gevolgen van het informatie-
 /cyberbeveiligingsincident.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.4.5.6 
@@ -3315,6 +3439,7 @@ opvolgen aan de belangrijkste belanghebbenden van mitigatiewerkzaamheden in antw
 op informatie over kwetsbaarheden afkomstig uit interne en externe bronnen.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 6, 7.5, 8.3, bijlage A (zie ISO 27002). 
@@ -3352,6 +3477,7 @@ Richtlijnen
 Een gedocumenteerde risicoaanvaarding heeft betrekking op risico's die volgens de organisatie niet 
 gevaarlijk zijn voor de bedrijfskritische systemen van de organisatie en waarbij de eigenaar van het risico 
 het risico formeel aanvaardt (gerelateerd aan de risicobereidheid, ”risk appetite”, van de organisatie).
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 17. 
 IEC 62443-2-1:2010, clausule 4.3.4.5.6 
@@ -3377,11 +3503,13 @@ Richtlijnen
 Overweeg na elk incident de betrokkenen samen te brengen en samen na te denken over manieren om 
 te verbeteren wat er is gebeurd, hoe het is gebeurd, hoe er is gereageerd, hoe het beter had kunnen gaan, 
 wat er moet gebeuren om herhaling te voorkomen, enz.
+
 De uit de afhandeling van incidenten geleerde lessen moeten worden vertaald in 
 bijgewerkte of nieuwe procedures voor de afhandeling van incidenten, die op hun beurt 
 moeten worden getest, goedgekeurd en getraind.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.3.4.5.10, 4.4.3.4 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 6.1, 8.3, 10, bijlage A (zie ISO 27002). 
@@ -3395,6 +3523,7 @@ De context van de organisatie heeft betrekking op de organisatiestructuur, haar 
 aanvalsvectoren, nieuwe bedreigingen, verbeterde technologie, de bedrijfsomgeving, problemen die zich 
 hebben voorgedaan tijdens de implementatie/uitvoering/testen van het plan en de lessen die zijn 
 geleerd.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 6.1, 8.3, 10, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.27
@@ -3435,6 +3564,7 @@ of geen verlies van operationele continuïteit en de continuïteit moet worden g
 totdat het systeem volledig is hersteld.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 CIS Controles V8 (ETSI TR 103 305 1 V4.1.1), Kritische Beveiliging Controle 11. 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 8, 10.2, bijlage A (zie ISO 27002). 
@@ -3455,6 +3585,7 @@ verwerken in bijgewerkte of nieuwe herstelprocedures voor systemen en dit, na he
 borgen met een passende opleiding.
 Richtlijnen
 Er zijn geen aanvullende richtsnoeren.
+
 Referenties
 IEC 62443-2-1:2010, clausule 4.4.3.4 
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 7.5, 8, 10.2, bijlage A (zie ISO 27002). 
@@ -3482,6 +3613,7 @@ Er moet een Public Relations Officer worden aangesteld.
 Richtlijnen
 De Public Relations Officer zou moeten overwegen gebruik te maken van vooraf bepaalde externe contacten 
 (bijv. pers, regelgevers, belangengroepen).
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5, 7.4, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.6 
@@ -3494,6 +3626,7 @@ Richtlijnen
 Crisisbestrijdingsstrategieën omvatten bijvoorbeeld maatregelen om de beeldvorming over de crisis vorm 
 te geven, de perceptie van de organisatie in crisis te veranderen, en het negatieve effect dat de crisis 
 teweegbrengt te verminderen.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5, 7.4, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.6 
@@ -3513,6 +3646,7 @@ belanghebbenden, directie- en managementteams.
 Richtlijnen
 Communicatie van herstelactiviteiten aan belanghebbenden geldt alleen voor entiteiten die onder de NIS-
 wetgeving vallen.
+
 Referenties
 ISO/IEC 27001:2022 (NBN ISO/IEC 27001:2023), clausule 5, 7.4, bijlage A (zie ISO 27002). 
 ISO/IEC 27002:2022 (NBN EN ISO/IEC 27002:2022), controle 5.6
