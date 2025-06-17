@@ -68,6 +68,8 @@
 	source={data.table}
 	deleteForm={data.deleteForm}
 	{URLModel}
+	forcePreventDelete
+	forcePreventEdit
 	canSelectObject={canEditObject}
 	baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}"
 >

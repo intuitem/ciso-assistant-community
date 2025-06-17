@@ -24,6 +24,7 @@
 	export let URLModel: urlModel | string | undefined;
 	export let identifierField = 'id';
 	export let preventDelete = false;
+	export let preventEdit = false;
 	export let baseClass =
 		'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end';
 
@@ -113,19 +114,21 @@
 					})
 				: Object.hasOwn(user.permissions, `delete_${model.name}`)
 			: false);
-	$: canEditObject = model
-		? $page.params.id
-			? canPerformAction({
-					user,
-					action: 'change',
-					model: model.name,
-					domain:
-						model.name === 'folder'
-							? row.meta.id
-							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-				})
-			: Object.hasOwn(user.permissions, `change_${model.name}`)
-		: false;
+	$: canEditObject =
+		!preventEdit &&
+		(model
+			? $page.params.id
+				? canPerformAction({
+						user,
+						action: 'change',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? row.meta.id
+								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+					})
+				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			: false);
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
