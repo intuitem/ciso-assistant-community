@@ -334,7 +334,7 @@
 					{/if}
 				{/snippet}
 				{#snippet content()}
-					<SuperForm {_form} debug validators={zod(z.object({}))}>
+					<SuperForm {_form} validators={zod(z.object({}))}>
 						{#snippet children({ form })}
 							{#each filteredFields as field}
 								{#if filters[field]?.component}
