@@ -114,21 +114,21 @@
 					})
 				: Object.hasOwn(user.permissions, `delete_${model.name}`)
 			: false);
-	$: canEditObject = 
-	  	!preventEdit &&
+	$: canEditObject =
+		!preventEdit &&
 		(model
-		? $page.params.id
-			? canPerformAction({
-					user,
-					action: 'change',
-					model: model.name,
-					domain:
-						model.name === 'folder'
-							? row.meta.id
-							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-				})
-			: Object.hasOwn(user.permissions, `change_${model.name}`)
-		: false);
+			? $page.params.id
+				? canPerformAction({
+						user,
+						action: 'change',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? row.meta.id
+								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+					})
+				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			: false);
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
