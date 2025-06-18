@@ -20,7 +20,6 @@
 	const zoom = 1.5;
 </script>
 
-
 <div class="bg-white shadow flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<GraphExplorer
