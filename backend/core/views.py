@@ -5252,7 +5252,10 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "confirmed": {"localName": "confirmed", "color": "#E6686D"},
                 "assigned": {"localName": "assigned", "color": "#fab998"},
                 "in_progress": {"localName": "inProgress", "color": "#fac858"},
-                "mitigated": {"localName": "mitigated", "color": "hsl(80deg, 80%, 60%)"},
+                "mitigated": {
+                    "localName": "mitigated",
+                    "color": "hsl(80deg, 80%, 60%)",
+                },
                 "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
                 "dismissed": {"localName": "dismissed", "color": "#5470c6"},
                 "deprecated": {"localName": "deprecated", "color": "#91cc75"},
