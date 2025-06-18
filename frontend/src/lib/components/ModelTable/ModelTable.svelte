@@ -46,7 +46,7 @@
 
 	export let search = true;
 	export let rowsPerPage = true;
-	export let rowCount = true;
+	export let showRowCount = true;
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 
@@ -135,6 +135,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	const rowCount = handler.getRowCount();
 	let invalidateTable = false;
 
 	handler.onChange((state: State) =>
@@ -540,8 +541,8 @@
 	</table>
 
 	<footer class="flex justify-between items-center space-x-8 p-2">
-		{#if rowCount && pagination}
-			<RowCount {handler} />
+		{#if showRowCount && pagination}
+			<RowCount {rowCount} />
 		{/if}
 		{#if pagination}
 			<Pagination {handler} />
