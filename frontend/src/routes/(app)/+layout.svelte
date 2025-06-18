@@ -29,7 +29,7 @@
 
 	let sidebarOpen = $state(true);
 
-	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-7 lg:ml-64' : 'ml-7'));
+	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
 
 	run(() => {
 		if (browser) {
