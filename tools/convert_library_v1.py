@@ -931,7 +931,11 @@ has_mappings = "mappings" in [
 lib_date = library_vars.get("library_publication_date", datetime.datetime.now())
 if type(lib_date) == datetime.datetime:
     lib_date = lib_date.date()
+
+convert_library_version = f"v1 ; Compat Mode: [{args.compat}]"    
+
 library = {
+    "convert_library_version": convert_library_version,
     "urn": library_vars["library_urn"],
     "locale": library_vars["library_locale"],
     "ref_id": library_vars["library_ref_id"],
