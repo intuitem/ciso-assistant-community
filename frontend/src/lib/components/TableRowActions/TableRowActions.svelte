@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import type { ModelMapEntry } from '$lib/utils/crud';
@@ -120,12 +120,12 @@
 		modalStore.trigger(modal);
 	}
 
-	const user = $page.data.user;
+	const user = page.data.user;
 
 	let canDeleteObject = $derived(
 		!preventDelete &&
 			(model
-				? $page.params.id
+				? page.params.id
 					? canPerformAction({
 							user,
 							action: 'delete',
@@ -141,7 +141,7 @@
 	let canEditObject = $derived(
 		!preventEdit &&
 			(model
-				? $page.params.id
+				? page.params.id
 					? canPerformAction({
 							user,
 							action: 'change',
