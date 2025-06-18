@@ -4,6 +4,14 @@ import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 
+export function tableSourceMapper(source: any[], keys: string[]): any[] {
+	return source.map((row) => {
+		const mappedRow: any = {};
+		keys.forEach((key) => (mappedRow[key] = row[key]));
+		return mappedRow;
+	});
+}
+
 interface ListViewFilterConfig {
 	component: ComponentType;
 	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
@@ -26,8 +34,6 @@ const YES_NO_OPTIONS = [
 	{ label: 'yes', value: 'true' },
 	{ label: 'no', value: 'false' }
 ];
-
-const YES_OPTION = [{ label: 'yes', value: 'true' }];
 
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -474,7 +480,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
-		options: YES_OPTION,
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -483,7 +489,7 @@ const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'mappingSuggested',
-		options: YES_OPTION,
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };

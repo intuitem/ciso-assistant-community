@@ -1,18 +1,12 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
-	// Props
-	/** Exposes parent props to this component. */
-	// export let parent: any;
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
-	const modalStore: ModalStore = getModalStore();
+	import { getModalStore, type ModalStore } from './stores';
 
 	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-white p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
+
+	const modalStore: ModalStore = getModalStore();
 </script>
 
 {#if $modalStore[0]}

@@ -173,7 +173,7 @@ export class PageDetail extends BasePage {
 				.getByTestId('tree-item')
 				.filter({ has: content, hasNotText: path.length != 0 ? path.at(-1) : undefined })
 				.getByTestId('tree-item-lead')
-				.getByTestId('progress-radial'),
+				.getByTestId('progress-ring-svg'),
 			default: this.page.getByTestId('tree-item').filter({ hasText: new RegExp(`^${value}\n*.*`) })
 		};
 	}

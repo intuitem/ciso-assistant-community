@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import TreeView from './TreeView.svelte';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 <main class="bg-white card p-4">

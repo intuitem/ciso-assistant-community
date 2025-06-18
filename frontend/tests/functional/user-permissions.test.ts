@@ -68,6 +68,13 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 			const setLoginPage = new LoginPage(setPasswordPage);
 			await setLoginPage.newPasswordInput.fill(vars.user.password);
 			await setLoginPage.confirmPasswordInput.fill(vars.user.password);
+			if (
+				setLoginPage.newPasswordInput.inputValue() !== vars.user.password ||
+				setLoginPage.confirmPasswordInput.inputValue() !== vars.user.password
+			) {
+				await setLoginPage.newPasswordInput.fill(vars.user.password);
+				await setLoginPage.confirmPasswordInput.fill(vars.user.password);
+			}
 			await setLoginPage.setPasswordButton.click();
 
 			await setLoginPage.isToastVisible(
