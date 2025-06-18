@@ -322,7 +322,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap {classesBase}">
+<div class="table-wrap border-collapse {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -401,7 +401,7 @@
 			</tr>
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="table-body w-full {regionBody}">
+			<tbody class="table-body w-full border-b border-b-surface-200-800 {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
 					<ContextMenu.Trigger asChild>
@@ -417,7 +417,7 @@
 								}}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-surface"
+								class="hover:preset-tonal-primary even:bg-gray-50 cursor-pointer"
 							>
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
@@ -603,3 +603,15 @@
 		{/if}
 	</footer>
 </div>
+
+<style>
+	tbody {
+		& > :not(:last-child) {
+			border-color: var(--color-surface-200-800);
+		}
+		& > :not(:last-child) {
+			border-top-width: 0px;
+			border-bottom-width: 0px !important;
+		}
+	}
+</style>
