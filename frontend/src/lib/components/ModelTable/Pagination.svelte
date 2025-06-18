@@ -12,6 +12,7 @@
 
 	const setPage = (value: 'previous' | 'next' | number) => {
 		handler.setPage(value);
+		// console.log('5');
 		handler.invalidate();
 	};
 
@@ -24,22 +25,26 @@
 		currentEndpoint === $page.url.pathname
 	) {
 		const endpoint = $page.url.pathname;
-		const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
+		const cache = JSON.parse(localStorage.getItem('paginationSettingsCache') ?? '{}');
 		cache[endpoint] = [$pageNumber, $rowsPerPage];
-		localStorage.setItem('pageNumberCache', JSON.stringify(cache));
+		localStorage.setItem('paginationSettingsCache', JSON.stringify(cache));
 	}
 
 	afterNavigate(() => {
+		// console.info('AFTERNAV!', currentEndpoint, $page.url.pathname);
 		// The second condition prevents afterNavigate from being executed more than once when the URL changes.
 		if ($page.url && $page.url.pathname !== currentEndpoint) {
 			const endpoint = $page.url.pathname;
 			let newPageNumber = 1;
 			if (listViewEndpointRegex.test(endpoint)) {
-				const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
+				const cache = JSON.parse(localStorage.getItem('paginationSettingsCache') ?? '{}');
 				const [savedPageNumber] = cache[endpoint] ?? [];
 				newPageNumber = Number(savedPageNumber ?? '1');
 			}
+			// console.log(newPageNumber);
 			handler.setPage(newPageNumber);
+			// console.log('6');
+			// handler.invalidate();
 			currentEndpoint = endpoint;
 		}
 	});
