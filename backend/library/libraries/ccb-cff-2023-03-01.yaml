@@ -17,11 +17,12 @@ packager: intuitem
 translations:
   fr:
     name: CCB CyberFondamentaux - 2023-03-01
-    description: 'Centre For Cybersecurity Belgium - CyberFondamentaux
-
-      With content from CyFun Self-Assessment tool V2024-11-05
-
-      https://ccb.belgium.be'
+    description: "Centre pour la Cybers\xE9curit\xE9 Belgique- CyberFondamentaux\n\
+      Avec le contenu de CyFun Self-Assessment tool V2024-11-05\nhttps://ccb.belgium.be"
+  nl:
+    name: CCB CyberFundamentals Framework - 2023-03-01
+    description: "Centrum voor Cybersecurity Belgi\xEB - CyberFondamentaux\nMet inhoud\
+      \ van CyFun Self-Assessment tool V2024-11-05\nhttps://ccb.belgium.be"
 objects:
   framework:
     urn: urn:intuitem:risk:framework:ccb-cff-2023-03-01
@@ -31,7 +32,10 @@ objects:
     translations:
       fr:
         name: CCB CyberFondamentaux - 2023-03-01
-        description: Centre For Cybersecurity Belgium - CyberFondamentaux
+        description: "Centre pour la Cybers\xE9curit\xE9 Belgique - CyberFondamentaux"
+      nl:
+        name: CCB CyberFundamentals Framework - 2023-03-01
+        description: "Centrum voor Cybersecurity Belgi\xEB - CyberFundamentals"
     min_score: 1
     max_score: 5
     scores_definition:
@@ -45,6 +49,11 @@ objects:
           description: "Il n\u2019existe pas de processus standard."
           description_doc: "Pas de documentation sur le processus ou pas d\u2019approbation\
             \ formelle par la direction. "
+        nl:
+          name: "Initi\xEBle"
+          description: Er bestaat geen standaardproces.
+          description_doc: Geen procesdocumentatie of niet formeel goedgekeurd door
+            het management.
     - score: 2
       name: Repeatable
       description: Ad-hoc process exists and is done informally.
@@ -58,6 +67,11 @@ objects:
           description_doc: "Il existe une documentation de processus formellement\
             \ approuv\xE9e, mais elle n\u2019a pas fait l\u2019objet d\u2019un audit\
             \ au cours des deux derni\xE8res ann\xE9es."
+        nl:
+          name: Herhaalbaar
+          description: Er bestaat een ad-hocproces dat informeel wordt uitgevoerd.
+          description_doc: Er bestaat formeel goedgekeurde Procesdocumentatie, maar
+            deze is de afgelopen 2 jaar niet herzien.
     - score: 3
       name: Defined
       description: 'Formal process exists and is implemented.
@@ -79,6 +93,13 @@ objects:
             \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
             es.\nLes exceptions sont document\xE9es et approuv\xE9es dans moins de\
             \ 5 % des cas."
+        nl:
+          name: Gedefinieerd
+          description: "Formeel proces bestaat en wordt ge\xEFmplementeerd. Bewijs\
+            \ beschikbaar voor de meeste activiteiten. Minder dan 10% procesuitzonderingen."
+          description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
+            worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
+            uitzonderingen < 5% van de tijd.
     - score: 4
       name: Managed
       description: 'Formal process exists and is implemented.
@@ -105,6 +126,15 @@ objects:
           description_doc: "Il existe une documentation formellement approuv\xE9e\
             \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
             es.\nExceptions document\xE9es et approuv\xE9es < 3 % du temps."
+        nl:
+          name: Beheerd
+          description: "Formeel proces bestaat en wordt ge\xEFmplementeerd. Voor alle\
+            \ activiteiten is bewijsmateriaal beschikbaar. Gedetailleerde metriek\
+            \ van het proces wordt vastgelegd en gerapporteerd.\nMinimale doelstelling\
+            \ voor metriek is vastgesteld. Minder dan 5% van de procesuitzonderingen."
+          description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
+            worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
+            uitzonderingen < 3% van de tijd.
     - score: 5
       name: Optimizing
       description: 'Formal process exists and is implemented.
@@ -131,6 +161,16 @@ objects:
           description_doc: "Il existe une documentation formellement approuv\xE9e\
             \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
             es.\nExceptions document\xE9es et approuv\xE9es < 0,5 % du temps."
+        nl:
+          name: Geoptimaliseerd
+          description: "Formeel proces bestaat en wordt ge\xEFmplementeerd. Voor alle\
+            \ activiteiten is bewijsmateriaal beschikbaar. Gedetailleerde metriek\
+            \ van het proces wordt vastgelegd en gerapporteerd..\nMinimale doelstelling\
+            \ voor metriek is vastgesteld en wordt voortdurend verbeterd. Minder dan\
+            \ 1% van de procesuitzonderingen."
+          description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
+            worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
+            uitzonderingen < 0,5% van de tijd.
     implementation_groups_definition:
     - ref_id: B
       name: basic
@@ -139,12 +179,18 @@ objects:
         fr:
           name: basique
           description: null
+        nl:
+          name: basis
+          description: null
     - ref_id: I
       name: important
       description: null
       translations:
         fr:
           name: important
+          description: null
+        nl:
+          name: belangrijk
           description: null
     - ref_id: E
       name: essential
@@ -153,12 +199,18 @@ objects:
         fr:
           name: essentiel
           description: null
+        nl:
+          name: essentieel
+          description: null
     - ref_id: BK
       name: basic - key measures
       description: null
       translations:
         fr:
           name: "basique - mesure cl\xE9"
+          description: null
+        nl:
+          name: basis - kernmaatregel
           description: null
     - ref_id: IK
       name: important - key measures
@@ -167,12 +219,18 @@ objects:
         fr:
           name: "important - mesure cl\xE9"
           description: null
+        nl:
+          name: belangrijk - kernmaatregel
+          description: null
     - ref_id: EK
       name: essential - key measures
       description: null
       translations:
         fr:
           name: "essentiel - mesure cl\xE9"
+          description: null
+        nl:
+          name: essentieel - kernmaatregel
           description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id
