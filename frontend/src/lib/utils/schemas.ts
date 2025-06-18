@@ -376,7 +376,7 @@ export const SSOSettingsSchema = z.object({
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),
-	client_id: z.string(),
+	client_id: z.string().default(''),
 	secret: z.string().optional(),
 	key: z.string().optional(),
 
@@ -412,7 +412,9 @@ export const SSOSettingsSchema = z.object({
 	want_attribute_statement: z.boolean().optional().nullable(),
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
-	want_name_id_encrypted: z.boolean().optional().nullable()
+	want_name_id_encrypted: z.boolean().optional().nullable(),
+	server_url: z.string().optional().nullable(),
+	token_auth_method: z.string().optional().nullable()
 });
 
 export const EntitiesSchema = z.object({

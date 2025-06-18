@@ -39,6 +39,28 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         allow_blank=True,
         allow_null=True,
     )
+    secret = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )  # NOTE: Only used for OIDC
+    server_url = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        source="settings.server_url",
+    )  # NOTE: Only used for OIDC
+    token_auth_method = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        default="client_secret_basic",
+        source="settings.token_auth_method",
+    )  # NOTE: Only used for OIDC
+    oauth_pkce_enabled = serializers.BooleanField(
+        default=False,
+        source="settings.oauth_pkce_enabled",
+    )  # NOTE: Only used for OIDC
     provider_name = serializers.CharField(
         required=False,
         allow_blank=True,

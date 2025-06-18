@@ -10,12 +10,15 @@ from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
 import structlog
+
+from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
 
@@ -58,7 +61,9 @@ class AccountAdapter(DefaultAccountAdapter):
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
-        email_address = next(iter(sociallogin.account.extra_data.values()))[0]
+        email_address = sociallogin.account.extra_data.get(
+            "email", next(iter(sociallogin.account.extra_data.values()))[0]
+        )
         try:
             user = User.objects.get(email=email_address)
             sociallogin.user = user

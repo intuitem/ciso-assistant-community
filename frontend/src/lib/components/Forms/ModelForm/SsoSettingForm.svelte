@@ -60,7 +60,6 @@
 					cacheLock={cacheLocks['provider_name']}
 				/>
 				<TextField
-					hidden
 					{form}
 					field="provider_id"
 					label={m.providerID()}
@@ -94,6 +93,27 @@
 				{/if}
 			{/snippet}
 		</Accordion.Item>
+		<TextField
+			{form}
+			field="server_url"
+			label={m.serverURL()}
+			disabled={!data.is_enabled}
+			cacheLock={cacheLocks['server_url']}
+		/>
+		<TextField
+			{form}
+			field="token_auth_method"
+			label={m.tokenAuthMethod()}
+			disabled={!data.is_enabled}
+			cacheLock={cacheLocks['token_auth_method']}
+		/>
+		<Checkbox
+			{form}
+			field="oauth_pkce_enabled"
+			label={m.oauthPKCEEnabled()}
+			disabled={!data.is_enabled}
+			cacheLock={cacheLocks['oauth_pkce_enabled']}
+		/>
 	{/if}
 	{#if data.provider === 'saml'}
 		<Accordion.Item value="saml">

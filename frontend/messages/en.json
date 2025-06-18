@@ -1665,5 +1665,8 @@
 				"countPlural=other": "{count} Days"
 			}
 		}
-	]
+	],
+	"serverURL": "Server URL",
+	"tokenAuthMethod": "Token auth method",
+	"oauthPKCEEnabled": "OAuth PKCE enabled"
 }
