@@ -2,29 +2,45 @@
 	import { onMount } from 'svelte';
 	import type * as echarts from 'echarts';
 
-	export let data;
-	export let width = '';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let title = '';
-	export let layout = 'force';
-	export let initLayout = 'circular';
-	export let edgeLength = 50;
-	export let name = 'graph';
-	export let zoom = 1;
-	export let color = [
-		'#5470c6',
-		'#91cc75',
-		'#fac858',
-		'#ee6666',
-		'#73c0de',
-		'#3ba272',
-		'#fc8452',
-		'#9a60b4',
-		'#ea7ccc'
-	];
+	interface Props {
+		data: any;
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		layout?: string;
+		initLayout?: string;
+		edgeLength?: number;
+		name?: string;
+		zoom?: number;
+		color?: any;
+	}
 
-	let searchQuery = '';
+	let {
+		data,
+		width = '',
+		height = 'h-full',
+		classesContainer = '',
+		title = '',
+		layout = 'force',
+		initLayout = 'circular',
+		edgeLength = 50,
+		name = 'graph',
+		zoom = 1,
+		color = [
+			'#5470c6',
+			'#91cc75',
+			'#fac858',
+			'#ee6666',
+			'#73c0de',
+			'#3ba272',
+			'#fc8452',
+			'#9a60b4',
+			'#ea7ccc'
+		]
+	}: Props = $props();
+
+	let searchQuery = $state('');
 	let chart: echarts.ECharts;
 	let currentEmphasisNodeId: number | null = null;
 	const chart_id = `${name}_div`;
@@ -254,16 +270,16 @@
 	<input
 		id="graph-search"
 		type="text"
-		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-sm"
+		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-xs"
 		bind:value={searchQuery}
-		on:keydown={handleKeyDown}
+		onkeydown={handleKeyDown}
 		placeholder="Find a node ..."
 	/>
 	<span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
 		<button
 			type="button"
 			class="text-gray-600 hover:text-gray-700"
-			on:click={() => searchNode(searchQuery)}
+			onclick={() => searchNode(searchQuery)}
 			aria-label="Search"
 		>
 			<svg
@@ -283,4 +299,4 @@
 		</button>
 	</span>
 </div>
-<div id={chart_id} class="{width} {height} {classesContainer} p-8" role="presentation" />
+<div id={chart_id} class="{width} {height} {classesContainer} p-8" role="presentation"></div>

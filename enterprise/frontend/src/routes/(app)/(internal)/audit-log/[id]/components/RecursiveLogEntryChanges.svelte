@@ -5,7 +5,11 @@
 
   type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
-  export let log: { changes: Record<string, any> };
+  interface Props {
+    log: { changes: Record<string, any> };
+  }
+
+  let { log }: Props = $props();
 
   /**
    * Attempts to parse a value if it's a JSON string.

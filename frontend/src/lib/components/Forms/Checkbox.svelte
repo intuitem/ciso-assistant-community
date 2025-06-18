@@ -1,38 +1,49 @@
 <script lang="ts">
-	import { SlideToggle, type CssClasses } from '@skeletonlabs/skeleton';
-	import { createEventDispatcher } from 'svelte';
+	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
-	export let helpText: string | undefined = undefined;
-	// The cachedValue isn't used in the ModelForm because we don't need it yet
-	export let cachedValue: boolean | undefined = undefined;
-	export let form: SuperForm<Record<string, boolean | undefined>>;
-	export let hidden = false;
-	export let disabled = false;
-	export let checkboxComponent: 'checkbox' | 'switch' = 'checkbox';
-	export let classesContainer: CssClasses = '';
+	interface Props {
+		label?: string | undefined;
+		field: string;
+		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
+		helpText?: string | undefined;
+		// The cachedValue isn't used in the ModelForm because we don't need it yet
+		cachedValue?: boolean | undefined;
+		form: SuperForm<Record<string, boolean | undefined>>;
+		hidden?: boolean;
+		disabled?: boolean;
+		checkboxComponent?: 'checkbox' | 'switch';
+		classes?: string;
+		classesContainer?: string;
+		onChange?: (event: boolean) => void;
+		[key: string]: any;
+	}
+
+	let {
+		label = $bindable(),
+		field,
+		valuePath = field,
+		helpText = undefined,
+		cachedValue = $bindable(),
+		form,
+		hidden = false,
+		disabled = false,
+		checkboxComponent = 'checkbox',
+		classes = '',
+		classesContainer = '',
+		onChange = () => {},
+		...rest
+	}: Props = $props();
 
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
-
-	const dispatch = createEventDispatcher();
-
-	function handleChange() {
-		dispatch('change', $value);
-	}
-
-	$: if (cachedValue !== undefined) {
-		value.set(cachedValue);
-	} else {
+	$effect(() => {
 		cachedValue = $value;
-	}
+	});
 
-	$: classesHidden = (h: boolean) => (h ? 'hidden' : '');
-	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
+	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));
+	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
 </script>
 
 <div class="{classesContainer} {classesHidden(hidden)}">
@@ -56,21 +67,24 @@
 					type="checkbox"
 					class="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
-					bind:checked={cachedValue}
-					on:change={handleChange}
+					bind:checked={$value}
+					onchange={() => onChange($value)}
 					{...$constraints}
-					{...$$restProps}
+					{...rest}
 					{disabled}
 				/>
 			{:else if checkboxComponent === 'switch'}
-				<SlideToggle
+				<Switch
 					name={field}
-					type="checkbox"
+					{classes}
 					data-testid="form-input-{field.replaceAll('_', '-')}"
-					bind:checked={cachedValue}
-					on:change={handleChange}
+					checked={Boolean($value)}
+					onCheckedChange={(e) => {
+						$value = e.checked;
+						onChange($value);
+					}}
 					{...$constraints}
-					{...$$restProps}
+					{...rest}
 					{disabled}
 				/>
 			{/if}

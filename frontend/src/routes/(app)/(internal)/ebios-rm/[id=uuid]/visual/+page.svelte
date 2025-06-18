@@ -1,8 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	pageTitle.set('Visual Analysis');
 	const color = [
 		'#91cc75',
@@ -18,7 +22,7 @@
 	const zoom = 1.5;
 </script>
 
-<div class="bg-white shadow flex overflow-x-auto">
+<div class="bg-white shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<GraphExplorer
 			title="Visual Analysis (beta)"

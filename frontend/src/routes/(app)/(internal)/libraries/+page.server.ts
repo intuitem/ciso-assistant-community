@@ -1,11 +1,11 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { tableSourceMapper } from '$lib/utils/table';
 
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
 import { LibraryUploadSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
-import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';

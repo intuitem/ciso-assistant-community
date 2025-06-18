@@ -4,32 +4,45 @@
 	import { m } from '$paraglide/messages';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	export let form: SuperForm<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
+	interface Props {
+		form: SuperForm<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+	}
 
-	$: flipVertically = formDataCache['risk_matrix_flip_vertical'] ?? false;
-	$: xAxis = formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact';
-	$: yAxis = formDataCache['risk_matrix_swap_axes'] ? 'impact' : 'probability';
-	$: xAxisLabel = safeTranslate(`${xAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`);
-	$: yAxisLabel = safeTranslate(`${yAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`);
+	let { form, model, cacheLocks = {} }: Props = $props();
+	let formDataCache = $state({});
 
 	const formStore = form.form;
-	$: horizontalAxisPos = flipVertically ? 'top-8' : 'bottom-8';
-	$: horizontalLabelPos = flipVertically ? 'top-2' : 'bottom-2';
+
+	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
+
+	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
+	let yAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'impact' : 'probability');
+	let xAxisLabel = $derived(safeTranslate(`${xAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`));
+	let yAxisLabel = $derived(safeTranslate(`${yAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`));
+
+	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
+	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
+
+	let openAccordionItems = $state(['notifications', 'interface']);
 </script>
 
-<Accordion regionControl="font-bold">
-	<AccordionItem open>
-		<svelte:fragment slot="summary"
-			><i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}</svelte:fragment
-		>
-		<svelte:fragment slot="content">
+<Accordion
+	value={openAccordionItems}
+	onValueChange={(e) => (openAccordionItems = e.value)}
+	multiple
+>
+	<Accordion.Item value="notifications">
+		{#snippet control()}
+			<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
+		{/snippet}
+		{#snippet panel()}
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -37,13 +50,13 @@
 					label={m.settingsNotificationsMail()}
 				/>
 			</div>
-		</svelte:fragment>
-	</AccordionItem>
-	<AccordionItem open>
-		<svelte:fragment slot="summary">
-			<i class="fa-solid fa-asterisk mr-2" />{m.settingsInterface()}
-		</svelte:fragment>
-		<svelte:fragment slot="content">
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="interface">
+		{#snippet control()}
+			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
+		{/snippet}
+		{#snippet panel()}
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -51,13 +64,13 @@
 					label={m.settingsAggregateMatrix()}
 				/>
 			</div>
-		</svelte:fragment>
-	</AccordionItem>
-	<AccordionItem open>
-		<svelte:fragment slot="summary"
-			><i class="fa-solid fa-gem mr-2"></i>{m.assets()}</svelte:fragment
-		>
-		<svelte:fragment slot="content">
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="assets">
+		{#snippet control()}
+			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
+		{/snippet}
+		{#snippet panel()}
 			<Select
 				{form}
 				field="security_objective_scale"
@@ -67,13 +80,13 @@
 				helpText={m.securityObjectiveScaleHelpText()}
 				label={m.securityObjectiveScale()}
 			/>
-		</svelte:fragment>
-	</AccordionItem>
-	<AccordionItem open>
-		<svelte:fragment slot="summary"
-			><i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}</svelte:fragment
-		>
-		<svelte:fragment slot="content">
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="riskMatrix">
+		{#snippet control()}
+			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
+		{/snippet}
+		{#snippet panel()}
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
 					<Checkbox
@@ -90,14 +103,15 @@
 						helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
 						bind:cachedValue={formDataCache['risk_matrix_flip_vertical']}
 					/>
-					<RadioGroupInput
-						{form}
-						label={m.settingsRiskMatrixLabels()}
-						field="risk_matrix_labels"
-						options={[
+					<RadioGroup
+						possibleOptions={[
 							{ label: m.iso27005(), value: 'ISO' },
 							{ label: m.ebiosRM(), value: 'EBIOS' }
 						]}
+						{form}
+						key="value"
+						labelKey="label"
+						field="risk_matrix_labels"
 					/>
 				</div>
 				<div class="flex-1">
@@ -125,13 +139,13 @@
 					</div>
 				</div>
 			</div>
-		</svelte:fragment>
-	</AccordionItem>
-	<AccordionItem>
-		<svelte:fragment slot="summary"
-			><i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}</svelte:fragment
-		>
-		<svelte:fragment slot="content">
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="ebiosRadar">
+		{#snippet control()}
+			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
+		{/snippet}
+		{#snippet panel()}
 			<NumberField
 				{form}
 				field="ebios_radar_max"
@@ -172,6 +186,6 @@
 				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
 			/>
-		</svelte:fragment>
-	</AccordionItem>
+		{/snippet}
+	</Accordion.Item>
 </Accordion>

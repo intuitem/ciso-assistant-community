@@ -1,23 +1,6 @@
 <script lang="ts">
-	// Accept entity_assessment.data as a prop
-	export let entity_assessment: {
-		provider: string;
-		entity_assessment_id: string;
-		baseline: string;
-		solutions: string;
-		completion: number;
-		review_progress: number;
-		conclusion: string;
-		last_update: string;
-		due_date: string;
-		eta_date: string;
-		observation: string;
-		reviewers: string;
-		has_questions: boolean;
-	};
-
 	// State to track if the card is flipped
-	let isFlipped = false;
+	let isFlipped = $state(false);
 
 	// Function to handle the flip action
 	function handleFlip() {
@@ -25,6 +8,26 @@
 	}
 
 	import { m } from '$paraglide/messages';
+	interface Props {
+		// Accept entity_assessment.data as a prop
+		entity_assessment: {
+			provider: string;
+			entity_assessment_id: string;
+			baseline: string;
+			solutions: string;
+			completion: number;
+			review_progress: number;
+			conclusion: string;
+			last_update: string;
+			due_date: string;
+			eta_date: string;
+			observation: string;
+			reviewers: string;
+			has_questions: boolean;
+		};
+	}
+
+	let { entity_assessment }: Props = $props();
 
 	// Function to determine progress bar color based on completion percentage
 	function getProgressColor(progress: number): string {
@@ -60,8 +63,8 @@
 		>
 			<!-- Flip button for front face -->
 			<button
-				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
-				on:click={handleFlip}
+				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-sm opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
+				onclick={handleFlip}
 				aria-label="Flip card"
 			>
 				<svg
@@ -111,7 +114,7 @@
 					<div class="mb-3">
 						<span class="block text-sm text-gray-500">Baseline</span>
 						<div
-							class="inline-block bg-gray-100 px-2 py-1 rounded text-sm font-mono overflow-hidden"
+							class="inline-block bg-gray-100 px-2 py-1 rounded-sm text-sm font-mono overflow-hidden"
 						>
 							<div class="line-clamp-2 min-h-[2.4em] flex items-center">
 								{entity_assessment.baseline}
@@ -185,8 +188,8 @@
 		>
 			<!-- Flip button for back face -->
 			<button
-				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
-				on:click={handleFlip}
+				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-sm opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
+				onclick={handleFlip}
 				aria-label="Flip card back"
 			>
 				<svg
