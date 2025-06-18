@@ -53,7 +53,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     f"Invalid value: {repr(value)}, the value must be among: {repr(expected_values)}"
                 )
 
-            setattr(instance, "value", validated_data["value"])
+        setattr(instance, "value", validated_data["value"])
         instance.save()
         return instance
 
