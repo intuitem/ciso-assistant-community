@@ -5,6 +5,7 @@ from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from iam.sso.models import SSOSettings
+from core.models import Asset
 
 from .serializers import (
     GlobalSettingsSerializer,
@@ -114,13 +115,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
-        choices = {
-            "1-4": "1-4",
-            "1-5": "1-5",
-            "0-3": "0-3",
-            "0-4": "0-4",
-            "FIPS-199": "FIPS-199",
-        }
+        choices = {key: key for key in Asset.SECURITY_OBJECTIVES_SCALES}
         return Response(choices)
 
     @action(detail=True, name="Get ebios rm radar parameters")

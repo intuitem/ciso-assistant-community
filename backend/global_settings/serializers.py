@@ -1,19 +1,21 @@
 from rest_framework import serializers
+from typing import Optional, Dict, List, Set, Tuple
 
+from core.models import Asset
 from .models import GlobalSettings
 
-GENERAL_SETTINGS_KEYS = [
-    "security_objective_scale",
-    "ebios_radar_max",
-    "ebios_radar_green_zone_radius",
-    "ebios_radar_yellow_zone_radius",
-    "ebios_radar_red_zone_radius",
-    "interface_agg_scenario_matrix",
-    "notifications_enable_mailing",
-    "risk_matrix_swap_axes",
-    "risk_matrix_flip_vertical",
-    "risk_matrix_labels",
-]
+GENERAL_SETTINGS_SCHEMA: Dict[str, Tuple[type, Optional[List[str]]]] = {
+    "security_objective_scale": (str, [*Asset.SECURITY_OBJECTIVES_SCALES]),
+    "ebios_radar_max": (int, None),
+    "ebios_radar_green_zone_radius": (float, None),
+    "ebios_radar_yellow_zone_radius": (float, None),
+    "ebios_radar_red_zone_radius": (float, None),
+    "notifications_enable_mailing": (bool, None),
+    "interface_agg_scenario_matrix": (bool, None),
+    "risk_matrix_swap_axes": (bool, None),
+    "risk_matrix_flip_vertical": (bool, None),
+    "risk_matrix_labels": (str, ["ISO", "EBIOS"]),
+}
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
@@ -39,8 +41,18 @@ class GlobalSettingsSerializer(serializers.ModelSerializer):
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         for key, value in validated_data["value"].items():
-            if key not in GENERAL_SETTINGS_KEYS:
+            if (key_schema := GENERAL_SETTINGS_SCHEMA.get(key)) is None:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            expected_type, expected_values = key_schema
+            if type(value) is not expected_type:
+                raise serializers.ValidationError(
+                    f"Invalid type for key '{key}' expected type was {expected_type.__name__}"
+                )
+            if expected_values is not None and not value in expected_values:
+                raise serializers.ValidationError(
+                    f"Invalid value: {repr(value)}, the value must be among: {repr(expected_values)}"
+                )
+
             setattr(instance, "value", validated_data["value"])
         instance.save()
         return instance
