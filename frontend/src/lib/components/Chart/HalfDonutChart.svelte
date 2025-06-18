@@ -2,11 +2,6 @@
 	import { onMount } from 'svelte';
 
 	import { safeTranslate } from '$lib/utils/i18n';
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let title = '';
-	export let name: string;
 
 	import { level } from '$paraglide/messages';
 	interface riskChartData {
@@ -15,8 +10,25 @@
 		color: string;
 	}
 
-	export let values: riskChartData[]; // Set the types for these variables later on
-	export let colors: string[] = [];
+	interface Props {
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		name: string;
+		values: riskChartData[]; // Set the types for these variables later on
+		colors?: string[];
+	}
+
+	let {
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		title = '',
+		name,
+		values = $bindable(),
+		colors = []
+	}: Props = $props();
 
 	for (const index in values) {
 		if (values[index].name) {
@@ -63,4 +75,4 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>

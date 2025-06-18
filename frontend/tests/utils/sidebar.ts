@@ -50,7 +50,9 @@ export class SideBar {
 
 	async click(parent: string, tab: string, waitForURL = true) {
 		if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
-			await this.page.locator('#' + parent.toLowerCase().replace(' ', '-')).click();
+			await this.page
+				.getByTestId('accordion-item-' + parent.toLowerCase().replace(' ', '-'))
+				.click();
 		}
 		await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible();
 		await this.page.getByTestId('accordion-item-' + tab.substring(1)).click();

@@ -4,9 +4,13 @@
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 
-	export let form: SuperValidated<any>;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+	}
+
+	let { form, cacheLocks = {}, formDataCache = $bindable({}) }: Props = $props();
 </script>
 
 <TextField

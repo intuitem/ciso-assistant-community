@@ -1,11 +1,23 @@
 <script lang="ts">
 	import { goto } from '$lib/utils/breadcrumbs';
 
-	export let count = 0;
-	export let label: string;
-	export let faIcon = '';
-	export let iconColor = '';
-	export let href: string | undefined = undefined;
+	interface Props {
+		count?: number;
+		label: string;
+		faIcon?: string;
+		iconColor?: string;
+		href?: string | undefined;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		count = 0,
+		label,
+		faIcon = '',
+		iconColor = '',
+		href = undefined,
+		children
+	}: Props = $props();
 
 	const clickHandler = () => {
 		if (href) {
@@ -13,24 +25,26 @@
 		}
 	};
 
-	$: classesHover = (href: string | undefined) => (href ? 'hover:variant-soft-secondary' : '');
+	let classesHover = $derived((href: string | undefined) =>
+		href ? 'hover:preset-tonal-secondary' : ''
+	);
 </script>
 
 <div
 	class="card p-2 bg-inherit w-full flex flex-col whitespace-normal group {classesHover(
 		href
-	)} bg-gradient-to-br from-white to-violet-50"
-	on:click={clickHandler}
+	)} bg-linear-to-br from-white to-violet-50"
+	onclick={clickHandler}
 	role={href ? 'button' : ''}
 >
-	<div class="text-sm font-medium text-gray-500 group-hover:text-secondary-700-200-token">
+	<div class="text-sm font-medium text-gray-500 group-hover:text-secondary-800-200">
 		{label}
 	</div>
 	<div class="flex flex-row items-end h-full content-end">
 		<span class="flex flex-row items-center">
-			<div class="text-2xl {iconColor} mr-2"><i class={faIcon} /></div>
+			<div class="text-2xl {iconColor} mr-2"><i class={faIcon}></i></div>
 			<div class="text-3xl font-semibold">{count}</div>
 		</span>
-		<slot />
+		{@render children?.()}
 	</div>
 </div>

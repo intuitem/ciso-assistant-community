@@ -1,36 +1,57 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 
-	let _class = '';
-	export { _class as class };
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let helpText: string | undefined = undefined;
-	export let form;
-	export let cachedValue: string = '';
-	export let cacheLock: CacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	};
-	export let hidden = false;
-	export let disabled = false;
-	export let rows = 5;
-	export let cols = 50;
+	interface Props {
+		class?: string;
+		label?: string | undefined;
+		field: string;
+		helpText?: string | undefined;
+		form: any;
+		cachedValue?: string;
+		cacheLock?: CacheLock;
+		hidden?: boolean;
+		disabled?: boolean;
+		rows?: number;
+		cols?: number;
+		[key: string]: any;
+	}
+
+	let {
+		class: _class = '',
+		label = $bindable(),
+		field,
+		helpText = undefined,
+		form,
+		cachedValue = $bindable(),
+		cacheLock = {
+			promise: new Promise((res) => res(null)),
+			resolve: (x) => x
+		},
+		hidden = false,
+		disabled = false,
+		rows = 5,
+		cols = 50,
+		...rest
+	}: Props = $props();
 
 	label = label ?? field;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	$: cachedValue = $value;
+	run(() => {
+		cachedValue = $value;
+	});
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
 	});
 
-	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
-	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
+	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
+	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
 </script>
 
 <div class={classesDisabled(disabled)}>
@@ -59,11 +80,11 @@
 			placeholder=""
 			bind:value={$value}
 			{...$constraints}
-			{...$$restProps}
+			{...rest}
 			{rows}
 			{cols}
 			{disabled}
-		/>
+		></textarea>
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>

@@ -1,9 +1,14 @@
-<script>
+<script lang="ts">
 	import { getLocale, overwriteSetLocale, setLocale } from '$paraglide/runtime';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { getCookie, deleteCookie, setCookie } from '$lib/utils/cookies';
 	import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	onMount(() => {
 		// const valueFromSession = sessionStorage.getItem('lang') || DEFAULT_LANGUAGE;
@@ -21,7 +26,7 @@
 	});
 
 	// initialize the language tag
-	$: _languageTag = getLocale;
+	let _languageTag = $derived(getLocale);
 
 	overwriteSetLocale((newLanguageTag) => {
 		// @ts-ignore
@@ -30,5 +35,5 @@
 </script>
 
 {#key _languageTag}
-	<slot />
+	{@render children?.()}
 {/key}

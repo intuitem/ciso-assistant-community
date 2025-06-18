@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import PriorityRadarChart from '$lib/components/Chart/PriorityRadarChart.svelte';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 <div class="bg-white shadow flex overflow-x-auto">

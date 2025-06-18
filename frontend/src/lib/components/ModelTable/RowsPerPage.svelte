@@ -1,15 +1,21 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 
-	export let handler: DataHandler;
+	interface Props {
+		handler: DataHandler;
+	}
+
+	let { handler }: Props = $props();
 
 	const pageNumber = handler.getPageNumber();
 	const rowsPerPage = handler.getRowsPerPage();
 	const rowCount = handler.getRowCount();
 
-	$: lastRowsPerPage = $rowsPerPage ?? 10;
+	let lastRowsPerPage = $derived($rowsPerPage ?? 10);
 
 	const setRowsPerPage = () => {
 		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
@@ -34,9 +40,11 @@
 		handler.invalidate();
 	};
 
-	$: if ($rowsPerPage && $rowCount?.start >= $rowCount?.total) {
-		handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
-	}
+	run(() => {
+		if ($rowsPerPage && $rowCount?.start >= $rowCount?.total) {
+			handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
+		}
+	});
 
 	onMount(() => {
 		const cachedValue = Number(localStorage.getItem('rowsPerPageCache') ?? '10');
@@ -55,7 +63,7 @@
 	<select
 		class="select bg-surface-50 w-fit mx-1"
 		bind:value={$rowsPerPage}
-		on:change={setRowsPerPage}
+		onchange={setRowsPerPage}
 	>
 		{#each options as option}
 			<option value={option}>

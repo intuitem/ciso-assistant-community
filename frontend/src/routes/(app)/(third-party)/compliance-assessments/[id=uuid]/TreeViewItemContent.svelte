@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
@@ -11,18 +11,37 @@
 	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let ref_id: string;
-	export let name: string;
-	export let description: string;
-	export let ra_id: string | undefined = undefined;
-	export let threats: z.infer<typeof ThreatSchema>[] | undefined = undefined;
-	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
-	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
-	export let canEditRequirementAssessment: boolean;
-	export let selectedStatus: string[];
-	export let resultCounts: Record<string, number> | undefined;
-	export let assessable: boolean;
-	export let max_score: number;
+	interface Props {
+		ref_id: string;
+		name: string;
+		description: string;
+		ra_id?: string | undefined;
+		threats?: z.infer<typeof ThreatSchema>[] | undefined;
+		reference_controls?: z.infer<typeof ReferenceControlSchema>[] | undefined;
+		children?: Record<string, Record<string, unknown>> | undefined;
+		canEditRequirementAssessment: boolean;
+		selectedStatus: string[];
+		resultCounts: Record<string, number> | undefined;
+		assessable: boolean;
+		max_score: number;
+		[key: string]: any;
+	}
+
+	let {
+		ref_id,
+		name,
+		description,
+		ra_id = undefined,
+		threats = undefined,
+		reference_controls = undefined,
+		children = undefined,
+		canEditRequirementAssessment,
+		selectedStatus,
+		resultCounts,
+		assessable,
+		max_score,
+		...rest
+	}: Props = $props();
 
 	const node = {
 		ref_id,
@@ -36,7 +55,7 @@
 		max_score,
 		resultCounts,
 		assessable,
-		...$$restProps
+		...rest
 	} as const;
 
 	type TreeViewItemNode = typeof node;
@@ -45,10 +64,12 @@
 	const title: string =
 		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
 
-	let showInfo = false;
+	let showInfo = $state(false);
 
-	let id = $page.params.id;
-	$: displayOnlyAssessableNodes = $auditFiltersStore[id]?.displayOnlyAssessableNodes ?? false;
+	let id = page.params.id;
+	let displayOnlyAssessableNodes = $derived(
+		$auditFiltersStore[id]?.displayOnlyAssessableNodes ?? false
+	);
 
 	const getAssessableNodes = (
 		startNode: TreeViewItemNode,
@@ -98,14 +119,22 @@
 	);
 
 	function nodeScore(): number | null {
-		if (!resultCounts) return null;
+		if (
+			!resultCounts ||
+			!resultCounts.hasOwnProperty('total_score') ||
+			!resultCounts.hasOwnProperty('scored')
+		) {
+			return null;
+		}
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
 
-	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
-	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
-	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
+	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
+	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
+	let classesPercentText = $derived((resultColor: string) =>
+		resultColor === '#000000' ? 'text-white' : ''
+	);
 </script>
 
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
@@ -114,11 +143,11 @@
 			<div class="flex flex-row space-x-2" style="font-weight: 300;">
 				<div>
 					{#if assessable}
-						<span class="w-full h-full flex rounded-token hover:text-primary-500">
+						<span class="w-full h-full flex rounded-base hover:text-primary-500">
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
-									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
+									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
 								>
 									{#if title || description}
 										{#if title}
@@ -135,7 +164,7 @@
 							{:else}
 								<Anchor
 									breadcrumbAction="push"
-									href="/requirement-assessments/{ra_id}?next={$page.url.pathname}"
+									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
 								>
 									{#if title}
 										<span style="font-weight: 600;">{title}</span>
@@ -160,7 +189,7 @@
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
-							{#if resultCounts[status] && (selectedStatus.includes(status) || selectedStatus.length === 0)}
+							{#if resultCounts?.status && (selectedStatus.includes(status) || selectedStatus.length === 0)}
 								<span
 									class="badge mr-1"
 									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
@@ -194,27 +223,27 @@
 				role="button"
 				tabindex="0"
 				class="select-none text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-				on:click={(e) => {
+				onclick={(e) => {
 					e.preventDefault();
 					showInfo = !showInfo;
 				}}
-				on:keydown={(e) => {
+				onkeydown={(e) => {
 					if (e.key === 'Enter') {
 						e.preventDefault();
 						showInfo = !showInfo;
 					}
 				}}
 			>
-				<i class="text-xs fa-solid fa-info-circle" /> Learn more
+				<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 			</div>
 			<div
-				class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
+				class="card p-2 preset-tonal-primary border border-primary-500 text-sm flex flex-row cursor-auto {classesShowInfo(
 					showInfo
 				)}"
 			>
 				<div class="flex-1">
 					<p class="font-medium">
-						<i class="fa-solid fa-gears" />
+						<i class="fa-solid fa-gears"></i>
 						Suggested reference controls
 					</p>
 					{#if reference_controls?.length === 0}
@@ -224,10 +253,7 @@
 							{#each reference_controls as func}
 								<li>
 									{#if func.id}
-										<a
-											class="anchor"
-											href="/reference-controls/{func.id}?next={$page.url.pathname}"
-										>
+										<a class="anchor" href="/reference-controls/{func.id}?next={page.url.pathname}">
 											{func.name}
 										</a>
 									{:else}
@@ -240,7 +266,7 @@
 				</div>
 				<div class="flex-1">
 					<p class="font-medium">
-						<i class="fa-solid fa-gears" />
+						<i class="fa-solid fa-gears"></i>
 						Threats covered
 					</p>
 					{#if threats?.length === 0}
@@ -250,7 +276,7 @@
 							{#each threats as threat}
 								<li>
 									{#if threat.id}
-										<a class="anchor" href="/threats/{threat.id}?next={$page.url.pathname}">
+										<a class="anchor" href="/threats/{threat.id}?next={page.url.pathname}">
 											{threat.name}
 										</a>
 									{:else}
@@ -283,12 +309,10 @@
 				</div>
 				{#if nodeScore() !== null}
 					<span>
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor(nodeScore(), node.max_score)}
-							font={150}
+						<ProgressRing
 							value={formatScoreValue(nodeScore(), node.max_score)}
-							width={'w-10'}>{nodeScore()}</ProgressRadial
+							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+							size="size-12"><p class="font-semibold text-xs">{nodeScore()}</p></ProgressRing
 						>
 					</span>
 				{/if}

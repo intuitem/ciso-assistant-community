@@ -1,9 +1,13 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { m } from '$paraglide/messages';
-	export let handler: DataHandler;
+	interface Props {
+		handler: DataHandler;
+	}
 
-	let value = '';
+	let { handler }: Props = $props();
+
+	let value = $state('');
 	let timeout: any;
 
 	const search = () => {
@@ -20,6 +24,7 @@
 	placeholder={m.searchPlaceholder()}
 	data-testid="search-input"
 	id="search-input"
+	type="search"
 	bind:value
-	on:input={search}
+	oninput={search}
 />

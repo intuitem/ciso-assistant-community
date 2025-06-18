@@ -1,103 +1,96 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { Command } from 'cmdk-sv';
-	import { onMount, onDestroy } from 'svelte';
-	import { writable } from 'svelte/store';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { navigationLinks } from './paletteData.ts';
+	import { navigationLinks } from './paletteData';
 	import { goto } from '$lib/utils/breadcrumbs';
 
-	// Create a store for command palette visibility
-	export const commandPaletteOpen = writable(false);
-
-	// Custom case-insensitive filter
-	function caseInsensitiveFilter(value: string, search: string) {
-		return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
-	}
-
-	// Keyboard shortcut handler
-	function handleKeydown(e: KeyboardEvent) {
-		if (browser && (e.metaKey || e.ctrlKey) && e.key === 'k') {
-			e.preventDefault();
-			commandPaletteOpen.update((current) => !current);
-		}
-	}
+	let opened = $state(false);
 
 	// Generate navigation commands with automatic close
 	const navigationCommands = navigationLinks.map((link) => ({
 		label: safeTranslate(link.label),
 		value: link.href,
 		onSelect: () => {
-			commandPaletteOpen.set(false);
+			opened = false;
 			goto(link.href, { label: link.label, breadcrumbAction: 'replace' });
 		}
 	}));
 
-	// Close command palette on route change
-	$: if ($page.url.pathname) {
-		commandPaletteOpen.set(false);
+	let selected = $state(0);
+	let searchText = $state('');
+	let filteredNavigationCommands = $derived(
+		navigationCommands.filter(
+			(link) => link.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0
+		)
+	);
+	$effect(() => {
+		if (selected >= filteredNavigationCommands.length) {
+			selected = 0;
+		}
+	});
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (!browser) return;
+		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+			e.preventDefault();
+			searchText = '';
+			selected = 0;
+			opened = !opened;
+		}
+		if (!opened) return;
+
+		if (e.key === 'Escape') {
+			opened = false;
+		} else if (e.key === 'ArrowDown') {
+			if (selected === navigationLinks.length - 1) return;
+			selected++;
+			document.querySelector(`[data-cmdk-nav-btn]:nth-of-type(${selected + 1})`)?.scrollIntoView();
+		} else if (e.key === 'ArrowUp') {
+			if (selected === 0) return;
+			selected--;
+			document.querySelector(`[data-cmdk-nav-btn]:nth-of-type(${selected + 1})`)?.scrollIntoView();
+		} else if (e.key === 'Enter') {
+			const selectedLink = filteredNavigationCommands[selected];
+			if (selectedLink) filteredNavigationCommands[selected].onSelect();
+		}
 	}
-
-	// Add global event listener
-	onMount(() => {
-		if (browser) {
-			window.addEventListener('keydown', handleKeydown);
-		}
-	});
-
-	onDestroy(() => {
-		if (browser) {
-			window.removeEventListener('keydown', handleKeydown);
-		}
-	});
 </script>
 
-<Command.Dialog bind:open={$commandPaletteOpen} label="Command Menu">
-	<Command.Root filter={caseInsensitiveFilter}>
-		<Command.Input placeholder="Type a command..." />
-		<Command.List>
-			<Command.Empty>No results found.</Command.Empty>
-			<Command.Group heading="Navigation">
-				{#each navigationCommands as command}
-					<Command.Item value={command.label} onSelect={command.onSelect}>
-						{command.label}
-					</Command.Item>
+<svelte:window onkeydown={handleKeydown} />
+
+{#if opened}
+	<div
+		class="backdrop-blur-xs fixed inset-0 z-500 w-full h-full m-auto flex items-center justify-center bg-black/50"
+	>
+		<div class="h-auto overflow-hidden flex flex-col max-h-88 w-md rounded-lg">
+			<input
+				autofocus
+				class="w-full bg-white px-4 py-3 border-b border-gray-200 outline-none focus:border-blue-800"
+				type="text"
+				bind:value={searchText}
+				placeholder="Type a command..."
+			/>
+			{#if filteredNavigationCommands.length > 0}
+				<span class="bg-white py-2 px-4 text-xs uppercase text-gray-500">Navigation</span>
+			{:else}
+				<span class="bg-white py-2 px-1 text-black">No results found.</span>
+			{/if}
+			<div class="overflow-auto flex flex-col">
+				{#each filteredNavigationCommands as navigationCommand, index}
+					{#if navigationCommand.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0}
+						<button
+							class="navigation-btn text-left py-2 px-4 text-black {selected === index
+								? 'bg-gray-100'
+								: 'bg-white'}"
+							data-cmdk-nav-btn=""
+							onmouseenter={() => {
+								selected = index;
+							}}
+							onclick={navigationCommand.onSelect}>{navigationCommand.label}</button
+						>
+					{/if}
 				{/each}
-			</Command.Group>
-			<Command.Separator />
-		</Command.List>
-	</Command.Root>
-</Command.Dialog>
-
-<style lang="postcss">
-	/* Global styles for the command palette */
-	:global([data-cmdk-dialog]) {
-		@apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2;
-	}
-
-	:global([data-cmdk-root]) {
-		@apply w-full max-w-md bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden;
-	}
-
-	:global([data-cmdk-input]) {
-		@apply w-full px-4 py-3 border-b border-gray-200 outline-none;
-	}
-
-	:global([data-cmdk-list]) {
-		@apply max-h-[300px] overflow-y-auto;
-	}
-
-	:global([data-cmdk-item]) {
-		@apply px-4 py-2 cursor-pointer hover:bg-gray-100
-               focus:bg-gray-100 focus:outline-none;
-	}
-
-	:global([data-cmdk-item][data-selected='true']) {
-		@apply bg-gray-100;
-	}
-
-	:global([data-cmdk-group-heading]) {
-		@apply px-4 py-2 text-xs text-gray-500 uppercase;
-	}
-</style>
+			</div>
+		</div>
+	</div>
+{/if}
