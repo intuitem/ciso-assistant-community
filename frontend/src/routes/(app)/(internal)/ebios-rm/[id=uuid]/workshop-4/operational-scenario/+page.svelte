@@ -53,7 +53,7 @@
 	<div slot="addButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
-				class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+				class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 				data-testid="add-button"
 				title={safeTranslate('add-' + data.model.localName)}
 				on:click={modalCreateForm}
