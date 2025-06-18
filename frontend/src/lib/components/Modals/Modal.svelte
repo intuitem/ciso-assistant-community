@@ -100,8 +100,7 @@
 	}: Props = $props();
 
 	// Base Styles
-	const cBackdrop =
-		'fixed top-0 left-0 right-0 bottom-0 bg-surface-50/50 dark:bg-surface-950/50 p-4';
+	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-950/50 p-4';
 	const cTransitionLayer = 'w-full h-fit min-h-full overflow-y-auto flex justify-center';
 	const cModal = 'block overflow-y-auto';
 	const cModalImage = 'w-full h-auto';
