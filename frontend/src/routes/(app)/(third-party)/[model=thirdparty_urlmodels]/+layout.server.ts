@@ -1,5 +1,5 @@
 import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import type { urlModel } from '$lib/utils/types';
 
