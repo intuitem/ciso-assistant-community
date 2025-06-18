@@ -1,4 +1,4 @@
-convert_library_version: 'v1 ; Compat: [False]'
+convert_library_version: 'v1 ; Compat Mode: [False]'
 urn: urn:intuitem:risk:library:ccb-cff-2023-03-01
 locale: en
 ref_id: CCB-CFF-2023-03-01
