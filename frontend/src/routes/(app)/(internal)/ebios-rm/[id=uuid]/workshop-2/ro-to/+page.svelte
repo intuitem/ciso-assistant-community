@@ -6,6 +6,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/stores';
+	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -42,6 +43,15 @@
 	});
 </script>
 
+<div class="flex items-center justify-between mb-4">
+	<a
+		href="/ebios-rm/{data.data.id}"
+		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+	>
+		<i class="fa-solid fa-arrow-left" />
+		<p class="">{m.goBackToEbiosRmStudy()}</p>
+	</a>
+</div>
 <ModelTable
 	source={data.table}
 	deleteForm={data.deleteForm}
