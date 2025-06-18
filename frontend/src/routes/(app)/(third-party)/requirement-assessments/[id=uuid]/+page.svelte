@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import {
@@ -55,10 +56,8 @@
 	}
 
 	function cancel(): void {
-		var currentUrl = window.location.href;
-		var url = new URL(currentUrl);
-		var nextValue = getSecureRedirect(url.searchParams.get('next'));
-		if (nextValue) window.location.href = nextValue;
+		const AuditURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
+		goto(AuditURL);
 	}
 
 	$: classesText =
