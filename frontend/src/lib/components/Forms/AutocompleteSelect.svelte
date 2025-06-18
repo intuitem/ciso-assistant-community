@@ -331,10 +331,16 @@
 				{#if option.option.suggested}
 					<span class="text-indigo-600">{option.option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && option.option.label}
-					{m[toCamelCase(option.option.value)]
-						? safeTranslate(option.option.value)
-						: safeTranslate(option.option.label)}
+				{:else if translateOptions && option.label}
+					{#if field === 'ro_to_couple'}
+						{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split(
+							'-'
+						)[1]}
+					{:else}
+						{m[toCamelCase(option.value)]
+							? safeTranslate(option.value)
+							: safeTranslate(option.label)}
+					{/if}
 				{:else}
 					{option.option.label || option.option}
 				{/if}

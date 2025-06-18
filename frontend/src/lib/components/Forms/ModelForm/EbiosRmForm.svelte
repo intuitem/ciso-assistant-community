@@ -170,6 +170,8 @@
 		multiple
 		{form}
 		optionsEndpoint="compliance-assessments"
+		optionsExtraFields={[['perimeter', 'str']]}
+		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
 		bind:cachedValue={formDataCache['compliance_assessments']}

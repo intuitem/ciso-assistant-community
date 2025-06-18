@@ -28,6 +28,7 @@
 		URLModel: urlModel | string | undefined;
 		identifierField?: string;
 		preventDelete?: boolean;
+		preventEdit?: boolean;
 		baseClass?: string;
 		hasBody?: boolean;
 		head?: import('svelte').Snippet;
@@ -44,6 +45,7 @@
 		URLModel,
 		identifierField = 'id',
 		preventDelete = false,
+		preventEdit = false,
 		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end',
 		hasBody = false,
 		head,
@@ -137,19 +139,20 @@
 				: false)
 	);
 	let canEditObject = $derived(
-		model
-			? $page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? row.meta.id
-								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false
+		!preventEdit &&
+			(model
+				? $page.params.id
+					? canPerformAction({
+							user,
+							action: 'change',
+							model: model.name,
+							domain:
+								model.name === 'folder'
+									? row.meta.id
+									: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+						})
+					: Object.hasOwn(user.permissions, `change_${model.name}`)
+				: false)
 	);
 
 	let displayDetail = $derived(detailURL);

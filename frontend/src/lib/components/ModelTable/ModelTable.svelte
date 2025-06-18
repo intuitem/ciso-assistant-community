@@ -70,6 +70,8 @@
 		canSelectObject?: boolean;
 		hideFilters?: boolean;
 		folderId?: string;
+		forcePreventDelete?: boolean;
+		forcePreventEdit?: boolean;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
@@ -108,6 +110,8 @@
 		canSelectObject = false,
 		hideFilters = $bindable(false),
 		folderId = '',
+		forcePreventDelete = false,
+		forcePreventEdit = false,
 		optButton,
 		selectButton,
 		addButton,
@@ -128,7 +132,11 @@
 		if (!rowMetaData[identifierField] || !URLModel) return;
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
 			label:
-				rowMetaData.str ?? rowMetaData.name ?? rowMetaData.email ?? rowMetaData[identifierField],
+				rowMetaData.str ??
+				rowMetaData.name ??
+				rowMetaData.email ??
+				rowMetaData.label ??
+				rowMetaData[identifierField],
 			breadcrumbAction: 'push'
 		});
 	}
@@ -188,7 +196,9 @@
 		(row?.meta?.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
-		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type);
+		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
+		forcePreventDelete;
+	const preventEdit = (row: TableSource) => forcePreventEdit;
 
 	const filterInitialData = page.url.searchParams.entries();
 
@@ -515,6 +525,7 @@
 												hasBody={actionsBody}
 												{identifierField}
 												preventDelete={preventDelete(row)}
+												preventEdit={preventEdit(row)}
 											>
 												{#snippet head()}
 													{#if actionsHead}
