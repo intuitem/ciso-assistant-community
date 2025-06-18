@@ -363,7 +363,10 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
         value_set = set(value)
 
         risk_matrix_keys = {"risk_matrix", "risk_matrices"}
-        requirement_mapping_set_keys = {"requirement_mapping_set", "requirement_mapping_sets"}
+        requirement_mapping_set_keys = {
+            "requirement_mapping_set",
+            "requirement_mapping_sets",
+        }
         framework_set = {"framework", "frameworks"}
 
         # For backward compatibility
