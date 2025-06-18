@@ -1,6 +1,6 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { getModelInfo, type ModelMapEntry } from '$lib/utils/crud';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
@@ -132,7 +132,7 @@ export const loadDetail = async ({ event, model, id }) => {
 	}
 	return {
 		data,
-		title: data.str || data.name || data.email || data.id,
+		title: data.str || data.name || data.email || data.label || data.id,
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,

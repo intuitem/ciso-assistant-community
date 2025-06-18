@@ -1,88 +1,110 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import RadioGroup from './RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	let _class = 'w-fit';
+	import * as m from '$paraglide/messages';
 
-	export { _class as class };
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let helpText: string | undefined = undefined;
-	export let questions = {};
+	interface Props {
+		class?: string;
+		label?: string;
+		shallow?: boolean;
+		form?: SuperForm<Record<string, any>>;
+		initialValue?: any;
+		questions?: any;
+		field: string;
+		helpText?: string;
+		onChange?: (urn: string, newAnswer: any) => void;
+	}
 
-	export let form: SuperForm<AnyZodObject>;
+	let {
+		class: _class = 'w-fit',
+		label,
+		shallow = false,
+		form,
+		questions = {},
+		initialValue = {},
+		field,
+		helpText,
+		onChange = () => {}
+	}: Props = $props();
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value } = form ? formFieldProxy(form, field) : {};
 
-	$: classesTextField = (errors: string[] | undefined) =>
-		errors && errors.length > 0 ? 'input-error' : '';
+	let internalAnswers = $state(value ? $value : initialValue);
 
-	function toggleSelection(urn, optionUrn) {
+	$effect(() => {
+		if (value) {
+			$value = internalAnswers;
+		}
+	});
+
+	function toggleSelection(urn: string, optionUrn: string) {
 		// Initialize the array if it hasn't been already.
-		if (!Array.isArray($value[urn])) {
-			$value[urn] = [];
+		if (!Array.isArray(internalAnswers[urn])) {
+			internalAnswers[urn] = [];
 		}
 		// Toggle the option's selection
-		if ($value[urn].includes(optionUrn)) {
-			$value[urn] = $value[urn].filter((val) => val !== optionUrn);
+		if (internalAnswers[urn].includes(optionUrn)) {
+			internalAnswers[urn] = internalAnswers[urn].filter((val) => val !== optionUrn);
 		} else {
-			$value[urn] = [...$value[urn], optionUrn];
+			internalAnswers[urn] = [...internalAnswers[urn], optionUrn];
 		}
 	}
 </script>
 
 <div>
-	{#if label !== undefined}
-		{#if $constraints?.required}
-			<label class="text-sm font-semibold" for={field}
-				>{label} <span class="text-red-500">*</span></label
-			>
-		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
-		{/if}
+	{#if label}
+		<label class="text-sm font-semibold" for={field}>{label}</label>
 	{/if}
-	{#if $errors && $errors.length > 0}
-		<div>
-			{#each $errors as error}
-				<p class="text-error-500 text-xs font-medium">{error}</p>
-			{/each}
-		</div>
-	{/if}
+
 	<div class="control whitespace-pre-line">
 		{#each Object.entries(questions) as [urn, question]}
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 				<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
-				{#if question.type === 'unique_choice'}
-					<RadioGroup
-						class="flex-col"
-						active="variant-filled-primary"
-						hover="hover:variant-soft-primary"
-					>
-						{#each question.choices as option}
-							<RadioItem
-								class="shadow-md flex"
-								bind:group={$value[urn]}
-								name="question"
-								value={option.urn}
-								on:click={() => ($value[urn] = $value[urn] === option.urn ? null : option.urn)}
-								><span class="text-left">{option.value}</span></RadioItem
-							>
+				{#if shallow}
+					{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}
+						{#each internalAnswers[urn] as answerUrn}
+							{#if question.choices.find((choice) => choice.urn === answerUrn)}
+								<p class="text-primary-500 font-semibold">
+									{question.choices.find((choice) => choice.urn === answerUrn).value}
+								</p>
+							{:else}
+								<p class="text-primary-500 font-semibold">
+									{answerUrn}
+								</p>
+							{/if}
 						{/each}
-					</RadioGroup>
+					{:else if question.choices.find((choice) => choice.urn === internalAnswers[urn])}
+						<p class="text-primary-500 font-semibold">
+							{question.choices.find((choice) => choice.urn === internalAnswers[urn]).value}
+						</p>
+					{:else}
+						<p class="text-gray-400 italic">{m.noAnswer()}</p>
+					{/if}
+				{:else if question.type === 'unique_choice'}
+					<RadioGroup
+						possibleOptions={question.choices}
+						{form}
+						initialValue={internalAnswers[urn]}
+						key="urn"
+						labelKey="value"
+						field="answers"
+						onChange={(newValue) => {
+							internalAnswers[urn] = newValue;
+							onChange(urn, newValue);
+						}}
+					/>
 				{:else if question.type === 'multiple_choice'}
-					<div
-						class="flex flex-col gap-1 p-1 bg-surface-200-700-token border-token border-surface-400-500-token rounded-token"
-					>
+					<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
 						{#each question.choices as option}
 							<button
 								type="button"
 								name="question"
 								class="shadow-md p-1
-									{$value[urn] && $value[urn].includes(option.urn)
-									? 'variant-filled-primary rounded-token'
-									: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
-								on:click={() => toggleSelection(urn, option.urn)}
+									{internalAnswers[urn] && internalAnswers[urn].includes(option.urn)
+									? 'preset-filled-primary-500 rounded-base'
+									: 'hover:preset-tonal-primary bg-gray-200 rounded-base'}"
+								onclick={() => toggleSelection(urn, option.urn)}
 							>
 								{option.value}
 							</button>
@@ -92,19 +114,12 @@
 					<input
 						type="date"
 						placeholder=""
-						class="{'input ' + _class} {classesTextField($errors)}"
-						bind:value={$value[urn]}
-						{...$constraints}
-						{...$$restProps}
+						class="input {_class}"
+						bind:value={internalAnswers[urn]}
 					/>
 				{:else if question.type === 'text'}
-					<textarea
-						placeholder=""
-						class="{'input w-full' + _class} {classesTextField($errors)}"
-						bind:value={$value[urn]}
-						{...$constraints}
-						{...$$restProps}
-					/>
+					<textarea placeholder="" class="input w-full {_class}" bind:value={internalAnswers[urn]}
+					></textarea>
 				{/if}
 			</li>
 		{/each}

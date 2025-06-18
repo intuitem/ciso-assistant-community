@@ -5,18 +5,29 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+	}
 
-	let activeActivity: string | null = null;
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context
+	}: Props = $props();
 
-	$page.url.searchParams.forEach((value, key) => {
+	let activeActivity: string | null = $state(null);
+
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -159,6 +170,8 @@
 		multiple
 		{form}
 		optionsEndpoint="compliance-assessments"
+		optionsExtraFields={[['perimeter', 'str']]}
+		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
 		bind:cachedValue={formDataCache['compliance_assessments']}

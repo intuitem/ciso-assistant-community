@@ -9,13 +9,21 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import * as m from '$paraglide/messages.js';
 
-	export let data: PageData;
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { getModelInfo } from '$lib/utils/crud.js';
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -46,77 +54,79 @@
 		dataType="form"
 		enctype="multipart/form-data"
 		data={data.form}
-		let:form
+		
 		validators={zod(ClientSettingsSchema)}
 		action="/settings/client-settings?/editClientSettings"
 		class="flex flex-col space-y-3"
 	>
-		<HiddenInput {form} field="id" />
-		<TextField {form} field="name" label={m.name()} />
-		<div class="flex items-center space-x-1">
-			<div class="w-full">
-				<FileInput
-					{form}
-					field="logo"
-					label={m.logo()}
-					helpText={data.settings.logo
-						? `${m.attachmentWarningText()}: ${data.settings.logo}`
-						: m.logoHelpText()}
-					allowedExtensions={['png', 'jpeg', 'jpg', 'svg']}
-				/>
+		{#snippet children({ form })}
+				<HiddenInput {form} field="id" />
+			<TextField {form} field="name" label={m.name()} />
+			<div class="flex items-center space-x-1">
+				<div class="w-full">
+					<FileInput
+						{form}
+						field="logo"
+						label={m.logo()}
+						helpText={data.settings.logo
+							? `${m.attachmentWarningText()}: ${data.settings.logo}`
+							: m.logoHelpText()}
+						allowedExtensions={['png', 'jpeg', 'jpg', 'svg']}
+					/>
+				</div>
+				{#if data.settings.logo != null}
+					<button
+						class="btn preset-filled-tertiary-500 h-full"
+						type="button"
+						onclick={(_) =>
+							modalConfirm(
+								data.settings.id,
+								data.settings.logo,
+								'settings/client-settings?/deleteLogo'
+							)}
+					>
+						<i class="fa-solid fa-trash"></i>
+					</button>
+				{/if}
 			</div>
-			{#if data.settings.logo != null}
+			<div class="flex items-center space-x-1">
+				<div class="w-full">
+					<FileInput
+						{form}
+						field="favicon"
+						label={m.favicon()}
+						helpText={data.settings.favicon
+							? `${m.attachmentWarningText()}: ${data.settings.favicon}`
+							: m.faviconHelpText()}
+						allowedExtensions={['png', 'jpeg', 'jpg', 'svg', 'ico']}
+					/>
+				</div>
+			</div>
+			{#if data.settings.favicon != null}
 				<button
-					class="btn variant-filled-tertiary h-full"
+					class="btn preset-filled-tertiary-500 h-full"
 					type="button"
-					on:click={(_) =>
+					onclick={(_) =>
 						modalConfirm(
 							data.settings.id,
-							data.settings.logo,
-							'settings/client-settings?/deleteLogo'
+							data.settings.favicon,
+							'settings/client-settings?/deleteFavicon'
 						)}
 				>
-					<i class="fa-solid fa-trash" />
+					<i class="fa-solid fa-trash"></i>
 				</button>
 			{/if}
-		</div>
-		<div class="flex items-center space-x-1">
-			<div class="w-full">
-				<FileInput
-					{form}
-					field="favicon"
-					label={m.favicon()}
-					helpText={data.settings.favicon
-						? `${m.attachmentWarningText()}: ${data.settings.favicon}`
-						: m.faviconHelpText()}
-					allowedExtensions={['png', 'jpeg', 'jpg', 'svg', 'ico']}
-				/>
-			</div>
-		</div>
-		{#if data.settings.favicon != null}
+			<Checkbox
+				{form}
+				field="show_images_unauthenticated"
+				label={m.showImagesUnauthenticated()}
+				helpText={m.showImagesUnauthenticatedHelpText()}
+			/>
 			<button
-				class="btn variant-filled-tertiary h-full"
-				type="button"
-				on:click={(_) =>
-					modalConfirm(
-						data.settings.id,
-						data.settings.favicon,
-						'settings/client-settings?/deleteFavicon'
-					)}
+				class="btn preset-filled-primary-500 font-semibold w-full"
+				data-testid="save-button"
+				type="submit">{m.save()}</button
 			>
-				<i class="fa-solid fa-trash" />
-			</button>
-		{/if}
-		<Checkbox
-			{form}
-			field="show_images_unauthenticated"
-			label={m.showImagesUnauthenticated()}
-			helpText={m.showImagesUnauthenticatedHelpText()}
-		/>
-		<button
-			class="btn variant-filled-primary font-semibold w-full"
-			data-testid="save-button"
-			type="submit">{m.save()}</button
-		>
-	</SuperForm>
+					{/snippet}
+		</SuperForm>
 {/if}
