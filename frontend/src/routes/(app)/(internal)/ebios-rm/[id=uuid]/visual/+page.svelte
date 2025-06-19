@@ -2,6 +2,8 @@
 	import type { PageData } from './$types';
 	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
+
 	interface Props {
 		data: PageData;
 	}
