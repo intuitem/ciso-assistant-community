@@ -47,7 +47,7 @@
 				const [savedPageNumber] = cache[endpoint] ?? [];
 				newPageNumber = Number(savedPageNumber ?? '1');
 			}
-			handler.setPage(newPageNumber);
+			setPage(newPageNumber);
 			currentEndpoint = endpoint;
 		}
 	});
