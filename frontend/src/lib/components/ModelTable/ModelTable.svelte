@@ -539,7 +539,7 @@
 												{/snippet}
 												{#snippet tail()}
 													{@const SvelteComponent_2 = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else}
+													{#if tail_render}{@render tail_render()}{:else if SvelteComponent_2}
 														<SvelteComponent_2 meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
