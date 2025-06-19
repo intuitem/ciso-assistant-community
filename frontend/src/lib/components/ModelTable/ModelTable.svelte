@@ -348,8 +348,8 @@
 						{#snippet children({ form })}
 							{#each filteredFields as field}
 								{#if filters[field]?.component}
-									{@const SvelteComponent = filters[field].component}
-									<SvelteComponent
+									{@const FilterComponent = filters[field].component}
+									<FilterComponent
 										{form}
 										{field}
 										{...filters[field].props}
@@ -424,8 +424,8 @@
 										{@const component = field_component_map[key]}
 										<td class={regionCell} role="gridcell">
 											{#if component && browser}
-												{@const SvelteComponent_1 = component}
-												<SvelteComponent_1 {meta} cell={value} />
+												{@const CellComponent = component}
+												<CellComponent {meta} cell={value} />
 											{:else}
 												<span class="base-font-family whitespace-pre-line break-words">
 													{#if Array.isArray(value)}
@@ -538,9 +538,9 @@
 													{/if}
 												{/snippet}
 												{#snippet tail()}
-													{@const SvelteComponent_2 = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else if SvelteComponent_2}
-														<SvelteComponent_2 meta={row.meta ?? {}} {actionsURLModel} {handler} />
+													{@const ActionsComponent = actionsComponent}
+													{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
+														<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
 											</TableRowActions>
