@@ -1,3 +1,4 @@
+from allauth.socialaccount.helpers import render_authentication_error
 from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
 
@@ -11,6 +12,7 @@ from allauth.socialaccount.providers.openid_connect.views import (
     OpenIDConnectOAuth2Adapter,
 )
 
+from iam.sso.errors import AuthError
 from iam.utils import generate_token
 
 
@@ -22,6 +24,10 @@ def callback(request, provider_id):
         )(request)
         if response.status_code != 302:
             return response
+        if request.user.is_anonymous:
+            return render_authentication_error(
+                request, None, error=AuthError.FAILED_SSO
+            )
         token = generate_token(request.user)
         next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate/{token}"
         return HttpResponseRedirect(next)
