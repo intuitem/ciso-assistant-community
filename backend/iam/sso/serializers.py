@@ -40,6 +40,8 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         allow_null=True,
     )
     secret = serializers.CharField(
+        wrtiable_only=True,
+        trim_whitespace=False,
         required=False,
         allow_blank=True,
         allow_null=True,
@@ -50,7 +52,13 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         allow_null=True,
         source="settings.server_url",
     )  # NOTE: Only used for OIDC
-    token_auth_method = serializers.CharField(
+    token_auth_method = serializers.ChoiceField(
+        choices=[
+            "client_secret_basic",
+            "client_secret_post",
+            "private_key_jwt",
+            "none",
+        ],
         required=False,
         allow_blank=True,
         allow_null=True,
