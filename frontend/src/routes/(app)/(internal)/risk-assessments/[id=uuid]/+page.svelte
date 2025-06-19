@@ -248,7 +248,7 @@
 		</div>
 	</div>
 	<!--Risk risk_assessment-->
-	<div class="card m-4 p-4 shadow bg-white">
+	<div class="card m-4 p-4 shadow-sm bg-white">
 		<div class="bg-white">
 			<div class="flex flex-row justify-between">
 				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
@@ -273,18 +273,19 @@
 					'residual_level'
 				]}
 			>
-				<button
-					slot="addButton"
-					class="btn variant-filled-primary self-end my-auto"
-					on:click={(_) => modalCreateForm()}
-					><i class="fa-solid fa-plus mr-2 lowercase" />
-					{m.addRiskScenario()}
-				</button>
+				{#snippet addButton()}
+					<button
+						class="btn preset-filled-primary-500 self-end my-auto"
+						onclick={(_) => modalCreateForm()}
+						><i class="fa-solid fa-plus mr-2 lowercase"></i>
+						{m.addRiskScenario()}
+					</button>
+				{/snippet}
 			</ModelTable>
 		</div>
 	</div>
 	<!--Matrix view-->
-	<div class="card m-4 p-4 shadow bg-white page-break">
+	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
 			<div class="flex-1">
