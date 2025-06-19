@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
@@ -30,7 +30,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -230,7 +230,7 @@
 				<Anchor
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
-					class="btn variant-filled-primary"
+					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
@@ -256,6 +256,12 @@
 				source={data.scenariosTable}
 				deleteForm={data.scenarioDeleteForm}
 				model={getModelInfo('risk-scenarios')}
+				URLModel="risk-scenarios"
+				search={false}
+				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				folderId={data.risk_assessment.folder.id}
+				fields={[
+					'ref_id',
 					'name',
 					'threats',
 					'existing_applied_controls',

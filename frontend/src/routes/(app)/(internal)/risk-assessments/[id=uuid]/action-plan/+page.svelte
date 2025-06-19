@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
-	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 
-	export let data;
+	let { data } = $props();
 
 	const appliedControlsHead = {
 		name: 'name',
@@ -60,7 +59,7 @@
 			search={true}
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
-			baseEndpoint="/risk-assessments/{$page.params.id}/action-plan"
+			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
 			fields={[
 				'name',
 				'status',
