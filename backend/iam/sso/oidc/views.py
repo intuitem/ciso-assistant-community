@@ -17,11 +17,13 @@ from iam.utils import generate_token
 @login_not_required
 def callback(request, provider_id):
     try:
-        OAuth2CallbackView.adapter_view(
+        response = OAuth2CallbackView.adapter_view(
             OpenIDConnectOAuth2Adapter(request, provider_id)
         )(request)
+        if response.status_code != 302:
+            return response
         token = generate_token(request.user)
-        next = f"{settings.CISO_ASSISTANT_URL}/sso/authenticate/{token}"
+        next = f"{response['Location'].rstrip('/')}/sso/authenticate/{token}"
         return HttpResponseRedirect(next)
     except SocialApp.DoesNotExist:
         raise Http404
