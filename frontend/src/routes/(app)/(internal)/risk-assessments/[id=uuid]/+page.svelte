@@ -104,12 +104,6 @@
 		risk_assessment.risk_matrix,
 		'residual'
 	);
-
-	const popupDownload = {
-		event: 'click',
-		target: 'popupDownload',
-		placement: 'bottom'
-	};
 </script>
 
 <main class="grow main">
@@ -181,11 +175,13 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
+					<Popover
+						open={exportPopupOpen}
+						onOpenChange={(e) => (exportPopupOpen = e.open)}
+						triggerClasses="btn preset-filled-primary-500 w-full"
+					>
 						{#snippet trigger()}
-							<button class="btn preset-filled-primary-500 w-full"
-								><i class="fa-solid fa-download mr-2"></i>{m.exportButton()}</button
-							>
+							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						{/snippet}
 						{#snippet content()}
 							<div
