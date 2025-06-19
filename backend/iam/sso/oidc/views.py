@@ -25,8 +25,8 @@ def callback(request, provider_id):
         token = generate_token(request.user)
         next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate/{token}"
         return HttpResponseRedirect(next)
-    except SocialApp.DoesNotExist:
-        raise Http404
+    except SocialApp.DoesNotExist as e:
+        raise Http404 from e
 
 
 @login_not_required
