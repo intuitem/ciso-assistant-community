@@ -1,13 +1,27 @@
 <script lang="ts">
-	export let input: null | HTMLInputElement = null;
-	export let index: number;
-	export let value: string;
-	export let codes: string[];
-	export let inputs: (null | HTMLInputElement)[];
-	export let className: string;
-	export let num: boolean;
-	export let style: string;
-	export let placeholder: string;
+	interface Props {
+		input?: null | HTMLInputElement;
+		index: number;
+		value: string;
+		codes: string[];
+		inputs: (null | HTMLInputElement)[];
+		className: string;
+		num: boolean;
+		style: string;
+		placeholder: string;
+	}
+
+	let {
+		input = $bindable(null),
+		index,
+		value = $bindable(),
+		codes = $bindable(),
+		inputs,
+		className,
+		num,
+		style,
+		placeholder
+	}: Props = $props();
 
 	let key: string;
 
@@ -86,11 +100,11 @@
 <input
 	class="{className} input w-24 h-24 text-4xl text-center"
 	bind:this={input}
-	on:keydown={keyDownHandler}
-	on:keyup={keyUpHandler}
-	on:keypress={typeHandler}
-	on:input={changeHandler}
-	on:paste={pasteHandler}
+	onkeydown={keyDownHandler}
+	onkeyup={keyUpHandler}
+	onkeypress={typeHandler}
+	oninput={changeHandler}
+	onpaste={pasteHandler}
 	{style}
 	{value}
 	{placeholder}

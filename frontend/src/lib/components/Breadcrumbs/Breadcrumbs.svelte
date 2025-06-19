@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -21,9 +21,9 @@
 	function getPageTitle(): string {
 		// Check each source in priority order
 		const title =
-			$page.data.title ??
-			$page.data.str ??
-			$page.data.name ??
+			page.data.title ??
+			page.data.str ??
+			page.data.name ??
 			getBreadcrumbTitle() ??
 			getUrlModelTitle();
 
@@ -35,22 +35,21 @@
 	}
 
 	function getUrlModelTitle(): string | undefined {
-		const lastPathSegment = $page.url.pathname.split('/').pop() as string;
+		const lastPathSegment = page.url.pathname.split('/').pop() as string;
 		return URL_MODEL_MAP[lastPathSegment]?.localNamePlural;
 	}
 
 	afterNavigate(async () => {
-		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, $page.url.pathname);
+		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, page.url.pathname);
 	});
 
-	$: {
+	$effect(() => {
 		$pageTitle = getPageTitle();
-		if ($breadcrumbs.length < 2)
-			breadcrumbs.push([{ label: $pageTitle, href: $page.url.pathname }]);
-	}
+		if ($breadcrumbs.length < 2) breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
+	});
 </script>
 
-<ol class="breadcrumb-nonresponsive h-6 overflow-hidden whitespace-nowrap">
+<ol class="flex items-center gap-4 h-6 overflow-hidden whitespace-nowrap">
 	{#each $breadcrumbs as c, i}
 		{#if i == $breadcrumbs.length - 1}
 			<span
@@ -58,21 +57,21 @@
 				data-testid="crumb-item"
 			>
 				{#if c.icon}
-					<i class={c.icon} />
+					<i class={c.icon}></i>
 				{/if}
 				{safeTranslate(c.label)}
 			</span>
 		{:else}
-			<li class="crumb">
+			<li>
 				{#if c.href}
 					<a
 						class="max-w-[64ch] overflow-hidden unstyled text-sm hover:text-primary-500 font-semibold antialiased whitespace-nowrap"
 						data-testid="crumb-item"
 						href={c.href}
-						on:click={() => breadcrumbs.slice(i)}
+						onclick={() => breadcrumbs.slice(i)}
 					>
 						{#if c.icon}
-							<i class={c.icon} />
+							<i class={c.icon}></i>
 						{/if}
 						{safeTranslate(c.label)}
 					</a>
@@ -82,13 +81,13 @@
 						data-testid="crumb-item"
 					>
 						{#if c.icon}
-							<i class={c.icon} />
+							<i class={c.icon}></i>
 						{/if}
 						{safeTranslate(c.label)}
 					</span>
 				{/if}
 			</li>
-			<li class="crumb-separator" aria-hidden>&rsaquo;</li>
+			<li class="crumb-separator" aria-hidden="true">›</li>
 		{/if}
 	{/each}
 </ol>

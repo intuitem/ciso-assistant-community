@@ -1,4 +1,4 @@
-<script lang="ts" type="module">
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import SideBarFooter from './SideBarFooter.svelte';
 	import SideBarHeader from './SideBarHeader.svelte';
@@ -7,27 +7,36 @@
 	import { writable } from 'svelte/store';
 
 	import { getCookie, setCookie } from '$lib/utils/cookies';
-	import { driverInstance } from '$lib/utils/stores';
+	import { driverInstance, tableHandlers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
 	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
 	import './driver-custom.css';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
-	export let open: boolean;
-	export let sideBarVisibleItems: Record<string, boolean>;
+	interface Props {
+		open: boolean;
+		sideBarVisibleItems: Record<string, boolean>;
+	}
+
+	let { open = $bindable(), sideBarVisibleItems }: Props = $props();
 
 	const user = $page.data?.user;
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.
+	// NOTE: .svelte.ts files might help here https://svelte.dev/docs/svelte/svelte-js-files
 	const steps = [
 		{
 			id: 1,
@@ -46,7 +55,7 @@
 		},
 		{
 			id: 3,
-			element: '#organization',
+			element: 'button[type="button"][id$="organization"]',
 			popover: {
 				title: m.tourOrganizationTitle(),
 				description: m.tourOrganizationDescription()
@@ -82,7 +91,7 @@
 		},
 		{
 			id: 8,
-			element: '#catalog-step',
+			element: 'catalog-step',
 			popover: {
 				title: m.tourCatalogTitle(),
 				description: m.tourCatalogDescription()
@@ -90,7 +99,7 @@
 		},
 		{
 			id: 9,
-			element: '#catalog',
+			element: 'button[type="button"][id$="catalog"]',
 			popover: {
 				description: m.tourCatalogBrowseDescription()
 			}
@@ -127,7 +136,7 @@
 		},
 		{
 			id: 14,
-			element: '#compliance',
+			element: 'button[type="button"][id$="compliance"]',
 			popover: {
 				description: m.tourComplianceDescription()
 			}
@@ -142,7 +151,7 @@
 		},
 		{
 			id: 16,
-			element: '#risk',
+			element: 'button[type="button"][id$="risk"]',
 			popover: {
 				description: m.tourRiskDescription()
 			}
@@ -157,7 +166,7 @@
 		},
 		{
 			id: 18,
-			element: '#overview',
+			element: 'button[type="button"][id$="overview"]',
 			popover: {
 				title: m.tourAnalyticsTitle(),
 				description: m.tourAnalyticsDescription()
@@ -198,13 +207,13 @@
 					{
 						label: m.showGuidedTour(),
 						action: triggerVisit,
-						classes: 'variant-filled-surface',
+						classes: 'preset-filled-surface-500',
 						btnIcon: 'fa-wand-magic-sparkles'
 					},
 					{
 						label: m.loadDemoData(),
 						action: loadDemoDomain,
-						classes: 'variant-filled-secondary',
+						classes: 'preset-filled-secondary-500',
 						btnIcon: 'fa-file-import',
 						async: true
 					}
@@ -245,6 +254,9 @@
 		});
 
 		invalidateAll();
+		Object.values($tableHandlers).forEach((handler) => {
+			handler.invalidate();
+		});
 		$loading = false;
 		return true;
 	}
@@ -272,7 +284,7 @@
 		setCookie('show_first_login_modal', 'false');
 	});
 
-	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
+	let classesSidebarOpen = $derived((open: boolean) => (open ? '' : '-ml-56 pointer-events-none'));
 </script>
 
 <div data-testid="sidebar">
@@ -288,7 +300,7 @@
 		</nav>
 	</aside>
 	{#if $loading}
-		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-[1000]">
+		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-1000">
 			<div class="flex flex-col items-center space-y-2">
 				<LoadingSpinner></LoadingSpinner>
 			</div>

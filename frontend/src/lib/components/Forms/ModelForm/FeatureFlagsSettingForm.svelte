@@ -3,7 +3,11 @@
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
-	export let form: SuperValidated<any>;
+	interface Props {
+		form: SuperValidated<any>;
+	}
+
+	let { form }: Props = $props();
 
 	// Config for feature flags
 	const featureFlagFields = [

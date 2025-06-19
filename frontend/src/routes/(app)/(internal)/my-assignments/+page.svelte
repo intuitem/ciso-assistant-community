@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
@@ -8,11 +7,16 @@
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const eta_span_class = { true: 'bg-orange-400 text-white' };
 	const status_span_class = {
-		on_hold: 'bg-violet-500 text-white p-1 rounded',
-		deprecated: 'bg-red-400 text-white p-1 rounded'
+		on_hold: 'bg-violet-500 text-white p-1 rounded-sm',
+		deprecated: 'bg-red-400 text-white p-1 rounded-sm'
 	};
 </script>
 
@@ -52,7 +56,7 @@
 								><span class={status_span_class[ac.status]}>{safeTranslate(ac.status) ?? '-'}</span>
 							</td>
 							<td class="px-6 py-4">
-								<span class=" p-1 rounded {eta_span_class[ac.eta_missed]}">
+								<span class=" p-1 rounded-sm {eta_span_class[ac.eta_missed]}">
 									{formatDateOrDateTime(ac.eta, getLocale()) ?? '-'}
 								</span>
 							</td>
