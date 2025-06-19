@@ -181,7 +181,11 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover open={exportPopupOpen} triggerClasses="btn preset-filled-primary-500 w-full" onOpenChange={(e) => (exportPopupOpen = e.open)}>
+					<Popover
+						open={exportPopupOpen}
+						triggerClasses="btn preset-filled-primary-500 w-full"
+						onOpenChange={(e) => (exportPopupOpen = e.open)}
+					>
 						{#snippet trigger()}
 							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						{/snippet}
