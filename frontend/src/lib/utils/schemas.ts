@@ -414,7 +414,8 @@ export const SSOSettingsSchema = z.object({
 	want_name_id: z.boolean().optional().nullable(),
 	want_name_id_encrypted: z.boolean().optional().nullable(),
 	server_url: z.string().optional().nullable(),
-	token_auth_method: z.string().optional().nullable()
+	token_auth_method: z.string().optional().nullable(),
+	oauth_pkce_enabled: z.boolean().optional().default(false)
 });
 
 export const EntitiesSchema = z.object({
