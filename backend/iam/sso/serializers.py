@@ -14,7 +14,7 @@ class SSOSettingsReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = SSOSettings
-        exclude = ["value"]
+        exclude = ["value", "secret"]
 
 
 class SSOSettingsWriteSerializer(BaseModelSerializer):
