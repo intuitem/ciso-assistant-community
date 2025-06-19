@@ -1,0 +1,13 @@
+[
+  {
+    "source1": {
+      "scanner": "prowler",
+      "settings": {
+        "config": {
+          "kubernetes": "kubeconfig_file_here"
+        }
+      },
+      "scoped_audits": ["audit_uuid_1", "audit_uuid_2"]
+    }
+  }
+]
