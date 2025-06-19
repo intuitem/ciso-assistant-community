@@ -74,47 +74,45 @@
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['client_id']}
 				/>
-				{#if data.provider !== 'saml'}
-					<TextField
-						{form}
-						type="password"
-						field="secret"
-						label={m.secret()}
-						helpText={m.secretHelpText()}
-						disabled={!data.is_enabled}
-						cacheLock={cacheLocks['secret']}
-					/>
-					<TextField
-						{form}
-						field="key"
-						label={m.key()}
-						disabled={!data.is_enabled}
-						cacheLock={cacheLocks['key']}
-					/>
-				{/if}
+				<TextField
+					{form}
+					type="password"
+					field="secret"
+					label={m.secret()}
+					helpText={m.secretHelpText()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['secret']}
+				/>
+				<TextField
+					{form}
+					field="key"
+					label={m.key()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['key']}
+				/>
+				<TextField
+					{form}
+					field="server_url"
+					label={m.serverURL()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['server_url']}
+				/>
+				<TextField
+					{form}
+					field="token_auth_method"
+					label={m.tokenAuthMethod()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['token_auth_method']}
+				/>
+				<Checkbox
+					{form}
+					field="oauth_pkce_enabled"
+					label={m.oauthPKCEEnabled()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['oauth_pkce_enabled']}
+				/>
 			{/snippet}
 		</Accordion.Item>
-		<TextField
-			{form}
-			field="server_url"
-			label={m.serverURL()}
-			disabled={!data.is_enabled}
-			cacheLock={cacheLocks['server_url']}
-		/>
-		<TextField
-			{form}
-			field="token_auth_method"
-			label={m.tokenAuthMethod()}
-			disabled={!data.is_enabled}
-			cacheLock={cacheLocks['token_auth_method']}
-		/>
-		<Checkbox
-			{form}
-			field="oauth_pkce_enabled"
-			label={m.oauthPKCEEnabled()}
-			disabled={!data.is_enabled}
-			cacheLock={cacheLocks['oauth_pkce_enabled']}
-		/>
 	{/if}
 	{#if data.provider === 'saml'}
 		<Accordion.Item value="saml">
