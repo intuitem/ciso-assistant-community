@@ -1,6 +1,6 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { getModelInfo, type ModelMapEntry } from '$lib/utils/crud';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';

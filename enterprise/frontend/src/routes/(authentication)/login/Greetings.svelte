@@ -1,10 +1,10 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
-	import Typewriter from 'svelte-typewriter';
+	import Typewriter from 'sv-typewriter';
 	import Logo from '$lib/components/Logo/Logo.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	const clientSettings = $page.data.clientSettings;
+	const clientSettings = page.data.clientSettings;
 </script>
 
 <div
