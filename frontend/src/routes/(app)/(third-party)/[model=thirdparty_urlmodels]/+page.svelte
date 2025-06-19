@@ -93,7 +93,7 @@
 									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
-									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2" /></a
+									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
 								>
 							{:else if URLModel === 'frameworks'}
 								<a
@@ -101,7 +101,7 @@
 									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
-									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
+									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
 								>
 							{:else if URLModel === 'requirement-mapping-sets'}
 								<a
@@ -109,7 +109,7 @@
 									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
-									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
+									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
 								>
 							{/if}
 						</span>

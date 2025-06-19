@@ -310,18 +310,10 @@
 	});
 
 	export {
-		group,
-		name,
-		value,
-		checked,
-		childrenProp,
 		mappingInference,
 		spacing,
-		open,
-		selection,
 		multiple,
 		disabled,
-		indeterminate,
 		padding,
 		indent,
 		hover,
