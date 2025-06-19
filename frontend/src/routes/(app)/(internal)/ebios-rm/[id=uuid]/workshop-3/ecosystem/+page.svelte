@@ -6,6 +6,8 @@
 	import { m } from '$paraglide/messages';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+
 	import { page } from '$app/state';
 	import {
 		getModalStore,
@@ -42,6 +44,17 @@
 	}
 	let value = $state(['']);
 </script>
+
+<div class="flex items-center justify-between mb-4">
+	<Anchor
+		breadcrumbAction="push"
+		href={`/ebios-rm/${data.data.id}`}
+		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+	>
+		<i class="fa-solid fa-arrow-left" />
+		<p>{m.goBackToEbiosRmStudy()}</p>
+	</Anchor>
+</div>
 
 <div class="space-y-2">
 	<Accordion

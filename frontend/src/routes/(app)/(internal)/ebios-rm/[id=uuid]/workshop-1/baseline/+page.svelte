@@ -6,6 +6,7 @@
 	import { m } from '$paraglide/messages';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
 	import {
 		getModalStore,
@@ -72,6 +73,16 @@
 	});
 </script>
 
+<div class="flex items-center justify-between mb-4">
+	<Anchor
+		breadcrumbAction="push"
+		href={`/ebios-rm/${data.data.id}`}
+		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+	>
+		<i class="fa-solid fa-arrow-left" />
+		<p>{m.goBackToEbiosRmStudy()}</p>
+	</Anchor>
+</div>
 <ModelTable
 	source={data.table}
 	deleteForm={data.deleteForm}
