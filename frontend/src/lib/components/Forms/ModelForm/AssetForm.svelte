@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -12,19 +12,31 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Duration from '../Duration.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let object: any = {};
-	export let data: any = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: any;
+		data?: any;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {},
+		data = {}
+	}: Props = $props();
 
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
-	const scale: SecurityObjectiveScale = $page.data.settings.security_objective_scale;
+	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
 	const securityObjectiveScaleMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale];
 
 	async function fetchSecurityObjectives(): Promise<string[]> {
@@ -39,8 +51,8 @@
 		return objectives;
 	}
 
-	let securityObjectives: string[] = [];
-	let disasterRecoveryObjectives: string[] = [];
+	let securityObjectives: string[] = $state([]);
+	let disasterRecoveryObjectives: string[] = $state([]);
 
 	onMount(async () => {
 		securityObjectives = await fetchSecurityObjectives();
@@ -158,15 +170,17 @@
 						class="h-full flex flex-row items-center justify-center my-1"
 						classesContainer="h-full"
 					/>
-					<RadioGroupInput
+					<RadioGroup
+						possibleOptions={securityObjectiveOptions}
 						{form}
 						label={safeTranslate(objective)}
+						labelKey="label"
+						key="value"
 						field={objective}
 						valuePath="security_objectives.objectives.{objective}.value"
-						options={securityObjectiveOptions}
 						disabled={objectiveFormData && objectiveFormData.is_enabled === false}
-					/></span
-				>
+					/>
+				</span>
 			{/each}
 		</div>
 	</Dropdown>
