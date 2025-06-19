@@ -947,5 +947,6 @@
 				"countPlural=other": "{count} Dagar"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Matchande scenarier"
 }
