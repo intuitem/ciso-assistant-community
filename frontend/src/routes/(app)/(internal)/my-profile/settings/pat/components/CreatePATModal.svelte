@@ -1,8 +1,4 @@
 <script lang="ts">
-	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
-
 	import { copy } from '@svelte-put/copy';
 
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
@@ -18,17 +14,24 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let form;
-	export let formAction: string = '?/createPAT';
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		form: any;
+		formAction?: string;
+		[key: string]: any;
+	}
 
-	let tokenDisplayed = false;
+	let { parent, form, formAction = '?/createPAT', ...rest }: Props = $props();
+
+	let tokenDisplayed = $state(false);
 
 	const _form = superForm(form, {
 		dataType: 'json',
 		enctype: 'application/x-www-form-urlencoded',
 		invalidateAll: true,
-		applyAction: $$props.applyAction ?? true,
-		resetForm: $$props.resetForm ?? false,
+		applyAction: rest.applyAction ?? true,
+		resetForm: rest.resetForm ?? false,
 		validators: zod(AuthTokenCreateSchema),
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
@@ -56,49 +59,49 @@
 						action={formAction}
 						{_form}
 						validators={zod(AuthTokenCreateSchema)}
-						let:form
 						class="modal-form {cForm}"
 						validationMethod="onsubmit"
 					>
-						{#if !tokenDisplayed}
-							<TextField {form} field="name" label={m.name()} classesContainer="w-full" />
-							<NumberField
-								{form}
-								field="expiry"
-								label={m.expiry()}
-								helpText={m.personalAccessTokenExpiryHelpText()}
-							/>
-							<footer class="modal-footer {parent.regionFooter}">
-								<button
-									class="btn variant-filled-primary w-full"
-									data-testid="activate-totp-confirm-button"
-									type="submit">{m.generateNewPersonalAccessToken()}</button
+						{#snippet children({ form })}
+							{#if !tokenDisplayed}
+								<TextField {form} field="name" label={m.name()} classesContainer="w-full" />
+								<NumberField
+									{form}
+									field="expiry"
+									label={m.expiry()}
+									helpText={m.personalAccessTokenExpiryHelpText()}
+								/>
+								<footer class="modal-footer {parent.regionFooter}">
+									<button
+										class="btn variant-filled-primary w-full"
+										data-testid="activate-totp-confirm-button"
+										type="submit">{m.generateNewPersonalAccessToken()}</button
+									>
+								</footer>
+							{:else}
+								<div class="card p-4 variant-ghost-secondary flex flex-row items-center">
+									<i class="fa-solid fa-bell mr-2 text-secondary-800"
+									></i>{m.personalAccessTokenOnlyDisplayedOnce()}
+								</div>
+								<span class="flex flex-row gap-2 variant-ghost-surface items-center card pl-2">
+									<pre>{page?.form?.form?.message?.data?.token}</pre>
+									<button
+										type="button"
+										class="btn px-2 py-1 {parent.buttonNeutral} rounded-l-none"
+										use:copy={{ text: page?.form?.form?.message?.data?.token }}
+										><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
+									></span
 								>
-							</footer>
-						{:else}
-							<div class="card p-4 variant-ghost-secondary flex flex-row items-center">
-								<i
-									class="fa-solid fa-bell mr-2 text-secondary-800"
-								/>{m.personalAccessTokenOnlyDisplayedOnce()}
-							</div>
-							<span class="flex flex-row gap-2 variant-ghost-surface items-center card pl-2">
-								<pre>{page?.form?.form?.message?.data?.token}</pre>
-								<button
-									type="button"
-									class="btn px-2 py-1 {parent.buttonNeutral} rounded-l-none"
-									use:copy={{ text: page?.form?.form?.message?.data?.token }}
-									><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
-								></span
-							>
-							<footer class="modal-footer {parent.regionFooter}">
-								<button
-									class="btn variant-filled-primary w-full"
-									data-testid="activate-totp-confirm-button"
-									type="button"
-									on:click={parent.onConfirm}>{m.done()}</button
-								>
-							</footer>
-						{/if}
+								<footer class="modal-footer {parent.regionFooter}">
+									<button
+										class="btn variant-filled-primary w-full"
+										data-testid="activate-totp-confirm-button"
+										type="button"
+										onclick={parent.onConfirm}>{m.done()}</button
+									>
+								</footer>
+							{/if}
+						{/snippet}
 					</SuperForm>
 				</div>
 			</div>

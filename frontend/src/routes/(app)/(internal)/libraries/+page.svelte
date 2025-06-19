@@ -34,7 +34,7 @@
 				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span>
 				{#if mappingSuggestedCount > 0}
 					<span class="badge preset-tonal-secondary" title={m.mappingSuggestedHelpText()}
-						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
+						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1"></i></span
 					>
 				{/if}
 			</Tabs.Control>
