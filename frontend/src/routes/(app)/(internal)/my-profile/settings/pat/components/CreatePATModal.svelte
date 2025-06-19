@@ -3,10 +3,6 @@
 	/** Exposes parent props to this component. */
 	export let parent: any;
 
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
 	import { copy } from '@svelte-put/copy';
 
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
@@ -14,6 +10,11 @@
 	import { AuthTokenCreateSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { m } from '$paraglide/messages';
+
+	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import { page } from '$app/state';
+	import { superForm } from 'sveltekit-superforms';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -36,10 +37,6 @@
 			}
 		}
 	});
-
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import { page } from '$app/stores';
-	import { superForm } from 'sveltekit-superforms';
 
 	// Base Classes
 	const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
@@ -85,11 +82,11 @@
 								/>{m.personalAccessTokenOnlyDisplayedOnce()}
 							</div>
 							<span class="flex flex-row gap-2 variant-ghost-surface items-center card pl-2">
-								<pre>{$page?.form?.form?.message?.data?.token}</pre>
+								<pre>{page?.form?.form?.message?.data?.token}</pre>
 								<button
 									type="button"
 									class="btn px-2 py-1 {parent.buttonNeutral} rounded-l-none"
-									use:copy={{ text: $page?.form?.form?.message?.data?.token }}
+									use:copy={{ text: page?.form?.form?.message?.data?.token }}
 									><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
 								></span
 							>

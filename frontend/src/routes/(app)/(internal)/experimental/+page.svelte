@@ -9,19 +9,19 @@
 	<Article
 		title="Frameworks mapping"
 		desc="Visualize applied mapping data as a graph"
-		link="experimental/mapping"
+		link="/experimental/mapping"
 		tags={['analysis', 'mapping']}
 	/>
 	<Article
 		title="Assets explorer"
 		desc="Visualize assets and their relationships"
-		link="assets/graph"
+		link="/assets/graph"
 		tags={['analysis', 'assets']}
 	/>
 	<Article
 		title="Requirements explorer"
 		desc="Visualize all requirements across all audits"
-		link="requirement-assessments"
+		link="/requirement-assessments"
 		tags={['analysis', 'assets']}
 	/>
 </div>
