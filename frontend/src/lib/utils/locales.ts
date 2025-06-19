@@ -69,7 +69,7 @@ export const LOCALE_MAP = {
 	},
 	uk: {
 		name: 'ukrainian',
-		flag: '🇺'
+		flag: '🇺🇦'
 	}
 };
 
