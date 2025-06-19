@@ -77,6 +77,7 @@
 				{#if data.provider !== 'saml'}
 					<TextField
 						{form}
+						type="password"
 						field="secret"
 						label={m.secret()}
 						helpText={m.secretHelpText()}
