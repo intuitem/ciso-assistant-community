@@ -376,7 +376,7 @@ export const SSOSettingsSchema = z.object({
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),
-	client_id: z.string().default(''),
+	client_id: z.string(),
 	secret: z.string().optional(),
 	key: z.string().optional(),
 
