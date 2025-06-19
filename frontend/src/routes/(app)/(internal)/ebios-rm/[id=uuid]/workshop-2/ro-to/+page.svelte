@@ -7,6 +7,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -44,13 +45,14 @@
 </script>
 
 <div class="flex items-center justify-between mb-4">
-	<a
-		href="/ebios-rm/{data.data.id}"
+	<Anchor
+		breadcrumbAction="push"
+		href={`/ebios-rm/${data.data.id}`}
 		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 	>
 		<i class="fa-solid fa-arrow-left" />
-		<p class="">{m.goBackToEbiosRmStudy()}</p>
-	</a>
+		<p>{m.goBackToEbiosRmStudy()}</p>
+	</Anchor>
 </div>
 <ModelTable
 	source={data.table}
