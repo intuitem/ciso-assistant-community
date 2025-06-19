@@ -248,67 +248,68 @@
 		</div>
 	</div>
 	<!--Risk risk_assessment-->
-	<div class="card m-4 p-4 shadow-sm bg-white">
+	<div class="card m-4 p-4 shadow bg-white">
 		<div class="bg-white">
 			<div class="flex flex-row justify-between">
 				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
 					{m.associatedRiskScenarios()}
 				</h4>
 			</div>
-		</div>
-		<ModelTable
-			source={data.scenariosTable}
-			deleteForm={data.scenarioDeleteForm}
-			model={getModelInfo('risk-scenarios')}
-			URLModel="risk-scenarios"
-			search={false}
-			baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
-			folderId={data.risk_assessment.folder.id}
-			fields={[
-				'ref_id',
-				'name',
-				'threats',
-				'existing_applied_controls',
-				'current_level',
-				'applied_controls',
-				'residual_level'
-			]}
-		>
-			{#snippet addButton()}
+			<ModelTable
+				source={data.scenariosTable}
+				deleteForm={data.scenarioDeleteForm}
+				model={getModelInfo('risk-scenarios')}
+				URLModel="risk-scenarios"
+				search={false}
+				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				folderId={data.risk_assessment.folder.id}
+				fields={[
+					'ref_id',
+					'name',
+					'threats',
+					'existing_applied_controls',
+					'current_level',
+					'applied_controls',
+					'residual_level'
+				]}
+			>
 				<button
-					class="btn preset-filled-primary-500 self-end my-auto"
-					onclick={(_) => modalCreateForm()}
-					><i class="fa-solid fa-plus mr-2 lowercase"></i>
+					slot="addButton"
+					class="btn variant-filled-primary self-end my-auto"
+					on:click={(_) => modalCreateForm()}
+					><i class="fa-solid fa-plus mr-2 lowercase" />
 					{m.addRiskScenario()}
 				</button>
-			{/snippet}
-		</ModelTable>
-		<!--Matrix view-->
-		<div class="card m-4 p-4 shadow-sm bg-white page-break">
-			<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-			<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
-				<div class="flex-1">
-					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
-					<RiskMatrix
-						riskMatrix={risk_assessment.risk_matrix}
-						matrixName={'current'}
-						data={currentCluster}
-						dataItemComponent={RiskScenarioItem}
-						{showRisks}
-						{useBubbles}
-					/>
-				</div>
-				<div class="flex-1">
-					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
-					<RiskMatrix
-						riskMatrix={risk_assessment.risk_matrix}
-						matrixName={'residual'}
-						data={residualCluster}
-						dataItemComponent={RiskScenarioItem}
-						{showRisks}
-						{useBubbles}
-					/>
-				</div>
+			</ModelTable>
+		</div>
+	</div>
+	<!--Matrix view-->
+	<div class="card m-4 p-4 shadow bg-white page-break">
+		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
+		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
+			<div class="flex-1">
+				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
+
+				<RiskMatrix
+					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
+					data={currentCluster}
+					dataItemComponent={RiskScenarioItem}
+					{showRisks}
+					{useBubbles}
+				/>
+			</div>
+			<div class="flex-1">
+				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
+
+				<RiskMatrix
+					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
+					data={residualCluster}
+					dataItemComponent={RiskScenarioItem}
+					{showRisks}
+					{useBubbles}
+				/>
 			</div>
 		</div>
 	</div>
