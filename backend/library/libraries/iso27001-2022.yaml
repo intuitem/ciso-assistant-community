@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:iso27001-2022
 locale: en
 ref_id: ISO/IEC 27001:2022
@@ -6,8 +8,8 @@ description: "Information security, cybersecurity and privacy protection \u2014 
   \ security management systems \u2014 Requirements"
 copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
   full standard from https://www.iso.org/standard/27001
-version: 10
-publication_date: 2025-05-30
+version: 11
+publication_date: 2025-06-19
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -25,6 +27,12 @@ translations:
       nosti - Po\u017Eadavky"
     copyright: "Toto je osnova normy ISO27001-2022. Celou normu si m\u016F\u017Eete\
       \ zakoupit od https://www.iso.org/standard/27001"
+  sv:
+    name: Internationell standard ISO/IEC 27001:2022
+    description: "Informationss\xE4kerhet, cybers\xE4kerhet och integritetsskydd \u2013\
+      \ Ledningssystem f\xF6r informationss\xE4kerhet \u2013 Krav"
+    copyright: "Detta \xE4r huvuddragen i ISO27001-2022-standarden. Du kan k\xF6pa\
+      \ hela standarden fr\xE5n https://www.iso.org/standard/27001"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -50,6 +58,12 @@ objects:
           en\xED pat\u0159\xED definov\xE1n\xED rozsahu, stanoven\xED c\xEDl\u016F\
           \ a zaji\u0161t\u011Bn\xED souladu s po\u017Eadavky na dodr\u017Eov\xE1\
           n\xED p\u0159edpis\u016F."
+      sv:
+        name: "Policyer f\xF6r informationss\xE4kerhet"
+        description: "Den h\xE4r kontrollen uppr\xE4ttar och underh\xE5ller informationss\xE4\
+          kerhetsprinciper som \xE4r anpassade till organisationens m\xE5l. \xC5tg\xE4\
+          rderna omfattar att definiera omfattning, s\xE4tta upp m\xE5l och s\xE4\
+          kerst\xE4lla anpassning till efterlevnadskraven."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.2
     ref_id: A.5.2
     name: Information security roles and responsibilities
@@ -73,6 +87,12 @@ objects:
           na odpov\u011Bdnost. Mezi opat\u0159en\xED pat\u0159\xED jasn\xE1 dokumentace\
           \ odpov\u011Bdnost\xED, pravideln\xE9 kontroly a mechanismy vym\xE1h\xE1\
           n\xED."
+      sv:
+        name: "Roller och ansvar f\xF6r informationss\xE4kerhet"
+        description: "Den h\xE4r kontrollen definierar och tilldelar roller och ansvar\
+          \ f\xF6r informationss\xE4kerhet f\xF6r att s\xE4kerst\xE4lla ansvarsskyldighet.\
+          \ \xC5tg\xE4rderna omfattar tydlig dokumentation av ansvarsomr\xE5den, periodiska\
+          \ granskningar och verkst\xE4llighetsmekanismer."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.3
     ref_id: A.5.3
     name: Segregation of duties
@@ -93,6 +113,12 @@ objects:
           , aby se sn\xED\u017Eilo riziko chyb, podvod\u016F a neopr\xE1vn\u011Bn\xE9\
           ho p\u0159\xEDstupu. Mezi opat\u0159en\xED pat\u0159\xED odd\u011Blen\xED\
           \ rol\xED, omezen\xED p\u0159\xEDstupu a pravideln\xE9 audity."
+      sv:
+        name: "\xC5tskillnad av arbetsuppgifter"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller uppdelning av uppgifter\
+          \ f\xF6r att minska risken f\xF6r fel, bedr\xE4gerier och obeh\xF6rig \xE5\
+          tkomst. \xC5tg\xE4rderna omfattar rollseparation, \xE5tkomstbegr\xE4nsningar\
+          \ och regelbundna granskningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.4
     ref_id: A.5.4
     name: Management responsibilities
@@ -114,6 +140,12 @@ objects:
           ny a implementov\xE1ny. Mezi opat\u0159en\xED pat\u0159\xED stanoven\xED\
           \ c\xEDl\u016F, alokace zdroj\u016F a dohled nad dodr\u017Eov\xE1n\xEDm\
           \ p\u0159edpis\u016F."
+      sv:
+        name: Ledningens ansvar
+        description: "Denna kontroll s\xE4kerst\xE4ller att ledningens ansvar f\xF6\
+          r informationss\xE4kerhet \xE4r tydligt definierat och implementerat. \xC5\
+          tg\xE4rderna inkluderar att s\xE4tta upp m\xE5l, f\xF6rdela resurser och\
+          \ \xF6vervaka efterlevnaden."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.5
     ref_id: A.5.5
     name: Contact with authorities
@@ -136,6 +168,12 @@ objects:
           \ zaveden\xED kontaktn\xEDch protokol\u016F, udr\u017Eov\xE1n\xED aktualizovan\xFD\
           ch seznam\u016F kontakt\u016F a p\u0159id\u011Blov\xE1n\xED odpov\u011B\
           dnost\xED."
+      sv:
+        name: Kontakt med myndigheter
+        description: "Denna kontroll s\xE4kerst\xE4ller snabb kommunikation med relevanta\
+          \ myndigheter under informationss\xE4kerhetsincidenter. \xC5tg\xE4rderna\
+          \ inkluderar att uppr\xE4tta kontaktprotokoll, uppr\xE4tth\xE5lla uppdaterade\
+          \ kontaktlistor och tilldela ansvar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.6
     ref_id: A.5.6
     name: Contact with special interest groups
@@ -156,6 +194,11 @@ objects:
           \ aby byli informov\xE1ni o bezpe\u010Dnostn\xEDch trendech a postupech.\
           \ Mezi tato opat\u0159en\xED pat\u0159\xED \xFA\u010Dast na f\xF3rech, \u010D\
           lenstv\xED a spole\u010Dn\xE9 iniciativy."
+      sv:
+        name: "Kontakt med s\xE4rskilda intresseorganisationer f\xF6r intresseorganisationer"
+        description: "Denna kontroll underl\xE4ttar kontakt med s\xE4rskilda intressegrupper\
+          \ f\xF6r att h\xE5lla sig informerade om s\xE4kerhetstrender och praxis.\
+          \ \xC5tg\xE4rderna inkluderar deltagande i forum, medlemskap och samarbetsinitiativ."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.7
     ref_id: A.5.7
     name: Threat intelligence
@@ -178,6 +221,12 @@ objects:
           rnit bezpe\u010Dnostn\xED rizika. Mezi tato opat\u0159en\xED pat\u0159\xED\
           \ monitorov\xE1n\xED informac\xED o hrozb\xE1ch, anal\xFDza trend\u016F\
           \ a sd\xEDlen\xED u\u017Eite\u010Dn\xFDch poznatk\u016F."
+      sv:
+        name: Information om hot
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att hotinformation\
+          \ utvecklas och underh\xE5lls f\xF6r att identifiera och minimera s\xE4\
+          kerhetsrisker. \xC5tg\xE4rderna omfattar \xF6vervakning av hotfl\xF6den,\
+          \ analys av trender och delning av anv\xE4ndbara insikter."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.8
     ref_id: A.5.8
     name: Information security in project management
@@ -199,6 +248,11 @@ objects:
           \ postup\u016F \u0159\xEDzen\xED projekt\u016F. Mezi tato opat\u0159en\xED\
           \ pat\u0159\xED posouzen\xED rizik, kontroly souladu s p\u0159edpisy a bezpe\u010D\
           nostn\xED kontroln\xED body b\u011Bhem \u017Eivotn\xEDho cyklu projektu."
+      sv:
+        name: "Informationss\xE4kerhet inom projektledning"
+        description: "Den h\xE4r kontrollen inf\xF6rlivar informationss\xE4kerhet\
+          \ i projektledningsmetoderna. \xC5tg\xE4rderna omfattar riskbed\xF6mningar,\
+          \ efterlevnadsgranskningar och s\xE4kerhetskontroller under projektets livscykel."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.9
     ref_id: A.5.9
     name: Inventory of information and other associated assets
@@ -218,6 +272,12 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje p\u0159esnou inventuru informac\xED\
           \ a souvisej\xEDc\xEDch aktiv. Mezi opat\u0159en\xED pat\u0159\xED sledov\xE1\
           n\xED aktiv, pravideln\xE9 audity a klasifikace podle citlivosti."
+      sv:
+        name: "Inventering av information och andra tillh\xF6rande tillg\xE5ngar"
+        description: "Denna kontroll s\xE4kerst\xE4ller att en korrekt inventering\
+          \ av information och tillh\xF6rande tillg\xE5ngar uppr\xE4tth\xE5lls. \xC5\
+          tg\xE4rderna inkluderar tillg\xE5ngssp\xE5rning, periodiska revisioner och\
+          \ klassificering efter k\xE4nslighet."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.10
     ref_id: A.5.10
     name: Acceptable use of information and other associated assets
@@ -240,6 +300,13 @@ objects:
           \ nakl\xE1d\xE1n\xED s nimi. Mezi tato opat\u0159en\xED pat\u0159\xED zdokumentovan\xE9\
           \ z\xE1sady, \u0161kolen\xED u\u017Eivatel\u016F a mechanismy vym\xE1h\xE1\
           n\xED."
+      sv:
+        name: "Acceptabel anv\xE4ndning av information och andra tillh\xF6rande tillg\xE5\
+          ngar"
+        description: "Den h\xE4r kontrollen definierar acceptabel anv\xE4ndning av\
+          \ information och associerade tillg\xE5ngar f\xF6r att s\xE4kerst\xE4lla\
+          \ korrekt hantering. \xC5tg\xE4rderna omfattar dokumenterade policyer, anv\xE4\
+          ndarutbildning och tvingande mekanismer."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.11
     ref_id: A.5.11
     name: Return of assets
@@ -260,6 +327,12 @@ objects:
           \ majetku, kdy\u017E zam\u011Bstnanci nebo dodavatel\xE9 odejdou nebo zm\u011B\
           n\xED svou roli. Mezi tato opat\u0159en\xED pat\u0159\xED kontroln\xED seznamy,\
           \ sledov\xE1n\xED majetku a protokoly o vy\u0159azov\xE1n\xED z provozu."
+      sv:
+        name: "\xC5terf\xF6ring av tillg\xE5ngar"
+        description: "Denna kontroll s\xE4kerst\xE4ller en s\xE4ker \xE5terl\xE4mning\
+          \ av tillg\xE5ngar n\xE4r anst\xE4llda eller entrepren\xF6rer l\xE4mnar\
+          \ eller byter roll. \xC5tg\xE4rderna omfattar checklistor, tillg\xE5ngssp\xE5\
+          rning och inaktiveringsprotokoll."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.12
     ref_id: A.5.12
     name: Classification of information
@@ -282,6 +355,12 @@ objects:
           na odpov\xEDdaj\xEDc\xED ochrana. Mezi opat\u0159en\xED pat\u0159\xED klasifika\u010D\
           n\xED sch\xE9mata, omezen\xED p\u0159\xEDstupu a pokyny pro ozna\u010Dov\xE1\
           n\xED."
+      sv:
+        name: Klassificering av information
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att information klassificeras\
+          \ baserat p\xE5 dess k\xE4nslighet och v\xE4rde f\xF6r att s\xE4kerst\xE4\
+          lla l\xE4mpligt skydd. M\xE5tten omfattar klassificeringsscheman, \xE5tkomstbegr\xE4\
+          nsningar och riktlinjer f\xF6r etikettering."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.13
     ref_id: A.5.13
     name: Labelling of information
@@ -302,6 +381,11 @@ objects:
           ov\xE1n\xED informac\xED tak, aby odr\xE1\u017Eelo po\u017Eadavky na jejich\
           \ klasifikaci a zpracov\xE1n\xED. Mezi opat\u0159en\xED pat\u0159\xED standardizovan\xE9\
           \ \u0161ablony, \u0161kolen\xED a audity."
+      sv:
+        name: "M\xE4rkning av information"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent m\xE4rkning\
+          \ av information f\xF6r att \xE5terspegla dess klassificerings- och hanteringskrav.\
+          \ \xC5tg\xE4rderna inkluderar standardiserade mallar, utbildning och revisioner."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.14
     ref_id: A.5.14
     name: Information transfer
@@ -322,6 +406,12 @@ objects:
           enos informac\xED mezi syst\xE9my nebo organizacemi. Mezi opat\u0159en\xED\
           \ pat\u0159\xED \u0161ifrov\xE1n\xED, \u0159\xEDzen\xED p\u0159\xEDstupu\
           \ a protokoly zabezpe\u010Den\xE9ho p\u0159enosu."
+      sv:
+        name: "\xD6verf\xF6ring av uppgifter"
+        description: "Denna kontroll uppr\xE4ttar s\xE4kra processer f\xF6r \xF6verf\xF6\
+          ring av information mellan system eller organisationer. \xC5tg\xE4rderna\
+          \ inkluderar kryptering, \xE5tkomstkontroller och s\xE4kra \xF6verf\xF6\
+          ringsprotokoll."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.15
     ref_id: A.5.15
     name: Access control
@@ -344,6 +434,12 @@ objects:
           vn\u011Bn\xE9 osoby. Mezi opat\u0159en\xED pat\u0159\xED p\u0159\xEDstup\
           \ zalo\u017Een\xFD na rol\xEDch, v\xEDcefaktorov\xE9 ov\u011B\u0159ov\xE1\
           n\xED a pravideln\xE9 kontroly."
+      sv:
+        name: "\xC5tkomstkontroll"
+        description: "Den h\xE4r kontrollen implementerar och underh\xE5ller mekanismer\
+          \ f\xF6r \xE5tkomstkontroll f\xF6r att begr\xE4nsa \xE5tkomsten till beh\xF6\
+          riga personer. \xC5tg\xE4rderna omfattar rollbaserad \xE5tkomst, multifaktorautentisering\
+          \ och periodiska granskningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.16
     ref_id: A.5.16
     name: Identity management
@@ -366,6 +462,12 @@ objects:
           \ syst\xE9m\u016Fm. Mezi opat\u0159en\xED pat\u0159\xED ov\u011B\u0159ov\xE1\
           n\xED identity, spr\xE1va \u017Eivotn\xEDho cyklu a z\u0159izov\xE1n\xED\
           \ p\u0159\xEDstupu."
+      sv:
+        name: Identitetshantering
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att identiteter hanteras\
+          \ p\xE5 ett s\xE4kert s\xE4tt f\xF6r att garantera korrekt och tillf\xF6\
+          rlitlig \xE5tkomst till system. \xC5tg\xE4rderna omfattar identitetsverifiering,\
+          \ livscykelhantering och \xE5tkomstetablering."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.17
     ref_id: A.5.17
     name: Authentication information
@@ -386,6 +488,12 @@ objects:
           \ jako jsou hesla, aby se zabr\xE1nilo neopr\xE1vn\u011Bn\xE9mu p\u0159\xED\
           stupu. Mezi opat\u0159en\xED pat\u0159\xED \u0161ifrov\xE1n\xED, bezpe\u010D\
           n\xE9 \xFAlo\u017Ei\u0161t\u011B a pravideln\xE9 aktualizace hesel."
+      sv:
+        name: Information om autentisering
+        description: "Den h\xE4r kontrollen skyddar autentiseringsinformation, till\
+          \ exempel l\xF6senord, f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst. \xC5\
+          tg\xE4rderna omfattar kryptering, s\xE4ker lagring och periodiska l\xF6\
+          senordsuppdateringar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.18
     ref_id: A.5.18
     name: Access rights
@@ -408,6 +516,12 @@ objects:
           \ s rolemi a odpov\u011Bdnostmi. Mezi opat\u0159en\xED pat\u0159\xED pravideln\xE9\
           \ audity, odebr\xE1n\xED p\u0159\xEDstupu a automatizovan\xE1 spr\xE1va\
           \ p\u0159\xEDstupu."
+      sv:
+        name: "R\xE4ttigheter"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att \xE5tkomstr\xE4\
+          ttigheter regelbundet granskas och hanteras s\xE5 att de \xF6verensst\xE4\
+          mmer med roller och ansvarsomr\xE5den. \xC5tg\xE4rderna omfattar periodiska\
+          \ granskningar, \xE5terkallande av \xE5tkomst och automatiserad \xE5tkomsthantering."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.19
     ref_id: A.5.19
     name: Information security in supplier relationships
@@ -428,6 +542,12 @@ objects:
           \ je za\u010Dlen\u011Bna do vztah\u016F a proces\u016F s dodavateli. Mezi\
           \ opat\u0159en\xED pat\u0159\xED due diligence, bezpe\u010Dnostn\xED kontroly\
           \ a pr\u016Fb\u011B\u017En\xE9 monitorov\xE1n\xED."
+      sv:
+        name: "Informationss\xE4kerhet i leverant\xF6rsrelationer"
+        description: "Denna kontroll s\xE4kerst\xE4ller att informationss\xE4kerheten\
+          \ \xE4r inb\xE4ddad i leverant\xF6rsrelationer och processer. \xC5tg\xE4\
+          rderna omfattar due diligence, s\xE4kerhetsgranskningar och l\xF6pande \xF6\
+          vervakning."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.20
     ref_id: A.5.20
     name: Addressing information security within supplier agreements
@@ -450,6 +570,12 @@ objects:
           n\xED bezpe\u010Dnost v r\xE1mci dodavatelsk\xFDch smluv. Mezi tato opat\u0159\
           en\xED pat\u0159\xED explicitn\xED smluvn\xED dolo\u017Eky, audity shody\
           \ s p\u0159edpisy a definovan\xE9 sankce za poru\u0161en\xED."
+      sv:
+        name: "Hantering av informationss\xE4kerhet inom leverant\xF6rsavtal"
+        description: "Denna kontroll adresserar informationss\xE4kerhetskrav inom\
+          \ leverant\xF6rsavtal. \xC5tg\xE4rderna omfattar uttryckliga kontraktsklausuler,\
+          \ efterlevnadsrevisioner och definierade p\xE5f\xF6ljder f\xF6r \xF6vertr\xE4\
+          delser."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.21
     ref_id: A.5.21
     name: Managing information security in the ICT supply chain
@@ -473,6 +599,12 @@ objects:
           nosti v dodavatelsk\xE9m \u0159et\u011Bzci IKT s c\xEDlem zajistit bezpe\u010D\
           nost slu\u017Eeb a komponent. Mezi opat\u0159en\xED pat\u0159\xED posouzen\xED\
           \ rizik, hodnocen\xED dodavatel\u016F a protokoly pro reakci na incidenty."
+      sv:
+        name: "Hantering av informationss\xE4kerhet i ICT-leveranskedjan"
+        description: "Denna kontroll hanterar informationss\xE4kerhetsrisker i ICT-f\xF6\
+          rs\xF6rjningskedjan f\xF6r att s\xE4kerst\xE4lla s\xE4kerheten f\xF6r tj\xE4\
+          nster och komponenter. \xC5tg\xE4rderna inkluderar riskbed\xF6mningar, leverant\xF6\
+          rsutv\xE4rderingar och protokoll f\xF6r incidenthantering."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.22
     ref_id: A.5.22
     name: Monitor, review and change management of supplier services
@@ -494,6 +626,13 @@ objects:
           \ jsou monitorov\xE1ny, kontrolov\xE1ny a upravov\xE1ny tak, aby byla zachov\xE1\
           na bezpe\u010Dnost informac\xED. Mezi opat\u0159en\xED pat\u0159\xED dohody\
           \ o \xFArovni slu\u017Eeb, pravideln\xE9 kontroly a aktualizace smluv."
+      sv:
+        name: "Uppf\xF6ljning, granskning och f\xF6r\xE4ndringsledning av leverant\xF6\
+          rstj\xE4nster"
+        description: "Denna kontroll s\xE4kerst\xE4ller att leverant\xF6rstj\xE4nster\
+          \ \xF6vervakas, granskas och justeras f\xF6r att uppr\xE4tth\xE5lla informationss\xE4\
+          kerheten. \xC5tg\xE4rderna omfattar serviceavtal, periodiska granskningar\
+          \ och kontraktsuppdateringar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.23
     ref_id: A.5.23
     name: Information security for use of cloud services
@@ -516,6 +655,11 @@ objects:
           \ souvisej\xEDc\xED rizika. Mezi opat\u0159en\xED pat\u0159\xED \u0161ifrov\xE1\
           n\xED dat, \u0159\xEDzen\xED p\u0159\xEDstupu a kontroly dodr\u017Eov\xE1\
           n\xED p\u0159edpis\u016F poskytovateli."
+      sv:
+        name: "Informationss\xE4kerhet f\xF6r anv\xE4ndning av molntj\xE4nster"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller s\xE4ker anv\xE4ndning\
+          \ av molntj\xE4nster genom att hantera associerade risker. \xC5tg\xE4rderna\
+          \ omfattar datakryptering, \xE5tkomstkontroller och granskningar av providerefterlevnad."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.24
     ref_id: A.5.24
     name: Information security incident management planning and preparation
@@ -538,6 +682,12 @@ objects:
           n\xED a p\u0159\xEDpravu na zvl\xE1d\xE1n\xED incident\u016F informa\u010D\
           n\xED bezpe\u010Dnosti. Mezi opat\u0159en\xED pat\u0159\xED pl\xE1ny reakce\
           \ na incidenty, \u0161kolen\xED a komunika\u010Dn\xED protokoly."
+      sv:
+        name: "Planering och f\xF6rberedelse av hantering av informationss\xE4kerhetsincidenter"
+        description: "Denna kontroll s\xE4kerst\xE4ller korrekt planering och f\xF6\
+          rberedelse f\xF6r hantering av informationss\xE4kerhetsincidenter. \xC5\
+          tg\xE4rderna omfattar incidenthanteringsplaner, tr\xE4nings\xF6vningar och\
+          \ kommunikationsprotokoll."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.25
     ref_id: A.5.25
     name: Assessment and decision on information security events
@@ -561,6 +711,12 @@ objects:
           n\xED bezpe\u010Dnosti. Mezi tato opat\u0159en\xED pat\u0159\xED anal\xFD\
           za hlavn\xEDch p\u0159\xED\u010Din, hodnocen\xED rizik a pl\xE1ny na zm\xED\
           rn\u011Bn\xED jejich dopad\u016F."
+      sv:
+        name: "Bed\xF6mning och beslut om informationss\xE4kerhetsh\xE4ndelser"
+        description: "Denna kontroll uppr\xE4ttar processer f\xF6r att bed\xF6ma och\
+          \ besluta om \xE5tg\xE4rder relaterade till informationss\xE4kerhetsh\xE4\
+          ndelser. \xC5tg\xE4rderna omfattar grundorsaksanalys, riskbed\xF6mning och\
+          \ \xE5tg\xE4rdsplaner."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.26
     ref_id: A.5.26
     name: Response to information security incidents
@@ -582,6 +738,12 @@ objects:
           uje rychlou obnovu. Mezi tato opat\u0159en\xED pat\u0159\xED hl\xE1\u0161\
           en\xED incident\u016F, eskala\u010Dn\xED protokoly a strategie omezen\xED\
           ."
+      sv:
+        name: "\xC5tg\xE4rder vid informationss\xE4kerhetsincidenter"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller ett effektivt svar\
+          \ p\xE5 informationss\xE4kerhetsincidenter f\xF6r att minimera p\xE5verkan\
+          \ och \xE5terh\xE4mta sig snabbt. \xC5tg\xE4rderna omfattar incidentrapportering,\
+          \ eskaleringsprotokoll och strategier f\xF6r att begr\xE4nsa spridningen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.27
     ref_id: A.5.27
     name: Learning from information security incidents
@@ -605,6 +767,12 @@ objects:
           ny a implementov\xE1ny za \xFA\u010Delem zlep\u0161en\xED proces\u016F.\
           \ Mezi opat\u0159en\xED pat\u0159\xED kontroly po incidentu, ak\u010Dn\xED\
           \ pl\xE1ny a aktualizace z\xE1sad."
+      sv:
+        name: "Att l\xE4ra sig av informationss\xE4kerhetsincidenter"
+        description: "Denna kontroll s\xE4kerst\xE4ller att l\xE4rdomar fr\xE5n informationss\xE4\
+          kerhetsincidenter dokumenteras och implementeras f\xF6r att f\xF6rb\xE4\
+          ttra processerna. \xC5tg\xE4rderna omfattar granskningar efter incidenter,\
+          \ handlingsplaner och policyuppdateringar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.28
     ref_id: A.5.28
     name: Collection of evidence
@@ -627,6 +795,12 @@ objects:
           ch incident\u016F na podporu vy\u0161et\u0159ov\xE1n\xED. Mezi opat\u0159\
           en\xED pat\u0159\xED postupy \u0159et\u011Bzce \xFAschovy, bezpe\u010Dn\xE9\
           \ \xFAlo\u017Ei\u0161t\u011B a kontroly p\u0159\xEDstupu."
+      sv:
+        name: Insamling av bevisning
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att bevis samlas in\
+          \ och bevaras under s\xE4kerhetsincidenter f\xF6r att st\xF6dja unders\xF6\
+          kningar. \xC5tg\xE4rderna omfattar sp\xE5rbarhetsprocedurer, s\xE4ker lagring\
+          \ och \xE5tkomstkontroller."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.29
     ref_id: A.5.29
     name: Information security during disruption
@@ -648,6 +822,12 @@ objects:
           \ kontinuita provozu. Mezi opat\u0159en\xED pat\u0159\xED pohotovostn\xED\
           \ pl\xE1ny, z\xE1lo\u017En\xED syst\xE9my a mechanismy pro p\u0159\xEDpad\
           \ selh\xE1n\xED."
+      sv:
+        name: "Informationss\xE4kerhet vid st\xF6rningar"
+        description: "Denna kontroll s\xE4kerst\xE4ller att informationss\xE4kerheten\
+          \ uppr\xE4tth\xE5lls under st\xF6rningar f\xF6r att garantera kontinuiteten\
+          \ i verksamheten. \xC5tg\xE4rderna omfattar beredskapsplaner, s\xE4kerhetskopieringssystem\
+          \ och mekanismer f\xF6r redundans."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.30
     ref_id: A.5.30
     name: ICT readiness for business continuity
@@ -670,6 +850,12 @@ objects:
           \ b\u011Bhem naru\u0161en\xED provozu. Mezi tato opat\u0159en\xED pat\u0159\
           \xED testov\xE1n\xED pl\xE1n\u016F obnovy, redundantn\xEDch syst\xE9m\u016F\
           \ a lokalit pro obnovu po hav\xE1rii."
+      sv:
+        name: "IKT-beredskap f\xF6r kontinuitet i verksamheten"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller IKT-beredskap f\xF6\
+          r aff\xE4rskontinuitet f\xF6r att minimera driftstopp under st\xF6rningar.\
+          \ \xC5tg\xE4rderna omfattar testning av \xE5terst\xE4llningsplaner, redundanta\
+          \ system och haveriberedskapsplatser."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.31
     ref_id: A.5.31
     name: Legal, statutory, regulatory and contractual requirements
@@ -691,6 +877,11 @@ objects:
           konn\xFDmi, regula\u010Dn\xEDmi a smluvn\xEDmi po\u017Eadavky na informa\u010D\
           n\xED bezpe\u010Dnost. Mezi opat\u0159en\xED pat\u0159\xED p\u0159ezkumy\
           \ politik, audity a dokumentace d\u016Fkaz\u016F."
+      sv:
+        name: "Juridiska, lagstadgade, regulatoriska och avtalsm\xE4ssiga krav"
+        description: "Denna kontroll s\xE4kerst\xE4ller efterlevnad av juridiska,\
+          \ lagstadgade, regulatoriska och avtalsenliga informationss\xE4kerhetskrav.\
+          \ \xC5tg\xE4rderna omfattar policygranskningar, revisioner och bevisdokumentation."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.32
     ref_id: A.5.32
     name: Intellectual property rights
@@ -711,6 +902,12 @@ objects:
           ho vlastnictv\xED prost\u0159ednictv\xEDm vhodn\xFDch opat\u0159en\xED v\
           \ oblasti zabezpe\u010Den\xED informac\xED. Mezi tato opat\u0159en\xED pat\u0159\
           \xED omezen\xED p\u0159\xEDstupu, \u0161ifrov\xE1n\xED a pr\xE1vn\xED dohody."
+      sv:
+        name: "Immateriella r\xE4ttigheter"
+        description: "Denna kontroll s\xE4kerst\xE4ller att immateriella r\xE4ttigheter\
+          \ skyddas genom l\xE4mpliga informationss\xE4kerhets\xE5tg\xE4rder. \xC5\
+          tg\xE4rderna omfattar \xE5tkomstbegr\xE4nsningar, kryptering och juridiska\
+          \ avtal."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.33
     ref_id: A.5.33
     name: Protection of records
@@ -733,6 +930,12 @@ objects:
           \ nebo neopr\xE1vn\u011Bn\xE9mu p\u0159\xEDstupu. Mezi opat\u0159en\xED\
           \ pat\u0159\xED z\xE1sady uchov\xE1v\xE1n\xED, bezpe\u010Dn\xE9 \xFAlo\u017E\
           i\u0161t\u011B a kontroly p\u0159\xEDstupu."
+      sv:
+        name: Skydd av register
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att arkivhandlingar\
+          \ lagras och skyddas p\xE5 ett s\xE4kert s\xE4tt f\xF6r att f\xF6rhindra\
+          \ f\xF6rlust eller obeh\xF6rig \xE5tkomst. \xC5tg\xE4rderna omfattar kvarh\xE5\
+          llningsprinciper, s\xE4ker lagring och \xE5tkomstkontroller."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.34
     ref_id: A.5.34
     name: Privacy and protection of PII
@@ -755,6 +958,11 @@ objects:
           mi \xFAdaji (PII). Mezi opat\u0159en\xED pat\u0159\xED anonymizace, \u0161\
           ifrov\xE1n\xED a dodr\u017Eov\xE1n\xED z\xE1kon\u016F na ochranu osobn\xED\
           ch \xFAdaj\u016F."
+      sv:
+        name: Sekretess och skydd av personuppgifter
+        description: "Den h\xE4r kontrollen skyddar sekretessen och s\xE4kerst\xE4\
+          ller s\xE4ker hantering av personligt identifierbar information (PII). \xC5\
+          tg\xE4rderna omfattar anonymisering, kryptering och efterlevnad av integritetslagar."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.35
     ref_id: A.5.35
     name: Independent review of information security
@@ -775,6 +983,12 @@ objects:
           n\xED bezpe\u010Dnosti za \xFA\u010Delem vyhodnocen\xED efektivity a souladu\
           \ s p\u0159edpisy. Mezi opat\u0159en\xED pat\u0159\xED extern\xED audity,\
           \ posouzen\xED rizik a n\xE1sledn\xE1 opat\u0159en\xED."
+      sv:
+        name: "Oberoende granskning av informationss\xE4kerhet"
+        description: "Denna kontroll s\xE4kerst\xE4ller oberoende granskningar av\
+          \ informationss\xE4kerhet f\xF6r att utv\xE4rdera effektivitet och efterlevnad.\
+          \ \xC5tg\xE4rderna omfattar bland annat externa revisioner, riskbed\xF6\
+          mningar och uppf\xF6ljnings\xE5tg\xE4rder."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.36
     ref_id: A.5.36
     name: Compliance with policies, rules and standards for information security
@@ -797,6 +1011,13 @@ objects:
           ech z\xE1sad, pravidel a standard\u016F pro informa\u010Dn\xED bezpe\u010D\
           nost. Mezi opat\u0159en\xED pat\u0159\xED pravideln\xE1 \u0161kolen\xED\
           , revize z\xE1sad a mechanismy vym\xE1h\xE1n\xED."
+      sv:
+        name: "Efterlevnad av policys, regler och standarder f\xF6r informationss\xE4\
+          kerhet"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller efterlevnad av alla\
+          \ policyer, regler och standarder f\xF6r informationss\xE4kerhet. \xC5tg\xE4\
+          rderna omfattar regelbunden utbildning, policygranskningar och verkst\xE4\
+          llighetsmekanismer."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.37
     ref_id: A.5.37
     name: Documented operating procedures
@@ -817,6 +1038,12 @@ objects:
           \ provozn\xED postupy, aby byla zaji\u0161t\u011Bna konzistence bezpe\u010D\
           nostn\xEDch postup\u016F. Mezi opat\u0159en\xED pat\u0159\xED dokumentace\
           \ proces\u016F, spr\xE1va verz\xED a p\u0159\xEDstupnost."
+      sv:
+        name: Dokumenterade driftsprocedurer
+        description: "Den h\xE4r kontrollen utvecklar och underh\xE5ller dokumenterade\
+          \ driftsprocedurer f\xF6r att s\xE4kerst\xE4lla konsekvens i s\xE4kerhetsrutinerna.\
+          \ \xC5tg\xE4rderna omfattar bland annat processdokumentation, versionskontroll\
+          \ och tillg\xE4nglighet."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.1
     ref_id: A.6.1
     name: Screening
@@ -840,6 +1067,12 @@ objects:
           ed jejich zam\u011Bstn\xE1n\xEDm. Mezi opat\u0159en\xED pat\u0159\xED prov\u011B\
           rky, ov\u011B\u0159ov\xE1n\xED toto\u017Enosti a posouzen\xED kvalifikac\xED\
           \ za \xFA\u010Delem sn\xED\u017Een\xED bezpe\u010Dnostn\xEDch rizik."
+      sv:
+        name: "S\xE5llning"
+        description: "Denna kontroll s\xE4kerst\xE4ller genomf\xF6randet av screeningprocesser\
+          \ f\xF6r att verifiera kandidaternas l\xE4mplighet f\xF6re anst\xE4llning.\
+          \ \xC5tg\xE4rderna inkluderar bakgrundskontroller, identitetsverifiering\
+          \ och bed\xF6mning av kvalifikationer f\xF6r att minska s\xE4kerhetsriskerna."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.2
     ref_id: A.6.2
     name: Terms and conditions of employment
@@ -861,6 +1094,12 @@ objects:
           \ Opat\u0159en\xED zahrnuj\xED explicitn\xED ustanoven\xED o d\u016Fv\u011B\
           rnosti, dodr\u017Eov\xE1n\xED z\xE1sad a d\u016Fsledc\xEDch poru\u0161en\xED\
           ."
+      sv:
+        name: "Anst\xE4llningsvillkor"
+        description: "Denna kontroll s\xE4kerst\xE4ller att det i anst\xE4llningsvillkoren\
+          \ ing\xE5r ett ansvar f\xF6r informationss\xE4kerhet. \xC5tg\xE4rderna omfattar\
+          \ uttryckliga klausuler om konfidentialitet, efterlevnad av policyer och\
+          \ konsekvenser vid \xF6vertr\xE4delser."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.3
     ref_id: A.6.3
     name: Information security awareness, education and training
@@ -884,6 +1123,12 @@ objects:
           \ bezpe\u010Dnosti, vzd\u011Bl\xE1v\xE1n\xED a \u0161kolen\xED. Mezi opat\u0159\
           en\xED pat\u0159\xED pl\xE1novan\xE1 \u0161kolen\xED, e-learningov\xE9 programy\
           \ a simulovan\xE1 cvi\u010Den\xED proti phishingu."
+      sv:
+        name: "Medvetenhet, utbildning och fortbildning om informationss\xE4kerhet"
+        description: "Denna kontroll s\xE4kerst\xE4ller att anst\xE4llda f\xE5r regelbunden\
+          \ medvetenhet, utbildning och tr\xE4ning om informationss\xE4kerhet. \xC5\
+          tg\xE4rderna inkluderar schemalagda utbildningssessioner, e-learningprogram\
+          \ och simulerade phishing-\xF6vningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.4
     ref_id: A.6.4
     name: Disciplinary process
@@ -906,6 +1151,12 @@ objects:
           \ Mezi opat\u0159en\xED pat\u0159\xED jasn\xE9 pokyny, eskala\u010Dn\xED\
           \ postupy a d\u016Fsledn\xE9 vym\xE1h\xE1n\xED pr\xE1va k zachov\xE1n\xED\
           \ odpov\u011Bdnosti."
+      sv:
+        name: "Disciplin\xE4r process"
+        description: "Denna kontroll uppr\xE4ttar en disciplin\xE4r process f\xF6\
+          r att hantera brott mot informationss\xE4kerhetspolicyer. \xC5tg\xE4rderna\
+          \ omfattar tydliga riktlinjer, eskaleringsf\xF6rfaranden och konsekvent\
+          \ till\xE4mpning f\xF6r att uppr\xE4tth\xE5lla ansvarsskyldigheten."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.5
     ref_id: A.6.5
     name: Responsibilities after termination or change of employment
@@ -931,6 +1182,13 @@ objects:
           n\u011B role. Mezi opat\u0159en\xED pat\u0159\xED odebr\xE1n\xED p\u0159\
           \xEDstupov\xFDch pr\xE1v, shroma\u017E\u010Fov\xE1n\xED organiza\u010Dn\xED\
           ch aktiv a prov\xE1d\u011Bn\xED v\xFDstupn\xEDch pohovor\u016F."
+      sv:
+        name: "Ansvar efter upps\xE4gning eller byte av anst\xE4llning"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att ansvarsomr\xE5\
+          den som r\xF6r informationss\xE4kerhet definieras och verkst\xE4lls efter\
+          \ upps\xE4gning eller roll\xE4ndringar. \xC5tg\xE4rderna omfattar \xE5terkallande\
+          \ av \xE5tkomstr\xE4ttigheter, insamling av organisationstillg\xE5ngar och\
+          \ genomf\xF6rande av avslutningsintervjuer."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.6
     ref_id: A.6.6
     name: Confidentiality or non-disclosure agreements
@@ -954,6 +1212,13 @@ objects:
           \xED podepsan\xE9 dohody na za\u010D\xE1tku pracovn\xEDho pom\u011Bru, pravideln\xE9\
           \ upom\xEDnky a vym\xE1h\xE1n\xED pr\xE1vn\xEDch krok\u016F v p\u0159\xED\
           pad\u011B poru\u0161en\xED."
+      sv:
+        name: Avtal om konfidentialitet eller tystnadsplikt
+        description: "Den h\xE4r kontrollen implementerar sekretess- eller sekretessavtal\
+          \ f\xF6r att skydda k\xE4nslig information. \xC5tg\xE4rderna inkluderar\
+          \ undertecknade avtal vid anst\xE4llningens b\xF6rjan, periodiska p\xE5\
+          minnelser och verkst\xE4llighet av r\xE4ttsliga \xE5tg\xE4rder vid \xF6\
+          vertr\xE4delser."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.7
     ref_id: A.6.7
     name: Remote working
@@ -976,6 +1241,12 @@ objects:
           \ d\xE1lku. Mezi opat\u0159en\xED pat\u0159\xED zabezpe\u010Den\xFD p\u0159\
           \xEDstup k podnikov\xFDm syst\xE9m\u016Fm, povinn\xE9 pou\u017E\xEDv\xE1\
           n\xED VPN a z\xE1sady pro vzd\xE1lenou manipulaci s citliv\xFDmi daty."
+      sv:
+        name: "Arbete p\xE5 distans"
+        description: "Denna kontroll s\xE4kerst\xE4ller en s\xE4ker hantering av informationss\xE4\
+          kerhetsrisker under distansarbete. \xC5tg\xE4rderna omfattar s\xE4ker \xE5\
+          tkomst till f\xF6retagssystem, obligatorisk anv\xE4ndning av VPN:er och\
+          \ policyer f\xF6r hantering av k\xE4nsliga data p\xE5 distans."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.8
     ref_id: A.6.8
     name: Information security event reporting
@@ -999,6 +1270,13 @@ objects:
           \ hl\xE1\u0161en\xED incident\u016F, osv\u011Btov\xE9 kampan\u011B a n\xE1\
           sledn\xE9 postupy pro vy\u0161et\u0159ov\xE1n\xED a \u0159e\u0161en\xED\
           \ nahl\xE1\u0161en\xFDch ud\xE1lost\xED."
+      sv:
+        name: "Rapportering av h\xE4ndelser om informationss\xE4kerhet"
+        description: "Denna kontroll s\xE4kerst\xE4ller att anst\xE4llda snabbt kan\
+          \ rapportera informationss\xE4kerhetsh\xE4ndelser. \xC5tg\xE4rderna omfattar\
+          \ kanaler f\xF6r incidentrapportering, kampanjer f\xF6r att \xF6ka medvetenheten\
+          \ och uppf\xF6ljningsf\xF6rfaranden f\xF6r att unders\xF6ka och hantera\
+          \ rapporterade h\xE4ndelser."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.1
     ref_id: A.7.1
     name: Physical security perimeters
@@ -1022,6 +1300,13 @@ objects:
           \ kontroly p\u0159\xEDstupu a monitorovac\xED syst\xE9my, kter\xE9 zaji\u0161\
           \u0165uj\xED, \u017Ee vstup mohou prov\xE1d\u011Bt pouze opr\xE1vn\u011B\
           n\xE9 osoby."
+      sv:
+        name: "Fysiska s\xE4kerhetsperimetrar"
+        description: "Den h\xE4r kontrollen uppr\xE4ttar fysiska s\xE4kerhetsperimeter\
+          \ f\xF6r att skydda kritiska omr\xE5den fr\xE5n obeh\xF6rig \xE5tkomst.\
+          \ \xC5tg\xE4rderna inkluderar barri\xE4rer, \xE5tkomstkontroller och \xF6\
+          vervakningssystem f\xF6r att s\xE4kerst\xE4lla att endast beh\xF6riga personer\
+          \ kan komma in."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.2
     ref_id: A.7.2
     name: Physical entry
@@ -1043,6 +1328,12 @@ objects:
           vn\u011Bn\xE9mu p\u0159\xEDstupu. Mezi tato opat\u0159en\xED pat\u0159\xED\
           \ syst\xE9my odznak\u016F, bezpe\u010Dnostn\xED person\xE1l a z\xE1znamy\
           \ o n\xE1v\u0161t\u011Bvn\xEDc\xEDch."
+      sv:
+        name: "Fysisk ing\xE5ng"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att fysiska startpunkter\
+          \ kontrolleras och \xF6vervakas f\xF6r att f\xF6rhindra obeh\xF6rig \xE5\
+          tkomst. \xC5tg\xE4rderna inkluderar passerkortssystem, s\xE4kerhetspersonal\
+          \ och bes\xF6ksloggar."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.3
     ref_id: A.7.3
     name: Securing offices, rooms and facilities
@@ -1064,6 +1355,12 @@ objects:
           \u0159\xED, m\xEDstnost\xED a za\u0159\xEDzen\xED z d\u016Fvodu ochrany\
           \ informac\xED a zdroj\u016F. Mezi opat\u0159en\xED pat\u0159\xED zamykan\xE9\
           \ dve\u0159e, omezen\xE9 prostory a syst\xE9my dohledu."
+      sv:
+        name: "S\xE4kra kontor, rum och anl\xE4ggningar"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att kontor, rum och\
+          \ anl\xE4ggningar \xE4r skyddade f\xF6r att skydda information och resurser.\
+          \ \xC5tg\xE4rderna inkluderar l\xE5sta d\xF6rrar, begr\xE4nsade omr\xE5\
+          den och \xF6vervakningssystem."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.4
     ref_id: A.7.4
     name: Physical security monitoring
@@ -1084,6 +1381,11 @@ objects:
           nosti pro detekci a rychlou reakci na hrozby. Mezi opat\u0159en\xED pat\u0159\
           \xED syst\xE9my CCTV, detektory pohybu a upozorn\u011Bn\xED v re\xE1ln\xE9\
           m \u010Dase."
+      sv:
+        name: "\xD6vervakning av fysisk s\xE4kerhet"
+        description: "Den h\xE4r kontrollen implementerar fysisk s\xE4kerhets\xF6\
+          vervakning f\xF6r att identifiera och reagera snabbt p\xE5 hot. \xC5tg\xE4\
+          rderna inkluderar CCTV-system, r\xF6relsedetektorer och varningar i realtid."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.5
     ref_id: A.7.5
     name: Protecting against physical and environmental threats
@@ -1104,6 +1406,12 @@ objects:
           mi a environment\xE1ln\xEDmi hrozbami. Mezi opat\u0159en\xED pat\u0159\xED\
           \ protipo\u017E\xE1rn\xED syst\xE9my, regulace teploty a protipovod\u0148\
           ov\xE9 bari\xE9ry."
+      sv:
+        name: "Skydd mot fysiska hot och milj\xF6hot"
+        description: "Denna kontroll skyddar system och resurser fr\xE5n fysiska och\
+          \ milj\xF6m\xE4ssiga hot. \xC5tg\xE4rderna omfattar brandsl\xE4ckningssystem,\
+          \ temperaturkontroller och barri\xE4rer f\xF6r att f\xF6rhindra \xF6versv\xE4\
+          mningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.6
     ref_id: A.7.6
     name: Working In secure areas
@@ -1125,6 +1433,12 @@ objects:
           \ pouze opr\xE1vn\u011Bn\xFDm osob\xE1m. Mezi opat\u0159en\xED pat\u0159\
           \xED syst\xE9my kontroly p\u0159\xEDstupu, doprovod n\xE1v\u0161t\u011B\
           vn\xEDk\u016F a monitorov\xE1n\xED aktivit."
+      sv:
+        name: "Arbeta i s\xE4kra omr\xE5den"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kra omr\xE5\
+          den hanteras f\xF6r att endast till\xE5ta auktoriserad \xE5tkomst. \xC5\
+          tg\xE4rderna omfattar bland annat system f\xF6r \xE5tkomstkontroll, eskorter\
+          \ av bes\xF6kare och aktivitets\xF6vervakning."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.7
     ref_id: A.7.7
     name: Clear desk and clear screen
@@ -1147,6 +1461,13 @@ objects:
           sad pro voln\xFD st\u016Fl a volnou obrazovku. Mezi opat\u0159en\xED pat\u0159\
           \xED uzam\u010Den\xED citliv\xFDch dokument\u016F a automatick\xE9 zamyk\xE1\
           n\xED obrazovek, kdy\u017E se nepou\u017E\xEDvaj\xED."
+      sv:
+        name: "Tydligt skrivbord och tydlig sk\xE4rm"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att k\xE4nslig information\
+          \ inte l\xE4mnas exponerad genom att anta principer f\xF6r tydligt skrivbord\
+          \ och genomskinlig sk\xE4rm. \xC5tg\xE4rderna inkluderar att l\xE5sa k\xE4\
+          nsliga dokument och automatiskt l\xE5sa sk\xE4rmar n\xE4r de inte anv\xE4\
+          nds."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.8
     ref_id: A.7.8
     name: Equipment siting and protection
@@ -1168,6 +1489,12 @@ objects:
           vn\u011Bn\xE9mu p\u0159\xEDstupu nebo po\u0161kozen\xED. Mezi opat\u0159\
           en\xED pat\u0159\xED bezpe\u010Dn\xE1 mont\xE1\u017E, uzam\u010Den\xE9 sk\u0159\
           \xEDn\u011B a oblasti s omezen\xFDm p\u0159\xEDstupem."
+      sv:
+        name: Placering och skydd av utrustning
+        description: "Denna kontroll s\xE4kerst\xE4ller att utrustningen \xE4r placerad\
+          \ och skyddad f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst eller skada.\
+          \ \xC5tg\xE4rderna inkluderar s\xE4ker montering, l\xE5sta sk\xE5p och omr\xE5\
+          den med begr\xE4nsad \xE5tkomst."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.9
     ref_id: A.7.9
     name: Security of assets off-premises
@@ -1189,6 +1516,12 @@ objects:
           \ zachov\xE1na d\u016Fv\u011Brnost a integrita. Mezi opat\u0159en\xED pat\u0159\
           \xED \u0161ifrov\xE1n\xED, bezpe\u010Dn\xFD p\u0159enos a sledov\xE1n\xED\
           \ p\u0159\xEDstupu."
+      sv:
+        name: "S\xE4kerhet f\xF6r tillg\xE5ngar utanf\xF6r de lokala byggnaderna"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att tillg\xE5ngar som\
+          \ anv\xE4nds eller lagras utanf\xF6r lokalerna skyddas f\xF6r att uppr\xE4\
+          tth\xE5lla konfidentialitet och integritet. \xC5tg\xE4rderna omfattar kryptering,\
+          \ s\xE4ker transport och \xE5tkomstsp\xE5rning."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.10
     ref_id: A.7.10
     name: Storage media
@@ -1208,6 +1541,11 @@ objects:
           \ zabr\xE1nilo neopr\xE1vn\u011Bn\xE9mu p\u0159\xEDstupu nebo manipulaci.\
           \ Mezi opat\u0159en\xED pat\u0159\xED bezpe\u010Dn\xE9 \xFAlo\u017Ei\u0161\
           t\u011B, \u0161ifrov\xE1n\xED a omezen\xED p\u0159\xEDstupu."
+      sv:
+        name: Lagringsmedier
+        description: "Den h\xE4r kontrollen skyddar lagringsmedia f\xF6r att f\xF6\
+          rhindra obeh\xF6rig \xE5tkomst eller manipulering. \xC5tg\xE4rderna omfattar\
+          \ s\xE4ker lagring, kryptering och \xE5tkomstbegr\xE4nsningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.11
     ref_id: A.7.11
     name: Supporting utilities
@@ -1229,6 +1567,12 @@ objects:
           \ a chr\xE1n\u011Bn\xE9 p\u0159ed p\u0159eru\u0161en\xEDm. Mezi opat\u0159\
           en\xED pat\u0159\xED redundantn\xED syst\xE9my a fyzick\xE9 zabezpe\u010D\
           en\xED."
+      sv:
+        name: "St\xF6d f\xF6r allm\xE4nnyttiga f\xF6retag"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att st\xF6dverktyg,\
+          \ till exempel kraft- och kylsystem, \xE4r tillf\xF6rlitliga och skyddade\
+          \ mot avbrott. \xC5tg\xE4rderna omfattar bland annat redundanta system och\
+          \ fysisk s\xE4kerhet."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.12
     ref_id: A.7.12
     name: Cabling security
@@ -1249,6 +1593,11 @@ objects:
           eny, aby se zabr\xE1nilo neopr\xE1vn\u011Bn\xE9mu zachycen\xED nebo po\u0161\
           kozen\xED. Mezi opat\u0159en\xED pat\u0159\xED ochrann\xE9 trubky, spr\xE1\
           vn\xE9 ozna\u010Den\xED a bezpe\u010Dn\xE9 veden\xED."
+      sv:
+        name: "S\xE4kerhet f\xF6r kabeldragning"
+        description: "Denna kontroll s\xE4kerst\xE4ller att kablarna \xE4r s\xE4krade\
+          \ f\xF6r att f\xF6rhindra obeh\xF6rig avlyssning eller skada. \xC5tg\xE4\
+          rderna inkluderar skyddsledningar, korrekt m\xE4rkning och s\xE4ker dragning."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.13
     ref_id: A.7.13
     name: Equipment maintenance
@@ -1271,6 +1620,12 @@ objects:
           \ a p\u0159edch\xE1zeny poruch\xE1m. Mezi tato opat\u0159en\xED pat\u0159\
           \xED pravideln\xFD servis, bezpe\u010Dn\xE9 postupy \xFAdr\u017Eby a p\u0159\
           \xEDstup opr\xE1vn\u011Bn\xE9ho person\xE1lu."
+      sv:
+        name: "Underh\xE5ll av utrustning"
+        description: "Denna kontroll s\xE4kerst\xE4ller att utrustningen underh\xE5\
+          lls f\xF6r att garantera korrekt funktion och f\xF6rhindra fel. \xC5tg\xE4\
+          rderna inkluderar regelbunden service, s\xE4kra underh\xE5llsrutiner och\
+          \ beh\xF6rig personal\xE5tkomst."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.14
     ref_id: A.7.14
     name: Secure disposal or re-use of equipment
@@ -1293,6 +1648,12 @@ objects:
           \ op\u011Btovn\xE9 pou\u017Eit\xED za\u0159\xEDzen\xED k ochran\u011B citliv\xFD\
           ch informac\xED. Mezi opat\u0159en\xED pat\u0159\xED sanitace dat, fyzick\xE9\
           \ zni\u010Den\xED a certifikovan\xE9 procesy likvidace."
+      sv:
+        name: "S\xE4ker kassering eller \xE5teranv\xE4ndning av utrustning"
+        description: "Denna kontroll s\xE4kerst\xE4ller s\xE4ker kassering eller \xE5\
+          teranv\xE4ndning av utrustning f\xF6r att skydda k\xE4nslig information.\
+          \ \xC5tg\xE4rderna inkluderar datasanering, fysisk f\xF6rst\xF6relse och\
+          \ certifierade bortskaffningsprocesser."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.1
     ref_id: A.8.1
     name: User end point devices
@@ -1315,6 +1676,12 @@ objects:
           \ za\u0159\xEDzen\xED, implementac\xED bezpe\u010Dnostn\xEDch opat\u0159\
           en\xED, jako je detekce koncov\xFDch bod\u016F, \u0161ifrov\xE1n\xED a zabezpe\u010D\
           en\xE9 konfigurace, aby se minimalizovala rizika."
+      sv:
+        name: "Anv\xE4ndarens slutpunktsenheter"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller skydd av slutpunktsenheter\
+          \ som b\xE4rbara datorer, station\xE4ra datorer och mobila enheter genom\
+          \ att implementera s\xE4kerhets\xE5tg\xE4rder som slutpunktsidentifiering,\
+          \ kryptering och s\xE4kra konfigurationer f\xF6r att minimera risker."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.2
     ref_id: A.8.2
     name: Privileged access rights
@@ -1338,6 +1705,13 @@ objects:
           \ a zv\xFD\u0161ila se bezpe\u010Dnost. Mezi opat\u0159en\xED pat\u0159\xED\
           \ \u0159\xEDzen\xED p\u0159\xEDstupu na z\xE1klad\u011B rol\xED, pravideln\xE9\
           \ kontroly a p\u0159\xEDsn\xE1 spr\xE1va \xFA\u010Dt\u016F."
+      sv:
+        name: "Privilegierade \xE5tkomstr\xE4ttigheter"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att privilegierade\
+          \ \xE5tkomstr\xE4ttigheter beviljas, hanteras och \xF6vervakas noggrant\
+          \ f\xF6r att f\xF6rhindra missbruk och f\xF6rb\xE4ttra s\xE4kerheten. \xC5\
+          tg\xE4rderna omfattar rollbaserade \xE5tkomstkontroller, periodiska granskningar\
+          \ och strikt kontohantering."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.3
     ref_id: A.8.3
     name: Information access restriction
@@ -1359,6 +1733,12 @@ objects:
           ebujete\u201C. Mezi opat\u0159en\xED pat\u0159\xED ov\u011B\u0159ov\xE1\
           n\xED u\u017Eivatel\u016F, opr\xE1vn\u011Bn\xED zalo\u017Een\xE1 na rol\xED\
           ch a pravideln\xE9 kontroly p\u0159\xEDstupu."
+      sv:
+        name: "Begr\xE4nsning av \xE5tkomst till information"
+        description: "Den h\xE4r kontrollen begr\xE4nsar \xE5tkomsten till k\xE4nslig\
+          \ information baserat p\xE5 principer som du beh\xF6ver veta. \xC5tg\xE4\
+          rderna omfattar anv\xE4ndarautentisering, rollbaserade beh\xF6righeter och\
+          \ regelbundna \xE5tkomstgranskningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.4
     ref_id: A.8.4
     name: Access to source code
@@ -1380,6 +1760,12 @@ objects:
           \u017Een\xED, \xFAprav\xE1m nebo odhalen\xED. Mezi opat\u0159en\xED pat\u0159\
           \xED spr\xE1va verz\xED, zabezpe\u010Den\xE9 repozit\xE1\u0159e a omezen\xFD\
           \ p\u0159\xEDstup v\xFDvoj\xE1\u0159\u016F."
+      sv:
+        name: "Tillg\xE5ng till k\xE4llkod"
+        description: "Den h\xE4r kontrollen skyddar \xE5tkomsten till k\xE4llkoden\
+          \ genom att f\xF6rhindra obeh\xF6rig visning, \xE4ndring eller exponering.\
+          \ \xC5tg\xE4rderna omfattar versionskontroll, s\xE4kra lagringsplatser och\
+          \ begr\xE4nsad \xE5tkomst f\xF6r utvecklare."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.5
     ref_id: A.8.5
     name: Secure authentication
@@ -1400,6 +1786,11 @@ objects:
           ov\xE1n\xED, jako je v\xEDcefaktorov\xE9 ov\u011B\u0159ov\xE1n\xED, k ov\u011B\
           \u0159en\xED identity u\u017Eivatel\u016F a zabr\xE1n\u011Bn\xED neopr\xE1\
           vn\u011Bn\xE9mu p\u0159\xEDstupu."
+      sv:
+        name: "S\xE4ker autentisering"
+        description: "Den h\xE4r kontrollen implementerar starka autentiseringsmekanismer,\
+          \ till exempel multifaktorautentisering, f\xF6r att verifiera anv\xE4ndaridentiteter\
+          \ och f\xF6rhindra obeh\xF6rig \xE5tkomst."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.6
     ref_id: A.8.6
     name: Capacity management
@@ -1421,6 +1812,12 @@ objects:
           \ a p\u0159edch\xE1zela naru\u0161en\xED. Mezi opat\u0159en\xED pat\u0159\
           \xED monitorov\xE1n\xED vyu\u017Eit\xED zdroj\u016F a pl\xE1nov\xE1n\xED\
           \ budouc\xEDch pot\u0159eb."
+      sv:
+        name: Hantering av kapacitet
+        description: "Denna kontroll s\xE4kerst\xE4ller att systemkapaciteten hanteras\
+          \ f\xF6r att ge tillr\xE4cklig prestanda och f\xF6rhindra st\xF6rningar.\
+          \ \xC5tg\xE4rderna omfattar bland annat \xF6vervakning av resursanv\xE4\
+          ndning och planering f\xF6r framtida behov."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.7
     ref_id: A.8.7
     name: Protection against malware
@@ -1440,6 +1837,11 @@ objects:
           \ software, n\xE1stroje pro detekci hrozeb a pravideln\xE9 aktualizace,\
           \ k ochran\u011B syst\xE9m\u016F p\u0159ed malwarem a \u0161kodliv\xFDmi\
           \ \xFAtoky."
+      sv:
+        name: Skydd mot skadlig kod
+        description: "Den h\xE4r kontrollen distribuerar \xE5tg\xE4rder som antivirusprogram,\
+          \ verktyg f\xF6r hotidentifiering och regelbundna uppdateringar f\xF6r att\
+          \ skydda system fr\xE5n skadlig kod och skadliga attacker."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.8
     ref_id: A.8.8
     name: Management of technical vulnerabilities
@@ -1460,6 +1862,11 @@ objects:
           uje technick\xE9 zranitelnosti, aby se minimalizovala bezpe\u010Dnostn\xED\
           \ rizika. Mezi opat\u0159en\xED pat\u0159\xED skenov\xE1n\xED zranitelnost\xED\
           \ a spr\xE1va oprav."
+      sv:
+        name: "Hantering av tekniska s\xE5rbarheter"
+        description: "Den h\xE4r kontrollen identifierar, utv\xE4rderar och \xE5tg\xE4\
+          rdar tekniska s\xE5rbarheter snabbt f\xF6r att minimera s\xE4kerhetsriskerna.\
+          \ \xC5tg\xE4rderna inkluderar s\xE5rbarhetsskanning och patchhantering."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.9
     ref_id: A.8.9
     name: Configuration management
@@ -1477,6 +1884,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje konzistentn\xED spr\xE1vu\
           \ konfigurac\xED syst\xE9mu, aby se zachovala bezpe\u010Dnostn\xED nastaven\xED\
           \ a zabr\xE1nilo se neopr\xE1vn\u011Bn\xFDm zm\u011Bn\xE1m."
+      sv:
+        name: Hantering av konfiguration
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent hantering\
+          \ av systemkonfigurationer f\xF6r att uppr\xE4tth\xE5lla s\xE4kerhetsinst\xE4\
+          llningar och f\xF6rhindra obeh\xF6riga \xE4ndringar."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.10
     ref_id: A.8.10
     name: Information deletion
@@ -1496,6 +1908,11 @@ objects:
           \ jsou bezpe\u010Dn\u011B smaz\xE1ny, jakmile ji\u017E nejsou pot\u0159\
           eba, aby se zabr\xE1nilo jejich neopr\xE1vn\u011Bn\xE9mu obnoven\xED nebo\
           \ odhalen\xED."
+      sv:
+        name: Radering av uppgifter
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att k\xE4nslig information\
+          \ tas bort p\xE5 ett s\xE4kert s\xE4tt n\xE4r den inte l\xE4ngre beh\xF6\
+          vs f\xF6r att f\xF6rhindra obeh\xF6rig \xE5terst\xE4llning eller exponering."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.11
     ref_id: A.8.11
     name: Data masking
@@ -1514,6 +1931,11 @@ objects:
         description: "Tato kontrola chr\xE1n\xED citliv\xE9 informace b\u011Bhem zpracov\xE1\
           n\xED nebo zobrazen\xED pomoc\xED technik maskov\xE1n\xED dat, kter\xE9\
           \ je chr\xE1n\xED p\u0159ed neopr\xE1vn\u011Bn\xFDmi u\u017Eivateli."
+      sv:
+        name: Maskering av data
+        description: "Den h\xE4r kontrollen skyddar k\xE4nslig information under bearbetning\
+          \ eller visning med hj\xE4lp av datamaskeringstekniker f\xF6r att d\xF6\
+          lja data fr\xE5n obeh\xF6riga anv\xE4ndare."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.12
     ref_id: A.8.12
     name: Data leakage prevention
@@ -1532,6 +1954,11 @@ objects:
           uj\xED n\xE1hodn\xE9mu vystaven\xED citliv\xFDch dat prost\u0159ednictv\xED\
           m e-mailu, vym\u011Bniteln\xFDch m\xE9di\xED nebo jin\xFDch kan\xE1l\u016F\
           ."
+      sv:
+        name: "F\xF6rebyggande av datal\xE4ckage"
+        description: "Den h\xE4r kontrollen implementerar mekanismer f\xF6r att f\xF6\
+          rhindra oavsiktlig exponering av k\xE4nsliga data via e-post, flyttbara\
+          \ medier eller andra kanaler."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.13
     ref_id: A.8.13
     name: Information backup
@@ -1550,6 +1977,11 @@ objects:
           n\xE9 z\xE1lohov\xE1n\xED d\u016Fle\u017Eit\xFDch informac\xED, aby byla\
           \ zaji\u0161t\u011Bna jejich dostupnost v p\u0159\xEDpad\u011B incident\u016F\
           \ nebo katastrof."
+      sv:
+        name: "S\xE4kerhetskopiering av information"
+        description: "Denna kontroll s\xE4kerst\xE4ller att kritisk information s\xE4\
+          kerhetskopieras regelbundet och s\xE4kert f\xF6r att s\xE4kerst\xE4lla dess\
+          \ tillg\xE4nglighet i h\xE4ndelse av incidenter eller katastrofer."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.14
     ref_id: A.8.14
     name: Redundancy of information processing facilities
@@ -1568,6 +2000,11 @@ objects:
           \ za\u0159\xEDzen\xED je zabudov\xE1na redundance, aby se zachovala dostupnost\
           \ a provoz b\u011Bhem syst\xE9mov\xFDch selh\xE1n\xED nebo nouzov\xFDch\
           \ situac\xED."
+      sv:
+        name: "Redundans f\xF6r informationsbehandlingsanl\xE4ggningar"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att redundans \xE4\
+          r inbyggd i bearbetningsanl\xE4ggningar f\xF6r att uppr\xE4tth\xE5lla tillg\xE4\
+          nglighet och drift under systemfel eller n\xF6dsituationer."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.15
     ref_id: A.8.15
     name: Logging
@@ -1585,6 +2022,11 @@ objects:
         description: "Tato kontrola umo\u017E\u0148uje protokolov\xE1n\xED aktivit\
           \ v syst\xE9mech pro podporu monitorov\xE1n\xED, detekce incident\u016F\
           \ a forenzn\xEDho vy\u0161et\u0159ov\xE1n\xED."
+      sv:
+        name: Skogsavverkning
+        description: "Den h\xE4r kontrollen m\xF6jligg\xF6r loggning av aktiviteter\
+          \ i system f\xF6r att st\xF6dja \xF6vervakning, incidentidentifiering och\
+          \ kriminaltekniska unders\xF6kningar."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.16
     ref_id: A.8.16
     name: Monitoring activities
@@ -1602,6 +2044,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje pr\u016Fb\u011B\u017En\xE9\
           \ monitorov\xE1n\xED aktivit syst\xE9mu za \xFA\u010Delem detekce, reakce\
           \ na a zm\xEDrn\u011Bn\xED bezpe\u010Dnostn\xEDch hrozeb."
+      sv:
+        name: "\xD6vervakning av aktiviteter"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller kontinuerlig \xF6vervakning\
+          \ av systemaktiviteter f\xF6r att identifiera, svara p\xE5 och minimera\
+          \ s\xE4kerhetshot."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.17
     ref_id: A.8.17
     name: Clock synchronization
@@ -1619,6 +2066,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje synchronizaci syst\xE9mov\xFD\
           ch hodin, aby se zachovala p\u0159esn\xE1 a konzistentn\xED \u010Dasov\xE1\
           \ raz\xEDtka pro protokoly a dal\u0161\xED kritick\xE9 procesy."
+      sv:
+        name: Synkronisering av klockan
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att systemklockorna\
+          \ \xE4r synkroniserade f\xF6r att uppr\xE4tth\xE5lla korrekta och konsekventa\
+          \ tidsst\xE4mplar f\xF6r loggar och andra kritiska processer."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.18
     ref_id: A.8.18
     name: Use of privileged utility programs
@@ -1636,6 +2088,11 @@ objects:
         description: "Tato kontrola omezuje a monitoruje pou\u017E\xEDv\xE1n\xED privilegovan\xFD\
           ch obslu\u017En\xFDch program\u016F, aby se zabr\xE1nilo zneu\u017Eit\xED\
           \ a neopr\xE1vn\u011Bn\xFDm akc\xEDm."
+      sv:
+        name: "Anv\xE4ndning av privilegierade verktygsprogram"
+        description: "Den h\xE4r kontrollen begr\xE4nsar och \xF6vervakar anv\xE4\
+          ndningen av privilegierade verktygsprogram f\xF6r att f\xF6rhindra missbruk\
+          \ och obeh\xF6riga \xE5tg\xE4rder."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.19
     ref_id: A.8.19
     name: Installation of software on operational systems
@@ -1654,6 +2111,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje bezpe\u010Dnou spr\xE1vu instalace\
           \ softwaru v provozn\xEDch syst\xE9mech, aby se zabr\xE1nilo zranitelnostem\
           \ nebo neopr\xE1vn\u011Bn\xFDm zm\u011Bn\xE1m."
+      sv:
+        name: "Installation av programvara p\xE5 operativsystem"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att programvaruinstallation\
+          \ p\xE5 operativsystem hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att f\xF6\
+          rhindra s\xE5rbarheter eller obeh\xF6riga \xE4ndringar."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.20
     ref_id: A.8.20
     name: Networks security
@@ -1674,6 +2136,11 @@ objects:
           t\u011B pomoc\xED firewall\u016F, syst\xE9m\u016F detekce naru\u0161en\xED\
           \ a \u0159\xEDzen\xED p\u0159\xEDstupu, kter\xE9 chr\xE1n\xED p\u0159ed\
           \ neopr\xE1vn\u011Bn\xFDm p\u0159\xEDstupem a \xFAtoky."
+      sv:
+        name: "N\xE4tverks s\xE4kerhet"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller n\xE4tverkss\xE4kerhet\
+          \ genom brandv\xE4ggar, intr\xE5ngsidentifieringssystem och \xE5tkomstkontroller\
+          \ f\xF6r att skydda mot obeh\xF6rig \xE5tkomst och attacker."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.21
     ref_id: A.8.21
     name: Security of network services
@@ -1691,6 +2158,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje ochranu s\xED\u0165ov\xFD\
           ch slu\u017Eeb, aby byla zachov\xE1na d\u016Fv\u011Brnost, integrita a dostupnost\
           \ b\u011Bhem pou\u017E\xEDv\xE1n\xED."
+      sv:
+        name: "S\xE4kerhet f\xF6r n\xE4ttj\xE4nster"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att n\xE4tverkstj\xE4\
+          nster skyddas f\xF6r att uppr\xE4tth\xE5lla konfidentialitet, integritet\
+          \ och tillg\xE4nglighet under anv\xE4ndning."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.22
     ref_id: A.8.22
     name: Segregation of networks
@@ -1708,6 +2180,11 @@ objects:
         description: "Tato kontrola implementuje segmentaci s\xEDt\u011B, aby se omezilo\
           \ \u0161\xED\u0159en\xED hrozeb a minimalizoval dopad potenci\xE1ln\xED\
           ch naru\u0161en\xED."
+      sv:
+        name: "Segregation av n\xE4tverk"
+        description: "Den h\xE4r kontrollen implementerar n\xE4tverkssegregering f\xF6\
+          r att begr\xE4nsa spridningen av hot och minimera effekten av potentiella\
+          \ intr\xE5ng."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.23
     ref_id: A.8.23
     name: Web filtering
@@ -1725,6 +2202,11 @@ objects:
         description: "Tato kontrola pou\u017E\xEDv\xE1 n\xE1stroje pro filtrov\xE1\
           n\xED webu k blokov\xE1n\xED p\u0159\xEDstupu k neopr\xE1vn\u011Bn\xE9mu\
           \ nebo \u0161kodliv\xE9mu obsahu p\u0159es internet."
+      sv:
+        name: Webbfiltrering
+        description: "Den h\xE4r kontrollen anv\xE4nder webbfiltreringsverktyg f\xF6\
+          r att blockera obeh\xF6rigt eller skadligt inneh\xE5ll fr\xE5n att n\xE5\
+          s via Internet."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.24
     ref_id: A.8.24
     name: Use of cryptography
@@ -1742,6 +2224,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje, \u017Ee kryptografick\xE9\
           \ techniky jsou pou\u017E\xEDv\xE1ny k ochran\u011B d\u016Fv\u011Brnosti,\
           \ integrity a autenticity dat."
+      sv:
+        name: "Anv\xE4ndning av kryptografi"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att kryptografiska\
+          \ tekniker till\xE4mpas f\xF6r att skydda datakonfidentialitet, integritet\
+          \ och \xE4kthet."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.25
     ref_id: A.8.25
     name: Secure development life cycle
@@ -1760,6 +2247,11 @@ objects:
         description: "Tato kontrola integruje zabezpe\u010Den\xED do v\u0161ech f\xE1\
           z\xED \u017Eivotn\xEDho cyklu v\xFDvoje, aby se zajistilo bezpe\u010Dn\xE9\
           \ vytv\xE1\u0159en\xED syst\xE9m\u016F a aplikac\xED."
+      sv:
+        name: "S\xE4ker utvecklingslivscykel"
+        description: "Den h\xE4r kontrollen integrerar s\xE4kerhet i alla steg i utvecklingslivscykeln\
+          \ f\xF6r att s\xE4kerst\xE4lla att system och program skapas p\xE5 ett s\xE4\
+          kert s\xE4tt."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.26
     ref_id: A.8.26
     name: Application security requirements
@@ -1776,6 +2268,10 @@ objects:
         name: "Po\u017Eadavky na zabezpe\u010Den\xED aplikac\xED"
         description: "Tato kontrola definuje a vynucuje bezpe\u010Dnostn\xED po\u017E\
           adavky pro aplikace, aby byla chr\xE1n\u011Bna p\u0159ed zranitelnostmi."
+      sv:
+        name: "S\xE4kerhetskrav f\xF6r program"
+        description: "Den h\xE4r kontrollen definierar och till\xE4mpar s\xE4kerhetskrav\
+          \ f\xF6r program f\xF6r att skydda mot s\xE4kerhetsrisker."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.27
     ref_id: A.8.27
     name: Secure system architecture and engineering principles
@@ -1795,6 +2291,10 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje, \u017Ee b\u011Bhem v\xFD\
           voje syst\xE9mov\xFDch architektur jsou p\u0159ijaty bezpe\u010Dn\xE9 principy\
           \ n\xE1vrhu."
+      sv:
+        name: "S\xE4ker systemarkitektur och tekniska principer"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kra designprinciper\
+          \ anv\xE4nds under utvecklingen av systemarkitekturer."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.28
     ref_id: A.8.28
     name: Secure coding
@@ -1811,6 +2311,10 @@ objects:
         name: "Bezpe\u010Dn\xE9 programov\xE1n\xED"
         description: "Tato kontrola implementuje bezpe\u010Dn\xE9 postupy programov\xE1\
           n\xED, aby se minimalizovaly zranitelnosti ve vyv\xEDjen\xE9m softwaru."
+      sv:
+        name: "S\xE4ker kodning"
+        description: "Den h\xE4r kontrollen implementerar s\xE4kra kodningsmetoder\
+          \ f\xF6r att minimera s\xE5rbarheter i utvecklad programvara."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.29
     ref_id: A.8.29
     name: Security testing in development and acceptance
@@ -1828,6 +2332,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje, \u017Ee bezpe\u010Dnostn\xED\
           \ testov\xE1n\xED je prov\xE1d\u011Bno b\u011Bhem f\xE1z\xED v\xFDvoje a\
           \ p\u0159ijet\xED, aby se identifikovaly slabiny."
+      sv:
+        name: "S\xE4kerhetstestning under utveckling och acceptans"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetstestning\
+          \ utf\xF6rs under utvecklings- och godk\xE4nnandefaserna f\xF6r att identifiera\
+          \ svagheter."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.30
     ref_id: A.8.30
     name: Outsourced development
@@ -1845,6 +2354,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje efektivn\xED \u0159\xEDzen\xED\
           \ bezpe\u010Dnostn\xEDch rizik, kdy\u017E je v\xFDvoj zad\xE1v\xE1n extern\xED\
           m dodavatel\u016Fm."
+      sv:
+        name: Outsourcad utveckling
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetsrisker\
+          \ hanteras effektivt n\xE4r utvecklingen l\xE4ggs ut p\xE5 entreprenad till\
+          \ tredjepartsleverant\xF6rer."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.31
     ref_id: A.8.31
     name: Separation of development, test and production environments
@@ -1866,6 +2380,11 @@ objects:
           ho, testovac\xEDho a produk\u010Dn\xEDho prost\u0159ed\xED, aby se zabr\xE1\
           nilo necht\u011Bn\xFDm interakc\xEDm a neopr\xE1vn\u011Bn\xE9mu p\u0159\xED\
           stupu."
+      sv:
+        name: "Separering av utvecklings-, test- och produktionsmilj\xF6er"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att utvecklings-, test-\
+          \ och produktionsmilj\xF6er \xE4r \xE5tskilda f\xF6r att f\xF6rhindra oavsiktliga\
+          \ interaktioner och obeh\xF6rig \xE5tkomst."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.32
     ref_id: A.8.32
     name: Change management
@@ -1883,6 +2402,11 @@ objects:
         description: "Tato kontrola zaji\u0161\u0165uje bezpe\u010Dn\xE9 \u0159\xED\
           zen\xED zm\u011Bn v syst\xE9mech, aby se minimalizovala rizika a udr\u017E\
           ela provozn\xED stabilita."
+      sv:
+        name: "Hantering av f\xF6r\xE4ndringar"
+        description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att \xE4ndringar i\
+          \ systemen hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att minimera risker\
+          \ och uppr\xE4tth\xE5lla driftstabiliteten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.33
     ref_id: A.8.33
     name: Test information
@@ -1900,6 +2424,10 @@ objects:
         description: "Tato kontrola chr\xE1n\xED testovac\xED data, aby se zabr\xE1\
           nilo \xFAniku citliv\xFDch nebo d\u016Fv\u011Brn\xFDch informac\xED b\u011B\
           hem testovac\xEDch proces\u016F."
+      sv:
+        name: Information om provningen
+        description: "Denna kontroll skyddar testdata f\xF6r att f\xF6rhindra exponering\
+          \ av k\xE4nslig eller konfidentiell information under testprocesser."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.34
     ref_id: A.8.34
     name: Protection of information systems during audit testing
@@ -1926,6 +2454,13 @@ objects:
           en\xED. Mezi opat\u0159en\xED pat\u0159\xED pou\u017E\xEDv\xE1n\xED neproduk\u010D\
           n\xEDch prost\u0159ed\xED, omezen\xED p\u0159\xEDstupu a dohody o ml\u010D\
           enlivosti k zachov\xE1n\xED bezpe\u010Dnosti a integrity syst\xE9mu."
+      sv:
+        name: Skydd av informationssystem under revisionstestning
+        description: "Denna kontroll s\xE4kerst\xE4ller att system och data skyddas\
+          \ under revisioner genom att f\xF6rhindra obeh\xF6rig \xE5tkomst, datal\xE4\
+          ckage eller st\xF6rningar. \xC5tg\xE4rderna omfattar anv\xE4ndning av icke-produktionsmilj\xF6\
+          er, \xE5tkomstbegr\xE4nsningar och konfidentialitetsavtal f\xF6r att uppr\xE4\
+          tth\xE5lla systemets s\xE4kerhet och integritet."
   framework:
     urn: urn:intuitem:risk:framework:iso27001-2022
     ref_id: ISO/IEC 27001:2022
@@ -1943,6 +2478,10 @@ objects:
         description: "Informa\u010Dn\xED bezpe\u010Dnost, kyberentick\xE1 bezpe\u010D\
           nost a ochrana soukrom\xED - Syst\xE9my managementu informa\u010Dn\xED bezpe\u010D\
           nosti - Po\u017Eadavky"
+      sv:
+        name: Internationell standard ISO/IEC 27001:2022
+        description: "Informationss\xE4kerhet, cybers\xE4kerhet och integritetsskydd\
+          \ \u2013 Ledningssystem f\xF6r informationss\xE4kerhet \u2013 Krav"
     implementation_groups_definition:
     - ref_id: Clauses
       name: Clauses
@@ -1963,6 +2502,8 @@ objects:
           name: Clauses
         cs:
           name: "Ustanoven\xED"
+        sv:
+          name: Klausuler
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
       depth: 2
@@ -1976,6 +2517,8 @@ objects:
           name: Contexte de l'organisation
         cs:
           name: Kontext organizace
+        sv:
+          name: Organisationens sammanhang
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
       assessable: true
       depth: 3
@@ -2002,6 +2545,11 @@ objects:
             uj\xED schopnost organizace dos\xE1hnout c\xEDl\u016F v oblasti informa\u010D\
             n\xED bezpe\u010Dnosti, a zajist\u011Bte, aby syst\xE9m ISMS byl v souladu\
             \ s jeho kontextem."
+        sv:
+          name: "F\xF6rst\xE5 organisationen och dess sammanhang"
+          description: "Identifiera interna och externa faktorer som p\xE5verkar organisationens\
+            \ f\xF6rm\xE5ga att uppn\xE5 informationss\xE4kerhetsm\xE5l, vilket s\xE4\
+            kerst\xE4ller att ISMS \xE4r anpassat till sitt sammanhang."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
       depth: 3
@@ -2027,6 +2575,11 @@ objects:
           description: "Analyzovat pot\u0159eby a o\u010Dek\xE1v\xE1n\xED zainteresovan\xFD\
             ch stran s c\xEDlem za\u010Dlenit je do syst\xE9mu ISMS a \u0159e\u0161\
             it relevantn\xED po\u017Eadavky na informa\u010Dn\xED bezpe\u010Dnost."
+        sv:
+          name: "F\xF6rst\xE5 intressenternas behov och f\xF6rv\xE4ntningar"
+          description: "Analysera behoven och f\xF6rv\xE4ntningarna hos intresserade\
+            \ parter f\xF6r att inf\xF6rliva dem i ISMS och ta itu med relevanta informationss\xE4\
+            kerhetskrav."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
       depth: 3
@@ -2052,6 +2605,12 @@ objects:
           description: "Definujte rozsah ISMS s ohledem na intern\xED a extern\xED\
             \ faktory, pot\u0159eby zainteresovan\xFDch stran a z\xE1vislosti v r\xE1\
             mci provozn\xEDho prost\u0159ed\xED."
+        sv:
+          name: "Fastst\xE4llande av omfattningen av ledningssystemet f\xF6r informationss\xE4\
+            kerhet"
+          description: "Definiera omfattningen av ISMS genom att ta h\xE4nsyn till\
+            \ interna och externa faktorer, intressenternas behov och beroenden inom\
+            \ den operativa milj\xF6n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
       depth: 3
@@ -2075,6 +2634,11 @@ objects:
           description: "Vytv\xE1\u0159ejte, provozujte a neust\xE1le vylep\u0161ujte\
             \ syst\xE9m ISMS pro efektivn\xED \u0159\xEDzen\xED rizik informa\u010D\
             n\xED bezpe\u010Dnosti a pln\u011Bn\xED c\xEDl\u016F organizace."
+        sv:
+          name: "Ledningssystem f\xF6r informationss\xE4kerhet"
+          description: "Bygg, k\xF6r och f\xF6rb\xE4ttra kontinuerligt ett ISMS f\xF6\
+            r att effektivt hantera informationss\xE4kerhetsrisker och uppfylla organisatoriska\
+            \ m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
       depth: 2
@@ -2088,6 +2652,8 @@ objects:
           name: Leadership
         cs:
           name: "V\u016Fd\u010D\xED role"
+        sv:
+          name: Ledarskap
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       assessable: true
       depth: 3
@@ -2119,6 +2685,11 @@ objects:
             \ podporou ISMS, jeho slad\u011Bn\xEDm s c\xEDli organizace, alokac\xED\
             \ zdroj\u016F, prosazov\xE1n\xEDm bezpe\u010Dnostn\xED kultury a prosazov\xE1\
             n\xEDm neust\xE1l\xE9ho zlep\u0161ov\xE1n\xED."
+        sv:
+          name: Ledarskap och engagemang
+          description: "Visa ledarskap och engagemang genom att st\xF6dja ISMS, anpassa\
+            \ det till organisatoriska m\xE5l, f\xF6rdela resurser, fr\xE4mja en s\xE4\
+            kerhetskultur och driva st\xE4ndiga f\xF6rb\xE4ttringar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       assessable: true
       depth: 3
@@ -2146,6 +2717,12 @@ objects:
             n\xED z\xE1vazky k dodr\u017Eov\xE1n\xED p\u0159edpis\u016F, neust\xE1\
             l\xE9mu zlep\u0161ov\xE1n\xED a podpo\u0159e informa\u010Dn\xED bezpe\u010D\
             nosti."
+        sv:
+          name: Politik
+          description: "Uppr\xE4tta en informationss\xE4kerhetspolicy i linje med\
+            \ organisationens m\xE5l och strategiska inriktning, som beskriver \xE5\
+            taganden om efterlevnad, st\xE4ndiga f\xF6rb\xE4ttringar och fr\xE4mjande\
+            \ av informationss\xE4kerhet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
       depth: 3
@@ -2171,6 +2748,11 @@ objects:
           description: "Definovat, p\u0159i\u0159adit a sd\u011Blit role, odpov\u011B\
             dnosti a opr\xE1vn\u011Bn\xED k zaji\u0161t\u011Bn\xED efektivn\xED implementace\
             \ a provozu ISMS s odpov\u011Bdnost\xED v souladu s c\xEDli organizace."
+        sv:
+          name: Organisatoriska roller, ansvar och befogenheter
+          description: "Definiera, tilldela och kommunicera roller, ansvar och befogenheter\
+            \ f\xF6r att s\xE4kerst\xE4lla en effektiv implementering och drift av\
+            \ ISMS, med ansvarsskyldighet anpassad till organisatoriska m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
       depth: 2
@@ -2184,6 +2766,8 @@ objects:
           name: Planification
         cs:
           name: "Pl\xE1nov\xE1n\xED"
+        sv:
+          name: Planering
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       assessable: false
       depth: 3
@@ -2197,6 +2781,8 @@ objects:
           name: "Actions \xE0 mettre en oeuvre face aux risques et opportunit\xE9s"
         cs:
           name: "\u010Cinnosti zam\u011B\u0159en\xE9 na rizika a p\xEDle\u017Eitosti"
+        sv:
+          name: "\xC5tg\xE4rder f\xF6r att hantera risker och m\xF6jligheter"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
       assessable: true
       depth: 4
@@ -2226,6 +2812,12 @@ objects:
             \ a extern\xED faktory, pot\u0159eby z\xFA\u010Dastn\u011Bn\xFDch stran\
             \ a p\u0159\xEDslu\u0161n\xE9 po\u017Eadavky, aby bylo zaji\u0161t\u011B\
             no, \u017Ee syst\xE9m ISMS dos\xE1hne sv\xFDch c\xEDl\u016F."
+        sv:
+          name: "Allm\xE4nt"
+          description: "Etablera en process f\xF6r att identifiera informationss\xE4\
+            kerhetsrisker och m\xF6jligheter, med h\xE4nsyn till interna och externa\
+            \ faktorer, intressenternas behov och till\xE4mpliga krav f\xF6r att s\xE4\
+            kerst\xE4lla att ISMS uppn\xE5r sina m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
       assessable: true
       depth: 4
@@ -2255,6 +2847,13 @@ objects:
             \ definovan\xFDch krit\xE9ri\xED pro vyhodnocen\xED hrozeb pro d\u016F\
             v\u011Brnost, integritu a dostupnost a zaji\u0161t\u011Bn\xED konzistentn\xED\
             ch a spolehliv\xFDch v\xFDsledk\u016F."
+        sv:
+          name: "Krav p\xE5 riskbed\xF6mning av informationss\xE4kerhet"
+          description: "Uppr\xE4tta en process f\xF6r att bed\xF6ma informationss\xE4\
+            kerhetsrisker med planerade intervall, med hj\xE4lp av definierade kriterier\
+            \ f\xF6r att utv\xE4rdera hot mot konfidentialitet, integritet och tillg\xE4\
+            nglighet, vilket s\xE4kerst\xE4ller konsekventa och tillf\xF6rlitliga\
+            \ resultat."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
       assessable: true
       depth: 4
@@ -2284,6 +2883,12 @@ objects:
             ch rizik informa\u010Dn\xED bezpe\u010Dnosti v\xFDb\u011Brem vhodn\xFD\
             ch kontrol, zaji\u0161t\u011Bn\xEDm souladu s krit\xE9rii akceptace rizik\
             \ a jejich dokumentov\xE1n\xEDm v pl\xE1nu pro \u0159e\u0161en\xED rizik."
+        sv:
+          name: "Hantering av informationss\xE4kerhetsrisker"
+          description: "Definiera en process f\xF6r att hantera identifierade informationss\xE4\
+            kerhetsrisker genom att v\xE4lja l\xE4mpliga kontroller, s\xE4kerst\xE4\
+            lla anpassning till kriterier f\xF6r riskacceptans och dokumentera dem\
+            \ i en riskhanteringsplan."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
       assessable: true
       depth: 3
@@ -2316,6 +2921,13 @@ objects:
             li a napl\xE1nujte si kroky s podrobn\xFDm popisem odpov\u011Bdnost\xED\
             , zdroj\u016F, \u010Dasov\xFDch harmonogram\u016F a metod hodnocen\xED\
             \ k jejich dosa\u017Een\xED."
+        sv:
+          name: "Informationss\xE4kerhetsm\xE5l och planering f\xF6r att uppn\xE5\
+            \ dem"
+          description: "S\xE4tt upp m\xE4tbara informationss\xE4kerhetsm\xE5l i linje\
+            \ med ISMS och strategiska m\xE5l, och planera \xE5tg\xE4rder som beskriver\
+            \ ansvar, resurser, tidslinjer och utv\xE4rderingsmetoder f\xF6r att uppn\xE5\
+            \ dem."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
       assessable: true
       depth: 3
@@ -2342,6 +2954,11 @@ objects:
             \ zajistili soulad s po\u017Eadavky na informa\u010Dn\xED bezpe\u010D\
             nost, bezprobl\xE9movou integraci do st\xE1vaj\xEDc\xEDch proces\u016F\
             \ a efektivn\xED \u0159\xEDzen\xED rizik."
+        sv:
+          name: "Planera f\xF6r \xE4ndringar"
+          description: "Planera \xE4ndringar i ISMS systematiskt f\xF6r att s\xE4\
+            kerst\xE4lla anpassning till informationss\xE4kerhetskrav, s\xF6ml\xF6\
+            s integration i befintliga processer och effektiv riskhantering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
       depth: 2
@@ -2355,6 +2972,8 @@ objects:
           name: Supports
         cs:
           name: Podpora
+        sv:
+          name: "St\xF6d"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
       assessable: true
       depth: 3
@@ -2381,6 +3000,12 @@ objects:
           description: "Zajistit nezbytn\xE9 zdroje pro budov\xE1n\xED, provoz a neust\xE1\
             l\xE9 zlep\u0161ov\xE1n\xED syst\xE9mu ISMS a zajistit jeho efektivn\xED\
             \ fungov\xE1n\xED a soulad s c\xEDli organizace."
+        sv:
+          name: Resurser
+          description: "Tillhandah\xE5lla de n\xF6dv\xE4ndiga resurserna f\xF6r att\
+            \ bygga, driva och kontinuerligt f\xF6rb\xE4ttra ISMS, vilket s\xE4kerst\xE4\
+            ller att det fungerar effektivt och \xE4r i linje med organisationens\
+            \ m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
       assessable: true
       depth: 3
@@ -2408,6 +3033,12 @@ objects:
             ebn\xE9 kompetence prost\u0159ednictv\xEDm odpov\xEDdaj\xEDc\xEDho vzd\u011B\
             l\xE1n\xED, \u0161kolen\xED nebo zku\u0161enost\xED k efektivn\xEDmu pln\u011B\
             n\xED sv\xFDch povinnost\xED."
+        sv:
+          name: Kompetens
+          description: "Se till att personal som \xE4r involverad i ISMS har den n\xF6\
+            dv\xE4ndiga kompetensen genom l\xE4mplig utbildning, tr\xE4ning eller\
+            \ erfarenhet f\xF6r att kunna fullg\xF6ra sina uppgifter p\xE5 ett effektivt\
+            \ s\xE4tt."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
       assessable: true
       depth: 3
@@ -2435,6 +3066,11 @@ objects:
             \ pracovn\xEDk\u016F o syst\xE9mu ISMS, jejich roli v informa\u010Dn\xED\
             \ bezpe\u010Dnosti a d\u016Fle\u017Eitosti dodr\u017Eov\xE1n\xED bezpe\u010D\
             nostn\xEDch politik a po\u017Eadavk\u016F."
+        sv:
+          name: Medvetenhet
+          description: "Fr\xE4mja medvetenhet bland relevant personal om ISMS, deras\
+            \ roll i informationss\xE4kerhet och vikten av att f\xF6lja s\xE4kerhetspolicyer\
+            \ och krav."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
       assessable: true
       depth: 3
@@ -2459,6 +3095,11 @@ objects:
           description: "Zav\xE9st efektivn\xED intern\xED a extern\xED komunika\u010D\
             n\xED procesy, kter\xE9 zajist\xED v\u010Dasnou a vhodnou v\xFDm\u011B\
             nu informac\xED relevantn\xEDch pro ISMS a jeho c\xEDle."
+        sv:
+          name: Kommunikation
+          description: "Etablera effektiva interna och externa kommunikationsprocesser\
+            \ f\xF6r att s\xE4kerst\xE4lla ett snabbt och l\xE4mpligt utbyte av information\
+            \ som \xE4r relevant f\xF6r ISMS och dess m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: false
       depth: 3
@@ -2472,6 +3113,8 @@ objects:
           name: "Informations document\xE9es"
         cs:
           name: "Dokumentovan\xE9 informace"
+        sv:
+          name: Dokumenterad information
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
       assessable: true
       depth: 4
@@ -2495,6 +3138,11 @@ objects:
           description: "Dokumentujte ISMS dle pot\u0159eby pro zaji\u0161t\u011Bn\xED\
             \ efektivn\xEDho pl\xE1nov\xE1n\xED, provozu, \u0159\xEDzen\xED proces\u016F\
             \ a souladu s po\u017Eadavky organizace."
+        sv:
+          name: "Allm\xE4nt"
+          description: "Dokumentera ISMS efter behov f\xF6r att s\xE4kerst\xE4lla\
+            \ effektiv planering, drift, kontroll av processer och anpassning till\
+            \ organisationens krav."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
       depth: 4
@@ -2518,6 +3166,10 @@ objects:
           description: "Zajistit, aby byla dokumentace ISMS \u0159\xE1dn\u011B vytvo\u0159\
             ena, aktualizov\xE1na a kontrolov\xE1na, v\u010Detn\u011B \u0159\xE1dn\xE9\
             ho schvalov\xE1n\xED a spr\xE1vy verz\xED."
+        sv:
+          name: Skapa och uppdatera dokumenterad information
+          description: "Se till att ISMS-dokumentationen skapas, uppdateras och kontrolleras\
+            \ p\xE5 l\xE4mpligt s\xE4tt, inklusive korrekt godk\xE4nnande och versionshantering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
       depth: 4
@@ -2542,6 +3194,11 @@ objects:
             stupn\u011Bte ji t\u011Bm, kte\u0159\xED ji pot\u0159ebuj\xED, a z\xE1\
             rove\u0148 ji chra\u0148te p\u0159ed neopr\xE1vn\u011Bn\xFDm p\u0159\xED\
             stupem nebo ztr\xE1tou."
+        sv:
+          name: Kontroll av dokumenterad information
+          description: "G\xF6r ISMS-dokumentationen tillg\xE4nglig och anv\xE4ndbar\
+            \ f\xF6r dem som beh\xF6ver den, samtidigt som den skyddas fr\xE5n obeh\xF6\
+            rig \xE5tkomst eller f\xF6rlust."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
       depth: 2
@@ -2555,6 +3212,8 @@ objects:
           name: Fonctionnement
         cs:
           name: Provoz
+        sv:
+          name: Verksamhet
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
       assessable: true
       depth: 3
@@ -2579,6 +3238,11 @@ objects:
           description: "Pl\xE1novat a \u0159\xEDdit procesy ISMS, zaji\u0161\u0165\
             ovat soulad s po\u017Eadavky a prov\xE1d\u011Bt nezbytn\xE9 \xFApravy\
             \ pro \u0159e\u0161en\xED rizik a p\u0159\xEDle\u017Eitost\xED."
+        sv:
+          name: Operativ planering och kontroll
+          description: "Planera och kontrollera ISMS-processer, s\xE4kerst\xE4lla\
+            \ \xF6verensst\xE4mmelse med krav och g\xF6ra n\xF6dv\xE4ndiga justeringar\
+            \ f\xF6r att hantera risker och m\xF6jligheter."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
       assessable: true
       depth: 3
@@ -2604,6 +3268,11 @@ objects:
           description: "Implementujte proces hodnocen\xED rizik za \xFA\u010Delem\
             \ identifikace, vyhodnocen\xED a stanoven\xED priorit rizik informa\u010D\
             n\xED bezpe\u010Dnosti, jak je definov\xE1no v r\xE1mci ISMS."
+        sv:
+          name: "Riskbed\xF6mning av informationss\xE4kerhet"
+          description: "Implementera riskbed\xF6mningsprocessen f\xF6r att identifiera,\
+            \ utv\xE4rdera och prioritera informationss\xE4kerhetsrisker enligt definitionen\
+            \ i ISMS-ramverket."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
       assessable: true
       depth: 3
@@ -2631,6 +3300,12 @@ objects:
             rem a implementac\xED vhodn\xFDch kontroln\xEDch mechanism\u016F k \u0159\
             e\u0161en\xED identifikovan\xFDch rizik a zajist\u011Bte soulad s krit\xE9\
             rii akceptace rizik organizace."
+        sv:
+          name: "Hantering av informationss\xE4kerhetsrisker"
+          description: "Till\xE4mpa riskhanteringsprocessen genom att v\xE4lja och\
+            \ implementera l\xE4mpliga kontroller f\xF6r att hantera identifierade\
+            \ risker, vilket s\xE4kerst\xE4ller anpassning till organisationens kriterier\
+            \ f\xF6r riskacceptans."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
       assessable: false
       depth: 2
@@ -2644,6 +3319,8 @@ objects:
           name: "\xC9valuation de la performance"
         cs:
           name: "Hodnocen\xED v\xFDkonnosti"
+        sv:
+          name: "Utv\xE4rdering av prestanda"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
       assessable: true
       depth: 3
@@ -2669,6 +3346,11 @@ objects:
           description: "Monitorovat, m\u011B\u0159it, analyzovat a vyhodnocovat v\xFD\
             konnost a efektivitu ISMS pomoc\xED vhodn\xFDch metod v souladu s c\xED\
             li organizace."
+        sv:
+          name: "\xD6vervakning, m\xE4tning, analys, utv\xE4rdering"
+          description: "\xD6vervaka, m\xE4ta, analysera och utv\xE4rdera ISMS:s prestanda\
+            \ och effektivitet med hj\xE4lp av l\xE4mpliga metoder i linje med organisationens\
+            \ m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       assessable: false
       depth: 3
@@ -2682,6 +3364,8 @@ objects:
           name: Audit interne
         cs:
           name: "Intern\xED audit"
+        sv:
+          name: Internrevision
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       assessable: true
       depth: 4
@@ -2707,6 +3391,11 @@ objects:
             \ aby se zajistilo, \u017Ee syst\xE9m ISMS spl\u0148uje po\u017Eadavky\
             \ normy ISO/IEC 27001 a je efektivn\u011B implementov\xE1n a udr\u017E\
             ov\xE1n."
+        sv:
+          name: "Allm\xE4nt"
+          description: "Genomf\xF6r interna revisioner med planerade intervall f\xF6\
+            r att s\xE4kerst\xE4lla att ISMS uppfyller kraven i ISO/IEC 27001 och\
+            \ implementeras och underh\xE5lls effektivt."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
       depth: 4
@@ -2732,6 +3421,11 @@ objects:
             etn\u011B definov\xE1n\xED krit\xE9ri\xED, rozsahu, metod a odpov\u011B\
             dnost\xED, a informovat o v\xFDsledc\xEDch p\u0159\xEDslu\u0161n\xE9 veden\xED\
             ."
+        sv:
+          name: "Program f\xF6r internrevision"
+          description: "Planera och genomf\xF6ra interna revisioner, inklusive att\
+            \ definiera kriterier, omfattning, metoder och ansvar, och rapportera\
+            \ resultaten till relevant ledning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: false
       depth: 3
@@ -2745,6 +3439,8 @@ objects:
           name: Revue de la direction
         cs:
           name: "P\u0159ezkoum\xE1n\xED veden\xEDm"
+        sv:
+          name: "Ledningens genomg\xE5ng"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
       assessable: true
       depth: 4
@@ -2768,6 +3464,11 @@ objects:
           description: "Pravideln\u011B kontrolujte syst\xE9m ISMS, abyste zajistili\
             \ jeho vhodnost, p\u0159im\u011B\u0159enost a \xFA\u010Dinnost p\u0159\
             i dosahov\xE1n\xED c\xEDl\u016F organizace."
+        sv:
+          name: "Allm\xE4nt"
+          description: "Granska ISMS med j\xE4mna mellanrum f\xF6r att s\xE4kerst\xE4\
+            lla dess l\xE4mplighet, tillr\xE4cklighet och effektivitet n\xE4r det\
+            \ g\xE4ller att uppn\xE5 organisatoriska m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
       depth: 4
@@ -2792,6 +3493,11 @@ objects:
           description: "Do p\u0159ezkoum\xE1n\xED managementem zahr\u0148te vstupy,\
             \ jako jsou v\xFDsledky auditu, v\xFDkonnost ISMS, stav rizik, mo\u017E\
             nosti zlep\u0161en\xED a po\u017Eadovan\xE9 zm\u011Bny."
+        sv:
+          name: "Indata fr\xE5n ledningens genomg\xE5ngar"
+          description: "Inkludera indata som revisionsresultat, ISMS-prestanda, riskstatus,\
+            \ f\xF6rb\xE4ttringsm\xF6jligheter och n\xF6dv\xE4ndiga \xE4ndringar i\
+            \ ledningens granskning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
       depth: 4
@@ -2815,6 +3521,10 @@ objects:
           description: "Zdokumentujte v\xFDsledky p\u0159ezkoum\xE1n\xED managementem,\
             \ v\u010Detn\u011B rozhodnut\xED o vylep\u0161en\xEDch, zm\u011Bn\xE1\
             ch ISMS a po\u017Eadavc\xEDch na zdroje."
+        sv:
+          name: "Resultat av ledningens genomg\xE5ng"
+          description: "Dokumentera resultaten av ledningens genomg\xE5ngar, inklusive\
+            \ beslut om f\xF6rb\xE4ttringar, ISMS-f\xF6r\xE4ndringar och resurskrav."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
       depth: 2
@@ -2828,6 +3538,8 @@ objects:
           name: "Am\xE9lioration"
         cs:
           name: "Zlep\u0161ov\xE1n\xED"
+        sv:
+          name: "F\xF6rb\xE4ttring"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       assessable: true
       depth: 3
@@ -2851,6 +3563,11 @@ objects:
           description: "Identifikovat a jednat na z\xE1klad\u011B p\u0159\xEDle\u017E\
             itost\xED k neust\xE1l\xE9mu zlep\u0161ov\xE1n\xED s c\xEDlem zv\xFD\u0161\
             it efektivitu a soulad ISMS s c\xEDli organizace."
+        sv:
+          name: "St\xE4ndiga f\xF6rb\xE4ttringar"
+          description: "Identifiera och agera p\xE5 m\xF6jligheter till st\xE4ndiga\
+            \ f\xF6rb\xE4ttringar f\xF6r att f\xF6rb\xE4ttra ISMS:s effektivitet och\
+            \ anpassning till organisatoriska m\xE5l."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
       depth: 3
@@ -2881,6 +3598,11 @@ objects:
             \ opat\u0159en\xED, identifikac\xED hlavn\xEDch p\u0159\xED\u010Din a\
             \ implementac\xED opat\u0159en\xED k prevenci jejich opakov\xE1n\xED a\
             \ z\xE1rove\u0148 dokumentujte proces."
+        sv:
+          name: "Avvikelse och korrigerande \xE5tg\xE4rder"
+          description: "Ta itu med avvikelser genom att vidta korrigerande \xE5tg\xE4\
+            rder, identifiera grundorsaker och implementera \xE5tg\xE4rder f\xF6r\
+            \ att f\xF6rhindra upprepning samtidigt som du dokumenterar processen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
@@ -2893,6 +3615,8 @@ objects:
           name: "D\xE9claration d'applicabilit\xE9"
         cs:
           name: "Prohl\xE1\u0161en\xED o aplikovatelnosti"
+        sv:
+          name: "Uttalande om till\xE4mplighet"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
       depth: 2
@@ -2906,6 +3630,8 @@ objects:
           name: "Mesure de s\xE9curit\xE9 organisationnelles"
         cs:
           name: "Organiza\u010Dn\xED kontroly"
+        sv:
+          name: Organisatoriska kontroller
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
       assessable: true
       depth: 3
@@ -2934,6 +3660,12 @@ objects:
             en\xED pat\u0159\xED definov\xE1n\xED rozsahu, stanoven\xED c\xEDl\u016F\
             \ a zaji\u0161t\u011Bn\xED souladu s po\u017Eadavky na dodr\u017Eov\xE1\
             n\xED p\u0159edpis\u016F."
+        sv:
+          name: "Policyer f\xF6r informationss\xE4kerhet"
+          description: "Den h\xE4r kontrollen uppr\xE4ttar och underh\xE5ller informationss\xE4\
+            kerhetsprinciper som \xE4r anpassade till organisationens m\xE5l. \xC5\
+            tg\xE4rderna omfattar att definiera omfattning, s\xE4tta upp m\xE5l och\
+            \ s\xE4kerst\xE4lla anpassning till efterlevnadskraven."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
       assessable: true
       depth: 3
@@ -2964,6 +3696,12 @@ objects:
             na odpov\u011Bdnost. Mezi opat\u0159en\xED pat\u0159\xED jasn\xE1 dokumentace\
             \ odpov\u011Bdnost\xED, pravideln\xE9 kontroly a mechanismy vym\xE1h\xE1\
             n\xED."
+        sv:
+          name: "Roller och ansvar f\xF6r informationss\xE4kerhet"
+          description: "Den h\xE4r kontrollen definierar och tilldelar roller och\
+            \ ansvar f\xF6r informationss\xE4kerhet f\xF6r att s\xE4kerst\xE4lla ansvarsskyldighet.\
+            \ \xC5tg\xE4rderna omfattar tydlig dokumentation av ansvarsomr\xE5den,\
+            \ periodiska granskningar och verkst\xE4llighetsmekanismer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
       assessable: true
       depth: 3
@@ -2990,6 +3728,12 @@ objects:
             , aby se sn\xED\u017Eilo riziko chyb, podvod\u016F a neopr\xE1vn\u011B\
             n\xE9ho p\u0159\xEDstupu. Mezi opat\u0159en\xED pat\u0159\xED odd\u011B\
             len\xED rol\xED, omezen\xED p\u0159\xEDstupu a pravideln\xE9 audity."
+        sv:
+          name: "\xC5tskillnad av arbetsuppgifter"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller uppdelning av uppgifter\
+            \ f\xF6r att minska risken f\xF6r fel, bedr\xE4gerier och obeh\xF6rig\
+            \ \xE5tkomst. \xC5tg\xE4rderna omfattar rollseparation, \xE5tkomstbegr\xE4\
+            nsningar och regelbundna granskningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
       assessable: true
       depth: 3
@@ -3018,6 +3762,12 @@ objects:
             ny a implementov\xE1ny. Mezi opat\u0159en\xED pat\u0159\xED stanoven\xED\
             \ c\xEDl\u016F, alokace zdroj\u016F a dohled nad dodr\u017Eov\xE1n\xED\
             m p\u0159edpis\u016F."
+        sv:
+          name: Ledningens ansvar
+          description: "Denna kontroll s\xE4kerst\xE4ller att ledningens ansvar f\xF6\
+            r informationss\xE4kerhet \xE4r tydligt definierat och implementerat.\
+            \ \xC5tg\xE4rderna inkluderar att s\xE4tta upp m\xE5l, f\xF6rdela resurser\
+            \ och \xF6vervaka efterlevnaden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
       assessable: true
       depth: 3
@@ -3047,6 +3797,12 @@ objects:
             \xED zaveden\xED kontaktn\xEDch protokol\u016F, udr\u017Eov\xE1n\xED aktualizovan\xFD\
             ch seznam\u016F kontakt\u016F a p\u0159id\u011Blov\xE1n\xED odpov\u011B\
             dnost\xED."
+        sv:
+          name: Kontakt med myndigheter
+          description: "Denna kontroll s\xE4kerst\xE4ller snabb kommunikation med\
+            \ relevanta myndigheter under informationss\xE4kerhetsincidenter. \xC5\
+            tg\xE4rderna inkluderar att uppr\xE4tta kontaktprotokoll, uppr\xE4tth\xE5\
+            lla uppdaterade kontaktlistor och tilldela ansvar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       assessable: true
       depth: 3
@@ -3073,6 +3829,11 @@ objects:
             \ aby byli informov\xE1ni o bezpe\u010Dnostn\xEDch trendech a postupech.\
             \ Mezi tato opat\u0159en\xED pat\u0159\xED \xFA\u010Dast na f\xF3rech,\
             \ \u010Dlenstv\xED a spole\u010Dn\xE9 iniciativy."
+        sv:
+          name: "Kontakt med s\xE4rskilda intresseorganisationer f\xF6r intresseorganisationer"
+          description: "Denna kontroll underl\xE4ttar kontakt med s\xE4rskilda intressegrupper\
+            \ f\xF6r att h\xE5lla sig informerade om s\xE4kerhetstrender och praxis.\
+            \ \xC5tg\xE4rderna inkluderar deltagande i forum, medlemskap och samarbetsinitiativ."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
       assessable: true
       depth: 3
@@ -3101,6 +3862,12 @@ objects:
             rnit bezpe\u010Dnostn\xED rizika. Mezi tato opat\u0159en\xED pat\u0159\
             \xED monitorov\xE1n\xED informac\xED o hrozb\xE1ch, anal\xFDza trend\u016F\
             \ a sd\xEDlen\xED u\u017Eite\u010Dn\xFDch poznatk\u016F."
+        sv:
+          name: Information om hot
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att hotinformation\
+            \ utvecklas och underh\xE5lls f\xF6r att identifiera och minimera s\xE4\
+            kerhetsrisker. \xC5tg\xE4rderna omfattar \xF6vervakning av hotfl\xF6den,\
+            \ analys av trender och delning av anv\xE4ndbara insikter."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
       assessable: true
       depth: 3
@@ -3129,6 +3896,12 @@ objects:
             en\xED pat\u0159\xED posouzen\xED rizik, kontroly souladu s p\u0159edpisy\
             \ a bezpe\u010Dnostn\xED kontroln\xED body b\u011Bhem \u017Eivotn\xED\
             ho cyklu projektu."
+        sv:
+          name: "Informationss\xE4kerhet inom projektledning"
+          description: "Den h\xE4r kontrollen inf\xF6rlivar informationss\xE4kerhet\
+            \ i projektledningsmetoderna. \xC5tg\xE4rderna omfattar riskbed\xF6mningar,\
+            \ efterlevnadsgranskningar och s\xE4kerhetskontroller under projektets\
+            \ livscykel."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       assessable: true
       depth: 3
@@ -3154,6 +3927,12 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje p\u0159esnou inventuru informac\xED\
             \ a souvisej\xEDc\xEDch aktiv. Mezi opat\u0159en\xED pat\u0159\xED sledov\xE1\
             n\xED aktiv, pravideln\xE9 audity a klasifikace podle citlivosti."
+        sv:
+          name: "Inventering av information och andra tillh\xF6rande tillg\xE5ngar"
+          description: "Denna kontroll s\xE4kerst\xE4ller att en korrekt inventering\
+            \ av information och tillh\xF6rande tillg\xE5ngar uppr\xE4tth\xE5lls.\
+            \ \xC5tg\xE4rderna inkluderar tillg\xE5ngssp\xE5rning, periodiska revisioner\
+            \ och klassificering efter k\xE4nslighet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
       assessable: true
       depth: 3
@@ -3183,6 +3962,13 @@ objects:
             no spr\xE1vn\xE9 nakl\xE1d\xE1n\xED s nimi. Mezi tato opat\u0159en\xED\
             \ pat\u0159\xED zdokumentovan\xE9 z\xE1sady, \u0161kolen\xED u\u017Eivatel\u016F\
             \ a mechanismy vym\xE1h\xE1n\xED."
+        sv:
+          name: "Acceptabel anv\xE4ndning av information och andra tillh\xF6rande\
+            \ tillg\xE5ngar"
+          description: "Den h\xE4r kontrollen definierar acceptabel anv\xE4ndning\
+            \ av information och associerade tillg\xE5ngar f\xF6r att s\xE4kerst\xE4\
+            lla korrekt hantering. \xC5tg\xE4rderna omfattar dokumenterade policyer,\
+            \ anv\xE4ndarutbildning och tvingande mekanismer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       assessable: true
       depth: 3
@@ -3210,6 +3996,12 @@ objects:
             \ nebo zm\u011Bn\xED svou roli. Mezi tato opat\u0159en\xED pat\u0159\xED\
             \ kontroln\xED seznamy, sledov\xE1n\xED majetku a protokoly o vy\u0159\
             azov\xE1n\xED z provozu."
+        sv:
+          name: "\xC5terf\xF6ring av tillg\xE5ngar"
+          description: "Denna kontroll s\xE4kerst\xE4ller en s\xE4ker \xE5terl\xE4\
+            mning av tillg\xE5ngar n\xE4r anst\xE4llda eller entrepren\xF6rer l\xE4\
+            mnar eller byter roll. \xC5tg\xE4rderna omfattar checklistor, tillg\xE5\
+            ngssp\xE5rning och inaktiveringsprotokoll."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
       assessable: true
       depth: 3
@@ -3238,6 +4030,12 @@ objects:
             \ byla zaji\u0161t\u011Bna odpov\xEDdaj\xEDc\xED ochrana. Mezi opat\u0159\
             en\xED pat\u0159\xED klasifika\u010Dn\xED sch\xE9mata, omezen\xED p\u0159\
             \xEDstupu a pokyny pro ozna\u010Dov\xE1n\xED."
+        sv:
+          name: Klassificering av information
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att information klassificeras\
+            \ baserat p\xE5 dess k\xE4nslighet och v\xE4rde f\xF6r att s\xE4kerst\xE4\
+            lla l\xE4mpligt skydd. M\xE5tten omfattar klassificeringsscheman, \xE5\
+            tkomstbegr\xE4nsningar och riktlinjer f\xF6r etikettering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
       assessable: true
       depth: 3
@@ -3264,6 +4062,12 @@ objects:
             ov\xE1n\xED informac\xED tak, aby odr\xE1\u017Eelo po\u017Eadavky na jejich\
             \ klasifikaci a zpracov\xE1n\xED. Mezi opat\u0159en\xED pat\u0159\xED\
             \ standardizovan\xE9 \u0161ablony, \u0161kolen\xED a audity."
+        sv:
+          name: "M\xE4rkning av information"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent m\xE4\
+            rkning av information f\xF6r att \xE5terspegla dess klassificerings- och\
+            \ hanteringskrav. \xC5tg\xE4rderna inkluderar standardiserade mallar,\
+            \ utbildning och revisioner."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
       assessable: true
       depth: 3
@@ -3290,6 +4094,12 @@ objects:
             enos informac\xED mezi syst\xE9my nebo organizacemi. Mezi opat\u0159en\xED\
             \ pat\u0159\xED \u0161ifrov\xE1n\xED, \u0159\xEDzen\xED p\u0159\xEDstupu\
             \ a protokoly zabezpe\u010Den\xE9ho p\u0159enosu."
+        sv:
+          name: "\xD6verf\xF6ring av uppgifter"
+          description: "Denna kontroll uppr\xE4ttar s\xE4kra processer f\xF6r \xF6\
+            verf\xF6ring av information mellan system eller organisationer. \xC5tg\xE4\
+            rderna inkluderar kryptering, \xE5tkomstkontroller och s\xE4kra \xF6verf\xF6\
+            ringsprotokoll."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       assessable: true
       depth: 3
@@ -3318,6 +4128,12 @@ objects:
             vn\u011Bn\xE9 osoby. Mezi opat\u0159en\xED pat\u0159\xED p\u0159\xEDstup\
             \ zalo\u017Een\xFD na rol\xEDch, v\xEDcefaktorov\xE9 ov\u011B\u0159ov\xE1\
             n\xED a pravideln\xE9 kontroly."
+        sv:
+          name: "\xC5tkomstkontroll"
+          description: "Den h\xE4r kontrollen implementerar och underh\xE5ller mekanismer\
+            \ f\xF6r \xE5tkomstkontroll f\xF6r att begr\xE4nsa \xE5tkomsten till beh\xF6\
+            riga personer. \xC5tg\xE4rderna omfattar rollbaserad \xE5tkomst, multifaktorautentisering\
+            \ och periodiska granskningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       assessable: true
       depth: 3
@@ -3346,6 +4162,12 @@ objects:
             \xEDstup k syst\xE9m\u016Fm. Mezi opat\u0159en\xED pat\u0159\xED ov\u011B\
             \u0159ov\xE1n\xED identity, spr\xE1va \u017Eivotn\xEDho cyklu a z\u0159\
             izov\xE1n\xED p\u0159\xEDstupu."
+        sv:
+          name: Identitetshantering
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att identiteter hanteras\
+            \ p\xE5 ett s\xE4kert s\xE4tt f\xF6r att garantera korrekt och tillf\xF6\
+            rlitlig \xE5tkomst till system. \xC5tg\xE4rderna omfattar identitetsverifiering,\
+            \ livscykelhantering och \xE5tkomstetablering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       assessable: true
       depth: 3
@@ -3372,6 +4194,12 @@ objects:
             \ jako jsou hesla, aby se zabr\xE1nilo neopr\xE1vn\u011Bn\xE9mu p\u0159\
             \xEDstupu. Mezi opat\u0159en\xED pat\u0159\xED \u0161ifrov\xE1n\xED, bezpe\u010D\
             n\xE9 \xFAlo\u017Ei\u0161t\u011B a pravideln\xE9 aktualizace hesel."
+        sv:
+          name: Information om autentisering
+          description: "Den h\xE4r kontrollen skyddar autentiseringsinformation, till\
+            \ exempel l\xF6senord, f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst.\
+            \ \xC5tg\xE4rderna omfattar kryptering, s\xE4ker lagring och periodiska\
+            \ l\xF6senordsuppdateringar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       assessable: true
       depth: 3
@@ -3400,6 +4228,12 @@ objects:
             \ s rolemi a odpov\u011Bdnostmi. Mezi opat\u0159en\xED pat\u0159\xED pravideln\xE9\
             \ audity, odebr\xE1n\xED p\u0159\xEDstupu a automatizovan\xE1 spr\xE1\
             va p\u0159\xEDstupu."
+        sv:
+          name: "R\xE4ttigheter"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att \xE5tkomstr\xE4\
+            ttigheter regelbundet granskas och hanteras s\xE5 att de \xF6verensst\xE4\
+            mmer med roller och ansvarsomr\xE5den. \xC5tg\xE4rderna omfattar periodiska\
+            \ granskningar, \xE5terkallande av \xE5tkomst och automatiserad \xE5tkomsthantering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
       assessable: true
       depth: 3
@@ -3426,6 +4260,12 @@ objects:
             \ informac\xED je za\u010Dlen\u011Bna do vztah\u016F a proces\u016F s\
             \ dodavateli. Mezi opat\u0159en\xED pat\u0159\xED due diligence, bezpe\u010D\
             nostn\xED kontroly a pr\u016Fb\u011B\u017En\xE9 monitorov\xE1n\xED."
+        sv:
+          name: "Informationss\xE4kerhet i leverant\xF6rsrelationer"
+          description: "Denna kontroll s\xE4kerst\xE4ller att informationss\xE4kerheten\
+            \ \xE4r inb\xE4ddad i leverant\xF6rsrelationer och processer. \xC5tg\xE4\
+            rderna omfattar due diligence, s\xE4kerhetsgranskningar och l\xF6pande\
+            \ \xF6vervakning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
       assessable: true
       depth: 3
@@ -3454,6 +4294,12 @@ objects:
             n\xED bezpe\u010Dnost v r\xE1mci dodavatelsk\xFDch smluv. Mezi tato opat\u0159\
             en\xED pat\u0159\xED explicitn\xED smluvn\xED dolo\u017Eky, audity shody\
             \ s p\u0159edpisy a definovan\xE9 sankce za poru\u0161en\xED."
+        sv:
+          name: "Hantering av informationss\xE4kerhet inom leverant\xF6rsavtal"
+          description: "Denna kontroll adresserar informationss\xE4kerhetskrav inom\
+            \ leverant\xF6rsavtal. \xC5tg\xE4rderna omfattar uttryckliga kontraktsklausuler,\
+            \ efterlevnadsrevisioner och definierade p\xE5f\xF6ljder f\xF6r \xF6vertr\xE4\
+            delser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       assessable: true
       depth: 3
@@ -3483,6 +4329,12 @@ objects:
             nosti v dodavatelsk\xE9m \u0159et\u011Bzci IKT s c\xEDlem zajistit bezpe\u010D\
             nost slu\u017Eeb a komponent. Mezi opat\u0159en\xED pat\u0159\xED posouzen\xED\
             \ rizik, hodnocen\xED dodavatel\u016F a protokoly pro reakci na incidenty."
+        sv:
+          name: "Hantering av informationss\xE4kerhet i ICT-leveranskedjan"
+          description: "Denna kontroll hanterar informationss\xE4kerhetsrisker i ICT-f\xF6\
+            rs\xF6rjningskedjan f\xF6r att s\xE4kerst\xE4lla s\xE4kerheten f\xF6r\
+            \ tj\xE4nster och komponenter. \xC5tg\xE4rderna inkluderar riskbed\xF6\
+            mningar, leverant\xF6rsutv\xE4rderingar och protokoll f\xF6r incidenthantering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       assessable: true
       depth: 3
@@ -3513,6 +4365,13 @@ objects:
             \ zachov\xE1na bezpe\u010Dnost informac\xED. Mezi opat\u0159en\xED pat\u0159\
             \xED dohody o \xFArovni slu\u017Eeb, pravideln\xE9 kontroly a aktualizace\
             \ smluv."
+        sv:
+          name: "Uppf\xF6ljning, granskning och f\xF6r\xE4ndringsledning av leverant\xF6\
+            rstj\xE4nster"
+          description: "Denna kontroll s\xE4kerst\xE4ller att leverant\xF6rstj\xE4\
+            nster \xF6vervakas, granskas och justeras f\xF6r att uppr\xE4tth\xE5lla\
+            \ informationss\xE4kerheten. \xC5tg\xE4rderna omfattar serviceavtal, periodiska\
+            \ granskningar och kontraktsuppdateringar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
       assessable: true
       depth: 3
@@ -3542,6 +4401,12 @@ objects:
             \xED souvisej\xEDc\xED rizika. Mezi opat\u0159en\xED pat\u0159\xED \u0161\
             ifrov\xE1n\xED dat, \u0159\xEDzen\xED p\u0159\xEDstupu a kontroly dodr\u017E\
             ov\xE1n\xED p\u0159edpis\u016F poskytovateli."
+        sv:
+          name: "Informationss\xE4kerhet f\xF6r anv\xE4ndning av molntj\xE4nster"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller s\xE4ker anv\xE4\
+            ndning av molntj\xE4nster genom att hantera associerade risker. \xC5tg\xE4\
+            rderna omfattar datakryptering, \xE5tkomstkontroller och granskningar\
+            \ av providerefterlevnad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
       assessable: true
       depth: 3
@@ -3570,6 +4435,12 @@ objects:
             nov\xE1n\xED a p\u0159\xEDpravu na zvl\xE1d\xE1n\xED incident\u016F informa\u010D\
             n\xED bezpe\u010Dnosti. Mezi opat\u0159en\xED pat\u0159\xED pl\xE1ny reakce\
             \ na incidenty, \u0161kolen\xED a komunika\u010Dn\xED protokoly."
+        sv:
+          name: "Planering och f\xF6rberedelse av hantering av informationss\xE4kerhetsincidenter"
+          description: "Denna kontroll s\xE4kerst\xE4ller korrekt planering och f\xF6\
+            rberedelse f\xF6r hantering av informationss\xE4kerhetsincidenter. \xC5\
+            tg\xE4rderna omfattar incidenthanteringsplaner, tr\xE4nings\xF6vningar\
+            \ och kommunikationsprotokoll."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
       assessable: true
       depth: 3
@@ -3600,6 +4471,12 @@ objects:
             \ informa\u010Dn\xED bezpe\u010Dnosti. Mezi tato opat\u0159en\xED pat\u0159\
             \xED anal\xFDza hlavn\xEDch p\u0159\xED\u010Din, hodnocen\xED rizik a\
             \ pl\xE1ny na zm\xEDrn\u011Bn\xED jejich dopad\u016F."
+        sv:
+          name: "Bed\xF6mning och beslut om informationss\xE4kerhetsh\xE4ndelser"
+          description: "Denna kontroll uppr\xE4ttar processer f\xF6r att bed\xF6ma\
+            \ och besluta om \xE5tg\xE4rder relaterade till informationss\xE4kerhetsh\xE4\
+            ndelser. \xC5tg\xE4rderna omfattar grundorsaksanalys, riskbed\xF6mning\
+            \ och \xE5tg\xE4rdsplaner."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
       assessable: true
       depth: 3
@@ -3627,6 +4504,12 @@ objects:
             uje rychlou obnovu. Mezi tato opat\u0159en\xED pat\u0159\xED hl\xE1\u0161\
             en\xED incident\u016F, eskala\u010Dn\xED protokoly a strategie omezen\xED\
             ."
+        sv:
+          name: "\xC5tg\xE4rder vid informationss\xE4kerhetsincidenter"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller ett effektivt svar\
+            \ p\xE5 informationss\xE4kerhetsincidenter f\xF6r att minimera p\xE5verkan\
+            \ och \xE5terh\xE4mta sig snabbt. \xC5tg\xE4rderna omfattar incidentrapportering,\
+            \ eskaleringsprotokoll och strategier f\xF6r att begr\xE4nsa spridningen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       assessable: true
       depth: 3
@@ -3656,6 +4539,12 @@ objects:
             \ jsou dokumentov\xE1ny a implementov\xE1ny za \xFA\u010Delem zlep\u0161\
             en\xED proces\u016F. Mezi opat\u0159en\xED pat\u0159\xED kontroly po incidentu,\
             \ ak\u010Dn\xED pl\xE1ny a aktualizace z\xE1sad."
+        sv:
+          name: "Att l\xE4ra sig av informationss\xE4kerhetsincidenter"
+          description: "Denna kontroll s\xE4kerst\xE4ller att l\xE4rdomar fr\xE5n\
+            \ informationss\xE4kerhetsincidenter dokumenteras och implementeras f\xF6\
+            r att f\xF6rb\xE4ttra processerna. \xC5tg\xE4rderna omfattar granskningar\
+            \ efter incidenter, handlingsplaner och policyuppdateringar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
       assessable: true
       depth: 3
@@ -3684,6 +4573,12 @@ objects:
             ch incident\u016F na podporu vy\u0161et\u0159ov\xE1n\xED. Mezi opat\u0159\
             en\xED pat\u0159\xED postupy \u0159et\u011Bzce \xFAschovy, bezpe\u010D\
             n\xE9 \xFAlo\u017Ei\u0161t\u011B a kontroly p\u0159\xEDstupu."
+        sv:
+          name: Insamling av bevisning
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att bevis samlas\
+            \ in och bevaras under s\xE4kerhetsincidenter f\xF6r att st\xF6dja unders\xF6\
+            kningar. \xC5tg\xE4rderna omfattar sp\xE5rbarhetsprocedurer, s\xE4ker\
+            \ lagring och \xE5tkomstkontroller."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
       assessable: true
       depth: 3
@@ -3711,6 +4606,12 @@ objects:
             ena kontinuita provozu. Mezi opat\u0159en\xED pat\u0159\xED pohotovostn\xED\
             \ pl\xE1ny, z\xE1lo\u017En\xED syst\xE9my a mechanismy pro p\u0159\xED\
             pad selh\xE1n\xED."
+        sv:
+          name: "Informationss\xE4kerhet vid st\xF6rningar"
+          description: "Denna kontroll s\xE4kerst\xE4ller att informationss\xE4kerheten\
+            \ uppr\xE4tth\xE5lls under st\xF6rningar f\xF6r att garantera kontinuiteten\
+            \ i verksamheten. \xC5tg\xE4rderna omfattar beredskapsplaner, s\xE4kerhetskopieringssystem\
+            \ och mekanismer f\xF6r redundans."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
       assessable: true
       depth: 3
@@ -3740,6 +4641,12 @@ objects:
             \ b\u011Bhem naru\u0161en\xED provozu. Mezi tato opat\u0159en\xED pat\u0159\
             \xED testov\xE1n\xED pl\xE1n\u016F obnovy, redundantn\xEDch syst\xE9m\u016F\
             \ a lokalit pro obnovu po hav\xE1rii."
+        sv:
+          name: "IKT-beredskap f\xF6r kontinuitet i verksamheten"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller IKT-beredskap f\xF6\
+            r aff\xE4rskontinuitet f\xF6r att minimera driftstopp under st\xF6rningar.\
+            \ \xC5tg\xE4rderna omfattar testning av \xE5terst\xE4llningsplaner, redundanta\
+            \ system och haveriberedskapsplatser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       assessable: true
       depth: 3
@@ -3767,6 +4674,11 @@ objects:
             \ z\xE1konn\xFDmi, regula\u010Dn\xEDmi a smluvn\xEDmi po\u017Eadavky na\
             \ informa\u010Dn\xED bezpe\u010Dnost. Mezi opat\u0159en\xED pat\u0159\xED\
             \ p\u0159ezkumy politik, audity a dokumentace d\u016Fkaz\u016F."
+        sv:
+          name: "Juridiska, lagstadgade, regulatoriska och avtalsm\xE4ssiga krav"
+          description: "Denna kontroll s\xE4kerst\xE4ller efterlevnad av juridiska,\
+            \ lagstadgade, regulatoriska och avtalsenliga informationss\xE4kerhetskrav.\
+            \ \xC5tg\xE4rderna omfattar policygranskningar, revisioner och bevisdokumentation."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
       assessable: true
       depth: 3
@@ -3794,6 +4706,12 @@ objects:
             en\xED v oblasti zabezpe\u010Den\xED informac\xED. Mezi tato opat\u0159\
             en\xED pat\u0159\xED omezen\xED p\u0159\xEDstupu, \u0161ifrov\xE1n\xED\
             \ a pr\xE1vn\xED dohody."
+        sv:
+          name: "Immateriella r\xE4ttigheter"
+          description: "Denna kontroll s\xE4kerst\xE4ller att immateriella r\xE4ttigheter\
+            \ skyddas genom l\xE4mpliga informationss\xE4kerhets\xE5tg\xE4rder. \xC5\
+            tg\xE4rderna omfattar \xE5tkomstbegr\xE4nsningar, kryptering och juridiska\
+            \ avtal."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
       assessable: true
       depth: 3
@@ -3822,6 +4740,12 @@ objects:
             nilo ztr\xE1t\u011B nebo neopr\xE1vn\u011Bn\xE9mu p\u0159\xEDstupu. Mezi\
             \ opat\u0159en\xED pat\u0159\xED z\xE1sady uchov\xE1v\xE1n\xED, bezpe\u010D\
             n\xE9 \xFAlo\u017Ei\u0161t\u011B a kontroly p\u0159\xEDstupu."
+        sv:
+          name: Skydd av register
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att arkivhandlingar\
+            \ lagras och skyddas p\xE5 ett s\xE4kert s\xE4tt f\xF6r att f\xF6rhindra\
+            \ f\xF6rlust eller obeh\xF6rig \xE5tkomst. \xC5tg\xE4rderna omfattar kvarh\xE5\
+            llningsprinciper, s\xE4ker lagring och \xE5tkomstkontroller."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
       assessable: true
       depth: 3
@@ -3850,6 +4774,12 @@ objects:
             mi \xFAdaji (PII). Mezi opat\u0159en\xED pat\u0159\xED anonymizace, \u0161\
             ifrov\xE1n\xED a dodr\u017Eov\xE1n\xED z\xE1kon\u016F na ochranu osobn\xED\
             ch \xFAdaj\u016F."
+        sv:
+          name: Sekretess och skydd av personuppgifter
+          description: "Den h\xE4r kontrollen skyddar sekretessen och s\xE4kerst\xE4\
+            ller s\xE4ker hantering av personligt identifierbar information (PII).\
+            \ \xC5tg\xE4rderna omfattar anonymisering, kryptering och efterlevnad\
+            \ av integritetslagar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
       assessable: true
       depth: 3
@@ -3877,6 +4807,12 @@ objects:
             \ efektivity a souladu s p\u0159edpisy. Mezi opat\u0159en\xED pat\u0159\
             \xED extern\xED audity, posouzen\xED rizik a n\xE1sledn\xE1 opat\u0159\
             en\xED."
+        sv:
+          name: "Oberoende granskning av informationss\xE4kerhet"
+          description: "Denna kontroll s\xE4kerst\xE4ller oberoende granskningar av\
+            \ informationss\xE4kerhet f\xF6r att utv\xE4rdera effektivitet och efterlevnad.\
+            \ \xC5tg\xE4rderna omfattar bland annat externa revisioner, riskbed\xF6\
+            mningar och uppf\xF6ljnings\xE5tg\xE4rder."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
       assessable: true
       depth: 3
@@ -3905,6 +4841,13 @@ objects:
             ech z\xE1sad, pravidel a standard\u016F pro informa\u010Dn\xED bezpe\u010D\
             nost. Mezi opat\u0159en\xED pat\u0159\xED pravideln\xE1 \u0161kolen\xED\
             , revize z\xE1sad a mechanismy vym\xE1h\xE1n\xED."
+        sv:
+          name: "Efterlevnad av policys, regler och standarder f\xF6r informationss\xE4\
+            kerhet"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller efterlevnad av alla\
+            \ policyer, regler och standarder f\xF6r informationss\xE4kerhet. \xC5\
+            tg\xE4rderna omfattar regelbunden utbildning, policygranskningar och verkst\xE4\
+            llighetsmekanismer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       assessable: true
       depth: 3
@@ -3931,6 +4874,12 @@ objects:
             \ provozn\xED postupy, aby byla zaji\u0161t\u011Bna konzistence bezpe\u010D\
             nostn\xEDch postup\u016F. Mezi opat\u0159en\xED pat\u0159\xED dokumentace\
             \ proces\u016F, spr\xE1va verz\xED a p\u0159\xEDstupnost."
+        sv:
+          name: Dokumenterade driftsprocedurer
+          description: "Den h\xE4r kontrollen utvecklar och underh\xE5ller dokumenterade\
+            \ driftsprocedurer f\xF6r att s\xE4kerst\xE4lla konsekvens i s\xE4kerhetsrutinerna.\
+            \ \xC5tg\xE4rderna omfattar bland annat processdokumentation, versionskontroll\
+            \ och tillg\xE4nglighet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       assessable: false
       depth: 2
@@ -3944,6 +4893,8 @@ objects:
           name: "Mesures de s\xE9curit\xE9 applicables aux personnes"
         cs:
           name: "Kontroly v oblasti lidsk\xFDch zdroj\u016F"
+        sv:
+          name: "Kontroller f\xF6r personer"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       assessable: true
       depth: 3
@@ -3974,6 +4925,12 @@ objects:
             \ prov\u011Brky, ov\u011B\u0159ov\xE1n\xED toto\u017Enosti a posouzen\xED\
             \ kvalifikac\xED za \xFA\u010Delem sn\xED\u017Een\xED bezpe\u010Dnostn\xED\
             ch rizik."
+        sv:
+          name: "S\xE5llning"
+          description: "Denna kontroll s\xE4kerst\xE4ller genomf\xF6randet av screeningprocesser\
+            \ f\xF6r att verifiera kandidaternas l\xE4mplighet f\xF6re anst\xE4llning.\
+            \ \xC5tg\xE4rderna inkluderar bakgrundskontroller, identitetsverifiering\
+            \ och bed\xF6mning av kvalifikationer f\xF6r att minska s\xE4kerhetsriskerna."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       assessable: true
       depth: 3
@@ -4002,6 +4959,12 @@ objects:
             \ Opat\u0159en\xED zahrnuj\xED explicitn\xED ustanoven\xED o d\u016Fv\u011B\
             rnosti, dodr\u017Eov\xE1n\xED z\xE1sad a d\u016Fsledc\xEDch poru\u0161\
             en\xED."
+        sv:
+          name: "Anst\xE4llningsvillkor"
+          description: "Denna kontroll s\xE4kerst\xE4ller att det i anst\xE4llningsvillkoren\
+            \ ing\xE5r ett ansvar f\xF6r informationss\xE4kerhet. \xC5tg\xE4rderna\
+            \ omfattar uttryckliga klausuler om konfidentialitet, efterlevnad av policyer\
+            \ och konsekvenser vid \xF6vertr\xE4delser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
       assessable: true
       depth: 3
@@ -4031,6 +4994,12 @@ objects:
             \ bezpe\u010Dnosti, vzd\u011Bl\xE1v\xE1n\xED a \u0161kolen\xED. Mezi opat\u0159\
             en\xED pat\u0159\xED pl\xE1novan\xE1 \u0161kolen\xED, e-learningov\xE9\
             \ programy a simulovan\xE1 cvi\u010Den\xED proti phishingu."
+        sv:
+          name: "Medvetenhet, utbildning och fortbildning om informationss\xE4kerhet"
+          description: "Denna kontroll s\xE4kerst\xE4ller att anst\xE4llda f\xE5r\
+            \ regelbunden medvetenhet, utbildning och tr\xE4ning om informationss\xE4\
+            kerhet. \xC5tg\xE4rderna inkluderar schemalagda utbildningssessioner,\
+            \ e-learningprogram och simulerade phishing-\xF6vningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       assessable: true
       depth: 3
@@ -4059,6 +5028,12 @@ objects:
             nosti. Mezi opat\u0159en\xED pat\u0159\xED jasn\xE9 pokyny, eskala\u010D\
             n\xED postupy a d\u016Fsledn\xE9 vym\xE1h\xE1n\xED pr\xE1va k zachov\xE1\
             n\xED odpov\u011Bdnosti."
+        sv:
+          name: "Disciplin\xE4r process"
+          description: "Denna kontroll uppr\xE4ttar en disciplin\xE4r process f\xF6\
+            r att hantera brott mot informationss\xE4kerhetspolicyer. \xC5tg\xE4rderna\
+            \ omfattar tydliga riktlinjer, eskaleringsf\xF6rfaranden och konsekvent\
+            \ till\xE4mpning f\xF6r att uppr\xE4tth\xE5lla ansvarsskyldigheten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       assessable: true
       depth: 3
@@ -4091,6 +5066,13 @@ objects:
             \ zm\u011Bn\u011B role. Mezi opat\u0159en\xED pat\u0159\xED odebr\xE1\
             n\xED p\u0159\xEDstupov\xFDch pr\xE1v, shroma\u017E\u010Fov\xE1n\xED organiza\u010D\
             n\xEDch aktiv a prov\xE1d\u011Bn\xED v\xFDstupn\xEDch pohovor\u016F."
+        sv:
+          name: "Ansvar efter upps\xE4gning eller byte av anst\xE4llning"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att ansvarsomr\xE5\
+            den som r\xF6r informationss\xE4kerhet definieras och verkst\xE4lls efter\
+            \ upps\xE4gning eller roll\xE4ndringar. \xC5tg\xE4rderna omfattar \xE5\
+            terkallande av \xE5tkomstr\xE4ttigheter, insamling av organisationstillg\xE5\
+            ngar och genomf\xF6rande av avslutningsintervjuer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       assessable: true
       depth: 3
@@ -4120,6 +5102,13 @@ objects:
             en\xED pat\u0159\xED podepsan\xE9 dohody na za\u010D\xE1tku pracovn\xED\
             ho pom\u011Bru, pravideln\xE9 upom\xEDnky a vym\xE1h\xE1n\xED pr\xE1vn\xED\
             ch krok\u016F v p\u0159\xEDpad\u011B poru\u0161en\xED."
+        sv:
+          name: Avtal om konfidentialitet eller tystnadsplikt
+          description: "Den h\xE4r kontrollen implementerar sekretess- eller sekretessavtal\
+            \ f\xF6r att skydda k\xE4nslig information. \xC5tg\xE4rderna inkluderar\
+            \ undertecknade avtal vid anst\xE4llningens b\xF6rjan, periodiska p\xE5\
+            minnelser och verkst\xE4llighet av r\xE4ttsliga \xE5tg\xE4rder vid \xF6\
+            vertr\xE4delser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
       assessable: true
       depth: 3
@@ -4149,6 +5138,13 @@ objects:
             \ p\u0159\xEDstup k podnikov\xFDm syst\xE9m\u016Fm, povinn\xE9 pou\u017E\
             \xEDv\xE1n\xED VPN a z\xE1sady pro vzd\xE1lenou manipulaci s citliv\xFD\
             mi daty."
+        sv:
+          name: "Arbete p\xE5 distans"
+          description: "Denna kontroll s\xE4kerst\xE4ller en s\xE4ker hantering av\
+            \ informationss\xE4kerhetsrisker under distansarbete. \xC5tg\xE4rderna\
+            \ omfattar s\xE4ker \xE5tkomst till f\xF6retagssystem, obligatorisk anv\xE4\
+            ndning av VPN:er och policyer f\xF6r hantering av k\xE4nsliga data p\xE5\
+            \ distans."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
       assessable: true
       depth: 3
@@ -4179,6 +5175,13 @@ objects:
             ly pro hl\xE1\u0161en\xED incident\u016F, osv\u011Btov\xE9 kampan\u011B\
             \ a n\xE1sledn\xE9 postupy pro vy\u0161et\u0159ov\xE1n\xED a \u0159e\u0161\
             en\xED nahl\xE1\u0161en\xFDch ud\xE1lost\xED."
+        sv:
+          name: "Rapportering av h\xE4ndelser om informationss\xE4kerhet"
+          description: "Denna kontroll s\xE4kerst\xE4ller att anst\xE4llda snabbt\
+            \ kan rapportera informationss\xE4kerhetsh\xE4ndelser. \xC5tg\xE4rderna\
+            \ omfattar kanaler f\xF6r incidentrapportering, kampanjer f\xF6r att \xF6\
+            ka medvetenheten och uppf\xF6ljningsf\xF6rfaranden f\xF6r att unders\xF6\
+            ka och hantera rapporterade h\xE4ndelser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       assessable: false
       depth: 2
@@ -4192,6 +5195,8 @@ objects:
           name: "Mesures de s\xE9curit\xE9 physique"
         cs:
           name: "Kontroly v oblasti fyzick\xE9 bezpe\u010Dnosti"
+        sv:
+          name: Fysiska kontroller
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
       assessable: true
       depth: 3
@@ -4222,6 +5227,13 @@ objects:
             \ bari\xE9ry, kontroly p\u0159\xEDstupu a monitorovac\xED syst\xE9my,\
             \ kter\xE9 zaji\u0161\u0165uj\xED, \u017Ee vstup mohou prov\xE1d\u011B\
             t pouze opr\xE1vn\u011Bn\xE9 osoby."
+        sv:
+          name: "Fysiska s\xE4kerhetsperimetrar"
+          description: "Den h\xE4r kontrollen uppr\xE4ttar fysiska s\xE4kerhetsperimeter\
+            \ f\xF6r att skydda kritiska omr\xE5den fr\xE5n obeh\xF6rig \xE5tkomst.\
+            \ \xC5tg\xE4rderna inkluderar barri\xE4rer, \xE5tkomstkontroller och \xF6\
+            vervakningssystem f\xF6r att s\xE4kerst\xE4lla att endast beh\xF6riga\
+            \ personer kan komma in."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
       assessable: true
       depth: 3
@@ -4249,6 +5261,12 @@ objects:
             vn\u011Bn\xE9mu p\u0159\xEDstupu. Mezi tato opat\u0159en\xED pat\u0159\
             \xED syst\xE9my odznak\u016F, bezpe\u010Dnostn\xED person\xE1l a z\xE1\
             znamy o n\xE1v\u0161t\u011Bvn\xEDc\xEDch."
+        sv:
+          name: "Fysisk ing\xE5ng"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att fysiska startpunkter\
+            \ kontrolleras och \xF6vervakas f\xF6r att f\xF6rhindra obeh\xF6rig \xE5\
+            tkomst. \xC5tg\xE4rderna inkluderar passerkortssystem, s\xE4kerhetspersonal\
+            \ och bes\xF6ksloggar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
       assessable: true
       depth: 3
@@ -4276,6 +5294,12 @@ objects:
             \u0159\xED, m\xEDstnost\xED a za\u0159\xEDzen\xED z d\u016Fvodu ochrany\
             \ informac\xED a zdroj\u016F. Mezi opat\u0159en\xED pat\u0159\xED zamykan\xE9\
             \ dve\u0159e, omezen\xE9 prostory a syst\xE9my dohledu."
+        sv:
+          name: "S\xE4kra kontor, rum och anl\xE4ggningar"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att kontor, rum och\
+            \ anl\xE4ggningar \xE4r skyddade f\xF6r att skydda information och resurser.\
+            \ \xC5tg\xE4rderna inkluderar l\xE5sta d\xF6rrar, begr\xE4nsade omr\xE5\
+            den och \xF6vervakningssystem."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
       assessable: true
       depth: 3
@@ -4302,6 +5326,11 @@ objects:
             nosti pro detekci a rychlou reakci na hrozby. Mezi opat\u0159en\xED pat\u0159\
             \xED syst\xE9my CCTV, detektory pohybu a upozorn\u011Bn\xED v re\xE1ln\xE9\
             m \u010Dase."
+        sv:
+          name: "\xD6vervakning av fysisk s\xE4kerhet"
+          description: "Den h\xE4r kontrollen implementerar fysisk s\xE4kerhets\xF6\
+            vervakning f\xF6r att identifiera och reagera snabbt p\xE5 hot. \xC5tg\xE4\
+            rderna inkluderar CCTV-system, r\xF6relsedetektorer och varningar i realtid."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       assessable: true
       depth: 3
@@ -4328,6 +5357,12 @@ objects:
             mi a environment\xE1ln\xEDmi hrozbami. Mezi opat\u0159en\xED pat\u0159\
             \xED protipo\u017E\xE1rn\xED syst\xE9my, regulace teploty a protipovod\u0148\
             ov\xE9 bari\xE9ry."
+        sv:
+          name: "Skydd mot fysiska hot och milj\xF6hot"
+          description: "Denna kontroll skyddar system och resurser fr\xE5n fysiska\
+            \ och milj\xF6m\xE4ssiga hot. \xC5tg\xE4rderna omfattar brandsl\xE4ckningssystem,\
+            \ temperaturkontroller och barri\xE4rer f\xF6r att f\xF6rhindra \xF6versv\xE4\
+            mningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       assessable: true
       depth: 3
@@ -4356,6 +5391,12 @@ objects:
             stup pouze opr\xE1vn\u011Bn\xFDm osob\xE1m. Mezi opat\u0159en\xED pat\u0159\
             \xED syst\xE9my kontroly p\u0159\xEDstupu, doprovod n\xE1v\u0161t\u011B\
             vn\xEDk\u016F a monitorov\xE1n\xED aktivit."
+        sv:
+          name: "Arbeta i s\xE4kra omr\xE5den"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kra omr\xE5\
+            den hanteras f\xF6r att endast till\xE5ta auktoriserad \xE5tkomst. \xC5\
+            tg\xE4rderna omfattar bland annat system f\xF6r \xE5tkomstkontroll, eskorter\
+            \ av bes\xF6kare och aktivitets\xF6vervakning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
       assessable: true
       depth: 3
@@ -4384,6 +5425,13 @@ objects:
             m z\xE1sad pro voln\xFD st\u016Fl a volnou obrazovku. Mezi opat\u0159\
             en\xED pat\u0159\xED uzam\u010Den\xED citliv\xFDch dokument\u016F a automatick\xE9\
             \ zamyk\xE1n\xED obrazovek, kdy\u017E se nepou\u017E\xEDvaj\xED."
+        sv:
+          name: "Tydligt skrivbord och tydlig sk\xE4rm"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att k\xE4nslig information\
+            \ inte l\xE4mnas exponerad genom att anta principer f\xF6r tydligt skrivbord\
+            \ och genomskinlig sk\xE4rm. \xC5tg\xE4rderna inkluderar att l\xE5sa k\xE4\
+            nsliga dokument och automatiskt l\xE5sa sk\xE4rmar n\xE4r de inte anv\xE4\
+            nds."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
       assessable: true
       depth: 3
@@ -4412,6 +5460,12 @@ objects:
             vn\u011Bn\xE9mu p\u0159\xEDstupu nebo po\u0161kozen\xED. Mezi opat\u0159\
             en\xED pat\u0159\xED bezpe\u010Dn\xE1 mont\xE1\u017E, uzam\u010Den\xE9\
             \ sk\u0159\xEDn\u011B a oblasti s omezen\xFDm p\u0159\xEDstupem."
+        sv:
+          name: Placering och skydd av utrustning
+          description: "Denna kontroll s\xE4kerst\xE4ller att utrustningen \xE4r placerad\
+            \ och skyddad f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst eller skada.\
+            \ \xC5tg\xE4rderna inkluderar s\xE4ker montering, l\xE5sta sk\xE5p och\
+            \ omr\xE5den med begr\xE4nsad \xE5tkomst."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
       assessable: true
       depth: 3
@@ -4439,6 +5493,12 @@ objects:
             \ zachov\xE1na d\u016Fv\u011Brnost a integrita. Mezi opat\u0159en\xED\
             \ pat\u0159\xED \u0161ifrov\xE1n\xED, bezpe\u010Dn\xFD p\u0159enos a sledov\xE1\
             n\xED p\u0159\xEDstupu."
+        sv:
+          name: "S\xE4kerhet f\xF6r tillg\xE5ngar utanf\xF6r de lokala byggnaderna"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att tillg\xE5ngar\
+            \ som anv\xE4nds eller lagras utanf\xF6r lokalerna skyddas f\xF6r att\
+            \ uppr\xE4tth\xE5lla konfidentialitet och integritet. \xC5tg\xE4rderna\
+            \ omfattar kryptering, s\xE4ker transport och \xE5tkomstsp\xE5rning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
       assessable: true
       depth: 3
@@ -4464,6 +5524,11 @@ objects:
             \ se zabr\xE1nilo neopr\xE1vn\u011Bn\xE9mu p\u0159\xEDstupu nebo manipulaci.\
             \ Mezi opat\u0159en\xED pat\u0159\xED bezpe\u010Dn\xE9 \xFAlo\u017Ei\u0161\
             t\u011B, \u0161ifrov\xE1n\xED a omezen\xED p\u0159\xEDstupu."
+        sv:
+          name: Lagringsmedier
+          description: "Den h\xE4r kontrollen skyddar lagringsmedia f\xF6r att f\xF6\
+            rhindra obeh\xF6rig \xE5tkomst eller manipulering. \xC5tg\xE4rderna omfattar\
+            \ s\xE4ker lagring, kryptering och \xE5tkomstbegr\xE4nsningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       assessable: true
       depth: 3
@@ -4491,6 +5556,12 @@ objects:
             \ spolehliv\xE9 a chr\xE1n\u011Bn\xE9 p\u0159ed p\u0159eru\u0161en\xED\
             m. Mezi opat\u0159en\xED pat\u0159\xED redundantn\xED syst\xE9my a fyzick\xE9\
             \ zabezpe\u010Den\xED."
+        sv:
+          name: "St\xF6d f\xF6r allm\xE4nnyttiga f\xF6retag"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att st\xF6dverktyg,\
+            \ till exempel kraft- och kylsystem, \xE4r tillf\xF6rlitliga och skyddade\
+            \ mot avbrott. \xC5tg\xE4rderna omfattar bland annat redundanta system\
+            \ och fysisk s\xE4kerhet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
       assessable: true
       depth: 3
@@ -4517,6 +5588,12 @@ objects:
             eny, aby se zabr\xE1nilo neopr\xE1vn\u011Bn\xE9mu zachycen\xED nebo po\u0161\
             kozen\xED. Mezi opat\u0159en\xED pat\u0159\xED ochrann\xE9 trubky, spr\xE1\
             vn\xE9 ozna\u010Den\xED a bezpe\u010Dn\xE9 veden\xED."
+        sv:
+          name: "S\xE4kerhet f\xF6r kabeldragning"
+          description: "Denna kontroll s\xE4kerst\xE4ller att kablarna \xE4r s\xE4\
+            krade f\xF6r att f\xF6rhindra obeh\xF6rig avlyssning eller skada. \xC5\
+            tg\xE4rderna inkluderar skyddsledningar, korrekt m\xE4rkning och s\xE4\
+            ker dragning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
       assessable: true
       depth: 3
@@ -4545,6 +5622,12 @@ objects:
             \ funkce a p\u0159edch\xE1zeny poruch\xE1m. Mezi tato opat\u0159en\xED\
             \ pat\u0159\xED pravideln\xFD servis, bezpe\u010Dn\xE9 postupy \xFAdr\u017E\
             by a p\u0159\xEDstup opr\xE1vn\u011Bn\xE9ho person\xE1lu."
+        sv:
+          name: "Underh\xE5ll av utrustning"
+          description: "Denna kontroll s\xE4kerst\xE4ller att utrustningen underh\xE5\
+            lls f\xF6r att garantera korrekt funktion och f\xF6rhindra fel. \xC5tg\xE4\
+            rderna inkluderar regelbunden service, s\xE4kra underh\xE5llsrutiner och\
+            \ beh\xF6rig personal\xE5tkomst."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
       assessable: true
       depth: 3
@@ -4573,6 +5656,12 @@ objects:
             \ nebo op\u011Btovn\xE9 pou\u017Eit\xED za\u0159\xEDzen\xED k ochran\u011B\
             \ citliv\xFDch informac\xED. Mezi opat\u0159en\xED pat\u0159\xED sanitace\
             \ dat, fyzick\xE9 zni\u010Den\xED a certifikovan\xE9 procesy likvidace."
+        sv:
+          name: "S\xE4ker kassering eller \xE5teranv\xE4ndning av utrustning"
+          description: "Denna kontroll s\xE4kerst\xE4ller s\xE4ker kassering eller\
+            \ \xE5teranv\xE4ndning av utrustning f\xF6r att skydda k\xE4nslig information.\
+            \ \xC5tg\xE4rderna inkluderar datasanering, fysisk f\xF6rst\xF6relse och\
+            \ certifierade bortskaffningsprocesser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       assessable: false
       depth: 2
@@ -4586,6 +5675,8 @@ objects:
           name: "Mesures de s\xE9curit\xE9 technologiques"
         cs:
           name: "Technologick\xE9 kontroly"
+        sv:
+          name: Tekniska kontroller
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
       assessable: true
       depth: 3
@@ -4614,6 +5705,12 @@ objects:
             \ za\u0159\xEDzen\xED, implementac\xED bezpe\u010Dnostn\xEDch opat\u0159\
             en\xED, jako je detekce koncov\xFDch bod\u016F, \u0161ifrov\xE1n\xED a\
             \ zabezpe\u010Den\xE9 konfigurace, aby se minimalizovala rizika."
+        sv:
+          name: "Anv\xE4ndarens slutpunktsenheter"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller skydd av slutpunktsenheter\
+            \ som b\xE4rbara datorer, station\xE4ra datorer och mobila enheter genom\
+            \ att implementera s\xE4kerhets\xE5tg\xE4rder som slutpunktsidentifiering,\
+            \ kryptering och s\xE4kra konfigurationer f\xF6r att minimera risker."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
       assessable: true
       depth: 3
@@ -4643,6 +5740,13 @@ objects:
             \ a zv\xFD\u0161ila se bezpe\u010Dnost. Mezi opat\u0159en\xED pat\u0159\
             \xED \u0159\xEDzen\xED p\u0159\xEDstupu na z\xE1klad\u011B rol\xED, pravideln\xE9\
             \ kontroly a p\u0159\xEDsn\xE1 spr\xE1va \xFA\u010Dt\u016F."
+        sv:
+          name: "Privilegierade \xE5tkomstr\xE4ttigheter"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att privilegierade\
+            \ \xE5tkomstr\xE4ttigheter beviljas, hanteras och \xF6vervakas noggrant\
+            \ f\xF6r att f\xF6rhindra missbruk och f\xF6rb\xE4ttra s\xE4kerheten.\
+            \ \xC5tg\xE4rderna omfattar rollbaserade \xE5tkomstkontroller, periodiska\
+            \ granskningar och strikt kontohantering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
       assessable: true
       depth: 3
@@ -4670,6 +5774,12 @@ objects:
             ebujete\u201C. Mezi opat\u0159en\xED pat\u0159\xED ov\u011B\u0159ov\xE1\
             n\xED u\u017Eivatel\u016F, opr\xE1vn\u011Bn\xED zalo\u017Een\xE1 na rol\xED\
             ch a pravideln\xE9 kontroly p\u0159\xEDstupu."
+        sv:
+          name: "Begr\xE4nsning av \xE5tkomst till information"
+          description: "Den h\xE4r kontrollen begr\xE4nsar \xE5tkomsten till k\xE4\
+            nslig information baserat p\xE5 principer som du beh\xF6ver veta. \xC5\
+            tg\xE4rderna omfattar anv\xE4ndarautentisering, rollbaserade beh\xF6righeter\
+            \ och regelbundna \xE5tkomstgranskningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
       assessable: true
       depth: 3
@@ -4697,6 +5807,12 @@ objects:
             \u017Een\xED, \xFAprav\xE1m nebo odhalen\xED. Mezi opat\u0159en\xED pat\u0159\
             \xED spr\xE1va verz\xED, zabezpe\u010Den\xE9 repozit\xE1\u0159e a omezen\xFD\
             \ p\u0159\xEDstup v\xFDvoj\xE1\u0159\u016F."
+        sv:
+          name: "Tillg\xE5ng till k\xE4llkod"
+          description: "Den h\xE4r kontrollen skyddar \xE5tkomsten till k\xE4llkoden\
+            \ genom att f\xF6rhindra obeh\xF6rig visning, \xE4ndring eller exponering.\
+            \ \xC5tg\xE4rderna omfattar versionskontroll, s\xE4kra lagringsplatser\
+            \ och begr\xE4nsad \xE5tkomst f\xF6r utvecklare."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
       assessable: true
       depth: 3
@@ -4723,6 +5839,11 @@ objects:
             ov\xE1n\xED, jako je v\xEDcefaktorov\xE9 ov\u011B\u0159ov\xE1n\xED, k\
             \ ov\u011B\u0159en\xED identity u\u017Eivatel\u016F a zabr\xE1n\u011B\
             n\xED neopr\xE1vn\u011Bn\xE9mu p\u0159\xEDstupu."
+        sv:
+          name: "S\xE4ker autentisering"
+          description: "Den h\xE4r kontrollen implementerar starka autentiseringsmekanismer,\
+            \ till exempel multifaktorautentisering, f\xF6r att verifiera anv\xE4\
+            ndaridentiteter och f\xF6rhindra obeh\xF6rig \xE5tkomst."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
       assessable: true
       depth: 3
@@ -4750,6 +5871,12 @@ objects:
             \ a p\u0159edch\xE1zela naru\u0161en\xED. Mezi opat\u0159en\xED pat\u0159\
             \xED monitorov\xE1n\xED vyu\u017Eit\xED zdroj\u016F a pl\xE1nov\xE1n\xED\
             \ budouc\xEDch pot\u0159eb."
+        sv:
+          name: Hantering av kapacitet
+          description: "Denna kontroll s\xE4kerst\xE4ller att systemkapaciteten hanteras\
+            \ f\xF6r att ge tillr\xE4cklig prestanda och f\xF6rhindra st\xF6rningar.\
+            \ \xC5tg\xE4rderna omfattar bland annat \xF6vervakning av resursanv\xE4\
+            ndning och planering f\xF6r framtida behov."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
       assessable: true
       depth: 3
@@ -4775,6 +5902,11 @@ objects:
             \ antivirov\xFD software, n\xE1stroje pro detekci hrozeb a pravideln\xE9\
             \ aktualizace, k ochran\u011B syst\xE9m\u016F p\u0159ed malwarem a \u0161\
             kodliv\xFDmi \xFAtoky."
+        sv:
+          name: Skydd mot skadlig kod
+          description: "Den h\xE4r kontrollen distribuerar \xE5tg\xE4rder som antivirusprogram,\
+            \ verktyg f\xF6r hotidentifiering och regelbundna uppdateringar f\xF6\
+            r att skydda system fr\xE5n skadlig kod och skadliga attacker."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
       assessable: true
       depth: 3
@@ -4801,6 +5933,11 @@ objects:
             \ odstra\u0148uje technick\xE9 zranitelnosti, aby se minimalizovala bezpe\u010D\
             nostn\xED rizika. Mezi opat\u0159en\xED pat\u0159\xED skenov\xE1n\xED\
             \ zranitelnost\xED a spr\xE1va oprav."
+        sv:
+          name: "Hantering av tekniska s\xE5rbarheter"
+          description: "Den h\xE4r kontrollen identifierar, utv\xE4rderar och \xE5\
+            tg\xE4rdar tekniska s\xE5rbarheter snabbt f\xF6r att minimera s\xE4kerhetsriskerna.\
+            \ \xC5tg\xE4rderna inkluderar s\xE5rbarhetsskanning och patchhantering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       assessable: true
       depth: 3
@@ -4824,6 +5961,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje konzistentn\xED spr\xE1\
             vu konfigurac\xED syst\xE9mu, aby se zachovala bezpe\u010Dnostn\xED nastaven\xED\
             \ a zabr\xE1nilo se neopr\xE1vn\u011Bn\xFDm zm\u011Bn\xE1m."
+        sv:
+          name: Hantering av konfiguration
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent hantering\
+            \ av systemkonfigurationer f\xF6r att uppr\xE4tth\xE5lla s\xE4kerhetsinst\xE4\
+            llningar och f\xF6rhindra obeh\xF6riga \xE4ndringar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
       assessable: true
       depth: 3
@@ -4849,6 +5991,11 @@ objects:
             \ jsou bezpe\u010Dn\u011B smaz\xE1ny, jakmile ji\u017E nejsou pot\u0159\
             eba, aby se zabr\xE1nilo jejich neopr\xE1vn\u011Bn\xE9mu obnoven\xED nebo\
             \ odhalen\xED."
+        sv:
+          name: Radering av uppgifter
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att k\xE4nslig information\
+            \ tas bort p\xE5 ett s\xE4kert s\xE4tt n\xE4r den inte l\xE4ngre beh\xF6\
+            vs f\xF6r att f\xF6rhindra obeh\xF6rig \xE5terst\xE4llning eller exponering."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
       assessable: true
       depth: 3
@@ -4875,6 +6022,11 @@ objects:
             \ zpracov\xE1n\xED nebo zobrazen\xED pomoc\xED technik maskov\xE1n\xED\
             \ dat, kter\xE9 je chr\xE1n\xED p\u0159ed neopr\xE1vn\u011Bn\xFDmi u\u017E\
             ivateli."
+        sv:
+          name: Maskering av data
+          description: "Den h\xE4r kontrollen skyddar k\xE4nslig information under\
+            \ bearbetning eller visning med hj\xE4lp av datamaskeringstekniker f\xF6\
+            r att d\xF6lja data fr\xE5n obeh\xF6riga anv\xE4ndare."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
       assessable: true
       depth: 3
@@ -4899,6 +6051,11 @@ objects:
             uj\xED n\xE1hodn\xE9mu vystaven\xED citliv\xFDch dat prost\u0159ednictv\xED\
             m e-mailu, vym\u011Bniteln\xFDch m\xE9di\xED nebo jin\xFDch kan\xE1l\u016F\
             ."
+        sv:
+          name: "F\xF6rebyggande av datal\xE4ckage"
+          description: "Den h\xE4r kontrollen implementerar mekanismer f\xF6r att\
+            \ f\xF6rhindra oavsiktlig exponering av k\xE4nsliga data via e-post, flyttbara\
+            \ medier eller andra kanaler."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
       assessable: true
       depth: 3
@@ -4924,6 +6081,11 @@ objects:
             n\xE9 z\xE1lohov\xE1n\xED d\u016Fle\u017Eit\xFDch informac\xED, aby byla\
             \ zaji\u0161t\u011Bna jejich dostupnost v p\u0159\xEDpad\u011B incident\u016F\
             \ nebo katastrof."
+        sv:
+          name: "S\xE4kerhetskopiering av information"
+          description: "Denna kontroll s\xE4kerst\xE4ller att kritisk information\
+            \ s\xE4kerhetskopieras regelbundet och s\xE4kert f\xF6r att s\xE4kerst\xE4\
+            lla dess tillg\xE4nglighet i h\xE4ndelse av incidenter eller katastrofer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
       assessable: true
       depth: 3
@@ -4949,6 +6111,11 @@ objects:
             ch za\u0159\xEDzen\xED je zabudov\xE1na redundance, aby se zachovala dostupnost\
             \ a provoz b\u011Bhem syst\xE9mov\xFDch selh\xE1n\xED nebo nouzov\xFD\
             ch situac\xED."
+        sv:
+          name: "Redundans f\xF6r informationsbehandlingsanl\xE4ggningar"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att redundans \xE4\
+            r inbyggd i bearbetningsanl\xE4ggningar f\xF6r att uppr\xE4tth\xE5lla\
+            \ tillg\xE4nglighet och drift under systemfel eller n\xF6dsituationer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
       assessable: true
       depth: 3
@@ -4972,6 +6139,11 @@ objects:
           description: "Tato kontrola umo\u017E\u0148uje protokolov\xE1n\xED aktivit\
             \ v syst\xE9mech pro podporu monitorov\xE1n\xED, detekce incident\u016F\
             \ a forenzn\xEDho vy\u0161et\u0159ov\xE1n\xED."
+        sv:
+          name: Skogsavverkning
+          description: "Den h\xE4r kontrollen m\xF6jligg\xF6r loggning av aktiviteter\
+            \ i system f\xF6r att st\xF6dja \xF6vervakning, incidentidentifiering\
+            \ och kriminaltekniska unders\xF6kningar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3
@@ -4995,6 +6167,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje pr\u016Fb\u011B\u017En\xE9\
             \ monitorov\xE1n\xED aktivit syst\xE9mu za \xFA\u010Delem detekce, reakce\
             \ na a zm\xEDrn\u011Bn\xED bezpe\u010Dnostn\xEDch hrozeb."
+        sv:
+          name: "\xD6vervakning av aktiviteter"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller kontinuerlig \xF6\
+            vervakning av systemaktiviteter f\xF6r att identifiera, svara p\xE5 och\
+            \ minimera s\xE4kerhetshot."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
       assessable: true
       depth: 3
@@ -5018,6 +6195,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje synchronizaci syst\xE9mov\xFD\
             ch hodin, aby se zachovala p\u0159esn\xE1 a konzistentn\xED \u010Dasov\xE1\
             \ raz\xEDtka pro protokoly a dal\u0161\xED kritick\xE9 procesy."
+        sv:
+          name: Synkronisering av klockan
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att systemklockorna\
+            \ \xE4r synkroniserade f\xF6r att uppr\xE4tth\xE5lla korrekta och konsekventa\
+            \ tidsst\xE4mplar f\xF6r loggar och andra kritiska processer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
       assessable: true
       depth: 3
@@ -5041,6 +6223,11 @@ objects:
           description: "Tato kontrola omezuje a monitoruje pou\u017E\xEDv\xE1n\xED\
             \ privilegovan\xFDch obslu\u017En\xFDch program\u016F, aby se zabr\xE1\
             nilo zneu\u017Eit\xED a neopr\xE1vn\u011Bn\xFDm akc\xEDm."
+        sv:
+          name: "Anv\xE4ndning av privilegierade verktygsprogram"
+          description: "Den h\xE4r kontrollen begr\xE4nsar och \xF6vervakar anv\xE4\
+            ndningen av privilegierade verktygsprogram f\xF6r att f\xF6rhindra missbruk\
+            \ och obeh\xF6riga \xE5tg\xE4rder."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       assessable: true
       depth: 3
@@ -5065,6 +6252,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje bezpe\u010Dnou spr\xE1vu\
             \ instalace softwaru v provozn\xEDch syst\xE9mech, aby se zabr\xE1nilo\
             \ zranitelnostem nebo neopr\xE1vn\u011Bn\xFDm zm\u011Bn\xE1m."
+        sv:
+          name: "Installation av programvara p\xE5 operativsystem"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att programvaruinstallation\
+            \ p\xE5 operativsystem hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att\
+            \ f\xF6rhindra s\xE5rbarheter eller obeh\xF6riga \xE4ndringar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
       assessable: true
       depth: 3
@@ -5091,6 +6283,11 @@ objects:
             t\u011B pomoc\xED firewall\u016F, syst\xE9m\u016F detekce naru\u0161en\xED\
             \ a \u0159\xEDzen\xED p\u0159\xEDstupu, kter\xE9 chr\xE1n\xED p\u0159\
             ed neopr\xE1vn\u011Bn\xFDm p\u0159\xEDstupem a \xFAtoky."
+        sv:
+          name: "N\xE4tverks s\xE4kerhet"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller n\xE4tverkss\xE4\
+            kerhet genom brandv\xE4ggar, intr\xE5ngsidentifieringssystem och \xE5\
+            tkomstkontroller f\xF6r att skydda mot obeh\xF6rig \xE5tkomst och attacker."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
       assessable: true
       depth: 3
@@ -5114,6 +6311,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje ochranu s\xED\u0165ov\xFD\
             ch slu\u017Eeb, aby byla zachov\xE1na d\u016Fv\u011Brnost, integrita a\
             \ dostupnost b\u011Bhem pou\u017E\xEDv\xE1n\xED."
+        sv:
+          name: "S\xE4kerhet f\xF6r n\xE4ttj\xE4nster"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att n\xE4tverkstj\xE4\
+            nster skyddas f\xF6r att uppr\xE4tth\xE5lla konfidentialitet, integritet\
+            \ och tillg\xE4nglighet under anv\xE4ndning."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
       assessable: true
       depth: 3
@@ -5137,6 +6339,11 @@ objects:
           description: "Tato kontrola implementuje segmentaci s\xEDt\u011B, aby se\
             \ omezilo \u0161\xED\u0159en\xED hrozeb a minimalizoval dopad potenci\xE1\
             ln\xEDch naru\u0161en\xED."
+        sv:
+          name: "Segregation av n\xE4tverk"
+          description: "Den h\xE4r kontrollen implementerar n\xE4tverkssegregering\
+            \ f\xF6r att begr\xE4nsa spridningen av hot och minimera effekten av potentiella\
+            \ intr\xE5ng."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
       assessable: true
       depth: 3
@@ -5160,6 +6367,11 @@ objects:
           description: "Tato kontrola pou\u017E\xEDv\xE1 n\xE1stroje pro filtrov\xE1\
             n\xED webu k blokov\xE1n\xED p\u0159\xEDstupu k neopr\xE1vn\u011Bn\xE9\
             mu nebo \u0161kodliv\xE9mu obsahu p\u0159es internet."
+        sv:
+          name: Webbfiltrering
+          description: "Den h\xE4r kontrollen anv\xE4nder webbfiltreringsverktyg f\xF6\
+            r att blockera obeh\xF6rigt eller skadligt inneh\xE5ll fr\xE5n att n\xE5\
+            s via Internet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       assessable: true
       depth: 3
@@ -5183,6 +6395,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje, \u017Ee kryptografick\xE9\
             \ techniky jsou pou\u017E\xEDv\xE1ny k ochran\u011B d\u016Fv\u011Brnosti,\
             \ integrity a autenticity dat."
+        sv:
+          name: "Anv\xE4ndning av kryptografi"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att kryptografiska\
+            \ tekniker till\xE4mpas f\xF6r att skydda datakonfidentialitet, integritet\
+            \ och \xE4kthet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
       assessable: true
       depth: 3
@@ -5207,6 +6424,11 @@ objects:
           description: "Tato kontrola integruje zabezpe\u010Den\xED do v\u0161ech\
             \ f\xE1z\xED \u017Eivotn\xEDho cyklu v\xFDvoje, aby se zajistilo bezpe\u010D\
             n\xE9 vytv\xE1\u0159en\xED syst\xE9m\u016F a aplikac\xED."
+        sv:
+          name: "S\xE4ker utvecklingslivscykel"
+          description: "Den h\xE4r kontrollen integrerar s\xE4kerhet i alla steg i\
+            \ utvecklingslivscykeln f\xF6r att s\xE4kerst\xE4lla att system och program\
+            \ skapas p\xE5 ett s\xE4kert s\xE4tt."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
       assessable: true
       depth: 3
@@ -5229,6 +6451,10 @@ objects:
           name: "Po\u017Eadavky na zabezpe\u010Den\xED aplikac\xED"
           description: "Tato kontrola definuje a vynucuje bezpe\u010Dnostn\xED po\u017E\
             adavky pro aplikace, aby byla chr\xE1n\u011Bna p\u0159ed zranitelnostmi."
+        sv:
+          name: "S\xE4kerhetskrav f\xF6r program"
+          description: "Den h\xE4r kontrollen definierar och till\xE4mpar s\xE4kerhetskrav\
+            \ f\xF6r program f\xF6r att skydda mot s\xE4kerhetsrisker."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
       assessable: true
       depth: 3
@@ -5254,6 +6480,10 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje, \u017Ee b\u011Bhem v\xFD\
             voje syst\xE9mov\xFDch architektur jsou p\u0159ijaty bezpe\u010Dn\xE9\
             \ principy n\xE1vrhu."
+        sv:
+          name: "S\xE4ker systemarkitektur och tekniska principer"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kra designprinciper\
+            \ anv\xE4nds under utvecklingen av systemarkitekturer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
       assessable: true
       depth: 3
@@ -5276,6 +6506,10 @@ objects:
           name: "Bezpe\u010Dn\xE9 programov\xE1n\xED"
           description: "Tato kontrola implementuje bezpe\u010Dn\xE9 postupy programov\xE1\
             n\xED, aby se minimalizovaly zranitelnosti ve vyv\xEDjen\xE9m softwaru."
+        sv:
+          name: "S\xE4ker kodning"
+          description: "Den h\xE4r kontrollen implementerar s\xE4kra kodningsmetoder\
+            \ f\xF6r att minimera s\xE5rbarheter i utvecklad programvara."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
       assessable: true
       depth: 3
@@ -5299,6 +6533,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje, \u017Ee bezpe\u010Dnostn\xED\
             \ testov\xE1n\xED je prov\xE1d\u011Bno b\u011Bhem f\xE1z\xED v\xFDvoje\
             \ a p\u0159ijet\xED, aby se identifikovaly slabiny."
+        sv:
+          name: "S\xE4kerhetstestning under utveckling och acceptans"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetstestning\
+            \ utf\xF6rs under utvecklings- och godk\xE4nnandefaserna f\xF6r att identifiera\
+            \ svagheter."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
       assessable: true
       depth: 3
@@ -5322,6 +6561,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje efektivn\xED \u0159\xED\
             zen\xED bezpe\u010Dnostn\xEDch rizik, kdy\u017E je v\xFDvoj zad\xE1v\xE1\
             n extern\xEDm dodavatel\u016Fm."
+        sv:
+          name: Outsourcad utveckling
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetsrisker\
+            \ hanteras effektivt n\xE4r utvecklingen l\xE4ggs ut p\xE5 entreprenad\
+            \ till tredjepartsleverant\xF6rer."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
       assessable: true
       depth: 3
@@ -5349,6 +6593,11 @@ objects:
             ho, testovac\xEDho a produk\u010Dn\xEDho prost\u0159ed\xED, aby se zabr\xE1\
             nilo necht\u011Bn\xFDm interakc\xEDm a neopr\xE1vn\u011Bn\xE9mu p\u0159\
             \xEDstupu."
+        sv:
+          name: "Separering av utvecklings-, test- och produktionsmilj\xF6er"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att utvecklings-,\
+            \ test- och produktionsmilj\xF6er \xE4r \xE5tskilda f\xF6r att f\xF6rhindra\
+            \ oavsiktliga interaktioner och obeh\xF6rig \xE5tkomst."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
       assessable: true
       depth: 3
@@ -5372,6 +6621,11 @@ objects:
           description: "Tato kontrola zaji\u0161\u0165uje bezpe\u010Dn\xE9 \u0159\xED\
             zen\xED zm\u011Bn v syst\xE9mech, aby se minimalizovala rizika a udr\u017E\
             ela provozn\xED stabilita."
+        sv:
+          name: "Hantering av f\xF6r\xE4ndringar"
+          description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att \xE4ndringar\
+            \ i systemen hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att minimera\
+            \ risker och uppr\xE4tth\xE5lla driftstabiliteten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
       assessable: true
       depth: 3
@@ -5395,6 +6649,10 @@ objects:
           description: "Tato kontrola chr\xE1n\xED testovac\xED data, aby se zabr\xE1\
             nilo \xFAniku citliv\xFDch nebo d\u016Fv\u011Brn\xFDch informac\xED b\u011B\
             hem testovac\xEDch proces\u016F."
+        sv:
+          name: Information om provningen
+          description: "Denna kontroll skyddar testdata f\xF6r att f\xF6rhindra exponering\
+            \ av k\xE4nslig eller konfidentiell information under testprocesser."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
       assessable: true
       depth: 3
@@ -5427,3 +6685,10 @@ objects:
             en\xED. Mezi opat\u0159en\xED pat\u0159\xED pou\u017E\xEDv\xE1n\xED neproduk\u010D\
             n\xEDch prost\u0159ed\xED, omezen\xED p\u0159\xEDstupu a dohody o ml\u010D\
             enlivosti k zachov\xE1n\xED bezpe\u010Dnosti a integrity syst\xE9mu."
+        sv:
+          name: Skydd av informationssystem under revisionstestning
+          description: "Denna kontroll s\xE4kerst\xE4ller att system och data skyddas\
+            \ under revisioner genom att f\xF6rhindra obeh\xF6rig \xE5tkomst, datal\xE4\
+            ckage eller st\xF6rningar. \xC5tg\xE4rderna omfattar anv\xE4ndning av\
+            \ icke-produktionsmilj\xF6er, \xE5tkomstbegr\xE4nsningar och konfidentialitetsavtal\
+            \ f\xF6r att uppr\xE4tth\xE5lla systemets s\xE4kerhet och integritet."
