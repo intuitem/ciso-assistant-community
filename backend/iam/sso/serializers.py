@@ -40,7 +40,7 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         allow_null=True,
     )
     secret = serializers.CharField(
-        wrtiable_only=True,
+        write_only=True,
         trim_whitespace=False,
         required=False,
         allow_blank=True,
