@@ -7,12 +7,16 @@
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
 
-	export let row: any;
-	export let handler: DataHandler;
+	interface Props {
+		row: any;
+		handler: DataHandler;
+	}
+
+	let { row, handler }: Props = $props();
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = [];
+	let options: { label: string; value: string }[] = $state([]);
 
 	onMount(async () => {
 		options = await fetch('/applied-controls/status').then((r) => r.json());
@@ -50,17 +54,17 @@
 
 <ContextMenu.Sub>
 	<ContextMenu.SubTrigger
-		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted data-[state=open]:bg-surface-50"
+		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50"
 	>
 		<div class="flex items-center">{m.changeStatus()}</div>
 	</ContextMenu.SubTrigger>
 	<ContextMenu.SubContent
-		class="z-50 w-full max-w-[209px] outline-none card bg-white px-1 py-1.5 shadow-md cursor-default data-[highlighted]:bg-surface-50"
+		class="z-50 w-full max-w-[209px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default data-highlighted:bg-surface-50"
 		sideOffset={10}
 	>
 		{#each options as option}
 			<ContextMenu.Item
-				class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent hover:bg-surface-50"
+				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50"
 				on:click={async () => await changeStatus(option.value)}
 			>
 				{safeTranslate(option.label)}

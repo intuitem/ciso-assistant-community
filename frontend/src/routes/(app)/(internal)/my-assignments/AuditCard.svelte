@@ -5,7 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import HalfGauge from './HalfGauge.svelte';
 
-	export let audit;
+	let { audit } = $props();
 	const badge_style = {
 		planned: 'bg-yellow-100',
 		in_progress: ' bg-orange-200',

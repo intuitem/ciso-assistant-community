@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 
