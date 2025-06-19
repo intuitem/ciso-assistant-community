@@ -3,7 +3,7 @@
 	import { WorldMapTopoJSON } from '@unovis/ts/maps';
 	import { VisSingleContainer, VisTopoJSONMap, VisTooltip } from '@unovis/svelte';
 
-	export let data;
+	let { data } = $props();
 	const mapData = { areas: data };
 
 	const tooltipTriggers = {
