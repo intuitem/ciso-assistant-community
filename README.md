@@ -210,6 +210,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
+80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
 
 ### Community contributions
 
