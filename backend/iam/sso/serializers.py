@@ -10,11 +10,10 @@ from core.serializers import BaseModelSerializer
 class SSOSettingsReadSerializer(BaseModelSerializer):
     name = serializers.CharField(read_only=True, source="get_name")
     provider = serializers.CharField(read_only=True, source="get_provider_display")
-    settings = serializers.CharField(read_only=True)
 
     class Meta:
         model = SSOSettings
-        exclude = ["value", "secret"]
+        fields = ["id", "name", "provider", "is_enabled", "force_sso"]
 
 
 class SSOSettingsWriteSerializer(BaseModelSerializer):
