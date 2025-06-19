@@ -1876,7 +1876,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response({"nodes": nodes, "categories": categories, "links": links})
 
 
-class ComplianceAssessmentActionPlanList(generics.ListAPIView):
+class ActionPlanList(generics.ListAPIView):
     filterset_fields = {
         "folder": ["exact"],
         "status": ["exact"],
@@ -1902,7 +1902,6 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
     }
     search_fields = ["name", "description", "ref_id"]
 
-    serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -1916,6 +1915,10 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         context.update({"pk": self.kwargs["pk"]})
         return context
 
+
+class ComplianceAssessmentActionPlanList(ActionPlanList):
+    serializer_class = ComplianceAssessmentActionPlanSerializer
+
     def get_queryset(self):
         compliance_assessment: ComplianceAssessment = ComplianceAssessment.objects.get(
             id=self.kwargs["pk"]
@@ -1925,6 +1928,19 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         )
         return AppliedControl.objects.filter(
             requirement_assessments__in=requirement_assessments
+        ).distinct()
+
+
+class RiskAssessmentActionPlanList(ActionPlanList):
+    serializer_class = RiskAssessmentActionPlanSerializer
+
+    def get_queryset(self):
+        risk_assessment: RiskAssessment = RiskAssessment.objects.get(
+            id=self.kwargs["pk"]
+        )
+        risk_scenarios = risk_assessment.risk_scenarios.all()
+        return AppliedControl.objects.filter(
+            risk_scenarios__in=risk_scenarios
         ).distinct()
 
 
