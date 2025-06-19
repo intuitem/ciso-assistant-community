@@ -23,7 +23,7 @@ def callback(request, provider_id):
         if response.status_code != 302:
             return response
         token = generate_token(request.user)
-        next = f"{response['Location'].rstrip('/')}/sso/authenticate/{token}"
+        next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate/{token}"
         return HttpResponseRedirect(next)
     except SocialApp.DoesNotExist:
         raise Http404
