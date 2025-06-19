@@ -36,5 +36,7 @@ export function transpose<T>(matrix: T[][]): T[][] {
 	if (!matrix || matrix.length === 0 || matrix[0].length === 0) {
 		return [];
 	}
-	return reverseCols(reverseRows(matrix.map((_, colIndex) => matrix.map((row) => row[colIndex]))));
+	return reverseCols(
+		reverseRows(matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex])))
+	);
 }
