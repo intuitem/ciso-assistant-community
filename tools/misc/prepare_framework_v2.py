@@ -56,7 +56,7 @@ def validate_implementation_groups(impl_groups, context="implementation_groups")
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
             if "name" not in group or not str(group["name"]).strip():
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in {context} #{i}')
-            if "description" not in group or not str(group["name"]).strip():
+            if "description" not in group or not str(group["description"]).strip():
                 print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in {context} #{i}')
 
 
