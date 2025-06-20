@@ -1670,5 +1670,7 @@
 	"tokenAuthMethod": "Token auth method",
 	"oauthPKCEEnabled": "OAuth PKCE enabled",
 	"suggestedParentheses": "(suggested)",
-	"matchingScenarios": "Matching scenarios"
+	"matchingScenarios": "Matching scenarios",
+	"clientSecretAlreadySetHelpText": "The client secret is already set.",
+	"resetClientSecret": "Reset client secret"
 }

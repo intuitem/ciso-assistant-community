@@ -223,6 +223,12 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+
+        # Use stored secret if no secret is transmitted
+        validated_data["secret"] = validated_data.get(
+            "secret", settings_object.value.get("secret", "")
+        )
+
         settings_object.value = validated_data
         settings_object.save()
         return instance

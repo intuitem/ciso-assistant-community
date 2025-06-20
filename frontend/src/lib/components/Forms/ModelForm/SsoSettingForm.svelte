@@ -8,6 +8,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -39,19 +40,19 @@
 	<span class="text-orange-500 italic text-sm"
 		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
 	>
-	<AutocompleteSelect
+	<RadioGroup
 		{form}
 		hidden={model.selectOptions['provider'].length < 2}
 		field="provider"
 		cacheLock={cacheLocks['provider']}
-		options={model.selectOptions['provider']}
+		possibleOptions={model.selectOptions['provider']}
 		label={m.provider()}
 		disabled={!data.is_enabled}
 	/>
 	{#if data.provider !== 'saml'}
 		<Accordion.Item value="idp">
 			{#snippet control()}
-				{m.IdPConfiguration()}
+				<span class="font-semibold">{m.IdPConfiguration()}</span>
 			{/snippet}
 			{#snippet panel()}
 				<TextField
@@ -87,7 +88,12 @@
 						cacheLock={cacheLocks['secret']}
 					/>
 				{:else}
-					s
+					<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
+						<p>{m.clientSecretAlreadySetHelpText()}</p>
+						<button class="btn preset-filled" onclick={() => (showSecretField = true)}
+							>{m.resetClientSecret()}</button
+						>
+					</div>
 				{/if}
 				<TextField
 					{form}
