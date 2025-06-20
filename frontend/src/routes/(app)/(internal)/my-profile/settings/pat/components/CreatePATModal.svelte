@@ -42,7 +42,7 @@
 	});
 
 	// Base Classes
-	const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
+	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 </script>
@@ -73,17 +73,17 @@
 								/>
 								<footer class="modal-footer {parent.regionFooter}">
 									<button
-										class="btn variant-filled-primary w-full"
+										class="btn preset-filled-primary-500 w-full"
 										data-testid="activate-totp-confirm-button"
 										type="submit">{m.generateNewPersonalAccessToken()}</button
 									>
 								</footer>
 							{:else}
-								<div class="card p-4 variant-ghost-secondary flex flex-row items-center">
+								<div class="card p-4 preset-tonal-secondary flex flex-row items-center">
 									<i class="fa-solid fa-bell mr-2 text-secondary-800"
 									></i>{m.personalAccessTokenOnlyDisplayedOnce()}
 								</div>
-								<span class="flex flex-row gap-2 variant-ghost-surface items-center card pl-2">
+								<span class="flex flex-row gap-2 preset-tonal items-center card pl-2">
 									<pre>{page?.form?.form?.message?.data?.token}</pre>
 									<button
 										type="button"
@@ -94,7 +94,7 @@
 								>
 								<footer class="modal-footer {parent.regionFooter}">
 									<button
-										class="btn variant-filled-primary w-full"
+										class="btn preset-filled-primary-500 w-full"
 										data-testid="activate-totp-confirm-button"
 										type="button"
 										onclick={parent.onConfirm}>{m.done()}</button
