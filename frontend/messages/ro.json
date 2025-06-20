@@ -953,5 +953,8 @@
 			}
 		}
 	],
+	"allowPat": "Permiteți tokenuri de acces personal (PAT)",
+	"allowPatHelpText": "Activați utilizarea tokenurilor de acces personal (PAT) pentru autentificarea API. Acest lucru le permite utilizatorilor să genereze tokenuri pentru acces programatic fără a folosi parole.",
+	"patCreationNotAllowed": "Crearea de PAT nu este permisă. Contactați administratorul.",
 	"matchingScenarios": "Scenarii potrivite"
 }

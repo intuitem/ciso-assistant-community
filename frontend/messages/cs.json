@@ -944,5 +944,8 @@
 			}
 		}
 	],
+	"allowPat": "Povolit osobní přístupové tokeny (PAT)",
+	"allowPatHelpText": "Povolte použití osobních přístupových tokenů (PAT) pro ověřování API. To umožní uživatelům generovat tokeny pro programový přístup bez použití hesel.",
+	"patCreationNotAllowed": "Vytváření PAT není povoleno. Kontaktujte správce.",
 	"matchingScenarios": "Shodné scénáře"
 }

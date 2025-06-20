@@ -956,5 +956,8 @@
 			}
 		}
 	],
+	"allowPat": "Személyes hozzáférési tokenek (PAT) engedélyezése",
+	"allowPatHelpText": "Engedélyezze a személyes hozzáférési tokenek (PAT) használatát API-hitelesítéshez. Ez lehetővé teszi, hogy a felhasználók jelszó nélkül programozott hozzáféréshez hozzanak létre tokeneket.",
+	"patCreationNotAllowed": "A PAT létrehozása nem engedélyezett. Kérjük, forduljon a rendszergazdához.",
 	"matchingScenarios": "Egyező forgatókönyvek"
 }

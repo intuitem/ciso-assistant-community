@@ -1145,5 +1145,8 @@
 			}
 		}
 	],
+	"allowPat": "Izinkan Token Akses Pribadi (PAT)",
+	"allowPatHelpText": "Aktifkan penggunaan Token Akses Pribadi (PAT) untuk autentikasi API. Ini memungkinkan pengguna membuat token untuk akses terprogram tanpa menggunakan kata sandi mereka.",
+	"patCreationNotAllowed": "Pembuatan PAT tidak diizinkan. Silakan hubungi administrator Anda.",
 	"matchingScenarios": "Skenario yang cocok"
 }

@@ -948,5 +948,8 @@
 			}
 		}
 	],
+	"allowPat": "Tillåt personliga åtkomsttoken (PAT)",
+	"allowPatHelpText": "Aktivera användning av personliga åtkomsttoken (PAT) för API-autentisering. Detta tillåter användare att skapa token för programmatisk åtkomst utan att använda sina lösenord.",
+	"patCreationNotAllowed": "Skapande av PAT är inte tillåtet. Kontakta din administratör.",
 	"matchingScenarios": "Matchande scenarier"
 }

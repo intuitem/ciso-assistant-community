@@ -1647,5 +1647,8 @@
 			}
 		}
 	],
+	"allowPat": "Autoriser les jetons d’accès personnel (PAT)",
+	"allowPatHelpText": "Activez l’utilisation de jetons d’accès personnel (PAT) pour l’authentification de l’API. Cela permet aux utilisateurs de générer des jetons pour un accès programmatique sans utiliser leur mot de passe.",
+	"patCreationNotAllowed": "La création de PAT n’est pas autorisée. Veuillez contacter votre administrateur.",
 	"matchingScenarios": "Scénarios correspondants"
 }
