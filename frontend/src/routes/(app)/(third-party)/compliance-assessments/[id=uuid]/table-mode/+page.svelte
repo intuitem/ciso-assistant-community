@@ -33,7 +33,6 @@
 		shallow?: boolean;
 		actionPath?: string;
 		questionnaireOnly?: boolean;
-		assessmentOnly?: boolean;
 		invalidateAll?: boolean;
 		[key: string]: any;
 	}
@@ -44,7 +43,6 @@
 		shallow = false,
 		actionPath = '',
 		questionnaireOnly = false,
-		assessmentOnly = false,
 		invalidateAll = true
 	}: Props = $props();
 
@@ -70,6 +68,11 @@
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
 	const requirementAssessments = $derived(data.requirement_assessments);
 	const complianceAssessment = $state(data.compliance_assessment);
+	const hasQuestions = $derived(
+		requirementAssessments.some(
+			(requirementAssessment) => requirementAssessment.requirement.questions
+		)
+	);
 
 	// svelte-ignore state_referenced_locally
 	requirementAssessments.forEach((ra) => {
@@ -143,7 +146,7 @@
 	}
 
 	let questionnaireMode = $state(
-		questionnaireOnly ? true : assessmentOnly ? false : page.data.user.is_third_party ? true : false
+		questionnaireOnly ? true : !hasQuestions ? false : page.data.user.is_third_party ? true : false
 	);
 
 	const modalStore: ModalStore = getModalStore();
@@ -282,7 +285,7 @@
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
-		{#if !(questionnaireOnly ? !assessmentOnly : assessmentOnly)}
+		{#if !(questionnaireOnly ? hasQuestions : !hasQuestions)}
 			<div
 				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
 			>
