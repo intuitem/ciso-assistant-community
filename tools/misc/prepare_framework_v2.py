@@ -8,7 +8,7 @@ It ensures the integrity of required fields, supports optional implementation gr
 validation with user-friendly error messages.
 
 Usage:
-    python generate_excel_from_yaml.py input.yaml [output.xlsx]
+    python generate_excel_from_yaml.py -i input.yaml [-o output.xlsx]
 
 Dependencies:
     - PyYAML
@@ -18,7 +18,8 @@ Features:
     - Required field validation
     - URN format enforcement
     - Optional implementation groups with structure validation
-    - Automatic Excel generation with multiple sheets
+    - Support for multiple locales with additional localized columns in the Excel sheets
+    - Automatic Excel generation with multiple sheets, including localized content and metadata
     - Informative logs and error handling
 """
 
