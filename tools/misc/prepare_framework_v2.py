@@ -88,6 +88,10 @@ def validate_extra_locales(data):
             # Validate implementation_groups in locale if present
             loc_impl_groups = loc_data.get("implementation_groups")
             if loc_impl_groups is not None:
+                if not impl_groups_main:
+                    print(f"⚠️  [WARNING] \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework. Skipping locale's \"implementation_groups\"")
+                    continue
+
                 validate_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
 
                 # Vérification que chaque ref_id locale existe dans le principal
@@ -212,10 +216,60 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
         impl_meta_sheet.append(["name", impl_group_base])
 
         impl_content_sheet = wb.create_sheet(f"{impl_group_base}_content")
-        impl_content_sheet.append(["ref_id", "name", "description"])
-        for group in impl_groups:
+
+        # Colonnes de base
+        base_header = ["ref_id", "name", "description"]
+        extra_cols = []
+
+        # Préparer les colonnes extra_locales si présentes
+        if extra_locales:
+            for locale_entry in extra_locales:
+                for loc_code, loc_data in locale_entry.items():
+                    loc_impl_groups = loc_data.get("implementation_groups")
+                    if loc_impl_groups and isinstance(loc_impl_groups, list):
+                        extra_cols.append(f"name[{loc_code}]")
+                        extra_cols.append(f"description[{loc_code}]")
+
+        full_header = base_header + extra_cols
+        impl_content_sheet.append(full_header)
+
+        # Index ref_id -> ligne (commencée à la 2e ligne)
+        ref_id_to_row = {}
+        for i, group in enumerate(impl_groups, start=2):
             row = [group.get("ref_id", ""), group.get("name", ""), group.get("description", "")]
             impl_content_sheet.append(row)
+            ref_id_to_row[group.get("ref_id", "")] = i
+
+        # Dictionnaire ref_id -> {lang: {name, description}}
+        lang_impl_groups_map = {}
+        for locale_entry in extra_locales or []:
+            for loc_code, loc_data in locale_entry.items():
+                loc_impl_groups = loc_data.get("implementation_groups")
+                if loc_impl_groups:
+                    for group in loc_impl_groups:
+                        rid = group["ref_id"]
+                        if rid not in lang_impl_groups_map:
+                            lang_impl_groups_map[rid] = {}
+                        lang_impl_groups_map[rid][loc_code] = {
+                            "name": group["name"],
+                            "description": group.get("description", "")
+                        }
+
+        # Indices colonnes supplémentaires
+        col_index_map = {col: idx + 1 for idx, col in enumerate(full_header)}
+
+        # Remplir les colonnes localisées
+        for rid, langs_data in lang_impl_groups_map.items():
+            if rid in ref_id_to_row:
+                row_num = ref_id_to_row[rid]
+                for lang_code, texts in langs_data.items():
+                    name_col = col_index_map.get(f"name[{lang_code}]")
+                    desc_col = col_index_map.get(f"description[{lang_code}]")
+                    if name_col:
+                        impl_content_sheet.cell(row=row_num, column=name_col, value=texts["name"])
+                    if desc_col:
+                        impl_content_sheet.cell(row=row_num, column=desc_col, value=texts["description"])
+                        
 
     try:
         wb.save(output_excel)
