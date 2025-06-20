@@ -15,7 +15,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 
-	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
@@ -32,12 +32,6 @@
 	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
-
-	const popupHover = {
-		event: 'hover',
-		target: 'popupHover',
-		placement: 'left'
-	};
 
 	interface Props {
 		data: any;
@@ -228,6 +222,8 @@
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
 	}
+
+	let openStateRA = $state(false);
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -472,27 +468,34 @@
 
 			{#if displayEditButton()}
 				{#if data.data.state === 'Created'}
-					<button
-						onclick={(_) => {
-							modalConfirm(data.data.id, data.data.name, '?/submit');
+					<Tooltip
+						open={openStateRA && !data.data.approver}
+						onOpenChange={(e) => (openStateRA = e.open)}
+						positioning={{ placement: 'top' }}
+						contentBase="card preset-tonal-error p-4"
+						openDelay={200}
+						closeDelay={100}
+						arrow
+						arrowBase="arrow preset-tonal-surface border border-error-100"
+						onclick={() => {
+							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
 						}}
-						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-						class="btn preset-filled-primary-500 *:pointer-events-none"
-						disabled={!data.data.approver}
-						use:popup={popupHover}
+						onkeydown={(_: any) => {
+							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
+						}}
+						triggerBase={data.data.approver
+							? 'btn preset-filled-primary-500 *:pointer-events-none'
+							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+						disabled={data.data.approver}
 					>
-						<i class="fas fa-paper-plane mr-2"></i>
-						{m.submit()}
-					</button>
-					{#if !data.data.approver}
-						<div
-							class="card preset-tonal-surface border border-surface-500 p-4 z-20"
-							data-popup="popupHover"
-						>
-							<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
-							<div class="arrow preset-filled-surface-500"></div>
-						</div>
-					{/if}
+						{#snippet trigger()}
+							<i class="fas fa-paper-plane mr-2"></i>
+							{m.submit()}
+						{/snippet}
+						{#snippet content()}
+							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
+						{/snippet}
+					</Tooltip>
 				{/if}
 
 				<Anchor
