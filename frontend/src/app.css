@@ -135,6 +135,15 @@
 	.capitalize-first:first-letter {
 		@apply capitalize;
 	}
+	tbody {
+		& > :not(:last-child) {
+			border-color: var(--color-surface-100-900) !important;
+		}
+		& > :not(:last-child) {
+			border-top-width: 0px;
+			border-bottom-width: 1px !important;
+		}
+	}
 }
 
 @layer base {
