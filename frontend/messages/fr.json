@@ -1646,5 +1646,6 @@
 				"countPlural=other": "{count} Jours"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Scénarios correspondants"
 }

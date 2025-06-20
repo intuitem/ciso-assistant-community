@@ -952,5 +952,6 @@
 				"countPlural=other": "{count} Zile"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Scenarii potrivite"
 }

@@ -1239,5 +1239,6 @@
 				"countPlural=other": "{count} Dage"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Matchende scenarier"
 }
