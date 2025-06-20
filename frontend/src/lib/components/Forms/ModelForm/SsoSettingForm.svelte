@@ -9,6 +9,7 @@
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Select from '../Select.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -20,6 +21,19 @@
 	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), data = {} }: Props = $props();
 
 	const formStore = form.form;
+
+	const oidcAuthMethods = [
+		'client_secret_basic',
+		'client_secret_post',
+		'client_secret_jwt',
+		'private_key_jwt',
+		'none'
+	];
+
+	const oidcAuthMethodOptions = oidcAuthMethods.map((method) => ({
+		label: method,
+		value: method
+	}));
 
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
@@ -115,12 +129,14 @@
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['server_url']}
 				/>
-				<TextField
+				<Select
 					{form}
 					field="token_auth_method"
 					label={m.tokenAuthMethod()}
 					disabled={!data.is_enabled}
+					options={oidcAuthMethodOptions}
 					cacheLock={cacheLocks['token_auth_method']}
+					disableDoubleDash
 				/>
 				<Checkbox
 					{form}
