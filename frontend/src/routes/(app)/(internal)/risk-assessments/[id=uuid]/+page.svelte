@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
@@ -30,7 +30,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -198,13 +198,13 @@
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 									>... {m.asCSV()}</a
 								>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 								<a
-									href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
 									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 								>
 								<a
-									href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/csv"
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 									>... {m.asCSV()}</a
 								>
@@ -224,10 +224,10 @@
 					{/if}
 				</div>
 				<Anchor
-					label={m.remediationPlan()}
-					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
+					label={m.actionPlan()}
+					href="/risk-assessments/{risk_assessment.id}/action-plan"
 					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.remediationPlan()}</Anchor
+					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
