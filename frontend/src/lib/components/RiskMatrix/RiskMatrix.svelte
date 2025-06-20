@@ -209,7 +209,6 @@
 					<Cell
 						{cell}
 						cellData={finalData ? finalData[i]?.[j] : undefined}
-						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
 						{dataItemComponent}
 						{useBubbles}
 					/>

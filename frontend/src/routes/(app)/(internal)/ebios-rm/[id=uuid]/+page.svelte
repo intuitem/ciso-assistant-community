@@ -131,7 +131,7 @@
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/action-plan?next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			}

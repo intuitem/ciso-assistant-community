@@ -184,10 +184,7 @@
 							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						{/snippet}
 						{#snippet content()}
-							<div
-								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-								data-popup="popupDownload"
-							>
+							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/pdf"
