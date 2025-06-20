@@ -472,29 +472,28 @@
 						open={openStateRA && !data.data.approver}
 						onOpenChange={(e) => (openStateRA = e.open)}
 						positioning={{ placement: 'top' }}
-						contentBase="card preset-tonal-surface border border-surface-500 p-4"
-						openDelay={0}
+						contentBase="card preset-tonal-surface border border-red-500 p-4"
+						openDelay={200}
 						closeDelay={100}
 						arrow
+						arrowBase="arrow preset-tonal-surface border border-red-500"
+						onclick={() => {
+							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
+						}}
+						onkeydown={(_: any) => {
+							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
+						}}
+						triggerBase={data.data.approver
+							? 'btn preset-filled-primary-500 *:pointer-events-none'
+							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+						disabled={data.data.approver}
 					>
 						{#snippet trigger()}
-							<!-- wrapping inside div otherwise throw an error -->
-							<div>
-								<button
-									onclick={(_) => {
-										modalConfirm(data.data.id, data.data.name, '?/submit');
-									}}
-									onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-									class="btn preset-filled-primary-500 *:pointer-events-none"
-									disabled={!data.data.approver}
-								>
-									<i class="fas fa-paper-plane mr-2"></i>
-									{m.submit()}
-								</button>
-							</div>
+							<i class="fas fa-paper-plane mr-2"></i>
+							{m.submit()}
 						{/snippet}
 						{#snippet content()}
-							<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
+							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
 						{/snippet}
 					</Tooltip>
 				{/if}
