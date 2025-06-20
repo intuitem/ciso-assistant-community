@@ -7,6 +7,7 @@
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
+	import { page } from '$app/state';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -18,6 +19,7 @@
 	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), data = {} }: Props = $props();
 
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
+	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
 </script>
 
 <Accordion
@@ -74,15 +76,19 @@
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['client_id']}
 				/>
-				<TextField
-					{form}
-					type="password"
-					field="secret"
-					label={m.secret()}
-					helpText={m.secretHelpText()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['secret']}
-				/>
+				{#if showSecretField}
+					<TextField
+						{form}
+						type="password"
+						field="secret"
+						label={m.secret()}
+						helpText={m.secretHelpText()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['secret']}
+					/>
+				{:else}
+					s
+				{/if}
 				<TextField
 					{form}
 					field="key"
