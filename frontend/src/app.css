@@ -135,6 +135,17 @@
 	.capitalize-first:first-letter {
 		@apply capitalize;
 	}
+	tbody {
+		& > :not(:last-child) {
+			border-color: var(--color-surface-100-900) !important;
+		}
+	}
+	.input,
+	.select,
+	.multiselect,
+	.textarea {
+		background-color: var(--color-surface-100);
+	}
 }
 
 @layer base {
