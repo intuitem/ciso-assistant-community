@@ -943,5 +943,6 @@
 				"countPlural=other": "{count} Dny"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Shodné scénáře"
 }
