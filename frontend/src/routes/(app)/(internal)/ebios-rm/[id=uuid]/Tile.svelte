@@ -113,10 +113,7 @@
 											</div>
 										{/snippet}
 										{#snippet content()}
-											<div
-												class="transition card bg-white shadow-lg p-4 z-20 duration-300"
-												data-popup={'popup' + workshop + i}
-											>
+											<div class="transition card bg-white shadow-lg p-4 z-20 duration-300">
 												<p
 													data-testid="activity-tooltip"
 													class="border-l-4 {borderColor} text-gray-500 p-2"
@@ -139,7 +136,6 @@
 											<div
 												class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 												data-testid="sidebar-more-panel"
-												data-popup="popupStep-{workshop}.{i + 1}"
 											>
 												<form
 													action="/ebios-rm/{page.params.id}?/changeStepState"
