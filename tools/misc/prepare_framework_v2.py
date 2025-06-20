@@ -45,6 +45,19 @@ def validate_required_field(field_name, value):
         raise ValueError(f"Missing or empty required field: \"{field_name}\"")
 
 
+def validate_implementation_groups(impl_groups, context="implementation_groups"):
+    if impl_groups is not None:
+        if not isinstance(impl_groups, list) or not impl_groups:
+            raise ValueError(f'Field "{context}" must be a non-empty list if defined.')
+        for i, group in enumerate(impl_groups, start=1):
+            if "ref_id" not in group or not str(group["ref_id"]).strip():
+                raise ValueError(f'Missing or empty \"ref_id\" in {context} #{i}')
+            if "name" not in group or not str(group["name"]).strip():
+                raise ValueError(f'Missing or empty \"name\" in {context} #{i}')
+            if "description" not in group or not str(group["name"]).strip():
+                print(f'⚠️  [WARNING] Missing or empty \"description\" in {context} #{i}')
+
+
 # Ajout validation extra_locales
 def validate_extra_locales(data):
     extra_locales = data.get("extra_locales")
@@ -53,6 +66,8 @@ def validate_extra_locales(data):
 
     if not isinstance(extra_locales, list) or not extra_locales:
         raise ValueError("Field \"extra_locales\" must be a non-empty list if defined.")
+
+    impl_groups_main = data.get("implementation_groups") or []
 
     for i, locale_entry in enumerate(extra_locales, start=1):
         if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
@@ -71,15 +86,14 @@ def validate_extra_locales(data):
                     print(f"⚠️  [WARNING] Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
 
             # Validate implementation_groups in locale if present
-            if "implementation_groups" in loc_data:
-                groups = loc_data["implementation_groups"]
-                if not isinstance(groups, list) or not groups:
-                    raise ValueError(f"Field \"implementation_groups\" in extra_locales for locale \"{loc_code}\" must be a non-empty list")
-                for j, group in enumerate(groups, start=1):
-                    if "ref_id" not in group or not str(group["ref_id"]).strip():
-                        raise ValueError(f"Missing or empty \"ref_id\" in implementation group #{j} for locale \"{loc_code}\"")
-                    if "name" not in group or not str(group["name"]).strip():
-                        raise ValueError(f"Missing or empty \"name\" in implementation group #{j} for locale \"{loc_code}\"")
+            loc_impl_groups = loc_data.get("implementation_groups")
+            if loc_impl_groups is not None:
+                validate_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
+
+                # Vérification que chaque ref_id locale existe dans le principal
+                for group in loc_impl_groups:
+                    if all(group["ref_id"] != fg["ref_id"] for fg in impl_groups_main):
+                        raise ValueError(f'ref_id "{group["ref_id"]}" in locale "{loc_code}" implementation_groups does not exist in framework implementation_groups.')
 
 
 def validate_yaml_data(data):
@@ -97,16 +111,8 @@ def validate_yaml_data(data):
 
     # Validate implementation_groups if base name is defined
     if impl_base:
-        if not isinstance(impl_groups, list) or not impl_groups:
-            raise ValueError("Field \"implementation_groups\" must be a non-empty list if \"implementation_groups_sheet_base_name\" is defined.")
+        validate_implementation_groups(impl_groups, "implementation_groups")
         print(f"ℹ️  [INFO] Implementation groups will be added using base name: \"{impl_base}\"")
-        for i, group in enumerate(impl_groups, start=1):
-            if "ref_id" not in group or not str(group["ref_id"]).strip():
-                raise ValueError(f"Missing or empty \"ref_id\" in implementation group #{i}")
-            if "name" not in group or not str(group["name"]).strip():
-                raise ValueError(f"Missing or empty \"name\" in implementation group #{i}")
-            if "description" not in group or not str(group["description"]).strip():
-                print(f"⚠️  [WARNING] Description is missing or empty in implementation group #{i}")
 
     # Validate extra_locales if present
     validate_extra_locales(data)
