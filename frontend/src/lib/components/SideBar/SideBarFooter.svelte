@@ -28,7 +28,7 @@
 		indonesian: m.indonesian(),
 		danish: m.danish(),
 		hungarian: m.hungarian(),
-                ukrainian: m.ukrainian()
+		ukrainian: m.ukrainian()
 	};
 
 	const modalStore = getModalStore();
@@ -51,7 +51,7 @@
 		id: 'Bahasa Indonesia',
 		da: 'Dansk',
 		hu: 'Magyar',
-                uk: 'Українська'
+		uk: 'Українська'
 	};
 
 	let value = $state(getLocale());
