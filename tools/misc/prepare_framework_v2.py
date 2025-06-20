@@ -27,6 +27,7 @@ import re
 import sys
 import os
 import yaml
+import argparse
 from openpyxl import Workbook
 # from datetime import date
 
@@ -35,7 +36,7 @@ from openpyxl import Workbook
 def validate_urn_root(urn_root):
     if not re.fullmatch(r"[a-z0-9._-]+", urn_root):
         raise ValueError(
-            "Invalid URN root : only lowercase alphanumeric characters, '-', '_', and '.' are allowed."
+            "(validate_urn_root) Invalid URN root : only lowercase alphanumeric characters, '-', '_', and '.' are allowed."
         )
 
 
@@ -48,14 +49,14 @@ def validate_required_field(field_name, value):
 def validate_implementation_groups(impl_groups, context="implementation_groups"):
     if impl_groups is not None:
         if not isinstance(impl_groups, list) or not impl_groups:
-            raise ValueError(f'Field "{context}" must be a non-empty list if defined.')
+            raise ValueError(f'(validate_implementation_groups) Field "{context}" must be a non-empty list if defined.')
         for i, group in enumerate(impl_groups, start=1):
             if "ref_id" not in group or not str(group["ref_id"]).strip():
-                raise ValueError(f'Missing or empty \"ref_id\" in {context} #{i}')
+                raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
             if "name" not in group or not str(group["name"]).strip():
-                raise ValueError(f'Missing or empty \"name\" in {context} #{i}')
+                raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in {context} #{i}')
             if "description" not in group or not str(group["name"]).strip():
-                print(f'⚠️  [WARNING] Missing or empty \"description\" in {context} #{i}')
+                print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in {context} #{i}')
 
 
 # Ajout validation extra_locales
@@ -65,31 +66,31 @@ def validate_extra_locales(data):
         return
 
     if not isinstance(extra_locales, list) or not extra_locales:
-        raise ValueError("Field \"extra_locales\" must be a non-empty list if defined.")
+        raise ValueError("(validate_extra_locales) Field \"extra_locales\" must be a non-empty list if defined.")
 
     impl_groups_main = data.get("implementation_groups") or []
 
     for i, locale_entry in enumerate(extra_locales, start=1):
         if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
-            raise ValueError(f"Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
+            raise ValueError(f"(validate_extra_locales) Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
 
         for loc_code, loc_data in locale_entry.items():
             if not re.fullmatch(r"[a-z0-9-]{2,5}", loc_code):
-                raise ValueError(f"Invalid locale code \"{loc_code}\" in extra_locales entry #{i}")
+                raise ValueError(f"(validate_extra_locales) Invalid locale code \"{loc_code}\" in extra_locales entry #{i}")
 
             if not isinstance(loc_data, dict) or not loc_data:
-                raise ValueError(f"Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
+                raise ValueError(f"(validate_extra_locales) Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
 
             # Champs facultatifs, warning s’ils sont manquants ou vides
             for req_field in ["framework_name", "description", "copyright"]:
                 if req_field not in loc_data or str(loc_data[req_field]).strip() == "":
-                    print(f"⚠️  [WARNING] Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
+                    print(f"⚠️  [WARNING] (validate_extra_locales) Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
 
             # Validate implementation_groups in locale if present
             loc_impl_groups = loc_data.get("implementation_groups")
             if loc_impl_groups is not None:
                 if not impl_groups_main:
-                    print(f"⚠️  [WARNING] \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework. Skipping locale's \"implementation_groups\"")
+                    print(f"⚠️  [WARNING] (validate_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework. Skipping locale's \"implementation_groups\"")
                     continue
 
                 validate_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
@@ -301,15 +302,16 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
 
 # CLI entry point
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python generate_excel_from_yaml.py input.yaml [output.xlsx]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Generate Excel file from YAML configuration")
+    parser.add_argument('-i', '--input', default="prepare_framework_v2_config.yaml",
+                        help="Input YAML configuration file (default: prepare_framework_v2_config.yaml)")
+    parser.add_argument('-o', '--output', default=None,
+                        help="Output Excel file name (optional)")
 
-    yaml_file = sys.argv[1]
-    output_file = sys.argv[2] if len(sys.argv) >= 3 else None
+    args = parser.parse_args()
 
     try:
-        create_excel_from_yaml(yaml_file, output_file)
+        create_excel_from_yaml(args.input, args.output)
     except Exception as err:
         print(f"❌ [FATAL ERROR] {err}")
         sys.exit(1)
