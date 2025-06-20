@@ -54,8 +54,7 @@
 
 	// Headers assignment remains the same
 	let rawYAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
-	let yAxisHeaders: typeof rawYAxisHeaders = []; // sera affectée dans run()
-//	let yAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let yAxisHeaders: typeof rawYAxisHeaders = [];
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
 	let popupHoverY = $derived(
@@ -86,9 +85,7 @@
 	);
 
 	$effect(() => {
-		yAxisHeaders = flipVertical
-			? rawYAxisHeaders.slice().reverse()
-			: rawYAxisHeaders;
+		yAxisHeaders = flipVertical ? rawYAxisHeaders.slice().reverse() : rawYAxisHeaders;
 
 		let matrix = baseMatrix;
 		let transformedData = baseData ? reverseRows(baseData) : undefined;
