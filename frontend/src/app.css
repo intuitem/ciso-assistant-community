@@ -139,10 +139,12 @@
 		& > :not(:last-child) {
 			border-color: var(--color-surface-100-900) !important;
 		}
-		& > :not(:last-child) {
-			border-top-width: 0px;
-			border-bottom-width: 1px !important;
-		}
+	}
+	.input,
+	.select,
+	.multiselect,
+	.textarea {
+		background-color: var(--color-surface-50);
 	}
 }
 
