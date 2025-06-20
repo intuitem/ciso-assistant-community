@@ -19,6 +19,8 @@
 
 	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), data = {} }: Props = $props();
 
+	const formStore = form.form;
+
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
 </script>
@@ -90,8 +92,12 @@
 				{:else}
 					<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
 						<p>{m.clientSecretAlreadySetHelpText()}</p>
-						<button class="btn preset-filled" onclick={() => (showSecretField = true)}
-							>{m.resetClientSecret()}</button
+						<button
+							class="btn preset-filled"
+							onclick={() => {
+								showSecretField = true;
+								$formStore.secret = '';
+							}}>{m.resetClientSecret()}</button
 						>
 					</div>
 				{/if}
