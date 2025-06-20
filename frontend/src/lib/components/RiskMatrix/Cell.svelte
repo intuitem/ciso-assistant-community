@@ -7,7 +7,6 @@
 		cellData?: Array<any>;
 		dataItemComponent: any;
 		useBubbles?: boolean;
-		popupTarget?: string | undefined;
 	}
 
 	let { cell, cellData = [], dataItemComponent, useBubbles = true }: Props = $props();
