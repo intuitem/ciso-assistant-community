@@ -262,7 +262,7 @@
 						<i class="fa-solid fa-info-circle"></i>
 						<p>{m.requirementAppliedControlHelpText()}</p>
 					</div>
-					<div class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4">
+					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 						<ModelTable
 							source={data.tables['applied-controls']}
 							hideFilters={true}
@@ -277,7 +277,7 @@
 						<i class="fa-solid fa-info-circle"></i>
 						<p>{m.requirementEvidenceHelpText()}</p>
 					</div>
-					<div class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4">
+					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 						<ModelTable
 							source={data.tables['evidences']}
 							hideFilters={true}

@@ -1666,5 +1666,6 @@
 			}
 		}
 	],
+	"suggestedParentheses": "(suggested)",
 	"matchingScenarios": "Matching scenarios"
 }
