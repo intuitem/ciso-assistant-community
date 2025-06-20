@@ -1668,5 +1668,6 @@
 	],
 	"allowPat": "Allow Personal Access Tokens (PAT)",
 	"allowPatHelpText": "Enable the use of Personal Access Tokens (PAT) for API authentication. This allows users to generate tokens for programmatic access without using their passwords.",
+	"patCreationNotAllowed": "PAT creation is not allowed. Please contact your administrator.",
 	"matchingScenarios": "Matching scenarios"
 }
