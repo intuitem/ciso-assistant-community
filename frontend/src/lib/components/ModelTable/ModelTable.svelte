@@ -323,7 +323,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap border-collapse {classesBase}">
+<div class="table-wrap {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -349,8 +349,8 @@
 						{#snippet children({ form })}
 							{#each filteredFields as field}
 								{#if filters[field]?.component}
-									{@const SvelteComponent = filters[field].component}
-									<SvelteComponent
+									{@const FilterComponent = filters[field].component}
+									<FilterComponent
 										{form}
 										{field}
 										{...filters[field].props}
@@ -402,7 +402,7 @@
 			</tr>
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="table-body w-full border-b border-b-surface-200-800 {regionBody}">
+			<tbody class="table-body w-full border-b border-b-surface-100-900 {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
 					<ContextMenu.Trigger asChild>
@@ -425,8 +425,8 @@
 										{@const component = field_component_map[key]}
 										<td class={regionCell} role="gridcell">
 											{#if component && browser}
-												{@const SvelteComponent_1 = component}
-												<SvelteComponent_1 {meta} cell={value} />
+												{@const CellComponent = component}
+												<CellComponent {meta} cell={value} />
 											{:else}
 												<span class="base-font-family whitespace-pre-line break-words">
 													{#if Array.isArray(value)}
@@ -539,9 +539,9 @@
 													{/if}
 												{/snippet}
 												{#snippet tail()}
-													{@const SvelteComponent_2 = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else}
-														<SvelteComponent_2 meta={row.meta ?? {}} {actionsURLModel} {handler} />
+													{@const ActionsComponent = actionsComponent}
+													{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
+														<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
 											</TableRowActions>
@@ -604,15 +604,3 @@
 		{/if}
 	</footer>
 </div>
-
-<style>
-	tbody {
-		& > :not(:last-child) {
-			border-color: var(--color-surface-200-800);
-		}
-		& > :not(:last-child) {
-			border-top-width: 0px;
-			border-bottom-width: 0px !important;
-		}
-	}
-</style>

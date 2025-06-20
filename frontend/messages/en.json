@@ -1670,5 +1670,7 @@
 				"countPlural=other": "{count} Days"
 			}
 		}
-	]
+	],
+	"suggestedParentheses": "(suggested)",
+	"matchingScenarios": "Matching scenarios"
 }
