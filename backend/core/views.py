@@ -1196,6 +1196,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 perimeter=Perimeter.objects.get(id=data["perimeter"]),
                 version=data["version"],
                 risk_matrix=risk_assessment.risk_matrix,
+                ref_id=data["ref_id"],
                 eta=risk_assessment.eta,
                 due_date=risk_assessment.due_date,
                 status=risk_assessment.status,
