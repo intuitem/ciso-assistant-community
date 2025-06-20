@@ -53,7 +53,9 @@
 	let finalData: typeof data | undefined = $state();
 
 	// Headers assignment remains the same
-	let yAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let rawYAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let yAxisHeaders: typeof rawYAxisHeaders = []; // sera affectée dans run()
+//	let yAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
 	let popupHoverY = $derived(
@@ -82,27 +84,27 @@
 	let baseData = $derived(
 		data ? (data.some((row) => row && row.length > 0) ? data : undefined) : undefined
 	);
-	run(() => {
-		// Swap axes if needed
+
+	$effect(() => {
+		yAxisHeaders = flipVertical
+			? rawYAxisHeaders.slice().reverse()
+			: rawYAxisHeaders;
+
+		let matrix = baseMatrix;
+		let transformedData = baseData ? reverseRows(baseData) : undefined;
+
 		if (swapAxes) {
-			baseMatrix = transpose(baseMatrix);
-			if (baseData) {
-				baseData = transpose(baseData);
-			}
+			matrix = transpose(matrix);
+			transformedData = transformedData && transpose(transformedData);
 		}
 
-		// Flip vertically if needed
 		if (flipVertical) {
-			yAxisHeaders = yAxisHeaders.slice().reverse();
-			baseMatrix = reverseRows(baseMatrix);
-			if (baseData) {
-				baseData = reverseRows(baseData);
-			}
+			matrix = reverseRows(matrix);
+			transformedData = transformedData && reverseRows(transformedData);
 		}
 
-		// Assign final derived values
-		finalMatrix = baseMatrix;
-		finalData = baseData ? (swapAxes ? reverseCols(baseData) : reverseRows(baseData)) : []; // Ensure data is in the correct orientation
+		finalMatrix = matrix;
+		finalData = transformedData ?? [];
 	});
 
 	let classesCellText = $derived((backgroundHexColor: string | undefined | null): string => {
