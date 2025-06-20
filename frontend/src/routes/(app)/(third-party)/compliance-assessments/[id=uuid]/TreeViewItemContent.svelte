@@ -20,6 +20,8 @@
 		reference_controls?: z.infer<typeof ReferenceControlSchema>[] | undefined;
 		children?: Record<string, Record<string, unknown>> | undefined;
 		canEditRequirementAssessment: boolean;
+		hasParentNode: boolean;
+		showDocumentationScore: boolean;
 		selectedStatus: string[];
 		resultCounts: Record<string, number> | undefined;
 		assessable: boolean;
@@ -36,6 +38,8 @@
 		reference_controls = undefined,
 		children = undefined,
 		canEditRequirementAssessment,
+		hasParentNode,
+		showDocumentationScore,
 		selectedStatus,
 		resultCounts,
 		assessable,
@@ -127,6 +131,18 @@
 			return null;
 		}
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
+		return Math.floor(mean * 10) / 10;
+	}
+
+	function nodeDocumentationScore(): number | null {
+		if (
+			!resultCounts ||
+			!resultCounts.hasOwnProperty('total_documentation_score') ||
+			!resultCounts.hasOwnProperty('scored')
+		) {
+			return null;
+		}
+		let mean = resultCounts['total_documentation_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
 
@@ -307,15 +323,35 @@
 						</div>
 					{/each}
 				</div>
-				{#if nodeScore() !== null}
-					<span>
+				<div class="flex flex-row space-x-2 items-center">
+					{#if hasParentNode}
+						{#if nodeScore() !== null}
+							<ProgressRing
+								strokeWidth="20px"
+								value={formatScoreValue(nodeScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+								size="size-12"><p class="font-semibold text-xs">{nodeScore()}</p></ProgressRing
+							>
+							{#if showDocumentationScore}
+								<ProgressRing
+									strokeWidth="20px"
+									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+									size="size-12"
+									><p class="font-semibold text-xs">{nodeDocumentationScore()}</p></ProgressRing
+								>
+							{/if}
+						{/if}
+					{:else}
+						{@const displayedScore = (nodeScore() + nodeDocumentationScore()) / 2}
 						<ProgressRing
-							value={formatScoreValue(nodeScore(), node.max_score)}
-							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
-							size="size-12"><p class="font-semibold text-xs">{nodeScore()}</p></ProgressRing
+							strokeWidth="20px"
+							value={formatScoreValue(displayedScore, node.max_score)}
+							meterStroke={displayScoreColor(displayedScore, node.max_score)}
+							size="size-12"><p class="font-semibold text-xs">{displayedScore}</p></ProgressRing
 						>
-					</span>
-				{/if}
+					{/if}
+				</div>
 			</div>
 		{/if}
 	</div>
