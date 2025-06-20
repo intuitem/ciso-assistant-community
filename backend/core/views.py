@@ -963,102 +963,67 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-    @action(detail=True, methods=["get"], name="Get treatment plan data")
-    def plan(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RiskAssessment,
-        )
-        if UUID(pk) in viewable_objects:
-            risk_assessment_object = self.get_object()
-            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
-            risk_assessment = RiskAssessmentReadSerializer(risk_assessment_object).data
-            risk_scenarios = RiskScenarioReadSerializer(
-                risk_scenarios_objects, many=True
-            ).data
-            [
-                risk_scenario.update(
-                    {
-                        "applied_controls": AppliedControlReadSerializer(
-                            AppliedControl.objects.filter(
-                                risk_scenarios__id=risk_scenario["id"]
-                            ),
-                            many=True,
-                        ).data
-                    }
-                )
-                for risk_scenario in risk_scenarios
-            ]
-            risk_assessment.update({"risk_scenarios": risk_scenarios})
-            return Response(risk_assessment)
-
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-    @action(detail=True, name="Get treatment plan CSV")
-    def treatment_plan_csv(self, request, pk):
+    @action(detail=True, name="Get action plan CSV")
+    def action_plan_csv(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
-        if UUID(pk) in object_ids_view:
-            risk_assessment = self.get_object()
-
-            response = HttpResponse(content_type="text/csv")
-
-            writer = csv.writer(response, delimiter=";")
-            columns = [
-                "risk_scenarios",
-                "measure_id",
-                "measure_name",
-                "measure_desc",
-                "category",
-                "csf_function",
-                "priority",
-                "reference_control",
-                "eta",
-                "effort",
-                "control_impact",
-                "cost",
-                "link",
-                "status",
-            ]
-            writer.writerow(columns)
-            (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, AppliedControl
-            )
-            for mtg in AppliedControl.objects.filter(id__in=object_ids_view).filter(
-                risk_scenarios__risk_assessment=risk_assessment
-            ):
-                risk_scenarios = ",".join(
-                    [
-                        f"{scenario.ref_id}: {scenario.name}"
-                        for scenario in mtg.risk_scenarios.all()
-                    ]
-                )
-                row = [
-                    risk_scenarios,
-                    mtg.id,
-                    mtg.name,
-                    mtg.description,
-                    mtg.get_category_display(),
-                    mtg.get_csf_function_display(),
-                    mtg.reference_control,
-                    mtg.eta,
-                    mtg.effort,
-                    mtg.control_impact,
-                    mtg.priority,
-                    mtg.cost,
-                    mtg.link,
-                    mtg.status,
-                ]
-                writer.writerow(row)
-
-            return response
-        else:
+        if UUID(pk) not in object_ids_view:
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+        risk_assessment = RiskAssessment.objects.get(id=pk)
+        risk_scenarios = risk_assessment.risk_scenarios.all()
+        queryset = AppliedControl.objects.filter(
+            risk_scenarios__in=risk_scenarios
+        ).distinct()
+
+        # Use the same serializer to maintain consistency - to review
+        serializer = RiskAssessmentActionPlanSerializer(
+            queryset, many=True, context={"pk": pk}
+        )
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="action_plan_{pk}.csv"'
+
+        writer = csv.writer(response)
+
+        writer.writerow(
+            [
+                "Name",
+                "Description",
+                "Category",
+                "CSF Function",
+                "Priority",
+                "Status",
+                "ETA",
+                "Expiry date",
+                "Effort",
+                "Impact",
+                "Cost",
+                "Covered scenarios",
+            ]
+        )
+
+        for item in serializer.data:
+            writer.writerow(
+                [
+                    item.get("name"),
+                    item.get("description"),
+                    item.get("category"),
+                    item.get("csf_function"),
+                    item.get("priority"),
+                    item.get("status"),
+                    item.get("eta"),
+                    item.get("expiry_date"),
+                    item.get("effort"),
+                    item.get("impact"),
+                    item.get("cost"),
+                    "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
+                ]
+            )
+
+        return response
 
     @action(detail=True, name="Get risk assessment CSV")
     def risk_assessment_csv(self, request, pk):
@@ -1157,18 +1122,49 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
-    @action(detail=True, name="Get treatment plan PDF")
-    def treatment_plan_pdf(self, request, pk):
+    @action(detail=True, name="Get action plan PDF")
+    def action_plan_pdf(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
-            risk_assessment = self.get_object()
-            context = RiskScenario.objects.filter(
-                risk_assessment=risk_assessment
-            ).order_by("created_at")
-            data = {"context": context, "risk_assessment": risk_assessment}
-            html = render_to_string("core/mp_pdf.html", data)
+            context = {
+                "to_do": list(),
+                "in_progress": list(),
+                "on_hold": list(),
+                "active": list(),
+                "deprecated": list(),
+                "--": list(),
+            }
+            color_map = {
+                "to_do": "#FFF8F0",
+                "in_progress": "#392F5A",
+                "on_hold": "#F4D06F",
+                "active": "#9DD9D2",
+                "deprecated": "#ff8811",
+                "--": "#e5e7eb",
+            }
+            status = AppliedControl.Status.choices
+            risk_assessment_object: RiskAssessment = self.get_object()
+            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
+            applied_controls = (
+                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios_objects)
+                .distinct()
+                .order_by("eta")
+            )
+            for applied_control in applied_controls:
+                context[applied_control.status].append(
+                    applied_control
+                ) if applied_control.status else context["no status"].append(
+                    applied_control
+                )
+            data = {
+                "status_text": status,
+                "color_map": color_map,
+                "context": context,
+                "risk_assessment": risk_assessment_object,
+            }
+            html = render_to_string("core/risk_action_plan_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
             response = HttpResponse(pdf_file, content_type="application/pdf")
             return response
@@ -1876,7 +1872,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response({"nodes": nodes, "categories": categories, "links": links})
 
 
-class ComplianceAssessmentActionPlanList(generics.ListAPIView):
+class ActionPlanList(generics.ListAPIView):
     filterset_fields = {
         "folder": ["exact"],
         "status": ["exact"],
@@ -1902,7 +1898,6 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
     }
     search_fields = ["name", "description", "ref_id"]
 
-    serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -1916,6 +1911,10 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         context.update({"pk": self.kwargs["pk"]})
         return context
 
+
+class ComplianceAssessmentActionPlanList(ActionPlanList):
+    serializer_class = ComplianceAssessmentActionPlanSerializer
+
     def get_queryset(self):
         compliance_assessment: ComplianceAssessment = ComplianceAssessment.objects.get(
             id=self.kwargs["pk"]
@@ -1925,6 +1924,19 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         )
         return AppliedControl.objects.filter(
             requirement_assessments__in=requirement_assessments
+        ).distinct()
+
+
+class RiskAssessmentActionPlanList(ActionPlanList):
+    serializer_class = RiskAssessmentActionPlanSerializer
+
+    def get_queryset(self):
+        risk_assessment: RiskAssessment = RiskAssessment.objects.get(
+            id=self.kwargs["pk"]
+        )
+        risk_scenarios = risk_assessment.risk_scenarios.all()
+        return AppliedControl.objects.filter(
+            risk_scenarios__in=risk_scenarios
         ).distinct()
 
 
@@ -4420,6 +4432,78 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return Response({"results": "mail sent"})
         raise ValidationError({"warning": ["noMailerConfigured"]})
 
+    @action(detail=True, methods=["post"])
+    def update_requirement(self, request, pk):
+        compliance_assessment = get_object_or_404(self.get_queryset(), pk=pk)
+
+        viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=ComplianceAssessment,
+        )
+        if not compliance_assessment.id in viewable_objects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            ref_id = request.data.get("ref_id")
+            result = request.data.get("result")
+            observation = request.data.get("observation")
+
+            if not all([ref_id, result]):
+                return Response(
+                    {"error": "ref_id and result are required fields"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # validate if result value is valid choice
+            valid_results = [
+                choice[0] for choice in RequirementAssessment.Result.choices
+            ]
+            if result not in valid_results:
+                return Response(
+                    {"error": f"invalid result value. Must be one of: {valid_results}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Find the requirement assessment to update
+            requirement_assessment = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
+            ).first()
+
+            if not requirement_assessment:
+                return Response(
+                    {"error": f"Requirement with ref_id {ref_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Update the requirement assessment
+            requirement_assessment.result = result
+            requirement_assessment.observation = observation
+            requirement_assessment.save()
+
+            return Response(
+                {
+                    "message": "Requirement updated successfully",
+                    "ref_id": ref_id,
+                    "result": result,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except RequirementAssessment.DoesNotExist:
+            return Response(
+                {"error": f"Requirement with ref_id {ref_id} not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except ValidationError as e:
+            return Response(
+                {"error": "invalid input provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in update_requirement: {str(e)}")
+            return Response(
+                {"error": "An unexpected error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
@@ -5252,8 +5336,11 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "confirmed": {"localName": "confirmed", "color": "#E6686D"},
                 "assigned": {"localName": "assigned", "color": "#fab998"},
                 "in_progress": {"localName": "inProgress", "color": "#fac858"},
-                "mitigated": {"localName": "mitigated", "color": "#59BBB2"},
-                "resolved": {"localName": "resolved", "color": "#59BBB2"},
+                "mitigated": {
+                    "localName": "mitigated",
+                    "color": "hsl(80deg, 80%, 60%)",
+                },
+                "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
                 "dismissed": {"localName": "dismissed", "color": "#5470c6"},
                 "deprecated": {"localName": "deprecated", "color": "#91cc75"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},

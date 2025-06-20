@@ -136,6 +136,10 @@ urlpatterns = [
         "compliance-assessments/<uuid:pk>/action-plan/",
         ComplianceAssessmentActionPlanList.as_view(),
     ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/",
+        RiskAssessmentActionPlanList.as_view(),
+    ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
 ]
 

@@ -98,13 +98,15 @@
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4">
 		<div class="flex flex-row justify-between items-center w-full">
-			<a
-				href="/ebios-rm/{ebiosRmStudy.id}"
+			<Anchor
+				breadcrumbAction="push"
+				href={`/ebios-rm/${data.data.id}`}
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left"></i>
-				<p class="">{m.goBackToEbiosRmStudy()}</p>
-			</a>
+				<i class="fa-solid fa-arrow-left" />
+				<p>{m.goBackToEbiosRmStudy()}</p>
+			</Anchor>
+
 			<div class="flex items-center space-x-2">
 				{#if ebiosRmStudy.ref_id}
 					<span class="badge bg-pink-200 text-pink-800 font-medium">

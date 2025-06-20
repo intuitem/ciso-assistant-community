@@ -1668,5 +1668,7 @@
 	],
 	"serverURL": "Server URL",
 	"tokenAuthMethod": "Token auth method",
-	"oauthPKCEEnabled": "OAuth PKCE enabled"
+	"oauthPKCEEnabled": "OAuth PKCE enabled",
+	"suggestedParentheses": "(suggested)",
+	"matchingScenarios": "Matching scenarios"
 }
