@@ -111,6 +111,43 @@
 	});
 </script>
 
+<!-- should go Component? -->
+{#snippet xAxisHeadersSnippet()}
+	{#each xAxisHeaders as xHeader, j}
+		<div
+			class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+				xHeader.hexcolor
+			)}"
+			style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+			data-testid="x-axis-header-{j}"
+		>
+			<Tooltip
+				open={popupHoverX[j].open}
+				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
+				openDelay={0}
+			>
+				{#snippet content()}
+					<div
+						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
+						style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+					>
+						<p data-testid="x-header-description" class="font-semibold">
+							{xHeader.description}
+						</p>
+						<div class="arrow bg-black"></div>
+					</div>
+				{/snippet}
+				{#snippet trigger()}
+					<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+					{#if xHeader.description}
+						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+					{/if}
+				{/snippet}
+			</Tooltip>
+		</div>
+	{/each}
+{/snippet}
+
 <div class="flex flex-row items-center">
 	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
 		{yAxisLabel}
@@ -129,29 +166,7 @@
 		>
 			{#if flipVertical}
 				<div></div>
-
-				{#each xAxisHeaders as xHeader, j}
-					<div
-						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
-							xHeader.hexcolor
-						)}"
-						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
-						data-testid="x-axis-header-{j}"
-					>
-						<div
-							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
-							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-							data-popup={'popup-' + matrixName + '-x-' + j}
-						>
-							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-							<div class="arrow bg-black"></div>
-						</div>
-						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
-						{#if xHeader.description}
-							<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
-						{/if}
-					</div>
-				{/each}
+				{@render xAxisHeadersSnippet()}
 			{/if}
 			{#each finalMatrix as row, i}
 				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
@@ -200,40 +215,7 @@
 
 			{#if !flipVertical}
 				<div></div>
-
-				{#each xAxisHeaders as xHeader, j}
-					<div
-						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
-							xHeader.hexcolor
-						)}"
-						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
-						data-testid="x-axis-header-{j}"
-					>
-						<Tooltip
-							open={popupHoverX[j].open}
-							onOpenChange={(e) => (popupHoverX[j].open = e.open)}
-							openDelay={0}
-						>
-							{#snippet content()}
-								<div
-									class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
-									style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-								>
-									<p data-testid="x-header-description" class="font-semibold">
-										{xHeader.description}
-									</p>
-									<div class="arrow bg-black"></div>
-								</div>
-							{/snippet}
-							{#snippet trigger()}
-								<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
-								{#if xHeader.description}
-									<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
-								{/if}
-							{/snippet}
-						</Tooltip>
-					</div>
-				{/each}
+				{@render xAxisHeadersSnippet()}
 			{/if}
 		</div>
 		{#if !flipVertical}
