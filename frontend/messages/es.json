@@ -960,5 +960,6 @@
 				"countPlural=other": "{count} Días"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Escenarios coincidentes"
 }
