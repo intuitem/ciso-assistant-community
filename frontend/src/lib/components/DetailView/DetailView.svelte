@@ -285,7 +285,9 @@
 			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
-						<div class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
+						<div
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4"
+						>
 							<dt
 								class="font-medium text-gray-900"
 								data-testid="{key.replace('_', '-')}-field-title"

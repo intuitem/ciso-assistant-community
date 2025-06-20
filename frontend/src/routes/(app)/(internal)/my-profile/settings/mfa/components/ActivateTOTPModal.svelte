@@ -12,7 +12,7 @@
 	import { goto } from '$app/navigation';
 
 	// Base Classes
-	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
