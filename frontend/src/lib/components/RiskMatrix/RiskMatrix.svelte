@@ -125,10 +125,11 @@
 				open={popupHoverX[j].open}
 				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
 				openDelay={0}
+				closeDelay={100}
 			>
 				{#snippet content()}
 					<div
-						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
+						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm max-w-xl"
 						style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
 					>
 						<p data-testid="x-header-description" class="font-semibold">
@@ -181,10 +182,12 @@
 						open={popupHoverY[i].open}
 						onOpenChange={(e) => (popupHoverY[i].open = e.open)}
 						openDelay={0}
+						closeDelay={100}
+						positioning={{ placement: 'bottom-end' }}
 					>
 						{#snippet content()}
 							<div
-								class="card bg-black teyt-gray-200 p-4 z-20 shadow-lg rounded-sm"
+								class="card bg-black teyt-gray-200 p-4 z-20 shadow-lg rounded-sm max-w-xl"
 								style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
 							>
 								<p data-testid="y-header-description" class="font-semibold">
