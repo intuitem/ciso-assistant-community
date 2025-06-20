@@ -141,7 +141,6 @@
 						<div
 							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
 							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-							data-popup={'popup-' + matrixName + '-x-' + j}
 						>
 							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
 							<div class="arrow bg-black"></div>
@@ -191,7 +190,6 @@
 					<Cell
 						{cell}
 						cellData={finalData ? finalData[i]?.[j] : undefined}
-						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
 						{dataItemComponent}
 						{useBubbles}
 					/>

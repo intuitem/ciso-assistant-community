@@ -209,7 +209,7 @@
 										<p class="text-sm text-surface-800 max-w-[65ch]">
 											{m.personalAccessTokensDescription()}
 										</p>
-										<div class="card p-4 variant-ghost-warning max-w-[65ch]">
+										<div class="card p-4 preset-tonal-warning max-w-[65ch]">
 											<i class="fa-solid fa-warning mr-2 text-warning-900"></i>
 											{m.personalAccessTokenCreateWarning()}
 										</div>

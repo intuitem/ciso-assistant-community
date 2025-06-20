@@ -432,9 +432,7 @@
 									<i class="fa-solid fa-info-circle"></i>
 									<p>{m.requirementAppliedControlHelpText()}</p>
 								</div>
-								<div
-									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-								>
+								<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 									<span class="flex flex-row justify-end items-center space-x-2">
 										{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 											<button
@@ -496,9 +494,7 @@
 									<i class="fa-solid fa-info-circle"></i>
 									<p>{m.requirementEvidenceHelpText()}</p>
 								</div>
-								<div
-									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-								>
+								<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 									<span class="flex flex-row justify-end items-center">
 										<button
 											class="btn preset-filled-primary-500 self-end"
@@ -528,9 +524,7 @@
 								</div>
 							</Tabs.Panel>
 							<Tabs.Panel value="security_exceptions">
-								<div
-									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-								>
+								<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 									<span class="flex flex-row justify-end items-center">
 										<button
 											class="btn preset-filled-primary-500 self-end"
