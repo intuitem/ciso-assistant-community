@@ -59,7 +59,7 @@ def validate_implementation_groups(impl_groups, context="implementation_groups")
                 print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in {context} #{i}')
 
 
-# Ajout validation extra_locales
+# Added validation for extra_locales
 def validate_extra_locales(data):
     extra_locales = data.get("extra_locales")
     if extra_locales is None:
@@ -81,7 +81,7 @@ def validate_extra_locales(data):
             if not isinstance(loc_data, dict) or not loc_data:
                 raise ValueError(f"(validate_extra_locales) Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
 
-            # Champs facultatifs, warning s’ils sont manquants ou vides
+            # Optional fields: warn if missing or empty
             for req_field in ["framework_name", "description", "copyright"]:
                 if req_field not in loc_data or str(loc_data[req_field]).strip() == "":
                     print(f"⚠️  [WARNING] (validate_extra_locales) Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
@@ -95,7 +95,7 @@ def validate_extra_locales(data):
 
                 validate_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
 
-                # Vérification que chaque ref_id locale existe dans le principal
+                # Check that each local ref_id exists in the main implementation_groups
                 for group in loc_impl_groups:
                     if all(group["ref_id"] != fg["ref_id"] for fg in impl_groups_main):
                         raise ValueError(f'ref_id "{group["ref_id"]}" in locale "{loc_code}" implementation_groups does not exist in framework implementation_groups.')
@@ -123,7 +123,7 @@ def validate_yaml_data(data):
     validate_extra_locales(data)
 
 
-# Modification dans create_excel_from_yaml :
+# Modification in create_excel_from_yaml:
 
 def create_excel_from_yaml(yaml_path, output_excel=None):
     if not os.path.isfile(yaml_path):
@@ -143,6 +143,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     elif yaml_output_name and str(yaml_output_name).strip() and output_excel != yaml_output_name.strip():
         print(f"ℹ️  [INFO] Overriding YAML \"excel_file_name\" with command line argument.")
 
+    # Ensure output filename ends with .xlsx extension
     if not output_excel.lower().endswith(".xlsx"):
         output_excel += ".xlsx"
 
@@ -159,7 +160,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
 
     wb = Workbook()
 
-    # Feuille principale library_meta
+    # Main sheet: library_meta
     ws1 = wb.active
     ws1.title = "library_meta"
     ws1.append(["type", "library"])
@@ -173,12 +174,12 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     ws1.append(["provider", provider])
     ws1.append(["packager", "intuitem"])
 
-    # Ajout extra_locales dans library_meta
+    # Add extra_locales to library_meta sheet
     extra_locales = data.get("extra_locales")
     if extra_locales:
         for locale_entry in extra_locales:
             for loc_code, loc_data in locale_entry.items():
-                # Ajouter uniquement les champs présents et non vides
+                # Only add fields that are present and non-empty
                 if "framework_name" in loc_data and str(loc_data["framework_name"]).strip():
                     ws1.append([f"name[{loc_code}]", loc_data["framework_name"]])
                 if "description" in loc_data and str(loc_data["description"]).strip():
@@ -186,7 +187,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
                 if "copyright" in loc_data and str(loc_data["copyright"]).strip():
                     ws1.append([f"copyright[{loc_code}]", loc_data["copyright"]])
 
-    # Feuille principale framework_meta
+    # Main sheet: framework_meta
     framework_meta_sheet = wb.create_sheet(f"{framework_sheet_base}_meta")
     framework_meta_sheet.append(["type", "framework"])
     framework_meta_sheet.append(["base_urn", f"urn:intuitem:risk:req_node:{urn_root}"])
@@ -197,7 +198,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     if impl_group_base:
         framework_meta_sheet.append(["implementation_groups_definition", impl_group_base])
 
-    # Ajout extra_locales dans framework_meta
+    # Add extra_locales to framework_meta sheet
     if extra_locales:
         for locale_entry in extra_locales:
             for loc_code, loc_data in locale_entry.items():
@@ -206,14 +207,14 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
                 if "description" in loc_data and str(loc_data["description"]).strip():
                     framework_meta_sheet.append([f"description[{loc_code}]", loc_data["description"]])
 
-    # Feuille principale framework_content
+    # Main sheet framework_content
     framework_content_sheet = wb.create_sheet(f"{framework_sheet_base}_content")
     base_columns = ["assessable", "depth", "ref_id", "name", "description", "annotation", "typical_evidence"]
     
     if impl_group_base:
         base_columns.append("implementation_groups")
     
-    # Ajouter les colonnes localisées si extra_locales est défini
+    # Add localized columns if extra_locales is defined
     localized_columns = []
     if extra_locales:
         for locale_entry in extra_locales:
@@ -229,7 +230,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     framework_content_sheet.append(full_columns)
 
 
-    # Feuilles implementation_groups (locale principale seulement)
+    # Implementation_groups sheets (main locale only)
     if impl_group_base:
         impl_meta_sheet = wb.create_sheet(f"{impl_group_base}_meta")
         impl_meta_sheet.append(["type", "implementation_groups"])
@@ -237,11 +238,11 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
 
         impl_content_sheet = wb.create_sheet(f"{impl_group_base}_content")
 
-        # Colonnes de base
+        # Base columns
         base_header = ["ref_id", "name", "description"]
         extra_cols = []
 
-        # Préparer les colonnes extra_locales si présentes
+        # Prepare extra_locales columns if present
         if extra_locales:
             for locale_entry in extra_locales:
                 for loc_code, loc_data in locale_entry.items():
@@ -253,14 +254,14 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
         full_header = base_header + extra_cols
         impl_content_sheet.append(full_header)
 
-        # Index ref_id -> ligne (commencée à la 2e ligne)
+        # ref_id -> row index mapping (starting at row 2)
         ref_id_to_row = {}
         for i, group in enumerate(impl_groups, start=2):
             row = [group.get("ref_id", ""), group.get("name", ""), group.get("description", "")]
             impl_content_sheet.append(row)
             ref_id_to_row[group.get("ref_id", "")] = i
 
-        # Dictionnaire ref_id -> {lang: {name, description}}
+        # Dictionary ref_id -> {lang: {name, description}}
         lang_impl_groups_map = {}
         for locale_entry in extra_locales or []:
             for loc_code, loc_data in locale_entry.items():
@@ -275,10 +276,10 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
                             "description": group.get("description", "")
                         }
 
-        # Indices colonnes supplémentaires
+        # Extra columns indexes map
         col_index_map = {col: idx + 1 for idx, col in enumerate(full_header)}
 
-        # Remplir les colonnes localisées
+        # Fill localized columns with translated data
         for rid, langs_data in lang_impl_groups_map.items():
             if rid in ref_id_to_row:
                 row_num = ref_id_to_row[rid]
