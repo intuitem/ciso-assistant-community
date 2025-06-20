@@ -1187,11 +1187,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             data = request.data
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
-                name=data["name"],
-                description=data["description"],
-                perimeter=Perimeter.objects.get(id=data["perimeter"]),
-                version=data["version"],
+                name=data.get("name"),
+                description=data.get("description"),
+                perimeter=Perimeter.objects.get(id=data.get("perimeter")),
+                version=data.get("version"),
                 risk_matrix=risk_assessment.risk_matrix,
+                ref_id=data.get("ref_id"),
                 eta=risk_assessment.eta,
                 due_date=risk_assessment.due_date,
                 status=risk_assessment.status,
