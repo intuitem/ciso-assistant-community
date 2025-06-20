@@ -247,12 +247,11 @@
 												>{m.generateNewPersonalAccessToken()}</button
 											>
 										{:else}
-											<div class="flex text-red-500 justify-center items-center">	
-												<i class="fa-solid fa-circle-exclamation mr-1"></i><span class="italic text-sm"
-												>{m.patCreationNotAllowed()}</span
-											>
+											<div class="flex text-red-500 justify-center items-center">
+												<i class="fa-solid fa-circle-exclamation mr-1"></i><span
+													class="italic text-sm">{m.patCreationNotAllowed()}</span
+												>
 											</div>
-											
 										{/if}
 									</div>
 								</div>
