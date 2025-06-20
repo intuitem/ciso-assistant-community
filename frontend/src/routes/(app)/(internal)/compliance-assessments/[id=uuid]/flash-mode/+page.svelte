@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import { m } from '$paraglide/messages';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
@@ -18,22 +22,24 @@
 	const requirementAssessments = data.requirement_assessments.filter(
 		(requirement) => requirement.name || requirement.description
 	);
-	let currentIndex = 0;
-	$: currentRequirementAssessment = requirementAssessments[currentIndex];
+	let currentIndex = $state(0);
+	let currentRequirementAssessment = $derived(requirementAssessments[currentIndex]);
 
-	$: color = complianceResultTailwindColorMap[currentRequirementAssessment.result];
+	let color = $derived(complianceResultTailwindColorMap[currentRequirementAssessment.result]);
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
-	$: requirement = requirementHashmap[currentRequirementAssessment.requirement.id];
-	$: parent = data.requirements.find((req) => req.urn === requirement.parent_urn);
+	let requirement = $derived(requirementHashmap[currentRequirementAssessment.requirement.id]);
+	let parent = $derived(data.requirements.find((req) => req.urn === requirement.parent_urn));
 
-	$: title = requirement.display_short
-		? requirement.display_short
-		: parent.display_short
-			? parent.display_short
-			: parent.description;
+	let title = $derived(
+		requirement.display_short
+			? requirement.display_short
+			: parent.display_short
+				? parent.display_short
+				: parent.description
+	);
 
 	// Function to handle the "Next" button click
 	function nextItem() {
@@ -53,11 +59,16 @@
 		}
 	}
 
-	$: result = currentRequirementAssessment.result;
+	// svelte-ignore state_referenced_locally
+	let result = $state(currentRequirementAssessment.result);
+	$effect(() => {
+		result = currentRequirementAssessment.result;
+	});
 
 	// Function to update the result of the current item
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;
+		result = newResult;
 		const form = document.getElementById('flashModeForm');
 		const formData = {
 			id: currentRequirementAssessment.id,
@@ -77,7 +88,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 <div class="flex flex-col h-full justify-center items-center">
 	<div
 		style="border-color: {color}"
@@ -91,7 +102,7 @@
 							href="/compliance-assessments/{data.compliance_assessment.id}"
 							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 						>
-							<i class="fa-solid fa-arrow-left" />
+							<i class="fa-solid fa-arrow-left"></i>
 							<p class="">{m.goBackToAudit()}</p>
 						</a>
 					</div>
@@ -110,36 +121,30 @@
 				<div>
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						<ul
-							class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+							class="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
 						>
-							<RadioGroup class="w-full flex-wrap items-center">
-								{#each possible_options as option}
-									<RadioItem
-										class="h-full"
-										active={color}
-										id={option.id}
-										value={option.id}
-										bind:group={result}
-										name="result"
-										style="border-color: {color}"
-										on:click={() => {
-											const newResult = result === option.id ? 'not_assessed' : option.id;
-											updateResult(newResult);
-										}}
-									>
-										{option.label}
-									</RadioItem>
-								{/each}
-							</RadioGroup>
+							<RadioGroup
+								possibleOptions={possible_options}
+								initialValue={currentRequirementAssessment.result}
+								classes="w-full"
+								colorMap={complianceResultTailwindColorMap}
+								field="result"
+								onChange={(newValue) => {
+									const newResult = result === newValue ? 'not_assessed' : newValue;
+									updateResult(newResult);
+								}}
+								key="id"
+								labelKey="label"
+							/>
 						</ul>
 					</form>
 				</div>
 			</div>
 			<div class="flex justify-between">
-				<button class="bg-gray-400 text-white px-4 py-2 rounded" on:click={previousItem}>
+				<button class="bg-gray-400 text-white px-4 py-2 rounded-sm" onclick={previousItem}>
 					{m.previous()}
 				</button>
-				<button class="variant-filled-primary px-4 py-2 rounded" on:click={nextItem}>
+				<button class="preset-filled-primary-500 px-4 py-2 rounded-sm" onclick={nextItem}>
 					{m.next()}
 				</button>
 			</div>

@@ -360,11 +360,21 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
             )
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        value_set = set(value)
+
+        risk_matrix_keys = {"risk_matrix", "risk_matrices"}
+        requirement_mapping_set_keys = {
+            "requirement_mapping_set",
+            "requirement_mapping_sets",
+        }
+        framework_set = {"framework", "frameworks"}
+
         # For backward compatibility
-        if "risk_matrix" in value:
-            value.append("risk_matrices")
-        if "requirement_mapping_set" in value:
-            value.append("requirement_mapping_sets")
+        for key_set in [risk_matrix_keys, requirement_mapping_set_keys, framework_set]:
+            if value_set & key_set:
+                value_set |= key_set
+
+        value = list(value_set)
         union_qs = Q()
         _value = {
             k: v

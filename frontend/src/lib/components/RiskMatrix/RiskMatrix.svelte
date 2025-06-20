@@ -1,29 +1,47 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Cell from './Cell.svelte';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import type { ComponentType } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	// --- Props ---
-	export let riskMatrix;
-	export let wrapperClass: string | undefined = '';
-	export let matrixName: string; // used to differentiate bubbles tooltip names
-	export let showRisks = false;
-	export let useBubbles = false;
-	export let data: Array<Array<any>> | undefined = undefined; // Ensure data is typed correctly
-	export let dataItemComponent: ComponentType | undefined = undefined;
+	interface Props {
+		// --- Props ---
+		riskMatrix: any;
+		wrapperClass?: string | undefined;
+		matrixName: string; // used to differentiate bubbles tooltip names
+		showRisks?: boolean;
+		useBubbles?: boolean;
+		data?: Array<Array<any>> | undefined; // Ensure data is typed correctly
+		dataItemComponent?: ComponentType | undefined;
+		// Axis configuration props
+		swapAxes?: boolean; // Probability on X, Impact on Y if true
+		flipVertical?: boolean; // Origin top-left for Y-axis if true
+		labelStandard?: string;
+	}
 
-	// Axis configuration props
-	export let swapAxes: boolean = $page.data.settings.risk_matrix_swap_axes ?? false; // Probability on X, Impact on Y if true
-	export let flipVertical: boolean = $page.data.settings.risk_matrix_flip_vertical ?? false; // Origin top-left for Y-axis if true
-	export let labelStandard: string = $page.data.settings.risk_matrix_labels ?? 'ISO';
+	let {
+		riskMatrix,
+		wrapperClass = '',
+		matrixName,
+		showRisks = false,
+		useBubbles = false,
+		data = undefined,
+		dataItemComponent = undefined,
+		swapAxes = page.data.settings.risk_matrix_swap_axes ?? false,
+		flipVertical = page.data.settings.risk_matrix_flip_vertical ?? false,
+		labelStandard = page.data.settings.risk_matrix_labels ?? 'ISO'
+	}: Props = $props();
 
-	$: console.log($page.data.settings);
+	run(() => {
+		console.log(page.data.settings);
+	});
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
@@ -31,36 +49,40 @@
 	const originalProbabilities = parsedRiskMatrix.probability;
 	const originalImpacts = parsedRiskMatrix.impact;
 
-	let yAxisLabel: string;
-	let xAxisLabel: string;
-	let yAxisHeaders: typeof originalProbabilities | typeof originalImpacts;
-	let xAxisHeaders: typeof originalImpacts | typeof originalProbabilities;
-	let finalMatrix: ReturnType<typeof buildRiskMatrix>;
-	let finalData: typeof data | undefined;
-	let popupHoverY: PopupSettings[] = [];
-	let popupHoverX: PopupSettings[] = [];
+	let finalMatrix: ReturnType<typeof buildRiskMatrix> = $state();
+	let finalData: typeof data | undefined = $state();
 
-	$: {
-		// Determine base axis types
-		const yAxisType = swapAxes ? 'impact' : 'probability';
-		const xAxisType = swapAxes ? 'probability' : 'impact';
+	// Headers assignment remains the same
+	let yAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
-		// Generate the full translation keys with the standard
-		yAxisLabel = safeTranslate(`${yAxisType}${labelStandard}`);
-		xAxisLabel = safeTranslate(`${xAxisType}${labelStandard}`);
+	let popupHoverY = $derived(
+		yAxisHeaders.map((_, i) => ({
+			event: 'hover',
+			target: `popup-${matrixName}-y-${i}`,
+			placement: swapAxes ? 'right' : 'bottom'
+		}))
+	);
+	let popupHoverX = $derived(
+		xAxisHeaders.map((_, i) => ({
+			event: 'hover',
+			target: `popup-${matrixName}-x-${i}`,
+			placement: 'bottom'
+		}))
+	);
 
-		// Headers assignment remains the same
-		yAxisHeaders = swapAxes ? originalImpacts : originalProbabilities;
-		xAxisHeaders = swapAxes ? originalProbabilities : originalImpacts;
+	let yAxisType = $derived(swapAxes ? 'impact' : 'probability');
+	let xAxisType = $derived(swapAxes ? 'probability' : 'impact');
 
-		// Build the initial matrix (always built as prob (Y) vs impact (X))
-		let baseMatrix = buildRiskMatrix(grid, risk);
-		let baseData = data
-			? data.some((row) => row && row.length > 0)
-				? data
-				: undefined
-			: undefined;
+	let yAxisLabel = $derived(safeTranslate(`${yAxisType}${labelStandard}`));
+	let xAxisLabel = $derived(safeTranslate(`${xAxisType}${labelStandard}`));
 
+	let baseMatrix = $derived(buildRiskMatrix(grid, risk));
+
+	let baseData = $derived(
+		data ? (data.some((row) => row && row.length > 0) ? data : undefined) : undefined
+	);
+	run(() => {
 		// Swap axes if needed
 		if (swapAxes) {
 			baseMatrix = transpose(baseMatrix);
@@ -81,25 +103,12 @@
 		// Assign final derived values
 		finalMatrix = baseMatrix;
 		finalData = baseData ? (swapAxes ? reverseCols(baseData) : reverseRows(baseData)) : []; // Ensure data is in the correct orientation
+	});
 
-		// Recalculate popup settings based on final headers
-		popupHoverY = yAxisHeaders.map((_, i) => ({
-			event: 'hover',
-			target: `popup-${matrixName}-y-${i}`,
-			placement: swapAxes ? 'right' : 'bottom' // Adjust placement based on orientation
-		}));
-
-		popupHoverX = xAxisHeaders.map((_, i) => ({
-			event: 'hover',
-			target: `popup-${matrixName}-x-${i}`,
-			placement: 'bottom'
-		}));
-	}
-
-	$: classesCellText = (backgroundHexColor: string | undefined | null): string => {
+	let classesCellText = $derived((backgroundHexColor: string | undefined | null): string => {
 		if (!backgroundHexColor) return '';
 		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
-	};
+	});
 </script>
 
 <div class="flex flex-row items-center">
@@ -119,7 +128,7 @@
 			data-testid="risk-matrix"
 		>
 			{#if flipVertical}
-				<div />
+				<div></div>
 
 				{#each xAxisHeaders as xHeader, j}
 					<div
@@ -130,19 +139,16 @@
 						data-testid="x-axis-header-{j}"
 					>
 						<div
-							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
 							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
 							data-popup={'popup-' + matrixName + '-x-' + j}
 						>
 							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-							<div class="arrow bg-black" />
+							<div class="arrow bg-black"></div>
 						</div>
 						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
 						{#if xHeader.description}
-							<i
-								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
-								use:popup={popupHoverX[j]}
-							></i>
+							<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 						{/if}
 					</div>
 				{/each}
@@ -156,23 +162,29 @@
 					style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
 					data-testid="y-axis-header-{i}"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
-						style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
-						data-popup={'popup-' + matrixName + '-y-' + i}
+					<Tooltip
+						open={popupHoverY[i].open}
+						onOpenChange={(e) => (popupHoverY[i].open = e.open)}
+						openDelay={0}
 					>
-						<p data-testid="y-header-description" class="font-semibold">
-							{yHeader.description}
-						</p>
-						<div class="arrow bg-black" />
-					</div>
-					<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
-					{#if yHeader.description}
-						<i
-							class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
-							use:popup={popupHoverY[i]}
-						></i>
-					{/if}
+						{#snippet content()}
+							<div
+								class="card bg-black teyt-gray-200 p-4 z-20 shadow-lg rounded-sm"
+								style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
+							>
+								<p data-testid="y-header-description" class="font-semibold">
+									{yHeader.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+						{#snippet trigger()}
+							<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
+							{#if yHeader.description}
+								<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+							{/if}
+						{/snippet}
+					</Tooltip>
 				</div>
 
 				{#each row as cell, j}
@@ -187,7 +199,7 @@
 			{/each}
 
 			{#if !flipVertical}
-				<div />
+				<div></div>
 
 				{#each xAxisHeaders as xHeader, j}
 					<div
@@ -197,21 +209,29 @@
 						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
 						data-testid="x-axis-header-{j}"
 					>
-						<div
-							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
-							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-							data-popup={'popup-' + matrixName + '-x-' + j}
+						<Tooltip
+							open={popupHoverX[j].open}
+							onOpenChange={(e) => (popupHoverX[j].open = e.open)}
+							openDelay={0}
 						>
-							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-							<div class="arrow bg-black" />
-						</div>
-						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
-						{#if xHeader.description}
-							<i
-								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
-								use:popup={popupHoverX[j]}
-							></i>
-						{/if}
+							{#snippet content()}
+								<div
+									class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
+									style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+								>
+									<p data-testid="x-header-description" class="font-semibold">
+										{xHeader.description}
+									</p>
+									<div class="arrow bg-black"></div>
+								</div>
+							{/snippet}
+							{#snippet trigger()}
+								<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+								{#if xHeader.description}
+									<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+								{/if}
+							{/snippet}
+						</Tooltip>
 					</div>
 				{/each}
 			{/if}

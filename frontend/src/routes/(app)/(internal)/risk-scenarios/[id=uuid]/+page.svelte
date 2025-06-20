@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { PageData } from './$types';
 
@@ -15,9 +15,13 @@
 
 	import { onMount } from 'svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	const user = $page.data.user;
+	let { data }: Props = $props();
+
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -25,15 +29,15 @@
 		model: model.name,
 		domain: data.scenario.perimeter.folder.id
 	});
-	let color_map = {};
+	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 	data.riskMatrix.risk.forEach((risk, i) => {
 		color_map[risk.name] = risk.hexcolor;
 	});
 
-	$: classesCellText = (backgroundHexColor: string) => {
+	let classesCellText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
-	};
+	});
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -41,7 +45,7 @@
 
 		if (event.key === 'e' && canEditObject) {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+			goto(`${page.url.pathname}/edit?next=${page.url.pathname}`);
 		}
 	}
 	onMount(() => {
@@ -79,9 +83,9 @@
 		</div>
 		{#if canEditObject}
 			<Anchor
-				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-				class="btn variant-filled-primary h-fit mt-1"
-				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
+				href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
+				class="btn preset-filled-primary-500 h-fit mt-1"
+				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 			>
 		{/if}
 	</div>
@@ -144,7 +148,7 @@
 				source={data.tables['assets']}
 				hideFilters={true}
 				URLModel="assets"
-				baseEndpoint="/assets?risk_scenarios={$page.params.id}"
+				baseEndpoint="/assets?risk_scenarios={page.params.id}"
 			/>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
@@ -153,7 +157,7 @@
 				source={data.tables['threats']}
 				hideFilters={true}
 				URLModel="threats"
-				baseEndpoint="/threats?risk_scenarios={$page.params.id}"
+				baseEndpoint="/threats?risk_scenarios={page.params.id}"
 			/>
 		</div>
 	</div>
@@ -163,7 +167,7 @@
 			source={data.tables['vulnerabilities']}
 			hideFilters={true}
 			URLModel="vulnerabilities"
-			baseEndpoint="/vulnerabilities?risk_scenarios={$page.params.id}"
+			baseEndpoint="/vulnerabilities?risk_scenarios={page.params.id}"
 		/>
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
@@ -172,7 +176,7 @@
 			source={data.tables['security-exceptions']}
 			hideFilters={true}
 			URLModel="security-exceptions"
-			baseEndpoint="/security-exceptions?risk_scenarios={$page.params.id}"
+			baseEndpoint="/security-exceptions?risk_scenarios={page.params.id}"
 		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
@@ -183,7 +187,7 @@
 				source={data.tables['risk_scenarios_e']}
 				hideFilters={true}
 				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?risk_scenarios_e={$page.params.id}"
+				baseEndpoint="/applied-controls?risk_scenarios_e={page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
@@ -196,7 +200,7 @@
 					{safeTranslate(data.scenario.current_proba.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-xmark mt-5" />
+			<i class="fa-solid fa-xmark mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
@@ -206,7 +210,7 @@
 					{safeTranslate(data.scenario.current_impact.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-equals mt-5" />
+			<i class="fa-solid fa-equals mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400 whitespace-nowrap"
 					>{m.currentRiskLevel()}</span
@@ -230,7 +234,7 @@
 				source={data.tables['risk_scenarios']}
 				hideFilters={true}
 				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?risk_scenarios={$page.params.id}"
+				baseEndpoint="/applied-controls?risk_scenarios={page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">
@@ -243,7 +247,7 @@
 					{safeTranslate(data.scenario.residual_proba.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-xmark mt-5" />
+			<i class="fa-solid fa-xmark mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
@@ -253,7 +257,7 @@
 					{safeTranslate(data.scenario.residual_impact.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-equals mt-5" />
+			<i class="fa-solid fa-equals mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400 whitespace-nowrap"
 					>{m.residualRiskLevel()}</span
