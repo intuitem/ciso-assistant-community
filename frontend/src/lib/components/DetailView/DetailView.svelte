@@ -472,11 +472,11 @@
 						open={openStateRA && !data.data.approver}
 						onOpenChange={(e) => (openStateRA = e.open)}
 						positioning={{ placement: 'top' }}
-						contentBase="card preset-tonal-surface border border-red-500 p-4"
+						contentBase="card preset-tonal-error p-4"
 						openDelay={200}
 						closeDelay={100}
 						arrow
-						arrowBase="arrow preset-tonal-surface border border-red-500"
+						arrowBase="arrow preset-tonal-surface border border-error-100"
 						onclick={() => {
 							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
 						}}
