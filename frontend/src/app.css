@@ -144,7 +144,7 @@
 	.select,
 	.multiselect,
 	.textarea {
-		background-color: var(--color-surface-50);
+		background-color: var(--color-surface-100);
 	}
 }
 
