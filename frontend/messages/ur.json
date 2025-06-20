@@ -923,5 +923,6 @@
 				"countPlural=other": "دن {count}"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "مطابق منظرنامے"
 }
