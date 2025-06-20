@@ -267,11 +267,6 @@
 		}
 	});
 
-	$effect(() => {
-		page.url.pathname;
-		handler.invalidate();
-	});
-
 	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	let canCreateObject = $derived(
