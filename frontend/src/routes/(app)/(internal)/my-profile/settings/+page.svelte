@@ -242,7 +242,7 @@
 										</ul>
 										{#if page.data.user.allow_pat}
 											<button
-												class="btn variant-ringed-surface w-fit"
+												class="btn preset-outlined-surface-500 w-fit"
 												onclick={(_) => modalPATCreateForm()}
 												>{m.generateNewPersonalAccessToken()}</button
 											>

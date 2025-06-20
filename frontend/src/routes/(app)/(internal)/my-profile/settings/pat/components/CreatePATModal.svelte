@@ -42,7 +42,7 @@
 	});
 
 	// Base Classes
-	const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
+	const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch] bg-surface-50';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 </script>
@@ -73,7 +73,7 @@
 								/>
 								<footer class="modal-footer {parent.regionFooter}">
 									<button
-										class="btn variant-filled-primary w-full"
+										class="btn preset-outlined-surface-500 w-fit"
 										data-testid="activate-totp-confirm-button"
 										type="submit">{m.generateNewPersonalAccessToken()}</button
 									>
@@ -94,7 +94,7 @@
 								>
 								<footer class="modal-footer {parent.regionFooter}">
 									<button
-										class="btn variant-filled-primary w-full"
+										class="btn preset-outlined-surface-500 w-fit"
 										data-testid="activate-totp-confirm-button"
 										type="button"
 										onclick={parent.onConfirm}>{m.done()}</button
