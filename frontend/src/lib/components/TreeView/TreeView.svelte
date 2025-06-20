@@ -48,7 +48,7 @@
 		disabled = false,
 		padding = 'py-4 px-4',
 		indent = 'ml-4',
-		hover = 'hover:variant-soft',
+		hover = 'hover:preset-tonal',
 		rounded = 'rounded-container-token',
 		caretOpen = 'rotate-180',
 		caretClosed = '',

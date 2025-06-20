@@ -3,7 +3,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 
 	// Base Classes
-	const cBase = 'card bg-white p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	const modalStore: ModalStore = getModalStore();
