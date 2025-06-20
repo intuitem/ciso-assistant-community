@@ -46,7 +46,7 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
-		disabled?: Boolean;
+		disabled?: boolean;
 	}
 
 	let {
