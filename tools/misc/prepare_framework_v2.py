@@ -207,7 +207,26 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
 
     # Feuille principale framework_content
     framework_content_sheet = wb.create_sheet(f"{framework_sheet_base}_content")
-    framework_content_sheet.append(["assessable", "depth", "ref_id", "name", "description", "annotation", "typical_evidence", ("implementation_groups" if impl_group_base else None)])
+    base_columns = ["assessable", "depth", "ref_id", "name", "description", "annotation", "typical_evidence"]
+    
+    if impl_group_base:
+        base_columns.append("implementation_groups")
+    
+    # Ajouter les colonnes localisées si extra_locales est défini
+    localized_columns = []
+    if extra_locales:
+        for locale_entry in extra_locales:
+            for loc_code in locale_entry.keys():
+                localized_columns.extend([
+                    f"name[{loc_code}]",
+                    f"description[{loc_code}]",
+                    f"annotation[{loc_code}]",
+                    f"typical_evidence[{loc_code}]"
+                ])
+
+    full_columns = base_columns + localized_columns
+    framework_content_sheet.append(full_columns)
+
 
     # Feuilles implementation_groups (locale principale seulement)
     if impl_group_base:
