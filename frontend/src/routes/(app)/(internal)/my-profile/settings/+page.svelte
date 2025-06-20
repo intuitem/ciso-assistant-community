@@ -171,18 +171,18 @@
 									<div class="flex flex-wrap justify-between gap-2">
 										{#if hasTOTP}
 											<button
-												class="btn preset-outlined-surface-500 w-fit"
+												class="btn preset-filled-primary-500 w-full"
 												onclick={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
 											>
 											{#if data.recoveryCodes}
 												<button
-													class="btn preset-outlined-surface-500 w-fit"
+													class="btn preset-filled-primary-500 w-full"
 													onclick={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
 												>
 											{/if}
 										{:else}
 											<button
-												class="btn preset-outlined-surface-500 w-fit"
+												class="btn preset-filled-primary-500 w-full"
 												onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 											>
 										{/if}
@@ -242,7 +242,7 @@
 										</ul>
 										{#if page.data.user.allow_pat}
 											<button
-												class="btn preset-outlined-surface-500 w-fit"
+												class="btn preset-filled-primary-500 w-full"
 												onclick={(_) => modalPATCreateForm()}
 												>{m.generateNewPersonalAccessToken()}</button
 											>

@@ -42,7 +42,6 @@
 	});
 
 	// Base Classes
-	//const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch] bg-surface-50';
 	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
