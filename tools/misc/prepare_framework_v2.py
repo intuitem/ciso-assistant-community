@@ -45,7 +45,43 @@ def validate_required_field(field_name, value):
         raise ValueError(f"Missing or empty required field: \"{field_name}\"")
 
 
-# Centralized validation of YAML content
+# Ajout validation extra_locales
+def validate_extra_locales(data):
+    extra_locales = data.get("extra_locales")
+    if extra_locales is None:
+        return
+
+    if not isinstance(extra_locales, list) or not extra_locales:
+        raise ValueError("Field \"extra_locales\" must be a non-empty list if defined.")
+
+    for i, locale_entry in enumerate(extra_locales, start=1):
+        if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
+            raise ValueError(f"Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
+
+        for loc_code, loc_data in locale_entry.items():
+            if not re.fullmatch(r"[a-z0-9-]{2,5}", loc_code):
+                raise ValueError(f"Invalid locale code \"{loc_code}\" in extra_locales entry #{i}")
+
+            if not isinstance(loc_data, dict) or not loc_data:
+                raise ValueError(f"Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
+
+            # Champs facultatifs, warning s’ils sont manquants ou vides
+            for req_field in ["framework_name", "description", "copyright"]:
+                if req_field not in loc_data or str(loc_data[req_field]).strip() == "":
+                    print(f"⚠️  [WARNING] Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
+
+            # Validate implementation_groups in locale if present
+            if "implementation_groups" in loc_data:
+                groups = loc_data["implementation_groups"]
+                if not isinstance(groups, list) or not groups:
+                    raise ValueError(f"Field \"implementation_groups\" in extra_locales for locale \"{loc_code}\" must be a non-empty list")
+                for j, group in enumerate(groups, start=1):
+                    if "ref_id" not in group or not str(group["ref_id"]).strip():
+                        raise ValueError(f"Missing or empty \"ref_id\" in implementation group #{j} for locale \"{loc_code}\"")
+                    if "name" not in group or not str(group["name"]).strip():
+                        raise ValueError(f"Missing or empty \"name\" in implementation group #{j} for locale \"{loc_code}\"")
+
+
 def validate_yaml_data(data):
     required_fields = [
         "urn_root", "locale", "ref_id", "framework_name", "description",
@@ -58,7 +94,6 @@ def validate_yaml_data(data):
 
     impl_base = data.get("implementation_groups_sheet_base_name")
     impl_groups = data.get("implementation_groups")
-
 
     # Validate implementation_groups if base name is defined
     if impl_base:
@@ -73,8 +108,12 @@ def validate_yaml_data(data):
             if "description" not in group or not str(group["description"]).strip():
                 print(f"⚠️  [WARNING] Description is missing or empty in implementation group #{i}")
 
+    # Validate extra_locales if present
+    validate_extra_locales(data)
 
-# Main logic to create Excel workbook from the YAML content
+
+# Modification dans create_excel_from_yaml :
+
 def create_excel_from_yaml(yaml_path, output_excel=None):
     if not os.path.isfile(yaml_path):
         raise FileNotFoundError(f"YAML file not found: \"{yaml_path}\"")
@@ -83,9 +122,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
         data = yaml.safe_load(f)
 
     validate_yaml_data(data)
-    
-    
-    # Determine output Excel file name based on YAML or CLI
+
     yaml_output_name = data.get("excel_file_name")
     if output_excel is None:
         if yaml_output_name and str(yaml_output_name).strip():
@@ -94,13 +131,10 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
             output_excel = "output.xlsx"
     elif yaml_output_name and str(yaml_output_name).strip() and output_excel != yaml_output_name.strip():
         print(f"ℹ️  [INFO] Overriding YAML \"excel_file_name\" with command line argument.")
-        
-    # Ensure the filename ends with .xlsx
+
     if not output_excel.lower().endswith(".xlsx"):
         output_excel += ".xlsx"
 
-
-    # Extract fields for easier reference
     urn_root = data["urn_root"]
     locale = data["locale"]
     ref_id = data["ref_id"]
@@ -114,7 +148,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
 
     wb = Workbook()
 
-    # Sheet 1: library_meta
+    # Feuille principale library_meta
     ws1 = wb.active
     ws1.title = "library_meta"
     ws1.append(["type", "library"])
@@ -127,9 +161,21 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     ws1.append(["copyright", copyright_])
     ws1.append(["provider", provider])
     ws1.append(["packager", "intuitem"])
-    # ws1.append(["publication_date", str(date.today())])
 
-    # Sheet 2: <framework>_meta
+    # Ajout extra_locales dans library_meta
+    extra_locales = data.get("extra_locales")
+    if extra_locales:
+        for locale_entry in extra_locales:
+            for loc_code, loc_data in locale_entry.items():
+                # Ajouter uniquement les champs présents et non vides
+                if "framework_name" in loc_data and str(loc_data["framework_name"]).strip():
+                    ws1.append([f"name[{loc_code}]", loc_data["framework_name"]])
+                if "description" in loc_data and str(loc_data["description"]).strip():
+                    ws1.append([f"description[{loc_code}]", loc_data["description"]])
+                if "copyright" in loc_data and str(loc_data["copyright"]).strip():
+                    ws1.append([f"copyright[{loc_code}]", loc_data["copyright"]])
+
+    # Feuille principale framework_meta
     framework_meta_sheet = wb.create_sheet(f"{framework_sheet_base}_meta")
     framework_meta_sheet.append(["type", "framework"])
     framework_meta_sheet.append(["base_urn", f"urn:intuitem:risk:req_node:{urn_root}"])
@@ -140,11 +186,20 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     if impl_group_base:
         framework_meta_sheet.append(["implementation_groups_definition", impl_group_base])
 
-    # Sheet 3: <framework>_content
-    framework_content_sheet = wb.create_sheet(f"{framework_sheet_base}_content")
-    framework_content_sheet.append(["assessable", "depth", "ref_id", "name", "description", "annotation", "typical_evidence", "implementation_groups"])
+    # Ajout extra_locales dans framework_meta
+    if extra_locales:
+        for locale_entry in extra_locales:
+            for loc_code, loc_data in locale_entry.items():
+                if "framework_name" in loc_data and str(loc_data["framework_name"]).strip():
+                    framework_meta_sheet.append([f"name[{loc_code}]", loc_data["framework_name"]])
+                if "description" in loc_data and str(loc_data["description"]).strip():
+                    framework_meta_sheet.append([f"description[{loc_code}]", loc_data["description"]])
 
-    # Optional implementation group sheets
+    # Feuille principale framework_content
+    framework_content_sheet = wb.create_sheet(f"{framework_sheet_base}_content")
+    framework_content_sheet.append(["assessable", "depth", "ref_id", "name", "description", "annotation", "typical_evidence", ("implementation_groups" if impl_group_base else None)])
+
+    # Feuilles implementation_groups (locale principale seulement)
     if impl_group_base:
         impl_meta_sheet = wb.create_sheet(f"{impl_group_base}_meta")
         impl_meta_sheet.append(["type", "implementation_groups"])
