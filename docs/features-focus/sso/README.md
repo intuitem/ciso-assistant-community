@@ -11,7 +11,7 @@ description: Configure Single Sign-On with different SAML providers
 * [Microsoft Entra ID](microsoft-entra-id.md)
 * [Okta](okta.md)
 * [Keycloak](keycloak.md)
-* [Google Workplace](google-workplace.md)
+* [Google Workspace](google-workplace.md)
 
 ### Configure CISO Assistant with SAML
 

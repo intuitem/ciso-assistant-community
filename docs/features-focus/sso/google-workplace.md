@@ -1,8 +1,8 @@
 ---
-description: Configure Google Workplace as an Identity Provider for CISO Assistant
+description: Configure Google Workspace as an Identity Provider for CISO Assistant
 ---
 
-# Google Workplace
+# Google Workspace
 
 {% hint style="danger" %}
 <mark style="color:red;">Google Workspace doesn't allow callbacks to urls containing</mark> <mark style="color:red;"></mark><mark style="color:red;">`http`</mark> <mark style="color:red;"></mark><mark style="color:red;">or</mark> <mark style="color:red;"></mark><mark style="color:red;">`localhost`</mark> <mark style="color:red;"></mark><mark style="color:red;">so it can be tricky to test it locally. You should deploy CISO Assistant with a FQDN to bypass these restrictions.</mark>

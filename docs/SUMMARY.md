@@ -30,7 +30,7 @@
   * [Microsoft Entra ID](features-focus/sso/microsoft-entra-id.md)
   * [Okta](features-focus/sso/okta.md)
   * [Keycloak](features-focus/sso/keycloak.md)
-  * [Google Workplace](features-focus/sso/google-workplace.md)
+  * [Google Workspace](features-focus/sso/google-workplace.md)
 * [Setting up Multi-Factor Authentication (MFA)](features-focus/setting-up-multi-factor-authentication-mfa.md)
 
 ## Model
