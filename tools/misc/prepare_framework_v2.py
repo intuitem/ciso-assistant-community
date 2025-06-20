@@ -1,5 +1,5 @@
 """
-Excel Framework Generator v0.3
+Excel Framework Generator v0.4
 --------------------------
 
 This script reads a YAML configuration file and generates a structured Excel (.xlsx) file
