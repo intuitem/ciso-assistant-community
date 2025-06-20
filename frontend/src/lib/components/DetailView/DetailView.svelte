@@ -539,41 +539,43 @@
 			{#snippet content()}
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Panel value={urlmodel}>
-						<div class="flex flex-row justify-between px-4 py-2">
-							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{safeTranslate('associated-' + model.info.localNamePlural)}
-							</h4>
-						</div>
-						{@const field = data.model.reverseForeignKeyFields.find(
-							(item) => item.urlModel === urlmodel
-						)}
-						{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
-						{#if model.table && !model.disableAddDeleteButtons}
-							<ModelTable
-								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
-								source={model.table}
-								deleteForm={model.deleteForm}
-								URLModel={urlmodel}
-								fields={fieldsToUse}
-							>
-								{#snippet addButton()}
-									<button
-										class="btn preset-filled-primary-500 self-end my-auto"
-										onclick={(_) => modalCreateForm(model)}
-										><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-											'add-' + model.info.localName
-										)}</button
-									>
-								{/snippet}
-							</ModelTable>
-						{:else if model.table}
-							<ModelTable
-								source={model.table}
-								URLModel={urlmodel}
-								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
-								fields={fieldsToUse}
-							/>
-						{/if}
+						{#key urlmodel}
+							<div class="flex flex-row justify-between px-4 py-2">
+								<h4 class="font-semibold lowercase capitalize-first my-auto">
+									{safeTranslate('associated-' + model.info.localNamePlural)}
+								</h4>
+							</div>
+							{@const field = data.model.reverseForeignKeyFields.find(
+								(item) => item.urlModel === urlmodel
+							)}
+							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+							{#if model.table && !model.disableAddDeleteButtons}
+								<ModelTable
+									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+									source={model.table}
+									deleteForm={model.deleteForm}
+									URLModel={urlmodel}
+									fields={fieldsToUse}
+								>
+									{#snippet addButton()}
+										<button
+											class="btn preset-filled-primary-500 self-end my-auto"
+											onclick={(_) => modalCreateForm(model)}
+											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
+												'add-' + model.info.localName
+											)}</button
+										>
+									{/snippet}
+								</ModelTable>
+							{:else if model.table}
+								<ModelTable
+									source={model.table}
+									URLModel={urlmodel}
+									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+									fields={fieldsToUse}
+								/>
+							{/if}
+						{/key}
 					</Tabs.Panel>
 				{/each}
 			{/snippet}
