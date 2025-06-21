@@ -29,8 +29,13 @@
 #     - name (str, required)
 #     - description (str, optional) — warning shown if missing
 #
+# - extra_locales: (list of locale dicts)
+#   Used to add additional localized columns and data in the Excel output.
+#   To enable, uncomment the example block below.
+#
 # TO ENABLE custom Excel file name : Uncomment the first block below.
 # TO ENABLE implementation groups: Uncomment the last two blocks below.
+# TO ENABLE extra_locales: Uncomment the block below marked as extra_locales.
 # ==============================================================================
 
 
@@ -59,13 +64,37 @@ framework_sheet_base_name: "examplefw"
 #   - ref_id: "grp001"
 #     name: "Access Control Group"
 #     description: "Covers requirements for authentication, authorization, and access restrictions."
-
+#
 #   - ref_id: "grp002"
 #     name: "Data Protection Group"
 #     description: |
 #       Ensures the confidentiality, integrity, and availability of sensitive data.
 #       Includes encryption, storage policies, and data lifecycle management.
-
+#
 #   - ref_id: "grp003"
 #     name: "Incident Response Group"
 #     # This group is missing a description on purpose to trigger a warning.
+
+# --- To enable extra locales (localized framework versions), uncomment the block below ---
+# extra_locales:
+#   - fr:
+#       framework_name: Exemple de Framework de risque
+#       description: |
+#         Il s'agit d'un framework de démonstration.
+#         Il présente des exemples de règles, de contrôles et d'exigences.
+#         Il est conçu pour illustrer et tester le générateur Excel.
+#       copyright: "© 2025 Entreprise d'Exemple"
+#
+#       implementation_groups:
+#       - ref_id: "grp001"
+#         name: "Groupe de contrôle d'accès"
+#         description: "Couvre les exigences en matière d'authentification, d'autorisation et de restrictions d'accès."
+#
+#       - ref_id: "grp002"
+#         name: "Groupe de protection des données"
+#         description: |
+#           Garantit la confidentialité, l'intégrité et la disponibilité des données sensibles.
+#           Comprend le cryptage, les politiques de stockage et la gestion du cycle de vie des données.
+#
+#       - ref_id: "grp003"
+#         name: "Groupe de réponse aux incidents"
