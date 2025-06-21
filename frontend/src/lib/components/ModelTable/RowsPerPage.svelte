@@ -17,6 +17,11 @@
 
 	let lastRowsPerPage = $derived($rowsPerPage ?? 10);
 
+	const setPage = (value: 'previous' | 'next' | number) => {
+		handler.setPage(value);
+		handler.invalidate();
+	};
+
 	const setRowsPerPage = () => {
 		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
 			localStorage.getItem('pageNumberCache') ?? '{}'
@@ -36,13 +41,12 @@
 
 		const itemNumber = ($pageNumber - 1) * lastRowsPerPage + 1;
 		const newPageNumber = Math.ceil(itemNumber / ($rowsPerPage ?? 10));
-		handler.setPage(newPageNumber);
-		handler.invalidate();
+		setPage(newPageNumber);
 	};
 
 	run(() => {
 		if ($rowsPerPage && $rowCount?.start >= $rowCount?.total) {
-			handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
+			setPage(Math.ceil($rowCount.total / $rowsPerPage));
 		}
 	});
 
