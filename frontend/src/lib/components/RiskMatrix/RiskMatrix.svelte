@@ -53,7 +53,8 @@
 	let finalData: typeof data | undefined = $state();
 
 	// Headers assignment remains the same
-	let yAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let rawYAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let yAxisHeaders: typeof rawYAxisHeaders = [];
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
 	let popupHoverY = $derived(
@@ -82,27 +83,25 @@
 	let baseData = $derived(
 		data ? (data.some((row) => row && row.length > 0) ? data : undefined) : undefined
 	);
-	run(() => {
-		// Swap axes if needed
+
+	$effect(() => {
+		yAxisHeaders = flipVertical ? rawYAxisHeaders.slice().reverse() : rawYAxisHeaders;
+
+		let matrix = baseMatrix;
+		let transformedData = baseData ? reverseRows(baseData) : undefined;
+
 		if (swapAxes) {
-			baseMatrix = transpose(baseMatrix);
-			if (baseData) {
-				baseData = transpose(baseData);
-			}
+			matrix = transpose(matrix);
+			transformedData = transformedData && transpose(transformedData);
 		}
 
-		// Flip vertically if needed
 		if (flipVertical) {
-			yAxisHeaders = yAxisHeaders.slice().reverse();
-			baseMatrix = reverseRows(baseMatrix);
-			if (baseData) {
-				baseData = reverseRows(baseData);
-			}
+			matrix = reverseRows(matrix);
+			transformedData = transformedData && reverseRows(transformedData);
 		}
 
-		// Assign final derived values
-		finalMatrix = baseMatrix;
-		finalData = baseData ? (swapAxes ? reverseCols(baseData) : reverseRows(baseData)) : []; // Ensure data is in the correct orientation
+		finalMatrix = matrix;
+		finalData = transformedData ?? [];
 	});
 
 	let classesCellText = $derived((backgroundHexColor: string | undefined | null): string => {
@@ -110,6 +109,44 @@
 		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
 	});
 </script>
+
+<!-- should go Component? -->
+{#snippet xAxisHeadersSnippet()}
+	{#each xAxisHeaders as xHeader, j}
+		<div
+			class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+				xHeader.hexcolor
+			)}"
+			style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+			data-testid="x-axis-header-{j}"
+		>
+			<Tooltip
+				open={popupHoverX[j].open}
+				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
+				openDelay={0}
+				closeDelay={100}
+			>
+				{#snippet content()}
+					<div
+						class="card bg-black p-4 z-20 shadow-lg rounded-sm max-w-xl"
+						style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+					>
+						<p data-testid="x-header-description" class="font-semibold">
+							{xHeader.description}
+						</p>
+						<div class="arrow bg-black"></div>
+					</div>
+				{/snippet}
+				{#snippet trigger()}
+					<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+					{#if xHeader.description}
+						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+					{/if}
+				{/snippet}
+			</Tooltip>
+		</div>
+	{/each}
+{/snippet}
 
 <div class="flex flex-row items-center">
 	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
@@ -129,28 +166,7 @@
 		>
 			{#if flipVertical}
 				<div></div>
-
-				{#each xAxisHeaders as xHeader, j}
-					<div
-						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
-							xHeader.hexcolor
-						)}"
-						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
-						data-testid="x-axis-header-{j}"
-					>
-						<div
-							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
-							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-						>
-							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-							<div class="arrow bg-black"></div>
-						</div>
-						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
-						{#if xHeader.description}
-							<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
-						{/if}
-					</div>
-				{/each}
+				{@render xAxisHeadersSnippet()}
 			{/if}
 			{#each finalMatrix as row, i}
 				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
@@ -165,10 +181,12 @@
 						open={popupHoverY[i].open}
 						onOpenChange={(e) => (popupHoverY[i].open = e.open)}
 						openDelay={0}
+						closeDelay={100}
+						positioning={{ placement: 'bottom-end' }}
 					>
 						{#snippet content()}
 							<div
-								class="card bg-black teyt-gray-200 p-4 z-20 shadow-lg rounded-sm"
+								class="card bg-black p-4 z-20 shadow-lg rounded-sm max-w-xl"
 								style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
 							>
 								<p data-testid="y-header-description" class="font-semibold">
@@ -198,40 +216,7 @@
 
 			{#if !flipVertical}
 				<div></div>
-
-				{#each xAxisHeaders as xHeader, j}
-					<div
-						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
-							xHeader.hexcolor
-						)}"
-						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
-						data-testid="x-axis-header-{j}"
-					>
-						<Tooltip
-							open={popupHoverX[j].open}
-							onOpenChange={(e) => (popupHoverX[j].open = e.open)}
-							openDelay={0}
-						>
-							{#snippet content()}
-								<div
-									class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
-									style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-								>
-									<p data-testid="x-header-description" class="font-semibold">
-										{xHeader.description}
-									</p>
-									<div class="arrow bg-black"></div>
-								</div>
-							{/snippet}
-							{#snippet trigger()}
-								<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
-								{#if xHeader.description}
-									<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
-								{/if}
-							{/snippet}
-						</Tooltip>
-					</div>
-				{/each}
+				{@render xAxisHeadersSnippet()}
 			{/if}
 		</div>
 		{#if !flipVertical}
