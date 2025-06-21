@@ -412,7 +412,18 @@ export const SSOSettingsSchema = z.object({
 	want_attribute_statement: z.boolean().optional().nullable(),
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
-	want_name_id_encrypted: z.boolean().optional().nullable()
+	want_name_id_encrypted: z.boolean().optional().nullable(),
+	server_url: z.string().optional().nullable(),
+	token_auth_method: z
+		.enum([
+			'client_secret_basic',
+			'client_secret_post',
+			'client_secret_jwt',
+			'private_key_jwt',
+			'none'
+		])
+		.default('client_secret_basic'),
+	oauth_pkce_enabled: z.boolean().optional().default(false)
 });
 
 export const EntitiesSchema = z.object({
