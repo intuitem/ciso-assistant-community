@@ -1638,7 +1638,7 @@ erDiagram
 
 ## Findings assessments
 
-This new type of assessments is intended to gather and manage findinds. The section is present in governance with the name "follow-up"/"Suivi".
+This new type of assessments is intended to gather and manage findings. The section is present in governance with the name "follow-up"/"Suivi".
 
 A findings assessment has the following specific fields:
 - category: --/pentest/audit/internal
@@ -1764,3 +1764,46 @@ Future task_nodes are generated partially in advance at creation/update of a tas
 - 24 months for monthly frequency
 - 53 weeks for weekly frequency
 - 63 days for daily frequency
+
+## Campaigns
+
+```mermaid
+erDiagram
+
+ROOT_FOLDER_OR_DOMAIN ||--o{ CAMPAIGN             : contains
+CAMPAIGN              }o--o{ FRAMEWORK            : contains_for_internal_scope
+CAMPAIGN              }o--o{ FRAMEWORK            : contains_for_tprm_scope
+CAMPAIGN              }o--o| MATRIX               : contains
+CAMPAIGN              }o--o{ COMPLIANCE_ASSESSMENT: contains
+CAMPAIGN              }o--o{ RISK_ASSESSMENT      : contains
+CAMPAIGN              }o--o{ ENTITY_ASSESSMENT    : contains
+CAMPAIGN              }o--o{ PERIMETER            : contains
+
+CAMPAIGN {
+    string      ref_id
+    string      name
+    string      description
+
+    date        eta
+    date        due_date
+    string      status
+    principal[] author
+    principal[] reviewer
+    string      observation
+}
+
+```
+
+The domain cannot be changed. All other parameters can change.
+
+A campaign covers 0 to several perimeters, that must be in the subtree of the campaign's domain. Perimeters can be added or removed at any time.
+
+When a perimeter is removed from a campaign, the corresponding assessments are either deleted or detached, as decided by the user. Detached assessments cannot be reattached.
+
+The person in charge of each assessment is determined by metadata on the perimeter (assigned_to).
+
+If a non-empty list of frameworks is set for TPRM scope, an entity assessment is generated for each (framework, perimeter) couple. Frameworks can be added or removed at any time. If a framework is removed, the corresponding entity assessments are either deleted or detached, as decided by the user. A detached assessment cannot be reattached.
+
+If a non-empty list of frameworks is set for internal scope, a compliance assessment is generated for each (framework, perimeter) couple. Frameworks can be added or removed at any time. If a framework is removed, the corresponding assessments are either deleted or detached, as decided by the user. A detached assessment cannot be reattached.
+
+If a matrix is set for a campaign, a risk analysis is generated for each perimeter. This can be added or removed at any time. If a matrix is removed, the corresponding risk assessments are either deleted or detached, as decided by the user. A detached risk assessment cannot be reattached.
