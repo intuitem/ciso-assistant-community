@@ -410,6 +410,10 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "If True allow the user to log in using the normal login form even with SSO forced."
         ),
     )
+    allow_pat = models.BooleanField(
+        default=False,
+        help_text=_("If True allow the user to create Personal Access Tokens (PAT)"),
+    )
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),

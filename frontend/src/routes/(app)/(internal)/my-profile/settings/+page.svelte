@@ -20,6 +20,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
+	import { page } from '$app/state';
 
 	interface Props {
 		data: PageData;
@@ -170,18 +171,18 @@
 									<div class="flex flex-wrap justify-between gap-2">
 										{#if hasTOTP}
 											<button
-												class="btn preset-outlined-surface-500 w-fit"
+												class="btn preset-filled-primary-500 w-full"
 												onclick={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
 											>
 											{#if data.recoveryCodes}
 												<button
-													class="btn preset-outlined-surface-500 w-fit"
+													class="btn preset-filled-primary-500 w-full"
 													onclick={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
 												>
 											{/if}
 										{:else}
 											<button
-												class="btn preset-outlined-surface-500 w-fit"
+												class="btn preset-filled-primary-500 w-full"
 												onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 											>
 										{/if}
@@ -239,9 +240,19 @@
 												</li>
 											{/each}
 										</ul>
-										<button class="btn preset-outlined w-fit" onclick={(_) => modalPATCreateForm()}
-											>{m.generateNewPersonalAccessToken()}</button
-										>
+										{#if page.data.user.allow_pat}
+											<button
+												class="btn preset-filled-primary-500 w-full"
+												onclick={(_) => modalPATCreateForm()}
+												>{m.generateNewPersonalAccessToken()}</button
+											>
+										{:else}
+											<div class="flex text-red-500 justify-center items-center">
+												<i class="fa-solid fa-circle-exclamation mr-1"></i><span
+													class="italic text-sm">{m.patCreationNotAllowed()}</span
+												>
+											</div>
+										{/if}
 									</div>
 								</div>
 							</dd>

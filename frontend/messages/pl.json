@@ -953,5 +953,8 @@
 			}
 		}
 	],
+	"allowPat": "Zezwalaj na osobiste tokeny dostępu (PAT)",
+	"allowPatHelpText": "Włącz użycie osobistych tokenów dostępu (PAT) do uwierzytelniania API. Pozwala to użytkownikom generować tokeny do programowego dostępu bez użycia haseł.",
+	"patCreationNotAllowed": "Tworzenie PAT nie jest dozwolone. Skontaktuj się z administratorem.",
 	"matchingScenarios": "Dopasowane scenariusze"
 }

@@ -1240,5 +1240,8 @@
 			}
 		}
 	],
+	"allowPat": "Tillad personlige adgangstokener (PAT)",
+	"allowPatHelpText": "Aktivér brug af personlige adgangstokener (PAT) til API-godkendelse. Dette gør det muligt for brugere at generere tokens til programmatisk adgang uden brug af deres adgangskoder.",
+	"patCreationNotAllowed": "Oprettelse af PAT er ikke tilladt. Kontakt din administrator.",
 	"matchingScenarios": "Matchende scenarier"
 }

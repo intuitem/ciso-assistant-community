@@ -71,6 +71,7 @@
 		label={m.keepLocalLogin()}
 		helpText={m.keepLocalLoginHelpText()}
 	/>
+	<Checkbox {form} field="allow_pat" label={m.allowPat()} helpText={m.allowPatHelpText()} />
 {/if}
 
 <span class="text-gray-500 pt-5">
