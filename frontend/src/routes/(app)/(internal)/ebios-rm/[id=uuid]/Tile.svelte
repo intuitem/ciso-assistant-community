@@ -1,13 +1,9 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
-	import { browser } from '$app/environment';
 	import { Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
@@ -76,7 +72,7 @@
 		{#if content}
 			{@render content()}
 		{:else if meta}
-			<div class="flex mx-auto">
+			<div class="flex mx-auto w-full px-6">
 				<div>
 					<ol class="relative text-gray-500 border-s border-gray-200">
 						{#each steps as step, i}
@@ -94,7 +90,7 @@
 											class="absolute flex items-center justify-center w-8 h-8 {step.status ===
 											'done'
 												? 'bg-success-200'
-												: 'bg-surface-200'} rounded-full -start-4 ring-4 ring-white"
+												: 'bg-surface-200'} rounded-full -start-6 ring-4 ring-white"
 										>
 											<i
 												class="fa-solid {step.status === 'done'
@@ -116,7 +112,7 @@
 										{#snippet trigger()}
 											<div class="text-gray-300 *:pointer-events-none">
 												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-6 ring-4 ring-white"
 												>
 													<i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
 												</span>
