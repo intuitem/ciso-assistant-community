@@ -36,13 +36,12 @@
 
 	let open = $state(Array(meta.length).fill(false));
 	let actionsOpen = $state(Array(meta.length).fill(false));
-
 	let steps = $state(meta);
 
-	let workshopStatus = $derived(
-		meta.every((step) => step.status === 'done')
+	let workshopStatus = $derived(() =>
+		steps.every((step) => step.status === 'done')
 			? 'done'
-			: meta.some((step) => step.status === 'done')
+			: steps.some((step) => step.status === 'done')
 				? 'in_progress'
 				: 'to_do'
 	);
@@ -52,18 +51,22 @@
 	<div class="rounded-lg bg-white p-4 flex flex-col justify-between h-full">
 		<div class="flex justify-between mb-2">
 			<div class="font-semibold">{title}</div>
-			<div class="text-xl" title={safeTranslate(workshopStatus)}>
-				{#if workshopStatus == 'to_do'}
+			<div class="text-xl" title={safeTranslate(workshopStatus())}>
+				{#if workshopStatus() == 'to_do'}
 					<i class="fa-solid fa-exclamation"></i>
-				{:else if workshopStatus == 'in_progress'}
+				{:else if workshopStatus() == 'in_progress'}
 					<i class="fa-solid fa-spinner"></i>
-				{:else if workshopStatus == 'done'}
+				{:else if workshopStatus() == 'done'}
 					<i class="fa-solid fa-check"></i>
 				{/if}
 			</div>
 		</div>
+
 		{@render action?.()}
-		{#if content}{@render content()}{:else if meta}
+
+		{#if content}
+			{@render content()}
+		{:else if meta}
 			<div class="flex mx-auto">
 				<div>
 					<ol class="relative text-gray-500 border-s border-gray-200">
@@ -125,12 +128,13 @@
 										{/snippet}
 									</Tooltip>
 								{/if}
+
 								{#if !step.disabled}
 									<Popover open={actionsOpen[i]} onOpenChange={(e) => (actionsOpen[i] = e.open)}>
 										{#snippet trigger()}
-											<button class="btn bg-initial" data-testid="sidebar-more-btn"
-												><i class="fa-solid fa-ellipsis-vertical"></i></button
-											>
+											<button class="btn bg-initial" data-testid="sidebar-more-btn">
+												<i class="fa-solid fa-ellipsis-vertical"></i>
+											</button>
 										{/snippet}
 										{#snippet content()}
 											<div
@@ -142,22 +146,24 @@
 													method="POST"
 													use:enhance={() => {
 														return async () => {
-															if (step.status !== 'done') step.status = 'done';
-															else step.status = 'in_progress';
+															steps = steps.map((s, idx) =>
+																idx === i
+																	? { ...s, status: s.status === 'done' ? 'in_progress' : 'done' }
+																	: s
+															);
 														};
 													}}
 												>
 													<input type="hidden" name="workshop" value={workshop} />
 													<input type="hidden" name="step" value={i + 1} />
-													{#if step.status === 'done'}
-														<input type="hidden" name="status" value="in_progress" />
-														<button type="submit" class="btn bg-initial"
-															>{m.markAsInProgress()}</button
-														>
-													{:else}
-														<input type="hidden" name="status" value="done" />
-														<button type="submit" class="btn bg-initial">{m.markAsDone()}</button>
-													{/if}
+													<input
+														type="hidden"
+														name="status"
+														value={step.status === 'done' ? 'in_progress' : 'done'}
+													/>
+													<button type="submit" class="btn bg-initial">
+														{step.status === 'done' ? m.markAsInProgress() : m.markAsDone()}
+													</button>
 												</form>
 											</div>
 										{/snippet}
@@ -169,6 +175,7 @@
 				</div>
 			</div>
 		{/if}
+
 		<div class="justify-end flex"></div>
 	</div>
 </div>
