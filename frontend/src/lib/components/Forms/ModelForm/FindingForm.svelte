@@ -19,8 +19,6 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 
-
-
 	interface Props {
 		form: SuperForm<any>;
 		model: ModelInfo;
