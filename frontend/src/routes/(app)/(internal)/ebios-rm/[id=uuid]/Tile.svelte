@@ -45,6 +45,18 @@
 				? 'in_progress'
 				: 'to_do'
 	);
+
+	function updateStepStatus(i: number) {
+		return async () => {
+			steps = steps.map((s, idx) =>
+				idx === i
+					? { ...s, status: s.status === 'done' ? 'in_progress' : 'done' }
+					: s
+			);
+			actionsOpen[i] = false;
+		};
+	}
+
 </script>
 
 <div class="p-5 {accent_color}">
@@ -144,15 +156,7 @@
 												<form
 													action="/ebios-rm/{page.params.id}?/changeStepState"
 													method="POST"
-													use:enhance={() => {
-														return async () => {
-															steps = steps.map((s, idx) =>
-																idx === i
-																	? { ...s, status: s.status === 'done' ? 'in_progress' : 'done' }
-																	: s
-															);
-														};
-													}}
+													use:enhance={updateStepStatus(i)}
 												>
 													<input type="hidden" name="workshop" value={workshop} />
 													<input type="hidden" name="step" value={i + 1} />
