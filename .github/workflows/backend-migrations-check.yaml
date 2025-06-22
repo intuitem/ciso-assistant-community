@@ -1,0 +1,105 @@
+name: Backend migrations check
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+env:
+  GITHUB_WORKFLOW: github_actions
+  backend-directory: ./backend
+  enterprise-backend-directory: ./enterprise/backend
+  enterprise-backend-settings-module: enterprise_core.settings
+  UBUNTU_VERSION: "ubuntu-24.04"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  migrations-check:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: 'True'
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: user@tests.com
+      EMAIL_HOST_PASSWORD: password
+      EMAIL_PORT: 1025
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Check that migrations were made
+        working-directory: ${{ env.backend-directory }}
+        run: poetry run python manage.py makemigrations --check --dry-run --verbosity=3
+
+  enterprise-migrations-check:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: 'True'
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: user@tests.com
+      EMAIL_HOST_PASSWORD: password
+      EMAIL_PORT: 1025
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      LICENSE_SEATS: 999
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Install enterprise backend
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: poetry install
+      - name: Check that migrations were made
+        working-directory: ${{ env.backend-directory }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: |
+          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings="$SETTINGS_MODULE"
+          if [ $? -ne 0 ]; then echo "::error Migrations were not made, please run the makemigrations command." && exit 1; fi

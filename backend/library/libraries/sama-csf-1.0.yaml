@@ -1,0 +1,2274 @@
+urn: urn:intuitem:risk:library:sama-csf-1.0
+locale: en
+ref_id: SAMA-CSF-1.0
+name: 'SAMA Cyber Security Fundamentals '
+description: 'SAMA Cyber Security Fundamentals '
+copyright: All texts, layouts, designs and other elements of any nature in this document
+  are subject to copyright law.
+version: 1
+publication_date: 2024-12-01
+provider: SAMA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:sama-csf-1.0
+    ref_id: SAMA-CSF-1.0
+    name: 'SAMA Cyber Security Fundamentals '
+    description: 'SAMA Cyber Security Fundamentals '
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Non-existent
+      description: "\u2022 No documentation.\n\u2022 There is no awareness or attention\
+        \ for certain cyber security control."
+    - score: 1
+      name: Ad-hoc
+      description: "\u2022 Cyber security controls is not or partially defined.\n\u2022\
+        \ Cyber security controls are performed in an inconsistent way.\n\u2022 The\
+        \ way of execution is depending on individuals."
+    - score: 2
+      name: Repeatable but informal
+      description: The execution of the cyber security control is based on an informal,
+        unwritten though standard practice.
+    - score: 3
+      name: Structured & formalized
+      description: "\u2022 Cyber security controls are defined, approved and implemented\
+        \ in a structured and formalized way.\n\u2022 The implementation of cyber\
+        \ security controls can be demonstrated."
+    - score: 4
+      name: Managed & measurable
+      description: "\u2022 The effectiveness of the cyber security controls are periodically\
+        \ assessed and improved when necessary.\n\u2022 This periodic measurement,\
+        \ evaluations and opportunities for improvement are documented."
+    - score: 5
+      name: Adaptive
+      description: "\u2022 Cyber security controls are subject to a continuous improvement\
+        \ plan."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      assessable: false
+      depth: 1
+      name: Cyber Security Leadership and Governance
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: 'Cyber Security Governance '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-1
+      description: A Cyber Security committee should be established and be mandated
+        by the board.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-2
+      description: The Cyber Security committee should be headed by an independent
+        senior manager from a control function.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-3
+      description: "The following positions should be represented in the Cyber Security\
+        \ committee: a. senior managers from all relevant departments (e.g., COO,\
+        \ CIO, compliance officer, heads of relevant business departments);b. Chief\
+        \ information security officer (CISO);c. Internal audit may attend as an \u201C\
+        observer\"."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-4
+      description: "A Cyber Security committee charter should be developed, approved,\
+        \ and reflect: \na. committee objectives \nb. roles and responsibilities \n\
+        c.minimum number of meeting participants. \nd.meeting frequency (minimum on\
+        \ a quarterly basis)."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-5
+      description: A Cyber Security function should be established.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-6
+      description: 'The Cyber Security function should be independent from the information
+        technology function. To avoid any conflict of interest, the Cyber Security
+        function and information technology function should have separate reporting
+        lines, budgets and staff evaluations.
+
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-7
+      description: The Cyber Security function should report directly to the CEO/managing
+        director of the Member Organization or general manager of a control function.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-8
+      description: A full-time senior manager for the Cyber Security function, referred
+        to as CISO, should be appointed at senior management level.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-9
+      description: "The Member Organization should :\na. ensure the CISO has a Saudi\
+        \ nationality. \nb. ensure the CISO is sufficiently qualified\nc. obtain no\
+        \ objection from SAMA to assign the CISO."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.1-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node3
+      ref_id: 3.1.1-10
+      description: The board of the Member Organization should allocate sufficient
+        budget to execute the required Cyber Security activities.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: Cyber Security Strategy
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node14
+      ref_id: 3.1.2-1
+      description: The Cyber Security strategy should be defined, approved, maintained
+        and executed.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node14
+      ref_id: 3.1.2-2
+      description: "The Cyber Security strategy should be aligned with: \na. the Member\
+        \ Organization\u2019s overall objectives; \nb. the legal and regulatory compliance\
+        \ requirements of the Member Organization. \nc. the Banking Sector\u2019s\
+        \ Cyber Security strategy."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.2-3.a-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node14
+      ref_id: 3.1.2-3.a-b
+      description: "The Cyber Security strategy should address: \na. the importance\
+        \ and benefits of Cyber Security for the Member Organization; \nb. the anticipated\
+        \ future state of Cyber Security for the Member Organization to become and\
+        \ remain resilient to (emerging) Cyber Security threats;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.2-3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node14
+      ref_id: 3.1.2-3.c
+      description: c. which and when Cyber Security initiatives and projects should
+        be executed to achieve the anticipated future state.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: 'Cyber Security Policy '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node19
+      ref_id: 3.1.3-1
+      description: The Cyber Security policy should be defined, approved and communicated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node19
+      ref_id: 3.1.3-2
+      description: The Cyber Security policy should be reviewed periodically according
+        to a predefined and structured review process.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.3-3.a-c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node19
+      ref_id: 3.1.3-3.a-c
+      description: "The Cyber Security policy should be: \na. considered as input\
+        \ for other corporate policies of the Member Organization (e.g., HR policy,\
+        \ finance policy and IT policy);\nb. supported by detailed security standards\
+        \ (e.g., password standard, firewall standard) and procedures\nc. based on\
+        \ best practices and (inter)national standards;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.3-3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node19
+      ref_id: 3.1.3-3.d
+      description: d. communicated to relevant stakeholders.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.3-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node19
+      ref_id: 3.1.3-4
+      description: "The Cyber Security policy should include: \na. a definition of\
+        \ Cyber Security; \nb. the Member Organization\u2019s overall Cyber Security\
+        \ objectives and scope. c. a statement of the board\u2019s intent, supporting\
+        \ the Cyber Security objectives; \nd. a definition of general and specific\
+        \ responsibilities for Cyber Security. \ne. the reference to supporting Cyber\
+        \ Security standards and procedures; \nf. Cyber Security requirements that\
+        \ ensure:\n1. information is classified in a way that indicates its importance\
+        \ to the Member Organization;\n2. information is protected in terms of Cyber\
+        \ Security requirements, in line with the risk appetite;\n3. owners are appointed\
+        \ for all information assets;\n4. Cyber Security risk assessments are conducted\
+        \ for information assets;\n5. relevant stakeholders are made aware of Cyber\
+        \ Security and their expected behavior (Cyber Security awareness program);\n\
+        6. compliance with regulatory and contractual obligations are being met;\n\
+        7. Cyber Security breaches and suspected Cyber Security weaknesses are reported;\n\
+        8. Cyber Security is reflected in business continuity management."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: Cyber Security Roles and Responsibilities
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-1
+      description: 'The Board of Directors has the ultimate responsibility for Cyber
+        Security, including: a. ensuring that sufficient budget for Cyber Security
+        is allocated. approving the Cyber Security committee charter''s. endorsing
+        (after being approved by the Cyber Security committee):
+
+        1. the Cyber Security governance;
+
+        2. the Cyber Security strategy;
+
+        3. the Cyber Security policy.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-2.a
+      description: "The Cyber Security committee should be responsible for: \na. monitoring,\
+        \ reviewing and communicating the Member Organization\u2019s Cyber Security\
+        \ risk appetite periodically or upon a material change in the risk appetite;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-2.b
+      description: b. reviewing the Cyber Security strategy to ensure that it supports
+        the Member Organization objectives;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-2.c
+      description: 'c. approving, communicating, supporting and monitoring:
+
+        1. the Cyber Security governance;
+
+        2. the Cyber Security strategy;
+
+        3. the Cyber Security policy;
+
+        4. Cyber Security programs (e.g., awareness program, data classification program,
+        data privacy, data leakage prevention, key Cyber Security improvements);
+
+        5. Cyber Security risk management process;
+
+        6. the key risk indicators (KRIs) and key performance indicators (KPIs) for
+        Cyber Security.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-3.a
+      description: "The senior management should be responsible for: \na. ensuring\
+        \ that standards, processes and procedures reflect security requirements (if\
+        \ applicable);"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-3.b
+      description: b. ensuring that individuals accept and comply with the Cyber Security
+        policy, supporting standards and procedures when they are issued and updated;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-3.c
+      description: c. ensuring that Cyber Security responsibilities are incorporated
+        in the job descriptions of key positions and Cyber Security staff.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.a
+      description: "The CISO should be responsible for: \na. developing and maintaining:\n\
+        1. Cyber Security strategy;\n2. Cyber Security policy;\n3. Cyber Security\
+        \ architecture;\n4. Cyber Security risk management process."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.b
+      description: b. ensuring that detailed security standards and procedures are
+        established, approved and implemented;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.c
+      description: c. delivering risk-based Cyber Security solutions that address
+        people, process and technology;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.d
+      description: d. developing the Cyber Security staff to deliver Cyber Security
+        solutions in a business context;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.e
+      description: 'e. Cyber Security activities across the Member Organization, including:
+
+        1. monitoring of the Cyber Security activities (SOC monitoring);
+
+        2. monitoring of compliance with Cyber Security regulations, policies, standards
+        and procedures;
+
+        3. overseeing the investigation of Cyber Security incidents;
+
+        4. gathering and analyzing threat intelligence from internal and external
+        sources;
+
+        5. performing Cyber Security reviews;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.f
+      description: "f. conducting Cyber Security risk assessments on the Members Organization\u2019\
+        s information assets;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.g
+      description: 'g. proactively supporting other functions on Cyber Security, including:
+
+        1. performing information and system classifications;
+
+        2. determining Cyber Security requirements for important projects;
+
+        3. performing Cyber Security reviews.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.h
+      description: h. defining and conducting the Cyber Security awareness programs;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-4.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-4.i
+      description: 'i. measuring and reporting the KRIs and KPIs on:
+
+        1. Cyber Security strategy;
+
+        2. Cyber Security policy compliance;
+
+        3. Cyber Security standards and procedures;
+
+        4. Cyber Security programs (e.g., awareness program, data classification program,
+        key Cyber Security improvements).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-5
+      description: "The internal audit function should be responsible for: \na. performing\
+        \ Cyber Security audits."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.4-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node25
+      ref_id: 3.1.4-6
+      description: "All Member Organization\u2019s staff should be responsible for:\
+        \ \na. complying with Cyber Security policy, standards and procedures."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node44
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: Cyber Security in Project Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node44
+      ref_id: 3.1.5-1
+      description: Cyber Security should be integrated into the Member Organization's
+        project management methodology to ensure that Cyber Security risks are identified
+        and addressed as part of a project.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node44
+      ref_id: 3.1.5-2
+      description: "The Member Organization\u2019s project management methodology\
+        \ should ensure that:\n a. Cyber Security objectives are included in project\
+        \ objectives. \nb. the Cyber Security function is part of all phases of the\
+        \ project. \nc. a risk assessment is performed at the start of the project\
+        \ to determine the Cyber Security risks and to ensure that Cyber Security\
+        \ requirements are addressed either by the existing Cyber Security controls\
+        \ (based on Cyber Security standards) or to be developed. \nd. Cyber Security\
+        \ risks are registered in the project-risk register and tracked. \ne. responsibilities\
+        \ for Cyber Security are defined and allocated; \nf. a Cyber Security review\
+        \ is performed by an independent internal or external party."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: Cyber Security Awareness
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-1
+      description: The Cyber Security awareness programs should be defined, approved
+        and conducted to promote Cyber Security awareness and to create a positive
+        Cyber Security culture.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-2
+      description: 'A Cyber Security awareness program should be defined and conducted
+        for: a. staff of the Member Organization. third parties of the Member Organization.
+        customers of the Member Organization.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-3
+      description: The Cyber Security awareness program should target Cyber Security
+        behaviors by tailoring the program to address the different target groups
+        through multiple channels.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-4
+      description: The activities of the Cyber Security awareness program should be
+        conducted periodically and throughout the year.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-5
+      description: 'The Cyber Security awareness program should at a minimum include:
+        a. an explanation of Cyber Security measures provided. the roles and responsibilities
+        regarding Cyber Security. information on relevant emerging Cyber Security
+        events and cyber threats (e.g., spear-phishing, whaling).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-6
+      description: 'The Cyber Security awareness program should be evaluated to: a.
+        measure the effectiveness of the awareness activities. formulate recommendations
+        to improve the Cyber Security awareness program.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.6-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node47
+      ref_id: 3.1.6-7
+      description: Customer awareness should address for both retail and commercial
+        customers and, at a minimum, include a listing of suggested Cyber Security
+        mechanisms which customers may consider implementing to mitigate their own
+        risk(s).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node55
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node2
+      name: Cyber Security Training
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node55
+      ref_id: 3.1.7.1
+      description: "Specialist or security-related skills training should be provided\
+        \ to staff in the Member Organization\u2019s relevant functional area categories\
+        \ in line with their job descriptions, including: a. key roles within organization.\
+        \ staff of the Cyber Security function. staff involved in developing and (technically)\
+        \ maintaining information assets. staff involved in risk assessments."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.1.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node55
+      ref_id: 3.1.7.2
+      description: "Education should be provided in order to equip staff with the\
+        \ skills and required knowledge to securely operate the Member Organization\u2019\
+        s information assets."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      assessable: false
+      depth: 1
+      name: Cyber Security Risk Management & Compliance
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Security Risk Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-1
+      description: The Cyber Security risk management process should be defined, approved
+        and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-2
+      description: The Cyber Security risk management process should focus on safeguarding
+        the confidentiality, integrity and availability of information assets.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-3
+      description: The Cyber Security risk management process should be aligned with
+        the existing enterprise risk management process
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-4.a
+      description: 'The Cyber Security risk management process should be documented
+        and address:
+
+        a. risk identification;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-4.b
+      description: b. risk analysis;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-4.c
+      description: c. risk response;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-4.d
+      description: d. risk monitoring & review
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-5
+      description: "The Cyber Security risk management process should address the\
+        \ Member Organization\u2019s information assets, including (but not limited\
+        \ to):\na. business processes;\nb. business applications;\nc. infrastructure\
+        \ components"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-6.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-6.a
+      description: 'The Cyber Security risk management process should be initiated:
+
+        a. at an early stage of the project;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-6.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-6.b
+      description: b. prior to critical change;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-6.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-6.c
+      description: c. when outsourcing is being considered;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-6.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-6.d
+      description: d. when launching new products and technologies.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-7
+      description: Existing information assets should be periodically subject to Cyber
+        Security risk assessment based on their classification or risk profile.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-8
+      description: 'The Cyber Security risk management activities should involve:
+        a. business owners. IT specialists. Cyber Security specialists. key user representatives.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-9
+      description: The result of the risk assessment should be reported to the relevant
+        business owner (i.e., risk owner) within the Member Organization;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-10
+      description: The relevant business owner (i.e., risk owner) within the Member
+        Organization should accept and endorse the risk assessment results.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node59
+      ref_id: 3.2.1-11
+      description: "The Member Organization\u2019s Cyber Security risk appetite and\
+        \ risk tolerance should be clearly defined and formally approved."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node77
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Security Risk Identification
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node77
+      ref_id: 3.2.1.1-1
+      description: Cyber Security risk identification should be performed.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node77
+      ref_id: 3.2.1.1-2
+      description: Identified Cyber Security risks should be documented (in a central
+        register).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node77
+      ref_id: 3.2.1.1-3
+      description: Cyber Security risk identification should address relevant information
+        assets, threats, vulnerabilities and the key existing Cyber Security controls.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node81
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Security Risk Analysis
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node81
+      ref_id: 3.2.1.2-1
+      description: A Cyber Security risk analysis should be performed.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node81
+      ref_id: 3.2.1.2-2
+      description: The Cyber Security risk analysis should address the level of potential
+        business impact and likelihood of Cyber Security threat events materializing.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Security Risk Response
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-1
+      description: "The relevant determined Cyber Security risks should be treated\
+        \ according to the Member Organization\u2019s risk appetite and Cyber Security\
+        \ requirements."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-2
+      description: Cyber Security risk response should ensure that the list of risk
+        treatment options are documented (i.e., accepting, avoiding, transferring
+        or mitigating risks by applying Cyber Security controls).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-3.a
+      description: "Accepting Cyber Security risks should include: \na. the consideration\
+        \ of predefined limits for levels of Cyber Security risk;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-3.b
+      description: 'b. the approval and sign-off by the business owner, ensuring that:
+
+        1. the accepted Cyber Security risk is within the risk appetite and is reported
+        to the Cyber Security committee;
+
+        2. the accepted Cyber Security risk does not contradict SAMA regulations.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-4
+      description: Avoiding Cyber Security risks should involve a decision by a business
+        owner to cancel or postpone a particular activity or project that introduces
+        an unacceptable Cyber Security risk.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-5
+      description: 'Transferring or sharing the Cyber Security risks should:
+
+        a. involve sharing the Cyber Security risks with relevant (internal or external)
+        providers;
+
+        b. be accepted by the receiving (internal or external) provider(s);
+
+        c. eventually lead to the actual transferring or sharing of the Cyber Security
+        risk.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-6
+      description: "Applying Cyber Security controls to mitigate Cyber Security risks\
+        \ should include \na. identifying appropriate Cyber Security controls. \n\
+        b.evaluating the strengths and weaknesses of the Cyber Security controls;\n\
+        1. assessing the cost of implementing the Cyber Security controls;\n2. assessing\
+        \ the feasibility of implementing the Cyber Security controls;\n3. Review\
+        \ relevant compliance requirements for the Cyber Security controls. \nc. selecting\
+        \ Cyber Security controls. \nd. identifying, documenting, and obtaining sign-off\
+        \ for any residual risk by the business owner."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.3-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node84
+      ref_id: 3.2.1.3-7
+      description: Cyber Security risk treatment actions should be documented in a
+        risk treatment plan.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node93
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Risk Monitoring and Review
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.4-1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node93
+      ref_id: 3.2.1.4-1.a
+      description: 'The Cyber Security treatment should be monitored, including:
+
+        a. tracking progress in accordance to treatment plan.
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.4-1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node93
+      ref_id: 3.2.1.4-1.b
+      description: b. the selected and agreed Cyber Security controls are being implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.1.4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node93
+      ref_id: 3.2.1.4-2
+      description: The design and effectiveness of the revised or newly implemented
+        Cyber Security controls should be reviewed.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node97
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Regulatory Compliance
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node97
+      ref_id: 3.2.2-1
+      description: 'A process should be established for ensuring compliance with relevant
+        regulatory requirements affecting Cyber Security across the Member Organization.
+        The process of ensuring compliance should:
+
+        a. be performed periodically or when new regulatory requirements become effective;
+
+        b. involve representatives from key areas of the Member Organization;
+
+        c. result in the update of Cyber Security policy, standards and procedures
+        to accommodate any necessary changes (if applicable).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node99
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Compliance with (inter)national industry standards
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.3-1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node99
+      ref_id: 3.2.3-1.a
+      description: 'The Member Organization should comply with:
+
+        a. Payment Card Industry Data Security Standard (PCI-DSS);'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.3-1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node99
+      ref_id: 3.2.3-1.b
+      description: b. EMV (Europay, MasterCard and Visa) technical standard;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.3-1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node99
+      ref_id: 3.2.3-1.c
+      description: "c. SWIFT Customer Security Controls Framework \u2013 March 2017."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node103
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Security Review
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node103
+      ref_id: 3.2.4-1
+      description: Cyber Security reviews should be periodically performed for critical
+        information assets.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node103
+      ref_id: 3.2.4-2
+      description: Customer and internet-facing services should be subject to annual
+        review and penetration tests.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.4-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node103
+      ref_id: 3.2.4-3
+      description: Details of Cyber Security review performed should be recorded,
+        including the results of review, issues identified and recommended actions.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.4-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node103
+      ref_id: 3.2.4-4
+      description: The results of Cyber Security review should be reported to business
+        owner.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.4-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node103
+      ref_id: 3.2.4-5
+      description: 'Cyber Security review should be subject to follow-up reviews to
+        check that:
+
+        a. all identified issues have been addressed;
+
+        b. critical risks have been treated effectively;
+
+        c. all agreed actions are being managed on an ongoing basis.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node109
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node58
+      name: Cyber Security Audits
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node109
+      ref_id: 3.2.5-1
+      description: Cyber Security audits should be performed independently and according
+        to generally accepted auditing standards and SAMA Cyber Security framework.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.2.5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node109
+      ref_id: 3.2.5-2
+      description: "Cyber Security audits should be performed according to the Member\
+        \ Organization\u2019s audit manual and audit plan."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      assessable: false
+      depth: 1
+      name: Operation & Technology
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Human Resources
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-1
+      description: The human resources process should define, approve and implement
+        Cyber Security requirements.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-2
+      description: The effectiveness of the human resources process should be monitored,
+        measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-3.a
+      description: "The human resource process should include: \na. Cyber Security\
+        \ responsibilities and non-disclosure clauses within staff agreements (during\
+        \ and after the employment);"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-3.b
+      description: b. staff should receive Cyber Security awareness at the start and
+        during their employment;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-3.c
+      description: c. when disciplinary actions will be applicable;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-3.d
+      description: d. screening and background check;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.1-3.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node113
+      ref_id: 3.3.1-3.e
+      description: 'e. post-employment Cyber Security activities, such as:
+
+        1. revoking access rights;
+
+        2. returning information assets assigned (e.g., access badge, tokens, mobile
+        devices, all electronic and physical information).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node121
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Physical Security
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node121
+      ref_id: 3.3.2-1
+      description: The physical security process should be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node121
+      ref_id: 3.3.2-2
+      description: The effectiveness of the physical security process should be monitored,
+        measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node121
+      ref_id: 3.3.2-3
+      description: "The physical security process should include (but not limited\
+        \ to): \na. physical entry controls (including visitor security); \nb. monitoring\
+        \ and surveillance (e.g., CCTV, ATMs GPS tracking, sensitivity sensors); \n\
+        c. protection of data centers and data rooms; \nd. environmental protection;\
+        \ \ne. protection of information assets during lifecycle (including transport\
+        \ and secure disposal, avoiding unauthorized access and (un)intended data\
+        \ leakage."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node125
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node125
+      ref_id: 3.3.3-1
+      description: The asset management process should be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node125
+      ref_id: 3.3.3-2
+      description: The effectiveness of the asset management process should be monitored,
+        measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node125
+      ref_id: 3.3.3-3
+      description: "The asset management process should include: \na. a unified register;\
+        \ \nb. ownership and custodianship of information assets; \nc. the reference\
+        \ to relevant other processes, depending on asset management; \nd. information\
+        \ asset classification, labeling and handling; \ne. the discovery of new information\
+        \ assets."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Cyber Security Architecture
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-1
+      description: The Cyber Security architecture should be defined, approved and
+        implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-2
+      description: The compliance with the Cyber Security architecture should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-3.a
+      description: "The Cyber Security architecture should include: \na. A strategic\
+        \ outline of Cyber Security capabilities and controls based on the business\
+        \ requirements;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-3.b
+      description: b. approval of the defined Cyber Security architecture;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-3.c
+      description: c. the requirement of having qualified Cyber Security architects;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-3.d
+      description: d. design principles for developing Cyber Security controls and
+        applying Cyber Security requirements (i.e., the security-by-design principle);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.4-3.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node129
+      ref_id: 3.3.4-3.e
+      description: e. periodic review of the Cyber Security architecture.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-1
+      description: The identity and access management policy, including the responsibilities
+        and accountabilities, should be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-2
+      description: The compliance with the identity and access policy should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-3
+      description: The effectiveness of the Cyber Security controls within the identity
+        and access management policy should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-4.a
+      description: "The identity and access management policy should include: \na.\
+        \ business requirements for access control (i.e., ned-to-have and ned-to-know);"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-4.b
+      description: 'b. user access management (e.g., joiners, movers, leavers):
+
+        1. all identified user types should be covered (i.e., internal staff, third
+        parties);
+
+        2. changes of job status or job positions for internal staff (e.g. joiner,
+        mover and leaver) should be instigated by the human resources department;
+
+        3. changes for external staff or third parties should be instigated by the
+        appointed accountable party;
+
+        4. user access requests are formally approved in accordance with business
+        and compliance requirements (i.e., ned-to-have and ned-to-know to avoid unauthorized
+        access and (un)intended data leakage));
+
+        5. changes in access rights should be processed in a timely manner;
+
+        6. periodically user access rights and profiles should be reviewed;
+
+        7. an audit trail of submitted, approved and processed user access requests
+        and revocation requests should be established;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-4.c
+      description: c. user access management should be supported by automation;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-4.d
+      description: d. centralization of the identity and access management function;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-4.e
+      description: e. multi-factor authentication for sensitive and critical systems
+        and profiles;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.5-4.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node137
+      ref_id: 3.3.5-4.f
+      description: "f. privileged and remote access management, which should address:\n\
+        1. the allocation and restricted use of privileged and remote access, specifying:\n\
+        \ a. multi-factor authentication should be used for all remote access;\n b.\
+        \ multi-factor authentication should be used for privilege access on critical\
+        \ systems based on a risk assessment;\n2. the periodic review of users with\
+        \ privileged and remote accounts;\n3. individual accountability;\n4. the use\
+        \ of non-personal privileged accounts, including:\na. limitation and monitoring;\n\
+        b. confidentiality of passwords;\nc. changing passwords frequently and at\
+        \ the end of each session."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Application Security
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-1
+      description: The application Cyber Security standards should be defined, approved
+        and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-2
+      description: The compliance with the application security standards should be
+        monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-3
+      description: The effectiveness of the application Cyber Security controls should
+        be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-4
+      description: Application development should follow the approved secure system
+        development life cycle methodology (SDLC).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.a
+      description: "The application security standard should include: \na. secure\
+        \ coding standards;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.b
+      description: b. the Cyber Security controls implemented (e.g., configuration
+        parameters, events to monitor and retain [including system access and data],
+        identity and access management);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.c
+      description: c. the segregation of duties within the application (supported
+        with a documented authorization matrix);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.d
+      description: d. the protection of data aligned with the (agreed) classification
+        scheme (including privacy of customer data and, avoiding unauthorized access
+        and (un)intended data leakage);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.e
+      description: e. vulnerability and patch management;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.f
+      description: f. back-up and recovery procedures;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.6-5.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node147
+      ref_id: 3.3.6-5.g
+      description: g. periodic Cyber Security compliance review.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Change Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-1
+      description: The change management process should be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-2
+      description: The compliance with the change management process should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-3
+      description: The effectiveness of the Cyber Security controls within the change
+        management process should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.a
+      description: "The change management process should include: \na. Cyber Security\
+        \ requirements for controlling changes to information assets, such as assessing\
+        \ the impact of requested changes, classification of changes and the review\
+        \ of changes;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.b
+      description: 'b. security testing, which should (if applicable) include:
+
+        1. penetration testing;
+
+        2. code review if applications are developed internally;
+
+        3. code review of externally developed applications and if the source code
+        is available
+
+        4. a code review report (or equivalent, such as an independent assurance statement)
+        in case the source code cannot be provided;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.c
+      description: c. approval of changes by the business owner;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.d
+      description: d. approval from the Cyber Security function before submitting
+        to Change Advisory Board (CAB);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.e
+      description: e. approval by CAB;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.f
+      description: f. post-implementation review of the related Cyber Security controls;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.g
+      description: g. development, testing and implementation are segregated for both
+        the (technical) environment and involved individuals;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.h
+      description: h. the procedure for emergency changes and fixes;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.7-4.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node159
+      ref_id: 3.3.7-4.i
+      description: i. fall-back and roll-back procedures.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Infrastructure Security
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-1
+      description: ' The infrastructure security standards should be defined, approved
+        and implemented.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-2
+      description: The compliance with the infrastructure security standards should
+        be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-3
+      description: The effectiveness of the infrastructure Cyber Security controls
+        should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-4
+      description: 'The infrastructure security standards should cover all instances
+        of infrastructure available in the main datacenter(s), the disaster recovery
+        data site(s) and office spaces.
+
+
+        The infrastructure security standards should cover all instances of infrastructure
+        (e.g., operating systems, servers, virtual machines, firewalls, network devices,
+        IDS, IPS, wireless network, gateway servers, proxy servers, email gateways,
+        external connections, databases, file-shares, workstations, laptops, tablets,
+        mobile devices, PBX).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.a
+      description: "The infrastructure security standard should include: \na. the\
+        \ Cyber Security controls implemented (e.g., configuration parameters, events\
+        \ to monitor and retain [including system access and data], data-leakage prevention\
+        \ [DLP], identity and access management, remote maintenance);"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.b
+      description: b. the segregation of duties within the infrastructure component
+        (supported with a documented authorization matrix);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.c
+      description: c. the protection of data aligned with the (agreed) classification
+        scheme (including privacy of customer data and, avoiding unauthorized access
+        and (un)intended data leakage);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.d
+      description: d. the use of approved software and secure protocols;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.e
+      description: e. segmentation of networks;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.f
+      description: f. malicious code/software and virus protection (and applying application
+        whitelisting and APT protection);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.g
+      description: g. vulnerability and patch management;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.h
+      description: "h. DDOS protection (where applicable); this should include:\n\
+        \ 1. the use of scrubbing services;\n 2. specification of the bandwidth agreed;\n\
+        \ 3. 24x7 monitoring by Security Operating Center (SOC), Service Provider\
+        \ (SP) and scrubbing provider;\n 4. testing of DDOS scrubbing (minimum twice\
+        \ a year);\n 5. DDOS services should be implemented for the main datacenter(s)\
+        \ as well as the disaster recovery site(s);"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.i
+      description: i. back-up and recovery procedures;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.8-5.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node172
+      ref_id: 3.3.8-5.j
+      description: j. periodic Cyber Security compliance review.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node187
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Cryptography
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.9-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node187
+      ref_id: 3.3.9-1
+      description: A cryptographic security standard should be defined, approved and
+        implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.9-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node187
+      ref_id: 3.3.9-2
+      description: The compliance with the cryptographic security standard should
+        be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.9-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node187
+      ref_id: 3.3.9-3
+      description: The effectiveness of the cryptographic security controls should
+        be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.9-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node187
+      ref_id: 3.3.9-4
+      description: 'The cryptographic security standard should include:
+
+        a. an overview of the approved cryptographic solutions and relevant restrictions
+        (e.g., technically, legally);
+
+        b. the circumstances when the approved cryptographic solutions should be applied;
+
+        c. the management of encryption keys, including lifecycle management, archiving
+        and recovery.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Bring Your Own Device (BYOD)
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-1
+      description: The BYOD Cyber Security standard should be defined, approved and
+        implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-2
+      description: The compliance with the BYOD Cyber Security standard should be
+        monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-3
+      description: The effectiveness of the BYOD Cyber Security controls should be
+        measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-4.a
+      description: 'The BYOD standard should include: a. responsibilities of the user
+        (including awareness training);'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-4.b
+      description: b. information regarding the restrictions and consequences for
+        staff when the Member Organization implements Cyber Security controls on their
+        personal devices; for example when using modified devices (jailbreaking),
+        terminating the employment or in case of loss or theft of the personal device;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-4.c
+      description: c. the isolation of business information from personal information
+        (e.g., containerization);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-4.d
+      description: "d. the regulation of corporate mobile applications or approved\
+        \ \u201Cpublic\u201D mobile applications;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.10-4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node192
+      ref_id: 3.3.10-4.e
+      description: e. the use of mobile device management (MDM); applying access controls
+        to the device and business container and encryption mechanisms on the personal
+        device (to ensure secure transmission and storage).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Secure Disposal of Information Assets
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.11-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      ref_id: 3.3.11-1
+      description: The secure disposal standard and procedure should be defined, approved
+        and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.11-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      ref_id: 3.3.11-2
+      description: The compliance with the secure disposal standard and procedure
+        should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.11-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      ref_id: 3.3.11-3
+      description: The effectiveness of the secure disposal Cyber Security controls
+        should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.11-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      ref_id: 3.3.11-4
+      description: Information assets should be disposed in accordance with legal
+        and regulatory requirements, when no longer required (i.e. meting data privacy
+        regulations to avoid unauthorized access and avoid (un)intended data leakage).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.11-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      ref_id: 3.3.11-5
+      description: Sensitive information should be destroyed using techniques to make
+        the information non-retrievable (e.g., secure erase, secure wiping, incineration,
+        double crosscut, shredding).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.11-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node201
+      ref_id: 3.3.11-6
+      description: The Member Organization should ensure that third party service
+        providers used for secure disposal, transport and storage comply with the
+        secure disposal standard and procedure and the effectiveness is periodically
+        measured and evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node208
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Payment Systems
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.12-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node208
+      ref_id: 3.3.12-1
+      description: For Saudi Arabian Riyal Interbank Express (SARIE) information,
+        please refer to the SARIE Information Security Policy, Version Issue 1.0 -
+        June 2016.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.12-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node208
+      ref_id: 3.3.12-2
+      description: "For mada information, please refer to the following sections in\
+        \ the mada Rules and Standards Technical Book (se appendix A):\n \u2022 Part\
+        \ IIIa - Security Framework, Version Issue 6.0.0 - May 2016\n \u2022 Part\
+        \ IIIb - HSM Requirements, Version Issue 6.0.0 - May 2016\n \u2022 SAMA CA\
+        \ IPK Certificate Procedures, Version Issue 6.0.1 \u2013 October 2016\n"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Electronic Banking Services
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-1
+      description: The Cyber Security standards for electronic banking services should
+        be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-2
+      description: The compliance with Cyber Security standards for electronic banking
+        services should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-3
+      description: The effectiveness of the Cyber Security standard for electronic
+        banking services should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-4.a
+      description: 'Electronic banking services security standard should cover: a.
+        use of brand protection measures to protect online services including social
+        media.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-4.b
+      description: "b. online, mobile and phone banking:\n 1. use of official application\
+        \ stores and websites (applicable for online and mobile banking);\n 2. use\
+        \ of detection measures and take-down of malicious apps and websites (applicable\
+        \ for online and mobile banking);\n 3. use of sandboxing (applicable for online\
+        \ and mobile banking);\n 4. use of non-caching techniques (applicable for\
+        \ online and mobile banking);\n 5. use of communication techniques to avoid\
+        \ \u2018man-in-the-middle\u2019-attacks (applicable for online and mobile\
+        \ banking);\n6. use of multi-factor authentication mechanisms:\n a. multi-factor\
+        \ authentication should be used during the registration process for the customer\
+        \ in order to use of electronic banking services;\n b. multi-factor authentication\
+        \ should be implemented for all electronic banking services available to customers;\n\
+        \ c. the use of hard and soft tokens should be password protected;\n d. revoking\
+        \ the access of customers after 3 successive incorrect passwords or invalid\
+        \ PINs;\n e. the process for changing the customer mobile number should only\
+        \ be done from either a branch or ATM;\n f. the processes for requesting and\
+        \ activating of the multi-factor authentication should be done through different\
+        \ delivery channels;\n g. multi-factor authentication should be implemented\
+        \ for the following processes:\n 1. sign-on;\n 2. adding or modifying beneficiaries;\n\
+        \ 3. adding utility and government payment services;\n 4. high-risk transactions\
+        \ (when it exceeds predefined limits);\n 5. password reset;\n7. the processes\
+        \ for adding and activating beneficiaries should be done through different\
+        \ delivery channels (applicable for mobile and online banking);\n 8. high\
+        \ availability of the electronic banking services should be ensured;\n 9.\
+        \ scheduled downtime of the electronic banking services should be timely communicated\
+        \ to SAMA and customers;\n 10. contractual agreements between the Member Organization\
+        \ and the customer addressing the roles, responsibilities and liabilities\
+        \ for both the Member Organization and the customers;\n11. obtaining approval\
+        \ of SAMA before launching a new electronic banking service."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-4.c
+      description: "c. ATMs and POSs:\n 1. prevention and detection of exploiting\
+        \ the ATM/POS application and infrastructure vulnerabilities (e.g., cables,\
+        \ (USB)-ports, rebooting);\n 2. Cyber Security measures, such as hardening\
+        \ of operating systems, malware protection, privacy screens, masking of passwords\
+        \ or account numbers (e.g., scren and receipt), geo-blocking (e.g., disable\
+        \ cards per default for outside GCC countries, disable magnetic strip transactions),\
+        \ video monitoring (CCTV), revoking cards after 3 successive invalid PINs,\
+        \ anti-skimming solutions (hardware/software), and PIN-pad protection;\n 3.\
+        \ remote stopping of ATMs in case of malicious activities."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.13-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node211
+      ref_id: 3.3.13-4.d
+      description: "d. SMS instant notification services:\n 1. SMS messages should\
+        \ not contain sensitive data (e.g., account balance - except for credit cards);\n\
+        \ 2. SMS alert should be sent to both mobile numbers (old and new) when the\
+        \ customer\u2019s mobile number has ben changed;\n 3. SMS notification should\
+        \ be sent to the customer\u2019s mobile number when requesting a new multi-factor\
+        \ authentication mechanism.\n 4. SMS notification should be sent to the customer\u2019\
+        s mobile number for all retail and personal financial transactions.\n 5. SMS\
+        \ notification should be sent to the customer\u2019s mobile number when beneficiaries\
+        \ are added, modified and activated."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Cyber Security Event Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-1
+      description: The security event management process should be defined, approved
+        and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-2
+      description: The effectiveness of the Cyber Security controls within the security
+        event management process should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-3
+      description: To support this process a security event monitoring standard should
+        be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-3.a
+      description: a. the standard should address for all information assets the mandatory
+        events which should be monitored, based on the classification or risk profile
+        of the information asset.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.a
+      description: 'The security event management process should include requirements
+        for:
+
+        a. the establishment of a designated team responsible for security monitoring
+        (i.e., Security Operations Center (SOC));'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.b
+      description: b. skilled and (continuously) trained staff;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.c
+      description: c. a restricted area to facilitate SOC activities and workspaces;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.d
+      description: d. resources required continuous security event monitoring activities
+        (24x7);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.e
+      description: e. detection and handling of malicious code and software;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.f
+      description: f. detection and handling of security or suspicious events and
+        anomalies;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.g
+      description: g. deployment of security network packet analysis solution;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.h
+      description: h. adequately protected logs;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.i
+      description: i. periodic compliance monitoring of applications and infrastructure
+        Cyber Security standards
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.j
+      description: j. automated and centralized analysis of security loggings and
+        correlation of event or patterns (i.e., Security Information and Event Management
+        (SIEM));
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.k
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.k
+      description: k. reporting of Cyber Security incidents;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.14-4.l
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node219
+      ref_id: 3.3.14-4.l
+      description: l. independent periodic testing of the effectiveness of the security
+        operations center (e.g., red-teaming).
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Cyber Security Incident Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-1
+      description: The Cyber Security incident management process should be defined,
+        approved, implemented and aligned with the enterprise incident management
+        process.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-2
+      description: The effectiveness of the Cyber Security controls within the Cyber
+        Security incident management process should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-3
+      description: The standard should address the mandatory and suspicious security
+        events which should be responded to.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4
+      description: 'The security incident management process should include requirements
+        for:'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.a
+      description: a. the establishment of a designated team responsible for security
+        incident management;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.b
+      description: b. skilled and (continuously) trained staff;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.c
+      description: c. sufficient capacity available of certified forensic staff for
+        handling major incidents (e.g., internal staff or contracting an external
+        forensic team);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.d
+      description: d. a restricted area to facilitate the computer emergency response
+        team (CERT) workspaces;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.e
+      description: e. the classification of Cyber Security incidents;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.f
+      description: f. the timely handling of Cyber Security incidents, recording and
+        monitoring progress;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.g
+      description: g. the protection of relevant evidence and loggings;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.h
+      description: h. post-incident activities, such as forensics, root-cause analysis
+        of the incidents;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.i
+      description: i. reporting of suggested improvements to the CISO and the Committe;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-4.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-4.j
+      description: j. establish a Cyber Security incident repository.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-5
+      description: "The Member Organization should inform \u2018SAMA IT Risk Supervision\u2019\
+        \ immediately when a medium or high classified security incident has occurred\
+        \ and identified."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-6
+      description: "The Member Organization should obtain \u2018no objection\u2019\
+        \ from \u2018SAMA IT Risk Supervision\u2019 before any media interaction related\
+        \ to the incident."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.15-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node236
+      ref_id: 3.3.15-7
+      description: "The Member Organization should submit a formal incident report\
+        \ \u2018SAMA IT Risk Supervision\u2019 after resuming operations, including\
+        \ the following incident details: a. title of incident;b. classification of\
+        \ the incident (medium or high);c. date and time of incident occurred. date\
+        \ and time of incident detected. information assets involved; f. (technical)\
+        \ details of the incident;g. root-cause analysis;h. corrective activities\
+        \ performed and planned;i. description of impact (e.g., loss of data, disruption\
+        \ of services, unauthorized modification of data, (un)intended data leakage,\
+        \ number of customers impacted);j. total estimated cost of incident;k. estimated\
+        \ cost of corrective actions."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node254
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Threat Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.16-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node254
+      ref_id: 3.3.16-1
+      description: The threat intelligence management process should be defined, approved
+        and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.16-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node254
+      ref_id: 3.3.16-2
+      description: The effectiveness of the threat intelligence management process
+        should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.16-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node254
+      ref_id: 3.3.16-3
+      description: 'The threat intelligence management process should include: a.
+        the use of internal sources, such as access control, application and infrastructure
+        logs, IDS, IPS, security tooling, Security Information and Event Monitoring
+        (SIEM), support functions (e.g., Legal, Audit, IT Helpdesk, Forensics, Fraud
+        Management, Risk Management, Compliance);b. the use of reliable and relevant
+        external sources, such as SAMA, government agencies, security forums, (security)
+        vendors, security organizations and specialist notification services;c. a
+        defined methodology to analyze the threat information periodically;d. the
+        relevant details on identified or collected threats, such as modus operandi,
+        actors, motivation and type of threats;e. the relevance of the derived intelligence
+        and the action-ability for follow-up (for e.g., SOC, Risk Management);f. sharing
+        the relevant intelligence with the relevant stakeholders (e.g., SAMA, BCIS
+        members).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node258
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node112
+      name: Vulnerability Management
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.17-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node258
+      ref_id: 3.3.17-1
+      description: The vulnerability management process should be defined, approved
+        and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.17-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node258
+      ref_id: 3.3.17-2
+      description: The effectiveness of the vulnerability management process should
+        be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.3.17-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node258
+      ref_id: 3.3.17-3
+      description: 'The vulnerability management process should include: a. all information
+        assets;b. frequency of performing the vulnerability scan (risk-based);c. classification
+        of vulnerabilities;d. defined timelines to mitigate (per classification);e.
+        prioritization for classified information assets; f. patch management and
+        method of deployment.'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node262
+      assessable: false
+      depth: 1
+      name: Third Party Security
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node262
+      name: 'Contract and Vendor Management '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1
+      description: The Cyber Security requirements should be defined, approved, implemented
+        and communicated within the contract and vendor management processes.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.2
+      description: The compliance with contract and vendor management process should
+        be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.3
+      description: The effectiveness of the Cyber Security controls within the contract
+        and vendor management process should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-4
+      description: "These contract and vendor management processes should cover: \n\
+        a. whether the involvement of the Cyber Security function is actively required\
+        \ (e.g., in case of due diligence);\nb. the baseline Cyber Security requirements\
+        \ which should be applied in all cases;\nc. the right to periodically perform\
+        \ Cyber Security reviews and audits."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-5.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-5.a
+      description: 'The contract management process should cover requirements for:
+        a. executing a Cyber Security risk assessment as part of the procurement process;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-5.b
+      description: b. defining the specific Cyber Security requirements as part of
+        the tender process;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-5.c
+      description: c. evaluating the replies of potential vendors on the defined Cyber
+        Security requirements;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-5.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-5.d
+      description: d. testing of the agreed Cyber Security requirements (risk-based);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-5.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-5.e
+      description: e. defining the communication or escalation process in case of
+        Cyber Security incidents;
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-5.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-5.f
+      description: f. ensuring Cyber Security requirements are defined for exiting,
+        terminating or renewing the contract (including escrow agreements if applicable);
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1-4.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1-4.g
+      description: g. defining a mutual confidentiality agreement.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.1.-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node263
+      ref_id: 3.4.1.-6
+      description: 'The vendor management process (i.e., service level management)
+        should cover requirements for: a. periodic reporting, reviewing, and evaluating
+        the contractually agreed Cyber Security requirements (in SLAs).'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node276
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node262
+      name: 'Outsourcing '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node276
+      ref_id: 3.4.2-1
+      description: The Cyber Security requirements within the outsourcing policy and
+        process should be defined, approved, implemented and communicated within Member
+        Organization.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node276
+      ref_id: 3.4.2-2
+      description: The Cyber Security requirements regarding the outsourcing policy
+        and process should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node276
+      ref_id: 3.4.2-3
+      description: "The outsourcing process should include: \na. the approval from\
+        \ SAMA prior to material outsourcing. \nb. the involvement of the Cyber Security\
+        \ function. \nc. compliance with the SAMA circular on outsourcing."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node262
+      name: 'Cloud Computing '
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1
+      description: The Cyber Security controls within the cloud computing policy for
+        hybrid and public cloud services should be defined, approved and implemented,
+        and communicated within Member Organization.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-2
+      description: The compliance with the cloud computing policy should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-3
+      description: The Cyber Security controls regarding the cloud computing policy
+        and process for hybrid and public cloud services should be periodically measured
+        and evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.a
+      description: "The cloud computing policy for hybrid and public cloud services\
+        \ should address requirements for: \na. the process for adopting cloud services,\
+        \ including that:\n1. a Cyber Security risk assessment and due diligence on\
+        \ the cloud service provider and its cloud services should be performed;\n\
+        2. the Member Organization should obtain SAMA approval prior to using cloud\
+        \ services or signing the contract with the cloud provider;\n3. a contract\
+        \ should be in place, including the Cyber Security requirements, before using\
+        \ cloud services;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.b
+      description: 'b. data location, including that:
+
+        1. in principle only cloud services should be used that are located in Saudi
+        Arabia, or when cloud services are to be used outside Saudi Arabia that the
+        Member Organization should obtain explicit approval from SAMA;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.c
+      description: "c. data use limitations, including that:\n1. the cloud service\
+        \ provider should not use the Member Organization\u2019s data for secondary\
+        \ purposes;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.d
+      description: "d. security, including that:\n1. The cloud service provider should\
+        \ implement and monitor the Cyber Security controls as determined in the risk\
+        \ assessment for protecting the confidentiality, integrity, and availability\
+        \ of the Member Organization\u2019s data;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.e
+      description: "e. data segregation, including that:\n1. the Member Organization\u2019\
+        s data is logically segregated from other data held by the cloud service provider,\
+        \ including that the cloud service provider should be able to identify the\
+        \ Member Organization\u2019s data and at all times should be able to distinguish\
+        \ it from other data."
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.f
+      description: "f. business continuity, including that:\n1. business continuity\
+        \ requirements are met in accordance with the Member Organization\u2019s business\
+        \ continuity policy;"
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.g
+      description: 'g. audit, review and monitoring, including that:
+
+        1. the Member Organization has the right to perform a Cyber Security review
+        at the cloud service provider;
+
+        2. the Member Organization has the right to perform a Cyber Security audit
+        at the cloud service provider;
+
+        3. the Member Organization has the right to perform a Cyber Security examination
+        at the cloud service provider;'
+    - urn: urn:intuitem:risk:req_node:sama-csf-1.0:3.4.3-1.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-csf-1.0:node280
+      ref_id: 3.4.3-1.h
+      description: "h. exit, including that:\n1. the Member Organization has termination\
+        \ rights;\n2. the cloud service provider has to return the Member Organization\u2019\
+        s data on termination;\n3. the cloud service provider has to irreversibly\
+        \ delete the Member Organization\u2019s data on termination."

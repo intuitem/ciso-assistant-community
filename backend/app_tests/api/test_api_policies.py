@@ -8,8 +8,8 @@ from test_utils import EndpointTestsQueries
 # Generic policy data for tests
 POLICY_NAME = "Test Policy"
 POLICY_DESCRIPTION = "Test Description"
-POLICY_STATUS = ("planned", "Planned")
-POLICY_STATUS2 = ("active", "Active")
+POLICY_STATUS = Policy.Status.TO_DO
+POLICY_STATUS2 = Policy.Status.ACTIVE
 POLICY_EFFORT = ("L", "Large")
 POLICY_EFFORT2 = ("M", "Medium")
 POLICY_LINK = "https://example.com"
@@ -97,7 +97,7 @@ class TestPolicysAuthenticated:
             {
                 "name": POLICY_NAME,
                 "description": POLICY_DESCRIPTION,
-                "status": POLICY_STATUS[0],
+                "status": POLICY_STATUS._value_,
                 "link": POLICY_LINK,
                 "eta": POLICY_ETA,
                 "effort": POLICY_EFFORT[0],
@@ -106,7 +106,7 @@ class TestPolicysAuthenticated:
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "reference_control": None,
-                "status": POLICY_STATUS[1],
+                "status": POLICY_STATUS._value_,
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
@@ -122,7 +122,7 @@ class TestPolicysAuthenticated:
             {
                 "name": POLICY_NAME,
                 "description": POLICY_DESCRIPTION,
-                "status": POLICY_STATUS[0],
+                "status": POLICY_STATUS._value_,
                 "link": POLICY_LINK,
                 "eta": POLICY_ETA,
                 "effort": POLICY_EFFORT[0],
@@ -130,7 +130,7 @@ class TestPolicysAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "status": POLICY_STATUS[1],
+                "status": POLICY_STATUS._value_,
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
@@ -149,7 +149,7 @@ class TestPolicysAuthenticated:
             {
                 "name": POLICY_NAME,
                 "description": POLICY_DESCRIPTION,
-                "status": POLICY_STATUS[0],
+                "status": POLICY_STATUS._value_,
                 "link": POLICY_LINK,
                 "eta": POLICY_ETA,
                 "effort": POLICY_EFFORT[0],
@@ -158,7 +158,7 @@ class TestPolicysAuthenticated:
             {
                 "name": "new " + POLICY_NAME,
                 "description": "new " + POLICY_DESCRIPTION,
-                "status": POLICY_STATUS2[0],
+                "status": POLICY_STATUS2._value_,
                 "link": "new " + POLICY_LINK,
                 "eta": "2025-01-01",
                 "effort": POLICY_EFFORT2[0],
@@ -166,7 +166,7 @@ class TestPolicysAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "status": POLICY_STATUS[1],
+                "status": POLICY_STATUS._value_,
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,

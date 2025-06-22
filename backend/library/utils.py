@@ -1,18 +1,17 @@
-import json
 import time
-import os
-from pathlib import Path
-import re
-from typing import List, Union
-from django.core.exceptions import SuspiciousFileOperation
-from django.http import Http404
 
-import yaml
+from .helpers import get_referential_translation
+from pathlib import Path
+from typing import List, Union
+from django.core.exceptions import SuspiciousFileOperation, ValidationError
+from django.http import Http404
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from ciso_assistant import settings
 from core.models import (
     Framework,
+    RequirementMapping,
+    RequirementMappingSet,
     StoredLibrary,
     LoadedLibrary,
     RequirementNode,
@@ -28,15 +27,36 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
 
-
-def match_urn(urn_string):
-    match = re.match(URN_REGEX, urn_string)
-    if match:
-        return match.groups()  # Returns all captured groups from the regex match
-    else:
-        return None
+def preview_library(framework: dict) -> dict[str, list]:
+    """
+    Function to create temporary requirement nodes list
+    Used to display requirements in tree view inside library detail view
+    """
+    preview = {}
+    requirement_nodes_list = []
+    if (requirement_nodes := framework.get("requirement_nodes")) is not None:
+        index = 0
+        for requirement_node in requirement_nodes:
+            parent_urn = requirement_node.get("parent_urn")
+            if parent_urn:
+                parent_urn = parent_urn.lower()
+            index += 1
+            requirement_nodes_list.append(
+                RequirementNode(
+                    description=get_referential_translation(
+                        requirement_node, "description"
+                    ),
+                    ref_id=requirement_node.get("ref_id"),
+                    name=get_referential_translation(requirement_node, "name"),
+                    urn=requirement_node["urn"].lower(),
+                    parent_urn=parent_urn,
+                    order_id=index,
+                    questions=requirement_node.get("questions"),
+                )
+            )
+    preview["requirement_nodes"] = requirement_nodes_list
+    return preview
 
 
 class RequirementNodeImporter:
@@ -51,12 +71,15 @@ class RequirementNodeImporter:
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
     def import_requirement_node(self, framework_object: Framework):
+        parent_urn = self.requirement_data.get("parent_urn")
+        if parent_urn:
+            parent_urn = parent_urn.lower()
         requirement_node = RequirementNode.objects.create(
             # Should i just inherit the folder from Framework or this is useless ?
             folder=Folder.get_root_folder(),
             framework=framework_object,
-            urn=self.requirement_data["urn"],
-            parent_urn=self.requirement_data.get("parent_urn"),
+            urn=self.requirement_data["urn"].lower(),
+            parent_urn=parent_urn,
             assessable=self.requirement_data.get("assessable"),
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
@@ -68,9 +91,10 @@ class RequirementNodeImporter:
             implementation_groups=self.requirement_data.get("implementation_groups"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
+            translations=self.requirement_data.get("translations", {}),
             is_published=True,
+            questions=self.requirement_data.get("questions"),
         )
-
         for threat in self.requirement_data.get("threats", []):
             requirement_node.threats.add(
                 Threat.objects.get(urn=threat.lower())
@@ -80,6 +104,124 @@ class RequirementNodeImporter:
             requirement_node.reference_controls.add(
                 ReferenceControl.objects.get(urn=reference_control.lower())
             )
+
+
+class RequirementMappingImporter:
+    REQUIRED_FIELDS = {
+        "target_requirement_urn",
+        "relationship",
+        "source_requirement_urn",
+    }
+
+    def __init__(self, data: dict):
+        self.data = data
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+    def load(
+        self,
+        mapping_set: RequirementMappingSet,
+    ):
+        try:
+            target_requirement = RequirementNode.objects.get(
+                urn=self.data["target_requirement_urn"].lower(), default_locale=True
+            )
+        except RequirementNode.DoesNotExist:
+            logger.error(
+                "Target requirement does not exist",
+                error=self.data["target_requirement_urn"],
+            )
+        try:
+            source_requirement = RequirementNode.objects.get(
+                urn=self.data["source_requirement_urn"].lower(), default_locale=True
+            )
+        except RequirementNode.DoesNotExist:
+            logger.error(
+                "Source requirement does not exist",
+                error=self.data["source_requirement_urn"],
+            )
+        return RequirementMapping.objects.create(
+            mapping_set=mapping_set,
+            target_requirement=target_requirement,
+            source_requirement=source_requirement,
+            relationship=self.data["relationship"],
+            annotation=self.data.get("annotation"),
+            strength_of_relationship=self.data.get("strength_of_relationship"),
+            rationale=self.data.get("rationale"),
+        )
+
+
+class RequirementMappingSetImporter:
+    REQUIRED_FIELDS = {"urn", "name", "source_framework_urn", "target_framework_urn"}
+    OBJECT_FIELDS = {"requirement_mappings"}
+
+    def __init__(self, data: dict):
+        self.data = data
+        self._requirement_mappings = []
+
+    def is_empty(self) -> bool:
+        return not self.data.get("requirement_mappings", [])
+
+    def init_requirement_mappings(
+        self, requirement_mappings: List[dict]
+    ) -> Union[str, None]:
+        requirement_mapping_importers = []
+        import_errors = []
+        for index, mapping in enumerate(requirement_mappings):
+            requirement_mapping_importer = RequirementMappingImporter(data=mapping)
+            requirement_mapping_importers.append(requirement_mapping_importer)
+            if (
+                requirement_mapping_error := requirement_mapping_importer.is_valid()
+            ) is not None:
+                import_errors.append((index, requirement_mapping_error))
+
+        self._requirement_mappings = requirement_mapping_importers
+
+        if import_errors:
+            invalid_requirement_mapping_index, requirement_mapping_error = (
+                import_errors[0]
+            )
+            return "[REQUIREMENT_MAPPING_ERROR] {} invalid requirement mapping{} detected, the {}{} requirement mapping has the following error : {}".format(
+                len(import_errors),
+                "s" if len(import_errors) > 1 else "",
+                invalid_requirement_mapping_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(
+                    invalid_requirement_mapping_index + 1, "th"
+                ),
+                requirement_mapping_error,
+            )
+
+    def load(
+        self,
+        library_object: LoadedLibrary,
+    ):
+        _target_framework = Framework.objects.get(
+            urn=self.data["target_framework_urn"].lower(), default_locale=True
+        )
+        _source_framework = Framework.objects.get(
+            urn=self.data["source_framework_urn"].lower(), default_locale=True
+        )
+        mapping_set = RequirementMappingSet.objects.create(
+            name=self.data["name"],
+            urn=self.data["urn"].lower(),
+            target_framework=_target_framework,
+            source_framework=_source_framework,
+            library=library_object,
+        )
+        for mapping in self._requirement_mappings:
+            mapping.load(mapping_set)
+        return mapping_set
+
+    def init(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+        if self.is_empty():
+            return "No requirement mappings objects has been detected"
+
+        return self.init_requirement_mappings(self.data["requirement_mappings"])
 
 
 # The couple (URN, locale) is unique. ===> Check it in the future
@@ -112,11 +254,11 @@ class FrameworkImporter:
                 len(import_errors),
                 "s" if len(import_errors) > 1 else "",
                 invalid_requirement_index + 1,
-                {1: "st", 2: "nd", 3: "rd"}.get(invalid_requirement_index, "th"),
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_requirement_index + 1, "th"),
                 invalid_requirement_error,
             )
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return (
             sum(
                 len(self.framework_data.get(object_field, []))
@@ -167,7 +309,7 @@ class FrameworkImporter:
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
-            urn=self.framework_data["urn"],
+            urn=self.framework_data["urn"].lower(),
             ref_id=self.framework_data["ref_id"],
             name=self.framework_data.get("name"),
             description=self.framework_data.get("description"),
@@ -180,6 +322,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            translations=self.framework_data.get("translations", {}),
             is_published=True,
         )
         for requirement_node in self._requirement_nodes:
@@ -200,13 +343,14 @@ class ThreatImporter:
     def import_threat(self, library_object: LoadedLibrary):
         Threat.objects.create(
             library=library_object,
-            urn=self.threat_data.get("urn"),
+            urn=self.threat_data["urn"].lower(),
             ref_id=self.threat_data["ref_id"],
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
+            translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
@@ -215,6 +359,9 @@ class ThreatImporter:
 class ReferenceControlImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in ReferenceControl.CATEGORY)
+    CSF_FUNCTIONS = set(
+        _csf_function[0] for _csf_function in ReferenceControl.CSF_FUNCTION
+    )
 
     def __init__(self, reference_control_data: dict):
         self.reference_control_data = reference_control_data
@@ -231,18 +378,28 @@ class ReferenceControlImporter:
                     category, ", ".join(ReferenceControlImporter.CATEGORIES)
                 )
 
+        if (
+            csf_function := self.reference_control_data.get("csf_function")
+        ) is not None:
+            if csf_function not in ReferenceControlImporter.CSF_FUNCTIONS:
+                return "Invalid CSF function '{}', the function must be among the following list : {}".format(
+                    csf_function, ", ".join(ReferenceControlImporter.CSF_FUNCTIONS)
+                )
+
     def import_reference_control(self, library_object: LoadedLibrary):
         ReferenceControl.objects.create(
             library=library_object,
-            urn=self.reference_control_data.get("urn"),
+            urn=self.reference_control_data["urn"].lower(),
             ref_id=self.reference_control_data["ref_id"],
             name=self.reference_control_data.get("name"),
             description=self.reference_control_data.get("description"),
             provider=library_object.provider,
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
+            csf_function=self.reference_control_data.get("csf_function"),
             is_published=True,
             locale=library_object.locale,
+            translations=self.reference_control_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
@@ -252,7 +409,7 @@ class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
     MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
 
-    def __init__(self, risk_matrix_data):
+    def __init__(self, risk_matrix_data: dict):
         self.risk_matrix_data = risk_matrix_data
 
     @staticmethod
@@ -278,13 +435,14 @@ class RiskMatrixImporter:
             folder=Folder.get_root_folder(),
             name=self.risk_matrix_data.get("name"),
             description=self.risk_matrix_data.get("description"),
-            urn=self.risk_matrix_data.get("urn"),
+            urn=self.risk_matrix_data["urn"].lower(),
             provider=library_object.provider,
             ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=json.dumps(matrix_data),
+            json_definition=matrix_data,
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            translations=self.risk_matrix_data.get("translations", {}),
             is_published=True,
         )
         logger.info("Risk matrix created", matrix=matrix)
@@ -295,14 +453,29 @@ class LibraryImporter:
     # The word "import" must be replaced by "load" in all classes/methods/variables declared in this file.
 
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
-    OBJECT_FIELDS = ["threats", "reference_controls", "risk_matrix", "framework"]
+    OBJECT_FIELDS = [
+        "threats",
+        "reference_controls",
+        "risk_matrix",  # This field name is deprecated
+        "risk_matrices",
+        "framework",  # This field name is deprecated
+        "frameworks",
+        "requirement_mapping_set",  # This field name is deprecated
+        "requirement_mapping_sets",
+    ]
+    NON_DEPRECATED_OBJECT_FIELDS = [
+        field
+        for field in OBJECT_FIELDS
+        if field not in ["framework", "risk_matrix", "requirement_mapping_set"]
+    ]
 
     def __init__(self, library: StoredLibrary):
         self._library = library
-        self._framework_importer = None
+        self._frameworks = []
         self._threats = []
         self._reference_controls = []
         self._risk_matrices = []
+        self._requirement_mapping_sets = []
 
     def init_threats(self, threats: List[dict]) -> Union[str, None]:
         threat_importers = []
@@ -322,7 +495,7 @@ class LibraryImporter:
                 len(import_errors),
                 "s" if len(import_errors) > 1 else "",
                 invalid_threat_index + 1,
-                {1: "st", 2: "nd", 3: "rd"}.get(invalid_threat_index, "th"),
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_threat_index + 1, "th"),
                 invalid_threat_error,
             )
 
@@ -352,7 +525,9 @@ class LibraryImporter:
                 len(import_errors),
                 "s" if len(import_errors) > 1 else "",
                 invalid_reference_control_index + 1,
-                {1: "st", 2: "nd", 3: "rd"}.get(invalid_reference_control_index, "th"),
+                {1: "st", 2: "nd", 3: "rd"}.get(
+                    invalid_reference_control_index + 1, "th"
+                ),
                 invalid_reference_control_error,
             )
 
@@ -373,13 +548,62 @@ class LibraryImporter:
                 len(import_errors),
                 "ces" if len(import_errors) > 1 else "x",
                 invalid_risk_matrix_index + 1,
-                {1: "st", 2: "nd", 3: "rd"}.get(invalid_risk_matrix_index, "th"),
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_risk_matrix_index + 1, "th"),
                 invalid_risk_matrix_error,
             )
 
-    def init_framework(self, framework_data: dict) -> Union[str, None]:
-        self._framework_importer = FrameworkImporter(framework_data)
-        return self._framework_importer.init()
+    def init_requirement_mapping_set(
+        self, requirement_mapping_sets: List[dict]
+    ) -> Union[str, None]:
+        requirement_mapping_set_importers = []
+        import_errors = []
+        for index, requirement_mapping_set_data in enumerate(requirement_mapping_sets):
+            requirement_mapping_set_importer = RequirementMappingSetImporter(
+                requirement_mapping_set_data
+            )
+            requirement_mapping_set_importers.append(requirement_mapping_set_importer)
+            if (
+                requirement_mapping_set_error := requirement_mapping_set_importer.init()
+            ) is not None:
+                import_errors.append((index, requirement_mapping_set_error))
+
+        self._requirement_mapping_sets = requirement_mapping_set_importers
+
+        if import_errors:
+            (
+                invalid_requirement_mapping_set_index,
+                invalid_requirement_mapping_set_error,
+            ) = import_errors[0]
+            return "[REQUIREMENT_MAPPING_SET_ERROR] {} invalid requirement mapping set{} detected, the {}{} requirement mapping set has the following error : {}".format(
+                len(import_errors),
+                "s" if len(import_errors) > 1 else "",
+                invalid_requirement_mapping_set_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(
+                    invalid_requirement_mapping_set_index + 1, "th"
+                ),
+                invalid_requirement_mapping_set_error,
+            )
+
+    def init_framework(self, frameworks: List[dict]) -> Union[str, None]:
+        framework_importers = []
+        import_errors = []
+        for index, framework_data in enumerate(frameworks):
+            framework_importer = FrameworkImporter(framework_data)
+            framework_importers.append(framework_importer)
+            if framework_error := framework_importer.init():
+                import_errors.append((index, framework_error))
+
+        self._frameworks = framework_importers
+
+        if import_errors:
+            invalid_framework_index, invalid_framework_error = import_errors[0]
+            return "[FRAMEWORK_ERROR] {} invalid framework{} detected, the {}{} framework has the following error : {}".format(
+                len(import_errors),
+                "s" if len(import_errors) > 1 else "",
+                invalid_framework_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_framework_index + 1, "th"),
+                invalid_framework_error,
+            )
 
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
@@ -388,7 +612,7 @@ class LibraryImporter:
                 ", ".join(missing_fields)
             )"""
 
-        library_objects = json.loads(self._library.content)
+        library_objects = self._library.content
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
@@ -397,22 +621,64 @@ class LibraryImporter:
                 ", ".join(self.OBJECT_FIELDS)
             )
 
-        if "framework" in library_objects:
-            framework_data = library_objects["framework"]
+        if "framework" in library_objects and "frameworks" in library_objects:
+            return (
+                "A library can't have both 'framework' and 'frameworks' objects fields."
+            )
+
+        if keys_found := [
+            key for key in ["framework", "frameworks"] if key in library_objects
+        ]:
+            framework_data = library_objects[keys_found[0]]
+            if isinstance(framework_data, dict):
+                framework_data = [framework_data]
             if (
                 framework_import_error := self.init_framework(framework_data)
             ) is not None:
-                print("framework_import_error", framework_import_error)
+                logger.error("Framework import error", error=framework_import_error)
                 return framework_import_error
+
+        if (
+            "requirement_mapping_set" in library_objects
+            and "requirement_mapping_sets" in library_objects
+        ):
+            return "A library can't have both 'requirement_mapping_set' and 'requirement_mapping_sets' objects fields."
+
+        if keys_found := [
+            key
+            for key in ["requirement_mapping_set", "requirement_mapping_sets"]
+            if key in library_objects
+        ]:
+            requirement_mapping_set_data = library_objects[keys_found[0]]
+            if isinstance(requirement_mapping_set_data, dict):
+                # For backward-compatibility
+                requirement_mapping_set_data = [requirement_mapping_set_data]
+            if (
+                requirement_mapping_set_import_error
+                := self.init_requirement_mapping_set(requirement_mapping_set_data)
+            ) is not None:
+                logger.error(
+                    "Requirement mapping set import error",
+                    error=requirement_mapping_set_import_error,
+                )
+                return requirement_mapping_set_import_error
 
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
             if (threat_import_error := self.init_threats(threat_data)) is not None:
-                print("threat errors", threat_import_error)
+                logger.error("Threat import error", error=threat_import_error)
                 return threat_import_error
 
-        if "risk_matrix" in library_objects:
-            risk_matrix_data = library_objects["risk_matrix"]
+        if "risk_matrix" in library_objects and "risk_matrices" in library_objects:
+            return "A library can't have both 'risk_matrix' and 'risk_matrices' objects fields."
+
+        if keys_found := [
+            key for key in ["risk_matrix", "risk_matrices"] if key in library_objects
+        ]:
+            risk_matrix_data = library_objects[keys_found[0]]
+            if isinstance(risk_matrix_data, dict):
+                # Handle risk matrix as dict for consistency (it would be bad for "risk_matrix" to not accept a dict but allowing it for "framework" and "requiremnt_mapping_set")
+                risk_matrix_data = [risk_matrix_data]
             if (
                 risk_matrix_import_error := self.init_risk_matrices(risk_matrix_data)
             ) is not None:
@@ -427,18 +693,25 @@ class LibraryImporter:
             ) is not None:
                 return reference_control_import_error
 
-    def check_and_import_dependencies(self):
+    def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
-
         if not self._library.dependencies:
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
-                dependency = StoredLibrary.objects.get(
-                    urn=dependency_urn
-                )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
-                error_msg = dependency.load()
-                if error_msg is not None:
+                try:
+                    dependency = StoredLibrary.objects.get(urn=dependency_urn)
+                    if (error_msg := dependency.load()) is not None:
+                        return error_msg
+                except StoredLibrary.DoesNotExist:
+                    return f"ERROR: Stored Library with URN {dependency_urn} does not exist"
+            else:
+                # try to update the dependency, because we might need the last version for the main library
+                dependency = LoadedLibrary.objects.get(urn=dependency_urn)
+                if (error_msg := dependency.update()) not in [
+                    None,
+                    "libraryHasNoUpdate",
+                ]:
                     return error_msg
 
     def create_or_update_library(self):
@@ -465,18 +738,20 @@ class LibraryImporter:
                 "version": self._library.version,
                 "provider": self._library.provider,
                 "packager": self._library.packager,
+                "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
                 "builtin": self._library.builtin,
                 "objects_meta": self._library.objects_meta,
+                "translations": self._library.translations,
             },
             urn=_urn,
             locale=_locale,
         )
         return library_object
 
-    def import_objects(self, library_object):
+    def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
         for threat in self._threats:
@@ -488,8 +763,11 @@ class LibraryImporter:
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
 
-        if self._framework_importer is not None:
-            self._framework_importer.import_framework(library_object)
+        for framework in self._frameworks:
+            framework.import_framework(library_object)
+
+        for requirement_mapping_set in self._requirement_mapping_sets:
+            requirement_mapping_set.load(library_object)
 
     @transaction.atomic
     def _import_library(self):
@@ -504,8 +782,9 @@ class LibraryImporter:
         """Main method to import a library."""
         if (error_message := self.init()) is not None:
             return error_message  # This error check should be done when storing the Library but no after.
-
+        print("::: Getting Dependencies :::")
         error_msg = self.check_and_import_dependencies()
+        print("::: Dependencies are ok :::")
         if error_msg is not None:
             return error_msg
 
@@ -515,10 +794,9 @@ class LibraryImporter:
                 break
             except OperationalError as e:
                 if e.args and e.args[0] == "database is locked":
-                    time.sleep(1)
+                    time.sleep(3)
                 else:
                     raise e
             except Exception as e:
-                print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

@@ -1,33 +1,56 @@
 <script lang="ts">
-	import TreeViewItem from './TreeViewItem.svelte';
-	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
+	import TreeViewItem from './TreeViewItem.svelte';
+	import type { TreeViewNode } from './types';
 
-	// this can't be passed using context, since we have to pass it to recursive children.
-	/** Provide data-driven nodes. */
-	export let nodes: TreeViewNode[] = [];
+	onMount(async () => {
+		if (selection) {
+			// random number as name
+			name = String(Math.random());
 
-	/**
-	 * provides id's of expanded nodes
-	 * @type {string[]}
-	 */
-	export let expandedNodes: string[] = [];
-	/**
-	 * provides id's of disabled nodes
-	 * @type {string[]}
-	 */
-	export let disabledNodes: string[] = [];
-	/**
-	 * provides id's of checked nodes
-	 * @type {string[]}
-	 */
-	export let checkedNodes: string[] = [];
-	/**
-	 * provides id's of indeterminate nodes
-	 * @type {string[]}
-	 */
-	export let indeterminateNodes: string[] = [];
+			// remove relational links
+			if (!relational) treeItems = [];
+		}
+	});
+
+	interface Props {
+		/** Provide data-driven nodes. */
+		nodes?: TreeViewNode[];
+		/**
+		 * provides id's of expanded nodes
+		 * @type {string[]}
+		 */
+		expandedNodes?: string[];
+		/**
+		 * provides id's of disabled nodes
+		 * @type {string[]}
+		 */
+		disabledNodes?: string[];
+		/**
+		 * provides id's of checked nodes
+		 * @type {string[]}
+		 */
+		checkedNodes?: string[];
+		/**
+		 * provides id's of indeterminate nodes
+		 * @type {string[]}
+		 */
+		indeterminateNodes?: string[];
+		// important to pass children up to items (recursively)
+		treeItems?: TreeViewItem[];
+	}
+
+	let {
+		nodes = [],
+		expandedNodes = $bindable([]),
+		disabledNodes = $bindable([]),
+		checkedNodes = $bindable([]),
+		indeterminateNodes = $bindable([]),
+		treeItems = $bindable([])
+	}: Props = $props();
+	let childrenNodes: TreeViewItem[][] = $state(Array(nodes.length).fill([]));
+	let rnodes = $state(nodes);
 
 	// Context API
 	let selection: boolean = getContext('selection');
@@ -35,8 +58,8 @@
 	let relational: boolean = getContext('relational');
 
 	// Locals
-	let group: unknown = multiple ? [] : '';
-	let name = '';
+	let group: unknown = $state(multiple ? [] : '');
+	let name = $state('');
 
 	// events
 	const dispatch = createEventDispatcher();
@@ -109,67 +132,72 @@
 		}
 	}
 
-	onMount(async () => {
-		if (selection) {
-			// random number as name
-			name = String(Math.random());
-
-			// remove relational links
-			if (!relational) treeItems = [];
+	function hasMappingInference(node: TreeViewNode) {
+		const length = Object.keys(node.contentProps?.mapping_inference ?? {}).length;
+		if (length > 0) {
+			return true;
 		}
-	});
+		return false;
+	}
 
-	// important to pass children up to items (recursively)
-	export let treeItems: TreeViewItem[] = [];
-	let children: TreeViewItem[][] = [];
+	function areAllChildrenHiddenRecursive(node: TreeViewNode): boolean {
+		if (!node.children || node.children.length === 0) return false;
+		return node.children.every(
+			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
+		);
+	}
 </script>
 
 {#if nodes && nodes.length > 0}
-	{#each nodes as node, i}
+	{#each rnodes as node, i}
 		<TreeViewItem
 			bind:this={treeItems[i]}
-			bind:children={children[i]}
+			bind:childrenProp={childrenNodes[i]}
 			bind:group
 			bind:name
 			bind:value={node.id}
+			classProp={node?.contentProps?.hidden === true || areAllChildrenHiddenRecursive(node)
+				? 'hidden'
+				: ''}
+			mappingInference={hasMappingInference(node)}
 			hideLead={!node.lead}
 			hideChildren={!node.children || node.children.length === 0}
 			open={expandedNodes.includes(node.id)}
 			disabled={disabledNodes.includes(node.id)}
 			checked={checkedNodes.includes(node.id)}
 			indeterminate={indeterminateNodes.includes(node.id)}
-			on:toggle={(e) => toggleNode(node, e.detail.open)}
+			onToggle={(isOpened) => {
+				toggleNode(node, isOpened);
+				dispatch('toggle', {
+					id: node.id
+				});
+			}}
 			on:groupChange={(e) => checkNode(node, e.detail.checked, e.detail.indeterminate)}
 			on:click={() =>
 				dispatch('click', {
 					id: node.id
 				})}
-			on:toggle={() => {
-				dispatch('toggle', {
-					id: node.id
-				});
-			}}
 		>
 			{#if typeof node.content === 'string'}
 				{node.content}
 			{:else}
-				<svelte:component this={node.content} {...node.contentProps} />
+				<node.content {...node.contentProps} />
 			{/if}
-			<svelte:fragment slot="lead">
+			{#snippet lead()}
 				{#if typeof node.lead === 'string'}
 					{node.lead}
 				{:else}
-					<svelte:component this={node.lead} {...node.leadProps} />
+					<node.lead {...node.leadProps} />
 				{/if}
-			</svelte:fragment>
-			<svelte:fragment slot="children">
+			{/snippet}
+			{#snippet childrenSlot()}
 				<RecursiveTreeViewItem
 					nodes={node.children}
 					bind:expandedNodes
 					bind:disabledNodes
 					bind:checkedNodes
 					bind:indeterminateNodes
-					bind:treeItems={children[i]}
+					bind:treeItems={childrenNodes[i]}
 					on:click={(e) =>
 						dispatch('click', {
 							id: e.detail.id
@@ -179,7 +207,7 @@
 							id: e.detail.id
 						})}
 				/>
-			</svelte:fragment>
+			{/snippet}
 		</TreeViewItem>
 	{/each}
 {/if}

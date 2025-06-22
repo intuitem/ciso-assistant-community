@@ -1,0 +1,45 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" .) | nindent 4 }}
+spec:
+  {{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.global.domain }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: {{ include "ciso-assistant.fullname" . }}-frontend
+            port:
+              number: {{ .Values.frontend.service.port }}
+        path: /
+        pathType: {{ .Values.ingress.pathType }}
+      - backend:
+          service:
+            name: {{ include "ciso-assistant.fullname" . }}-backend
+            port:
+              number: {{ .Values.backend.service.port }}
+        path: /api/
+        pathType: {{ .Values.ingress.pathType }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+      - {{ .Values.global.domain }}
+      {{- if .Values.ingress.tls.existingSecret }}
+      secretName: {{ .Values.ingress.tls.existingSecret }}
+      {{ else }}
+      secretName: {{ include "ciso-assistant.fullname" . }}-tls
+      {{- end }}
+  {{- end }}
+{{- end }}

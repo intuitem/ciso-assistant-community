@@ -1,15 +1,9 @@
 <script lang="ts">
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import * as m from '$paraglide/messages';
-	import { ProgressRadial, RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
+	import { run } from 'svelte/legacy';
+
+	import { displayScoreColor } from '$lib/utils/helpers';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-
-	export let label: string | undefined = undefined;
-	export let field: string;
-
-	export let min_score = 0;
-	export let max_score = 100;
-	export let score_step = 1;
 
 	interface ScoresDefinition {
 		score: number;
@@ -17,85 +11,123 @@
 		description: string;
 	}
 
-	export let scores_definition: ScoresDefinition[] = [];
+	interface Props {
+		label?: string | undefined;
+		field: string;
+		isDoc?: boolean;
+		fullDonut?: boolean;
+		inversedColors?: boolean;
+		styles?: string;
+		min_score?: number;
+		max_score?: number;
+		score_step?: number;
+		helpText?: string | undefined;
+		disabled?: boolean;
+		scores_definition?: ScoresDefinition[];
+		form: SuperForm<Record<string, any>>;
+		score?: any;
+		onChange?: (score: number) => void;
+		left?: import('svelte').Snippet;
+	}
 
-	export let form: SuperForm<Record<string, any>>;
+	let {
+		label = undefined,
+		field,
+		isDoc = false,
+		inversedColors = false,
+		styles = '',
+		min_score = 0,
+		max_score = 100,
+		score_step = $bindable(max_score === 100 ? 5 : 1),
+		helpText = undefined,
+		disabled = false,
+		scores_definition = [],
+		form,
+		onChange = () => {},
+		left
+	}: Props = $props();
+
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	let previous = $state($value);
 
-	$value = $value ?? min_score;
+	$effect(() => {
+		if (previous !== $value && previous !== undefined) {
+			onChange($value);
+		}
+		previous = $value;
+	});
 
-	const isScored = formFieldProxy(form, 'is_scored')['value'];
-
-	$: if (max_score === 100) score_step = 5;
-
-	const status = formFieldProxy(form, 'status')['value'];
-	$: isApplicable = $status === 'not_applicable' ? false : true;
+	run(() => {
+		$value = !disabled ? ($value ?? min_score) : $value;
+	});
 </script>
 
-<div>
-	{#if label !== undefined}
-		{#if $constraints?.required}
-			<label class="text-sm font-semibold" for={field}
-				>{label} <span class="text-red-500">*</span></label
-			>
-		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
+{@render left?.()}
+{#if !disabled}
+	<div class={styles}>
+		{#if $errors && $errors.length > 0}
+			<div>
+				{#each $errors as error}
+					<p class="text-error-500 text-xs font-medium">{error}</p>
+				{/each}
+			</div>
 		{/if}
-	{/if}
-	{#if $errors && $errors.length > 0}
-		<div>
-			{#each $errors as error}
-				<p class="text-error-500 text-xs font-medium">{error}</p>
-			{/each}
-		</div>
-	{/if}
-	<div class="flex flex-row w-full items-center justify-evenly space-x-4">
-		{#if isApplicable}
-			<div class="flex w-full items-center justify-center">
-				<RangeSlider
-					class="w-full"
+		<div class="flex flex-row w-full items-center justify-evenly space-x-4">
+			<div class="flex flex-col w-full align-top">
+				{#if label !== undefined}
+					{#if $constraints?.required}
+						<label class="text-sm font-semibold" for={field}
+							>{label} <span class="text-red-500">*</span></label
+						>
+					{:else}
+						<label class="text-sm font-semibold" for={field}>{label}</label>
+					{/if}
+				{/if}
+				<input
 					data-testid="range-slider-input"
-					name="range-slider"
+					name={field}
+					type="range"
+					class="input px-0"
 					bind:value={$value}
 					min={min_score}
 					max={max_score}
 					step={score_step}
-					ticked
-					disabled={!$isScored}
-				>
-					<div class="flex justify-between space-x-8 items-center">
-						<SlideToggle
-							bind:checked={$isScored}
-							class="shrink-0"
-							active="bg-primary-500"
-							name="score-slider"
-						>
-							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
-						>
-						{#if $isScored && scores_definition && $value !== null}
-							{#each scores_definition as definition}
-								{#if definition.score === $value}
-									<p class="w-full max-w-[80ch]">
-										{definition.name}{definition.description ? `: ${definition.description}` : ''}
-									</p>
-								{/if}
-							{/each}
-						{/if}
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor($value, max_score)}
-							value={$isScored ? formatScoreValue($value, max_score) : 0}
-							font={150}
-							class="shrink-0"
-							width={'w-12'}>{$isScored ? $value : '--'}</ProgressRadial
-						>
-					</div>
-				</RangeSlider>
+					{disabled}
+					{...constraints}
+				/>
 			</div>
-		{:else}
-			<p class="text-sm text-gray-500">
-				You cannot score if the requirement assessment is not applicable
-			</p>
+			<ProgressRing
+				meterStroke={displayScoreColor($value, max_score, inversedColors)}
+				value={$value}
+				label={$value}
+				onValueChange={(e) => ($value = e.value)}
+				classes="shrink-0"
+				size="size-12"
+				min={min_score}
+				max={max_score}
+				>{$value}
+			</ProgressRing>
+		</div>
+		<div class="flex w-full items-center">
+			<div class="flex space-x-8 w-full justify-center">
+				<div class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
+					{#if !disabled && scores_definition && $value !== null}
+						{#each scores_definition as definition}
+							{#if definition.score === $value}
+								<p class="font-bold">{definition.name}</p>
+								{#if isDoc && definition.description_doc}
+									{definition.description_doc}
+								{:else if definition.description}
+									{definition.description}
+								{/if}
+							{/if}
+						{/each}
+					{/if}
+				</div>
+			</div>
+		</div>
+		{#if helpText}
+			<p class="text-sm text-gray-500">{helpText}</p>
 		{/if}
 	</div>
-</div>
+{/if}

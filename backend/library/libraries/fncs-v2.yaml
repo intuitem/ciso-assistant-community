@@ -1,0 +1,1114 @@
+urn: urn:intuitem:risk:library:FNCS-v2
+locale: it
+ref_id: FNCS-v2
+name: Framework Nazionale CyberSecurity v2
+description: 'Framework Nazionale CyberSecurity v2
+
+  https://www.cybersecurityframework.it/sites/default/files/framework2/Framework_nazionale_cybersecurity_data_protection.pdf'
+copyright: "Creative Commons License. This work is licensed under a Creative Commons\
+  \ Attribution 4.0 Interna-\ntional License (http://creativecommons.org/licenses/by/4.0/).\n\
+  Titolo: Framework Nazionale per la Cybersecurity e la Data Protection\nDistribuito\
+  \ online \u2013 http://www.cybersecurityframework.it"
+version: 1
+publication_date: 2024-11-11
+provider: CIS-Sapienza & cini
+packager: atomikiss
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:FNCS-v2
+    ref_id: FNCS-v2
+    name: Framework Nazionale CyberSecurity v2
+    description: 'Framework Nazionale CyberSecurity v2
+
+      https://www.cybersecurityframework.it/sites/default/files/framework2/Framework_nazionale_cybersecurity_data_protection.pdf'
+    min_score: 1
+    max_score: 5
+    scores_definition:
+    - score: 1
+      name: Iniziale
+      description: 'Nessuna documentazione di processo o non formalmente approvata
+        dalla direzione.
+
+        Il processo standard non esiste.'
+    - score: 2
+      name: '
+
+        Ripetibile'
+      description: "La documentazione del processo \xE8 formalmente approvata, ma\
+        \ non \xE8 stata revisionata negli ultimi 2 anni.\nEsiste un processo ad hoc,\
+        \ svolto in modo informale."
+    - score: 3
+      name: '
+
+        Definito'
+      description: "Esiste una documentazione del processo formalmente approvata e\
+        \ le eccezioni sono documentate e approvate. Le eccezioni documentate e approvate\
+        \ sono < 5% delle volte.\nEsiste un processo formale ed \xE8 implementato.\
+        \ \xC8 disponibile evidenza per la maggior parte delle attivit\xE0. Le eccezioni\
+        \ al processo sono inferiori al 10%."
+    - score: 4
+      name: Gestito
+      description: "Esiste una documentazione del processo formalmente approvata e\
+        \ le eccezioni sono documentate e approvate. Le eccezioni documentate e approvate\
+        \ sono < 3% delle volte.\nEsiste un processo formale ed \xE8 implementato.\
+        \ \xC8 disponibile evidenza per tutte le attivit\xE0. Vengono raccolte e riportate\
+        \ metriche dettagliate del processo.\n\xC8 stato stabilito un obiettivo minimo\
+        \ per le metriche. Le eccezioni al processo sono inferiori al 5%."
+    - score: 5
+      name: '
+
+        Ottimizzato'
+      description: "Esiste una documentazione del processo formalmente approvata e\
+        \ le eccezioni sono documentate e approvate. Le eccezioni documentate e approvate\
+        \ sono < 0,5% delle volte.\nEsiste un processo formale ed \xE8 implementato.\
+        \ \xC8 disponibile evidenza per tutte le attivit\xE0. Vengono raccolte e riportate\
+        \ metriche dettagliate del processo.\n\xC8 stato stabilito un obiettivo minimo\
+        \ per le metriche, con un miglioramento continuo. Le eccezioni al processo\
+        \ sono inferiori all'1%."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      assessable: false
+      depth: 1
+      ref_id: ID
+      name: Identify
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: ID.AM
+      name: Asset Management
+      description: I dati, il personale, i dispositivi e i sistemi e le facilities
+        necessari all'organizzazione sono identificati e gestiti in coerenza con gli
+        obiettivi e con la strategia di rischio dell'organizzazione.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: ID.AM-1
+      description: Sono censiti i sistemi e gli apparati fisici in uso nell'organizzazione
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: ID.AM-2
+      description: Sono censite le piattaforme e le applicazioni software in uso nell'organizzazione
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: ID.AM-3
+      description: I flussi di dati e comunicazioni inerenti l'organizzazione sono
+        identificati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: ID.AM-4
+      description: I sistemi informativi esterni all'organizzazione sono catalogati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: ID.AM-5
+      description: "Le risorse (es: hardware, dispositivi, dati, allocazione temporale,\
+        \ personale e software) sono prioritizzate in base alla loro classificazione\
+        \ (e.g. confidenzialit\xE0, integrit\xE0, disponibilit\xE0), criticit\xE0\
+        \ e valore per il business dell'organizzazione"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.am-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: ID.AM-6
+      description: "Sono definiti e resi noti ruoli e responsabilit\xE0 inerenti la\
+        \ cybersecurity per tutto il personale e per eventuali terze parti rilevanti\
+        \ (es. fornitori, clienti, partner)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.am-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: DP-ID.AM-7
+      description: "Sono definiti e resi noti ruoli e responsabilit\xE0 inerenti al\
+        \ trattamento e la protezione dei dati personali per tutto il personale e\
+        \ per eventuali terze parti rilevanti (es. fornitori, clienti, partner)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.am-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.am
+      ref_id: DP-ID.AM-8
+      description: I trattamenti di dati personali sono identificati e catalogati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.be
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: ID.BE
+      name: Business Environment
+      description: "La mission dell'organizzazione, gli obiettivi, le attivit\xE0\
+        \ e gli attori coinvolti sono compresi e valutate in termini di priorit\xE0\
+        . Tali informazioni influenzano i ruoli, le responsabilit\xE0 di cybersecurity\
+        \ e le decisioni in materia di gestione del rischio."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.be-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.be
+      ref_id: ID.BE-1
+      description: "Il ruolo dell'organizzazione all'interno della filiera produttiva\
+        \ \xE8 identificato e reso noto"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.be-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.be
+      ref_id: ID.BE-2
+      description: "Il ruolo dell'organizzazione come  infrastruttura critica e nel\
+        \ settore industriale di riferimento \xE8 identificato e reso noto"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.be-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.be
+      ref_id: ID.BE-3
+      description: "Sono definite e rese note delle priorit\xE0 per quanto riguarda\
+        \ la missione, gli obiettivi e le attivit\xE0 dell'organizzazione"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.be-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.be
+      ref_id: ID.BE-4
+      description: Sono identificate e rese note interdipendenze e funzioni fondamentali
+        per la fornitura di servizi critici
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.be-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.be
+      ref_id: ID.BE-5
+      description: Sono identificati e resi noti i requisiti di resilienza a supporto
+        della fornitura di servizi critici per tutti gli stati di esercizio (es. sotto
+        stress/attacco, in fase di recovery, normale esercizio)
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: ID.GV
+      name: Governance
+      description: Le politiche, le procedure e i processi per gestire e monitorare
+        i requisiti dell'organizzazione (organizzativi, legali, relativi al rischio,
+        ambientali) sono compresi e utilizzati nella gestione del rischio di cybersecurity.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv
+      ref_id: ID.GV-1
+      description: "\xC8 indetificata e resa nota una policy di cybersecurity"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv
+      ref_id: ID.GV-2
+      description: "Ruoli e responsabilit\xE0 inerenti la cybersecurity sono coordinati\
+        \ ed allineati con i ruoli interni ed i partner esterni"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv
+      ref_id: ID.GV-3
+      description: "I requisiti legali in materia di cybersecurity, con l'inclusione\
+        \ degli obblighi riguardanti la privacy e le libert\xE0 civili, sono compresi\
+        \ e gestiti"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.gv
+      ref_id: ID.GV-4
+      description: La governance ed i processi di risk management includono la gestione
+        dei rischi legati alla cybersecurity
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: ID.RA
+      name: Risk Assessment
+      description: "L'impresa comprende il rischio di cybersecurity inerente l'operativit\xE0\
+        \ dell'organizzazione (incluse la mission, le funzioni, l'immagine o la reputazione),\
+        \ gli asset e gli individui."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: ID.RA-1
+      description: "Le vulnerabilit\xE0 delle risorse (es. sistemi, locali, dispositivi)\
+        \ dell'organizzazione sono identificate e documentate"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: ID.RA-2
+      description: "L'organizzazione riceve informazioni su minacce, vulnerabilit\xE0\
+        \ ed altri dati configurabili come Cyber Threat Intelligence da fonti esterne\
+        \ (e.g. CERT, fonti aperte, forum di information sharing)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: ID.RA-3
+      description: Le minacce, sia interne che esterne, sono identificate e documentate
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: ID.RA-4
+      description: "Sono identificati i potenziali impatti sul business e le relative\
+        \ probabilit\xE0 di accadimento"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: ID.RA-5
+      description: "Le minacce, le vulnerabilit\xE0, le relative probabilit\xE0 di\
+        \ accadimento e conseguenti impatti sono utilizzati per determinare il rischio"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: ID.RA-6
+      description: Sono identificate e prioritizzate le risposte al rischio
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.ra-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.ra
+      ref_id: DP-ID.RA-7
+      description: Viene effettuata una valutazione di impatto sulla protezione dei
+        dati personali
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: ID.RM
+      name: Risk Management Strategy
+      description: " Le priorit\xE0  e i requisiti dell'organizzazione e la tolleranza\
+        \ al rischio  sono  definiti e utilizzati per supportare le decisioni sul\
+        \ rischio operazionale."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm
+      ref_id: ID.RM-1
+      description: I processi di risk management sono stabiliti, gestiti e concordati
+        tra i responsabili dell'organizzazione (c.d. stakeholder)
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm
+      ref_id: ID.RM-2
+      description: "Il rischio tollerato dall'organizzazione \xE8 identificato ed\
+        \ espresso chiaramente"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.rm
+      ref_id: ID.RM-3
+      description: "Il rischio tollerato \xE8 determinato tenendo conto del ruolo\
+        \ dell'organizzazione come infrastruttura critica e dei rischi specifici presenti\
+        \ nel settore industriale di appartenenza"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: ID.SC
+      name: Supply Chain Risk Management
+      description: "Le priorit\xE0, i vincoli, le tolleranze al rischio e le ipotesi\
+        \ dell'organizzazione sono stabilite e utilizzate per supportare le decisioni\
+        \ di rischio associate alla gestione del rischio legato alla catena di approvvigionamento.\
+        \ L'organizzazione ha definito e implementato i processi atti a identificare,\
+        \ valutare e gestire il rischio legato alla catena di approvvigionamento."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc
+      ref_id: ID.SC-1
+      description: I processi di gestione del rischio inerenti la catena di approvvigionamento
+        cyber sono identificati, ben definiti, validati, gestiti e approvati da attori
+        interni all'organizzazione
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc
+      ref_id: ID.SC-2
+      description: I fornitori e i partner terzi di sistemi informatici, componenti
+        e servizi sono identificati, prioritizzati e valutati utilizzando un processo
+        di valutazione del rischio inerente la catena di approvvigionamento cyber
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc
+      ref_id: ID.SC-3
+      description: I contratti con i fornitori e i partner terzi sono utilizzati per
+        realizzare appropriate misure progettate per rispettare gli obiettivi del
+        programma di cybersecurity dell'organizzazione e del Piano di Gestione del
+        Rischio della catena di approvvigionamento cyber
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc
+      ref_id: ID.SC-4
+      description: Fornitori e partner terzi sono regolarmente valutati utilizzando
+        audit, verifiche, o altre forme di valutazione per confermare il rispetto
+        degli obblighi contrattuali
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id.sc
+      ref_id: ID.SC-5
+      description: La pianificazione e la verifica della risposta e del ripristino
+        sono condotti con i fornitori e i partner terzi
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:id
+      ref_id: DP-ID.DM
+      name: Data Management
+      description: i dati personali sono trattati attraverso processi definiti, in
+        coerenza con le normative di riferimento.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm
+      ref_id: DP-ID.DM-1
+      description: "Il ciclo di vita dei dati \xE8 definito e documentato"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm
+      ref_id: DP-ID.DM-2
+      description: Sono definiti, implementati e documentati i processi riguardanti
+        l'informazione dell'interessato in merito al trattamento dei dati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm
+      ref_id: DP-ID.DM-3
+      description: Sono definiti, implementati e documentati i processi di raccolta
+        e revoca del consenso dell'interessato al trattamento di dati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm
+      ref_id: DP-ID.DM-4
+      description: Sono definiti, implementati e documentati i processi per l'esercizio
+        dei diritti (accesso, rettifica, cancellazione, ecc.) dell'interessato
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:dp-id.dm
+      ref_id: DP-ID.DM-5
+      description: Sono definiti, implementati e documentati i processi di trasferimento
+        dei dati in ambito internazionale
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      assessable: false
+      depth: 1
+      ref_id: PR
+      name: Protect
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      ref_id: PR.AC
+      name: Identity Management, Authentication and Access Control
+      description: "L'accesso agli asset fisici e logici ed alle relative risorse\
+        \ \xE8 limitato al personale, ai processi e ai dispositivi autorizzati, ed\
+        \ \xE8 gestito in maniera coerente con la valutazione del rischio di accesso\
+        \ non autorizzato alle attivit\xE0 ed alle transazioni autorizzate"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-1
+      description: "Le identit\xE0 digitali e le credenziali di accesso per gli utenti,\
+        \ i dispositivi e i processi autorizzati sono amministrate, verificate, revocate\
+        \ e sottoposte a audit sicurezza"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-2
+      description: "L'accesso fisico alle risorse \xE8 protetto e amministrato"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-3
+      description: "L'accesso remoto alle risorse \xE8 amministrato"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-4
+      description: I diritti di accesso alle risorse e le relative autorizzazioni
+        sono amministrati secondo il principio del privilegio minimo e della separazione
+        delle funzioni
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-5
+      description: "L'integrit\xE0 di rete \xE8 protetta (es. segregazione di rete,\
+        \ segmentazione di rete)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-6
+      description: "Le identit\xE0 sono comprovate, associate a credenziali e verificate\
+        \ durante le interazioni"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ac
+      ref_id: PR.AC-7
+      description: "Le modalit\xE0 di autenticazione (es. autenticazione a fattore\
+        \ singolo o multiplo) per gli utenti, i dispositivi e altri asset sono commisurate\
+        \ al rischio della transazione (es. rischi legati alla sicurezza e privacy\
+        \ degli individui e altri rischi dell'organizzazione)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      ref_id: PR.AT
+      name: Awareness and Training
+      description: Il personale e le terze parti sono sensibilizzate in materia di
+        cybersecurity e vengono addestrate per adempiere ai loro compiti e ruoli coerentemente
+        con le politiche, le procedure e gli accordi esistenti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at
+      ref_id: PR.AT-1
+      description: 'Tutti gli utenti sono informati e addestrati '
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at
+      ref_id: PR.AT-2
+      description: "Gli utenti con privilegi (es. Amministratori di Sistema) comprendono\
+        \ i loro ruoli e responsabilit\xE0 "
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at
+      ref_id: PR.AT-3
+      description: "Tutte le terze parti (es. fornitori, clienti, partner) comprendono\
+        \ i loro ruoli e responsabilit\xE0 "
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at
+      ref_id: PR.AT-4
+      description: "I dirigenti ed i vertici aziendali comprendono i loro ruoli e\
+        \ responsabilit\xE0 "
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.at
+      ref_id: PR.AT-5
+      description: "Il personale addetto alla sicurezza fisica e alla cybersecurity\
+        \ comprende i suoi ruoli e responsabilit\xE0 "
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      ref_id: PR.DS
+      name: Data Security
+      description: "I dati sono memorizzati e gestiti in accordo alla strategia di\
+        \ gestione del rischio dell'organizzazione, al fine di garantire l'integrit\xE0\
+        , la confidenzialit\xE0 e la disponibilit\xE0 delle informazioni."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-1
+      description: I dati memorizzati sono protetti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-2
+      description: I dati sono protetti durante la trasmissione
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-3
+      description: Il trasferimento fisico,  la rimozione e la distruzione dei dispositivi
+        atti alla memorizzazione di dati sono gestiti attraverso un processo formale
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-4
+      description: "I sistemi hanno adeguate risorse a disposizione per poter garantire\
+        \ la disponibilit\xE0"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-5
+      description: Sono implementate tecniche di protezione (es. controllo di accesso)
+        contro la sottrazione dei dati (data leak).
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-6
+      description: "Sono impiegati meccanismi di controllo dell'integrit\xE0 dei dati\
+        \ per verificare l'autenticit\xE0 di software, firmware e delle informazioni"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-7
+      description: Gli ambienti di sviluppo e test sono separati dall'ambiente di
+        produzione
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ds
+      ref_id: PR.DS-8
+      description: "Sono impiegati meccanismi di controllo dell'integrit\xE0 per verificare\
+        \ l'integrit\xE0 del hardware"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      ref_id: PR.IP
+      name: Information Protection Processes and Procedures
+      description: "Sono attuate e adeguate nel tempo politiche di sicurezza (che\
+        \ indirizzano scopo, ambito, ruoli e responsabilit\xE0, impegno da parte del\
+        \ management e coordinamento tra le diverse entit\xE0 organizzative), processi\
+        \ e procedure per gestire la protezione dei sistemi informativi e degli assets."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-1
+      description: "Sono definite e gestite delle pratiche di riferimento (c.d. baseline)\
+        \ per la configurazione dei sistemi IT e di controllo industriale che incorporano\
+        \ principi di sicurezza (es. principio di minima funzionalit\xE0)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-2
+      description: Viene implementato un processo per la gestione del ciclo di vita
+        dei sistemi (System Development Life Cycle).
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-3
+      description: Sono attivi processi di controllo della modifica delle configurazioni
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-4
+      description: I backup delle informazioni sono eseguiti, amministrati e verificati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-5
+      description: Sono rispettate le policy ed i regolamenti relativi agli ambienti
+        fisici in cui operano le risorse dell'organizzazione
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-6
+      description: "I dati sono distrutti in conformit\xE0 con le policy"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-7
+      description: I processi di protezione sono sottoposti a miglioramenti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-8
+      description: L'efficacia delle tecnologie di protezione viene condivisa
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-9
+      description: Sono attivi ed amministrati piani di risposta (Incident Response
+        e Business Continuity) e recupero (Incident Recovery e Disaster Recovery)
+        in caso di incidente/disastro
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-10
+      description: I piani di risposta e recupero a seguito di incidenti/disastri
+        sono verificati nel tempo
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-11
+      description: 'Le problematiche inerenti la cybersecurity sono incluse nei processi
+        di gestione del personale (es: screening, deprovisioning)'
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ip
+      ref_id: PR.IP-12
+      description: "Viene sviluppato e implementato un piano di gestione delle vulnerabilit\xE0"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ma
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      ref_id: PR.MA
+      name: Maintenance
+      description: "La manutenzione dei sistemi informativi e di controllo industriale\
+        \ \xE8 fatta in accordo con le politiche e le procedure esistenti."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ma-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ma
+      ref_id: PR.MA-1
+      description: "La manutenzione e la riparazione delle risorse e dei sistemi \xE8\
+        \ eseguita e registrata con strumenti controllati ed autorizzati"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ma-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.ma
+      ref_id: PR.MA-2
+      description: "La manutenzione remota delle risorse e dei sistemi \xE8 approvata,\
+        \ documentata e svolta in modo da evitare accessi non autorizzati"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr
+      ref_id: PR.PT
+      name: Protective Technology
+      description: Le soluzioni tecniche di sicurezza sono gestite per assicurare
+        sicurezza e resilienza di sistemi e asset, in coerenza con le relative politiche,
+        procedure ed accordi.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt
+      ref_id: PR.PT-1
+      description: "Esiste ed \xE8 attuata una policy per definire, implementare e\
+        \ revisionare i log dei sistemi"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt
+      ref_id: PR.PT-2
+      description: "I supporti di memorizzazione removibili sono protetti ed il loro\
+        \ uso \xE8 ristretto in accordo alle policy"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt
+      ref_id: PR.PT-3
+      description: "Viene adottato il principio di minima funzionalit\xE0 configurando\
+        \ i sistemi in modo che forniscano solo le funzionalit\xE0 necessarie"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt
+      ref_id: PR.PT-4
+      description: Le reti di comunicazione e controllo sono protette
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:pr.pt
+      ref_id: PR.PT-5
+      description: Sono implementati meccanismi (es. failsafe, load balancing, hot
+        swap) che permettono di soddisfare requisiti di resilienza sia durante il
+        normale esercizio che in situazioni avverse
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de
+      assessable: false
+      depth: 1
+      ref_id: DE
+      name: Detect
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de
+      ref_id: DE.AE
+      name: Anomalies and Events
+      description: "Le attivit\xE0 anomale sono rilevate e il loro impatto potenziale\
+        \ viene analizzato."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae
+      ref_id: DE.AE-1
+      description: Sono definite, rese note e gestite delle pratiche di riferimento
+        (c.d. baseline) inerenti l'utilizzo della rete ed i flussi informativi attesi
+        per utenti e sistemi
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae
+      ref_id: DE.AE-2
+      description: Gli eventi rilevati vengono analizzati per comprendere gli obiettivi
+        e le metodologie dell'attacco
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae
+      ref_id: DE.AE-3
+      description: Le informazioni relative agli eventi sono raccolte e correlate
+        da sensori e sorgenti multiple
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae
+      ref_id: DE.AE-4
+      description: Viene determinato l'impatto di un evento
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.ae
+      ref_id: DE.AE-5
+      description: Vengono definite delle soglie di allerta per gli incidenti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de
+      ref_id: DE.CM
+      name: Security Continuous Monitoring
+      description: I sistemi informativi e gli asset sono monitorati per indentificare
+        eventi di cybersecurity e per verificare l'efficacia delle misure di protezione.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-1
+      description: Viene svolto il monitoraggio della rete informatica per rilevare
+        potenziali eventi di cybersecurity
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-2
+      description: Viene svolto il monitoraggio degli spazi fisici per rilevare potenziali
+        eventi di cybersecurity
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-3
+      description: Viene svolto il monitoraggio del personale per rilevare potenziali
+        eventi di cybersecurity
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-4
+      description: Il codice malevolo viene rilevato
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-5
+      description: Il codice non autorizzato su dispositivi mobili viene rilevato
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-6
+      description: "Viene svolto il monitoraggio delle attivit\xE0 dei service provider\
+        \ esterni per rilevare potenziali eventi di cybersecurity"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-7
+      description: Viene svolto il monitoraggio per rilevare personale, connessioni,
+        dispositivi o software non autorizzati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.cm
+      ref_id: DE.CM-8
+      description: "Vengono svolte scansioni per l'identificazione di vulnerabilit\xE0"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de
+      ref_id: DE.DP
+      name: Detection Processes
+      description: Sono adottati, mantenuti e verificati  processi e procedure di
+        monitoraggio per assicurare la comprensione di eventi anomali.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp
+      ref_id: DE.DP-1
+      description: "Ruoli e responsabilit\xE0 per i processi di monitoraggio sono\
+        \ ben definiti al fine di garantire l'accountability"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp
+      ref_id: DE.DP-2
+      description: "Le attivit\xE0 di monitoraggio soddisfano tutti i requisiti applicabili"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp
+      ref_id: DE.DP-3
+      description: I processi di monitoraggio vengono testati
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp
+      ref_id: DE.DP-4
+      description: L'informazione relativa agli eventi rilevati viene comunicata
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:de.dp
+      ref_id: DE.DP-5
+      description: I processi di monitoraggio sono oggetto di periodici miglioramenti
+        e perfezionamenti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs
+      assessable: false
+      depth: 1
+      ref_id: RS
+      name: Response
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.rp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs
+      ref_id: RS.RP
+      name: Response Planning
+      description: Procedure e processi di risposta sono eseguiti e mantenuti per
+        assicurare una risposta agli incidenti di cybersecurity rilevati.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.rp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.rp
+      ref_id: RS.RP-1
+      description: Esiste un piano di risposta (response plan) e questo viene eseguito
+        durante o dopo un incidente
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs
+      ref_id: RS.CO
+      name: Communications
+      description: "Le attivit\xE0 di risposta sono coordinate con le parti interne\
+        \ ed esterne (es. eventuale supporto da parte degli organi di legge o dalle\
+        \ forze dell'ordine)."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      ref_id: RS.CO-1
+      description: Il personale conosce il proprio ruolo e le operazioni che deve
+        svolgere in caso sia necessaria una risposta ad un incidente
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      ref_id: RS.CO-2
+      description: Sono stabiliti dei criteri per documentare gli incidenti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      ref_id: RS.CO-3
+      description: Le informazioni sono condivise in maniera coerente con il piano
+        di risposta
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      ref_id: RS.CO-4
+      description: Il coordinamento con le parti interessate dell'organizzazione avviene
+        in coerenza con i piani di risposta
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      ref_id: RS.CO-5
+      description: "\xC8 attuata una condivisione spontanea delle informazioni con\
+        \ le parti interessate esterne all'organizzazione (information sharing) per\
+        \ ottenere una maggior consapevolezza della situazione (c.d. situational awareness)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:dp-rs.co-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.co
+      ref_id: DP-RS.CO-6
+      description: "Gli incidenti che si configurano come violazioni di dati personali\
+        \ sono documentati ed eventualmente vengono informati le autorit\xE0 di riferimento\
+        \ e gli interessati"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs
+      ref_id: RS.AN
+      name: Analysis
+      description: "Vengono condotte analisi per assicurare un'efficace riposta e\
+        \ supporto alle attivit\xE0 di ripristino."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an
+      ref_id: RS.AN-1
+      description: Le notifiche provenienti dai sistemi di monitoraggio vengono sempre
+        visionate e analizzate
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an
+      ref_id: RS.AN-2
+      description: Viene compreso l'impatto di ogni incidente
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an
+      ref_id: RS.AN-3
+      description: A seguito di un incidente viene svolta un'analisi forense
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an
+      ref_id: RS.AN-4
+      description: Gli incidenti sono categorizzate in maniera coerente con i piani
+        di risposta
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.an
+      ref_id: RS.AN-5
+      description: "Sono definiti processi per ricevere, analizzare e rispondere a\
+        \ informazioni inerenti vulnerabilit\xE0 rese note da fonti interne o esterne\
+        \ all'organizzazione (es. test interni, bollettini di sicurezza, o ricercatori\
+        \ in sicurezza)"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs
+      ref_id: RS.MI
+      name: Mitigation
+      description: Vengono eseguite azioni per prevenire l'espansione di un evento
+        di sicurezza, per mitigare i sui effetti e per risolvere l'incidente.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi
+      ref_id: RS.MI-1
+      description: In caso di incidente vengono messe in atto procedure atte a contenerne
+        l'impatto
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi
+      ref_id: RS.MI-2
+      description: In caso di incidente vengono messe in atto procedure atte a mitigarne
+        gli effetti
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.mi
+      ref_id: RS.MI-3
+      description: "Le nuove vulnerabilit\xE0 sono mitigate o documentate come rischio\
+        \ accettato"
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.im
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs
+      ref_id: RS.IM
+      name: Improvements
+      description: "Le attivit\xE0 di risposta sono migliorate incorporando le \"\
+        lesson learned\" da attivit\xE0 precedenti di monitoraggio e risposta."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.im-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.im
+      ref_id: RS.IM-1
+      description: I piani di risposta agli incidenti tengono in considerazione le
+        esperienze passate (lesson learned)
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rs.im-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rs.im
+      ref_id: RS.IM-2
+      description: Le strategie di risposta agli incidenti sono aggiornate
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc
+      assessable: false
+      depth: 1
+      ref_id: RC
+      name: Recover
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.rp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc
+      ref_id: RC.RP
+      name: Recovery Planning
+      description: I processi e le procedure di ripristino sono eseguite e mantenute
+        per assicurare un recupero dei sistemi o asset coinvolti da un incidente di
+        cybersecurity.
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.rp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc.rp
+      ref_id: RC.RP-1
+      description: Esiste un piano di ripristino (recovery plan) e viene eseguito
+        durante o dopo un incidente di cybersecurity
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.im
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc
+      ref_id: RC.IM
+      name: Improvements
+      description: "I piani di ripristino ed i relativi processi sono migliorati tenendo\
+        \ conto delle \"lesson learned\" per le attivit\xE0 future."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.im-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc.im
+      ref_id: RC.IM-1
+      description: I piani di riprisitino tengono in considerazione le esperienze
+        passate (lesson learned)
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.im-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc.im
+      ref_id: RC.IM-2
+      description: Le strategie di recupero sono aggiornate
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc
+      ref_id: RC.CO
+      name: Communications
+      description: "Le attivit\xE0 di ripristino a seguito di un incidente sono coordinate\
+        \ con le parti interne ed esterne (es. le vittime, gli ISP, i proprietari\
+        \ dei sistemi attaccati, i vendor, i CERT/CSIRT)."
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co
+      ref_id: RC.CO-1
+      description: A seguito di un incidente vengono gestite le pubbliche relazioni
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co
+      ref_id: RC.CO-2
+      description: 'A seguito di un incidente viene ripristinata la reputazione '
+    - urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:FNCS-v2:rc.co
+      ref_id: RC.CO-3
+      description: "Le attivit\xE0 di ripristino condotte a seguito di un incidente\
+        \ vengono comunicate alle parti interessate interne ed esterne all'organizzazione,\
+        \ inclusi i dirigenti ed i vertici dell'organizzazione"

@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from core.models import User
 from core.models import (
-    Project,
+    Perimeter,
     RiskAcceptance,
     RiskScenario,
     RiskMatrix,
@@ -117,7 +117,12 @@ class TestRiskAcceptanceAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "approver": {"id": str(approver.id), "str": approver.email},
+                "approver": {
+                    "id": str(approver.id),
+                    "str": approver.email,
+                    "last_name": approver.last_name,
+                    "first_name": approver.first_name,
+                },
                 "state": RISK_ACCEPTANCE_STATE[1],
             },
             user_group=test.user_group,
@@ -134,7 +139,7 @@ class TestRiskAcceptanceAuthenticated:
             description="test description",
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
-                project=Project.objects.create(name="test", folder=test.folder),
+                perimeter=Perimeter.objects.create(name="test", folder=test.folder),
                 risk_matrix=RiskMatrix.objects.create(name="test", folder=test.folder),
             ),
         )
@@ -157,7 +162,12 @@ class TestRiskAcceptanceAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "approver": {"id": str(approver.id), "str": approver.email},
+                "approver": {
+                    "id": str(approver.id),
+                    "str": approver.email,
+                    "last_name": approver.last_name,
+                    "first_name": approver.first_name,
+                },
                 "risk_scenarios": [
                     {"id": str(risk_scenario.id), "str": str(risk_scenario)}
                 ],
@@ -181,7 +191,7 @@ class TestRiskAcceptanceAuthenticated:
             description="test description",
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
-                project=Project.objects.create(name="test", folder=folder),
+                perimeter=Perimeter.objects.create(name="test", folder=folder),
                 risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
             ),
         )
@@ -208,7 +218,12 @@ class TestRiskAcceptanceAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "approver": {"id": str(approver.id), "str": approver.email},
+                "approver": {
+                    "id": str(approver.id),
+                    "str": approver.email,
+                    "last_name": approver.last_name,
+                    "first_name": approver.first_name,
+                },
                 # 'state': RISK_ACCEPTANCE_STATE[1],
             },
             user_group=test.user_group,

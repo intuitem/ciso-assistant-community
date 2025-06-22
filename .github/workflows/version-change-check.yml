@@ -1,11 +1,18 @@
 name: Version change checker
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches: [main]
     types: [opened]
+
+env:
+  UBUNTU_VERSION: "ubuntu-24.04"
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

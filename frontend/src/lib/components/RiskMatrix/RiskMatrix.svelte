@@ -1,101 +1,277 @@
 <script lang="ts">
-	import { buildRiskMatrix } from './utils';
+	import { run } from 'svelte/legacy';
 
-	import * as m from '../../../paraglide/messages';
+	import Cell from './Cell.svelte';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
+
+	import { page } from '$app/state';
+	import { isDark } from '$lib/utils/helpers';
+	import { m } from '$paraglide/messages';
 	import type { ComponentType } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let riskMatrix;
-	export let wrapperClass: string | undefined = '';
+	interface Props {
+		// --- Props ---
+		riskMatrix: any;
+		wrapperClass?: string | undefined;
+		matrixName: string; // used to differentiate bubbles tooltip names
+		showRisks?: boolean;
+		useBubbles?: boolean;
+		data?: Array<Array<any>> | undefined; // Ensure data is typed correctly
+		dataItemComponent?: ComponentType | undefined;
+		// Axis configuration props
+		swapAxes?: boolean; // Probability on X, Impact on Y if true
+		flipVertical?: boolean; // Origin top-left for Y-axis if true
+		labelStandard?: string;
+	}
+
+	let {
+		riskMatrix,
+		wrapperClass = '',
+		matrixName,
+		showRisks = false,
+		useBubbles = false,
+		data = undefined,
+		dataItemComponent = undefined,
+		swapAxes = page.data.settings.risk_matrix_swap_axes ?? false,
+		flipVertical = page.data.settings.risk_matrix_flip_vertical ?? false,
+		labelStandard = page.data.settings.risk_matrix_labels ?? 'ISO'
+	}: Props = $props();
+
+	run(() => {
+		console.log(page.data.settings);
+	});
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
 	const risk = parsedRiskMatrix.risk;
-	export let showRisks = false;
+	const originalProbabilities = parsedRiskMatrix.probability;
+	const originalImpacts = parsedRiskMatrix.impact;
 
-	const displayedRiskMatrix = buildRiskMatrix(grid, risk);
-	export let data: Array<any> | undefined = undefined;
-	export let dataItemComponent: ComponentType | undefined = undefined;
-	// reverse data array to display it in the right order
-	let displayedData: typeof data;
-	if (data) {
-		displayedData = data.some((e) => {
-			return e.length;
-		})
-			? data.slice().reverse()
-			: undefined;
-	}
+	let finalMatrix: ReturnType<typeof buildRiskMatrix> = $state();
+	let finalData: typeof data | undefined = $state();
+
+	// Headers assignment remains the same
+	let yAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
+	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
+
+	let popupHoverY = $derived(
+		yAxisHeaders.map((_, i) => ({
+			event: 'hover',
+			target: `popup-${matrixName}-y-${i}`,
+			placement: swapAxes ? 'right' : 'bottom'
+		}))
+	);
+	let popupHoverX = $derived(
+		xAxisHeaders.map((_, i) => ({
+			event: 'hover',
+			target: `popup-${matrixName}-x-${i}`,
+			placement: 'bottom'
+		}))
+	);
+
+	let yAxisType = $derived(swapAxes ? 'impact' : 'probability');
+	let xAxisType = $derived(swapAxes ? 'probability' : 'impact');
+
+	let yAxisLabel = $derived(safeTranslate(`${yAxisType}${labelStandard}`));
+	let xAxisLabel = $derived(safeTranslate(`${xAxisType}${labelStandard}`));
+
+	let baseMatrix = $derived(buildRiskMatrix(grid, risk));
+
+	let baseData = $derived(
+		data ? (data.some((row) => row && row.length > 0) ? data : undefined) : undefined
+	);
+	run(() => {
+		// Swap axes if needed
+		if (swapAxes) {
+			baseMatrix = transpose(baseMatrix);
+			if (baseData) {
+				baseData = transpose(baseData);
+			}
+		}
+
+		// Flip vertically if needed
+		if (flipVertical) {
+			yAxisHeaders = yAxisHeaders.slice().reverse();
+			baseMatrix = reverseRows(baseMatrix);
+			if (baseData) {
+				baseData = reverseRows(baseData);
+			}
+		}
+
+		// Assign final derived values
+		finalMatrix = baseMatrix;
+		finalData = baseData ? (swapAxes ? reverseCols(baseData) : reverseRows(baseData)) : []; // Ensure data is in the correct orientation
+	});
+
+	let classesCellText = $derived((backgroundHexColor: string | undefined | null): string => {
+		if (!backgroundHexColor) return '';
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
+	});
 </script>
 
 <div class="flex flex-row items-center">
-	<div class="flex font-semibold text-xl -rotate-90">{m.probability()}</div>
-	<div
-		class="{wrapperClass} grid gap-1 w-full"
-		style="grid-template-columns: repeat({displayedRiskMatrix.length + 1}, minmax(0, 1fr));"
-		data-testid="risk-matrix"
-	>
-		{#each displayedRiskMatrix as row, i}
-			{@const reverseIndex = displayedRiskMatrix.length - i - 1}
-			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
-			<div
-				class="flex flex-col items-center justify-center bg-gray-200"
-				data-testid="probability-row-header"
-			>
-				<span class="font-semibold text-center" data-testid="probability-name"
-					>{probability.name}</span
-				>
-				<span class="text-xs text-center" data-testid="probability-description"
-					>{probability.description}</span
-				>
+	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
+		{yAxisLabel}
+	</div>
+
+	<div class="flex flex-col w-full">
+		{#if flipVertical}
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+				{xAxisLabel}
 			</div>
-			{#each row as cell, j}
-				<div
-					class="flex flex-wrap items-center space-x-1 justify-center h-20 [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar"
-					style="background-color: {cell.level.hexcolor};"
-					data-testid="cell"
-				>
-					{#if displayedData}
-						{#if dataItemComponent}
-							{#each displayedData[i][j] as item}
-								<svelte:component this={dataItemComponent} data={item} />
-							{/each}
-						{:else}
-							<div class="mx-auto text-center">{displayedData[i][j]}</div>
+		{/if}
+		<div
+			class="{wrapperClass} grid gap-1 w-full"
+			style="grid-template-columns: auto repeat({xAxisHeaders.length}, minmax(0, 1fr)); grid-template-rows: repeat({yAxisHeaders.length}, minmax(0, 1fr)) auto;"
+			data-testid="risk-matrix"
+		>
+			{#if flipVertical}
+				<div></div>
+
+				{#each xAxisHeaders as xHeader, j}
+					<div
+						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							xHeader.hexcolor
+						)}"
+						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="x-axis-header-{j}"
+					>
+						<div
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+							data-popup={'popup-' + matrixName + '-x-' + j}
+						>
+							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
+							<div class="arrow bg-black"></div>
+						</div>
+						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+						{#if xHeader.description}
+							<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 						{/if}
-					{/if}
+					</div>
+				{/each}
+			{/if}
+			{#each finalMatrix as row, i}
+				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
+				<div
+					class="flex flex-col items-center min-h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center p-1 {classesCellText(
+						yHeader.hexcolor
+					)}"
+					style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
+					data-testid="y-axis-header-{i}"
+				>
+					<Tooltip
+						open={popupHoverY[i].open}
+						onOpenChange={(e) => (popupHoverY[i].open = e.open)}
+						openDelay={0}
+					>
+						{#snippet content()}
+							<div
+								class="card bg-black teyt-gray-200 p-4 z-20 shadow-lg rounded-sm"
+								style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
+							>
+								<p data-testid="y-header-description" class="font-semibold">
+									{yHeader.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+						{#snippet trigger()}
+							<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
+							{#if yHeader.description}
+								<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+							{/if}
+						{/snippet}
+					</Tooltip>
 				</div>
+
+				{#each row as cell, j}
+					<Cell
+						{cell}
+						cellData={finalData ? finalData[i]?.[j] : undefined}
+						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
+						{dataItemComponent}
+						{useBubbles}
+					/>
+				{/each}
 			{/each}
-		{/each}
-		<div />
-		{#each parsedRiskMatrix.impact as impact}
-			<div
-				class="flex flex-col items-center justify-center bg-gray-200 h-20"
-				data-testid="impact-col-header"
-			>
-				<span class="font-semibold" data-testid="impact-name">{impact.name}</span>
-				<span class="text-xs" data-testid="impact-description">{impact.description}</span>
+
+			{#if !flipVertical}
+				<div></div>
+
+				{#each xAxisHeaders as xHeader, j}
+					<div
+						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							xHeader.hexcolor
+						)}"
+						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="x-axis-header-{j}"
+					>
+						<Tooltip
+							open={popupHoverX[j].open}
+							onOpenChange={(e) => (popupHoverX[j].open = e.open)}
+							openDelay={0}
+						>
+							{#snippet content()}
+								<div
+									class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
+									style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+								>
+									<p data-testid="x-header-description" class="font-semibold">
+										{xHeader.description}
+									</p>
+									<div class="arrow bg-black"></div>
+								</div>
+							{/snippet}
+							{#snippet trigger()}
+								<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+								{#if xHeader.description}
+									<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
+								{/if}
+							{/snippet}
+						</Tooltip>
+					</div>
+				{/each}
+			{/if}
+		</div>
+		{#if !flipVertical}
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+				{xAxisLabel}
 			</div>
-		{/each}
+		{/if}
 	</div>
 </div>
-<div class="flex font-semibold text-xl items-center justify-center p-2 pl-60">{m.impact()}</div>
+
 {#if showRisks}
-	<div class="w-full flex flex-col justify-start">
+	<div class="w-full flex flex-col justify-start mt-4">
 		<h3 class="flex font-semibold p-2 m-2 text-md">{m.riskLevels()}</h3>
 		<div class="flex justify-start mx-2">
-			<table class="w-3/4 border-separate">
-				{#each parsedRiskMatrix.risk as risk}
-					<tr class="col">
-						<td
-							class="w-16 text-center border-4 border-white p-2 font-semibold whitespace-nowrap"
-							style="background-color: {risk.hexcolor}"
-						>
-							{risk.name}
-						</td>
-						<td class="col italic">
-							{risk.description}
-						</td>
+			<table class="w-auto border-separate" style="border-spacing: 0 4px;">
+				<thead>
+					<tr>
+						<th class="text-left pb-2 px-2 font-semibold">{m.level()}</th>
+						<th class="text-left pb-2 px-2 font-semibold">{m.description()}</th>
 					</tr>
-				{/each}
+				</thead>
+				<tbody>
+					{#each parsedRiskMatrix.risk as riskItem}
+						<tr class="col">
+							<td
+								class="w-auto text-center border-4 border-white p-2 font-semibold whitespace-nowrap rounded-l {classesCellText(
+									riskItem.hexcolor
+								)}"
+								style="background-color: {riskItem.hexcolor}"
+							>
+								{riskItem.name}
+							</td>
+							<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-white rounded-r">
+								{riskItem.description}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
 			</table>
 		</div>
 	</div>

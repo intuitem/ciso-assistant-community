@@ -1,0 +1,1415 @@
+urn: urn:intuitem:risk:library:Controlli-Minimi-AGID
+locale: it
+ref_id: Controlli-Minimi-AGID
+name: Controlli Minimi AGID
+description: 'Misure minime di sicurezza ICT per le pubbliche amministrazioni.
+
+  https://www.agid.gov.it/sites/default/files/repository_files/documentazione/misure_minime_di_sicurezza_v.1.0.pdf'
+copyright: AGID
+version: 1
+publication_date: 2024-11-09
+provider: AGID
+packager: atomikiss
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:Controlli-Minimi-AGID
+    ref_id: Controlli-Minimi-AGID
+    name: Controlli Minimi AGID
+    description: 'Misure minime di sicurezza ICT per le pubbliche amministrazioni.
+
+      https://www.agid.gov.it/sites/default/files/repository_files/documentazione/misure_minime_di_sicurezza_v.1.0.pdf'
+    min_score: 1
+    max_score: 5
+    scores_definition:
+    - score: 1
+      name: Iniziale
+      description: 'Nessuna documentazione di processo o non formalmente approvata
+        dalla direzione.
+
+        Il processo standard non esiste.'
+    - score: 2
+      name: '
+
+        Ripetibile'
+      description: "La documentazione del processo \xE8 formalmente approvata, ma\
+        \ non \xE8 stata revisionata negli ultimi 2 anni.\nEsiste un processo ad hoc,\
+        \ svolto in modo informale."
+    - score: 3
+      name: '
+
+        Definito'
+      description: "Esiste una documentazione del processo formalmente approvata e\
+        \ le eccezioni sono documentate e approvate. Le eccezioni documentate e approvate\
+        \ sono < 5% delle volte.\nEsiste un processo formale ed \xE8 implementato.\
+        \ \xC8 disponibile evidenza per la maggior parte delle attivit\xE0. Le eccezioni\
+        \ al processo sono inferiori al 10%."
+    - score: 4
+      name: Gestito
+      description: "Esiste una documentazione del processo formalmente approvata e\
+        \ le eccezioni sono documentate e approvate. Le eccezioni documentate e approvate\
+        \ sono < 3% delle volte.\nEsiste un processo formale ed \xE8 implementato.\
+        \ \xC8 disponibile evidenza per tutte le attivit\xE0. Vengono raccolte e riportate\
+        \ metriche dettagliate del processo.\n\xC8 stato stabilito un obiettivo minimo\
+        \ per le metriche. Le eccezioni al processo sono inferiori al 5%."
+    - score: 5
+      name: '
+
+        Ottimizzato'
+      description: "Esiste una documentazione del processo formalmente approvata e\
+        \ le eccezioni sono documentate e approvate. Le eccezioni documentate e approvate\
+        \ sono < 0,5% delle volte.\nEsiste un processo formale ed \xE8 implementato.\
+        \ \xC8 disponibile evidenza per tutte le attivit\xE0. Vengono raccolte e riportate\
+        \ metriche dettagliate del processo.\n\xC8 stato stabilito un obiettivo minimo\
+        \ per le metriche, con un miglioramento continuo. Le eccezioni al processo\
+        \ sono inferiori all'1%."
+    implementation_groups_definition:
+    - ref_id: M
+      name: Minimo
+      description: "\xE8 quello al quale ogni Pubblica Amministrazione, indipendentemente\
+        \ dalla sua natura e dimensione, deve necessariamente essere o rendersi conforme."
+    - ref_id: S
+      name: Standard
+      description: "\xE8 il livello, superiore al livello minimo, che ogni amministrazione\
+        \ deve considerare come base di riferimento in termini di sicurezza e rappresenta\
+        \ la maggior parte delle realt\xE0 della PA italiana."
+    - ref_id: A
+      name: Alto
+      description: "deve essere adottato dalle organizzazioni maggiormente esposte\
+        \ a rischi (ad esempio per la criticit\xE0 delle informazioni trattate o dei\
+        \ servizi erogati), ma anche visto come obiettivo di miglioramento da parte\
+        \ di tutte le altre organizzazioni."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 1 (CSC 1)
+      name: INVENTARIO DEI DISPOSITIVI AUTORIZZATI E NON AUTORIZZATI
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.1.1
+      description: Implementare un inventario delle risorse attive correlato a quello
+        ABSC 1.4
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.1.2
+      description: Implementare ABSC 1.1.1 attraverso uno strumento automatico.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.1.3
+      description: Effettuare il discovery dei dispositivi collegati alla rete con
+        allarmi in caso di anomalie.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.1.4
+      description: Qualificare i sistemi connessi alla rete attraverso l'analisi del
+        loro traffico.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.2.1
+      description: Implementare il "logging" delle operazione del server DHCP.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.2.2
+      description: Utilizzare le informazioni ricavate dal "logging" DHCP per migliorare
+        l'inventario delle risorse e identificare le risorse non ancora censite.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.3.1
+      description: Aggiornare l'inventario quando nuovi dispositivi approvati vengono
+        collegati in rete.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.3.2
+      description: Aggiornare l'inventario con uno strumento automatico quando nuovi
+        dispositivi approvati vengono collegati in rete.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.4.1
+      description: Gestire l'inventario delle risorse di tutti i sistemi collegati
+        alla rete e dei dispositivi di rete stessi, registrando almeno l'indirizzo
+        IP.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.4.2
+      description: Per tutti i dispositivi che possiedono un indirizzo IP l'inventario
+        deve indicare i nomi delle macchine, la funzione del sistema, un titolare
+        responsabile della risorsa e l'ufficio associato. L'inventario delle risorse
+        creato deve inoltre includere informazioni sul fatto che il dispositivo sia
+        portatile e/o personale.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.4.3
+      description: Dispositivi come telefoni cellulari, tablet, laptop e altri dispositivi
+        elettronici portatili che memorizzano o elaborano dati devono essere identificati,
+        a prescindere che siano collegati o meno alla rete dell'organizzazione.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.5.1
+      description: Installare un'autenticazione a livello di rete via 802.1x per limitare
+        e controllare quali dispositivi possono essere connessi alla rete. L'802.1x
+        deve essere correlato ai dati dell'inventario per distinguere i sistemi autorizzati
+        da quelli non autorizzati.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-1-(csc-1)
+      ref_id: ABSC 1.6.1
+      description: Utilizzare i certificati lato client per validare e autenticare
+        i sistemi prima della connessione a una rete locale.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 2 (CSC 2)
+      name: INVENTARIO DEI SOFTWARE AUTORIZZATI E NON AUTORIZZATI
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.1.1
+      description: Stilare un elenco di software autorizzati e relative versioni necessari
+        per ciascun tipo di sistema, compresi server, workstation e laptop di vari
+        tipi e per diversi usi. Non consentire l'installazione di software non compreso
+        nell'elenco.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.2.1
+      description: "Implementare una \"whitelist\" delle applicazioni autorizzate,\
+        \ bloccando l'esecuzione del software non incluso nella lista. La \"whitelist\"\
+        \ pu\xF2 essere molto ampia per includere i software pi\xF9 diffusi."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.2.2
+      description: "Per sistemi con funzioni specifiche (che richiedono solo un piccolo\
+        \ numero di programmi per funzionare), la \"whitelist\" pu\xF2 essere pi\xF9\
+        \ mirata. Quando si proteggono i sistemi con software personalizzati che pu\xF2\
+        \ essere difficile inserire nella \"whitelist\", ricorrere al punto ABSC 2.4.1\
+        \ (isolando il software personalizzato in un sistema operativo virtuale)."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.2.3
+      description: "Utilizzare strumenti di verifica dell'integrit\xE0 dei file per\
+        \ verificare che le applicazioni nella \"whitelist\" non siano state modificate."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.3.1
+      description: Eseguire regolari scansioni sui sistemi al fine di rilevare la
+        presenza di software non autorizzato.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.3.2
+      description: Mantenere un inventario del software in tutta l'organizzazione
+        che copra tutti i tipi di sistemi operativi in uso, compresi server, workstation
+        e laptop.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.3.3
+      description: "Installare strumenti automatici d'inventario del software che\
+        \ registrino anche la versione del sistema operativo utilizzato nonch\xE9\
+        \ le applicazioni installate, le varie versioni ed il livello di patch."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-2-(csc-2)
+      ref_id: ABSC 2.4.1
+      description: Utilizzare macchine virtuali e/o sistemi air-gapped  per isolare
+        ed eseguire applicazioni necessarie per operazioni strategiche o critiche
+        dell'Ente, che a causa dell'elevato rischio non devono essere installate in
+        ambienti direttamente collegati in rete.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 3 (CSC 3)
+      name: PROTEGGERE LE CONFIGURAZIONI DI HARDWARE E SOFTWARE SUI DISPOSITIVI MOBILI,
+        LAPTOP, WORKSTATION E SERVER
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.1.1
+      description: Utilizzare configurazioni sicure standard per la protezione dei
+        sistemi operativi.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.1.2
+      description: 'Le configurazioni sicure standard  devono corrispondere alle versioni
+        "hardened" del sistema operativo e delle applicazioni installate. La procedura
+        di hardening comprende tipicamente: eliminazione degli account non necessari
+        (compresi gli account di servizio), disattivazione o eliminazione dei servizi
+        non necessari, configurazione di stack e heaps non eseguibili, applicazione
+        di patch, chiusura di porte di rete aperte e non utilizzate.'
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.1.3
+      description: "Assicurare con regolarit\xE0 la validazione e l'aggiornamento\
+        \ delle immagini d'installazione nella loro configurazione di sicurezza anche\
+        \ in considerazione delle pi\xF9 recenti vulnerabilit\xE0 e vettori di attacco."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.2.1
+      description: 'Definire ed impiegare una configurazione standard per workstation,
+        server e altri tipi di sistemi usati dall''organizzazione. '
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.2.2
+      description: Eventuali sistemi in esercizio che vengano compromessi devono essere
+        ripristinati utilizzando la configurazione standard.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.2.3
+      description: Le modifiche alla configurazione standard devono effettuate secondo
+        le procedure di gestione dei cambiamenti.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.3.1
+      description: Le immagini d'installazione devono essere memorizzate offline.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.3.2
+      description: "Le immagini d'installazione sono conservate in modalit\xE0 protetta,\
+        \ garantendone l'integrit\xE0 e la disponibilit\xE0 solo agli utenti autorizzati."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.4.1
+      description: Eseguire tutte le operazioni di amministrazione remota di server,
+        workstation, dispositivi di rete e analoghe apparecchiature per mezzo di connessioni
+        protette (protocolli intrinsecamente sicuri, ovvero su canali sicuri).
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.5.1
+      description: "Utilizzare strumenti di verifica dell'integrit\xE0 dei file per\
+        \ assicurare che i file critici del sistema (compresi eseguibili di sistema\
+        \ e delle applicazioni sensibili, librerie e configurazioni) non siano stati\
+        \ alterati."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.5.2
+      description: Nel caso in cui la verifica di cui al punto precedente venga eseguita
+        da uno strumento automatico, per qualunque alterazione di tali file deve essere
+        generato un alert.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.5.3
+      description: Per il supporto alle analisi, il sistema di segnalazione deve essere
+        in grado di mostrare la cronologia dei cambiamenti della configurazione nel
+        tempo e identificare chi ha eseguito ciascuna modifica.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.5.4
+      description: "I controlli di integrit\xE0 devono inoltre identificare le alterazioni\
+        \ sospette del sistema, delle variazioni dei permessi di file e cartelle."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.6.1
+      description: Utilizzare un sistema centralizzato di controllo automatico delle
+        configurazioni che consenta di rilevare e segnalare le modifiche non autorizzate.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-3-(csc-3)
+      ref_id: ABSC 3.7.1
+      description: Utilizzare strumenti di gestione della configurazione dei sistemi
+        che consentano il ripristino delle impostazioni di configurazione standard.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 4 (CSC 4)
+      name: "VALUTAZIONE E CORREZIONE CONTINUA DELLA VULNERABILIT\xC0"
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.1.1
+      description: "Ad ogni modifica significativa della configurazione eseguire la\
+        \ ricerca delle vulnerabilit\xE0 su tutti i sistemi in rete con strumenti\
+        \ automatici che forniscano a ciascun amministratore di sistema report con\
+        \ indicazioni delle vulnerabilit\xE0 pi\xF9 critiche."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.1.2
+      description: "Eseguire periodicamente la ricerca delle vulnerabilit\xE0 ABSC\
+        \ 4.1.1 con frequenza commisurata alla complessit\xE0 dell'infrastruttura."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.1.3
+      description: "Usare uno SCAP (Security Content Automation Protocol) di validazione\
+        \ della vulnerabilit\xE0 che rilevi sia le vulnerabilit\xE0 basate sul codice\
+        \ (come quelle descritte dalle voci Common Vulnerabilities ed Exposures) che\
+        \ quelle basate sulla configurazione (come elencate nel Common Configuration\
+        \ Enumeration Project)."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.2.1
+      description: "Correlare i log di sistema con le informazioni ottenute dalle\
+        \ scansioni delle vulnerabilit\xE0."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.2.2
+      description: "Verificare che i log registrino le attivit\xE0 dei sistemi di\
+        \ scanning delle vulnerabilit\xE0."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.2.3
+      description: Verificare nei log la presenza di attacchi pregressi condotti contro
+        target riconosciuto come vulnerabile.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.3.1
+      description: "Eseguire le scansioni di vulnerabilit\xE0 in modalit\xE0 privilegiata,\
+        \ sia localmente, sia da remoto, utilizzando un account dedicato che non deve\
+        \ essere usato per nessun'altra attivit\xE0 di amministrazione."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.3.2
+      description: "Vincolare l'origine delle scansioni di vulnerabilit\xE0 a specifiche\
+        \ macchine o indirizzi IP, assicurando che solo il personale autorizzato abbia\
+        \ accesso a tale interfaccia e la utilizzi propriamente."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.4.1
+      description: "Assicurare che gli strumenti di scansione delle vulnerabilit\xE0\
+        \ utilizzati siano regolarmente aggiornati con tutte le pi\xF9 rilevanti vulnerabilit\xE0\
+        \ di sicurezza."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.4.2
+      description: "Registrarsi ad un servizio che fornisca tempestivamente le informazioni\
+        \ sulle nuove minacce e vulnerabilit\xE0. Utilizzandole per aggiornare le\
+        \ attivit\xE0 di scansione."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.5.1
+      description: Installare automaticamente le patch e gli aggiornamenti del software
+        sia per il sistema operativo sia per le applicazioni.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.5.2
+      description: "Assicurare l'aggiornamento dei sistemi separati dalla rete, in\
+        \ particolare di quelli air-gapped, adottando misure adeguate al loro livello\
+        \ di criticit\xE0."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.6.1
+      description: "Verificare regolarmente che tutte le attivit\xE0 di scansione\
+        \ effettuate con gli account aventi privilegi di amministratore siano state\
+        \ eseguite secondo delle policy predefinite."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.7.1
+      description: "Verificare che le vulnerabilit\xE0 emerse dalle scansioni siano\
+        \ state risolte sia per mezzo di patch, o implementando opportune contromisure\
+        \ oppure documentando e accettando un ragionevole rischio."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.7.2
+      description: "Rivedere periodicamente l'accettazione dei rischi di vulnerabilit\xE0\
+        \ esistenti per determinare se misure pi\xF9 recenti o successive patch possono\
+        \ essere risolutive o se le condizioni sono cambiate, con la conseguente modifica\
+        \ del livello di rischio."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.8.1
+      description: "Definire un piano di gestione dei rischi che tenga conto dei livelli\
+        \ di gravit\xE0 delle vulnerabilit\xE0 , del potenziale impatto e della tipologia\
+        \ degli apparati (e.g. server esposti, server interni, PdL, portatili, etc.)."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.8.2
+      description: "Attribuire alle azioni per la risoluzione delle vulnerabilit\xE0\
+        \ un livello di priorit\xE0 in base al rischio associato.  In particolare\
+        \ applicare le patch per le vulnerabilit\xE0 a partire da quelle pi\xF9 critiche."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.9.1
+      description: "Prevedere, in caso di nuove vulnerabilit\xE0, misure alternative\
+        \ se non sono immediatamente disponibili patch o se i tempi di distribuzione\
+        \ non sono compatibili con quelli fissati dall'organizzazione."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4.10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-4-(csc-4)
+      ref_id: ABSC 4.10.1
+      description: 'Valutare in un opportuno ambiente di test le patch dei prodotti
+        non standard (es.: quelli sviluppati ad hoc) prima di installarle nei sistemi
+        in esercizio.'
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 5 (CSC 5)
+      name: USO APPROPRIATO DEI PRIVILEGI DI AMMINISTRAT
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.1.1
+      description: "Limitare i privilegi di amministrazione ai soli utenti che abbiano\
+        \ le competenze adeguate e la necessit\xE0 operativa di modificare la configurazione\
+        \ dei sistemi. "
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.1.2
+      description: Utilizzare le utenze amministrative solo per effettuare operazioni
+        che ne richiedano i privilegi, registrando ogni accesso effettuato.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.1.3
+      description: "Assegnare a ciascuna utenza amministrativa solo i privilegi necessari\
+        \ per svolgere le attivit\xE0 previste per essa."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.1.4
+      description: Registrare le azioni compiute da un'utenza amministrativa e rilevare
+        ogni anomalia di comportamento.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.2.1
+      description: 'Mantenere l''inventario di tutte le utenze amministrative, garantendo
+        che ciascuna di esse sia debitamente e formalmente autorizzata. '
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.2.2
+      description: Gestire l'inventario delle utenze amministrative attraverso uno
+        strumento automatico che segnali ogni variazione che intervenga.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.3.1
+      description: Prima di collegare alla rete un nuovo dispositivo sostituire le
+        credenziali dell'amministratore predefinito con valori coerenti con quelli
+        delle utenze amministrative in uso.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.4.1
+      description: Tracciare nei log l'aggiunta o la soppressione di un'utenza amministrativa.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.4.2
+      description: Generare un'allerta quando viene aggiunta un'utenza amministrativa.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.4.3
+      description: Generare un'allerta quando vengano aumentati i diritti di un'utenza
+        amministrativa.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.5.1
+      description: Tracciare nei log i tentativi falliti di accesso con un'utenza
+        amministrativa.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.6.1
+      description: "Utilizzare sistemi di autenticazione a pi\xF9 fattori per tutti\
+        \ gli accessi amministrativi, inclusi gli accessi di amministrazione di dominio.\
+        \ L'autenticazione a pi\xF9 fattori pu\xF2 utilizzare diverse tecnologie,\
+        \ quali smart card, certificati digitali, one time password (OTP), token,\
+        \ biometria ed altri analoghi sistemi."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.7.1
+      description: "Quando l'autenticazione a pi\xF9 fattori non \xE8 supportata,\
+        \ utilizzare per le utenze amministrative credenziali di elevata robustezza\
+        \ (e.g. almeno 14 caratteri)."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.7.2
+      description: Impedire che per le utenze amministrative vengano utilizzate credenziali
+        deboli.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.7.3
+      description: Assicurare che le credenziali delle utenze amministrative vengano
+        sostituite con sufficiente frequenza (password aging).
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.7.4
+      description: "Impedire che credenziali gi\xE0 utilizzate possano essere riutilizzate\
+        \ a breve distanza di tempo (password history)."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.7.5
+      description: Assicurare che dopo la modifica delle credenziali trascorra un
+        sufficiente lasso di tempo per poterne effettuare una nuova.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.7.6
+      description: Assicurare che le stesse credenziali amministrative non possano
+        essere riutilizzate prima di sei mesi.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.8.1
+      description: Non consentire l'accesso diretto ai sistemi con le utenze amministrative,
+        obbligando gli amministratori ad accedere con un'utenza normale e successivamente
+        eseguire come utente privilegiato i singoli comandi.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.9.1
+      description: "Per le operazioni che richiedono privilegi gli amministratori\
+        \ debbono utilizzare macchine dedicate, collocate su una rete logicamente\
+        \ dedicata, isolata rispetto a Internet. Tali macchine non possono essere\
+        \ utilizzate per altre attivit\xE0."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.10.1
+      description: Assicurare la completa distinzione tra utenze privilegiate e non
+        privilegiate degli amministratori, alle quali debbono corrispondere credenziali
+        diverse.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.10.2
+      description: Tutte le utenze, in particolare quelle amministrative, debbono
+        essere nominative e riconducibili ad una sola persona.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.10.3
+      description: "Le utenze amministrative anonime, quali \"root\" di UNIX o \"\
+        Administrator\" di Windows, debbono essere utilizzate solo per le situazioni\
+        \ di emergenza e le relative credenziali debbono essere gestite in modo da\
+        \ assicurare l'imputabilit\xE0 di chi ne fa uso."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.10.4
+      description: "Evitare l'uso di utenze amministrative locali per le macchine\
+        \ quando sono disponibili utenze amministrative di livello pi\xF9 elevato\
+        \ (e.g. dominio)."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.11.1
+      description: "Conservare le credenziali amministrative in modo da garantirne\
+        \ disponibilit\xE0 e riservatezza."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5.11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-5-(csc-5)
+      ref_id: ABSC 5.11.2
+      description: Se per l'autenticazione si utilizzano certificati digitali, garantire
+        che le chiavi private siano adeguatamente protette.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 8 (CSC 8)
+      name: DIFESE CONTRO I MALWARE
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.1.1
+      description: Installare su tutti i sistemi connessi alla rete locale strumenti
+        atti a rilevare la presenza e bloccare l'esecuzione di malware (antivirus
+        locali). Tali strumenti sono mantenuti aggiornati in modo automatico.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.1.2
+      description: Installare su tutti i dispositivi firewall ed IPS personali.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.1.3
+      description: Gli eventi rilevati dagli strumenti sono inviati ad un repository
+        centrale (syslog) dove sono stabilmente archiviati.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.2.1
+      description: "Tutti gli strumenti di cui in ABSC_8.1 sono monitorati e gestiti\
+        \ centralmente. Non \xE8 consentito agli utenti alterarne la configurazione."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.2.2
+      description: "\xC8 possibile forzare manualmente dalla console centrale l'aggiornamento\
+        \ dei sistemi anti-malware installati su ciascun dispositivo. La corretta\
+        \ esecuzione dell'aggiornamento \xE8 automaticamente verificata e riportata\
+        \ alla console centrale."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.2.3
+      description: "L'analisi dei potenziali malware \xE8 effettuata su di un'infrastruttura\
+        \ dedicata, eventualmente basata sul cloud."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.3.1
+      description: "Limitare l'uso di dispositivi esterni a quelli necessari per le\
+        \ attivit\xE0 aziendali. "
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.3.2
+      description: Monitorare l'uso e i tentativi di utilizzo di dispositivi esterni.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.4.1
+      description: "Abilitare le funzioni atte a contrastare lo sfruttamento delle\
+        \ vulnerabilit\xE0, quali Data Execution Prevention (DEP), Address Space Layout\
+        \ Randomization (ASLR), virtualizzazione, confinamento, etc. disponibili nel\
+        \ software di base. "
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.4.2
+      description: "Installare strumenti aggiuntivi di contrasto allo sfruttamento\
+        \ delle vulnerabilit\xE0,  ad esempio quelli forniti come opzione dai produttori\
+        \ di sistemi operativi."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.5.1
+      description: Usare strumenti di filtraggio che operano sull'intero flusso del
+        traffico di rete per impedire che il codice malevolo raggiunga gli host.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.5.2
+      description: Installare sistemi di analisi avanzata del software sospetto.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.6.1
+      description: Monitorare, analizzare ed eventualmente bloccare gli accessi a
+        indirizzi che abbiano una cattiva reputazione.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.7.1
+      description: Disattivare l'esecuzione automatica dei contenuti al momento della
+        connessione dei dispositivi removibili.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.7.2
+      description: Disattivare l'esecuzione automatica dei contenuti dinamici (e.g.
+        macro) presenti nei file.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.7.3
+      description: Disattivare l'apertura automatica dei messaggi di posta elettronica.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.7.4
+      description: Disattivare l'anteprima automatica dei contenuti dei file.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.8.1
+      description: Eseguire automaticamente una scansione anti-malware dei supporti
+        rimuovibili al momento della loro connessione.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.9.1
+      description: Filtrare il contenuto dei messaggi di posta prima che questi raggiungano
+        la casella del destinatario, prevedendo anche l'impiego di strumenti antispam.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.9.2
+      description: Filtrare il contenuto del traffico web.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.9.3
+      description: "Bloccare nella posta elettronica e nel traffico web i file la\
+        \ cui tipologia non \xE8 strettamente necessaria per l'organizzazione ed \xE8\
+        \ potenzialmente pericolosa (e.g. .cab)."
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.10.1
+      description: Utilizzare strumenti anti-malware che sfruttino, oltre alle firme,
+        tecniche di rilevazione basate sulle anomalie di comportamento.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8.11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-8-(csc-8)
+      ref_id: ABSC 8.11.1
+      description: Implementare una procedura di risposta agli incidenti che preveda
+        la trasmissione al provider di sicurezza dei campioni di software sospetto
+        per la generazione di firme personalizzate.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 10 (CSC 10)
+      name: COPIE DI SICUREZZA
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      ref_id: ABSC 10.1.1
+      description: Effettuare almeno settimanalmente una copia di sicurezza almeno
+        delle informazioni strettamente necessarie per il completo ripristino del
+        sistema.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      ref_id: ABSC 10.1.2
+      description: "Per assicurare la capacit\xE0 di recupero di un sistema dal proprio\
+        \ backup, le procedure di backup devono riguardare il sistema operativo, le\
+        \ applicazioni software e la parte dati."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      ref_id: ABSC 10.1.3
+      description: Effettuare backup multipli con strumenti diversi per contrastare
+        possibili malfunzionamenti nella fase di restore.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      ref_id: ABSC 10.2.1
+      description: "Verificare periodicamente l'utilizzabilit\xE0 delle copie mediante\
+        \ ripristino di prova."
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      ref_id: ABSC 10.3.1
+      description: 'Assicurare la riservatezza delle informazioni contenute nelle
+        copie di sicurezza mediante adeguata protezione fisica dei supporti ovvero
+        mediante cifratura. La codifica effettuata prima della trasmissione consente
+        la remotizzazione del backup anche nel cloud. '
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-10-(csc-10)
+      ref_id: ABSC 10.4.1
+      description: Assicurarsi che i supporti contenenti almeno una delle copie non
+        siano permanentemente accessibili dal sistema onde evitare che attacchi su
+        questo possano coinvolgere anche tutte le sue copie di sicurezza.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      assessable: false
+      depth: 1
+      ref_id: ABSC 13 (CSC 13)
+      name: PROTEZIONE DEI DATI
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.1.1
+      description: Effettuare un'analisi dei dati per individuare quelli con particolari
+        requisiti di riservatezza (dati rilevanti) e segnatamente quelli ai quali
+        va applicata la protezione crittografica.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.2.1
+      description: Utilizzare sistemi di cifratura per i dispositivi portatili e i
+        sistemi che contengono informazioni rilevanti.
+      implementation_groups:
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.3.1
+      description: Utilizzare sul perimetro della rete strumenti automatici per bloccare,
+        limitare ovvero monitorare in maniera puntuale, sul traffico uscente dalla
+        propria rete, l'impiego di crittografia non autorizzata o l'accesso a siti
+        che consentano lo scambio e la potenziale esfiltrazione di informazioni.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.4.1
+      description: Effettuare periodiche scansioni, attraverso sistemi automatizzati,
+        in grado di rilevare sui server la presenza di specifici "data pattern", significativi
+        per l'Amministrazione, al fine di evidenziare l'esistenza di dati rilevanti
+        in chiaro.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.5.1
+      description: Nel caso in cui non sia strettamente necessario l'utilizzo di dispositivi
+        esterni, implementare sistemi/configurazioni che impediscano la scrittura
+        di dati su tali supporti.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.5.2
+      description: "Utilizzare strumenti software centralizzati atti a gestire il\
+        \ collegamento alle workstation/server dei soli dispositivi esterni autorizzati\
+        \ (in base a numero seriale o altre propriet\xE0 univoche) cifrando i relativi\
+        \ dati. Mantenere una lista aggiornata di tali dispositivi."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.6.1
+      description: Implementare strumenti DLP (Data Loss Prevention) di rete per monitorare
+        e controllare i flussi di dati all'interno della rete in maniera da evidenziare
+        eventuali anomalie.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.6.2
+      description: Qualsiasi anomalia rispetto al normale traffico di rete deve essere
+        registrata anche per consentirne l'analisi off line.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.7.1
+      description: "Monitorare il traffico uscente rilevando le connessioni che usano\
+        \ la crittografia senza che ci\xF2 sia previsto."
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.8.1
+      description: Bloccare il traffico da e verso url presenti in una blacklist.
+      implementation_groups:
+      - M
+      - S
+      - A
+    - urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:Controlli-Minimi-AGID:absc-13-(csc-13)
+      ref_id: ABSC 13.9.1
+      description: Assicurare che la copia di un file fatta in modo autorizzato mantenga
+        le limitazioni di accesso della sorgente,  ad esempio attraverso sistemi che
+        implementino le regole di controllo degli accessi (e.g. Access Control List)
+        anche quando i dati sono trasferiti al di fuori del loro repository.
+      implementation_groups:
+      - A

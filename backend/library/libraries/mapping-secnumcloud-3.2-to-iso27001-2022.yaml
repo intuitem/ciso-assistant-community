@@ -1,0 +1,2301 @@
+urn: urn:protocolpaladin:risk:library:mapping-secnumcloud-3.2-to-iso27001-2022
+locale: fr
+ref_id: mapping-secnumcloud-3.2-to-iso27001-2022
+name: SecNumCloud v3.2 -> ISO/IEC 27001:2022
+description: "Correspondance entre le r\xE9f\xE9rentiel d\u2019exigences de prestataires\
+  \ de services d\u2019informatique en nuage (SecNumCloud 3.2) et la norme internationale\
+  \ ISO/IEC 27001:2022"
+copyright: https://www.iso.org/standard/27001 - ANSSI - ANS
+version: 2
+publication_date: 2024-10-30
+provider: ISO/IEC - ANSSI - ANS (annexe 1 du document HDS 2.0)
+packager: protocolpaladin
+dependencies:
+- urn:intuitem:risk:library:secnumcloud-3.2
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_set:
+    urn: urn:protocolpaladin:risk:req_mapping_set:secnumcloud-3.2
+    ref_id: mapping-secnumcloud-3.2-to-iso27001-2022
+    name: SecNumCloud v3.2 -> ISO/IEC 27001:2022
+    description: "Correspondance entre le r\xE9f\xE9rentiel d\u2019exigences de prestataires\
+      \ de services d\u2019informatique en nuage (SecNumCloud 3.2) et la norme internationale\
+      \ ISO/IEC 27001:2022"
+    source_framework_urn: urn:intuitem:risk:framework:secnumcloud-3.2
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5;2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node93
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node94
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node95
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node96
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node97
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node98
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node99
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node100
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node101
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:5.3.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.1.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:6.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node137
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:7.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node156
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node157
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node158
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node159
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node160
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node161
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.1.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:8.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.3.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node201
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node202
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node203
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.5.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.5.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node214
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node215
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.i
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.6.k
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.7.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:9.7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.5.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.5.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:10.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.1.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node270
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node271
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node272
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.1.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.1.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.g
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.h
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.i
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.i
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.2.2.j
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.6.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.6.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.7.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.8.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.9.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.9.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:11.10.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node129
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node130
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node132
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node133
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node329
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node330
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node331
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.5.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.5.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node346
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node347
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node348
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node349
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node350
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.6.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node352
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node353
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node354
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node355
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node356
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node357
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.6.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.6.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.6.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.7.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.7.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.7.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.8.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.9.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.9.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.9.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.10.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.10.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.10.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.11.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.11.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.12.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.12.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.12.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.12.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.12.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.12.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node387
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node387
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node388
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node388
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.13.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node391
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node392
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node393
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node394
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.14.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node397
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node398
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node399
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node378
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node379
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node403
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node404
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node405
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node406
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node407
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node408
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node409
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node410
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node411
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node412
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node416
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node416
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node416
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node416
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node417
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node417
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node417
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node417
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node418
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node418
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node418
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node418
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:13.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node442
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node443
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:14.7.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:15.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.1.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:16.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:17.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node500
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node501
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node502
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node503
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node504
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node505
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.1.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node513
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node514
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node515
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node516
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node517
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node518
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node522
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node522
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node522
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node523
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node523
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node523
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node524
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node524
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node524
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.2.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node527
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node527
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node528
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node528
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node529
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node529
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node530
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node530
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node531
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node531
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node513
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node514
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node515
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node516
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node517
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node518
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:18.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node576
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node577
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node578
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.5.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node582
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node583
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node584
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node585
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node586
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node587
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node588
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node590
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node591
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node592
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node593
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.5.c
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node598
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node598
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node599
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node599
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node600
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node600
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node601
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node601
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node602
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node602
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node603
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node603
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node604
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node604
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node606
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node606
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node607
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node607
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node609
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node609
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node610
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:node610
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.6.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.6.e
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.6.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:19.6.f
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null

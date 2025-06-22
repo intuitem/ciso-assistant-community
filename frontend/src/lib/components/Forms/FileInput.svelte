@@ -1,23 +1,37 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { formFieldProxy, fileProxy } from 'sveltekit-superforms';
 
-	let _class = '';
+	interface Props {
+		class?: string;
+		label?: string | undefined;
+		field: string;
+		helpText?: string | undefined;
+		form: any;
+		allowPaste?: boolean;
+		resetSignal?: boolean; // Reset the form value if set to true
+		allowedExtensions: string[] | '*';
+		[key: string]: any;
+	}
 
-	export { _class as class };
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let helpText: string | undefined = undefined;
-	export let form;
-	export let allowPaste: boolean = false;
-	// allowPaste should be set to false when we have multiple FileField at the same time (the ideal implementation would be to deduce to which FileInput the paste operation must be forwarded depending on the targetElement of the "paste" event)
+	let {
+		class: _class = '',
+		label = undefined,
+		field,
+		helpText = undefined,
+		form,
+		allowPaste = false,
+		resetSignal = false,
+		allowedExtensions,
+		...rest
+	}: Props = $props();
 
 	const { errors, constraints } = formFieldProxy(form, field);
 	let value = fileProxy(form, field);
-	let fileInput: null | HTMLInputElement = null;
+	let fileInput: null | HTMLInputElement = $state(null);
 
-	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
-
-	const allowedExtensions = new Set(['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'bmp', 'tiff']);
+	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
 
 	function getShortenPreciseType(preciseType: string): string {
 		const shortPreciseTypeResult = /^[a-z0-9]+/.exec(preciseType);
@@ -29,7 +43,11 @@
 		const [mainType, preciseType] = mimeType.toLocaleLowerCase().split('/');
 		const shortPreciseType = getShortenPreciseType(preciseType);
 
-		if (mainType === 'image' && allowedExtensions.has(shortPreciseType)) return shortPreciseType;
+		if (
+			mainType === 'image' &&
+			(allowedExtensions === '*' || allowedExtensions.includes(shortPreciseType))
+		)
+			return shortPreciseType;
 		return null;
 	}
 
@@ -38,7 +56,9 @@
 		if (extension === null) return null;
 		// We could implement some contextual data in the filename (for example the evidence name or the name of an object this evidence is related to etc...)
 		const date = new Date();
-		return `${date.getDay()}-${date.getMonth()}-${date.getFullYear()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}_${date.getMilliseconds()}.${extension}`;
+		return `${date.getDate()}-${
+			date.getMonth() + 1
+		}-${date.getFullYear()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}_${date.getMilliseconds()}.${extension}`;
 	}
 
 	function onPaste(event: ClipboardEvent) {
@@ -67,9 +87,16 @@
 			}
 		}
 	}
+
+	run(() => {
+		if (resetSignal) {
+			const dataTransfer = new DataTransfer();
+			$value = dataTransfer.files; // Empty FileList
+		}
+	});
 </script>
 
-<svelte:document on:paste={onPaste} />
+<svelte:document onpaste={onPaste} />
 
 <div>
 	{#if label !== undefined}
@@ -98,8 +125,13 @@
 			placeholder=""
 			bind:files={$value}
 			bind:this={fileInput}
+			accept={allowedExtensions === '*'
+				? null
+				: Array.from(allowedExtensions)
+						.map((ext) => '.' + ext)
+						.join(',')}
 			{...$constraints}
-			{...$$restProps}
+			{...rest}
 		/>
 	</div>
 	{#if helpText}

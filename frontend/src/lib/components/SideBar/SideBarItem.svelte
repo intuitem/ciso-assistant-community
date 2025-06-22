@@ -1,32 +1,41 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
-	import * as m from '$paraglide/messages';
+	import { page } from '$app/state';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let item: any; // TODO: type this
+	interface Props {
+		item?: { name: string; href: string; fa_icon: string }[];
+		sideBarVisibleItems: Record<string, boolean>;
+	}
 
-	const modalStore = getModalStore();
+	let { item = [], sideBarVisibleItems }: Props = $props();
 
-	$: classesActive = (href: string) =>
-		href === $page.url.pathname
+	let classesActive = $derived((href: string) =>
+		href === page.url.pathname
 			? 'bg-primary-100 text-primary-800'
-			: 'hover:bg-primary-50 text-gray-800 ';
+			: 'hover:bg-primary-50 text-gray-800 '
+	);
 </script>
 
 {#each item as item}
-	<a
-		href={item.href}
-		class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-token {classesActive(
-			item.href ?? ''
-		)}"
-		data-testid={'accordion-item-' + item.href.substring(1)}
-	>
-		<span class="px-4 flex items-center w-full space-x-2 text-xs">
-			<i class="{item.fa_icon} w-1/12" />
-			<span class="text-sm tracking-wide truncate">{localItems()[item.name]}</span>
-		</span></a
-	>
+	<!-- undefined and true must be shown -->
+	{#if sideBarVisibleItems[item.name] !== false}
+		<Anchor
+			href={item.href}
+			breadcrumbAction="replace"
+			class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-base {classesActive(
+				item.href ?? ''
+			)}"
+			data-testid={'accordion-item-' + item.href.substring(1)}
+		>
+			<span
+				class="px-4 flex items-center w-full space-x-2 text-xs"
+				id={item.name}
+				title={safeTranslate(item.name)}
+			>
+				<i class="{item.fa_icon} w-1/12"></i>
+				<span class="text-sm tracking-wide truncate">{safeTranslate(item.name)}</span>
+			</span>
+		</Anchor>
+	{/if}
 {/each}

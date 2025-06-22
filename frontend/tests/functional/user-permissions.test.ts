@@ -1,5 +1,7 @@
 import { LoginPage } from '../utils/login-page.js';
 import { SideBar } from '../utils/sidebar.js';
+import { m } from '$paraglide/messages';
+
 import {
 	test,
 	expect,
@@ -17,8 +19,8 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 	test.describe(`${userGroupData.name} user has the right permissions`, async () => {
 		test.describe.configure({ mode: 'serial' });
 
-		let vars = TestContent.generateTestVars();
-		let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+		const vars = TestContent.generateTestVars();
+		const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 		test.beforeEach(async ({ page }) => {
 			setHttpResponsesListener(page);
@@ -66,6 +68,13 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 			const setLoginPage = new LoginPage(setPasswordPage);
 			await setLoginPage.newPasswordInput.fill(vars.user.password);
 			await setLoginPage.confirmPasswordInput.fill(vars.user.password);
+			if (
+				setLoginPage.newPasswordInput.inputValue() !== vars.user.password ||
+				setLoginPage.confirmPasswordInput.inputValue() !== vars.user.password
+			) {
+				await setLoginPage.newPasswordInput.fill(vars.user.password);
+				await setLoginPage.confirmPasswordInput.fill(vars.user.password);
+			}
 			await setLoginPage.setPasswordButton.click();
 
 			await setLoginPage.isToastVisible(
@@ -221,7 +230,9 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 			await loginPage.login();
 			await foldersPage.goto();
 			await foldersPage.deleteItemButton(vars.folderName).click();
-			await foldersPage.deleteModalConfirmButton.click();
+			await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+			await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+			await foldersPage.deletePromptConfirmButton().click();
 			await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 			await usersPage.goto();
 			await usersPage.deleteItemButton(vars.user.email).click();

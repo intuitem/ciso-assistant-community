@@ -1,0 +1,205 @@
+urn: urn:intuitem:risk:library:risk-matrix-6x6-detailed
+locale: fr
+ref_id: risk-matrix-6x6-detailed
+name: 6x6 detailed
+description: 6x6 detailed example
+copyright: domaine public
+version: 1
+publication_date: 2024-12-17
+provider: intuitem
+packager: intuitem
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:6x6-detailed
+    ref_id: risk-matrix-6x6-detailed
+    name: 6x6 detailed
+    description: 6x6 detailed example
+    probability:
+    - id: 0
+      abbreviation: EX
+      name: Exceptionnel
+      description: Une fois tous les 5 ans ou 1 tous les 10.000 (< 1%)
+      translations:
+        en:
+          name: Exceptional
+          description: Once every 5 years or every 10,000 days (< 1%)
+      hexcolor: '#00B050'
+    - id: 1
+      abbreviation: RA
+      name: Rare
+      description: Une fois par an ou 1 tous les 1.000 (< 5%)
+      translations:
+        en:
+          name: Rare
+          description: Once per year or every 1,000 days (< 5%)
+      hexcolor: '#FFFF00'
+    - id: 2
+      abbreviation: UL
+      name: "Peu fr\xE9quent"
+      description: Une fois par trimestre ou 1 tous les 100 (< 10%)
+      translations:
+        en:
+          name: Uncommon
+          description: Once per quarter or every 100 days (< 10%)
+      hexcolor: '#FFC000'
+    - id: 3
+      abbreviation: LI
+      name: "Fr\xE9quent"
+      description: Une fois par mois ou 1 tous les 50 (< 20%)
+      translations:
+        en:
+          name: Common
+          description: Once per month or every 50 days (< 20%)
+      hexcolor: '#FF0000'
+    - id: 4
+      abbreviation: VF
+      name: "Tr\xE8s fr\xE9quent"
+      description: Une fois par semaine ou 1 tous les 10 (<90%)
+      translations:
+        en:
+          name: Very frequent
+          description: Once per week or every 10 days (< 90%)
+      hexcolor: '#FF0000'
+    - id: 5
+      abbreviation: RE
+      name: "R\xE9current"
+      description: Une fois par jour 1 tous les 2 (> 90%)
+      translations:
+        en:
+          name: Recurrent
+          description: Once per day or every 2 days (> 90%)
+      hexcolor: '#FF0000'
+    impact:
+    - id: 0
+      abbreviation: LO
+      name: 'Faible '
+      description: "<10k\u20AC "
+      translations:
+        en:
+          name: 'Low '
+          description: "<10k\u20AC "
+      hexcolor: '#00B050'
+    - id: 1
+      abbreviation: MI
+      name: "Mod\xE9r\xE9 "
+      description: " entre 10 et 50k\u20AC "
+      translations:
+        en:
+          name: Moderate
+          description: " from 10 to 50k\u20AC "
+      hexcolor: '#FFFF00'
+    - id: 2
+      abbreviation: SI
+      name: 'Significatif '
+      description: " entre 50 et 100k\u20AC "
+      translations:
+        en:
+          name: 'Significant '
+          description: " from 50 to 100k\u20AC "
+      hexcolor: '#FFC000'
+    - id: 3
+      abbreviation: SE
+      name: "S\xE9rieux "
+      description: "entre 100 et 500 k\u20AC"
+      translations:
+        en:
+          name: Serious
+          description: "from 100 to 500 k\u20AC"
+      hexcolor: '#FF0000'
+    - id: 4
+      abbreviation: CR
+      name: 'Critique '
+      description: "entre 500 et 1 000 k\u20AC"
+      translations:
+        en:
+          name: 'Critical '
+          description: "from 500 to 1 000 k\u20AC"
+      hexcolor: '#FF0000'
+    - id: 5
+      abbreviation: CA
+      name: 'Catastrophique '
+      description: "> 1 000 k\u20AC"
+      translations:
+        en:
+          name: 'Catastrophic '
+          description: "> 1 000 k\u20AC"
+      hexcolor: '#FF0000'
+    risk:
+    - id: 0
+      abbreviation: LO
+      name: Faible
+      description: "Risque n\xE9gligeable"
+      translations:
+        en:
+          name: Low
+          description: Negligible risk
+      hexcolor: '#00B050'
+    - id: 1
+      abbreviation: MO
+      name: "Mod\xE9r\xE9"
+      description: "Risque relevant de l'activit\xE9 courante du m\xE9tier (dispositifs\
+        \ de\nma\xEEtrise inscrits dans les proc\xE9dures et outils)"
+      translations:
+        en:
+          name: Moderate
+          description: Risk related to routine business activity (control measures
+            defined in procedures and tools)
+      hexcolor: '#FFFF00'
+    - id: 2
+      abbreviation: SI
+      name: Significatif
+      description: "Risque demandant un niveau de ma\xEEtrise satisfaisant et un suivi\
+        \ par le m\xE9tier"
+      translations:
+        en:
+          name: Significant
+          description: Risk requiring satisfactory control and monitoring by the business
+      hexcolor: '#FFC000'
+    - id: 3
+      abbreviation: MA
+      name: Majeur
+      description: "Risque prioritaire dont le niveau de ma\xEEtrise doit \xEAtre\
+        \ suivi par la Direction m\xE9tier en relation avec le RSSI"
+      translations:
+        en:
+          name: Major
+          description: Priority risk where control levels must be monitored by business
+            management in coordination with the CISO.
+      hexcolor: '#FF0000'
+    grid:
+    - - 0
+      - 0
+      - 0
+      - 0
+      - 1
+      - 3
+    - - 0
+      - 0
+      - 1
+      - 1
+      - 2
+      - 3
+    - - 0
+      - 1
+      - 1
+      - 2
+      - 2
+      - 3
+    - - 0
+      - 1
+      - 2
+      - 2
+      - 2
+      - 3
+    - - 0
+      - 1
+      - 2
+      - 2
+      - 3
+      - 3
+    - - 1
+      - 2
+      - 2
+      - 3
+      - 3
+      - 3

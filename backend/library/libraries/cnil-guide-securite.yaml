@@ -1,0 +1,623 @@
+urn: urn:intuitem:risk:library:cnil-guide-securite
+locale: fr
+ref_id: cnil-guide-securite
+name: "CNIL : guide de s\xE9curit\xE9 des donn\xE9es"
+description: "CNIL : GUIDE PRATIQUE RGPD POUR LA S\xC9CURIT\xC9 DES DONN\xC9ES PERSONNELLES"
+copyright: "CNIL (Commission nationale de l\u2019informatique et des libert\xE9s)\
+  \ - CC BY ND"
+version: 1
+publication_date: 2024-12-14
+provider: CNIL
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cnil-guide-securite
+    ref_id: cnil-guide-securite
+    name: "CNIL : guide de s\xE9curit\xE9 des donn\xE9es"
+    description: "CNIL : GUIDE PRATIQUE RGPD POUR LA S\xC9CURIT\xC9 DES DONN\xC9ES\
+      \ PERSONNELLES"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: "Piloter la s\xE9curit\xE9 des donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:1
+      ref_id: '1.1'
+      description: "Faire de la s\xE9curit\xE9 un enjeu partag\xE9 et port\xE9 par\
+        \ l\u2019\xE9quipe dirigeante"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:1
+      ref_id: '1.2'
+      description: "\xC9valuer r\xE9guli\xE8rement l\u2019efficacit\xE9 des mesures\
+        \ de s\xE9curit\xE9 mises en \u0153uvre et adopter une d\xE9marche d\u2019\
+        am\xE9lioration continue"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "D\xE9finir un cadre pour les utilisateurs"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:2
+      ref_id: '2.1'
+      description: "R\xE9diger une charte informatique comprenant les modalit\xE9\
+        s d\u2019utilisation des syst\xE8mes informatiques,\nles r\xE8gles de s\xE9\
+        curit\xE9 et les moyens d\u2019administration en place"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:2
+      ref_id: '2.2'
+      description: "Donner une force contraignante \xE0 la charte et y rappeler les\
+        \ sanctions encourues en cas de non-respect"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Impliquer et former les utilisateurs
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:3
+      ref_id: '3.1'
+      description: "Sensibiliser les personnes manipulant les donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:3
+      ref_id: '3.2'
+      description: "Adapter le contenu des sensibilisations \xE0 la population cibl\xE9\
+        e et \xE0 leurs t\xE2ches"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Authentifier les utilisateurs
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:4
+      ref_id: '4.1'
+      description: "Octroyer un identifiant (\xAB login \xBB) unique \xE0 chaque utilisateur"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:4
+      ref_id: '4.2'
+      description: Adopter une politique de mot de passe conforme aux recommandations
+        de la CNIL
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:4
+      ref_id: '4.3'
+      description: "Obliger l\u2019utilisateur \xE0 changer le mot de passe attribu\xE9\
+        \ automatiquement ou par un administrateur"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "G\xE9rer les habilitations"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:5
+      ref_id: '5.1'
+      description: "D\xE9finir des profils d\u2019habilitation"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:5
+      ref_id: '5.2'
+      description: "Supprimer les permissions d\u2019acc\xE8s obsol\xE8tes"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:5
+      ref_id: '5.3'
+      description: "R\xE9aliser une revue annuelle des habilitations"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "S\xE9curiser les postes de travail"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:6
+      ref_id: '6.1'
+      description: "Pr\xE9voir une proc\xE9dure de verrouillage automatique de session"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:6
+      ref_id: '6.2'
+      description: "Installer et configurer un pare-feu (\xAB firewall \xBB en anglais)\
+        \ logiciel"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:6
+      ref_id: '6.3'
+      description: "Utiliser des antivirus r\xE9guli\xE8rement mis \xE0 jour"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:6
+      ref_id: '6.4'
+      description: "Recueillir l\u2019accord de l\u2019utilisateur avant toute intervention\
+        \ sur son poste"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: "S\xE9curiser l\u2019informatique mobile"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:7
+      ref_id: '7.1'
+      description: "Sensibiliser les utilisateurs aux risques sp\xE9cifiques du nomadisme"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:7
+      ref_id: '7.2'
+      description: "Pr\xE9voir des moyens de chiffrement des \xE9quipements mobiles"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:7
+      ref_id: '7.3'
+      description: "Exiger un secret pour le d\xE9verrouillage des smartphones"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: "Prot\xE9ger le r\xE9seau informatique"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:8
+      ref_id: '8.1'
+      description: "Limiter les flux r\xE9seau au strict n\xE9cessaire"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:8
+      ref_id: '8.2'
+      description: "S\xE9curiser les r\xE9seaux Wi-Fi, notamment en mettant en \u0153\
+        uvre le protocole WPA3"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:8
+      ref_id: '8.3'
+      description: "S\xE9curiser les acc\xE8s distants des appareils informatiques\
+        \ nomades par VPN"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:8
+      ref_id: '8.4'
+      description: "Cloisonner le r\xE9seau, entre autres en mettant en place une\
+        \ DMZ (zone d\xE9militaris\xE9e)"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: "S\xE9curiser les serveurs"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:9
+      ref_id: '9.1'
+      description: "D\xE9sinstaller ou d\xE9sactiver les services et interfaces inutiles"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:9
+      ref_id: '9.2'
+      description: "Limiter l\u2019acc\xE8s aux outils et interfaces d\u2019administration\
+        \ aux seules personnes habilit\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:9
+      ref_id: '9.3'
+      description: "Installer sans d\xE9lai les mises \xE0 jour critiques apr\xE8\
+        s les avoir test\xE9es le cas \xE9ch\xE9ant"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: "S\xE9curiser les sites web"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:10
+      ref_id: '10.1'
+      description: "S\xE9curiser les flux d\u2019\xE9change des donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:10
+      ref_id: '10.2'
+      description: "V\xE9rifier qu'aucun secret ou donn\xE9e personnelle ne passe\
+        \ par les URL"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:10
+      ref_id: '10.3'
+      description: "Contr\xF4ler que les entr\xE9es des utilisateurs correspondent\
+        \ \xE0 ce qui est attendu"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: "Encadrer les d\xE9veloppements informatiques"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:11
+      ref_id: '11.1'
+      description: "Prendre en compte la protection des donn\xE9es personnelles d\xE8\
+        s la conception"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:11
+      ref_id: '11.2'
+      description: "Proposer des param\xE8tres respectueux de la vie priv\xE9e par\
+        \ d\xE9faut"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:11.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:11
+      ref_id: '11.3'
+      description: "R\xE9aliser des tests complets avant la mise \xE0 disposition\
+        \ ou la mise \xE0 jour d\u2019un produit"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:11.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:11
+      ref_id: '11.4'
+      description: "Utiliser des donn\xE9es fictives ou anonymis\xE9es pour le d\xE9\
+        veloppement et les tests"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: "Prot\xE9ger les locaux"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:12
+      ref_id: '12.1'
+      description: "Restreindre les acc\xE8s aux locaux au moyen de portes verrouill\xE9\
+        es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:12
+      ref_id: '12.2'
+      description: "Installer des alarmes anti-intrusion et les v\xE9rifier p\xE9\
+        riodiquement"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: "S\xE9curiser les \xE9changes avec l\u2019ext\xE9rieur"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:13
+      ref_id: '13.1'
+      description: "Chiffrer les donn\xE9es avant leur envoi"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:13
+      ref_id: '13.2'
+      description: S'assurer qu'il s'agit du bon destinataire
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:13
+      ref_id: '13.3'
+      description: "Transmettre le secret lors d'un envoi distinct et via un canal\
+        \ diff\xE9rent"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:14
+      assessable: false
+      depth: 1
+      ref_id: '14'
+      name: "G\xE9rer la sous-traitance"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:14.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:14
+      ref_id: '14.1'
+      description: "Pr\xE9voir des clauses sp\xE9cifiques dans les contrats des sous-traitants"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:14.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:14
+      ref_id: '14.2'
+      description: "Pr\xE9voir les conditions de restitution et de destruction des\
+        \ donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:14.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:14
+      ref_id: '14.3'
+      description: "S'assurer de l'effectivit\xE9 des garanties pr\xE9vues (ex. :\
+        \ audits de s\xE9curit\xE9, visites)"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:15
+      assessable: false
+      depth: 1
+      ref_id: '15'
+      name: "Encadrer la maintenance et la fin de vie des mat\xE9riels et des logiciels"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:15.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:15
+      ref_id: '15.1'
+      description: Enregistrer les interventions de maintenance dans une main courante
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:15.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:15
+      ref_id: '15.2'
+      description: Encadrer les interventions de tiers par un responsable de l'organisme
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:15.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:15
+      ref_id: '15.3'
+      description: "Effacer les donn\xE9es de tout mat\xE9riel avant sa mise au rebut"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:16
+      assessable: false
+      depth: 1
+      ref_id: '16'
+      name: "Tracer les op\xE9rations"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:16.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:16
+      ref_id: '16.1'
+      description: "Pr\xE9voir un syst\xE8me de journalisation"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:16.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:16
+      ref_id: '16.2'
+      description: "Informer les utilisateurs de la mise en place du syst\xE8me de\
+        \ journalisation"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:16.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:16
+      ref_id: '16.3'
+      description: "Prot\xE9ger les \xE9quipements de journalisation et les informations\
+        \ journalis\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:16.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:16
+      ref_id: '16.4'
+      description: "Analyser r\xE9guli\xE8rement les traces pour d\xE9tecter la survenue\
+        \ d\u2019un incident"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:17
+      assessable: false
+      depth: 1
+      ref_id: '17'
+      name: Sauvegarder
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:17.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:17
+      ref_id: '17.1'
+      description: "Effectuer des sauvegardes r\xE9guli\xE8res"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:17.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:17
+      ref_id: '17.2'
+      description: "Prot\xE9ger les sauvegardes, autant pendant leur stockage que\
+        \ leur convoyage"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:17.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:17
+      ref_id: '17.3'
+      description: "Tester r\xE9guli\xE8rement la restauration des sauvegardes et\
+        \ leur int\xE9grit\xE9"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:18
+      assessable: false
+      depth: 1
+      ref_id: '18'
+      name: "Pr\xE9voir la continuit\xE9 et la reprise d\u2019activit\xE9"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:18.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:18
+      ref_id: '18.1'
+      description: "Pr\xE9voir un plan de continuit\xE9 et de reprise d\u2019activit\xE9"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:18.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:18
+      ref_id: '18.2'
+      description: "Effectuer des exercices r\xE9guli\xE8rement"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:19
+      assessable: false
+      depth: 1
+      ref_id: '19'
+      name: "G\xE9rer les incidents et les violations"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:19.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:19
+      ref_id: '19.1'
+      description: "Traiter les alertes remont\xE9es par le syst\xE8me de journalisation"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:19.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:19
+      ref_id: '19.2'
+      description: "Pr\xE9voir les proc\xE9dures et les responsabilit\xE9s internes\
+        \ pour la gestion des incidents, dont la proc\xE9dure\nde notification aux\
+        \ r\xE9gulateurs des violations de donn\xE9es personnelles"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:20
+      assessable: false
+      depth: 1
+      ref_id: '20'
+      name: Analyse de risques
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:20.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:20
+      ref_id: '20.1'
+      description: "Mener une analyse de risques, m\xEAme minimale, sur les traitements\
+        \ de donn\xE9es envisag\xE9s"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:20.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:20
+      ref_id: '20.2'
+      description: "Suivre au cours du temps l\u2019avancement du plan d\u2019action\
+        \ d\xE9cid\xE9 \xE0 l\u2019issue de l\u2019analyse de risques"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:20.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:20
+      ref_id: '20.3'
+      description: "Revoir r\xE9guli\xE8rement l\u2019analyse de risques"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:21
+      assessable: false
+      depth: 1
+      ref_id: '21'
+      name: Chiffrement, hachage, signature
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:21.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:21
+      ref_id: '21.1'
+      description: "Utiliser des algorithmes, des logiciels et des biblioth\xE8ques\
+        \ reconnues et s\xE9curis\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:21.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:21
+      ref_id: '21.2'
+      description: "Conserver les secrets et les cl\xE9s cryptographiques de mani\xE8\
+        re s\xE9curis\xE9e"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:22
+      assessable: false
+      depth: 1
+      ref_id: '22'
+      name: 'Cloud : Informatique en nuage'
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:22.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:22
+      ref_id: '22.1'
+      description: "Inclure les services cloud dans l\u2019analyse de risques"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:22.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:22
+      ref_id: '22.2'
+      description: "\xC9valuer la s\xE9curit\xE9 mise en place par le fournisseur"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:22.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:22
+      ref_id: '22.3'
+      description: "Veiller \xE0 la r\xE9partition des responsabilit\xE9s de s\xE9\
+        curit\xE9 dans le contrat"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:22.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:22
+      ref_id: '22.4'
+      description: "Assurer le m\xEAme niveau de s\xE9curit\xE9 dans le cloud que\
+        \ sur site"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:23
+      assessable: false
+      depth: 1
+      ref_id: '23'
+      name: "Applications mobiles : Conception et d\xE9veloppement"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:23.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:23
+      ref_id: '23.1'
+      description: "Prendre en compte les sp\xE9cificit\xE9s de l\u2019environnement\
+        \ mobile pour r\xE9duire les donn\xE9es personnelles\ncollect\xE9es et limiter\
+        \ les permissions demand\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:23.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:23
+      ref_id: '23.2'
+      description: Encapsuler les communications dans un canal TLS
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:23.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:23
+      ref_id: '23.3'
+      description: "Utiliser les suites cryptographiques du syst\xE8me d\u2019exploitation\
+        \ et les protections mat\xE9rielles des secrets"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:24
+      assessable: false
+      depth: 1
+      ref_id: '24'
+      name: 'Intelligence artificielle : Conception et apprentissage'
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:24.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:24
+      ref_id: '24.1'
+      description: "Adopter les bonnes pratiques de s\xE9curit\xE9 applicables au\
+        \ d\xE9veloppement informatique"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:24.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:24
+      ref_id: '24.2'
+      description: "Veiller \xE0 la qualit\xE9 et l'int\xE9grit\xE9 des donn\xE9es\
+        \ utilis\xE9es pour l'apprentissage et l'inf\xE9rence"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:24.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:24
+      ref_id: '24.3'
+      description: "Documenter le fonctionnement et les limitations du syst\xE8me"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:25
+      assessable: false
+      depth: 1
+      ref_id: '25'
+      name: 'API : Interfaces de programmation applicative'
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:25.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:25
+      ref_id: '25.1'
+      description: "Organiser et documenter la s\xE9curit\xE9 des acc\xE8s aux API\
+        \ et aux donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:cnil-guide-securite:25.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cnil-guide-securite:25
+      ref_id: '25.2'
+      description: "Limiter le partage des donn\xE9es uniquement aux personnes et\
+        \ aux finalit\xE9s pr\xE9vues"

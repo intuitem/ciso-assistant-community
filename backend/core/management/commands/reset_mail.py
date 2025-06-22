@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from core.models import *
 from iam.models import User, Folder
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from django.utils.translation import gettext_lazy as _
 
 
 class Command(BaseCommand):
@@ -13,7 +14,7 @@ class Command(BaseCommand):
         try:
             admin.mailing(
                 email_template_name="registration/password_reset_email.html",
-                subject="CISO Assistant: Password Reset",
+                subject=_("CISO Assistant: Password Reset"),
             )
             self.stdout.write("reset mail sent")
         except Exception as e:

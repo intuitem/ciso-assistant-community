@@ -1,61 +1,79 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import * as m from '$paraglide/messages';
+	import { run } from 'svelte/legacy';
 
-	export let handler: DataHandler;
+	import type { DataHandler } from '@vincjo/datatables/remote';
+	import { page } from '$app/stores';
+	import { m } from '$paraglide/messages';
+	import { afterNavigate } from '$app/navigation';
+	interface Props {
+		handler: DataHandler;
+	}
+
+	let { handler }: Props = $props();
+
 	const pageNumber = handler.getPageNumber();
+	const rowsPerPage = handler.getRowsPerPage();
 	const pageCount = handler.getPageCount();
 	const pages = handler.getPages({ ellipsis: true });
-	let urlModel: string | undefined;
-	let _sessionStorage = null;
 
-	onMount(() => {
-		_sessionStorage = sessionStorage;
+	const setPage = (value: 'previous' | 'next' | number) => {
+		handler.setPage(value);
+		handler.invalidate();
+	};
+
+	const listViewEndpointRegex = /^\/[a-zA-Z0-9_\-]+$/;
+	let currentEndpoint: string | null = $state(null);
+
+	run(() => {
+		if (
+			$page.url &&
+			listViewEndpointRegex.test($page.url.pathname) &&
+			currentEndpoint === $page.url.pathname
+		) {
+			const endpoint = $page.url.pathname;
+			const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
+			cache[endpoint] = [$pageNumber, $rowsPerPage];
+			localStorage.setItem('pageNumberCache', JSON.stringify(cache));
+		}
 	});
 
-	$: if ($page.url && _sessionStorage) {
-		const pageData = JSON.parse(_sessionStorage.getItem('model_table_page_data') ?? '{}');
-		urlModel = `${$page.url}`.replace('//+$/', '').split('/').pop();
-
-		const currentPage = pageData[urlModel] ?? 1;
-		handler.setPage(currentPage);
-		pageData[urlModel] = currentPage;
-
-		_sessionStorage.setItem('model_table_page_data', JSON.stringify(pageData));
-	}
-
-	$: if ($pageNumber && urlModel && _sessionStorage) {
-		const pageData = JSON.parse(_sessionStorage.getItem('model_table_page_data') ?? '{}');
-		pageData[urlModel] = $pageNumber;
-		_sessionStorage.setItem('model_table_page_data', JSON.stringify(pageData));
-	}
+	afterNavigate(() => {
+		// The second condition prevents afterNavigate from being executed more than once when the URL changes.
+		if ($page.url && $page.url.pathname !== currentEndpoint) {
+			const endpoint = $page.url.pathname;
+			let newPageNumber = 1;
+			if (listViewEndpointRegex.test(endpoint)) {
+				const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
+				const [savedPageNumber] = cache[endpoint] ?? [];
+				newPageNumber = Number(savedPageNumber ?? '1');
+			}
+			handler.setPage(newPageNumber);
+			currentEndpoint = endpoint;
+		}
+	});
 </script>
 
 <section class="flex">
-	<button
-		type="button"
-		class:disabled={$pageNumber === 1}
-		on:click={() => handler.setPage('previous')}
-	>
+	<button type="button" class:disabled={$pageNumber === 1} onclick={() => setPage('previous')}>
 		{m.previous()}
 	</button>
-	{#each $pages as page}
-		<button
-			type="button"
-			class:active={$pageNumber === page}
-			class:ellipse={page === null}
-			on:click={() => handler.setPage(page)}
-		>
-			{page ?? '...'}
+	{#if $pages === undefined}
+		<button type="button" onclick={() => setPage($pageNumber)}>
+			{$pageNumber}
 		</button>
-	{/each}
-	<button
-		type="button"
-		class:disabled={$pageNumber === $pageCount}
-		on:click={() => handler.setPage('next')}
-	>
+	{:else}
+		{#each $pages as page}
+			<button
+				type="button"
+				class:active={$pageNumber === page}
+				class:ellipse={page === null}
+				onclick={() => setPage(page)}
+			>
+				{page ?? '...'}
+			</button>
+		{/each}
+	{/if}
+	<button type="button" class:disabled={$pageNumber === $pageCount} onclick={() => setPage('next')}>
 		{m.next()}
 	</button>
 </section>

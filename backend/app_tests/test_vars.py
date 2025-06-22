@@ -1,5 +1,5 @@
 from typing import Any
-from core.apps import (
+from core.startup import (
     READER_PERMISSIONS_LIST,
     APPROVER_PERMISSIONS_LIST,
     ANALYST_PERMISSIONS_LIST,
@@ -15,7 +15,7 @@ FOLDERS_ENDPOINT = "folders-list"
 FRAMEWORKS_ENDPOINT = "frameworks-list"
 STORED_LIBRARIES_ENDPOINT = "stored-libraries-list"
 RISK_MATRICES_ENDPOINT = "risk-matrices-list"
-PROJECTS_ENDPOINT = "projects-list"
+PERIMETERS_ENDPOINT = "perimeters-list"
 REQUIREMENT_ASSESSMENTS_ENDPOINT = "requirement-assessments-list"
 REQUIREMENT_NODES_ENDPOINT = "requirement-nodes-list"
 RISK_ACCEPTANCES_ENDPOINT = "risk-acceptances-list"

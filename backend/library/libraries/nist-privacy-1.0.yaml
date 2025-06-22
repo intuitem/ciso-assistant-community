@@ -7,6 +7,7 @@ description: 'NIST Privacy Framework: A Tool for Improving Privacy through Enter
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
 version: 1
+publication_date: 2024-04-14
 provider: NIST
 packager: intuitem
 objects:

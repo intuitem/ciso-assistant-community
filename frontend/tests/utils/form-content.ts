@@ -7,7 +7,8 @@ export enum FormFieldType {
 	SELECT = 'select',
 	SELECT_AUTOCOMPLETE = 'select-autocomplete',
 	SELECT_MULTIPLE_AUTOCOMPLETE = 'select-multi-autocomplete',
-	TEXT = 'text'
+	TEXT = 'text',
+	NUMBER = 'number'
 }
 
 type FormField = {
@@ -75,9 +76,9 @@ export class FormContent {
 								(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 							);
 							await expect(
-								this.page.getByRole('option', { name: values[key].value, exact: true }).first()
+								field.locator.getByRole('option', { name: values[key].value, exact: true }).first()
 							).toBeVisible();
-							await this.page
+							await field.locator
 								.getByRole('option', { name: values[key].value, exact: true })
 								.first()
 								.click();
@@ -85,9 +86,9 @@ export class FormContent {
 							await responsePromise;
 						} else {
 							await expect(
-								this.page.getByRole('option', { name: values[key], exact: true }).first()
+								field.locator.getByRole('option', { name: values[key], exact: true }).first()
 							).toBeVisible();
-							await this.page
+							await field.locator
 								.getByRole('option', { name: values[key], exact: true })
 								.first()
 								.click();
@@ -98,9 +99,9 @@ export class FormContent {
 					await field.locator.click();
 					for (const val of values[key]) {
 						await expect(
-							this.page.getByRole('option', { name: val, exact: true }).first()
+							field.locator.getByRole('option', { name: val, exact: true }).first()
 						).toBeVisible();
-						await this.page.getByRole('option', { name: val, exact: true }).first().click();
+						await field.locator.getByRole('option', { name: val, exact: true }).first().click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&
@@ -113,6 +114,9 @@ export class FormContent {
 					break;
 				case FormFieldType.DATE:
 					await field.locator.clear();
+				case FormFieldType.NUMBER:
+					await field?.locator.fill(values[key].toString());
+					break;
 				default:
 					await field?.locator.fill(values[key]);
 					break;

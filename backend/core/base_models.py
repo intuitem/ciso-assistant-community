@@ -46,13 +46,19 @@ class AbstractBaseModel(models.Model):
         # to avoid false positives as a result of the object being compared to itself
         if self.pk:
             scope = scope.exclude(pk=self.pk)
-        return not scope.filter(
-            **{
-                f"{field}__iexact": getattr(self, field)
-                for field in fields_to_check
-                if hasattr(self, field)
-            }
-        ).exists()
+        filters = {}
+        for field in fields_to_check:
+            if hasattr(self, field):
+                field_value = getattr(self, field)
+                model_field = self._meta.get_field(field)
+
+                # Use the appropriate lookup based on the field type
+                if isinstance(model_field, models.ForeignKey):
+                    filters[f"{field}__exact"] = field_value
+                else:
+                    filters[f"{field}__iexact"] = field_value
+
+        return not scope.filter(**filters).exists()
 
     def display_path(self):
         pass
@@ -71,8 +77,8 @@ class AbstractBaseModel(models.Model):
             return self.__class__.objects.filter(risk_scenario=self.risk_scenario)
         if hasattr(self, "risk_assessment") and self.risk_assessment is not None:
             return self.__class__.objects.filter(risk_assessment=self.risk_assessment)
-        if hasattr(self, "project") and self.project is not None:
-            return self.__class__.objects.filter(project=self.project)
+        if hasattr(self, "perimeter") and self.perimeter is not None:
+            return self.__class__.objects.filter(perimeter=self.perimeter)
         if hasattr(self, "folder") and self.folder is not None:
             return self.__class__.objects.filter(folder=self.folder)
         if hasattr(self, "parent_folder") and self.parent_folder is not None:
@@ -116,3 +122,15 @@ class NameDescriptionMixin(AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class ETADueDateMixin(models.Model):
+    """
+    Mixin for models that have an ETA and a due date.
+    """
+
+    eta = models.DateField(null=True, blank=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+
+    class Meta:
+        abstract = True

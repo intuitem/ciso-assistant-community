@@ -1,8 +1,24 @@
+from hashlib import sha256
 from typing import Any
+
 from django.db import models
 from rest_framework import serializers
 
 from iam.models import Folder
+
+
+class HashSlugRelatedField(serializers.SlugRelatedField):
+    """
+    A custom SlugRelatedField that hashes the slug value during serialization.
+    """
+
+    def to_representation(self, obj):
+        # Get the original slug value
+        value = super().to_representation(obj)
+        if value is None:
+            return None
+        # Hash the value
+        return sha256(str(value).encode()).hexdigest()[:12]
 
 
 class FieldsRelatedField(serializers.RelatedField):
@@ -27,6 +43,7 @@ class FieldsRelatedField(serializers.RelatedField):
         res = {"str": str(value)}
 
         if value == Folder.get_root_folder():
+            res.update({"id": value.id})
             return res
 
         fields = fields or self.fields

@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     container_name: backend
@@ -8,35 +6,58 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend
+      - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
     volumes:
       - ./db:/code/db
 
+  huey:
+    container_name: huey
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=False
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+
   frontend:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     depends_on:
       - backend
 
   caddy:
     container_name: caddy
-    image: caddy:2.7.6
+    image: caddy:2.10.0
+    environment:
+      - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped
     ports:
       - 8443:8443
-    command:
-      - caddy
-      - reverse-proxy
-      - --from
-      - https://localhost:8443
-      - --to
-      - frontend:3000
     volumes:
       - ./db:/data
+    command: |
+      sh -c 'echo $$CISO_ASSISTANT_URL "{
+      reverse_proxy /api/* backend:8000
+      reverse_proxy /* frontend:3000
+      }" > Caddyfile && caddy run'

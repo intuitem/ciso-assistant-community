@@ -1,29 +1,40 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { safeTranslate } from '$lib/utils/i18n';
 
-	// export let name: string;
-	export let s_label = '';
+	interface Props {
+		// export let name: string;
+		s_label?: string;
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		name?: string;
+		values: any[]; // Set the types for these variables later on
+		labels: any[];
+	}
 
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let title = '';
-
-	export let values: any[]; // Set the types for these variables later on
-	export let labels: any[];
+	let {
+		s_label = '',
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		title = '',
+		name = '',
+		values = $bindable(),
+		labels
+	}: Props = $props();
 
 	for (const index in values) {
 		if (values[index].localName) {
-			values[index].name = localItems()[values[index].localName];
+			values[index].name = safeTranslate(values[index].localName);
 		}
 	}
 
-	let chart_element: HTMLElement | null = null;
+	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(chart_element, null, { renderer: 'svg' });
+		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		// specify chart configuration item and data
 		let option = {
@@ -37,9 +48,6 @@
 			},
 			tooltip: {
 				trigger: 'item'
-			},
-			legend: {
-				data: ['Allocated Budget', 'Actual Spending']
 			},
 			radar: {
 				shape: 'circle',
@@ -70,4 +78,4 @@
 	});
 </script>
 
-<div class="{width} {height} {classesContainer}" bind:this={chart_element} />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>

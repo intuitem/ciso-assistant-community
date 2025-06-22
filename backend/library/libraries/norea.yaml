@@ -1,0 +1,3283 @@
+urn: urn:intuitem:risk:library:norea-dora-in-control
+locale: en
+ref_id: NOREA-DORA-in-control
+name: NOREA - DORA in Control Framework V3.0
+description: 'The NOREA DORA in Control Framework is a practical tool designed to
+  support organizations in their journey toward compliance with the Digital Operational
+  Resilience Act (DORA). While this framework offers valuable guidance, it is important
+  to note that the legal requirements set out in the DORA itself remain leading.
+
+  Link: https://www.norea.nl/dora'
+copyright: "The NOREA DORA in Control Framework and Dashboard is licensed under a\
+  \ creative Commons BY 4.0. For more information:\nhttps://creativecommons.org/licenses/by/4.0/\n\
+  You are free to:\nShare \u2014 copy and redistribute the material in any medium\
+  \ or format\nAdapt \u2014 remix, transform, and build upon the material for any\
+  \ purpose, even commercially\nThe licensor cannot revoke these freedoms as long\
+  \ as you follow the license terms.\nUnder the following terms:\nAttribution - You\
+  \ must give appropriate credit , provide a link to the license, and indicate if\
+  \ changes were made. You may do so in any reasonable manner, but not in any way\
+  \ that suggests the licensor endorses you or your use."
+version: 1
+publication_date: 2024-11-10
+provider: NOREA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:norea-dora-in-control
+    ref_id: NOREA-DORA-in-control
+    name: NOREA - DORA in Control Framework V3.0
+    description: 'The NOREA DORA in Control Framework is a practical tool designed
+      to support organizations in their journey toward compliance with the Digital
+      Operational Resilience Act (DORA). While this framework offers valuable guidance,
+      it is important to note that the legal requirements set out in the DORA itself
+      remain leading.
+
+      Link: https://www.norea.nl/dora'
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Incomplete - No attention has been given to this control.
+    - score: 1
+      name: Initial
+      description: Initial - The control is (partially) defined but is performed in
+        an inconsistent manner with a large dependency on individuals relating to
+        control execution.
+    - score: 2
+      name: Managed
+      description: Managed - The control is implemented and performed with consistence
+        and structure for part of the proces or control (evidence not always available)
+    - score: 3
+      name: Defined
+      description: Defined (design existence and operation) - The design of the control
+        measure is documented and implemented in a structured and formalized manner.
+        The required effectiveness of the control measure can be demonstrated and
+        is tested. Where necessary, the control measure is improved. *This is the
+        advised level to be demonstrably compliant with DORA.
+    - score: 4
+      name: Quantitative
+      description: Quantitatively Managed - In addition to the effectiveness of individual
+        control measures, the effectiveness of the cohesion of all information security
+        measures is also evaluated periodically. This evaluation of the system of
+        control measures is recorded and reported to management.
+    - score: 5
+      name: Optimizing
+      description: Optimizing - Continuous efforts are made to improve the effectiveness
+        of the system of control measures by taking future risks into account. This
+        involves the use of external data and benchmarking. Employees are proactively
+        involved in the future-oriented improvement of the effectiveness of the coherence
+        of information security measures.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
+      assessable: false
+      depth: 1
+      ref_id: GRM
+      name: Governance and Risk Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
+      ref_id: '1'
+      name: Management Responsibilities
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
+      ref_id: '1.1'
+      name: Governance of ICT risk
+      description: 'The Management body shall take ultimate responsibility for effectively
+        managing all ICT risks of the financial entity. As such, the management body
+        periodically (e.g. annually) reviews and approves:
+
+        - Policies related to the availability, authenticity, integrity, and confidentiality
+        of data, including the policy on arrangements with ICT third-party service
+        providers (see control 2.1).
+
+        - The roles, responsibilities and goverance arrangements for ICT risk management
+        (including those related to ICT third-party arrangements), including the continuous
+        monitoring thereof.
+
+        -  the policy on arrangements with ICT third-party service providers and stays
+        informed about third-party  arrangements, services provided, planned material
+        changes regarding third- party service providers, and understand the impact
+        of these changes on critical and important functions of the entity (including
+        risk assessment results).  '
+      annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
+      ref_id: '1.2'
+      name: Knowledge of the Management Body
+      description: 'The Management body shall ensure that it is kept up to date with
+        sufficient knowledge and skills to understand and assess ICT risks and operations
+        (e.g. through periodic trainings).
+
+        '
+      annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
+      ref_id: '1.3'
+      name: 'Digital Operational Resilience Strategy '
+      description: "The Management body shall set and approve the digital operational\
+        \ resilience strategy and periodically update when needed.\n\nThe digital\
+        \ operational resilience strategy  must:\n- Set out how the risk management\
+        \ framework will be implemented. \n- Elaborate on the alignment between the\
+        \ risk management framework and the business strategy and objectives. \n-\
+        \ Establish the ICT risk tolerance level (based on risk appetite) and the\
+        \ impact tolerance level for ICT disruptions. \n- Include clear security objectives,\
+        \ including Key Performance Indicators (KPIs) and risk metrics. \n- Elaborate\
+        \ on the ICT reference architecture and any changes needed to reach specific\
+        \ business objectives.\n- Outline the mechanisms in place to detect ICT-related\
+        \ incidents\n- Contain evidence to prove the current digital operational resilience\
+        \ situation (e.g. based on the number of major ICT-related incidents and the\
+        \ effectiveness of preventive measures.\n- Contain how the digital operational\
+        \ resilience testing is implemented (see controls under 19 and 20).\n- Outline\
+        \ the communication strategy in case of incidents (see 11.3)\n\nThe Management\
+        \ body shall allocate and review the budget required for resources to fulfill\
+        \ the digital operational resilience needs of the entity.\n\nEnsure monitoring\
+        \ is arranged on the the effectiveness of the implementation of the digital\
+        \ operational resilience."
+      annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
+      ref_id: '1.4'
+      name: Business Continuity Oversight
+      description: The Management body reviews and approves periodically (e.g. annually)
+        the ICT business continuity policy and the ICT response and recovery plans.
+      annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
+      ref_id: '1.5'
+      name: Audit Plan Approval and Review
+      description: The Management body reviews and approves periodically (e.g. annually)
+        internal ICT audit plans, ICT audits, and material modifications to the audits.
+      annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
+      ref_id: '2'
+      name: Risk Management Framework
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      ref_id: '2.1'
+      name: Protection Measures
+      description: "Implement policies and procedures to protect all information,\
+        \ ICT assets, and relevant physical ICT components and infrastructures. At\
+        \ least the following policies shall be established, maintained and approved\
+        \ by the Management body.\n\n- Security policy\n- Human resources policy \n\
+        - Encryption and cryptographic control policy\n- Identity and access management\
+        \ (IAM) policy\n- Change management policy\n- Network security policy\n- ICT\
+        \ operating policies and procedures \n- Communication policy\n- Vulnerability\
+        \ and patch management policy\n- Back up policy\n- Project management policy\n\
+        - Physical and environmental security policy\n- Business continuity policy\
+        \ with response and recovery plans (including testing plans)\n- ICT third-party\
+        \ service providers management policy\n- Operations of ICT assets (ensuring\
+        \ network security, protect against intrusions and data misuse and defining\
+        \ how the entity operates, monitors, controls, and restores ICT assets, including\
+        \ the documentation of ICT operations)"
+      annotation: '6.1
+
+        6.2
+
+        6.3
+
+        6.4
+
+        6.5
+
+        6.7
+
+        8.1
+
+        9.1
+
+        9.4
+
+        11.1
+
+        11.3
+
+        11.6
+
+        12.1
+
+        12.2
+
+        12.3
+
+        13.3
+
+        13.5
+
+        13.7
+
+        24.1
+
+        28.2
+
+        28.3
+
+        1.1 (RTS RM)
+
+        2.1 (RTS RM)
+
+        2.2 (RTS RM)
+
+        3.1 (RTS RM)
+
+        3.1 (RTS TPPM)
+
+        3.2 (RTS TPPM)
+
+        3.3 (RTS TPPM)
+
+        3.4 (RTS TPPM)
+
+        3.6 (RTS TPPM)
+
+        3.7 (RTS TPPM)
+
+        4.1 (RTS TPPM)
+
+        7.1 (RTS TPPM)
+
+        7.2 (RTS TPPM)
+
+        8.1 (RTS RM)
+
+        8.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      ref_id: '2.2'
+      name: Critical and Important Functions
+      description: Identify, classify and adequately document all critical and important
+        functions. This process involves determining which functions are essential
+        for the entity's operational stability and continuity.  Review as needed,
+        and at least yearly, the adequacy of this classification.
+      annotation: '6.1
+
+        6.2
+
+        6.3
+
+        6.4
+
+        6.5
+
+        6.7
+
+        8.1
+
+        9.1
+
+        9.4
+
+        11.1
+
+        11.3
+
+        11.6
+
+        12.1
+
+        12.2
+
+        12.3
+
+        13.3
+
+        13.5
+
+        13.7
+
+        24.1
+
+        28.2
+
+        28.3
+
+        1.1 (RTS RM)
+
+        2.1 (RTS RM)
+
+        2.2 (RTS RM)
+
+        3.1 (RTS RM)
+
+        3.1 (RTS TPPM)
+
+        3.2 (RTS TPPM)
+
+        3.3 (RTS TPPM)
+
+        3.4 (RTS TPPM)
+
+        3.6 (RTS TPPM)
+
+        3.7 (RTS TPPM)
+
+        4.1 (RTS TPPM)
+
+        7.1 (RTS TPPM)
+
+        7.2 (RTS TPPM)
+
+        8.1 (RTS RM)
+
+        8.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      ref_id: '2.3'
+      name: Clear Segregation of Duties (SoD)
+      description: Establish Segregation of Duties (SoD) with regard to risk management
+        functions, following the three lines of defence model or internal risk management
+        and control model.
+      annotation: '6.1
+
+        6.2
+
+        6.3
+
+        6.4
+
+        6.5
+
+        6.7
+
+        8.1
+
+        9.1
+
+        9.4
+
+        11.1
+
+        11.3
+
+        11.6
+
+        12.1
+
+        12.2
+
+        12.3
+
+        13.3
+
+        13.5
+
+        13.7
+
+        24.1
+
+        28.2
+
+        28.3
+
+        1.1 (RTS RM)
+
+        2.1 (RTS RM)
+
+        2.2 (RTS RM)
+
+        3.1 (RTS RM)
+
+        3.1 (RTS TPPM)
+
+        3.2 (RTS TPPM)
+
+        3.3 (RTS TPPM)
+
+        3.4 (RTS TPPM)
+
+        3.6 (RTS TPPM)
+
+        3.7 (RTS TPPM)
+
+        4.1 (RTS TPPM)
+
+        7.1 (RTS TPPM)
+
+        7.2 (RTS TPPM)
+
+        8.1 (RTS RM)
+
+        8.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      ref_id: '2.4'
+      name: 'ICT Risk management framework '
+      description: 'A sound, comprehensive and well-documented ICT risk management
+        framework is in place. Which as goal to address all ICT risks properly and
+        ensure a high level of digital resilience. The reponsibility for risk management
+        is properly assigned to a control function. '
+      annotation: '6.1
+
+        6.2
+
+        6.3
+
+        6.4
+
+        6.5
+
+        6.7
+
+        8.1
+
+        9.1
+
+        9.4
+
+        11.1
+
+        11.3
+
+        11.6
+
+        12.1
+
+        12.2
+
+        12.3
+
+        13.3
+
+        13.5
+
+        13.7
+
+        24.1
+
+        28.2
+
+        28.3
+
+        1.1 (RTS RM)
+
+        2.1 (RTS RM)
+
+        2.2 (RTS RM)
+
+        3.1 (RTS RM)
+
+        3.1 (RTS TPPM)
+
+        3.2 (RTS TPPM)
+
+        3.3 (RTS TPPM)
+
+        3.4 (RTS TPPM)
+
+        3.6 (RTS TPPM)
+
+        3.7 (RTS TPPM)
+
+        4.1 (RTS TPPM)
+
+        7.1 (RTS TPPM)
+
+        7.2 (RTS TPPM)
+
+        8.1 (RTS RM)
+
+        8.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      ref_id: '2.5'
+      name: Annual Framework Review and Audit Process
+      description: 'The effectiveness of the risk management framework is monitored
+        based on the risk exposure over time to critical or important business functions.
+        Implement a reviewing and auditing process, with a minimum yearly review of
+        the framework, triggered by major ICT incidents, regulator instructions, or
+        major audit findings. '
+      annotation: '6.1
+
+        6.2
+
+        6.3
+
+        6.4
+
+        6.5
+
+        6.7
+
+        8.1
+
+        9.1
+
+        9.4
+
+        11.1
+
+        11.3
+
+        11.6
+
+        12.1
+
+        12.2
+
+        12.3
+
+        13.3
+
+        13.5
+
+        13.7
+
+        24.1
+
+        28.2
+
+        28.3
+
+        1.1 (RTS RM)
+
+        2.1 (RTS RM)
+
+        2.2 (RTS RM)
+
+        3.1 (RTS RM)
+
+        3.1 (RTS TPPM)
+
+        3.2 (RTS TPPM)
+
+        3.3 (RTS TPPM)
+
+        3.4 (RTS TPPM)
+
+        3.6 (RTS TPPM)
+
+        3.7 (RTS TPPM)
+
+        4.1 (RTS TPPM)
+
+        7.1 (RTS TPPM)
+
+        7.2 (RTS TPPM)
+
+        8.1 (RTS RM)
+
+        8.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
+      ref_id: '2.6'
+      name: Third-Party (Multi-vendor) Risk Management Program
+      description: "Maintain a comprehensive third-party risk management program which\
+        \ includes:\n- A register of information related to the use of thirdparty\
+        \ service providers, especially those supporting critical or important functions\
+        \ (see also control 17.3).\n- Put in place a policy on the management of ICT\
+        \ third-parties, including the criteria for determining the criticality of\
+        \ service providers and the internal responsibilities for managing third-parties.\
+        \ \n- Ensuring that senior management reviews the policy and designate a member\
+        \ to monitor relations with the third-parties and the contractual arrangements.\
+        \ \n- A multi-vendor strategy, if deemed relevant,  showing key dependencies\
+        \ on ICT third-party service providers and explaining the rationale behind\
+        \ the procurement mix of ICT third-party service providers.  "
+      annotation: '6.1
+
+        6.2
+
+        6.3
+
+        6.4
+
+        6.5
+
+        6.7
+
+        8.1
+
+        9.1
+
+        9.4
+
+        11.1
+
+        11.3
+
+        11.6
+
+        12.1
+
+        12.2
+
+        12.3
+
+        13.3
+
+        13.5
+
+        13.7
+
+        24.1
+
+        28.2
+
+        28.3
+
+        1.1 (RTS RM)
+
+        2.1 (RTS RM)
+
+        2.2 (RTS RM)
+
+        3.1 (RTS RM)
+
+        3.1 (RTS TPPM)
+
+        3.2 (RTS TPPM)
+
+        3.3 (RTS TPPM)
+
+        3.4 (RTS TPPM)
+
+        3.6 (RTS TPPM)
+
+        3.7 (RTS TPPM)
+
+        4.1 (RTS TPPM)
+
+        7.1 (RTS TPPM)
+
+        7.2 (RTS TPPM)
+
+        8.1 (RTS RM)
+
+        8.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
+      ref_id: '3'
+      name: Risk Asessments
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:3
+      ref_id: '3.1'
+      name: 'Risk Assessment '
+      description: 'Identify all sources of ICT risk on a continuous basis, including
+        risk exposure to and from other entities. Gather information, assess, and
+        review at least on a yearly basis the cyber threats and ICT vulnerabilities
+        relevant to business functions and assets. Evaluate the (potential) impact
+        of these threats and vulnerabilities on the assets. '
+      annotation: '8.2
+
+        8.3
+
+        8.7
+
+        8.4
+
+        13.1'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:3
+      ref_id: '3.2'
+      name: Major change risk assessment
+      description: Perform a risk assessment upon each major change in the network,
+        IT infrastructure, and the processes or procedures affecting business functions
+        and assets.
+      annotation: '8.2
+
+        8.3
+
+        8.7
+
+        8.4
+
+        13.1'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:3
+      ref_id: '3.3'
+      name: Legacy Systems risk assessment
+      description: Conduct specific risk assessments on all legacy ICT systems, applications,
+        or systems at least yearly. Perform assessments before and after connecting
+        legacy ICT systems, applications, or systems.
+      annotation: '8.2
+
+        8.3
+
+        8.7
+
+        8.4
+
+        13.1'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
+      ref_id: '4'
+      name: (Internal) ICT Audit
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
+      ref_id: '4.1'
+      name: Audit approach and frequency
+      description: "The Internal audit department shall conduct audits on the following\
+        \ domains: \n- Risk management framework, policies, related processes, and\
+        \ procedures\n- ICT Response and recovery plans\n- ICT Third-party service\
+        \ providers\n\nAdjust audit frequency and focus based on the entity's ICT\
+        \ risk profile."
+      annotation: '6.6
+
+        11.3
+
+        13.7
+
+        28.6
+
+        3.8 (RTS TPPM)
+
+        8.1 (RTS TPPM)
+
+        8.2 (RTS TPPM)
+
+        8.3 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
+      ref_id: '4.2'
+      name: Auditor requirements
+      description: Ensure that the internal audit staff possess sufficient ICT risk
+        knowledge, skills, and expertise to perform the audits. Also, ensure the independence
+        of the audit function.
+      annotation: '6.6
+
+        11.3
+
+        13.7
+
+        28.6
+
+        3.8 (RTS TPPM)
+
+        8.1 (RTS TPPM)
+
+        8.2 (RTS TPPM)
+
+        8.3 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
+      ref_id: '4.3'
+      name: Audit findings
+      description: "Establish a follow-up process for audit findings, including rules\
+        \ for timely verification and remediation of critical findings. Maintain a\
+        \ continuous learning and improvement process based on risk assessment results,\
+        \ resilience testing, (cyber) incidents, and testing of business continuity\
+        \ plans. The results of this process shall be reported annually by senior\
+        \ ICT staff to the management body. The format and content of the review report\
+        \ shall meet the requirements stated in Chapter 5 (Article 27) of RTS RM.\n\
+        \n "
+      annotation: '6.6
+
+        11.3
+
+        13.7
+
+        28.6
+
+        3.8 (RTS TPPM)
+
+        8.1 (RTS TPPM)
+
+        8.2 (RTS TPPM)
+
+        8.3 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
+      ref_id: '4.4'
+      name: Reliance Third-Party Assurance and Certifications
+      description: 'Use, where appropriate, third-party certifications, third-party
+        or internal audit reports made available by the ICT third-party service provider,
+        or own audit reports to confirm adherence of contractual requirements on information
+        access, inspection, audit, and ICT testing with the third-party. Rely on third-party
+        certifications and audit reports from ICT third-party service providers only
+        if the following specific conditions are met: the audit plan is aligned with
+        contractual arrangements, the audit scope is comprehensive and covers identified
+        systems and key controls, ongoing assessment of certification/report content
+        are performed and validated, key systems and controls are covered in future
+        versions of the certification or audit report, there is confidence in the
+        certifying/auditing party''s capabilities, certifications/audits adhere to
+        recognized professional standards, the right to request scope expansion is
+        covered in the contract, and right to perform discretionary audits is retained.'
+      annotation: '6.6
+
+        11.3
+
+        13.7
+
+        28.6
+
+        3.8 (RTS TPPM)
+
+        8.1 (RTS TPPM)
+
+        8.2 (RTS TPPM)
+
+        8.3 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
+      assessable: false
+      depth: 1
+      ref_id: OM
+      name: Operational Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
+      ref_id: '5'
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:5
+      ref_id: '5.1'
+      name: Resilient Systems
+      description: 'Use and maintain ICT systems, protocols, and tools that are up
+        to date and:
+
+        - Tailored to the magnitude of ICT operations
+
+        - Reliable
+
+        - Equipped with sufficient capacity to accurately process data and to deal
+        with peak orders, message or transaction volumes as needed
+
+        - Technologically resilient to deal with additional processing needs under
+        stressed market conditions or other adverse market conditions
+
+        '
+      annotation: "7\n8.1 \n8.5\n8.6\n4.1 (RTS RM)\n4.2 (RTS RM)\n5.1 (RTS RM)\n5.2\
+        \ (RTS RM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:5
+      ref_id: '5.2'
+      name: Inventory Management
+      description: "Keep an inventory of (ICT) assets, monitor their life-cycle and\
+        \ update it periodically and upon every major change in the network, the IT\
+        \ infrastructure, and processes and procedures supporting business functions.\
+        \ Keep records of the following for each ICT asset: unique identifier, location\
+        \ (physical or logical), asset classification, identity of asset owner, information\
+        \ for specific risk assessment on legacy systems, business functions or services\
+        \ supported, business continuity requirements (e.g., RTO, RPO), exposure to\
+        \ external networks, including the internet, links and interdependencies among\
+        \ assets and business functions using each asset, and the end dates of the\
+        \ ICT third-party service provider\u2019s regular, extended and custom support\
+        \ services after which it is no longer supported by its supplier or by an\
+        \ ICT third-party service provider.\n\nIdeally, inventory management is perfomed\
+        \ in an automated and continuous fashion."
+      annotation: "7\n8.1 \n8.5\n8.6\n4.1 (RTS RM)\n4.2 (RTS RM)\n5.1 (RTS RM)\n5.2\
+        \ (RTS RM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:5
+      ref_id: '5.3'
+      name: Asset Classification and Documentation
+      description: Identify, classify and document all ICT-supported business functions,
+        including the assets supporting them, and detail the roles and dependencies
+        of these assets in relation to ICT risk. Additionally, identify and document
+        all ICT-supported business functions dependent on ICT third-party service
+        providers, and identify the services provided by third-party providers that
+        support critical or important business functions. Make a mapping of critical
+        (ICT) assets based on a criticality assessment, which must include network
+        resources, hardware equipment, and resources on remote sites. This mapping
+        should also incorporate the configuration of assets and their links and interdependencies
+        with other assets. The criticality assessment should follow clear criteria
+        to evaluate the ICT risk related to business functions, taking into account
+        the potential impact of confidentiality, integrity, and availability losses.
+        Review the adequacy of this classification and documentation at least on a
+        yearly basis, ensuring it meets the requirements for maintaining accurate
+        and up-to-date asset records.
+      annotation: "7\n8.1 \n8.5\n8.6\n4.1 (RTS RM)\n4.2 (RTS RM)\n5.1 (RTS RM)\n5.2\
+        \ (RTS RM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
+      ref_id: '6'
+      name: Change Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:6
+      ref_id: '6.1'
+      name: Change Procedures
+      description: Ensure that all changes to software, hardware, firmware components,
+        and systems, along with security parameters, are appropriately placed and
+        scoped. Document and communicate change details, including the purpose and
+        scope of the change, the implementation timeline, and expected outcomes. Define
+        clear roles and responsibilities to ensure that changes are defined, planned,
+        transitioned, tested, and finalized in a controlled manner. Additionally,
+        establish effective quality assurance procedures. Implement mechanisms to
+        maintain independence between the functions that approve changes and those
+        responsible for requesting and implementing them.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        17.1 (RTS RM)
+
+        17.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:6
+      ref_id: '6.2'
+      name: Security Requirements
+      description: Identify the potential impact of a change on existing security
+        measures and assess whether additional security measures are required for
+        its implementation. Verify that security requirements have been met for all
+        implemented changes. Establish fallback procedures and assign responsibilities
+        for aborting changes or recovering from changes not successfully implemented.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        17.1 (RTS RM)
+
+        17.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:6
+      ref_id: '6.3'
+      name: Emergency Change Management
+      description: Define procedures for documenting, reevaluating, assessing, and
+        approving the implementation of emergency changes, including workarounds and
+        patches.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        17.1 (RTS RM)
+
+        17.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:6
+      ref_id: '6.4'
+      name: OTAP Implementation
+      description: Ensure segregation of production environments from development,
+        testing, and other non-production environments, encompassing all components
+        of an environment. This also includes requirements to conduct the development
+        and testing in production environments. Ensure that the instances in which
+        testing is performed in production environment are clearly identified, justified,
+        for limited periods of time approved by the relevant function.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        17.1 (RTS RM)
+
+        17.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
+      ref_id: '7'
+      name: ICT Operations
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
+      ref_id: '7.1'
+      name: ICT Monitoring
+      description: Develop, document and implement capacity and performance management
+        procedures to identify capacity requirements of their ICT systems and apply
+        resource optimisation and monitoring procedures to maintain and improve the
+        availability of data and ICT systems and efficiency of ICT systems and prevent
+        ICT capacity shortages.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
+      ref_id: '7.2'
+      name: Clock Synchronization Standardization
+      description: Ensure clock synchronization of all ICT systems to a single reliable
+        reference source time.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
+      ref_id: '7.3'
+      name: System Management and Security
+      description: Provide system descriptions that encompass secure installation,
+        maintenance, configuration, and deinstallation/disposal of ICT assets. This
+        includes the management of assets, both automated and manual, and the identification
+        and control of legacy ICT systems.
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
+      ref_id: '7.4'
+      name: Error Handling and Recovery
+      description: 'Establish guidelines for handling errors, including support and
+        escalation contacts, as well as external support contacts in case of unexpected
+        operational or technical issues. Define the procedures for ICT system restart,
+        rollback, and recovery to be used in the event of an ICT system disruption.
+        Ensure the contact details are available in case systems are unavailable as
+        well. '
+      annotation: '8.1 (RTS RM)
+
+        8.2 (RTS RM)
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:cm
+      assessable: false
+      depth: 1
+      ref_id: CM
+      name: Continuity Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:cm
+      ref_id: '8'
+      name: Backup Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:8
+      ref_id: '8.1'
+      name: Backup Policy
+      description: Define backup policies aimed at ensuring minimum downtime, limited
+        disruption, and loss, and put in place restoration and recovery procedures.
+        Specify the scope of the data subject to backups and the minimum frequency
+        of backups, based on the criticality or confidentiality of data. Determine
+        a Recovery Time Objective (RTO) and a Recovery Point Objective (RPO) based
+        on data criticality and overall impact on market efficiency to ensure that
+        service levels are met in extreme scenarios.
+      annotation: '12.1
+
+        12.2
+
+        12.3
+
+        12.6
+
+        12.7'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:8
+      ref_id: '8.2'
+      name: Restore Procedures
+      description: "Ensure that the activation of backup systems will not jeopardize\
+        \ the security of ICT systems or the availability, authenticity, integrity\
+        \ or confidentiality of data. For example through the execution of periodic\
+        \ restore tests based on the backup, restoration, and recovery procedures.\
+        \ \n\nEnsure that when restoring backup data using self-managed systems, that\
+        \ systems are used that are both physically and logically segregated from\
+        \ the source system to ensure protection. Furthermore, the backup systems\
+        \ shall be securely protected from any unauthorized access or IT corruption\
+        \ and allow for timely restoration. Institutions must validate that the highest\
+        \ level of data integrity is maintained when restoring backups.\n\nAdditionally\
+        \ for central counterparties: the recovery plans shall enable the recovery\
+        \ of all transactions at the time of disruption to allow the central counterparty\
+        \ to continue to operate with certainty and to complete settlement on the\
+        \ scheduled date.\n\nAdditionally for data reporting service providers*: the\
+        \ providers shall additionally maintain adequate resources and have back-up\
+        \ and restoration facilities in place in order to offer and maintain their\
+        \ services at all times.\n\n*For definition of DRSP see: https://www.esma.europa.eu/esmas-activities/markets-and-infrastructure/data-reporting-services-providers "
+      annotation: '12.1
+
+        12.2
+
+        12.3
+
+        12.6
+
+        12.7'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:cm
+      ref_id: '9'
+      name: Response and Recovery
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      ref_id: '9.1'
+      name: Business Continuity Policy
+      description: 'Establish an ICT business continuity policy that enables the continuity
+        of critical or important functions, ensures rapid response to incidents, facilitates
+        the resumption of activities, deployment of containment measures, activation
+        and deactivation of response and recovery procedures, estimation of impact,
+        damage, and losses, and provides clear communication to relevant stakeholders.
+        Regularly review the business continuity policy and make necessary adjustments
+        to enhance effectiveness.
+
+
+        Refer to Articles 24.2-4 of the RTS RM for specific requirements for Central
+        counterparties, Trading venues, and Central security depositories.'
+      annotation: '11.1
+
+        11.2
+
+        11.4
+
+        11.5
+
+        11.6
+
+        11.7
+
+        11.8
+
+        11.9
+
+        11.10
+
+        12.5
+
+        24.1 (RTS RM)
+
+        24.2 (RTS RM)
+
+        24.3 (RTS RM)
+
+        24.4 (RTS RM)
+
+        25.1 (RTS RM)
+
+        25.2 (RTS RM)
+
+        25.3 (RTS RM)
+
+        25.4 (RTS RM)
+
+        25.5 (RTS RM)
+
+        25.6 (RTS RM)
+
+        26.1 (RTS RM)
+
+        26.2 (RTS RM)
+
+        26.3 (RTS RM)
+
+        26.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      ref_id: '9.2'
+      name: Crisis Management
+      description: Formulate and maintain a crisis management team tasked with overseeing
+        and coordinating actions during a crisis or major disruption. Regularly review
+        recovery/response plans. Make necessary adjustments to enhance effectiveness.
+      annotation: '11.1
+
+        11.2
+
+        11.4
+
+        11.5
+
+        11.6
+
+        11.7
+
+        11.8
+
+        11.9
+
+        11.10
+
+        12.5
+
+        24.1 (RTS RM)
+
+        24.2 (RTS RM)
+
+        24.3 (RTS RM)
+
+        24.4 (RTS RM)
+
+        25.1 (RTS RM)
+
+        25.2 (RTS RM)
+
+        25.3 (RTS RM)
+
+        25.4 (RTS RM)
+
+        25.5 (RTS RM)
+
+        25.6 (RTS RM)
+
+        26.1 (RTS RM)
+
+        26.2 (RTS RM)
+
+        26.3 (RTS RM)
+
+        26.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      ref_id: '9.3'
+      name: Record Keeping
+      description: Keep detailed records of activities conducted before, during, and
+        after disruptions, including actions taken and outcomes. Maintain an estimation
+        of aggregated annual costs and losses resulting from major disruptions. This
+        information shall be reported to the regulator upon their request.
+      annotation: '11.1
+
+        11.2
+
+        11.4
+
+        11.5
+
+        11.6
+
+        11.7
+
+        11.8
+
+        11.9
+
+        11.10
+
+        12.5
+
+        24.1 (RTS RM)
+
+        24.2 (RTS RM)
+
+        24.3 (RTS RM)
+
+        24.4 (RTS RM)
+
+        25.1 (RTS RM)
+
+        25.2 (RTS RM)
+
+        25.3 (RTS RM)
+
+        25.4 (RTS RM)
+
+        25.5 (RTS RM)
+
+        25.6 (RTS RM)
+
+        26.1 (RTS RM)
+
+        26.2 (RTS RM)
+
+        26.3 (RTS RM)
+
+        26.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      ref_id: '9.4'
+      name: Business Impact analysis
+      description: "Perform a comprehensive Business Impact Analysis (BIA) of exposures\
+        \ to severe business disruptions. The BIA should be done by means of quantitative\
+        \ and qualitative criteria, using internal and external data and scenario\
+        \ analysis, as appropriate. The BIA shall consider the criticality of identified\
+        \ and mapped business functions, support processes, third-party dependencies\
+        \ and information assets, and their interdependencies. Financial entities\
+        \ shall ensure that ICT assets and ICT services are designed and used in full\
+        \ alignment with the BIA, in particular with regard to adequately ensuring\
+        \ the redundancy of all critical components.\n\n "
+      annotation: '11.1
+
+        11.2
+
+        11.4
+
+        11.5
+
+        11.6
+
+        11.7
+
+        11.8
+
+        11.9
+
+        11.10
+
+        12.5
+
+        24.1 (RTS RM)
+
+        24.2 (RTS RM)
+
+        24.3 (RTS RM)
+
+        24.4 (RTS RM)
+
+        25.1 (RTS RM)
+
+        25.2 (RTS RM)
+
+        25.3 (RTS RM)
+
+        25.4 (RTS RM)
+
+        25.5 (RTS RM)
+
+        25.6 (RTS RM)
+
+        26.1 (RTS RM)
+
+        26.2 (RTS RM)
+
+        26.3 (RTS RM)
+
+        26.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      ref_id: '9.5'
+      name: Response and Recovery
+      description: Establish comprehensive response and recovery plans encompassing
+        short-term and long-term recovery options. These plans must thoroughly identify
+        potential scenarios and shall duly take into account scenarios of cyber-attacks,
+        switchovers, degradation of critical function provision, premises failure,
+        breakdowns in ICT assets or communication infrastructure, staff unavailability,
+        natural disasters and the impact of climate change, pandemic situations, physical
+        attacks, insider threats, political or social instability, and power outages.
+        Additionally, these plans must incorporate alternative options in cases where
+        primary recovery measures are impractical in the short term due to factors
+        such as cost, risks, logistics, or unforeseen circumstances. Address potential
+        failures of key ICT third-party service providers into the plans.
+      annotation: '11.1
+
+        11.2
+
+        11.4
+
+        11.5
+
+        11.6
+
+        11.7
+
+        11.8
+
+        11.9
+
+        11.10
+
+        12.5
+
+        24.1 (RTS RM)
+
+        24.2 (RTS RM)
+
+        24.3 (RTS RM)
+
+        24.4 (RTS RM)
+
+        25.1 (RTS RM)
+
+        25.2 (RTS RM)
+
+        25.3 (RTS RM)
+
+        25.4 (RTS RM)
+
+        25.5 (RTS RM)
+
+        25.6 (RTS RM)
+
+        26.1 (RTS RM)
+
+        26.2 (RTS RM)
+
+        26.3 (RTS RM)
+
+        26.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
+      ref_id: '9.6'
+      name: Testing and Assessment
+      description: "Regularly test ICT business continuity, response, and recovery\
+        \ plans, particularly in collaboration with third-party service providers\
+        \ supporting critical or important functions. Testing should  take into account\
+        \ the financial entity\u2019s BIA and the ICT risk assessment and occur on\
+        \ a yearly basis and whenever there are significant changes to systems supporting\
+        \ critical or important functions. \nTests must be based on realistic scenarios\
+        \ and encompass scenarios like cyber attacks, insolvency or failure of the\
+        \ third-party, backup restores, and switchover between primary and redundant\
+        \ processing sites. \nThe testing shall verify whether at least critical or\
+        \ important functions can be operated appropriately, for a sufficient period\
+        \ of time and whether the normal functioning (of the business process) may\
+        \ be restored. Conduct testing of crisis communication plans to ensure effective\
+        \ communication strategies during a crisis or major disruption. Document test\
+        \ results and report any identified deficiencies resulting from the tests\
+        \ to the management body.\n\nRefer to Articles 24.2-3 of the RTS RM for the\
+        \ specific requirements for Central counterparties and Central security depositories."
+      annotation: '11.1
+
+        11.2
+
+        11.4
+
+        11.5
+
+        11.6
+
+        11.7
+
+        11.8
+
+        11.9
+
+        11.10
+
+        12.5
+
+        24.1 (RTS RM)
+
+        24.2 (RTS RM)
+
+        24.3 (RTS RM)
+
+        24.4 (RTS RM)
+
+        25.1 (RTS RM)
+
+        25.2 (RTS RM)
+
+        25.3 (RTS RM)
+
+        25.4 (RTS RM)
+
+        25.5 (RTS RM)
+
+        25.6 (RTS RM)
+
+        26.1 (RTS RM)
+
+        26.2 (RTS RM)
+
+        26.3 (RTS RM)
+
+        26.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:im
+      assessable: false
+      depth: 1
+      ref_id: IM
+      name: Incident Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:im
+      ref_id: '10'
+      name: Incident Classification
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:10
+      ref_id: '10.1'
+      name: Incident Classification Criteria
+      description: 'Classify ICT-related incidents based on their impact using the
+        following criteria: number of clients/customers or financial counterparts
+        affected, number of transactions affected, reputational damage, duration of
+        the incident and downtime of services, geographical spread of the incident,
+        data loss in relation to the CIA-triad, criticality of the services affected,
+        and the overall economic impact of the incident.
+
+
+        An incident is considered major if (1) any malicious unauthorised access to
+        network and information systems is identified, which may result to data losses
+        or (2) the thresholds of two additional criteria are met (refer to the DORA
+        RTS IM (Major Incidents) sheet for the thresholds). Also, take into account
+        recurring incidents, where recurring incidents are considered major when (1)
+        the incidents have occurred at least twice within 6 months, (2) the incidents
+        have the same apparent root cause, (3) the incidents collectively categorise
+        as a major incident.  '
+      annotation: '18.1
+
+        18.2
+
+        1 (RTS IM)
+
+        2 (RTS IM)
+
+        3 (RTS IM)
+
+        4 (RTS IM)
+
+        5 (RTS IM)
+
+        6 (RTS IM)
+
+        7 (RTS IM)
+
+        8 (RTS IM)
+
+        9 (RTS IM)
+
+        10 (RTS IM)
+
+        11 (RTS IM)
+
+        12 (RTS IM)
+
+        13 (RTS IM)
+
+        14 (RTS IM)
+
+        15 (RTS IM)
+
+        16 (RTS IM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:10
+      ref_id: '10.2'
+      name: 'Cyber Threat Classification Criteria
+
+        '
+      description: Classify significant cyber threats. A threat is considered significant
+        if it has a high probability of materialisation, could meet any of the criteria
+        that classify as a 'major incident' when materialised, and when it could affect
+        or could have affected critical or important functions of the financial entity,
+        or could affect other financial entities, third party providers, clients or
+        financial counterparts.
+      annotation: '18.1
+
+        18.2
+
+        1 (RTS IM)
+
+        2 (RTS IM)
+
+        3 (RTS IM)
+
+        4 (RTS IM)
+
+        5 (RTS IM)
+
+        6 (RTS IM)
+
+        7 (RTS IM)
+
+        8 (RTS IM)
+
+        9 (RTS IM)
+
+        10 (RTS IM)
+
+        11 (RTS IM)
+
+        12 (RTS IM)
+
+        13 (RTS IM)
+
+        14 (RTS IM)
+
+        15 (RTS IM)
+
+        16 (RTS IM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:im
+      ref_id: '11'
+      name: Incident Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:11
+      ref_id: '11.1'
+      name: Incident Management Process
+      description: Implement an incident management process to detect, manage, and
+        report ICT incidents. This includes incident response procedures to mitigate
+        impacts and ensure timely restoration of services. Assign specific roles and
+        responsibilities for various incident scenarios. Also, establish a list of
+        contacts with internal functions and external stakeholders that are directly
+        involved in ICT operations security, including on detection and monitoring
+        cyber threats, detection of anomalous activities and vulnerability management.
+        Establish early warning indicators for potential incidents and incident triggers
+        upon the occurance of malicious activity, data losses, adverse impact detected
+        on financial entity's transactions and operations, systems and network unavailability,
+        problems reported by users of the financial entity, and incident notifications
+        from an third-party service provider detected in the systems and networks
+        of the third-party service provider and which may affect the financial entity.
+        Identify, document, and address incident root causes. Conduct post-ICT-related
+        incident reviews after major disruptions. Analyze causes, evaluate response
+        promptness and quality, and assess incident escalation and communication effectiveness.
+      annotation: '13.2
+
+        17.1
+
+        17.2
+
+        17.3
+
+        19.1
+
+        19.3
+
+        19.4
+
+        22.1 (RTS RM)
+
+        23.1 (RTS RM)
+
+        23.5 (RTS RM)
+
+        2.1 (RTS/ITS MIR)
+
+        3.1 (RTS/ITS MIR)
+
+        4.1 (RTS/ITS MIR)
+
+        5.1 (RTS/ITS MIR)
+
+        6.1 (RTS/ITS MIR)
+
+        6.2 (RTS/ITS MIR)
+
+        6.3 (RTS/ITS MIR)
+
+        6.4 (RTS/ITS MIR)
+
+        6.5 (RTS/ITS MIR)
+
+        7.1 (RTS/ITS MIR)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:11
+      ref_id: '11.2'
+      name: Incident Tracking
+      description: Develop procedures to identify, track, log, categorize, and classify
+        ICT-related incidents based on priority, severity, and criticality of impacted
+        services. Maintain records of all ICT-related incidents and significant cyber
+        threats. Implement a monitoring process to track incidents and cyber threats.
+      annotation: '13.2
+
+        17.1
+
+        17.2
+
+        17.3
+
+        19.1
+
+        19.3
+
+        19.4
+
+        22.1 (RTS RM)
+
+        23.1 (RTS RM)
+
+        23.5 (RTS RM)
+
+        2.1 (RTS/ITS MIR)
+
+        3.1 (RTS/ITS MIR)
+
+        4.1 (RTS/ITS MIR)
+
+        5.1 (RTS/ITS MIR)
+
+        6.1 (RTS/ITS MIR)
+
+        6.2 (RTS/ITS MIR)
+
+        6.3 (RTS/ITS MIR)
+
+        6.4 (RTS/ITS MIR)
+
+        6.5 (RTS/ITS MIR)
+
+        7.1 (RTS/ITS MIR)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:11
+      ref_id: '11.3'
+      name: Incident Communication and Reporting
+      description: 'Create communication plans to inform both internal (staff, senior
+        management) and external (clients/customers, financial counterparts) stakeholders
+        on incidents. Inform affected customers promptly upon awareness of an incident
+        that impacts them. Provide details on the incident and outline mitigating
+        measures taken and planned. Report major incidents to the regulator, involving
+        three stages: 1) initial notification upon discovering the incident (within
+        4 hours from the moment of classification of the incident as major, but no
+        later than 24 hours from the time of detection of the incident) , 2) intermediate
+        report on incident developments (within 72 hours from the submission of the
+        initial notification even where the status or the handling of the incident
+        have not changed, or when regular activities have been recovered), and 3)
+        the final report with the root cause analysis and follow-up actions (no later
+        than one month from the submission of the latest updated intermediate report).
+        Also provide notifications to the regulator on significant cyber threats.
+        The incident reports and notifications on cyber threats shall follow the content
+        guidelines defined in the corresponding RTS/ITS. '
+      annotation: '13.2
+
+        17.1
+
+        17.2
+
+        17.3
+
+        19.1
+
+        19.3
+
+        19.4
+
+        22.1 (RTS RM)
+
+        23.1 (RTS RM)
+
+        23.5 (RTS RM)
+
+        2.1 (RTS/ITS MIR)
+
+        3.1 (RTS/ITS MIR)
+
+        4.1 (RTS/ITS MIR)
+
+        5.1 (RTS/ITS MIR)
+
+        6.1 (RTS/ITS MIR)
+
+        6.2 (RTS/ITS MIR)
+
+        6.3 (RTS/ITS MIR)
+
+        6.4 (RTS/ITS MIR)
+
+        6.5 (RTS/ITS MIR)
+
+        7.1 (RTS/ITS MIR)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:ssd
+      assessable: false
+      depth: 1
+      ref_id: SSD
+      name: Software and Systems Development
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:ssd
+      ref_id: '12'
+      name: Acquisition, Development, and Maintenance
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:12
+      ref_id: '12.1'
+      name: Policy Framework
+      description: Establish and maintain a policy governing the acquisition, development,
+        and maintenance of ICT systems. Implement security practices and methodologies
+        throughout the acquisition, development, and maintenance lifecycle. Define
+        functional and non-functional requirements for ICT systems, including security
+        aspects. Obtain approval from relevant business functions and asset owners
+        in accordance with internal governance.
+      annotation: '16.1 (RTS RM)
+
+        16.2 (RTS RM)
+
+        16.3 (RTS RM)
+
+        16.4 (RTS RM)
+
+        16.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:12
+      ref_id: '12.2'
+      name: Environment Risk Mitigation Measures
+      description: "Put in place measures to mitigate the risk of unintentional alteration\
+        \ or intentional manipulation during development, maintenance, and deployment\
+        \ in production. Protect the integrity and confidentiality of data in non-production\
+        \ environments. Store only anonymized, pseudonymized, or randomized production\
+        \ data. \n\nProduction data that are not anonymized, not pseudonymized or\
+        \ not randomized may be stored only for specific testing occasions, for limited\
+        \ periods of time and following the approval by the relevant function and,\
+        \ for financial entities other than microenterprises, the reporting of such\
+        \ occasions to the ICT\nrisk management function."
+      annotation: '16.1 (RTS RM)
+
+        16.2 (RTS RM)
+
+        16.3 (RTS RM)
+
+        16.4 (RTS RM)
+
+        16.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:12
+      ref_id: '12.3'
+      name: Systems Testing Procedures
+      description: Develop and follow procedures for testing and approval of all ICT
+        systems before use and after maintenance. Determine testing level based on
+        criticality of the business functions and ICT assets. Design and implement
+        testing procedures to verify that new ICT systems are adequate to perform
+        as intended, including the quality of the software developed internally. Perform
+        security testing of software packages no later than the integration phase.
+      annotation: '16.1 (RTS RM)
+
+        16.2 (RTS RM)
+
+        16.3 (RTS RM)
+
+        16.4 (RTS RM)
+
+        16.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:12
+      ref_id: '12.4'
+      name: Source Code Reviews
+      description: Conduct source code reviews encompassing static and dynamic testing,
+        for the purpose of acquisition, development and maintenance of ICT-systems.
+        Include security testing for internet-exposed systems. Identify and address
+        vulnerabilities and anomalies in the source code and put in place plans to
+        mitigate them. Monitor mitigation efforts. Implement controls to safeguard
+        the integrity of source code, whether developed in-house or by a third-party
+        service provider. Analyze and test source code and proprietary software provided
+        by third-party service providers or from open-source projects for vulnerabilities.
+      annotation: '16.1 (RTS RM)
+
+        16.2 (RTS RM)
+
+        16.3 (RTS RM)
+
+        16.4 (RTS RM)
+
+        16.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:ssd
+      ref_id: '13'
+      name: Project Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:13
+      ref_id: '13.1'
+      name: ICT Project Management Practices
+      description: 'Ensure effective management of ICT projects related to acquisition,
+        maintenance, and, where applicable, development of ICT systems, through a
+        project management policy. The ICT project plan shall include: clear project
+        objectives, project governance structure, roles and responsibilities, defined
+        timeframe and steps, key project milestones, and change management requirements.
+        Specify requirements for project team members, ensuring the inclusion of staff
+        from business activities or functions impacted by the project. Team members
+        must possess the knowledge to ensure the secure and successful project implementation.
+        Establish reporting requirements, including periodic reporting on the establishment
+        and progress of projects impacting critical or important functions, along
+        with their associated risks. Reporting shall be done periodically and, where
+        necessary, on an eventdriven basis, considering the importance and size of
+        the ICT projects and the project risk assessment.'
+      annotation: '15.1 (RTS RM)
+
+        15.2 (RTS RM)
+
+        15.3 (RTS RM)
+
+        15.4 (RTS RM)
+
+        15.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:13
+      ref_id: '13.2'
+      name: Project Risk Management
+      description: Perform a risk assessment of the ICT project. Conduct testing of
+        all project management requirements, including security requirements. Establish
+        an approval process for deploying to the production environment.
+      annotation: '15.1 (RTS RM)
+
+        15.2 (RTS RM)
+
+        15.3 (RTS RM)
+
+        15.4 (RTS RM)
+
+        15.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
+      assessable: false
+      depth: 1
+      ref_id: TPRM
+      name: Third-party Risk Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
+      ref_id: '14'
+      name: Third-party Due Diligence and Selection
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:14
+      ref_id: '14.1'
+      name: Suitability Criteria
+      description: Ensure that the third-party service provider has the business reputation,
+        sufficient abilities, expertise and adequate financial, human and technical
+        resources, information security standards, appropriate organisational structure
+        (including risk management and internal controls) and, if applicable, the
+        required authorisation(s) or registration(s) to provide ICT services supporting
+        the critical or important functions in a reliable and professional manner.
+      annotation: '3.5 (RTS TPPM)
+
+        3.9 (RTS TPPM)
+
+        5.2 (RTS TPPM)
+
+        6.1 (RTS TPPM)
+
+        6.2 (RTS TPPM)
+
+        6.3 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:14
+      ref_id: '14.2'
+      name: Selection Criteria
+      description: 'Take the following into account when selecting and assessing the
+        service provider: audits conducted by the financial entity or on its behalf,
+        third-party certifications, independent audit reports, internal audit function
+        reports, and publicly available information. Confirm adherence to ethical,
+        social, human, and environmental (sustainability) principles, encompassing
+        appropriate working conditions including the prohibition of child labour.
+        Assess if the service provider operates in a third country and evaluate if
+        this practice heightens operational, reputational, or sanctions-related risks.
+        Secure consent from the service provider for effective audit conduct, both
+        onsite and by designated parties, including auditors from the financial entity,
+        external (third-party auditors), and by competent authorities (such as the
+        regulator). Verify if the service provider intends to engage ICT sub-contractors
+        for substantial portions of their services.'
+      annotation: '3.5 (RTS TPPM)
+
+        3.9 (RTS TPPM)
+
+        5.2 (RTS TPPM)
+
+        6.1 (RTS TPPM)
+
+        6.2 (RTS TPPM)
+
+        6.3 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
+      ref_id: '15'
+      name: Third-party (Standard) Contract Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
+      ref_id: '15.1'
+      name: Termination Rights and Conditions
+      description: Define explicit termination rights including significant breaches
+        of laws, regulations, or contract terms, material changes in third-party risks,
+        demonstrated ICT weaknesses, and regulator oversight constraints. Set provisions
+        for ensuring access, recovery, and return of data in an easily accessible
+        format in cases of termination, insolvency, resolution, or discontinuation
+        of the service provider's business operations.
+      annotation: '28.7
+
+        30.1
+
+        30.2
+
+        3.9 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
+      ref_id: '15.2'
+      name: Service Level Management
+      description: Define clear and measurable service level descriptions outlining
+        expected performance and quality standards. Ensure that the service provider
+        provides a comprehensive description of all functions and ICT services that
+        are offered, including any sub-contracting arrangements. Establish arrangements
+        ensuring appropriate levels of data protection in line with regulatory requirements.
+      annotation: '28.7
+
+        30.1
+
+        30.2
+
+        3.9 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
+      ref_id: '15.3'
+      name: Service Locations and Data Processing
+      description: Specify service locations and data processing sites. Require timely
+        notification of any intended changes to these locations.
+      annotation: '28.7
+
+        30.1
+
+        30.2
+
+        3.9 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
+      ref_id: '15.4'
+      name: Cooperation in Incident Response
+      description: Oblige the ICT third-party service provider to fully cooperate
+        with the regulator and provide necessary assistance in the event of an incident
+        related to the provided service.
+      annotation: '28.7
+
+        30.1
+
+        30.2
+
+        3.9 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
+      ref_id: '15.5'
+      name: Participation in Security Awareness Programs
+      description: Specify conditions for the participation of the service provider
+        in security awareness and resilience programs/trainings.
+      annotation: '28.7
+
+        30.1
+
+        30.2
+
+        3.9 (RTS TPPM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
+      ref_id: '16'
+      name: Third-party (Critical) Contract Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:16
+      ref_id: '16.1'
+      name: (Critical) Service Level Management
+      description: Ensure the contract with ICT third-party service provider delivering
+        critical or important services encompasses comprehensive service level descriptions,
+        including updates and detailed reporting (both quantitative and qualitative).
+        Evaluate the service provider's compliance with performance and quality standards
+        by reviewing reports on activities and services, incident reports, security
+        and business continuity measures, and testing. Assess performance using key
+        performance indicators, key control indicators, audits, self-certifications,
+        and independent reviews. Receive relevant information from the service provider
+        regarding their activities and services and ensure timely notification and
+        response to incidents. Conduct independent reviews and compliance audits with
+        legal and regulatory requirements and policies. Specify notification periods
+        for any material changes that may impact the entity or agreed service levels.
+      annotation: '30.3
+
+        9.1 (RTS TPPM)
+
+        9.2 (RTS TPPM)
+
+        4.1 (RTS SCM)
+
+        4.2 (RTS SCM)
+
+        7.1 (RTS SCM)
+
+        '
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:16
+      ref_id: '16.2'
+      name: Contractual Clauses
+      description: Secure rights for continuous performance monitoring, including
+        unrestricted rights to access, inspection, and audit. This encompasses alternative
+        assurance levels, cooperation with regulator inspections, and full disclosure
+        of audit scope, procedures, and frequency. Include a mandatory transition
+        period upon termination, allowing the service provider to continue services
+        during migration, affording the entity time to transition to another provider
+        or in-house solutions based on service complexity. Mandate the implementation
+        and testing of business contingency plans and the establishment of a security
+        management system by the service provider. Require the service provider's
+        participation in the entity's (advanced) testing program (TLPT), where required.
+      annotation: '30.3
+
+        9.1 (RTS TPPM)
+
+        9.2 (RTS TPPM)
+
+        4.1 (RTS SCM)
+
+        4.2 (RTS SCM)
+
+        7.1 (RTS SCM)
+
+        '
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:16
+      ref_id: '16.3'
+      name: Third-party Critical Subcontracting Management
+      description: Delineate critical and important ICT services in contracts with
+        third-party ICT service providers, specifying conditions for subcontracting.
+        Require continual monitoring of subcontracted services supporting critical
+        functions to ensure compliance with contractual obligations. Detail monitoring
+        and reporting responsibilities of the third-party service provider to the
+        financial entity, including risk assessments related to subcontractor locations
+        and data ownership. Mandate incident response and business continuity plans
+        for subcontractors, along with adherence to specified service levels and security
+        standards. Ensure subcontractors grant the same audit and access rights to
+        the financial entity as the primary service provider. Retain termination rights
+        for the financial entity in cases of unauthorized subcontracting or failure
+        to meet agreed-upon service levels. Implement changes relative to contractual
+        agreements as soon as possible and document the planned timeline for the implementation.
+      annotation: '30.3
+
+        9.1 (RTS TPPM)
+
+        9.2 (RTS TPPM)
+
+        4.1 (RTS SCM)
+
+        4.2 (RTS SCM)
+
+        7.1 (RTS SCM)
+
+        '
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
+      ref_id: '17'
+      name: Third-party Risk Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      ref_id: '17.1'
+      name: Third-party Risk Management
+      description: Manage third-party risks proportionate to dependency nature, service-related
+        risks, and impact on entity's continuity and availability in case of disruption.
+        Implement a policy for critical function ICT services provided by third-party
+        service providers, considering the location of the service provider (or its
+        parent company), the level of assurance regarding the service providers' risk
+        management framework (including risk mitigation and business continuity measures),
+        the nature of the data shared with the service provider, the location of data
+        processing and storage, group affiliation of the service provider, and the
+        potential impact of the risks and disruptions on the continuity and availability
+        on the activities of the entity. Test response and recovery of critical function-supporting
+        services provided by third parties.
+      annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
+        \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      ref_id: '17.2'
+      name: Pre-Contract Risk Assessment
+      description: 'Perform pre-contract risk assessment. This assessment must assess
+        if: the contract covers services supporting critical or important functions,
+        a service provider is easily replaceable, the risks of sub-contracting are
+        covered, the risks of outsourcing service to a third-country are covered,
+        the risks of bankruptcy are covered on the side of the service provider, supervisory
+        conditions for contracting are met, all contractual risks are identified and
+        assessed (e.g., to cover for ICT concentration risks), the service provider
+        is suitable, and if there are conflicts of interest. Assess service provider
+        resources for ensuring entity compliance with all legal and regulatory requirements.'
+      annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
+        \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      ref_id: '17.3'
+      name: Register of Information
+      description: 'Maintain a comprehensive register of information related to contractual
+        arrangements with third-party service providers, distinguishing those supporting
+        critical/important functions. Ensure that the register is in line with all
+        mandatory fields as defined in the ITS on the register of information.  '
+      annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
+        \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      ref_id: '17.4'
+      name: Contractual Requisites
+      description: Only contract with service providers meeting appropriate information
+        security standards (e.g., ISO 27001, SOC, PCI-DSS, etc.) appropriate to the
+        criticaly of services delivered. Determine audit frequency for service providers,
+        ensuring auditors possess requisite skills and knowledge for complex services
+      annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
+        \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      ref_id: '17.5'
+      name: Exit strategies
+      description: Develop and periodically test exit strategies and plans, considering
+        risks related to third-party service providers, including potential failure,
+        service quality deterioration, business disruption, and termination of contractual
+        arrangements. Ensure that the exit plan is realistic, feasible, based on plausible
+        scenarios and reasonable assumptions and shall have a planned implementation
+        schedule compatible with the exit and termination terms established in the
+        relevant contractual arrangements. Also, ensure smooth exit and workload migration
+        to another service provider without business disruption, compliance loss,
+        or service quality decline.
+      annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
+        \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
+      ref_id: '17.6'
+      name: Annual Reporting of New Arrangements
+      description: Report new service provider arrangements to the regulator, especially
+        those supporting critical or important functions, to the regulator on a yearly
+        basis, with immediate notification for critical services.
+      annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
+        \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
+      ref_id: '18'
+      name: Subcontracting Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:18
+      ref_id: '18.1'
+      name: Third-Party Subcontractor Due Diligence
+      description: Implement due diligence procedures to evaluate third-party ICT
+        service providers' subcontracting practices. Ensure these providers actively
+        engage in operational reporting and testing, demonstrating their ability to
+        assess subcontractor capabilities effectively. Require active involvement
+        and notification of the financial entity in subcontracting decisions, ensuring
+        alignment with contractual arrangements. Verify that subcontracting agreements
+        reflect the terms and conditions outlined in the primary contract between
+        the financial entity and the third-party provider. Assess the third-party
+        provider's organizational structure, resources, and information security standards,
+        including incident response and risk management mechanisms. Mitigate risks
+        associated with subcontractor failure and geographical location, considering
+        potential impacts on digital operational resilience and financial stability.
+        Address any barriers to audit and access rights for competent authorities
+        and the financial institution.
+      annotation: '1.1 (RTS SCM)
+
+        2.1 (RTS SCM)
+
+        3.1 (RTS SCM)
+
+        3.2 (RTS SCM)
+
+        3.3 (RTS SCM)
+
+        5.1 (RTS SCM)
+
+        5.2 (RTS SCM)
+
+        5.3 (RTS SCM)
+
+        5.4 (RTS SCM)
+
+        6.1 (RTS SCM)
+
+        6.2 (RTS SCM)
+
+        6.3 (RTS SCM)
+
+        6.4 (RTS SCM)
+
+        '
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:18
+      ref_id: '18.2'
+      name: Subcontracting Risk Management
+      description: Establish a risk management process to oversee subcontracting activities
+        effectively. Monitor the entire ICT subcontracting chain, documenting conditions
+        and ensuring compliance with contractual obligations and the obligation to
+        maintain and update the register of information. Review contractual documentation
+        and key performance indicators to verify adherence to established conditions
+        throughout the subcontracting chain. Require advance notice of significant
+        changes to subcontracting arrangements, enabling thorough risk assessment
+        and mitigation. Ensure that the right to approve changes or request modifications
+        to material subcontracting activities is added to the contracts with the third-party
+        ICT service providers that provide critical or important functions. Implement
+        proactive measures to address identified risks and enhance subcontracting
+        oversight.
+      annotation: '1.1 (RTS SCM)
+
+        2.1 (RTS SCM)
+
+        3.1 (RTS SCM)
+
+        3.2 (RTS SCM)
+
+        3.3 (RTS SCM)
+
+        5.1 (RTS SCM)
+
+        5.2 (RTS SCM)
+
+        5.3 (RTS SCM)
+
+        5.4 (RTS SCM)
+
+        6.1 (RTS SCM)
+
+        6.2 (RTS SCM)
+
+        6.3 (RTS SCM)
+
+        6.4 (RTS SCM)
+
+        '
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:18
+      ref_id: '18.3'
+      name: Subcontracting Monitoring
+      description: Institute a process of continuous improvement and monitoring to
+        enhance subcontracting practices and mitigate associated risks. Regularly
+        review and update subcontracting conditions based on changing business environments
+        and risk assessments. Conduct periodic assessments of subcontracting criteria,
+        including ICT threats, concentration risks, and geopolitical factors. Ensure
+        uniform implementation of subcontracting conditions across all subsidiaries,
+        within permissible limits. Monitor and evaluate the effectiveness of subcontracting
+        controls through independent reviews and compliance audits. Proactively identify
+        and address any deficiencies or emerging risks to strengthen subcontracting
+        governance and oversight.
+      annotation: '1.1 (RTS SCM)
+
+        2.1 (RTS SCM)
+
+        3.1 (RTS SCM)
+
+        3.2 (RTS SCM)
+
+        3.3 (RTS SCM)
+
+        5.1 (RTS SCM)
+
+        5.2 (RTS SCM)
+
+        5.3 (RTS SCM)
+
+        5.4 (RTS SCM)
+
+        6.1 (RTS SCM)
+
+        6.2 (RTS SCM)
+
+        6.3 (RTS SCM)
+
+        6.4 (RTS SCM)
+
+        '
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:rt
+      assessable: false
+      depth: 1
+      ref_id: RT
+      name: Resilience testing
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:rt
+      ref_id: '19'
+      name: Digital Operational Resilience Testing
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:19
+      ref_id: '19.1'
+      name: Resilience Testing Program
+      description: 'Establish a risk-based digital operational resilience testing
+        program encompassing identification, classification, and full remediation
+        of test deficiencies based on risk landscape and criticality of assets and
+        services. Utilize independent internal or external parties for conducting
+        tests, ensuring clear Segregation of Duties (SoD). Conduct yearly tests on
+        all systems and applications supporting critical or important functions (see
+        controls 19-20 for the digital operational resilience tests). '
+      annotation: '24.1
+
+        24.2
+
+        24.3
+
+        24.4
+
+        24.5
+
+        24.6
+
+        25.1'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:19
+      ref_id: '19.2'
+      name: Diverse Testing Modalities
+      description: Employ a range of tests including vulnerability assessments, open
+        source analyses, network security assessments, gap analyses, physical security
+        reviews, questionnaires, scanning software solutions, source code reviews
+        (where applicable), scenario-based tests, compatibility testing, performance
+        testing, end-to-end testing, and penetration testing as appropriate.
+      annotation: '24.1
+
+        24.2
+
+        24.3
+
+        24.4
+
+        24.5
+
+        24.6
+
+        25.1'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:19
+      ref_id: '19.3'
+      name: Periodic TLPT Testing
+      description: "Conduct Threat-led penetration testing (TLPT) every three years,\
+        \ aligning with the entity's risk profile. Ensure TLPT covers all critical\
+        \ or important functions and test on live production systems. Provide the\
+        \ regulator with a report encompassing TLPT findings, remediation plans, and\
+        \ documentation demonstrating adherence to this control. Perform TLPT according\
+        \ to the DORA TLPT framework (based on the TIBER-EU framework) as defined\
+        \ in the corresponding RTS. \n\n*Note that this control is only applicable\
+        \ for financial institutions wich are eligible for TLPT. Refer to the RTS\
+        \ on TLPT for more information on applicability."
+      annotation: '26.1
+
+        26.2
+
+        26.3
+
+        26.5
+
+        26.6
+
+        26.8
+
+        27.1
+
+        27.2
+
+        2 (RTS TLPT)
+
+        3 (RTS TLPT)
+
+        4 (RTS TLPT)
+
+        5 (RTS TLPT)
+
+        6 (RTS TLPT)
+
+        7 (RTS TLPT)
+
+        8 (RTS TLPT)
+
+        9 (RTS TLPT)
+
+        10 (RTS TLPT)
+
+        11 (RTS TLPT)
+
+        12 (RTS TLPT)
+
+        13 (RTS TLPT)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:rt
+      ref_id: '20'
+      name: Threat-led Penetration Testing (TLPT)
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:20.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:20
+      ref_id: '20.1'
+      name: Outsourced System testing
+      description: 'Extend TLPT to critical outsourced systems, processes, and technologies.
+        The entity shall remain responsible for control compliance. Collaborate with
+        the service providers to establish risk management controls, mitigating risks
+        to data, assets, and critical functions.
+
+
+        *Note that this control is only applicable for financial institutions wich
+        are eligible for TLPT. Refer to the RTS on TLPT for more information on applicability.'
+      annotation: '26.1
+
+        26.2
+
+        26.3
+
+        26.5
+
+        26.6
+
+        26.8
+
+        27.1
+
+        27.2
+
+        2 (RTS TLPT)
+
+        3 (RTS TLPT)
+
+        4 (RTS TLPT)
+
+        5 (RTS TLPT)
+
+        6 (RTS TLPT)
+
+        7 (RTS TLPT)
+
+        8 (RTS TLPT)
+
+        9 (RTS TLPT)
+
+        10 (RTS TLPT)
+
+        11 (RTS TLPT)
+
+        12 (RTS TLPT)
+
+        13 (RTS TLPT)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:20.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:20
+      ref_id: '20.2'
+      name: Selection of TLPT Testers
+      description: 'Engage either internal or external TLPT testers, with external
+        testers contracted every third TLPT cycle. Ensure internal testers are regulator-approved,
+        possess adequate resources, and engage external threat intelligence providers.
+        Select TLPT testers based on reputation, expertise in threat intelligence,
+        penetration testing, and red team practices, relevant certifications, independent
+        assurance, and indemnity insurance coverage.
+
+
+        *Note that this control is only applicable for financial institutions wich
+        are eligible for TLPT. Refer to the RTS on TLPT for more information on applicability.'
+      annotation: '26.1
+
+        26.2
+
+        26.3
+
+        26.5
+
+        26.6
+
+        26.8
+
+        27.1
+
+        27.2
+
+        2 (RTS TLPT)
+
+        3 (RTS TLPT)
+
+        4 (RTS TLPT)
+
+        5 (RTS TLPT)
+
+        6 (RTS TLPT)
+
+        7 (RTS TLPT)
+
+        8 (RTS TLPT)
+
+        9 (RTS TLPT)
+
+        10 (RTS TLPT)
+
+        11 (RTS TLPT)
+
+        12 (RTS TLPT)
+
+        13 (RTS TLPT)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      assessable: false
+      depth: 1
+      ref_id: SM
+      name: Security Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '21'
+      name: Architectural and Network Security
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:21
+      ref_id: '21.1'
+      name: Network Design and Segmentation
+      description: Design the network infrastructure in a way that allows it to be
+        instantaneously severed or segmented to minimize and prevent contagion. Have
+        provisions for temporarily isolating subnetworks and network components/devices.
+        Ensure redundant capabilities are equipped with sufficient resources, capabilities,
+        and functions (e.g., redundant network setup). Systems and networks must be
+        segregated based on function criticality, classification, and overall risk
+        profile. Maintain a separate network for asset administration. Provide a Layer
+        3 or 7 (L3/L7) visual representation of all networks and data flows. Conduct
+        yearly performance reviews of the network architecture/design.
+      annotation: '9.4 (b)
+
+        12.4
+
+        13.1 (RTS RM)
+
+        13.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:21
+      ref_id: '21.2'
+      name: Network Security
+      description: "Implement controls to prevent and detect unauthorized network\
+        \ connections. Establish and maintain a secure configuration baseline for\
+        \ all network components, following vendor instructions, industry standards,\
+        \ and best practices. Ensure Confidentiality, Integrity, and Availability\
+        \ (CIA) of data during network transmission. Prevent and detect data leakage,\
+        \ and secure data transfer with external parties. Implement measures to secure\
+        \ network traffic between internal networks and the internet/external connections.\
+        \ Apply encryption for all communication protocols over corporate, public,\
+        \ domestic, thirdparty, and wireless networks, based on data classification\
+        \ and risk assessments. \n\nRegularly review roles and responsibilities for\
+        \ defining, implementing, approving, changing, and reviewing firewall rules\
+        \ and connection filters.\n\nFinancial entities shall perform the review of\
+        \ firewall rules and connections filters on a regular basis according to the\
+        \ classification and overall risk profile of ICT systems involved. For the\
+        \ ICT systems supporting critical or important functions, the financial entities\
+        \ shall verify the adequacy of the existing firewall rules and connection\
+        \ filters at least every six months."
+      annotation: '9.4 (b)
+
+        12.4
+
+        13.1 (RTS RM)
+
+        13.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:21
+      ref_id: '21.3'
+      name: Session Management
+      description: Enforce procedures to limit, lock, and terminate system and remote
+        sessions after a predefined period of inactivity.
+      annotation: '9.4 (b)
+
+        12.4
+
+        13.1 (RTS RM)
+
+        13.2 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '22'
+      name: Security Monitoring & Log Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:22
+      ref_id: '22.1'
+      name: Security Monitoring (SIEM)
+      description: Put in place mechanisms to detect anomalous activities, including
+        network performance issues, incidents (reported by the third-parties in the
+        services that they provide), and potential material single points of failure.
+        The mechanisms shall enable multi-layers of control, define alerting thresholds,
+        monitoring on specific events and criteria to automatically trigger incident
+        response. Identify and implement tools generating alerts of anomalous activities
+        and behaviour, at least for ICT assets and information assets supporting critical
+        or important functions. Devote sufficient resources to detection and monitoring
+        activities, especially to cybersecurity attacks.
+      annotation: '10.1
+
+        10.2
+
+        10.3
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.1 (RTS RM)
+
+        12.2 (RTS RM)
+
+        23.2 (RTS RM)
+
+        23.3 (RTS RM)
+
+        23.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:22
+      ref_id: '22.2'
+      name: Event Identification for Logging
+      description: Identify events to be logged, covering logical access, physical
+        access, identity management, capacity management, change management, ICT operation
+        (including system activity), and network traffic activities (including network
+        performance). Determine the level of detail for the logs, aligning with the
+        purpose for which the logs were created and to enable effective detection
+        of anomalous activities. Define retention periods for logs, considering business
+        and security objectives, the purpose of recording logs, and risk assessments.
+      annotation: '10.1
+
+        10.2
+
+        10.3
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.1 (RTS RM)
+
+        12.2 (RTS RM)
+
+        23.2 (RTS RM)
+
+        23.3 (RTS RM)
+
+        23.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:22
+      ref_id: '22.3'
+      name: Secure Handling of Log Data
+      description: 'Implement measures to secure and handle log data, taking into
+        account the purpose for which the logs were created. Establish measures to
+        detect failures in logging systems. Protect the recording of anomalous activities
+        against tampering and unauthorised access at rest, in use, where relevant,
+        and in transit. '
+      annotation: '10.1
+
+        10.2
+
+        10.3
+
+        9.1 (RTS RM)
+
+        9.2 (RTS RM)
+
+        12.1 (RTS RM)
+
+        12.2 (RTS RM)
+
+        23.2 (RTS RM)
+
+        23.3 (RTS RM)
+
+        23.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '23'
+      name: Data and (Legacy) System Security
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
+      ref_id: '23.1'
+      name: ICT (Security) Systems, tools, and solutions
+      description: Design, procure, and implement security solutions and tooling with
+        the goal to ensure resilience, continuity, and CIA of ICT systems, particularly
+        those supporting critical or important functions.
+      annotation: '9.2
+
+        9.3
+
+        11.2 (RTS RM)
+
+        20.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
+      ref_id: '23.2'
+      name: Data Protection Practices
+      description: Establish a secure configuration baseline for ICT assets, incorporating
+        industry practices and techniques to minimize exposure to cyber threats. Deploy
+        security measures to ensure CIA, prevent data loss and leakage, and protect
+        against malicious codes. Protect data from risks arising from data management,
+        including poor administration, processing risks, and human error. Ensure secure
+        transfer of data and minimize the risk of data corruption or loss, unauthorized
+        access, and technical flaws that may hinder business activity. Implement access
+        restrictions based on data classification schemes. Regularly verify the effective
+        deployment of these baselines.
+      annotation: '9.2
+
+        9.3
+
+        11.2 (RTS RM)
+
+        20.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
+      ref_id: '23.3'
+      name: Vendor Recommended Security Settings
+      description: Consider the security measures and settings recommended by the
+        third-party service provider delivering the ICT service. Implement technical
+        and organisational measures to minimise the risks related to the infrastructure
+        used and managed by the ICT third-party service provider.
+      annotation: '9.2
+
+        9.3
+
+        11.2 (RTS RM)
+
+        20.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
+      ref_id: '23.4'
+      name: Endpoint Devices
+      description: Enforce usage requirements for portable and nonportable endpoint
+        devices. Ensure that only authorized data storage media, systems, and endpoint
+        devices are used to transfer and store data. Implement security measures to
+        ensure that teleworking and the use of private endpoint devices do not adversely
+        impact the overall security of the entity. This includes having a centralized
+        management solution to remotely manage and wipe endpoint devices, security
+        mechanisms that cannot be modified, removed, or bypassed, and the use of removable
+        data storage devices only when the residual ICT risk remains within predefined
+        risk tolerance levels. Enforce security measures to allow only authorized
+        software installation on systems and endpoint devices.
+      annotation: '9.2
+
+        9.3
+
+        11.2 (RTS RM)
+
+        20.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
+      ref_id: '23.5'
+      name: Secure Data Deletion and Disposal
+      description: Establish a process to securely delete data on and offpremises.
+        Establish a process to securely dispose or decommission data storage devices
+        on and offpremises that contain confidential information.
+      annotation: '9.2
+
+        9.3
+
+        11.2 (RTS RM)
+
+        20.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '24'
+      name: Encryption and Cryptography
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:24.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:24
+      ref_id: '24.1'
+      name: Data Encryption
+      description: 'Define rules for encrypting data at rest, in transit, and, where
+        applicable, in use, considering data classification and risk assessments.
+        Specify procedures when encryption of data in use is not feasible, ensuring
+        processing in a separate and protected environment or taking equivalent measures.
+        Implement rules for encrypting internal network connections and traffic with
+        external parties, aligned with data classification and risk assessments. '
+      annotation: '6.1 (RTS RM)
+
+        6.2 (RTS RM)
+
+        6.3 (RTS RM)
+
+        6.4 (RTS RM)
+
+        6.5 (RTS RM)
+
+        7.1 (RTS RM)
+
+        7.2 (RTS RM)
+
+        7.3 (RTS RM)
+
+        7.4 (RTS RM)
+
+        7.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:24.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:24
+      ref_id: '24.2'
+      name: Cryptographic Key Management and Lifecycle
+      description: Establish protocols for the proper use, protection, and lifecycle
+        management of cryptographic keys. Define criteria for selecting cryptographic
+        techniques and practices, incorporating best practices and industry standards.
+        Employ mitigation and monitoring measures if adherence to these practices
+        and standards is not possible. Outline requirements for managing and controlling
+        cryptographic keys throughout their lifecycle, including generation, storage,
+        backup, archiving, retrieval, transmission, retirement, revocation, and destruction.
+        Establish methods to recover cryptographic keys in case of loss, compromise,
+        or damage. Monitor crypto-analysis developments and, when necessary, update
+        or change cryptographic technology. Implement mitigation and monitoring measures
+        if changing or updating the cryptographic technology is not feasible. Maintain
+        a register for all certificates and certificate storing devices.
+      annotation: '6.1 (RTS RM)
+
+        6.2 (RTS RM)
+
+        6.3 (RTS RM)
+
+        6.4 (RTS RM)
+
+        6.5 (RTS RM)
+
+        7.1 (RTS RM)
+
+        7.2 (RTS RM)
+
+        7.3 (RTS RM)
+
+        7.4 (RTS RM)
+
+        7.5 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '25'
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:25
+      ref_id: '25.1'
+      name: Identity Management
+      description: Assign a unique identity to each staff member or staff of the third-party
+        service provider accessing information and ICT assets. Implement a lifecycle
+        management process for identities, covering creation, change, recertification,
+        temporary deactivation, and termination of user accounts. Utilize automated
+        solutions where applicable.
+      annotation: '20.1 (RTS RM)
+
+        20.2 (RTS RM)
+
+        21.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:25
+      ref_id: '25.2'
+      name: Privilige Access Management
+      description: Define access rights based on need-to-know, need-to-use, and least
+        privilege principles, including provisions for remote and emergency access.
+        Enforce segregation of duties to prevent unjustified access or combinations
+        that could circumvent controls. Ensure user accountability by limiting generic
+        and shared user accounts, enabling user identification for all ICT system
+        actions. Implement controls and tools to restrict unauthorized access.
+      annotation: '20.1 (RTS RM)
+
+        20.2 (RTS RM)
+
+        21.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:25
+      ref_id: '25.3'
+      name: Account Management
+      description: Establish procedures for granting, changing, and revoking access
+        rights, specifying roles and responsibilities. Define retention periods for
+        access logs. Assign privileged, emergency, and administrator access on a need-to-use
+        or ad-hoc basis, with automated solutions for privilege access management.
+        Withdraw access rights promptly upon termination of employment or when no
+        longer required. Conduct periodic reviews of access rights, ensuring at least
+        annual reviews for non-critical ICT systems and semi-annual reviews for critical
+        systems.
+      annotation: '20.1 (RTS RM)
+
+        20.2 (RTS RM)
+
+        21.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:25
+      ref_id: '25.4'
+      name: Authentication Methods
+      description: Use authentication methods commensurate  with the classification
+        and risk profile of ICT assets. Implement strong authentication methods, particularly
+        for remote access, privileged access, and access to critical ICT assets.
+      annotation: '20.1 (RTS RM)
+
+        20.2 (RTS RM)
+
+        21.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '26'
+      name: Physical and Environmental Security
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:26.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:26
+      ref_id: '26.1'
+      name: Physical and Environmental Security
+      description: Implement measures to safeguard the environment (premises, data
+        centers, and sensitive designated areas) where important assets are located
+        from attacks, accidents and from environmental threats and hazards. The level
+        of protection from environmental threats should be commensurate with the importance
+        of the asset storage location and the criticality of operations. Safeguard
+        assets both within and outside the entity's premises, ensuring the Confidentiality,
+        Integrity, and Availability (CIA) of these assets. These measures should be
+        determined based on the outcomes of a risk assessment. This also includes
+        practices like maintaining a clean desk and ensuring screens are clear at
+        processing facilities and access to critical ICT assets. Identify and record
+        authorized personnel entering critical locations of the financial entity.
+        Grant physical access rights to critical ICT assets based on need-to-know,
+        least privilege principles, and ad-hoc requirements according to the access
+        management policy. Monitor physical access to premises, data centers, and
+        designated sensitive areas, aligned with asset classification and area criticality.
+        Regularly review and promptly revoke unnecessary physical access rights.
+      annotation: '20.1 (RTS RM)
+
+        20.2 (RTS RM)
+
+        21.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '27'
+      name: Security Awareness
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:27.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:27
+      ref_id: '27.1'
+      name: Resilience Training Programs
+      description: 'Implement security awareness and digital operational resilience
+        training as integral components of staff training schemes and ensure training
+        extends to all staff members, including senior management. Customize training
+        intensity based on employee roles and functions. For the training content,
+        cover topics such as network security, insights from prior incidents, threat
+        intelligence, defenses against intrusions, data protection measures (e.g.,
+        encryption, cryptography). Conduct the resilience training program on an annual
+        basis. Staff shall be informed on the ICT security policies, procedures and
+        protocols and be made aware of the reporting channels put in place for detecting
+        anomalous activities. Upon termination of employment, all staff are required
+        to return all ICT assets and information assets. '
+      annotation: '5.2
+
+        13.6
+
+        19.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:27.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:27
+      ref_id: '27.2'
+      name: Inclusion of Third-Party Providers
+      description: 'Incorporate ICT third-party service providers as participants
+        in relevant training programs, where appropriate. Third-parties shall be informed
+        on the ICT security policies, procedures and protocols and be made aware of
+        the reporting channels put in place for detecting anomalous activities. Upon
+        termination of employment or contract termination, the third-parties are required
+        to return all ICT assets and information assets that belong to the financial
+        entity. '
+      annotation: '5.2
+
+        13.6
+
+        19.1 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
+      ref_id: '28'
+      name: Vulnerability and Patch Management
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:28
+      ref_id: '28.1'
+      name: Resource Management
+      description: Identify and maintain relevant and trustworthy information resources
+        to build and sustain awareness about vulnerabilities. Track the usage of thirdparty
+        libraries, including open source, by monitoring versions and potential updates
+        (see also 28.2-3).
+      annotation: '25.2
+
+        10.1 (RTS RM)
+
+        10.2 (RTS RM)
+
+        10.3 (RTS RM)
+
+        10.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:28
+      ref_id: '28.2'
+      name: Vulnerability Management
+      description: 'Conduct automated vulnerability scanning and assessments on ICT
+        assets. For assets supporting critical or important functions, perform scans
+        and assessments on a weekly basis. Record detected vulnerabilities, monitor
+        their resolution status, and verify the remediation of vulnerabilities. Disclose
+        vulnerabilities responsibly to clients/customers, financial counterparts,
+        and the public when appropriate. Ensure thirdparty service providers report
+        vulnerabilities related to the services they offer. This includes investigating
+        vulnerabilities, determining root causes, and implementing appropriate solutions
+        by the service providers.
+
+
+        *Specific to central securities depositories and central counterparties: perform
+        vulnerability assessments before any deployment or redeployment of new or
+        existing applications and infrastructure components, and ICT services supporting
+        critical or important functions.'
+      annotation: '25.2
+
+        10.1 (RTS RM)
+
+        10.2 (RTS RM)
+
+        10.3 (RTS RM)
+
+        10.4 (RTS RM)'
+    - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:28
+      ref_id: '28.3'
+      name: Patch Management
+      description: 'Identify and evaluate available ICT assets (e.g., software and
+        hardware) patches and updates using automated tools, to the extent possible.
+        Deploy patches to address identified vulnerabilities. Prioritize the deployment
+        of patches and other mitigation measures based on the criticality of the vulnerability
+        and the classification and risk profile of the affected assets. Establish
+        emergency procedures for patching and updating ICT assets. Test and deploy
+        ICT asset patches and updates.  Set due dates  for the installation of ICT
+        asset patches and updates, and establish escalation procedures in case the
+        due dates  cannot be met. In cases where no patches can be applied or are
+        available, identify and implement alternative mitigation measures within the
+        set due dates. '
+      annotation: '25.2
+
+        10.1 (RTS RM)
+
+        10.2 (RTS RM)
+
+        10.3 (RTS RM)
+
+        10.4 (RTS RM)'

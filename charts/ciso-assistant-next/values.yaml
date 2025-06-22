@@ -1,0 +1,348 @@
+## CISO Assistant configuration
+## Ref: https://github.com/intuitem/ciso-assistant-community
+##
+
+# -- Provide a name in place of `ciso-assistant`
+nameOverride: ciso-assistant
+# -- String to fully override `"ciso-assistant.fullname"`
+fullnameOverride: ""
+
+## Globally shared configuration
+global:
+  # -- Default domain used by all components
+  ## Used for ingresses, certificates, environnement vars, etc.
+  domain: octopus.foo.bar
+  # -- Globally enable TLS (URLs, etc.)
+  tls: false
+
+  # -- Extra allowed hosts (comma separated, without spaces)
+  extraAllowedHosts: ""
+
+  # Default image used by all components
+  image:
+    # -- If defined, a registry applied to all CISO Assistant deployments
+    registry: ghcr.io
+    # -- Overrides the global CISO Assistant image tag whose default is the chart appVersion
+    tag: ""
+    # -- If defined, a imagePullPolicy applied to all CISO Assistant deployments
+    imagePullPolicy: IfNotPresent
+
+  # -- Secrets with credentials to pull images from a private registry
+  imagePullSecrets: []
+
+  # -- Labels to add to all deployed objects
+  commonLabels: {} # @schema additionalProperties: true
+
+  # -- Kubernetes cluster domain name
+  clusterDomain: cluster.local
+
+  # -- Toggle and define pod-level security context
+  # @default -- `{}`
+  securityContext: {} # @schema additionalProperties: true
+  #  fsGroupChangePolicy: Always
+  #  sysctls: []
+  #  supplementalGroups: []
+  #  fsGroup: 1001
+
+  # -- Default node selector for all components
+  nodeSelector: {} # @schema additionalProperties: true
+
+  # -- Default tolerations for all components
+  tolerations: []
+
+## CISO Assistant backend
+backend:
+  # -- Backend container name
+  name: backend
+
+  # -- The number of backend pods to run
+  replicas: 1
+
+  # -- Backend deployment annotations
+  annotations: {} # @schema additionalProperties: true
+
+  # -- Backend pod annotations
+  podAnnotations: {} # @schema additionalProperties: true
+
+  ## Backend specific config
+  config:
+    # -- Admin email for initial configuration
+    emailAdmin: admin@example.net
+
+    ## SMTP configuration
+    smtp:
+      # -- Default from email address
+      defaultFrom: no-reply@ciso-assistant.net
+      # -- Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key
+      existingSecret: ""
+      # -- SMTP hostname
+      host: smtp.server.local
+      # -- SMTP post
+      port: 25
+      # -- Enable TLS for SMTP
+      useTls: false
+      # -- SMTP username
+      username: ""
+      # -- SMTP password
+      password: ""
+
+    # -- Set the database type (sqlite, pgsql or externalPgsql)
+    ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
+    databaseType: sqlite
+
+    # -- Set Django secret key
+    djangoSecretKey: "changeme"
+    # -- Name of an existing secret resource containing the django secret in a 'django-secret-key' key
+    djangoExistingSecretKey: ""
+
+    # -- Enable Django debug mode
+    djangoDebug: false
+
+  ## Huey config
+  huey:
+    # -- Huey container name
+    name: huey
+
+    # -- Environment variables to pass to Huey
+    env: []
+
+    # -- Resources for Huey
+    resources: {} # @schema additionalProperties: true
+      #   requests:
+      #     cpu: 100m
+      #     memory: 512Mi
+      #   limits:
+      #     cpu: 256m
+      #     memory: 1024Mi
+
+  ## Backend persistence configuration (used for sqlite DBs and local storage)
+  persistence:
+    sqlite:
+      # -- Enable SQLite persistence (for backend and/or Huey)
+      ## Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite`
+      enabled: false
+      # -- SQLite persistant volume size
+      size: 5Gi
+      # -- SQLite persistant volume storageClass
+      storageClass: ""
+      # -- SQLite persistant volume accessMode
+      accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim for sqlite
+      existingClaim: ""
+    localStorage:
+      # -- Enable Local Storage persistence
+      enabled: false
+      # -- Local Storage persistant volume size
+      size: 5Gi
+      # -- Local Storage persistant volume storageClass
+      storageClass: ""
+      # -- Local Storage persistant volume accessMode
+      accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC
+      existingClaim: ""
+
+  ## Backend image
+  image:
+    # -- Registry to use for the backend
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the backend
+    repository: intuitem/ciso-assistant-community/backend
+    # -- Tag to use for the backend
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the backend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the backend
+  resources: {} # @schema additionalProperties: true
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to backend
+  env: []
+
+  # -- Toggle and define container-level security context
+  # @default -- `{}`
+  containerSecurityContext: {} # @schema additionalProperties: true
+  #  seLinuxOptions: {} # @schema additionalProperties: true
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
+
+  ## Backend service configuration
+  service:
+    # -- Backend service annotations
+    annotations: {} # @schema additionalProperties: true
+    # -- Backend service labels
+    labels: {} # @schema additionalProperties: true
+    # -- Backend service http port
+    port: 80
+    # -- Backend service port name
+    portName: http
+
+## CISO Assistant frontend
+frontend:
+  # -- Frontend container name
+  name: frontend
+
+  # -- The number of frontend pods to run
+  replicas: 1
+
+  # -- Frontend deployment annotations
+  annotations: {} # @schema additionalProperties: true
+
+  # -- Frontend pod annotations
+  podAnnotations: {} # @schema additionalProperties: true
+
+  ## Frontend specific config
+  config:
+    # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
+    bodySizeLimit: "50M"
+
+  ## Frontend image
+  image:
+    # -- Registry to use for the frontend
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the frontend
+    repository: intuitem/ciso-assistant-community/frontend
+    # -- Tag to use for the frontend
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the frontend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the frontend
+  resources: {} # @schema additionalProperties: true
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to frontend
+  env: []
+
+  # -- Toggle and define container-level security context
+  # @default -- `{}`
+  containerSecurityContext: {} # @schema additionalProperties: true
+  #  seLinuxOptions: {} # @schema additionalProperties: true
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
+
+  ## Frontend service configuration
+  service:
+    # -- Frontend service annotations
+    annotations: {} # @schema additionalProperties: true
+    # -- Frontend service labels
+    labels: {} # @schema additionalProperties: true
+    # -- Frontend service http port
+    port: 80
+    # -- Frontend service port name
+    portName: http
+
+# CISO Assistant ingress configuration
+# Note: host value is inherited from global.domain
+ingress:
+  # -- Enable an ingress resource for the CISO Assistant
+  enabled: false
+  # -- Additional ingress labels
+  labels: {} # @schema additionalProperties: true
+  # -- Additional ingress annotations
+  annotations: {} # @schema additionalProperties: true
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt
+  # -- Defines which ingress controller will implement the resource
+  ingressClassName: ""
+  # -- The path to CISO Assistant
+  path: /
+  # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
+  pathType: Prefix
+  tls:
+    # -- Enable TLS for the ingress
+    enabled: false
+    # -- Use existing TLS secret
+    existingSecret: ""
+    # -- Custom TLS certificate as secret
+    ## Note: 'key' and 'certificate' are expected in PEM format
+    certificateSecret: {} # @schema additionalProperties: true
+      # key: |-
+      #   -----BEGIN RSA PRIVATE KEY-----
+      #   ...
+      #   -----END RSA PRIVATE KEY-----
+      # certificate: |-
+      #   -----BEGIN CERTIFICATE-----
+      #   ...
+      #   -----END CERTIFICATE-----
+
+## Bundeled PostgreSQL database configuration (Bitnami chart)
+## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
+## Note: Don't enable if you use SQLite mode or external PgSQL database
+postgresql: # @schema additionalProperties: true
+  # -- Enable to deploy PostgreSQL.
+  enabled: false
+  global: # @schema additionalProperties: true
+    postgresql: # @schema additionalProperties: true
+      auth: # @schema additionalProperties: true
+        # -- Super-user postgres account password
+        ## Note: if not set, it will be dynamically generated
+        postgresPassword: ""
+        # -- Database name
+        database: ciso-assistant
+        # -- Database username
+        username: ciso-assistant
+        # -- Database user account password
+        ## Note: if not set, it will be dynamically generated
+        password: ""
+  primary: # @schema additionalProperties: true
+    persistence: # @schema additionalProperties: true
+      # -- PostgreSQL persistant volume size (default 8Gi).
+      size: 5Gi
+
+## External PostgreSQL database configuration
+## Note: All of these values are only used when backend.config.databaseType is set to externalPgsql
+externalPgsql:
+  # -- Host of an external PostgreSQL instance to connect
+  host: ""
+  # -- User of an external PostgreSQL instance to connect
+  user: ciso-assistant
+  # -- Password of an external PostgreSQL instance to connect
+  password: ""
+  # -- Secret containing the password of an external PostgreSQL instance to connect
+  ## Name of an existing secret resource containing the DB password in a 'password' key
+  existingSecret: ""
+  # -- Database inside an external PostgreSQL to connect
+  database: ciso-assistant
+  # -- Port of an external PostgreSQL to connect
+  port: 5432

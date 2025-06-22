@@ -1,0 +1,955 @@
+urn: urn:intuitem:risk:library:formulaire-sdi-secnum-2216
+locale: fr
+ref_id: "formulaire-d-évaluation-de-la-maturité-niveau-fondamental-dga/ssdi"
+name: "Formulaire d'évaluation de la maturité - niveau fondamental (DGA)"
+description: "Le ministère des Armées et les 8 grands maîtres d’œuvre industriels
+  ont lancé avec le soutien de l’ANSSI, la définition d’un référentiel de maturité
+  cyber.\nCes travaux ont été menés avec l’objectif de simplifier et d’harmoniser
+  les exigences des donneurs d’ordres étatiques et industriels et s’inscrivent dans
+  une démarche progressive d’amélioration du niveau de cybersécurité des entreprises
+  de la BITD.\nLe premier niveau de ce référentiel, dit niveau fondamental, représente
+  la première marche de cette démarche. Il comprend 21 exigences basiques, qui vont
+  progressivement s’imposer dans les relations entre la DGA et l’industrie, sous forme
+  contractuelle dans un premier temps.\nLe référentiel fondamental comprend deux documents :\n
+  \t•\tune description du contexte et de la manière d’utiliser le référentiel (https://armement.defense.gouv.fr/sites/default/files/2024-09/20230905_NP_Guide-SDI-SecNum-2217-Ed.02_R%C3%A9frentiel%20maturit%C3%A9%20Cyber%20fondamental.pdf)\n
+  \t•\tun tableau des exigences  commentées (https://armement.defense.gouv.fr/sites/default/files/2023-10/20231006_NP_Formulaire-SDI-SecNum-2216-Ed.08_Socle%20Commun%20automatis%C3%A9.xlsx)"
+copyright: DGA/SSDI
+version: 2
+publication_date: 2024-10-22
+provider: DGA/SSDI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:formulaire-sdi-secnum-2216
+    ref_id: "formulaire-d-évaluation-de-la-maturité-niveau-fondamental-dga/ssdi"
+    name: "Formulaire d'évaluation de la maturité - niveau fondamental (DGA)"
+    description: "Le ministère des Armées et les 8 grands maîtres d’œuvre industriels
+      ont lancé avec le soutien de l’ANSSI, la définition d’un référentiel de maturité
+      cyber.\nCes travaux ont été menés avec l’objectif de simplifier et d’harmoniser
+      les exigences des donneurs d’ordres étatiques et industriels et s’inscrivent
+      dans une démarche progressive d’amélioration du niveau de cybersécurité des
+      entreprises de la BITD.\nLe premier niveau de ce référentiel, dit niveau fondamental,
+      représente la première marche de cette démarche. Il comprend 21 exigences basiques,
+      qui vont progressivement s’imposer dans les relations entre la DGA et l’industrie,
+      sous forme contractuelle dans un premier temps.\nLe référentiel fondamental
+      comprend deux documents :\n\t•\tune description du contexte et de la manière
+      d’utiliser le référentiel (https://armement.defense.gouv.fr/sites/default/files/2024-09/20230905_NP_Guide-SDI-SecNum-2217-Ed.02_R%C3%A9frentiel%20maturit%C3%A9%20Cyber%20fondamental.pdf)\n
+      \t•\tun tableau des exigences  commentées (https://armement.defense.gouv.fr/sites/default/files/2023-10/20231006_NP_Formulaire-SDI-SecNum-2216-Ed.08_Socle%20Commun%20automatis%C3%A9.xlsx)"
+    requirement_nodes:
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-1
+        assessable: true
+        depth: 1
+        ref_id: 0_Gouvernance-1
+        name: Prise en compte du risque cyber
+        description: "L'entreprise intègre le risque cyber dans ses risques et le
+          traite comme un risque majeur tel que l'incendie, le risque financier."
+        annotation: "Une gestion globalisée des risques permet d'assurer la cohérence
+          du traitement des risques Cyber.\nPour la gestion de crise cyber, un annuaire
+          papier doit au minima identifier les acteurs internes ou externes qui peuvent
+          aider l'entreprise en cas de crise cyber"
+        typical_evidence: "Une attestation engageant la société  que le risque cyber
+          est bien pris en compte dans la gestion des risques de l'entreprise et qu'il
+          existe un annuaire des contacts cyber\nEn cas d'audit, les éléments de prise
+          en compte du risque cyber."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-1:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de prise
+              en compte du risque cyber ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-1:question:1:choice:1
+                value: "Le risque cyber n'est pas présent dans la gestion des risques
+                  ou l'entreprise n'a pas de gestion des risques formalisée."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-1:question:1:choice:2
+                value: "L'entreprise a une gestion des risques formalisée, le risque
+                  cyber est adressé sur un projet ou domaine particulier."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-1:question:1:choice:3
+                value: "L'entreprise a une gestion des risques formalisée couvrant
+                  le risque cyber sur l'ensemble de la société."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-1:question:1:choice:4
+                value: "L'entreprise a un process de gestion des risques, couvrant
+                  le risque cyber sur l'ensemble de la société. Ce process a une gouvernance
+                  garantissant la revue périodique et la mise à jour des informations."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-2
+        assessable: true
+        depth: 1
+        ref_id: 0_Gouvernance-2
+        name: Identification des biens sensibles
+        description: "L'entreprise effectue une analyse de la sensibilité de ses informations
+          et maintient une liste des informations sensibles, de leurs lieux de stockage
+          et de traitement."
+        annotation: "Les informations sensibles de l’entreprise sont celles dont la
+          connaissance par un tiers hostile permet de nuire à l’entreprise, ses clients
+          ou ses fournisseurs. On peut penser à des informations commerciales, des
+          informations techniques précises, des secrets de fabrication ou des données
+          sensibles fournies par des clients (dites données confiées). \nLes lieux
+          de stockage à recenser peuvent être  en local ou dans le cloud.\nCe travail
+          est un préalable à la définition d’une politique de sécurité."
+        typical_evidence: "Une attestation engageant la société  que cette analyse
+          de sensibilité est faite. \nEn cas d'audit, cette analyse peut être demandée."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-2:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence d'identification
+              des biens sensibles ? "
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-2:question:1:choice:1
+                value: "Il n'y a pas d'analyse de la sensibilité des informations."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-2:question:1:choice:2
+                value: "Certaines informations sont identifiées comme sensibles avec
+                  un traitement adapté mais la démarche n'est pas systématisée."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-2:question:1:choice:3
+                value: "L'entreprise a effectué une analyse de la sensibilité des
+                  informations en sa possession  et dispose : d'une approche globale
+                  garantissant la sécurité de l'ensemble ou d'un inventaire de ces
+                  informations sensibles, de leurs lieux de stockage et de traitement."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-2:question:1:choice:4
+                value: "L'entreprise procède à la catégorisation des informations
+                  en sa possession en fonction de leur sensibilité, et dispose de
+                  règles sur leurs lieux de stockage et de traitement. La démarche
+                  est formalisée en processus et les analyses sont tenues à jour."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-3
+        assessable: true
+        depth: 1
+        ref_id: 0_Gouvernance-3
+        name: "Politique de sécurité des systèmes d'information"
+        description: "Un responsable des sujets cybersécurité est désigné par la direction
+          de l’entreprise et lui rend compte directement. "
+        annotation: "La nomination d'un responsable permet d'assurer la cohérence
+          et la constance de l'effort dans la définition et la mise en œuvre de plans
+          d'action satisfaisant à la couverture des risques cyber. Il doit disposer
+          de la capacité de mettre en œuvre ce plan d'action.  \nCe responsable doit
+          en particulier assurer la communication vers l’extérieur de l’entreprise
+          (clients, fournisseurs) pour tous les sujets cyber et assurer le relai avec
+          les équipes internes.\nLe responsable n'est pas obligatoirement un spécialiste
+          technique. \nEn cas d'audit, le responsable est le point de contact de l'entreprise."
+        typical_evidence: "Les nom et coordonnées (téléphone et mail) du responsable
+          des sujets cyber et désignation du poste.\nEn cas d'audit, une description
+          de sa mission cyber."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-3:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport l'exigence de politique
+              de sécurité des systèmes d'information ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-3:question:1:choice:1
+                value: "Il n'y a pas de rôle défini en lien avec la cybersécurité."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-3:question:1:choice:2
+                value: "Le rôle est tenu ou partiellement tenu, éventuellement distribué
+                  sur plusieurs personnes, sans formalisation."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-3:question:1:choice:3
+                value: "Un responsable pour l'ensemble de l'entreprise est nommé par
+                  la direction. Les moyens mis à disposition permettent une couverture
+                  partielle des risques cyber."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-3:question:1:choice:4
+                value: "Un responsable pour l'ensemble de l'entreprise est officialisé
+                  dans une organisation publiée avec des responsabilités explicitées
+                  et des moyens adaptés au traitement des risques cyber. Il  rend
+                  compte à la direction."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-4
+        assessable: true
+        depth: 1
+        ref_id: 0_Gouvernance-4
+        name: Gestion des ressources humaines
+        description: "Chaque utilisateur des systèmes d'information reçoit une sensibilisation
+          aux risques cyber et aux bons comportements à adopter."
+        annotation: "Chaque utilisateur du SI de l'entreprise est un maillon à part
+          entière de la chaîne des systèmes d’information.\nCes actions doivent être
+          régulières, adaptées aux utilisateurs ciblés, peuvent prendre différentes
+          formes (mails, affichage, réunions, espace intranet dédié, etc.)\nDes formations
+          complémentaires adaptées aux rôles tenus doivent de plus être réalisées
+          (responsables de SI industriels, administrateurs, chefs de projets, …).\n
+          Les utilisateurs doivent notamment être régulièrement sensibilisés aux risques
+          liés à la messagerie (phishing)."
+        typical_evidence: "Pourcentage d'utilisateurs sensibilisés et liste des principales
+          actions menées, modalités et fréquence. \nEn cas d'audit, le détail des
+          actions de sensibilisation , fréquence et audience."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-4:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de gestion
+              des ressources humaines ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-4:question:1:choice:1
+                value: "Il n'existe pas de sensibilisation à la cyber sécurité dans
+                  l'entreprise."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-4:question:1:choice:2
+                value: "Des sensibilisations ont été réalisées, sans systématisation
+                  ni récurrence."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-4:question:1:choice:3
+                value: "Chaque utilisateur des systèmes d'information a reçu au moins
+                  une sensibilisation aux risques cyber et aux bons comportements
+                  à adopter."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-4:question:1:choice:4
+                value: "Une sensibilisation est réalisée de manière récurrente pour
+                  l'ensemble des salariés ; elle est adaptée aux positionnements et
+                  aux rôles."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-5
+        assessable: true
+        depth: 1
+        ref_id: 0_Gouvernance-5
+        name: Cartographie
+        description: "L'entreprise identifie les actifs support (postes de travail,
+          serveurs, machines-outils, connexions réseaux...) et maintient à jour cet
+          inventaire. "
+        annotation: "Une connaissance à jour du système d’information de l’entreprise
+          est un préalable à toutes actions de sécurité.\nLes actifs peuvent être
+          des stations de travail, serveurs, machines-outils, connexion réseau vers
+          un prestataire externe...)\nCet inventaire inclut le schéma détaillé du
+          réseau, incluant les connexions internes et externes.\nUn guide recommandé
+          est cis à www.ssi.gouv.fr/guide/cartographie-du-systeme-dinformation"
+        typical_evidence: "Date du dernier inventaire, cadence et méthode de mise
+          à jour et en cas d'audit, le dit inventaire."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-5:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de cartographie
+              ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-5:question:1:choice:1
+                value: "Il n'y a pas de cartographie des actifs et de leurs interconnexions
+                  ou pas à jour, ou ne comprenant pas tous les éléments indispensables."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-5:question:1:choice:2
+                value: "Existence d'une cartographie comprenant les premiers éléments
+                  indispensables aux opérations de sécurité numérique Niveau 1 du
+                  guide ANSSI."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-5:question:1:choice:3
+                value: "Existence d'une cartographie orientée sur la sécurité numérique.
+                  Niveau 2 du guide ANSSI."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-5:question:1:choice:4
+                value: "Existence d'une cartographie exhaustive et détaillée, qui
+                  intègre les besoins de sécurité numérique. Niveau 3 du guide ANSSI."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-6
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-6
+        name: Filtrage
+        description: "Les points de connexion entre le SI et l'internet sont identifiés
+          et maitrisés. Des dispositifs de sécurité y sont déployés pour se prémunir
+          des attaques.\n"
+        annotation: "Une attention particulière doit être portée sur la communication
+          entre les PC des utilisateurs, les serveurs de l'entreprise et  des réseaux
+          tiers, dont Internet, canal principal des attaquants.\nDes passerelles d’accès
+          sécurisées entre le SI interne et les SI tiers dont Internet  doivent  être
+          mises en place. \nDes règles de filtrages doivent être définies dans une
+          politique de gestion des flux entrants et sortants.\nLes services de l'entreprise
+          exposés sur l'internet (webSite) sont cloisonnés du reste du système d'information.
+          \nD'autres types de solutions comme les NDR (Network Detection and Response)
+          permettent d'apporter une protection supplémentaire contre les menaces."
+        typical_evidence: "Liste des points d'accès du SI à l'internet \nEn cas d'audit:
+          les moyens de protection et règles mises en place, les plages d'adresse
+          IP, racines DNS et les services exposés à l'internet."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-6:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de filtrage
+              ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-6:question:1:choice:1
+                value: "Il n'y a pas de politique de contrôle de l'accès à internet."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-6:question:1:choice:2
+                value: "Les points de connexion entre le SI et l'internet sont identifiés
+                  et maitrisés. Des dispositifs de sécurité minimaux (ex : ceux intégrés
+                  aux moyens de connexion \"box\") sont en place et configurés. (ex
+                  : configuration du routeur et du firewall)."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-6:question:1:choice:3
+                value: "Les points de connexion entre le SI et l'internet sont identifiés
+                  et maitrisés. Des dispositifs de sécurité dédiés (firewall / proxy)
+                  y sont déployés pour se prémunir des attaques. Le proxy  utilise
+                  à minima un filtrage par catégorie de sites (ex : sites malveillants)"
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-6:question:1:choice:4
+                value: "Des dispositifs de sécurité dédiés y sont déployés pour se
+                  prémunir des attaques. L'ensemble est à l'état de l'art, incluant
+                  l'enregistrement des événements (logs), maintenu à jour et formalisé
+                  en politiques. Des alertes automatiques sont configurées et une
+                  surveillance est mise en place."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-7
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-7
+        name: "Sécurité des réseaux sans fils"
+        description: "Les accès sans fil sont sécurisés.\n"
+        annotation: "Les accès sans fil (WIFI) rendent possible l'accès au réseau
+          interne de l'entreprise depuis l’extérieur des locaux et ce à des distances
+          importantes avec des antennes adaptées.\nIl convient de:\n• S’assurer de
+          la sécurité des réseaux d’accès Wi-Fi (utilisation du mode de chiffrement
+          le plus fort (WPA2 ou 3) et d’une clé robuste) et de la séparation des usages
+          (accès visiteurs permettant uniquement l’accès à Internet / accès employés
+          permettant l’accès au réseau local);\n• Utiliser des protocoles réseaux
+          sécurisés dès qu’ils existent;\nL'ANSSI publie un catalogue de produits
+          recommandées : https://www.ssi.gouv.fr/uploads/liste-produits-et-services-qualifies.pdf "
+        typical_evidence: "Description de la configuration de sécurité des points
+          d'accès wifi."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-7:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de sécurité
+              des réseaux sans fils ? "
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-7:question:1:choice:1
+                value: "Les accès sans fil sont disponibles et le mot de passe est
+                  accessible à tous."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-7:question:1:choice:2
+                value: "L'accès sans fil est disponible avec une séparation des usages
+                  (guest et employés). Les mots de passe ne sont pas changés régulièrement."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-7:question:1:choice:3
+                value: "L' accès sans fil est disponible et les accès visiteurs sont
+                  activés à la demande avec limitation dans le temps (24h). Seuls
+                  les terminaux identifiés sont autorisés sur le réseau sans fil de
+                  l'entreprise. (ex : contrôle des adresse MAC)"
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-7:question:1:choice:4
+                value: "L'accès sans fil est disponible et déployé selon les préconisations
+                  de l'ANSSI sur la sécurisation du WIFI (ou : pas d'accès sans fil)"
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-8
+        assessable: true
+        depth: 1
+        ref_id: 0_Gouvernance-8
+        name: Support d'informations sensibles
+        description: "Les supports contenant des informations sensibles sont soit
+          chiffrés soit stockés en lieu sûr.\nEn fin de vie, ces supports sont :\n
+          - soit effacés avec la garantie technique de la suppression définitive de
+          ces informations avant leur éventuelle réutilisation;\n- soit mis au rebut
+          avec une destruction physique rendant toute réutilisation impossible."
+        annotation: "Les cas de réutilisation incluent: \n- les réutilisations internes
+          à l'entreprise (nouveaux projets);\n- la vente ou le don de matériel.\n
+          Les supports visés sont les disques durs, internes et externes, les SSD
+          internes et externes, les clés USB, les CDROM/DVD, clé USB, …\nSeules des
+          solutions  d'effacement sécurisé garantissant la suppression définitive
+          des données doivent être mise en œuvre, voir : https://www.ssi.gouv.fr/entreprise/produits-certifies/produits-certifies-cspn/"
+        typical_evidence: "Description des méthodes et outils d'effacement et de destruction. "
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-8:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de support
+              d'informations sensibles ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-8:question:1:choice:1
+                value: Il n'y a pas de traitement particulier des supports des informations
+                  sensibles.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-8:question:1:choice:2
+                value: "Des outils et des moyens permettant d'assurer la sécurité
+                  (stockage, chiffrement, moyens de destruction) sont disponibles."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-8:question:1:choice:3
+                value: "Les supports contenant des informations sensibles sont stockés
+                  en lieu sûr et / ou chiffrés. En fin de vie, ces supports font l'objet
+                  d'un traitement spécifique garantissant l'effacement sécurisé ou
+                  la destruction."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:0_gouvernance-8:question:1:choice:4
+                value: "Les supports contenant des informations sensibles sont stockés
+                  en lieu sûr et / ou chiffrés durant tout leur cycle de vie y compris
+                  la maintenance, le changement de destination et leur destruction
+                  en fin de vie.Une traçabilité de la destruction ou effacement des
+                  supports concernés est conservée."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-9
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-9
+        name: "Protection des équipements mobiles"
+        description: "En prévention des risques de sécurité liés aux vols physiques,
+          l'entreprise met en place des mesures de sécurisation des équipements mobiles
+          notamment nomades."
+        annotation: "Tous les terminaux - ordinateurs, tablettes, smartphones - ou
+          supports mémoire - clés USB, disques ou SSD externes - peuvent être volés.
+          Ils peuvent contenir des données sensibles ou des données  d’accès aux SI
+          de l’entreprise, etc.\nLes mesures suivantes sont a minima mises en place
+          : \n• les utilisateurs de PC sont dotés de moyens de protection physique,
+          par exemple un câble antivol, un filtre de confidentialité, ...\n• les données
+          sensibles sont chiffrées sur tous les supports. Par exemple, les mémoires
+          de masse des ordinateurs peuvent être chiffrées grâce à un chiffrement de
+          surface."
+        typical_evidence: "Liste des mesures de sécurité spécifiques prises pour chaque
+          catégorie d'équipements."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-9:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de protection
+              des équipements mobiles ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-9:question:1:choice:1
+                value: "Il n'y a pas de politique particulière pour les terminaux
+                  nomades."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-9:question:1:choice:2
+                value: "Des mesures permettant d'assurer la sécurité des équipements
+                  mobiles sont disponibles mais leur usage n'est ni obligatoire ni
+                  systématique."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-9:question:1:choice:3
+                value: "Tous les terminaux nomades disposent de moyens de protection
+                  antivol (si possible) et d'un chiffrement des données."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-9:question:1:choice:4
+                value: "Tous les terminaux nomades disposent de moyens de protection
+                  antivol (si possible) et d'un chiffrement des données. L'ensemble
+                  de la démarche est défini par procédure. La conformité à l'ensemble
+                  des recommandations de l'ANSSI (RECOMMANDATIONS SUR LE NOMADISME
+                  NUMÉRIQUE) est évaluée."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-10
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-10
+        name: "Accès aux SI"
+        description: "Les accès distants au SI de l'entreprise sont sécurisés.\n"
+        annotation: "L'accès distant au SI de l'entreprise doit être sécurisé par
+          VPN ou dispositif équivalent, et a minima par une authentification forte
+          (MFA : multi-factor authentication, authentification à multiples facteurs)"
+        typical_evidence: "Matériels et configurations d'accès distants mis en œuvre,
+          en particulier authentification.\nLes règles d'ouverture du service d'accès
+          à distance aux personnels, sous-traitants, intervenants sur site.\nSolutions
+          mises en œuvre d'authentification renforcée (à deux facteurs)."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-10:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence d'accès
+              aux SI ? "
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-10:question:1:choice:1
+                value: "Les accès distant au SI de l'entreprise ne sont pas sécurisés."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-10:question:1:choice:2
+                value: "Les accès distant au SI de l'entreprise sont sécurisés par
+                  VPN ou équivalent."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-10:question:1:choice:3
+                value: "Les accès distant au SI de l'entreprise sont sécurisés par
+                  VPN ou équivalent et nécessitent une authentification multi-facteurs
+                  (MFA)."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-10:question:1:choice:4
+                value: "Les accès distant au SI de l'entreprise sont sécurisés par
+                  VPN ou équivalent et nécessitent une authentification multi-facteurs
+                  (MFA). La totalité des flux réseaux passe par les équipements de
+                  sécurité de l'entreprise. Une politique encadre l'emploi de l'accès
+                  distant ; elle prévoit en particulier des restrictions de fonctionnalités
+                  qui s'appliquent aux accès distants (ou pas d'accès à distance autorisé)"
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-11
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-11
+        name: "Accès aux SI"
+        description: "Tout équipement se connectant au réseau de l'entreprise doit
+          être maîtrisé ou contrôlé par l'entreprise \n\n"
+        annotation: "L'entreprise met en place des mesures organisationnelles et/ou
+          techniques visant à ce qu'aucun équipement  non maîtrisé soit connecté sur
+          le réseau de l'entreprise sans connaissance, autorisation et précaution
+          préalables.  \nIl s'agit ici de dissuader les utilisateurs de mélanger les
+          usages privés et publics des moyens de l'entreprise. Dans tous les cas,
+          l’utilisation de moyens personnels pour mener des actions d’administration
+          est interdite. Voir : \nwww.cybermalveillance.gouv.fr/tous-nos-contenus/bonnes-pratiques/sécurité-usages-pro-perso "
+        typical_evidence: Description des mesures organisationnelles et/ou techniques
+          mis en place.
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-11:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de accès
+              aux SI? "
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-11:question:1:choice:1
+                value: "Tout matériel est connectable au réseau d'entreprise, y compris
+                  les matériels personnels."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-11:question:1:choice:2
+                value: "Seuls les terminaux fournis par l'entreprise sont autorisés
+                  sur les réseaux de l'entreprise. Les utilisateurs peuvent être administrateurs
+                  de leurs postes ou d'un terminal de service. Il existe une charte
+                  d'utilisation."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-11:question:1:choice:3
+                value: "Seuls les terminaux fournis par l'entreprise peuvent techniquement
+                  se connecter aux réseaux de l'entreprise (ex : contrôle adresse
+                  MAC). Les utilisateurs ne sont pas administrateurs mais peuvent
+                  avoir accès à un compte local d'administration.Il existe une charte
+                  d'utilisation."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-11:question:1:choice:4
+                value: "Seuls les terminaux fournis par l'entreprise peuvent techniquement
+                  se connecter aux réseaux de l'entreprise (ex : 802.1.x), et leurs
+                  fonctionnalités sont administrés par l'entreprise. Il existe une
+                  charte d'utilisation."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-12
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-12
+        name: MCS
+        description: "L'entreprise met en œuvre les correctifs de sécurité publiés
+          par les éditeurs.\nLes retards ou les exceptions sont connus et des mesures
+          spécifiques de sécurité viennent les pallier.\n"
+        annotation: "Cette exigence s'applique à l'ensemble des SI de l'entreprise
+          y compris les moyens de test et de production.\nL'activation des mises à
+          jour automatiques permet de faciliter la gestion du parc . Les éditeurs
+          ou sources étatiques comme le CERT-FR permettent d'avoir des informations
+          sur les mises à jour importantes (CERT-FR : www.cert.ssi.gouv.fr).\nLes
+          difficultés rencontrées (incompatibilité logicielle ou matérielle empêchant
+          la mise à jour, système déconnecté, ...) doivent être tracées et le risque
+          contenu.\nDe plus, une attention pourra être portée à l'obsolescence des
+          logiciels et matériels sous surveillance. Les fournisseurs et éditeurs peuvent
+          fournir les éléments quant aux cycles de vie des produits. Il est vital
+          de ne télécharger des mises à jours que depuis un site officiel de l’éditeur."
+        typical_evidence: "Description de la démarche de mises à jour des SI et de
+          ses exceptions (par exemple : mise à jour automatique pour tous les postes
+          Windows, sauf ceux qui sont non connectés à Internet où la mise à jour est
+          effectué manuellement tous les 15 jours).\nDélai de mises à jour des postes
+          de travail et serveurs Windows après publication des correctifs.\nMéthode
+          de veille des vulnérabilités.\nMesures spécifiques mises en place pour les
+          équipements qui ne peuvent être mis à jour."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-12:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de MCS ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-12:question:1:choice:1
+                value: "L'entreprise réalise certaines mises à jour, sans que ce soit
+                  automatique."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-12:question:1:choice:2
+                value: "L'entreprise a configuré, sur les logiciels qui le permettent,
+                  des installations automatiques des mises à jour publiées par l'éditeur."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-12:question:1:choice:3
+                value: "L'entreprise a un processus formalisé de configuration et
+                  de suivi des mises à jour pour l'ensemble de ses SI."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-12:question:1:choice:4
+                value: "L'entreprise a un processus formalisé de configuration et
+                  de suivi des mises à jour pour l'ensemble de ses SI. Ce processus
+                  intègre également une surveillance des obsolescence avec des mesures
+                  compensatoires (ex : migration anticipée; cloisonnement) "
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-13
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-13
+        name: Protection Malware
+        description: "L'entreprise met en œuvre un logiciel de protection contre les
+          logiciels malveillants et le configure correctement sur chaque poste de
+          travail et serveurs de l’entreprise.\nLe logiciel et ses bases de menaces
+          sont mis à jour sans délai. "
+        annotation: "Les antivirus et antimalware commerciaux proposent une mise à
+          jour automatique et un scan automatique des espaces de stockage : il est
+          indispensable de procéder à l’activation de ces mécanismes dans les paramètres.\n\
+          D'autres types de solutions comme les EDR (Endpoint Detection and Response)
+          permettent d'apporter une protection supplémentaire contre les menaces. "
+        typical_evidence: "Listes des logiciels anti- malwares installés et la fréquence
+          de mise à jour"
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-13:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de protection
+              Malware ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-13:question:1:choice:1
+                value: L'entreprise ne dispose pas d'antivirus ou d'antimalware.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-13:question:1:choice:2
+                value: L'entreprise dispose d'un logiciel de protection sur une partie
+                  du parc de terminaux de l'entreprise.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-13:question:1:choice:3
+                value: "Tous les SI de l'entreprise sont sécurisés par au moins un
+                  logiciel de protection, dont la base antivirale ou règle de détection
+                  est en mise à jour automatique."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-13:question:1:choice:4
+                value: "La sécurité des SI est assurée par une surveillance multiple
+                  (antivirus, EDR, surveillance des flux et des données stockées,
+                  ...),  en mise à jour automatique."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-14
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-14
+        name: Protection Malware
+        description: "La messagerie est sécurisée par des équipements ou des services
+          permettant de réduire drastiquement le nombre et la portée des messages
+          malveillants.\n"
+        annotation: "La messagerie est le principal vecteur d’infection du poste de
+          travail, qu’il s’agisse de l’ouverture de pièces jointes (PJ) contenant
+          un code malveillant ou du clic malencontreux sur un lien redirigeant vers
+          un site lui-même malveillant (phishing ou hameçonnage).\nIl est nécessaire
+          de mettre en place un filtrage automatique des messages lorsque les PJ sont
+          potentiellement dangereuses (.exe, .zip, .bat par exemple). Ces fonctions
+          sont souvent intégrées aux logiciels anti-virus ou dans les grandes plateformes
+          de messagerie (exemple : gmail, orange). "
+        typical_evidence: "Le dispositif de sécurisation mis en place : passerelle
+          de messagerie (si hébergé en interne) ou nom du fournisseur de service de
+          messagerie"
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-14:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de protection
+              Malware ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-14:question:1:choice:1
+                value: L'entreprise utilise un service de messagerie grand public.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-14:question:1:choice:2
+                value: L'entreprise utilise un service de messagerie professionnelle.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-14:question:1:choice:3
+                value: "La messagerie professionnelle est sécurisée par des outils
+                  (à minima anti spam et antivirus)."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-14:question:1:choice:4
+                value: "La messagerie professionnelle est sécurisée par des outils
+                  (à minima anti spam et antivirus) et la configuration spécifique
+                  (TLS, …) est à l'état de l'art. Un process est en place pour traiter
+                  les alertes des utilisateurs."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-15
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-15
+        name: "Contrôle d'accès"
+        description: "Chaque utilisateur est identifié et authentifié individuellement
+          et chaque utilisateur ne peut accéder qu’aux seules informations, ressources
+          et applications qui lui sont explicitement autorisées. "
+        annotation: "Les informations accessibles à l'utilisateur doivent se limiter
+          à celles qui sont nécessaires à ses tâches.\nLes règles de gestion des droits
+          et des accès doivent être définies (par exemple, mise en place de volumes
+          partagés par service (comptabilité, production, bureau d'étude) et affectation
+          des droits des utilisateurs aux seuls volumes qui leur sont nécessaires)\n
+          Aucun système ne doit être utilisé sans une authentification préalable.
+          Les systèmes d'exploitation ont, par défaut, des mécanismes pouvant répondre
+          à cette exigence.\nLorsque l'identification/authentification individuelle
+          n'est pas possible des mesures complémentaires doivent être mise en œuvre
+          pour assurer la traçabilité et l'imputabilité des actions (par exemple un
+          cahier de présence).\nLes éléments suivants devront être produits et tenus
+          à jour :\n• Les procédures d’arrivée, de départ, de changement de fonction
+          et d’attribution / suppression des droits et des comptes\n• Une procédure
+          périodique de revue des comptes et des droits d’accès "
+        typical_evidence: "Existence de :\n• Procédure d'arrivée (création des comptes);\n
+          • Procédure  d'attribution et des modification des droits d'accès;\n• Procédure
+          de départ d'un utilisateur  (suppression des droits, restitution de l’ensemble
+          du matériel qui lui a été mis à disposition,…)."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-15:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de contrôle
+              d'accès ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-15:question:1:choice:1
+                value: Il n'y a pas de politique de gestion des droits utilisateurs.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-15:question:1:choice:2
+                value: "Il existe des restrictions d'accès à certaines ressource,
+                  application ou informations mais sans politique générale formelle."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-15:question:1:choice:3
+                value: "Chaque utilisateur est identifié et authentifié individuellement.
+                  L'accès aux informations, ressources et applications est restreint
+                  à celles explicitement autorisées.Les exceptions sont identifiées
+                  et gérées spécifiquement."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-15:question:1:choice:4
+                value: "Chaque utilisateur est identifié et authentifié individuellement.
+                  L'accès aux informations, ressources et applications est restreint
+                  à celles explicitement autorisées. Il existe un processus de revue
+                  périodique des comptes et droits utilisateurs. Les exceptions sont
+                  identifiées et gérées spécifiquement"
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-16
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-16
+        name: Authentification
+        description: "Pour assurer une authentification robuste, l'entreprise met
+          en place des règles de gestion des secrets."
+        annotation: "Les règles de gestion des secrets permettant des authentifications
+          - mots de passe, clés - prennent en compte :\n• Leur complexité et leur
+          longueur \n• Leur durée de validité\n• Leur fréquence de renouvellement
+          \n• Les précautions contre la réutilisation des mots de passe lors du renouvellement\n
+          • Leur renouvellement en cas de soupçon ou de certitude de compromission.\n
+          Les éléments techniques (complexité, durée de validité, stockage, etc) sont
+          paramétrables dans les systèmes d'exploitation.\nCes éléments permettent
+          de garantir que l’élément secret d’un compte n’est connu, accessible en
+          clair ou modifiable que des utilisateurs qui en ont la responsabilité.\n
+          Le guide suivant de l'ANSSI peut servir de référence sur ce sujet : https://www.ssi.gouv.fr/uploads/2021/10/anssi-guide-authentification_multifacteur_et_mots_de_passe.pdf"
+        typical_evidence: "Les règles concernant la gestion des secrets."
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-16:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence d'authentification
+              ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-16:question:1:choice:1
+                value: Il n'y a pas de politique de gestion des secrets (MdP).
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-16:question:1:choice:2
+                value: Il existe une politique de gestion des secrets mais il n'y
+                  a pas de contrainte technique obligeant le respect de cette politique.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-16:question:1:choice:3
+                value: Il existe une politique de gestion des secrets avec une contrainte
+                  technique obligeant le respect de cette politique
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-16:question:1:choice:4
+                value: "L'entreprise dispose d'un politique de gestion des secrets,
+                  implémentée automatiquement et qui respecte des critères reconnus
+                  en matière de complexité (ex : guide ANSSI)."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-17
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-17
+        name: Mesures physiques
+        description: "L'entreprise contrôle, trace et protège l’accès aux locaux,
+          aux salles serveurs et aux locaux techniques."
+        annotation: "Ces protections reposent sur des équipements de contrôle d'accès
+          physiques (clés, serrures, lecteurs de cartes, …) et sur des mesures organisationnelles
+          (port permanent du badge, sensibilisation des personnels, etc)."
+        typical_evidence: Description des moyens de protection mis en place
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-17:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de mesures
+              physiques ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-17:question:1:choice:1
+                value: "Il n'y a pas de gestion des accès à l'intérieur des sites
+                  de l'entreprise."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-17:question:1:choice:2
+                value: "Certains locaux sont sécurisés et leur accès est restreint
+                  aux seules personnes explicitement autorisées (ex : salle serveur
+                  fermée à clef)."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-17:question:1:choice:3
+                value: "Tous les locaux de stockage / archivage de données (salles
+                  serveurs, sauvegardes, archives) sont sécurisés et leur accès est
+                  restreint aux seules personnes explicitement autorisées."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-17:question:1:choice:4
+                value: "Tous les locaux de l'entreprise disposent de mesures physiques
+                  et organisationnelles de contrôle d'accès (accès restreint et tracé
+                  aux seules personnes explicitement autorisées)."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-18
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-18
+        name: Mesures physiques
+        description: "Les visiteurs doivent être enregistrés lors de leur arrivée
+          dans les locaux de l’entreprise. Ils doivent être accompagnés et surveillés
+          dans tous les locaux où ils pourraient avoir accès aux SI de l'entreprise."
+        annotation: "le port du badge doit être imposé au moins pour les visiteurs "
+        typical_evidence: "Engagement sur l'honneur et en cas d'audit, accès au registre
+          des visiteurs"
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-18:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de mesures
+              physiques ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-18:question:1:choice:1
+                value: "Il n'y a pas de gestion des accès pour les visiteurs à l'intérieur
+                  des sites de l'entreprise et la dimension et les usages de l'entreprise
+                  ne permet pas de distinguer clairement les employés des visiteurs. "
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-18:question:1:choice:2
+                value: "Les visiteurs sont enregistrés à l'arrivée sur site, et peuvent
+                  ensuite circuler librement.  La dimension et les usages de l'entreprise
+                  ne permet pas de distinguer clairement les employés des visiteurs. "
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-18:question:1:choice:3
+                value: "Les visiteurs sont enregistrés. Des signes distinctifs (badges,
+                  …) permettent aux employés de les identifier."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-18:question:1:choice:4
+                value: "Les visiteurs sont enregistrés et leur identité est vérifiée.
+                  Des droits de circulation leur sont attribués ou ils sont accompagnés."
+      - urn: urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-19
+        assessable: true
+        depth: 1
+        ref_id: 1_Protection-19
+        name: "Comptes d’administration"
+        description: "Les comptes usuels des utilisateurs n'ont pas de droits d'administration.\n\
+          L'administration des systèmes est réalisée avec des comptes individuels
+          spécifiques permettant d'identifier de façon irrécusable l'administrateur."
+        annotation: "Les comptes “Administrateur” permettent de contrôler le SI. Leur
+          compromission est donc extrêmement grave. L'entreprise doit mettre en oeuvre
+          le principe du moindre privilège qui revient à offrir à chacun juste les
+          droits nécessaires à ces actions et rien de plus. L’accès aux comptes à
+          privilèges doit être exclusivement réservés aux personnels qui assurent
+          effectivement des tâches de gestion du SI.\nLes mesures suivantes doivent
+          être prises pour séparer les fonctions d'administration des fonctions utilisateur
+          sans privilège :\n• le nombre d'administrateurs doit être le plus restreint
+          possible et leur liste revue tous les ans\n• L’accès à Internet depuis les
+          postes ou serveurs utilisés pour l’administration du système d’information
+          et pour tous les comptes à privilèges est impossible et interdit;\nl'utilisation
+          d'un poste dédié pour les activités d'administration des services de l'entreprise
+          est requis\n• Les droits administrateurs sont requis pour installer un logiciel
+          sur un poste de travail ou configurer ce même poste.\n\nChaque utilisateur
+          du SI doit avoir un compte individualisé ne disposant pas de privilèges
+          administrateur sur son poste de travail. Des solutions permettant de donner
+          des droits administrateurs pour une durée limitée et pour son poste existent.\n
+          \nTous ces éléments sont configurables dans les systèmes d'exploitation.\n
+          Le guide suivant de l'ANSSI détaille cette exigence : https://www.ssi.gouv.fr/administration/guide/securiser-ladministration-des-systemes-dinformation/"
+        typical_evidence: "Nombre d'utilisateurs disposant de droits d'administration
+          et dernière date de revue de cette liste"
+        questions:
+          urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-19:question:1:
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de comptes
+              d’administration ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-19:question:1:choice:1
+                value: L'entreprise n'a pas mis en place de politique stricte de gestion
+                  des droits.
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-19:question:1:choice:2
+                value: "Chaque utilisateur du SI doit avoir un compte individualisé
+                  ne disposant pas de privilèges administrateur sur son poste de travail.
+                  Les droits d'administrateurs sont donnés aux personnels assurant
+                  effectivement une gestion du SI ou temporairement (administration
+                  locale avec désactivation automatique des droits)."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-19:question:1:choice:3
+                value: "Chaque utilisateur du SI doit avoir un compte individualisé
+                  ne disposant pas de privilèges administrateur sur son poste de travail.
+                  Les droits d'administrateurs sont donnés aux personnels assurant
+                  effectivement une gestion du SI.Les règles d'octroi des droits d'administration
+                  font l'objet d'une politique stricte."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:1_protection-19:question:1:choice:4
+                value: "Chaque utilisateur du SI doit avoir un compte individualisé
+                  ne disposant pas de privilèges administrateur sur son poste de travail.
+                  Les droits d'administrateurs sont donnés aux personnels assurant
+                  effectivement une gestion du SI. Les règles d'octroi des droits
+                  d'administration font l'objet d'une politique stricte. L'administration
+                  des terminaux et SI est réservée à des comptes spécifiques, dont
+                  la liste est revue régulièrement.L'accès à internet pour les comptes
+                  à privilèges est impossible et interdit."
+      - urn: "urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:2_défense-20"
+        assessable: true
+        depth: 1
+        ref_id: "2_Défense-20"
+        name: Gestion des incidents
+        description: "En cas d’incident cyber sur le SI de l’entreprise, une alerte
+          est envoyée à tous les clients (ou partenaires) potentiellement impactés
+          dans le respect du secret des affaires.\nLes incidents doivent aussi être
+          remontés à  l'ANSSI par les fournisseurs français"
+        annotation: "Un incident cyber est tout incident pouvant impacter directement
+          ou indirectement les données ou les systèmes d'Information des clients ou
+          les activités réalisées pour ceux-ci :  fuite de données, arrêt de production,
+          problème d'intégrité dans les livraisons, ransomware, … Le point de contact
+          chez les donneurs d'ordre est le CSIRT. L'adresse du CERT FR de l'ANSSI
+          est la suivante : cert-fr@ssi.gouv.fr. En cas d’incident, l’entreprise met
+          en œuvre des moyens adaptés pour procéder à son traitement en s’appuyant
+          si nécessaire sur des prestataires externes. Dans le cas d’incident grave
+          impliquant un traitement par des équipes étatiques, l’entreprise s’engage
+          à leur faciliter l’accès à ses locaux et à leur fournir les informations
+          nécessaires relatives à l’incident."
+        typical_evidence: "Engagement de la société  à gérer les incidents"
+        questions:
+          "urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:2_défense-20:question:1":
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de gestion
+              des incidents ?"
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:2_défense-20:question:1:choice:1
+                value: "L'entreprise n'a pas formalisé de dispositif d'alerte en cas
+                  d'incident de cyber sécurité."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:2_défense-20:question:1:choice:2
+                value: "L'entreprise a formalisé un dispositif d'alerte."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:2_défense-20:question:1:choice:3
+                value: "L'entreprise dispose d'un plan de gestion des incidents de
+                  cybersécurité formalisé intégrant explicitement l'identification
+                  des personnels à mobiliser, leur rôle et l'alerte de ses clients.
+                  Dans le cas où l'entreprise possède une connexion avec le SI de
+                  son client, elle  peut remonter l'alerte en moins de 24h."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:2_défense-20:question:1:choice:4
+                value: "L'entreprise dispose d'un plan de gestion des incidents de
+                  cybersécurité formalisé et testé annuellement intégrant explicitement\
+                  \  l'identification des personnels à mobiliser, leur rôle et  l'alerte
+                  de ses clients."
+      - urn: "urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:3_résilience-21"
+        assessable: true
+        depth: 1
+        ref_id: "3_Résilience-21"
+        name: Sauvegarde et restauration
+        description: "L'entreprise met en place un système de sauvegarde et de restauration
+          des systèmes d'informations afin de pouvoir garantir le cas échéant une
+          reprise rapide de son activité. "
+        annotation: "Pour permettre une reprise rapide de l'activité, ces sauvegardes
+          doivent inclure toutes les données y compris les données de configuration
+          du Systèmes d'information, de tous ses éléments, en particulier celles des
+          postes de travail.\nLa garantie de l'intégrité et de la disponibilité de
+          ces sauvegardes en cas d'attaque est cruciale pour permettre un redémarrage
+          des activités de l'entreprise. A ce titre, les moyens de sauvegarde doivent
+          être hors système d'information pour échapper à une attaque qui toucherait
+          celui-ci. La règle dite 3-2-1 résume les préconisations : 3 copies des données
+          (les données en production, une copie en ligne, une copie hors ligne), 2
+          supports différents, 1 hors ligne\n\nLe rythme de sauvegarde doit être fixé
+          au vu et su du volume de données, des capacités de l'entreprise ainsi que
+          de la réglementation à respecter. \nDes tests de restauration doivent être
+          menés de manière régulière pour s’assurer que les sauvegardes sont bien
+          utilisables et que le processus de restauration est maîtrisé par l’entreprise.\n
+          Le site suivant donne des bonnes pratiques en termes de sauvegarde:  www.cybermalveillance.gouv.fr/tous-nos-contenus/bonnes-pratiques/sauvegardes"
+        typical_evidence: L'existence d'un plan de sauvegarde, existence d'une sauvegarde
+          hors ligne
+        questions:
+          "urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:3_résilience-21:question:1":
+            type: unique_choice
+            text: "Comment vous positionnez-vous par rapport à l'exigence de sauvegarde
+              et restauration ? "
+            choices:
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:3_résilience-21:question:1:choice:1
+                value: "La sauvegarde des informations et données est laissée à l'initiative
+                  des salariés ou d'équipes."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:3_résilience-21:question:1:choice:2
+                value: "L'entreprise a au moins un système de sauvegarde automatique
+                  qui protège les données sensibles."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:3_résilience-21:question:1:choice:3
+                value: "L'entreprise à plusieurs systèmes de sauvegardes avec une
+                  indépendance.Les données sensibles et permettant une reprise rapide
+                  sont couvertes."
+              - urn: 
+                  urn:intuitem:risk:req_node:formulaire-sdi-secnum-2216:3_résilience-21:question:1:choice:4
+                value: "Une politique de sauvegarde est établie établissant les données
+                  sauvegardées.L'entreprise à un système de sauvegarde qui respecte
+                  le principe 3-2-1.Les procédures de restaurations et reprise existe
+                  et sont testées régulièrement."

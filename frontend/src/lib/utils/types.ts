@@ -8,17 +8,31 @@ export interface User {
 	first_name: string;
 	last_name: string;
 	is_active: boolean;
+	keep_local_login: boolean;
 	date_joined: string;
+	user_groups: Record<string, any>[];
+	roles: Record<string, any>[];
+	permissions: Record<string, any>[];
+	is_third_party: boolean;
+	is_admin: boolean;
+	accessible_domains: string[];
+	domain_permissions: Record<string, string[]>;
+	root_folder_id: string;
+}
+
+export interface GlobalSettings {
+	name: string;
+	settings: Record<string, any>;
 }
 
 export interface LoginRequestBody {
-	username: string;
+	email: string;
 	password: string;
 }
 
 export const URL_MODEL = [
 	'folders',
-	'projects',
+	'perimeters',
 	'risk-matrices',
 	'risk-assessments',
 	'threats',
@@ -37,10 +51,58 @@ export const URL_MODEL = [
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
-	'libraries'
+	'stored-libraries',
+	'loaded-libraries',
+	'libraries',
+	'sso-settings',
+	'general-settings',
+	'feature-flags',
+	'requirement-mapping-sets',
+	'entities',
+	'entity-assessments',
+	'solutions',
+	'representatives',
+	'vulnerabilities',
+	'filtering-labels',
+	'feared-events',
+	'ro-to',
+	'stakeholders',
+	'strategic-scenarios',
+	'attack-paths',
+	'operational-scenarios',
+	'qualifications',
+	'processings',
+	'processing-natures',
+	// 'ebios-rm',
+	'security-exceptions',
+	'findings',
+	'findings-assessments',
+	// privacy,
+	'processings',
+	'purposes',
+	'personal-data',
+	'data-subjects',
+	'data-recipients',
+	'data-contractors',
+	'data-transfers',
+	// incidents,
+	'incidents',
+	'timeline-entries',
+	// tasks,
+	'task-templates',
+	'task-nodes',
+	// resilience,
+	'business-impact-analysis',
+	'escalation-thresholds',
+	'asset-assessments',
+	'asset-class'
 ] as const;
 
+export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+
 export type urlModel = (typeof URL_MODEL)[number];
+
+export type thirdPartyUrlModel = (typeof THIRD_PARTY_URL_MODEL)[number];
 
 export type ModelInfo = ModelMapEntry;
 
@@ -71,7 +133,7 @@ export interface RiskMatrix {
 	json_definition: string; // stringified
 }
 
-export interface Project {
+export interface Perimeter {
 	id: string;
 	folder: Record<string, any>;
 	lc_status: string;
@@ -80,7 +142,7 @@ export interface Project {
 	is_published: boolean;
 	name: string;
 	description?: string;
-	internal_reference?: string;
+	ref_id?: string;
 	compliance_assessments: Record<string, any>[];
 }
 
@@ -124,4 +186,9 @@ export interface AppliedControlStatus {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on
+}
+
+export interface CacheLock {
+	promise: Promise<any>;
+	resolve: (_: any) => any;
 }

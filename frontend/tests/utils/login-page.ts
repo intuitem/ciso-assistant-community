@@ -43,8 +43,17 @@ export class LoginPage extends BasePage {
 	) {
 		this.email = email;
 		this.password = password;
+		// try avoiding race condition
+		await this.page.waitForLoadState('networkidle');
 		await this.usernameInput.fill(email);
 		await this.passwordInput.fill(password);
+		if (
+			(await this.usernameInput.inputValue()) !== email ||
+			(await this.passwordInput.inputValue()) !== password
+		) {
+			await this.usernameInput.fill(email);
+			await this.passwordInput.fill(password);
+		}
 		await this.loginButton.click();
 		if (email === LoginPage.defaultEmail && password === LoginPage.defaultPassword) {
 			await this.page.waitForURL(/^.*\/((?!login).)*$/, { timeout: 10000 });

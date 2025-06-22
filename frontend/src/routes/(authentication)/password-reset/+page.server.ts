@@ -1,13 +1,14 @@
-import { fail, redirect, type Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { emailSchema } from '$lib/utils/schemas';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { setFlash } from 'sveltekit-flash-message/server';
-import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
-import * as m from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
+import { emailSchema } from '$lib/utils/schemas';
+import { m } from '$paraglide/messages';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	// redirect user if already logged in
@@ -56,9 +57,6 @@ export const actions: Actions = {
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
-			headers: {
-				'X-CSRFToken': csrfToken
-			},
 			body: JSON.stringify(form.data)
 		};
 
@@ -68,7 +66,7 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.log(response);
 			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
+				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 			}
 			redirect(302, '/login');
 		}

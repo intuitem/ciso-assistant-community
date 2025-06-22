@@ -1,0 +1,176 @@
+urn: urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+locale: en
+ref_id: risk-matrix-4x4-ebios-rm
+name: 4x4 risk matrix from EBIOS-RM
+description: based on the official guide of the EBIOS RM approach
+copyright: public domain
+version: 4
+publication_date: 2025-05-02
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: Matrice 4x4 EBIOS-RM
+    description: "Bas\xE9e sur le guide officiel de la m\xE9thode EBIOS RM"
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm
+    ref_id: risk-matrix-4x4-ebios-rm
+    name: 4x4 risk matrix from EBIOS-RM
+    description: based on the official guide of the EBIOS RM approach
+    probability:
+    - id: 0
+      abbreviation: V1
+      name: Unlikely
+      description: The source of risk is unlikely to achieve its intended objective
+        under any of the proposed procedures. The likelihood of the scenario is weak.
+      translations:
+        fr:
+          name: Peu vraisemblable
+          description: "La source de risque a peu de chances d\u2019atteindre son\
+            \ objectif vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9\
+            s. La vraisemblance du sc\xE9nario est faible."
+      hexcolor: '#FAF7E9'
+    - id: 1
+      abbreviation: V2
+      name: Likely
+      description: ' The source of risk is likely to achieve its intended objective
+        according to one of the operating procedures envisaged. The likelihood of
+        the scenario is significant. '
+      translations:
+        fr:
+          name: Vraisemblable
+          description: "La source de risque est susceptible d\u2019atteindre son objectif\
+            \ vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9s. La vraisemblance\
+            \ du sc\xE9nario est significative."
+      hexcolor: '#EEE6BC'
+    - id: 2
+      abbreviation: V3
+      name: Very likely
+      description: The risk source is very likely to achieve its intended objective
+        through one of the anticipated methods of operation. The likelihood of the
+        scenario is high.
+      translations:
+        fr:
+          name: "Tr\xE8s vraisemblable"
+          description: "La source de risque va probablement atteindre son objectif\
+            \ vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9s. La vraisemblance\
+            \ du sc\xE9nario est \xE9lev\xE9e."
+      hexcolor: '#DCCC77'
+    - id: 3
+      abbreviation: V4
+      name: Certain
+      description: The risk source will certainly achieve its intended objective through
+        one of the anticipated methods of operation OR such a scenario has already
+        occurred within the organization (incident history).
+      translations:
+        fr:
+          name: Certain
+          description: "La source de risque va certainement atteindre son objectif\
+            \ vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9s OU un\
+            \ tel sc\xE9nario s\u2019est d\xE9j\xE0 produit au sein de l\u2019organisation\
+            \ (historique d\u2019incidents)."
+      hexcolor: '#C4AA00'
+    impact:
+    - id: 0
+      abbreviation: G1
+      name: Minor
+      description: 'No operational impact on the performance of the activity or on
+        the safety of people and property. '
+      translations:
+        fr:
+          name: Mineur
+          description: "Aucun impact op\xE9rationnel ni sur les performances de l\u2019\
+            activit\xE9 ni sur la s\xE9curit\xE9 des personnes et des biens."
+      hexcolor: '#42C7C4'
+    - id: 1
+      abbreviation: G2
+      name: Significant
+      description: 'Deterioration in the performance of the activity without impact
+        on the safety of people and property. '
+      translations:
+        fr:
+          name: Significatif
+          description: "D\xE9gradation des performances de l\u2019activit\xE9 sans\
+            \ impacts sur la s\xE9curit\xE9 des personnes et des biens."
+      hexcolor: '#FBF082'
+    - id: 2
+      abbreviation: G3
+      name: Important
+      description: 'Sharp deterioration in the performance of the activity, with possible
+        significant impacts on the safety of people and property. '
+      translations:
+        fr:
+          name: Important
+          description: "Forte d\xE9gradation des performances de l\u2019activit\xE9\
+            , avec d\u2019\xE9ventuels impacts significatifs sur la s\xE9curit\xE9\
+            \ des personnes et des biens."
+      hexcolor: '#FFC586'
+    - id: 3
+      abbreviation: G4
+      name: Critical
+      description: Inability for the company to carry out all or part of its activity,
+        with possible serious impacts on the safety of people and property.
+      translations:
+        fr:
+          name: Critique
+          description: "Incapacit\xE9 pour la soci\xE9t\xE9 d\u2019assurer tout ou\
+            \ partie de son activit\xE9, avec d\u2019\xE9ventuels impacts graves sur\
+            \ la s\xE9curit\xE9 des personnes et des biens."
+      hexcolor: '#EE7B86'
+    risk:
+    - id: 0
+      abbreviation: '1'
+      name: Low
+      description: Acceptable as is.
+      translations:
+        fr:
+          name: Faible
+          description: "Acceptable en l'\xE9tat"
+      hexcolor: '#59BBB2'
+    - id: 1
+      abbreviation: '2'
+      name: Medium
+      description: Tolerable under control. Risk management monitoring must be conducted,
+        and actions should be implemented as part of continuous improvement in the
+        medium and long term.
+      translations:
+        fr:
+          name: Moyen
+          description: "Tol\xE9rable sous contr\xF4le. Un suivi en termes de gestion\
+            \ du risque est \xE0 mener et des actions sont \xE0 mettre en place dans\
+            \ le cadre d\u2019une am\xE9lioration continue sur le moyen et long terme."
+      hexcolor: '#F5C481'
+    - id: 2
+      abbreviation: '3'
+      name: High
+      description: Unacceptable. Risk reduction measures must be implemented urgently
+        in the short term. Otherwise, all or part of the activity will be denied.
+      translations:
+        fr:
+          name: "\xC9lev\xE9"
+          description: "Inacceptable. Des mesures de r\xE9duction du risque doivent\
+            \ imp\xE9rativement \xEAtre prises \xE0 court terme. Dans le cas contraire,\
+            \ tout ou partie de l\u2019activit\xE9 sera refus\xE9e."
+      hexcolor: '#E6686D'
+    grid:
+    - - 0
+      - 0
+      - 0
+      - 1
+    - - 0
+      - 0
+      - 1
+      - 1
+    - - 1
+      - 1
+      - 2
+      - 2
+    - - 1
+      - 2
+      - 2
+      - 2
+    translations:
+      fr:
+        name: Matrice 4x4 EBIOS-RM
+        description: "Bas\xE9e sur le guide officiel de la m\xE9thode EBIOS RM"

@@ -66,13 +66,12 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = lib_detail_response["framework"]
 
         # Asserts that the library is not already loaded
-        assert (
-            Framework.objects.all().count() == 0
-        ), "libraries are already loaded in the database"
+        assert Framework.objects.all().count() == 0, (
+            "libraries are already loaded in the database"
+        )
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Frameworks",
@@ -99,7 +98,10 @@ class TestLibrariesAuthenticated:
                 "name": lib_detail_response["name"],
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {
+                    "id": str(Folder.get_root_folder().id),
+                    "str": Folder.get_root_folder().name,
+                },
             },
             base_count=1,
             user_group=test.user_group,
@@ -112,9 +114,9 @@ class TestLibrariesAuthenticated:
         """test to delete frameworks with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        assert (
-            Framework.objects.all().count() == 1
-        ), "Frameworks are not correctly imported in the database"
+        assert Framework.objects.all().count() == 1, (
+            "Frameworks are not correctly imported in the database"
+        )
 
         EndpointTestsQueries.Auth.delete_object(
             test.client,
@@ -135,13 +137,12 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = lib_detail_response["risk_matrix"][0]
 
         # Asserts that the library is not already loaded
-        assert (
-            RiskMatrix.objects.all().count() == 0
-        ), "libraries are already loaded in the database"
+        assert RiskMatrix.objects.all().count() == 0, (
+            "libraries are already loaded in the database"
+        )
         EndpointTestsQueries.Auth.get_object(
             test.client, "Risk matrices", user_group=test.user_group
         )
@@ -166,7 +167,10 @@ class TestLibrariesAuthenticated:
                 "name": lib_detail_response["name"],
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {
+                    "id": str(Folder.get_root_folder().id),
+                    "str": Folder.get_root_folder().name,
+                },
                 #                                 'json_definition': lib_detail_response  # TODO: restore this test
             },
             base_count=1,

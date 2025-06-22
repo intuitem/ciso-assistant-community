@@ -150,12 +150,12 @@ class TestUsersAuthenticated:
         response = test.admin_client.post(url, data, format="json")
 
         # Asserts that the user was not created
-        assert (
-            response.status_code == status.HTTP_400_BAD_REQUEST
-        ), "users can be created with an already used email"
-        assert response.json() == {
-            "email": ["user with this email already exists."]
-        }, "users can be created with an already used email"
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, (
+            "users can be created with an already used email"
+        )
+        assert response.json() == {"email": ["user with this email already exists."]}, (
+            "users can be created with an already used email"
+        )
 
     def test_invalid_emails(self, test):
         """test to create users with the API with authentication and invalid emails"""
@@ -182,9 +182,9 @@ class TestUsersAuthenticated:
             response = test.admin_client.post(url, data, format="json")
 
             # Asserts that the user was not created
-            assert (
-                response.status_code == status.HTTP_400_BAD_REQUEST
-            ), f"users can be created with an invalid email ({email})"
-            assert response.json() == {
-                "email": ["Enter a valid email address."]
-            }, f"users can be created with an invalid email ({email})"
+            assert response.status_code == status.HTTP_400_BAD_REQUEST, (
+                f"users can be created with an invalid email ({email})"
+            )
+            assert response.json() == {"email": ["Enter a valid email address."]}, (
+                f"users can be created with an invalid email ({email})"
+            )

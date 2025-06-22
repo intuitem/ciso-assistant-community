@@ -2,12 +2,20 @@
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import type { DataHandler } from '@vincjo/datatables/remote';
+	import { tableHandlers } from '$lib/utils/stores';
 
-	export let meta: any;
-	export let actionsURLModel: string;
-	$: library = meta;
-	let loading = { form: false, library: '' };
+	interface Props {
+		meta: any;
+		actionsURLModel: string;
+		handler: DataHandler;
+	}
+
+	let { meta, actionsURLModel }: Props = $props();
+	let library = $derived(meta);
+	let loading = $state({ form: false, library: '' });
 
 	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
 		const data = new FormData(event.currentTarget);
@@ -46,28 +54,31 @@
 				/>
 			</svg>
 		</div>
-	{:else}
+	{:else if page.data.user.is_admin}
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.urn}?/load"
+				action="/stored-libraries/{library.id}?/load"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
-						update();
+						await update();
+						Object.values($tableHandlers).forEach((handler) => {
+							handler.invalidate();
+						});
 					};
 				}}
-				on:submit={handleSubmit}
 			>
 				<button
 					type="submit"
 					data-testid="tablerow-import-button"
-					on:click={(e) => e.stopPropagation()}
+					id="tablerow-import-button"
+					onclick={(e) => e.stopPropagation()}
 				>
-					<i class="fa-solid fa-file-import" />
+					<i class="fa-solid fa-file-import"></i>
 				</button>
 			</form>
 		</span>
@@ -99,7 +110,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.urn}?/update"
+				action="/loaded-libraries/{library.id}?/update"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
@@ -109,10 +120,10 @@
 						update();
 					};
 				}}
-				on:submit={handleSubmit}
+				onsubmit={handleSubmit}
 			>
-				<button title={m.updateThisLibrary()} on:click={(e) => e.stopPropagation()}>
-					<i class="fa-solid fa-circle-up" />
+				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
+					<i class="fa-solid fa-circle-up"></i>
 				</button>
 			</form>
 		</span>

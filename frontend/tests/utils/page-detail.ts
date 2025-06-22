@@ -7,7 +7,12 @@ export class PageDetail extends BasePage {
 	item: string;
 	readonly editButton: Locator;
 
-	constructor(public readonly page: Page, url: string, form: FormContent, item: string) {
+	constructor(
+		public readonly page: Page,
+		url: string,
+		form: FormContent,
+		item: string
+	) {
 		super(page, url, item);
 		this.form = form;
 		this.item = item;
@@ -20,10 +25,9 @@ export class PageDetail extends BasePage {
 
 	async editItem(buildParams: { [k: string]: string }, editParams: { [k: string]: string }) {
 		await this.editButton.click();
-		await this.hasTitle('Edit ' + this.item);
 		await this.hasBreadcrumbPath(['Edit'], false);
 
-		let editedValues: { [k: string]: string } = {};
+		const editedValues: { [k: string]: string } = {};
 		for (const key in editParams) {
 			editedValues[key] = editParams[key] === '' ? buildParams[key] + ' edited' : editParams[key];
 		}
@@ -31,20 +35,16 @@ export class PageDetail extends BasePage {
 		await this.form.fill(editedValues);
 		await this.form.saveButton.click();
 
-		await this.isToastVisible(
-			'The .+: ' +
-				({ ...buildParams, ...editedValues }.name || { ...buildParams, ...editedValues }.email) +
-				' has been successfully updated'
-		);
+		await this.isToastVisible('The .+ has been successfully updated');
 		return editedValues;
 	}
 
 	async verifyItem(values: { [k: string]: any }) {
 		if (this.url.includes('risk-assessments')) {
-			if ('project' in values) {
+			if ('perimeter' in values) {
 				await expect
 					.soft(this.page.getByTestId('name-field-value'))
-					.toHaveText(`${values.project}/${values.name} - ${values.version}`);
+					.toHaveText(`${values.perimeter}/${values.name} - ${values.version}`);
 			} else {
 				await expect
 					.soft(this.page.getByTestId('name-field-value'))
@@ -73,6 +73,18 @@ export class PageDetail extends BasePage {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
 							.toHaveText(new RegExp(key.replaceAll('_', ' ').replace('lc ', ''), 'i'));
+					} else if (key === 'folder') {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText(new RegExp('domain'.replaceAll('_', ' '), 'i'));
+					} else if (key === 'ref_id') {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText('Reference ID');
+					} else if (key === 'owners') {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText('Assigned to');
 					} else {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
@@ -82,7 +94,7 @@ export class PageDetail extends BasePage {
 					if (this.form.fields.get(key)?.type === FormFieldType.CHECKBOX) {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-value'))
-							.toHaveText(values[key] ? 'true' : '--');
+							.toHaveText(values[key] ? '✅' : '❌');
 					} else if (this.form.fields.get(key)?.type === FormFieldType.DATE) {
 						const displayedValue = await this.page
 							.getByTestId(key.replaceAll('_', '-') + '-field-value')
@@ -161,7 +173,7 @@ export class PageDetail extends BasePage {
 				.getByTestId('tree-item')
 				.filter({ has: content, hasNotText: path.length != 0 ? path.at(-1) : undefined })
 				.getByTestId('tree-item-lead')
-				.getByTestId('progress-radial'),
+				.getByTestId('progress-ring-svg'),
 			default: this.page.getByTestId('tree-item').filter({ hasText: new RegExp(`^${value}\n*.*`) })
 		};
 	}

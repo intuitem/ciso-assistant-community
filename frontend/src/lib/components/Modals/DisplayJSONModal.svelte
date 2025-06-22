@@ -1,17 +1,12 @@
 <script lang="ts">
-	// Props
-	/** Exposes parent props to this component. */
-	// export let parent: any;
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
-	const modalStore: ModalStore = getModalStore();
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { getModalStore, type ModalStore } from './stores';
 
 	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-white p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
+
+	const modalStore: ModalStore = getModalStore();
 </script>
 
 {#if $modalStore[0]}
@@ -21,12 +16,14 @@
 			{$modalStore[0].title ?? '(title missing)'}
 		</header>
 		{#if body}
-			{#each Object.entries(JSON.parse(body)) as [key, value]}
-				<div>
-					<div class="font-bold capitalize">{key}:</div>
-					<div>{value}</div>
-				</div>
-			{/each}
+			<div data-testid="key-value">
+				{#each Object.entries(JSON.parse(body)) as [key, value]}
+					<div>
+						<div data-testid="{key}-key" class="font-bold">{safeTranslate(key)}:</div>
+						<div data-testid="{key}-value">{safeTranslate(value)}</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 {/if}

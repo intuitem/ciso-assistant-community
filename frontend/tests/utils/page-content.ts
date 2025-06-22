@@ -12,6 +12,8 @@ export class PageContent extends BasePage {
 	readonly deleteModalTitle: Locator;
 	readonly deleteModalConfirmButton: Locator;
 	readonly deleteModalCancelButton: Locator;
+	readonly deleteModalPromptConfirmButton: Locator;
+	readonly deleteModalPromptConfirmText: Locator;
 
 	constructor(
 		public readonly page: Page,
@@ -30,10 +32,12 @@ export class PageContent extends BasePage {
 		this.itemDetail = new PageDetail(page, url, this.form, '');
 		this.addButton = this.page.getByTestId('add-button');
 		this.editButton = this.page.getByTestId('edit-button');
-		this.searchInput = this.page.getByTestId('search-input');
+		this.searchInput = this.page.getByRole('searchbox').first();
 		this.deleteModalTitle = this.page.getByTestId('modal-title');
 		this.deleteModalConfirmButton = this.page.getByTestId('delete-confirm-button');
 		this.deleteModalCancelButton = this.page.getByTestId('delete-cancel-button');
+		this.deleteModalPromptConfirmButton = this.page.getByTestId('delete-prompt-confirm-button');
+		this.deleteModalPromptConfirmText = this.page.getByTestId('delete-prompt-confirm-text');
 	}
 
 	async createItem(values: { [k: string]: any }, dependency?: any) {
@@ -41,7 +45,7 @@ export class PageContent extends BasePage {
 			await this.page.goto('/libraries');
 			await this.page.waitForURL('/libraries');
 
-			await this.importLibrary(dependency.ref || dependency.name, dependency.urn);
+			await this.importLibrary(dependency.name, dependency.urn);
 			await this.goto();
 		}
 
@@ -65,12 +69,15 @@ export class PageContent extends BasePage {
 		}
 	}
 
-	async importLibrary(ref: string, urn?: string, language = 'English') {
+	async importLibrary(name: string, urn?: string, language = 'English') {
+		await this.page.waitForTimeout(3000);
+		await this.page.getByRole('searchbox').first().clear();
+		await this.page.getByRole('searchbox').first().fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&
 			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
 		) {
-			if (await this.getRow(ref).isHidden()) {
+			if (await this.getRow(name).isHidden()) {
 				await this.tab('Libraries store').click();
 				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 			} else {
@@ -78,19 +85,26 @@ export class PageContent extends BasePage {
 			}
 		}
 		// If the library is not visible, it might have already been loaded
-		if (await this.importItemButton(ref, language === 'any' ? undefined : language).isHidden()) {
-			await this.tab('Loaded libraries').click();
-			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-			expect(this.getRow(ref)).toBeVisible();
+		await this.page.waitForTimeout(3000);
+		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
+			if (await this.tab('Loaded libraries').isVisible()) {
+				await this.tab('Loaded libraries').click();
+				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+				await this.page.getByRole('searchbox').first().clear();
+				await this.page.getByRole('searchbox').first().fill(name);
+			}
+			await expect(this.getRow(name)).toBeVisible();
 			return;
 		}
-		await this.importItemButton(ref, language === 'any' ? undefined : language).click();
+		await this.importItemButton(name, language === 'any' ? undefined : language).click();
 		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
 		await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-		expect(this.getRow(ref)).toBeVisible();
+		await this.page.getByRole('searchbox').first().clear();
+		await this.page.getByRole('searchbox').first().fill(name);
+		await expect(this.getRow(name)).toBeVisible();
 	}
 
 	async viewItemDetail(value?: string) {
@@ -120,7 +134,7 @@ export class PageContent extends BasePage {
 	}
 
 	tab(value: string) {
-		return this.page.getByTestId('tab').filter({ hasText: value });
+		return this.page.getByTestId('tabs-control').filter({ hasText: value });
 	}
 
 	editItemButton(value: string) {
@@ -129,6 +143,14 @@ export class PageContent extends BasePage {
 
 	deleteItemButton(value: string) {
 		return this.getRow(value).getByTestId('tablerow-delete-button');
+	}
+
+	deletePromptConfirmTextField() {
+		return this.page.getByTestId('delete-prompt-confirm-textfield');
+	}
+
+	deletePromptConfirmButton() {
+		return this.page.getByTestId('delete-prompt-confirm-button');
 	}
 
 	importItemButton(value: string, language?: string) {

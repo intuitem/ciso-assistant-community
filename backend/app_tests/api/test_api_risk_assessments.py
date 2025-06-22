@@ -1,11 +1,11 @@
 import pytest
 from rest_framework.test import APIClient
-from core.models import Project, RiskAssessment, RiskMatrix
+from core.models import Perimeter, RiskAssessment, RiskMatrix
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
 
-# Generic project data for tests
+# Generic perimeter data for tests
 RISK_ASSESSMENT_NAME = "Test risk_assessment"
 RISK_ASSESSMENT_DESCRIPTION = "Test Description"
 RISK_ASSESSMENT_VERSION = "1.0"
@@ -27,7 +27,7 @@ class TestRiskAssessmentUnauthenticated:
             {
                 "name": RISK_ASSESSMENT_NAME,
                 "description": RISK_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "risk_matrix": RiskMatrix.objects.create(
@@ -46,7 +46,7 @@ class TestRiskAssessmentUnauthenticated:
             {
                 "name": RISK_ASSESSMENT_NAME,
                 "description": RISK_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ).id,
             },
@@ -62,7 +62,7 @@ class TestRiskAssessmentUnauthenticated:
             {
                 "name": RISK_ASSESSMENT_NAME,
                 "description": RISK_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "risk_matrix": RiskMatrix.objects.create(
@@ -72,7 +72,7 @@ class TestRiskAssessmentUnauthenticated:
             {
                 "name": "new " + RISK_ASSESSMENT_NAME,
                 "description": "new " + RISK_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test2", folder=Folder.objects.create(name="test3")
                 ).id,
             },
@@ -87,7 +87,7 @@ class TestRiskAssessmentUnauthenticated:
             RiskAssessment,
             {
                 "name": RISK_ASSESSMENT_NAME,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "risk_matrix": RiskMatrix.objects.create(
@@ -105,7 +105,7 @@ class TestRiskAssessmentAuthenticated:
         """test to get risk assessments from the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        project = Project.objects.create(name="test", folder=test.folder)
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.get_object(
@@ -116,13 +116,17 @@ class TestRiskAssessmentAuthenticated:
                 "name": RISK_ASSESSMENT_NAME,
                 "description": RISK_ASSESSMENT_DESCRIPTION,
                 "version": RISK_ASSESSMENT_VERSION,
-                "project": project,
+                "perimeter": perimeter,
                 "risk_matrix": risk_matrix,
             },
             {
-                "project": {
-                    "id": str(project.id),
-                    "str": project.folder.name + "/" + project.name,
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
+                    "folder": {
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
+                    },
                 },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
@@ -134,7 +138,7 @@ class TestRiskAssessmentAuthenticated:
         """test to create risk assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        project = Project.objects.create(name="test", folder=test.folder)
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.create_object(
@@ -145,13 +149,17 @@ class TestRiskAssessmentAuthenticated:
                 "name": RISK_ASSESSMENT_NAME,
                 "description": RISK_ASSESSMENT_DESCRIPTION,
                 "version": RISK_ASSESSMENT_VERSION,
-                "project": str(project.id),
+                "perimeter": str(perimeter.id),
                 "risk_matrix": str(risk_matrix.id),
             },
             {
-                "project": {
-                    "id": str(project.id),
-                    "str": project.folder.name + "/" + project.name,
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
+                    "folder": {
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
+                    },
                 },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
@@ -164,8 +172,8 @@ class TestRiskAssessmentAuthenticated:
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
-        project = Project.objects.create(name="test", folder=test.folder)
-        project2 = Project.objects.create(
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
+        perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
         risk_matrix = RiskMatrix.objects.all()[0]
@@ -179,20 +187,24 @@ class TestRiskAssessmentAuthenticated:
                 "name": RISK_ASSESSMENT_NAME,
                 "description": RISK_ASSESSMENT_DESCRIPTION,
                 "version": RISK_ASSESSMENT_VERSION,
-                "project": project,
+                "perimeter": perimeter,
                 "risk_matrix": risk_matrix,
             },
             {
                 "name": "new " + RISK_ASSESSMENT_NAME,
                 "description": "new " + RISK_ASSESSMENT_DESCRIPTION,
                 "version": RISK_ASSESSMENT_VERSION + ".1",
-                "project": str(project2.id),
+                "perimeter": str(perimeter2.id),
                 "risk_matrix": str(risk_matrix2.id),
             },
             {
-                "project": {
-                    "id": str(project.id),
-                    "str": project.folder.name + "/" + project.name,
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
+                    "folder": {
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
+                    },
                 },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
@@ -204,7 +216,7 @@ class TestRiskAssessmentAuthenticated:
         """test to delete risk assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        project = Project.objects.create(name="test", folder=test.folder)
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.delete_object(
@@ -213,7 +225,7 @@ class TestRiskAssessmentAuthenticated:
             RiskAssessment,
             {
                 "name": RISK_ASSESSMENT_NAME,
-                "project": project,
+                "perimeter": perimeter,
                 "risk_matrix": risk_matrix,
             },
             user_group=test.user_group,
@@ -224,4 +236,4 @@ class TestRiskAssessmentAuthenticated:
     # def test_get_status_choice(self, test):
     #     """test to get risk assessments status choices from the API with authentication"""
 
-    #     EndpointTestsQueries.get_object_options_auth(test.client, "Risk Assessment", "lc_status", Project.PRJ_LC_STATUS)
+    #     EndpointTestsQueries.get_object_options_auth(test.client, "Risk Assessment", "lc_status", Perimeter.PRJ_LC_STATUS)

@@ -1,6 +1,8 @@
 *.DS_Store
 *~$*
 .env
+.venv
+venv
 **/node_modules/
 .vscode
 *.sqlite3
@@ -9,4 +11,10 @@ temp/
 db/
 .dccache
 /backend/profiles
-docker-compose.yml
+./backend/ciso_assistant/.meta
+caddy_data/
+**/dist/
+**/.meta
+charts/custom-values.yaml
+**/charts/*/charts
+charts/ciso-assistant-next/custom.yaml

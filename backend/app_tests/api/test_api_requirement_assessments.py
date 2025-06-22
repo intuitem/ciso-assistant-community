@@ -7,14 +7,14 @@ from core.models import (
     RequirementAssessment,
     Framework,
 )
-from core.models import Project, AppliedControl
+from core.models import Perimeter, AppliedControl
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
 
 # Generic requirement assessment data for tests
-REQUIREMENT_ASSESSMENT_STATUS = "partially_compliant"
-REQUIREMENT_ASSESSMENT_STATUS2 = "non_compliant"
+REQUIREMENT_ASSESSMENT_STATUS = "to_do"
+REQUIREMENT_ASSESSMENT_STATUS2 = "in_progress"
 REQUIREMENT_ASSESSMENT_OBSERVATION = "Test observation"
 
 
@@ -39,7 +39,7 @@ class TestRequirementAssessmentsUnauthenticated:
                 "folder": folder,
                 "compliance_assessment": ComplianceAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     framework=Framework.objects.all()[0],
                 ),
                 "requirement": RequirementNode.objects.create(
@@ -77,7 +77,7 @@ class TestRequirementAssessmentsUnauthenticated:
                 "folder": folder,
                 "compliance_assessment": ComplianceAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     framework=Framework.objects.all()[0],
                 ),
                 "requirement": RequirementNode.objects.create(
@@ -102,7 +102,7 @@ class TestRequirementAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
 
@@ -124,7 +124,48 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                 },
-                "requirement": str(RequirementNode.objects.all()[0].id),
+                "requirement": {
+                    "id": str(RequirementNode.objects.all()[0].id),
+                    "urn": RequirementNode.objects.all()[0].urn,
+                    "annotation": RequirementNode.objects.all()[0].annotation,
+                    "name": RequirementNode.objects.all()[0].name,
+                    "questions": RequirementNode.objects.all()[0].questions,
+                    "description": RequirementNode.objects.all()[0].description,
+                    "typical_evidence": RequirementNode.objects.all()[
+                        0
+                    ].typical_evidence,
+                    "ref_id": RequirementNode.objects.all()[0].ref_id,
+                    "associated_reference_controls": RequirementNode.objects.all()[
+                        0
+                    ].associated_reference_controls,
+                    "associated_threats": RequirementNode.objects.all()[
+                        0
+                    ].associated_threats,
+                    "parent_requirement": {
+                        "str": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "str"
+                        ),
+                        "urn": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "urn"
+                        ),
+                        "id": str(
+                            RequirementNode.objects.all()[0].parent_requirement.get(
+                                "id"
+                            )
+                        ),
+                        "ref_id": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("ref_id"),
+                        "name": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "name"
+                        ),
+                        "description": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("description"),
+                    }
+                    if RequirementNode.objects.all()[0].parent_requirement
+                    else None,
+                },
             },
             base_count=-1,
             user_group=test.user_group,
@@ -137,7 +178,7 @@ class TestRequirementAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
         applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
@@ -173,12 +214,12 @@ class TestRequirementAssessmentsAuthenticated:
         folder = Folder.objects.create(name="test2")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
         compliance_assessment2 = ComplianceAssessment.objects.create(
             name="test2",
-            project=Project.objects.create(name="test2", folder=folder),
+            perimeter=Perimeter.objects.create(name="test2", folder=folder),
             framework=Framework.objects.all()[0],
         )
         applied_control = AppliedControl.objects.create(name="test", folder=folder)
@@ -210,7 +251,48 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                 },
-                "requirement": str(RequirementNode.objects.all()[0].id),
+                "requirement": {
+                    "id": str(RequirementNode.objects.all()[0].id),
+                    "urn": RequirementNode.objects.all()[0].urn,
+                    "annotation": RequirementNode.objects.all()[0].annotation,
+                    "name": RequirementNode.objects.all()[0].name,
+                    "questions": RequirementNode.objects.all()[0].questions,
+                    "description": RequirementNode.objects.all()[0].description,
+                    "typical_evidence": RequirementNode.objects.all()[
+                        0
+                    ].typical_evidence,
+                    "ref_id": RequirementNode.objects.all()[0].ref_id,
+                    "associated_reference_controls": RequirementNode.objects.all()[
+                        0
+                    ].associated_reference_controls,
+                    "associated_threats": RequirementNode.objects.all()[
+                        0
+                    ].associated_threats,
+                    "parent_requirement": {
+                        "str": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "str"
+                        ),
+                        "urn": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "urn"
+                        ),
+                        "id": str(
+                            RequirementNode.objects.all()[0].parent_requirement.get(
+                                "id"
+                            )
+                        ),
+                        "ref_id": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("ref_id"),
+                        "name": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "name"
+                        ),
+                        "description": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("description"),
+                    }
+                    if RequirementNode.objects.all()[0].parent_requirement
+                    else None,
+                },
             },
             user_group=test.user_group,
         )

@@ -1,23 +1,28 @@
 name: Unit tests on CISO Assistant frontend
+permissions:
+  contents: read
 
 on:
   push:
     paths:
       - "frontend/**"
+  workflow_dispatch:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  UBUNTU_VERSION: "ubuntu-24.04"
+  NODE_VERSION: "22"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       working-directory: ./frontend
 
     strategy:
       max-parallel: 4
       matrix:
-        node-version: ["20"]
+        node-version: ["22"]
 
     steps:
       - uses: actions/checkout@v3
@@ -25,15 +30,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install latest npm
+      - name: Install latest pnpm
         working-directory: ${{env.working-directory}}
         run: |
-          npm install -g npm &&
-          npm --version &&
-          npm list -g --depth 0
+          npm install -g pnpm &&
+          pnpm --version &&
+          pnpm list -g --depth 0
       - name: Install dependencies
         working-directory: ${{env.working-directory}}
-        run: npm ci
+        run: pnpm i --frozen-lockfile
+      - name: Prepare sveltekit
+        working-directory: ${{env.working-directory}}
+        run: pnpm run prepare
       - name: Run tests
         working-directory: ${{env.working-directory}}
-        run: npm run test:ci
+        run: pnpm run test:ci

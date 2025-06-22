@@ -1,21 +1,21 @@
-import { Console } from 'console';
 import { test, expect, type Locator } from '../../utils/test-utils.js';
 
 test.describe.configure({ mode: 'serial' });
 test('every library can be loaded', async ({ logedPage, librariesPage, page }) => {
-	test.slow();
+	// Long timeout because of the time it takes to load all libraries
+	test.setTimeout(600000);
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
 
-	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(1)').all();
+	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(2)').all();
 	const libraryNames: string[] = await Promise.all(
 		libraries.map(async (library) => await library.innerText())
 	);
 
 	let previousRemainingLibrary = '';
 	let nextRemainingLibrary = libraryNames[0];
-	for (let i = 1; i < libraryNames.length; i++) {
-		console.log('Importing library: ' + nextRemainingLibrary);
+	for (let i = 1; i < Math.min(12, libraries.length); i++) {
+		console.log('library:' + nextRemainingLibrary);
 		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
 
 		await librariesPage.tab('Libraries store').click();

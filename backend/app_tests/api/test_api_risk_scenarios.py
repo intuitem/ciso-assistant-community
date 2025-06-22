@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from core.models import (
     Asset,
-    Project,
+    Perimeter,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -13,57 +13,106 @@ from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
 
-# Generic project data for tests
+# Generic perimeter data for tests
 RISK_SCENARIO_NAME = "Test scenario"
 RISK_SCENARIO_DESCRIPTION = "Test Description"
 RISK_SCENARIO_existing_controls = "Test Existing Controls"
 RISK_SCENARIO_existing_controls2 = "Test New Existing Controls"
-RISK_SCENARIO_CURRENT_PROBABILITIES = (2, "High")
-RISK_SCENARIO_CURRENT_PROBABILITIES2 = (1, "Medium")
-RISK_SCENARIO_CURRENT_IMPACT = (2, "High")
-RISK_SCENARIO_CURRENT_IMPACT2 = (1, "Medium")
-RISK_SCENARIO_CURRENT_LEVEL = (
-    2,
-    {
-        "abbreviation": "H",
-        "name": "High",
-        "description": "unacceptable risk",
-        "hexcolor": "#FF0000",
-    },
-)
-RISK_SCENARIO_CURRENT_LEVEL2 = (
-    1,
-    {
-        "abbreviation": "M",
-        "name": "Medium",
-        "description": "risk requiring mitigation within 2 years",
-        "hexcolor": "#FFFF00",
-    },
-)
-RISK_SCENARIO_RESIDUAL_PROBABILITIES = (1, "Medium")
-RISK_SCENARIO_RESIDUAL_PROBABILITIES2 = (0, "Low")
-RISK_SCENARIO_RESIDUAL_IMPACT = (1, "Medium")
-RISK_SCENARIO_RESIDUAL_IMPACT2 = (0, "Low")
-RISK_SCENARIO_RESIDUAL_LEVEL = (
-    1,
-    {
-        "abbreviation": "M",
-        "name": "Medium",
-        "description": "risk requiring mitigation within 2 years",
-        "hexcolor": "#FFFF00",
-    },
-)
-RISK_SCENARIO_RESIDUAL_LEVEL2 = (
-    0,
-    {
-        "abbreviation": "L",
-        "name": "Low",
-        "description": "acceptable risk",
-        "hexcolor": "#00FF00",
-    },
-)
-RISK_SCENARIO_TREATMENT_STATUS = ("accept", "Accept")
-RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "Mitigate")
+RISK_SCENARIO_REF_ID = "Ref ID"
+RISK_SCENARIO_CURRENT_PROBABILITIES = {
+    "value": 2,
+    "abbreviation": "H",
+    "name": "High",
+    "description": "Frequent event",
+    "hexcolor": "#FF0000",
+}
+
+RISK_SCENARIO_CURRENT_PROBABILITIES2 = {
+    "value": 1,
+    "abbreviation": "M",
+    "name": "Medium",
+    "description": "Occasional event",
+    "hexcolor": "#FFFF00",
+}
+
+RISK_SCENARIO_CURRENT_IMPACT = {
+    "value": 2,
+    "abbreviation": "H",
+    "name": "High",
+    "description": "High impact",
+    "hexcolor": "#FF0000",
+}
+
+RISK_SCENARIO_CURRENT_IMPACT2 = {
+    "value": 1,
+    "abbreviation": "M",
+    "name": "Medium",
+    "description": "Medium impact",
+    "hexcolor": "#FFFF00",
+}
+
+RISK_SCENARIO_CURRENT_LEVEL = {
+    "value": 2,
+    "abbreviation": "H",
+    "name": "High",
+    "description": "unacceptable risk",
+    "hexcolor": "#FF0000",
+}
+RISK_SCENARIO_CURRENT_LEVEL2 = {
+    "value": 1,
+    "abbreviation": "M",
+    "name": "Medium",
+    "description": "risk requiring mitigation within 2 years",
+    "hexcolor": "#FFFF00",
+}
+
+RISK_SCENARIO_RESIDUAL_PROBABILITIES = {
+    "value": 1,
+    "abbreviation": "M",
+    "name": "Medium",
+    "description": "Occasional event",
+    "hexcolor": "#FFFF00",
+}
+RISK_SCENARIO_RESIDUAL_PROBABILITIES2 = {
+    "value": 0,
+    "abbreviation": "L",
+    "name": "Low",
+    "description": "Unfrequent event",
+    "hexcolor": "#92D050",
+}
+
+RISK_SCENARIO_RESIDUAL_IMPACT = {
+    "value": 1,
+    "abbreviation": "M",
+    "name": "Medium",
+    "description": "Medium impact",
+    "hexcolor": "#FFFF00",
+}
+
+RISK_SCENARIO_RESIDUAL_IMPACT2 = {
+    "value": 0,
+    "abbreviation": "L",
+    "name": "Low",
+    "description": "Low impact",
+    "hexcolor": "#92D050",
+}
+
+RISK_SCENARIO_RESIDUAL_LEVEL = {
+    "value": 1,
+    "abbreviation": "M",
+    "name": "Medium",
+    "description": "risk requiring mitigation within 2 years",
+    "hexcolor": "#FFFF00",
+}
+RISK_SCENARIO_RESIDUAL_LEVEL2 = {
+    "value": 0,
+    "abbreviation": "L",
+    "name": "Low",
+    "description": "acceptable risk",
+    "hexcolor": "#00FF00",
+}
+RISK_SCENARIO_TREATMENT_STATUS = ("accept", "accept")
+RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "mitigate")
 RISK_SCENARIO_JUSTIFICATION = "Test justification"
 
 
@@ -87,7 +136,7 @@ class TestRiskScenariosUnauthenticated:
                 "description": RISK_SCENARIO_DESCRIPTION,
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
                 ),
             },
@@ -120,7 +169,7 @@ class TestRiskScenariosUnauthenticated:
                 "description": RISK_SCENARIO_DESCRIPTION,
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
                 ),
                 "threats": [Threat.objects.create(name="test", folder=folder)],
@@ -145,7 +194,7 @@ class TestRiskScenariosUnauthenticated:
                 "description": RISK_SCENARIO_DESCRIPTION,
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
                 ),
                 "threats": [Threat.objects.create(name="test", folder=folder)],
@@ -163,7 +212,9 @@ class TestRiskScenariosAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="testProject", folder=test.folder),
+            perimeter=Perimeter.objects.create(
+                name="testPerimeter", folder=test.folder
+            ),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
@@ -175,28 +226,30 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls[0],
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES[0],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT[0],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL[0],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL["value"],
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES["value"],
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT["value"],
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL["value"],
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS[0],
                 "justification": RISK_SCENARIO_JUSTIFICATION,
                 "risk_assessment": risk_assessment,
                 "threats": [threat],
             },
             {
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT[1],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL[1],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES[1],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT[1],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL[1],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES,
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT,
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL,
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES,
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT,
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL,
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS[1],
                 "risk_assessment": {
                     "id": str(risk_assessment.id),
+                    "name": str(risk_assessment.name),
                     "str": str(risk_assessment),
                 },
                 "threats": [{"id": str(threat.id), "str": str(threat)}],
@@ -215,7 +268,7 @@ class TestRiskScenariosAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
@@ -231,13 +284,14 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls[0],
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES[0],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT[0],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL[0],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL["value"],
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES["value"],
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT["value"],
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL["value"],
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS[0],
                 "justification": RISK_SCENARIO_JUSTIFICATION,
                 "risk_assessment": str(risk_assessment.id),
@@ -246,16 +300,17 @@ class TestRiskScenariosAuthenticated:
                 "applied_controls": [str(applied_controls.id)],
             },
             {
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT[1],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL[1],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES[1],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT[1],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL[1],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES,
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT,
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL,
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES,
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT,
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL,
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS[1],
                 "risk_assessment": {
                     "id": str(risk_assessment.id),
                     "str": str(risk_assessment),
+                    "name": str(risk_assessment.name),
                 },
                 "threats": [{"id": str(threat.id), "str": threat.name}],
                 "risk_matrix": {
@@ -279,12 +334,12 @@ class TestRiskScenariosAuthenticated:
         folder = Folder.objects.create(name="test2")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         risk_assessment2 = RiskAssessment.objects.create(
             name="test2",
-            project=Project.objects.create(name="test2", folder=folder),
+            perimeter=Perimeter.objects.create(name="test2", folder=folder),
             risk_matrix=RiskMatrix.objects.all()[1],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
@@ -299,13 +354,14 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls[0],
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES[0],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT[0],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL[0],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL["value"],
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES["value"],
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT["value"],
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL["value"],
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS[0],
                 "justification": RISK_SCENARIO_JUSTIFICATION,
                 "risk_assessment": risk_assessment,
@@ -314,13 +370,14 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": "new " + RISK_SCENARIO_NAME,
                 "description": "new " + RISK_SCENARIO_DESCRIPTION,
+                "ref_id": "n" + RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls2[0],
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2[0],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT2[0],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL2[0],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES2[0],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT2[0],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL2[0],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2["value"],
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT2["value"],
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL2["value"],
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES2["value"],
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT2["value"],
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL2["value"],
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS2[0],
                 "justification": "new " + RISK_SCENARIO_JUSTIFICATION,
                 "risk_assessment": str(risk_assessment2.id),
@@ -329,16 +386,17 @@ class TestRiskScenariosAuthenticated:
                 "applied_controls": [str(applied_controls.id)],
             },
             {
-                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
-                "current_impact": RISK_SCENARIO_CURRENT_IMPACT[1],
-                "current_level": RISK_SCENARIO_CURRENT_LEVEL[1],
-                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES[1],
-                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT[1],
-                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL[1],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES,
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT,
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL,
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES,
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT,
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL,
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS[1],
                 "risk_assessment": {
                     "id": str(risk_assessment.id),
                     "str": str(risk_assessment),
+                    "name": str(risk_assessment.name),
                 },
                 "threats": [{"id": str(threat.id), "str": threat.name}],
                 "risk_matrix": {
@@ -357,7 +415,7 @@ class TestRiskScenariosAuthenticated:
         folder = test.folder
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="testProject", folder=folder),
+            perimeter=Perimeter.objects.create(name="testPerimeter", folder=folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=folder)
