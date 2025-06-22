@@ -5,7 +5,6 @@
 	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -14,6 +13,11 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		form: SuperForm<any>;
