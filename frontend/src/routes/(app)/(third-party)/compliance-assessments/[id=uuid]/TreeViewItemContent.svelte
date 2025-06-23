@@ -343,7 +343,11 @@
 							{/if}
 						{/if}
 					{:else}
-						{@const displayedScore = (nodeScore() + nodeDocumentationScore()) / 2}
+						{@const displayedScore = showDocumentationScore
+							? (nodeScore() + nodeDocumentationScore()) / 2
+							: nodeScore()}
+						{nodeScore()}
+						{nodeDocumentationScore()}
 						<ProgressRing
 							strokeWidth="20px"
 							value={formatScoreValue(displayedScore, node.max_score)}
