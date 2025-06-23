@@ -75,6 +75,7 @@
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
+		badge?: import('svelte').Snippet<[string, { [key: string]: any }]>;
 		actions?: import('svelte').Snippet<[any]>;
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
@@ -115,6 +116,7 @@
 		optButton,
 		selectButton,
 		addButton,
+		badge,
 		actions,
 		actionsBody,
 		actionsHead,
@@ -501,6 +503,7 @@
 															{safeTranslate(value ?? '-')}
 														{/if}
 													{/if}
+													{@render badge?.(key, row)}
 												</span>
 											{/if}
 										</td>

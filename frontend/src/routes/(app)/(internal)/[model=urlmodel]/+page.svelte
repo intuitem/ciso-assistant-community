@@ -211,6 +211,14 @@
 						</span>
 					</div>
 				{/snippet}
+				{#snippet badge(key, row)}
+					{#if URLModel === 'risk-assessments'}
+						{#if key === 'perimeter' && row.meta.ebios_rm_study}
+							<span class="badge preset-tonal-primary">ebios-rm</span>
+						{/if}
+					{/if}
+				{/snippet}
+				{#if URLModel === 'risk-assessments'}{/if}
 			</ModelTable>
 		{/key}
 	</div>
