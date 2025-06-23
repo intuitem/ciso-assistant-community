@@ -216,7 +216,10 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     oidc_has_secret = serializers.SerializerMethodField()
 
     def get_oidc_has_secret(self, obj) -> bool:
-        return bool(SSOSettings.objects.get().secret)
+        try:
+            return bool(SSOSettings.objects.get().secret)
+        except SSOSettings.DoesNotExist:
+            return False
 
     class Meta:
         model = SSOSettings
