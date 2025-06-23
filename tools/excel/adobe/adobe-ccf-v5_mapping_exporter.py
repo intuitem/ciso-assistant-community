@@ -6,13 +6,14 @@ You can also modify the "destination_file" variable to make the file name more c
 """
 
 import pandas as pd
+import re
 
 # === Configurable parameters ===
 source_file = "Open_Source_CCF.xlsx"
-destination_file = "part_mapping_adobe-ccf-v5_to_soc2.xlsx"  # <--- You can change this
+destination_file = "part_mapping_adobe-ccf-v5-to-pcidss-4_0.xlsx"  # <--- You can change this
 source_sheet = "CCF Open Source v5"
 destination_sheet = "mappings"
-target_column_name = "SOC 2 Ref#"   # <--- You can change this
+target_column_name = "PCI-DSS V4 Ref #"   # <--- You can change this
 
 # Load the Excel sheet (header is row 2, i.e., index 1)
 df = pd.read_excel(source_file, sheet_name=source_sheet, header=1)
@@ -28,8 +29,8 @@ for _, row in df.iterrows():
     if pd.isna(soc2_raw) or not str(soc2_raw).strip():
         continue
 
-    # Split on line breaks and clean
-    refs = [str(ref).strip().lower() for ref in str(soc2_raw).splitlines() if str(ref).strip()]
+    # Split on both newlines and commas, then clean
+    refs = [str(ref).strip().lower() for ref in re.split(r'[\n,]+', str(soc2_raw)) if str(ref).strip()]
     
     for ref in refs:
         results.append({
