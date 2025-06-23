@@ -874,6 +874,20 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                 source_node_id_raw = str(data.get("source_node_id", "")).strip()
                 target_node_id_raw = str(data.get("target_node_id", "")).strip()
                 
+                # Checks the required fields, cleaning the values first
+                required_fields = ["source_node_id", "target_node_id", "relationship"]
+                missing_fields = []
+
+                for field in required_fields:
+                    value = data.get(field)
+                    if value is None or str(value).strip() == "":
+                        missing_fields.append(field)
+
+                if missing_fields:
+                    quoted_fields = [f'"{field}"' for field in missing_fields]
+                    raise ValueError(f"(requirement_mapping_set) Missing or empty required field{'s' if len(missing_fields)>1 else ''} in row #{row[0].row}: {', '.join(quoted_fields)}")
+
+
                 # [+] Compat mode set to "2" so it can be compatible with every version of mappings >=v2 without having to choose a specific compat mode
                 source_node_id = clean_urn_suffix(source_node_id_raw, compat_mode=2)
                 target_node_id = clean_urn_suffix(target_node_id_raw, compat_mode=2)
