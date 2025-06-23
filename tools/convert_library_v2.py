@@ -998,7 +998,9 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
 
     # Step 6: Export to YAML
     print(f"✅ YAML saved as: \"{output_file}\"")
-    print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain behaviors.")
+    if not verbose:
+        print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain behaviors.")
+
     with open(output_file, "w", encoding="utf-8") as f:
         yaml.dump(library, f, sort_keys=False, allow_unicode=False)
 
