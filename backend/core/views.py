@@ -1155,7 +1155,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control
-                ) if applied_control.status else context["no status"].append(
+                ) if applied_control.status else context["--"].append(
                     applied_control
                 )
             data = {
@@ -4389,7 +4389,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control
-                ) if applied_control.status else context["no status"].append(
+                ) if applied_control.status else context["--"].append(
                     applied_control
                 )
             data = {
