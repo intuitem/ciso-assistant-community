@@ -10,7 +10,7 @@ import re  # <-- Needed for splitting by both \n and ,
 
 # === Configurable parameters ===
 source_file = "Cisco-CCFv3-Public_INFO.xlsx"
-destination_file = "part_mapping-cisco-ccf-v3.0-to-soc2-2017-rev-2022.xlsx"  # <--- You can change this
+destination_file = "part_mapping.xlsx"  # <--- You can change this
 source_sheet = "CCF V3"
 destination_sheet = "mappings"
 target_column_names = ["SOC TSC Common Criteria 2022", "SOC TSC Availability 2022", "SOC TSC Confidentiality 2022"]  # <--- You can add more columns here
