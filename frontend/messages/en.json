@@ -1672,5 +1672,7 @@
 	"suggestedParentheses": "(suggested)",
 	"matchingScenarios": "Matching scenarios",
 	"clientSecretAlreadySetHelpText": "The client secret is already set.",
-	"resetClientSecret": "Reset client secret"
+	"resetClientSecret": "Reset client secret",
+	"oidcTokenAuthMethodHelpText": "Optional token endpoint authentication method. If omitted, a method from the server's auth token method list is used",
+	"oidcPKCEEnabledHelpText": "Enable OAuth PKCE (Proof Key for Code Exchange) support. This is recommended for public clients."
 }

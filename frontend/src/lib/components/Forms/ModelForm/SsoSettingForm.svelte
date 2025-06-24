@@ -1,15 +1,15 @@
 <script lang="ts">
-	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import { page } from '$app/state';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
-	import { page } from '$app/state';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Select from '../Select.svelte';
+	import type { SuperValidated } from 'sveltekit-superforms';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -45,7 +45,6 @@
 	multiple
 >
 	<Checkbox {form} field="is_enabled" label={m.enableSSO()} helpText={m.enableSSOHelpText()} />
-	<!-- Incomplete Translation -->
 	<Checkbox
 		{form}
 		field="force_sso"
@@ -71,14 +70,14 @@
 				<span class="font-semibold">{m.IdPConfiguration()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<TextField
+				<HiddenInput
 					{form}
 					field="provider_name"
 					label={m.name()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['provider_name']}
 				/>
-				<TextField
+				<HiddenInput
 					{form}
 					field="provider_id"
 					label={m.providerID()}
@@ -117,18 +116,18 @@
 				{/if}
 				<TextField
 					{form}
-					field="key"
-					label={m.key()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['key']}
-				/>
-				<TextField
-					{form}
 					field="server_url"
 					label={m.serverURL()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['server_url']}
 				/>
+			{/snippet}
+		</Accordion.Item>
+		<Accordion.Item value="oidcAdvanced">
+			{#snippet control()}
+				<span class="font-semibold">{m.advancedSettings()}</span>
+			{/snippet}
+			{#snippet panel()}
 				<Select
 					{form}
 					field="token_auth_method"
@@ -136,7 +135,7 @@
 					disabled={!data.is_enabled}
 					options={oidcAuthMethodOptions}
 					cacheLock={cacheLocks['token_auth_method']}
-					disableDoubleDash
+					helpText={m.oidcTokenAuthMethodHelpText()}
 				/>
 				<Checkbox
 					{form}
@@ -144,6 +143,7 @@
 					label={m.oauthPKCEEnabled()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['oauth_pkce_enabled']}
+					helpText={m.oidcPKCEEnabledHelpText()}
 				/>
 			{/snippet}
 		</Accordion.Item>
@@ -216,7 +216,7 @@
 			{/snippet}
 		</Accordion.Item>
 
-		<Accordion.Item value="advanced"
+		<Accordion.Item value="samlAdvanced"
 			>{#snippet control()}
 				<span class="font-semibold">{m.advancedSettings()}</span>
 			{/snippet}
