@@ -214,7 +214,10 @@
 				{#snippet badge(key, row)}
 					{#if URLModel === 'risk-assessments'}
 						{#if key === 'perimeter' && row.meta.ebios_rm_study}
-							<span class="badge preset-tonal-primary">ebios-rm</span>
+							<span
+								class="badge inline-block bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-md border border-amber-200 rotate-[-6deg] font-semibold uppercase tracking-wide"
+								>ebios-rm</span
+							>
 						{/if}
 					{/if}
 				{/snippet}
