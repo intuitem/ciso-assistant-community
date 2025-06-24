@@ -9,7 +9,7 @@ import pandas as pd
 import re
 
 # === Configurable parameters ===
-source_file = "Open_Source_CCF.xlsx"
+source_file = "Open_Source_CCF_INFO.xlsx"
 destination_file = "part_mapping_adobe-ccf-v5-to-pcidss-4_0.xlsx"  # <--- You can change this
 source_sheet = "CCF Open Source v5"
 destination_sheet = "mappings"
