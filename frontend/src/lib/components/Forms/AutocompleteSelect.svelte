@@ -14,6 +14,7 @@
 		label: string;
 		value: string | number;
 		suggested?: boolean;
+		translatedLabel?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -183,7 +184,8 @@
 					suggested: optionsSuggestions?.some(
 						(s) =>
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
-					)
+					),
+					translatedLabel: safeTranslate(fullLabel)
 				};
 			})
 			.filter(
@@ -194,7 +196,7 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
-				return 0;
+				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
 
@@ -342,9 +344,7 @@
 						{@const [firstPart, ...restParts] = option.option.label.split(' - ')}
 						{safeTranslate(firstPart)} - {restParts.join(' - ')}
 					{:else}
-						{@const translatedValue = safeTranslate(option.option.value)}
-						{@const translatedLabel = safeTranslate(option.option.label)}
-						{translatedValue !== option.option.value ? translatedValue : translatedLabel}
+						{option.option.translatedLabel}
 					{/if}
 				{:else}
 					{option.option.label || option.option}
