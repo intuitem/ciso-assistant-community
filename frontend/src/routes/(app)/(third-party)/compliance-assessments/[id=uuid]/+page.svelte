@@ -709,17 +709,6 @@
 					</div>
 				{/snippet}
 			</Popover>
-			<!-- <button
-				use:popup={popupFilter}
-				class="btn variant-filled-primary self-end relative"
-				id="filters"
-			>
-				<i class="fa-solid fa-filter mr-2" />
-				{m.filters()}
-				{#if filterCount}
-					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
-				{/if}
-			</button> -->
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
