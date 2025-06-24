@@ -337,15 +337,14 @@
 				{#if option.option.suggested}
 					<span class="text-primary-600">{option.option.label}</span>
 					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{:else if translateOptions && option.label}
+				{:else if translateOptions && option.option}
 					{#if field === 'ro_to_couple'}
-						{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split(
-							'-'
-						)[1]}
+						{@const [firstPart, ...restParts] = option.option.label.split(' - ')}
+						{safeTranslate(firstPart)} - {restParts.join(' - ')}
 					{:else}
-						{m[toCamelCase(option.value)]
-							? safeTranslate(option.value)
-							: safeTranslate(option.label)}
+						{@const translatedValue = safeTranslate(option.option.value)}
+						{@const translatedLabel = safeTranslate(option.option.label)}
+						{translatedValue !== option.option.value ? translatedValue : translatedLabel}
 					{/if}
 				{:else}
 					{option.option.label || option.option}
