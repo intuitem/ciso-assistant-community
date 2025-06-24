@@ -100,7 +100,7 @@
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !px-2 !flex',
+		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
 		closeDropdownOnSelect: !multiple
 	};
 
@@ -318,7 +318,13 @@
 		class="control overflow-x-clip flex items-center space-x-2"
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
-		<input type="hidden" name={field} value={$value ? $value : ''} />
+		{#if Array.isArray($value)}
+			{#each $value as val}
+				<input type="hidden" name={field} value={val} />
+			{/each}
+		{:else if $value}
+			<input type="hidden" name={field} value={$value} />
+		{/if}
 		<MultiSelect
 			bind:selected
 			{options}
@@ -329,8 +335,8 @@
 		>
 			{#snippet children(option)}
 				{#if option.option.suggested}
-					<span class="text-indigo-600">{option.option.label}</span>
-					<span class="text-sm text-gray-500"> (suggested)</span>
+					<span class="text-primary-600">{option.option.label}</span>
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
 				{:else if translateOptions && option.label}
 					{#if field === 'ro_to_couple'}
 						{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split(
