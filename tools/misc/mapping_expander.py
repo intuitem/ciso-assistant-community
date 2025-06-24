@@ -49,10 +49,11 @@ import os
 import json
 
 # === Configuration variables ===
+current_script_path = os.path.dirname(os.path.abspath(__file__))
 source_file = "../excel/ccf/part_mapping_adobe-ccf-v5_to_soc2.xlsx"
 reference_file = "../excel/ccf/mapping-adobe-ccf-v5-to-soc2-2017-rev-2022_new.xlsx"
 destination_file = "../excel/ccf/destination.xlsx"
-exceptions_json_path = "mapping_expander_exceptions.json"
+exceptions_json_path = f"{current_script_path}/mapping_expander_exceptions.json"
 
 source_sheet_name = "mappings"           # Sheet name in the source file
 reference_sheet_name = "target"          # Sheet name in the reference file
@@ -82,7 +83,7 @@ new_rows = []
 warnings_list = []
 exceptions_list = []
 
-for _, row in df_source.iterrows():
+for index, row in df_source.iterrows():
     source_id = row["source_node_id"]
     target_prefix = row["target_node_id"]
 
@@ -91,7 +92,7 @@ for _, row in df_source.iterrows():
         framework_rules = exception_map[framework_exception]
         search_prefix = framework_rules.get(target_prefix, target_prefix)
         if search_prefix != target_prefix:
-            print(f"ℹ️  Exception applied for framework \"{framework_exception}\": \"{target_prefix}\" mapped to \"{search_prefix}\" (source_node_id: \"{source_id}\")")
+            print(f"ℹ️  Exception applied for framework \"{framework_exception}\": \"{target_prefix}\" mapped to \"{search_prefix}\" (source_node_id: \"{source_id}\") [row #{index+2}]")
             exceptions_list.append({
                 "source_node_id": source_id,
                 "original_target_node_id": target_prefix,
@@ -104,7 +105,7 @@ for _, row in df_source.iterrows():
     matches = [node_id for node_id in node_id_list if node_id.startswith(search_prefix)]
 
     if not matches:
-        warning_msg = f"No match found in reference for target_node_id \"{target_prefix}\" (source_node_id: \"{source_id}\")"
+        warning_msg = f"No match found in reference for target_node_id \"{target_prefix}\" (source_node_id: \"{source_id}\") [row #{index+2}]"
         print(f"⚠️  [WARNING] {warning_msg}")
         warnings_list.append({
             "source_node_id": source_id,
