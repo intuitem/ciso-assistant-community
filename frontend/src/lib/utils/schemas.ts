@@ -378,10 +378,9 @@ export const SSOSettingsSchema = z.object({
 	force_sso: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
-	provider_name: z.string(),
+	provider_name: z.string().optional(),
 	client_id: z.string(),
 	secret: z.string().optional(),
-	key: z.string().optional(),
 
 	// SAML specific fields
 	attribute_mapping_uid: z
@@ -425,7 +424,8 @@ export const SSOSettingsSchema = z.object({
 			'private_key_jwt',
 			'none'
 		])
-		.default('client_secret_basic'),
+		.optional()
+		.nullable(),
 	oauth_pkce_enabled: z.boolean().optional().default(false)
 });
 

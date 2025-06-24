@@ -62,7 +62,6 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         required=False,
         allow_blank=True,
         allow_null=True,
-        default="client_secret_basic",
         source="settings.token_auth_method",
     )  # NOTE: Only used for OIDC
     oauth_pkce_enabled = serializers.BooleanField(
@@ -232,6 +231,8 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         validated_data["secret"] = validated_data.get(
             "secret", settings_object.value.get("secret", "")
         )
+        validated_data["provider_id"] = validated_data.get("provider", "n/a")
+        validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
 
         settings_object.value = validated_data
         settings_object.save()
