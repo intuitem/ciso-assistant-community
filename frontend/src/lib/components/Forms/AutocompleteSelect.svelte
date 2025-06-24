@@ -321,7 +321,13 @@
 		class="control overflow-x-clip flex items-center space-x-2"
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
-		<input type="hidden" name={field} value={$value ? $value : ''} />
+		{#if Array.isArray($value)}
+			{#each $value as val}
+				<input type="hidden" name={field} value={val} />
+			{/each}
+		{:else if $value}
+			<input type="hidden" name={field} value={$value} />
+		{/if}
 		<MultiSelect
 			bind:selected
 			{options}

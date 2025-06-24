@@ -164,6 +164,7 @@
 				}),
 				{ taint: false }
 			);
+			form.newEvidence = undefined;
 			console.debug('formStore', $formStore);
 		}
 	});
