@@ -232,6 +232,8 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
             "secret", settings_object.value.get("secret", "")
         )
         validated_data["provider_id"] = validated_data.get("provider", "n/a")
+        if "settings" not in validated_data:
+            validated_data["settings"] = {}
         validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
 
         settings_object.value = validated_data
