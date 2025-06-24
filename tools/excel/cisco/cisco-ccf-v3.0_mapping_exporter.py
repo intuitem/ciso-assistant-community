@@ -24,6 +24,7 @@ df = df.drop(index=[i - 1 for i in rows_to_ignore], errors="ignore")
 
 # Prepare result rows
 results = []
+seen_pairs = set()  # <-- Track unique (source_node_id, target_node_id) pairs
 
 for column_name in target_column_names:
     first_entry = True  # Track first entry for this column
@@ -39,6 +40,11 @@ for column_name in target_column_names:
         refs = [str(ref).strip().lower() for ref in re.split(r'[\n,]+', str(soc2_raw)) if str(ref).strip()]
 
         for i, ref in enumerate(refs):
+            pair = (ccf_id, ref)
+            if pair in seen_pairs:
+                continue  # Skip duplicates
+            seen_pairs.add(pair)
+
             row_data = {
                 "source_node_id": str(ccf_id),
                 "target_node_id": str(ref)
