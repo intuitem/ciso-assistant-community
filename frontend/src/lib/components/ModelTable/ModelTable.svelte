@@ -340,7 +340,7 @@
 					<i class="fa-solid fa-filter mr-2"></i>
 					{m.filters()}
 					{#if filterCount}
-						<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+						<span class="text-sm">{filterCount}</span>
 					{/if}
 				{/snippet}
 				{#snippet content()}
