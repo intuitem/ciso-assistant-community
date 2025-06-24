@@ -1,5 +1,5 @@
 """
-Simple script to export a mapping from the Adobe CCF v5 PDF
+Simple script to export a mapping from the Adobe CCF v5 Excel
 
 Simply change the "target_column_name" variable to the column name you want in the original Excel file (e.g. SOC 2 Ref#).
 You can also modify the "destination_file" variable to make the file name more consistent.
