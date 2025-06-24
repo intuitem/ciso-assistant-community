@@ -200,19 +200,6 @@
 		forcePreventDelete;
 	const preventEdit = (row: TableSource) => forcePreventEdit;
 
-	const filterInitialData = page.url.searchParams.entries();
-
-	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
-		SPA: true,
-		validators: zod(z.object({})),
-		dataType: 'json',
-		invalidateAll: false,
-		applyAction: false,
-		resetForm: false,
-		taintedMessage: false,
-		validationMethod: 'auto'
-	});
-
 	const tableURLModel = URLModel;
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
@@ -251,6 +238,27 @@
 				}
 			}
 		}
+	});
+
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params to filter initial data
+	for (const [key, value] of page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
+	const zodFiltersObject = {};
+	Object.keys(filters).forEach((k) => {
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
+	});
+	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
+		SPA: true,
+		validators: zod(z.object(zodFiltersObject)),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
 	});
 
 	$effect(() => {
