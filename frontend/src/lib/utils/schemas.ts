@@ -331,6 +331,7 @@ export const EvidenceSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	findings: z.string().optional().array().optional(),
 	findings_assessment: z.string().optional().array().optional(),
+	timeline_entries: z.string().optional().array().optional(),
 
 	link: z
 		.string()
