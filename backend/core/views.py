@@ -2,6 +2,7 @@ import csv
 import json
 import mimetypes
 import re
+import regex
 import os
 import uuid
 import zipfile
@@ -4701,13 +4702,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True)
     def export(self, request, pk):
+        def sanitize_filename(name):
+            return regex.sub(r"[^\p{L}\p{N}\p{M}\-_.]+", "_", name)
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
             (index_content, evidences) = generate_html(compliance_assessment)
-            zip_name = f"{compliance_assessment.name.replace('/', '-')}-{compliance_assessment.framework.name.replace('/', '-')}-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.zip"
+            zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
             # Create temporary file that will be automatically deleted
             temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
