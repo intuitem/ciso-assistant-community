@@ -1015,6 +1015,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
     )
+    timeline_entries = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TimelineEntry.objects.all(), required=False
+    )
 
     class Meta:
         model = Evidence
