@@ -473,14 +473,13 @@ class ThreatViewSet(BaseModelViewSet):
 
 
 class AssetFilter(df.FilterSet):
-    exclude_childrens = df.ModelChoiceFilter(
+    exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
-        method="filter_exclude_childrens",
-        label="Exclude childrens",
+        method="filter_exclude_children",
+        label="Exclude children",
     )
 
-    def filter_exclude_childrens(self, queryset, name, value):
-        print(value.get_descendants())
+    def filter_exclude_children(self, queryset, name, value):
         descendants = value.get_descendants()
         return queryset.exclude(id__in=[descendant.id for descendant in descendants])
 
@@ -490,7 +489,7 @@ class AssetFilter(df.FilterSet):
             "folder",
             "type",
             "parent_assets",
-            "exclude_childrens",
+            "exclude_children",
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
@@ -508,6 +507,20 @@ class AssetViewSet(BaseModelViewSet):
     model = Asset
     filterset_class = AssetFilter
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self) -> models.query.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("asset_class", "folder")
+            .prefetch_related(
+                "parent_assets",
+                "child_assets",
+                "owner",
+                "security_exceptions",
+                "filtering_labels",
+            )
+        )
 
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")
