@@ -221,7 +221,7 @@
 		}
 	});
 
-	async function handleSelectChange() {
+	function handleSelectChange() {
 		if (allowUserOptions && selectedValues.length > 0) {
 			for (const val of selectedValues) {
 				if (!options.some((opt) => opt.value === val)) {
@@ -231,7 +231,9 @@
 			}
 		}
 
-		onChange($value);
+		// change($value);
+		$effect(async () => await onChange($value));
+		// dispatch('cache', selected);
 	}
 
 	function arraysEqual(
@@ -269,12 +271,12 @@
 		cachedValue = selected.map((option) => option.value);
 	});
 
-	run(async () => {
+	run(() => {
 		// Only update value after options are loaded
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
 			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
-			await handleSelectChange();
+			handleSelectChange();
 			isInternalUpdate = false;
 		}
 	});
