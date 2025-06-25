@@ -23,7 +23,14 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
+	const fearedEvents = data.fearedevent_set;
+	const initialDescription =
+		fearedEvents.length > 0
+			? '\nFeared Events:\n' + fearedEvents.map((event) => `- ${event.str}`).join('\n') + '\n'
+			: '';
+
 	const initialData = {
+		description: initialDescription,
 		risk_matrix: data.risk_matrix.id,
 		ebios_rm_study: params.id
 	};
