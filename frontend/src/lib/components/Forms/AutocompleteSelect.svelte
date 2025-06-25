@@ -14,6 +14,7 @@
 		label: string;
 		value: string | number;
 		suggested?: boolean;
+		translatedLabel?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -183,7 +184,8 @@
 					suggested: optionsSuggestions?.some(
 						(s) =>
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
-					)
+					),
+					translatedLabel: safeTranslate(fullLabel)
 				};
 			})
 			.filter(
@@ -194,7 +196,7 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
-				return 0;
+				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
 
@@ -337,15 +339,12 @@
 				{#if option.option.suggested}
 					<span class="text-primary-600">{option.option.label}</span>
 					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{:else if translateOptions && option.label}
+				{:else if translateOptions && option.option}
 					{#if field === 'ro_to_couple'}
-						{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split(
-							'-'
-						)[1]}
+						{@const [firstPart, ...restParts] = option.option.label.split(' - ')}
+						{safeTranslate(firstPart)} - {restParts.join(' - ')}
 					{:else}
-						{m[toCamelCase(option.value)]
-							? safeTranslate(option.value)
-							: safeTranslate(option.label)}
+						{option.option.translatedLabel}
 					{/if}
 				{:else}
 					{option.option.label || option.option}

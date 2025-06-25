@@ -54,7 +54,7 @@
 
 	// Headers assignment remains the same
 	let rawYAxisHeaders = $derived(swapAxes ? originalImpacts : originalProbabilities);
-	let yAxisHeaders: typeof rawYAxisHeaders = [];
+	let yAxisHeaders: typeof rawYAxisHeaders = $state([]);
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
 	let popupHoverY = $derived(
