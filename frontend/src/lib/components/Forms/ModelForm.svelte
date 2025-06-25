@@ -237,9 +237,9 @@
 				bind:cachedValue={formDataCache['reference_control']}
 				label={m.referenceControl()}
 				nullable={true}
-				on:change={async (e) => {
-					if (e.detail) {
-						await fetch(`/reference-controls/${e.detail}`)
+				onChange={async (e) => {
+					if (e) {
+						await fetch(`/reference-controls/${e}`)
 							.then((r) => r.json())
 							.then((r) => {
 								form.form.update((currentData) => {
