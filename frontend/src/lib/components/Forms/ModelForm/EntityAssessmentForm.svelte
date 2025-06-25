@@ -57,9 +57,9 @@
 		cacheLock={cacheLocks['framework']}
 		bind:cachedValue={formDataCache['framework']}
 		label={m.framework()}
-		on:change={async (e) => {
-			if (e.detail) {
-				await fetch(`/frameworks/${e.detail}`)
+		onChange={async (e) => {
+			if (e) {
+				await fetch(`/frameworks/${e}`)
 					.then((r) => r.json())
 					.then((r) => {
 						const implementation_groups = r['implementation_groups_definition'] || [];
