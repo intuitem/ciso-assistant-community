@@ -1638,8 +1638,8 @@
 	"campaign": "Campaign",
 	"campaigns": "Campaigns",
 	"addCampaign": "Start a campaign",
-  "averageProgress": "Average progress",
-  "daysRemaining": "Days remaining",
+	"averageProgress": "Average progress",
+	"daysRemaining": "Days remaining",
 	"associatedFindingsAssessments": "Associated follow-ups",
 	"hourCount": [
 		{

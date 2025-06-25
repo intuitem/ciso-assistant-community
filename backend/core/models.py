@@ -3602,9 +3602,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
-    framework = models.ForeignKey(
-        Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
-    )
+    frameworks = models.ManyToManyField(Framework, related_name="campaigns")
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -3621,13 +3619,15 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Start date"),
     )
-    perimeters = models.ManyToManyField(Perimeter, blank=True, related_name="campaigns")
+    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns")
 
     class Meta:
         verbose_name = "Campaign"
         verbose_name_plural = "Campaigns"
 
     def metrics(self):
+        if ComplianceAssessment.objects.filter(campaign=self).count() == 0:
+            return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
             [
                 ca.get_progress()

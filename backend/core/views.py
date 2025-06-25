@@ -4065,7 +4065,7 @@ class QualificationViewSet(BaseModelViewSet):
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = ["folder", "framework", "perimeters"]
+    filterset_fields = ["folder", "frameworks", "perimeters"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -4088,16 +4088,17 @@ class CampaignViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         super().perform_create(serializer)
         campaign = serializer.instance
-        framework = serializer.instance.framework
+        frameworks = serializer.instance.frameworks.all()
         for perimeter in campaign.perimeters.all():
-            compliance_assessment = ComplianceAssessment.objects.create(
-                name=f"{campaign.name} - {perimeter.name}",
-                campaign=campaign,
-                perimeter=perimeter,
-                framework=framework,
-                folder=perimeter.folder,
-            )
-            compliance_assessment.create_requirement_assessments()
+            for framework in frameworks:
+                compliance_assessment = ComplianceAssessment.objects.create(
+                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
+                    campaign=campaign,
+                    perimeter=perimeter,
+                    framework=framework,
+                    folder=perimeter.folder,
+                )
+                compliance_assessment.create_requirement_assessments()
 
 
 class ComplianceAssessmentViewSet(BaseModelViewSet):

@@ -639,7 +639,7 @@
 				closeOnInteractOutside={false}
 			>
 				{#snippet trigger()}
-					<i class="fa-solid fa-filter mr-2" />
+					<i class="fa-solid fa-filter mr-2"></i>
 					{m.filters()}
 					{#if filterCount}
 						<span class="text-xs">{filterCount}</span>

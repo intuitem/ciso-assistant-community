@@ -1,16 +1,26 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let classesContainer = '';
-	export let name = 'single_gauge';
-	export let value: number;
-	export let max: number;
-	export let isPercentage = false;
+	interface Props {
+		classesContainer?: string;
+		name?: string;
+		value: number;
+		max: number;
+		isPercentage?: boolean;
+	}
+
+	let {
+		classesContainer = '',
+		name = 'single_gauge',
+		value,
+		max,
+		isPercentage = false
+	}: Props = $props();
 
 	const chart_id = `${name}_div`;
 
 	// Calculate percentage
-	$: percentage = Math.round((value / max) * 100);
+	let percentage = $derived(Math.round((value / max) * 100));
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -93,4 +103,4 @@
 	});
 </script>
 
-<div id={chart_id} class={classesContainer} style="width: 400px; height: 400px;" />
+<div id={chart_id} class={classesContainer} style="width: 400px; height: 400px;"></div>

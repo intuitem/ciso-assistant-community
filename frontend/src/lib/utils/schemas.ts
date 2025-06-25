@@ -325,8 +325,8 @@ export const ComplianceAssessmentSchema = z.object({
 
 export const CampaignSchema = z.object({
 	...NameDescriptionMixin,
-	framework: z.string(),
-	perimeters: z.array(z.string().optional()).optional(),
+	frameworks: z.array(z.string()),
+	perimeters: z.array(z.string()),
 	status: z.string().optional().nullable(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	folder: z.string()

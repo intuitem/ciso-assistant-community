@@ -5,19 +5,34 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: any;
+		context: string;
+	}
+
+	let {
+		form,
+		model = $bindable(),
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {},
+		context
+	}: Props = $props();
 </script>
 
 <AutocompleteSelect
+	multiple
 	{form}
 	optionsEndpoint="frameworks"
-	field="framework"
-	cacheLock={cacheLocks['framework']}
-	bind:cachedValue={formDataCache['framework']}
+	field="frameworks"
+	cacheLock={cacheLocks['frameworks']}
+	bind:cachedValue={formDataCache['frameworks']}
 	label={m.targetFramework()}
 />
 <AutocompleteSelect
