@@ -13,9 +13,11 @@ NUM_PIVOTS = 10
 
 
 class MappingEngine:
+
     def __init__(self):
         self.all_rms: Dict[Tuple[str, str], dict] = {}
         self.framework_mappings: Dict[str, List[str]] = defaultdict(list)
+        self.direct_mappings: set[Tuple[str, str]] = set()
 
     def load_rms_data(self) -> None:
         """
@@ -44,22 +46,31 @@ class MappingEngine:
 
         for src, tgt in self.all_rms:
             self.framework_mappings[src].append(tgt)
+            self.direct_mappings.add((src, tgt))
+
 
     def all_paths_between(
         self, source_urn: str, dest_urn: str, max_depth: Optional[int] = None
     ) -> List[List[str]]:
+        # ✅ 1. Return only direct path if it exists
+        if (source_urn, dest_urn) in self.direct_mappings:
+            return [[source_urn, dest_urn]]
+
+        # 🔄 2. BFS for shortest paths
         queue = deque()
         queue.append(([source_urn], {source_urn}))
-        shortest_lengths = defaultdict(set)
-        shortest_lengths[source_urn].add(0)
+        shortest_paths = []
+        shortest_length = None
 
-        found_paths = []
         while queue:
             path, visited = queue.popleft()
             current = path[-1]
 
             if current == dest_urn:
-                found_paths.append(path)
+                if shortest_length is None:
+                    shortest_length = len(path)
+                if len(path) == shortest_length:
+                    shortest_paths.append(path)
                 continue
 
             if max_depth and len(path) >= max_depth:
@@ -68,15 +79,10 @@ class MappingEngine:
             for neighbor in self.framework_mappings.get(current, []):
                 if neighbor in visited:
                     continue
+                queue.append((path + [neighbor], visited | {neighbor}))
 
-                next_length = len(path)
-                if neighbor not in shortest_lengths or next_length <= min(
-                    shortest_lengths[neighbor]
-                ):
-                    shortest_lengths[neighbor].add(next_length)
-                    queue.append((path + [neighbor], visited | {neighbor}))
+        return shortest_paths
 
-        return found_paths
 
     def all_paths_from(self, source_urn, max_depth=None):
         """
