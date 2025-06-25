@@ -55,7 +55,7 @@
 	hidden={initialData.risk_assessment}
 	onChange={async (e) => {
 		if (e) {
-			await fetchDefaultRefId(e.detail);
+			await fetchDefaultRefId(e);
 		}
 	}}
 />
