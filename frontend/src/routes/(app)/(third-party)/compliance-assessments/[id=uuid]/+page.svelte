@@ -621,7 +621,7 @@
 		<div class="flex flex-row items-center font-semibold justify-between">
 			<div>
 				<span class="h4">{m.associatedRequirements()}</span>
-				<span class="badge variant-soft-primary ml-1">
+				<span class="badge bg-violet-400 text-white ml-1 rounded-xl">
 					{#if treeViewNodes}
 						{assessableNodesCount(treeViewNodes)}
 					{/if}
