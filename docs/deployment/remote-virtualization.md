@@ -98,7 +98,7 @@ Let's say that you want to setup or experiment with CISO Assistant on a Network 
 
 
 
-<figure><img src="../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (10) (1).png" alt=""><figcaption></figcaption></figure>
 
 * Install a recent version of Docker on your remote server
 * Given that we are using TLS with Caddy, we need to have DNS entries and not IPs

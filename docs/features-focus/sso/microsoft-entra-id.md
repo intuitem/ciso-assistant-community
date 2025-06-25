@@ -41,7 +41,7 @@ Go into your **Azur portal home**
 
     <figure><img src="../../.gitbook/assets/entra-sso-step-8-9.png" alt=""><figcaption></figcaption></figure>
 10. Make sure you use the same Identifier (Entity ID) that you've set earlier and appear on block 1, on CISO Assistant SP Entity ID:\
-    <img src="../../.gitbook/assets/image.png" alt="" data-size="original">&#x20;
+    <img src="../../.gitbook/assets/image (10).png" alt="" data-size="original">&#x20;
 11. Click on **Users and groups** in the sidebar menu, and **Add user/group** to give them access to CISO Assistant with SSO. The matching key will be the email and you'll be able to grant their permissions on the applications.\
 
 

@@ -11,7 +11,7 @@ This capability is supported on CISO Assistant and allows the user to create a p
 \
 Mapping are library objects that can be customized, imported and submitted to the community. To see the available ones, head to the libraries store and filter to mapping:\
 \
-![](<../.gitbook/assets/image (1).png>)
+![](<../.gitbook/assets/image (1) (1).png>)
 
 
 
@@ -19,7 +19,7 @@ Mappings are essentially a representation of the links between assessable nodes 
 
 Mapping is a directed graph linked a SRC framework to a TGT framework on which the nodes can have one of the following relationships:\
 \
-![](<../.gitbook/assets/image (2).png>) &#x20;
+![](<../.gitbook/assets/image (2) (1).png>) &#x20;
 
 
 
