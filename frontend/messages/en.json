@@ -919,7 +919,7 @@
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
 	"fixed": "Fixed",
-	"general": "general",
+	"general": "General",
 	"generalSettingsDescription": "Configure your general settings here.",
 	"securityObjectiveScale": "Security objective scale",
 	"generalSettingsUpdated": "General settings updated",
