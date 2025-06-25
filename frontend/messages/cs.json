@@ -944,5 +944,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Shodné scénáře"
+	"matchingScenarios": "Shodné scénáře",
+	"select": "Vybrat",
+	"deselect": "Zrušit výběr"
 }

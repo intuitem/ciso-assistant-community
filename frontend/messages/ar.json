@@ -924,5 +924,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "السيناريوهات المطابقة"
+	"matchingScenarios": "السيناريوهات المطابقة",
+	"select": "تحديد",
+	"deselect": "إلغاء التحديد"
 }

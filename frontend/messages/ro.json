@@ -953,5 +953,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Scenarii potrivite"
+	"matchingScenarios": "Scenarii potrivite",
+	"select": "Selectează",
+	"deselect": "Deselectează"
 }

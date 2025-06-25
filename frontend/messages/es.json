@@ -961,5 +961,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Escenarios coincidentes"
+	"matchingScenarios": "Escenarios coincidentes",
+	"select": "Seleccionar",
+	"deselect": "Deseleccionar"
 }

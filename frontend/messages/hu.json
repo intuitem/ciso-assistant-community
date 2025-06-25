@@ -956,5 +956,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Egyező forgatókönyvek"
+	"matchingScenarios": "Egyező forgatókönyvek",
+	"select": "Kiválasztás",
+	"deselect": "Kijelölés megszüntetése"
 }

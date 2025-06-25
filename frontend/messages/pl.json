@@ -953,5 +953,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Dopasowane scenariusze"
+	"matchingScenarios": "Dopasowane scenariusze",
+	"select": "Wybierz",
+	"deselect": "Odznacz"
 }
