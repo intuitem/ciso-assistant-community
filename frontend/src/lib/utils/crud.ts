@@ -926,6 +926,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
 				detail: true
 			},
+			{
+				field: 'feared_events',
+				urlModel: 'feared-events',
+				endpointUrl: 'ebios-rm/feared-events'
+			},
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{
 				field: 'attack_paths',

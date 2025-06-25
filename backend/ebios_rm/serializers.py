@@ -1,3 +1,4 @@
+from typing import Any
 from core.serializers import (
     BaseModelSerializer,
 )
@@ -31,9 +32,9 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     reference_entity = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
-    reference_entity = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
+    fearedevent_set = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
@@ -247,6 +248,7 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
+    feared_events = FieldsRelatedField(source="ro_to_couple.feared_events", many=True)
     gravity = serializers.JSONField(source="get_gravity_display")
     attack_paths = FieldsRelatedField(many=True)
 
