@@ -34,6 +34,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     reference_entity = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
+    fearedevent_set = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
