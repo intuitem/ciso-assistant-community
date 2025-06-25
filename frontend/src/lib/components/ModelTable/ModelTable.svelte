@@ -170,7 +170,7 @@
 			};
 		}),
 		{
-			rowsPerPage: pagination ? numberRowsPerPage : undefined,
+			rowsPerPage: pagination ? numberRowsPerPage : 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
 			totalRows: source?.meta?.count
 		}
 	);
