@@ -4719,18 +4719,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if evidence.attachment:
-                            if default_storage.exists(evidence.attachment.name):
-                                with default_storage.open(
-                                    evidence.attachment.name
-                                ) as attachment_file:
-                                    zipf.writestr(
-                                        os.path.join(
-                                            "evidences",
-                                            os.path.basename(evidence.attachment.name),
-                                        ),
-                                        attachment_file.read(),
-                                    )
+                        if evidence.attachment and default_storage.exists(
+                            evidence.attachment.name
+                        ):
+                            with default_storage.open(
+                                evidence.attachment.name
+                            ) as attachment_file:
+                                zipf.writestr(
+                                    os.path.join(
+                                        "evidences",
+                                        os.path.basename(evidence.attachment.name),
+                                    ),
+                                    attachment_file.read(),
+                                )
                     zipf.writestr("index.html", index_content)
 
                 # Seek to beginning for reading
