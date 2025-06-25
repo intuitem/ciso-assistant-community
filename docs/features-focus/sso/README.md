@@ -54,19 +54,19 @@ Once you've retrieved the IdP Entity ID, the Metadata URL and the Entity ID from
     <figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 2.  Navigate to **SSO** settings
 
-    <figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 3.  **Enable SSO**
 
-    <figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 4.  Select the **OpenID Connect** provider
 
-    <figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 5.  Enter the **Client ID**
 
-    <figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 6.  Enter the **Client secret**
 
-    <figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 7. Enter the **Server URL**
 8. And that's it! Don't forget to **click the 'Save' button**
 9. You should now be able to see the **Login with SSO** button
