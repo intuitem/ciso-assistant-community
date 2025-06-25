@@ -53,9 +53,9 @@
 	bind:cachedValue={formDataCache['risk_assessment']}
 	label={m.riskAssessment()}
 	hidden={initialData.risk_assessment}
-	on:change={async (e) => {
-		if (e.detail) {
-			await fetchDefaultRefId(e.detail);
+	onChange={async (e) => {
+		if (e) {
+			await fetchDefaultRefId(e);
 		}
 	}}
 />
