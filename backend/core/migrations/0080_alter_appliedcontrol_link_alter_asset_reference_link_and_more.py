@@ -5,30 +5,64 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0079_finding_evidences_findingsassessment_evidences'),
+        ("core", "0079_finding_evidences_findingsassessment_evidences"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='appliedcontrol',
-            name='link',
-            field=models.URLField(blank=True, help_text='External url for action follow-up (eg. Jira ticket)', max_length=2048, null=True, validators=[django.core.validators.URLValidator(schemes={'http', 'https'})], verbose_name='Link'),
+            model_name="appliedcontrol",
+            name="link",
+            field=models.URLField(
+                blank=True,
+                help_text="External url for action follow-up (eg. Jira ticket)",
+                max_length=2048,
+                null=True,
+                validators=[
+                    django.core.validators.URLValidator(schemes={"http", "https"})
+                ],
+                verbose_name="Link",
+            ),
         ),
         migrations.AlterField(
-            model_name='asset',
-            name='reference_link',
-            field=models.URLField(blank=True, help_text='External url for action follow-up (eg. Jira ticket)', max_length=2048, null=True, validators=[django.core.validators.URLValidator(schemes={'http', 'https'})], verbose_name='Link'),
+            model_name="asset",
+            name="reference_link",
+            field=models.URLField(
+                blank=True,
+                help_text="External url for action follow-up (eg. Jira ticket)",
+                max_length=2048,
+                null=True,
+                validators=[
+                    django.core.validators.URLValidator(schemes={"http", "https"})
+                ],
+                verbose_name="Link",
+            ),
         ),
         migrations.AlterField(
-            model_name='evidence',
-            name='link',
-            field=models.URLField(blank=True, help_text='Link to the evidence (eg. Jira ticket, etc.)', max_length=2048, null=True, validators=[django.core.validators.URLValidator(schemes={'http', 'https'})], verbose_name='Link'),
+            model_name="evidence",
+            name="link",
+            field=models.URLField(
+                blank=True,
+                help_text="Link to the evidence (eg. Jira ticket, etc.)",
+                max_length=2048,
+                null=True,
+                validators=[
+                    django.core.validators.URLValidator(schemes={"http", "https"})
+                ],
+                verbose_name="Link",
+            ),
         ),
         migrations.AlterField(
-            model_name='incident',
-            name='link',
-            field=models.URLField(blank=True, max_length=2048, null=True, validators=[django.core.validators.URLValidator(schemes={'http', 'https'})], verbose_name='Link'),
+            model_name="incident",
+            name="link",
+            field=models.URLField(
+                blank=True,
+                max_length=2048,
+                null=True,
+                validators=[
+                    django.core.validators.URLValidator(schemes={"http", "https"})
+                ],
+                verbose_name="Link",
+            ),
         ),
     ]

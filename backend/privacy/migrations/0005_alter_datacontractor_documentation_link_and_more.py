@@ -5,20 +5,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('privacy', '0004_migrate_privacy_prefixes_fix'),
+        ("privacy", "0004_migrate_privacy_prefixes_fix"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='datacontractor',
-            name='documentation_link',
-            field=models.URLField(blank=True, validators=[django.core.validators.URLValidator(schemes={'http', 'https'})]),
+            model_name="datacontractor",
+            name="documentation_link",
+            field=models.URLField(
+                blank=True,
+                validators=[
+                    django.core.validators.URLValidator(schemes={"http", "https"})
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='datatransfer',
-            name='documentation_link',
-            field=models.URLField(blank=True, validators=[django.core.validators.URLValidator(schemes={'http', 'https'})]),
+            model_name="datatransfer",
+            name="documentation_link",
+            field=models.URLField(
+                blank=True,
+                validators=[
+                    django.core.validators.URLValidator(schemes={"http", "https"})
+                ],
+            ),
         ),
     ]
