@@ -15,14 +15,16 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		error(400, 'Error fetching the ZIP file');
 	}
 
-	const fileName = `${compliance_assessment.name}-${
+	const originalFileName = `${compliance_assessment.name}-${
 		compliance_assessment.framework.str
 	}-${new Date().toISOString()}.zip`;
+	const sanitizedFilename = originalFileName.replace(/[^\x01-\x7F]/g, '');
 
-	return new Response(await res.blob(), {
+	const blobData = await res.blob();
+	return new Response(blobData, {
 		headers: {
 			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename="${fileName}"`
+			'Content-Disposition': `attachment; filename="${sanitizedFilename}"`
 		}
 	});
 };
