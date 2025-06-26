@@ -98,6 +98,16 @@ backend:
     # -- Enable Django debug mode
     djangoDebug: false
 
+  # -- Init containers for the backend
+  # initContainers:
+  # - name: init-container
+  #   image: busybox
+  #   command: ["sh", "-c", "echo 'Hello, World!' > /tmp/hello.txt"]
+  #   volumeMounts:
+  #     - name: tmp-volume
+  #       mountPath: /tmp
+  initContainers: []
+
   ## Huey config
   huey:
     # -- Huey container name
@@ -271,6 +281,16 @@ frontend:
     port: 80
     # -- Frontend service port name
     portName: http
+
+  # -- Init containers for the frontend
+  # initContainers:
+  # - name: init-container
+  #   image: busybox
+  #   command: ["sh", "-c", "echo 'Hello, World!' > /tmp/hello.txt"]
+  #   volumeMounts:
+  #     - name: tmp-volume
+  #       mountPath: /tmp
+  initContainers: []
 
 # CISO Assistant ingress configuration
 # Note: host value is inherited from global.domain

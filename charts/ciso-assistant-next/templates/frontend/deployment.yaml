@@ -31,6 +31,10 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.frontend.initContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ .Values.frontend.name }}
         image: {{ default .Values.global.image.registry .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.frontend.image.tag }}
