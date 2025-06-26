@@ -58,13 +58,11 @@
 </script>
 
 {#if row}
-	<ContextMenu.Sub>
-		<ContextMenu.SubTrigger
-			class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50"
+	<ContextMenu.Item
+		class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+	>
+		<button onclick={changeSelected} class="flex items-center"
+			>{row.is_selected ? m.deselect() : m.select()}</button
 		>
-			<button onclick={changeSelected} class="flex items-center"
-				>{row.is_selected ? m.deselect() : m.select()}</button
-			>
-		</ContextMenu.SubTrigger>
-	</ContextMenu.Sub>
+	</ContextMenu.Item>
 {/if}
