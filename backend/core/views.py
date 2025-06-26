@@ -2,6 +2,8 @@ import csv
 import json
 import mimetypes
 import re
+from django_filters.filterset import filterset_factory
+from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
@@ -147,17 +149,89 @@ SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
+class MultipleCharFilter(df.MultipleChoiceFilter):
+    """
+    Custom filter that allows multiple values for CharField with OR operation.
+    Supports both comma-separated values and multiple query parameters.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("lookup_expr", "icontains")
+        print(kwargs)
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        print("entering filter method")
+        print("qs:", qs)
+        print("value:", value)
+        return super().filter(qs, value)
+
+
 class GenericFilterSet(df.FilterSet):
+    @classmethod
+    def filter_for_lookup(cls, field, lookup_type):
+        DEFAULTS = dict(cls.FILTER_DEFAULTS)
+        if hasattr(cls, "_meta"):
+            DEFAULTS.update(cls._meta.filter_overrides)
+
+        data = try_dbfield(DEFAULTS.get, field.__class__) or {}
+        filter_class = data.get("filter_class")
+        params = data.get("extra", lambda field: {})(field)
+
+        # if there is no filter class, exit early
+        if not filter_class:
+            return None, {}
+
+        # perform lookup specific checks
+        if lookup_type == "exact" and getattr(field, "choices", None):
+            return df.MultipleChoiceFilter, {"choices": field.choices, **params}
+
+        if lookup_type == "isnull":
+            data = try_dbfield(DEFAULTS.get, models.BooleanField)
+
+            filter_class = data.get("filter_class")
+            params = data.get("extra", lambda field: {})(field)
+            return filter_class, params
+
+        if lookup_type == "in":
+
+            class ConcreteInFilter(df.BaseInFilter, filter_class):
+                pass
+
+            ConcreteInFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteInFilter, params
+
+        if lookup_type == "range":
+
+            class ConcreteRangeFilter(df.BaseRangeFilter, filter_class):
+                pass
+
+            ConcreteRangeFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteRangeFilter, params
+
+        return filter_class, params
+
     class Meta:
         model = None  # This will be set dynamically via filterset_factory.
-        fields = "__all__"
         filter_overrides = {
-            models.CharField: {
-                "filter_class": df.MultipleChoiceFilter,
+            models.ForeignKey: {
+                "filter_class": df.ModelMultipleChoiceFilter,
                 "extra": lambda f: {
-                    "lookup_expr": "icontains",
-                    # If your model field defines choices, they will be used:
-                    "choices": f.choices if hasattr(f, "choices") else None,
+                    "queryset": f.remote_field.model.objects.all(),
+                    "to_field_name": f.remote_field.field_name,
+                },
+            },
+            models.ManyToManyField: {
+                "filter_class": df.ModelMultipleChoiceFilter,
+                "extra": lambda f: {
+                    "queryset": f.remote_field.model.objects.all(),
+                    "to_field_name": f.remote_field.set_field_name,
                 },
             },
         }
@@ -177,16 +251,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     serializers_module = "core.serializers"
 
-    # @property
-    # def filterset_class(self):
-    #     # If you have defined filterset_fields, build the FilterSet on the fly.
-    #     if self.filterset_fields:
-    #         return filterset_factory(
-    #             model=self.model,
-    #             filterset=GenericFilterSet,
-    #             fields=self.filterset_fields,
-    #         )
-    #     return None
+    @property
+    def filterset_class(self):
+        # If you have defined filterset_fields, build the FilterSet on the fly.
+        if self.filterset_fields:
+            return filterset_factory(
+                model=self.model,
+                filterset=GenericFilterSet,
+                fields=self.filterset_fields,
+            )
+        return None
 
     def get_queryset(self) -> models.query.QuerySet:
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
