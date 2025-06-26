@@ -190,6 +190,8 @@
 	"importMatrices": "Importă matrici",
 	"importFrameworks": "Importă cadre",
 	"importMappings": "Importați mapări",
+	"importThreats": "Importă amenințări",
+	"importReferenceControls": "Importă controale de referință",
 	"summary": "Rezumat",
 	"composer": "Compozitor",
 	"statistics": "Statistici",

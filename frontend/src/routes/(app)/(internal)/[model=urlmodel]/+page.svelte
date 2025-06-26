@@ -132,6 +132,17 @@
 										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
 									>
 								{/if}
+								{#if ['threats', 'reference-controls'].includes(URLModel)}
+									{@const title =
+										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
+									<a
+										href={`/libraries?object_type=${URLModel}`}
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										data-testid="add-button"
+										id="add-button"
+										{title}><i class="fa-solid fa-file-import mr-2"></i></a
+									>
+								{/if}
 								{#if URLModel === 'assets'}
 									<a
 										href="assets/graph/"
@@ -159,7 +170,7 @@
 								<a
 									href="/libraries?object_type=risk_matrix"
 									onclick={handleClickForGT}
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -168,7 +179,7 @@
 								<a
 									href="/libraries?object_type=framework"
 									onclick={handleClickForGT}
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -176,33 +187,7 @@
 							{:else if URLModel === 'requirement-mapping-sets'}
 								<a
 									href="/libraries?object_type=requirement_mapping_set"
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
-								>
-							{:else if URLModel === 'risk-matrices'}
-								<a
-									href="/libraries?object_type=risk_matrices"
-									onclick={handleClickForGT}
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
-								>
-							{:else if URLModel === 'frameworks'}
-								<a
-									href="/libraries?object_type=frameworks"
-									onclick={handleClickForGT}
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
-								>
-							{:else if URLModel === 'requirement-mapping-sets'}
-								<a
-									href="/libraries?object_type=requirement_mapping_sets"
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a

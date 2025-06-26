@@ -191,6 +191,8 @@
 	"importMatrices": "Імпорт матриць",
 	"importFrameworks": "Імпорт фреймворків",
 	"importMappings": "Імпорт зіставлень",
+	"importThreats": "Імпорт загроз",
+	"importReferenceControls": "Імпорт типових контролів",
 	"summary": "Короткий зміст",
 	"composer": "Композитор",
 	"statistics": "Статистика",
