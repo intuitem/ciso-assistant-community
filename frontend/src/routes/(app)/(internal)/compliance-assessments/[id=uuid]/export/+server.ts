@@ -18,13 +18,14 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const originalFileName = `${compliance_assessment.name}-${
 		compliance_assessment.framework.str
 	}-${new Date().toISOString()}.zip`;
-	const sanitizedFilename = originalFileName.replace(/[^\x01-\xFF]/g, '');
+	const fallbackFileName = originalFileName.replace(/[^\x01-\xFF]/g, '');
+	const urlEncodedFileName = encodeURIComponent(originalFileName);
 
 	const blobData = await res.blob();
 	return new Response(blobData, {
 		headers: {
 			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename="${sanitizedFilename}"`
+			'Content-Disposition': `attachment; filename*=utf-8''${urlEncodedFileName}; filename=fallback-ascii-name.txt; filename="${fallbackFileName}"`
 		}
 	});
 };
