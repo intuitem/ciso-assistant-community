@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const originalFileName = `${compliance_assessment.name}-${
 		compliance_assessment.framework.str
 	}-${new Date().toISOString()}.zip`;
-	const sanitizedFilename = originalFileName.replace(/[^\x01-\x7F]/g, '');
+	const sanitizedFilename = originalFileName.replace(/[^\x01-\xFF]/g, '');
 
 	const blobData = await res.blob();
 	return new Response(blobData, {
