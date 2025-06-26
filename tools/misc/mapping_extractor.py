@@ -22,12 +22,13 @@ Configuration:
     - header_row             : 1-based row number containing column headers in the Excel sheet (default: 1)
 
 Output:
-- An Excel file with two sheets:
+- An Excel file with three sheets:
   1. "info": a summary sheet with metadata about the extraction (script version, file names, etc.).
   2. "mappings": a normalized list of unique source-target pairs:
      - source_node_id: normalized source ID (lowercase, spaces to dashes)
      - target_node_id: one entry per target
      - Col Name: shown only for the first entry of a target column group
+  3. "warnings": a sheet listing any issues encountered during validation, such as missing or duplicated columns.
 - Duplicate mappings are removed automatically.
 """
 
