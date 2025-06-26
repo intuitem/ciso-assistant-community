@@ -179,7 +179,7 @@ class TestAppliedControlsAuthenticated:
                 "description": "new " + APPLIED_CONTROL_DESCRIPTION,
                 "category": APPLIED_CONTROL_CATEGORY2[0],
                 "status": APPLIED_CONTROL_STATUS2._value_,
-                "link": "new " + APPLIED_CONTROL_LINK,
+                "link": APPLIED_CONTROL_LINK + "?new=1",
                 "eta": "2025-01-01",
                 "effort": APPLIED_CONTROL_EFFORT2[0],
                 "cost": APPLIED_CONTROL_COST2,
