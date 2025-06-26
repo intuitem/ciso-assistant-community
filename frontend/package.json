@@ -91,5 +91,10 @@
 		"svelte-multiselect": "^11.1.1",
 		"svelte-persisted-store": "^0.11.0"
 	},
-	"packageManager": "pnpm@10.12.3"
+	"packageManager": "pnpm@10.12.3",
+	"pnpm": {
+		"overrides": {
+			"esbuild": "^0.25.5"
+		}
+	}
 }
