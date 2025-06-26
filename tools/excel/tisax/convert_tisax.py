@@ -1,23 +1,24 @@
 """
-Simple script to convert TISAX v6.0.2 excel in a CISO Assistant Excel file
+Simple script to convert TISAX v6.0.2 & v6.0.3 excel in a CISO Assistant Excel file
 Source;  https://portal.enx.com/isa6-en.xlsx
 """
 
 import openpyxl
-import sys
 import re
 import argparse
 from openpyxl.styles import numbers
 
+VERSION_TO_EXPORT='6.0.3'
+
 parser = argparse.ArgumentParser(
     prog="convert_tisax",
-    description="convert TISAX controls offical v6.0.2 Excel file to CISO Assistant Excel file",
+    description=f"convert TISAX controls offical v{VERSION_TO_EXPORT} Excel file to CISO Assistant Excel file",
 )
 
 parser.add_argument("filename", help="name of official TISAX Excel file")
 args = parser.parse_args()
 input_file_name = args.filename
-output_file_name = "tisax-v6.0.2.xlsx"
+output_file_name = f"tisax-v{VERSION_TO_EXPORT}.xlsx"
 
 library_copyright = """© 2023 ENX Association, an Association according to the French Law of 1901, registered under No. w923004198 at the Sous-préfecture of Boulogne-Billancourt, France.
 This work of ENX's Working Group ISA was provided to the VDA in the present version by the ENX Association for published by the VDA as the VDA ISA. It is made to all interested parties free of charge under the following licensing terms. The release in the VDA is done by the VDA's Working Group Information Security and Economic Protection. Publication takes place with the consent of the rights holder. The VDA is responsible for the publication of the VDA ISA.
@@ -183,17 +184,17 @@ print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
-ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:tisax-v6.0.2"])
+ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:tisax-v{VERSION_TO_EXPORT}"])
 ws.append(["library_version", "1"])
 ws.append(["library_locale", "en"])
-ws.append(["library_ref_id", "TISAX v6.0.2"])
+ws.append(["library_ref_id", f"TISAX v{VERSION_TO_EXPORT}"])
 ws.append(["library_name", "Trusted Information Security Assessment Exchange    "])
 ws.append(["library_description", library_description])
 ws.append(["library_copyright", library_copyright])
 ws.append(["library_provider", "VDA"])
 ws.append(["library_packager", packager])
-ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:tisax-v6.0.2"])
-ws.append(["framework_ref_id", "TISAX v6.0.2"])
+ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:tisax-v{VERSION_TO_EXPORT}"])
+ws.append(["framework_ref_id", f"TISAX v{VERSION_TO_EXPORT}"])
 ws.append(["framework_name", "Trusted Information Security Assessment Exchange"])
 ws.append(["framework_description", library_description])
 ws.append(["framework_min_score", 0])
