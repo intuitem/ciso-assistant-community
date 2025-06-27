@@ -4502,7 +4502,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     reference_control=reference_control,
                     category=reference_control.category,
                 )
-                if reference_control.description and applied_control.description is None:
+                if (
+                    reference_control.description
+                    and applied_control.description is None
+                ):
                     applied_control.description = reference_control.description
                     applied_control.save()
                 if created:
