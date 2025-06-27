@@ -750,7 +750,7 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
                             ref_id_urn = f"node{counter - counter_fix}-{counter_fix}"
                         else:
                             
-                            # Adds the ability to use the column "urn_id" column despite compatibility mode set to "1"
+                            # Adds the ability to use the "urn_id" column despite compatibility mode set to "1"
                             if data.get("urn_id") and data.get("urn_id").strip():
                                 ref_id_urn = data.get('urn_id').strip()
                             else:
