@@ -82,7 +82,7 @@
 							modalConfirm(
 								data.settings.id,
 								data.settings.logo,
-								'settings/client-settings?/deleteLogo'
+								'/settings/client-settings?/deleteLogo'
 							)}
 					>
 						<i class="fa-solid fa-trash"></i>
@@ -110,7 +110,7 @@
 						modalConfirm(
 							data.settings.id,
 							data.settings.favicon,
-							'settings/client-settings?/deleteFavicon'
+							'/settings/client-settings?/deleteFavicon'
 						)}
 				>
 					<i class="fa-solid fa-trash"></i>
