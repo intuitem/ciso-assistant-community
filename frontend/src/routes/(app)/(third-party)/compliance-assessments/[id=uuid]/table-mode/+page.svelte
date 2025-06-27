@@ -66,7 +66,7 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	const requirementAssessments = $derived(data.requirement_assessments);
+	const requirementAssessments = $state(data.requirement_assessments);
 	const complianceAssessment = $state(data.compliance_assessment);
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -538,7 +538,7 @@
 												checkboxComponent="switch"
 												classes="h-full flex flex-row items-center justify-center my-1"
 												classesContainer="h-full flex flex-row items-center space-x-4"
-												onChange={async (isChecked) => {
+												onChange={async () => {
 													requirementAssessment.is_scored = !requirementAssessment.is_scored;
 													await update(requirementAssessment, 'is_scored');
 												}}
