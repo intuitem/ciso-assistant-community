@@ -1220,7 +1220,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ref_id=scenario.ref_id,
                 )
 
-                for field in ["applied_controls", "threats", "assets"]:
+                for field in [
+                    "applied_controls",
+                    "threats",
+                    "assets",
+                    "existing_applied_controls",
+                ]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
