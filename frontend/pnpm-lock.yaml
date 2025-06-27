@@ -54,8 +54,8 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0(svelte@5.34.3)
       svelte-persisted-store:
-        specifier: ^0.12.0
-        version: 0.12.0(svelte@5.34.3)
+        specifier: ^0.11.0
+        version: 0.11.0(svelte@5.34.3)
     devDependencies:
       '@inlang/paraglide-js':
         specifier: ^2.0.6
@@ -3959,11 +3959,11 @@ packages:
     peerDependencies:
       svelte: ^5.8.0
 
-  svelte-persisted-store@0.12.0:
-    resolution: {integrity: sha512-BdBQr2SGSJ+rDWH8/aEV5GthBJDapVP0GP3fuUCA7TjYG5ctcB+O9Mj9ZC0+Jo1oJMfZUd1y9H68NFRR5MyIJA==}
+  svelte-persisted-store@0.11.0:
+    resolution: {integrity: sha512-9RgJ5DrawGyyfK22A80cfu8Jose3CV8YjEZKz9Tn94rQ0tWyEmYr+XI+wrVF6wjRbW99JMDSVcFRiM3XzVJj/w==}
     engines: {node: '>=0.14'}
     peerDependencies:
-      svelte: ^3.48.0 || ^4 || ^5
+      svelte: ^3.48.0 || ^4.0.0 || ^5.0.0-next.0
 
   svelte-preprocess@5.1.4:
     resolution: {integrity: sha512-IvnbQ6D6Ao3Gg6ftiM5tdbR6aAETwjhHV+UKGf5bHGYR69RQvF1ho0JKPcbUON4vy4R7zom13jPjgdOWCQ5hDA==}
@@ -8415,7 +8415,7 @@ snapshots:
     dependencies:
       svelte: 5.34.3
 
-  svelte-persisted-store@0.12.0(svelte@5.34.3):
+  svelte-persisted-store@0.11.0(svelte@5.34.3):
     dependencies:
       svelte: 5.34.3
 

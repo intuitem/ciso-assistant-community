@@ -89,7 +89,7 @@
 		"frappe-gantt": "^1.0.3",
 		"globals": "^15.13.0",
 		"svelte-multiselect": "^11.1.0",
-		"svelte-persisted-store": "^0.12.0"
+		"svelte-persisted-store": "^0.11.0"
 	},
 	"packageManager": "pnpm@10.12.1"
 }
