@@ -160,7 +160,7 @@ export async function defaultWriteFormAction({
 	};
 
 	if (urlModel == 'users') {
-		((flashParams.type = 'warning'), (flashParams.message += safeTranslate('userHasNoRights')));
+		(flashParams.type = 'warning'), (flashParams.message += safeTranslate('userHasNoRights'));
 	}
 	setFlash(flashParams, event);
 
