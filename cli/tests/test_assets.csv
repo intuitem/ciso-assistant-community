@@ -1,0 +1,11 @@
+name,description,domain,type
+Web Server,Main web application server,Global,Primary
+Database Server,Primary database server,Global,Primary
+Load Balancer,Network load balancer,Global,Support
+Backup Server,Backup and recovery server,Global,Support
+Firewall Device,Network security firewall,Global,Support
+User Workstations,Employee desktop computers,Global,Support
+Mobile Devices,Company mobile phones,Global,Support
+Network Switch,Core network switch,Global,Support
+Email Server,Corporate email server,Global,Primary
+File Server,Document storage server,Global,Primary
