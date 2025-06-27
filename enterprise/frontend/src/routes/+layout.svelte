@@ -116,7 +116,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon ?? '/favicon.ico'} />
+  <link rel="icon" href={favicon && Object.hasOwn(favicon, 'url') ? favicon.url : favicon} />
 </svelte:head>
 
 <ParaglideJsProvider>
