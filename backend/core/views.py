@@ -4179,6 +4179,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
+        show_documentation_score = audit.show_documentation_score
         for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
             entry = {
@@ -4189,9 +4190,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "description": req_node.description,
                 "compliance_result": req.result,
                 "requirement_progress": req.status,
-                "score": req.score,
                 "observations": req.observation,
             }
+            if show_documentation_score:
+                entry["implementation_score"] = req.score
+                entry["documentation_score"] = req.documentation_score
+            else:
+                entry["score"] = req.score
             entries.append(entry)
 
         df = pd.DataFrame(entries)
