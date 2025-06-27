@@ -64,6 +64,7 @@ previous_domain = None
 
 for _, row in df.iterrows():
     current_domain = row["SCF Domain"]
+    current_domain = current_domain.strip()
 
     # If the domain has changed, add a depth=1 row
     if pd.notna(current_domain) and current_domain != previous_domain:
