@@ -1326,9 +1326,20 @@ def duplicate_related_objects(
         """
         Duplicate an object and link it to the duplicate object.
         """
-        new_obj.pk = None
-        new_obj.folder = target_folder
-        new_obj.save()
+        # Get the model of the object
+        model_class = new_obj.__class__
+
+        # Extract all fields except the primary key
+        field_values = {}
+        for field in new_obj._meta.fields:
+            if not field.primary_key and not field.auto_created:
+                field_values[field.name] = getattr(new_obj, field.name)
+
+        # Apply changes
+        field_values["folder"] = target_folder
+
+        # Create the new object
+        new_obj = model_class.objects.create(**field_values)
         link_existing_object(duplicate_object, new_obj, field_name)
 
     model_class = getattr(type(source_object), field_name).field.related_model
