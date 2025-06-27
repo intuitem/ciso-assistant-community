@@ -101,8 +101,6 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
-    RoleCodename,
-    UserGroupCodename,
     compare_schema_versions,
     _generate_occurrences,
     _create_task_dict,
@@ -147,24 +145,6 @@ LONG_CACHE_TTL = 60  # mn
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
-
-
-class MultipleCharFilter(df.MultipleChoiceFilter):
-    """
-    Custom filter that allows multiple values for CharField with OR operation.
-    Supports both comma-separated values and multiple query parameters.
-    """
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("lookup_expr", "icontains")
-        print(kwargs)
-        super().__init__(*args, **kwargs)
-
-    def filter(self, qs, value):
-        print("entering filter method")
-        print("qs:", qs)
-        print("value:", value)
-        return super().filter(qs, value)
 
 
 class GenericFilterSet(df.FilterSet):
