@@ -3,11 +3,9 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
-	import { toCamelCase } from '$lib/utils/locales';
 	import { run } from 'svelte/legacy';
 
 	interface Option {
@@ -47,6 +45,7 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
+		mount?: (value: any) => void;
 	}
 
 	let {
@@ -79,7 +78,8 @@
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
 		},
-		cachedValue = $bindable()
+		cachedValue = $bindable(),
+		mount = () => null
 	}: Props = $props();
 
 	let optionHashmap: Record<string, Option> = {};
@@ -105,7 +105,6 @@
 		closeDropdownOnSelect: !multiple
 	};
 
-	const dispatch = createEventDispatcher();
 	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 	async function fetchOptions() {
@@ -207,7 +206,7 @@
 
 	onMount(async () => {
 		await fetchOptions();
-		dispatch('mount', $value);
+		mount($value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);
@@ -232,9 +231,9 @@
 			}
 		}
 
-		// dispatch('change', $value);
-		$effect(() => onChange($value));
-		dispatch('cache', selected);
+		// change($value);
+		$effect(async () => await onChange($value));
+		// dispatch('cache', selected);
 	}
 
 	function arraysEqual(

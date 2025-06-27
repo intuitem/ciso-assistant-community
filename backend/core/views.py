@@ -2,9 +2,11 @@ import csv
 import json
 import mimetypes
 import re
+import regex
 import os
 import uuid
 import zipfile
+import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
@@ -4741,30 +4743,52 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True)
     def export(self, request, pk):
+        def sanitize_filename(name):
+            return regex.sub(r"[^\p{L}\p{N}\p{M}\-_.]+", "_", name)
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
             (index_content, evidences) = generate_html(compliance_assessment)
-            zip_name = f"{compliance_assessment.name.replace('/', '-')}-{compliance_assessment.framework.name.replace('/', '-')}-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.zip"
-            with zipfile.ZipFile(zip_name, "w") as zipf:
-                for evidence in evidences:
-                    if evidence.attachment:
-                        if default_storage.exists(evidence.attachment.name):
-                            zipf.writestr(
-                                os.path.join(
-                                    "evidences",
-                                    os.path.basename(evidence.attachment.name),
-                                ),
-                                default_storage.open(evidence.attachment.name).read(),
-                            )
-                zipf.writestr("index.html", index_content)
+            zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
-            response = FileResponse(open(zip_name, "rb"), as_attachment=True)
-            response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
-            os.remove(zip_name)
-            return response
+            # Create temporary file that will be automatically deleted
+            temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
+
+            try:
+                with zipfile.ZipFile(temp_file, "w") as zipf:
+                    for evidence in evidences:
+                        if evidence.attachment and default_storage.exists(
+                            evidence.attachment.name
+                        ):
+                            with default_storage.open(
+                                evidence.attachment.name
+                            ) as attachment_file:
+                                zipf.writestr(
+                                    os.path.join(
+                                        "evidences",
+                                        os.path.basename(evidence.attachment.name),
+                                    ),
+                                    attachment_file.read(),
+                                )
+                    zipf.writestr("index.html", index_content)
+
+                # Seek to beginning for reading
+                temp_file.seek(0)
+
+                # Create response - FileResponse will handle closing the temp_file
+                response = FileResponse(
+                    temp_file, as_attachment=True, filename=zip_name
+                )
+                return response
+
+            except Exception:
+                # Clean up on error
+                temp_file.close()
+                raise
+
         else:
             return Response({"error": "Permission denied"})
 
