@@ -3,17 +3,16 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
-	import { toCamelCase } from '$lib/utils/locales';
 	import { run } from 'svelte/legacy';
 
 	interface Option {
 		label: string;
 		value: string | number;
 		suggested?: boolean;
+		translatedLabel?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -47,6 +46,7 @@
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
 		disabled?: boolean;
+		mount?: (value: any) => void;
 	}
 
 	let {
@@ -80,7 +80,8 @@
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
 		},
-		cachedValue = $bindable()
+		cachedValue = $bindable(),
+		mount = () => null
 	}: Props = $props();
 
 	let optionHashmap: Record<string, Option> = {};
@@ -106,7 +107,6 @@
 		closeDropdownOnSelect: !multiple
 	};
 
-	const dispatch = createEventDispatcher();
 	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 	async function fetchOptions() {
@@ -185,7 +185,8 @@
 					suggested: optionsSuggestions?.some(
 						(s) =>
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
-					)
+					),
+					translatedLabel: safeTranslate(fullLabel)
 				};
 			})
 			.filter(
@@ -196,7 +197,7 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
-				return 0;
+				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
 
@@ -207,7 +208,7 @@
 
 	onMount(async () => {
 		await fetchOptions();
-		dispatch('mount', $value);
+		mount($value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);
@@ -232,9 +233,9 @@
 			}
 		}
 
-		// dispatch('change', $value);
-		$effect(() => onChange($value));
-		dispatch('cache', selected);
+		// change($value);
+		$effect(async () => await onChange($value));
+		// dispatch('cache', selected);
 	}
 
 	function arraysEqual(
@@ -340,15 +341,12 @@
 				{#if option.option.suggested}
 					<span class="text-primary-600">{option.option.label}</span>
 					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{:else if translateOptions && option.label}
+				{:else if translateOptions && option.option}
 					{#if field === 'ro_to_couple'}
-						{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split(
-							'-'
-						)[1]}
+						{@const [firstPart, ...restParts] = option.option.label.split(' - ')}
+						{safeTranslate(firstPart)} - {restParts.join(' - ')}
 					{:else}
-						{m[toCamelCase(option.value)]
-							? safeTranslate(option.value)
-							: safeTranslate(option.label)}
+						{option.option.translatedLabel}
 					{/if}
 				{:else}
 					{option.option.label || option.option}

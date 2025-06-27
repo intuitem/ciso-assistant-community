@@ -2,9 +2,13 @@ import csv
 import json
 import mimetypes
 import re
+from django_filters.filterset import filterset_factory
+from django_filters.utils import try_dbfield
+import regex
 import os
 import uuid
 import zipfile
+import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
@@ -97,8 +101,6 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
-    RoleCodename,
-    UserGroupCodename,
     compare_schema_versions,
     _generate_occurrences,
     _create_task_dict,
@@ -146,16 +148,68 @@ MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
 class GenericFilterSet(df.FilterSet):
+    @classmethod
+    def filter_for_lookup(cls, field, lookup_type):
+        DEFAULTS = dict(cls.FILTER_DEFAULTS)
+        if hasattr(cls, "_meta"):
+            DEFAULTS.update(cls._meta.filter_overrides)
+
+        data = try_dbfield(DEFAULTS.get, field.__class__) or {}
+        filter_class = data.get("filter_class")
+        params = data.get("extra", lambda field: {})(field)
+
+        # if there is no filter class, exit early
+        if not filter_class:
+            return None, {}
+
+        # perform lookup specific checks
+        if lookup_type == "exact" and getattr(field, "choices", None):
+            return df.MultipleChoiceFilter, {"choices": field.choices, **params}
+
+        if lookup_type == "isnull":
+            data = try_dbfield(DEFAULTS.get, models.BooleanField)
+
+            filter_class = data.get("filter_class")
+            params = data.get("extra", lambda field: {})(field)
+            return filter_class, params
+
+        if lookup_type == "in":
+
+            class ConcreteInFilter(df.BaseInFilter, filter_class):
+                pass
+
+            ConcreteInFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteInFilter, params
+
+        if lookup_type == "range":
+
+            class ConcreteRangeFilter(df.BaseRangeFilter, filter_class):
+                pass
+
+            ConcreteRangeFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteRangeFilter, params
+
+        return filter_class, params
+
     class Meta:
         model = None  # This will be set dynamically via filterset_factory.
-        fields = "__all__"
         filter_overrides = {
-            models.CharField: {
-                "filter_class": df.MultipleChoiceFilter,
+            models.ForeignKey: {
+                "filter_class": df.ModelMultipleChoiceFilter,
                 "extra": lambda f: {
-                    "lookup_expr": "icontains",
-                    # If your model field defines choices, they will be used:
-                    "choices": f.choices if hasattr(f, "choices") else None,
+                    "queryset": f.remote_field.model.objects.all(),
+                },
+            },
+            models.ManyToManyField: {
+                "filter_class": df.ModelMultipleChoiceFilter,
+                "extra": lambda f: {
+                    "queryset": f.remote_field.model.objects.all(),
                 },
             },
         }
@@ -175,16 +229,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     serializers_module = "core.serializers"
 
-    # @property
-    # def filterset_class(self):
-    #     # If you have defined filterset_fields, build the FilterSet on the fly.
-    #     if self.filterset_fields:
-    #         return filterset_factory(
-    #             model=self.model,
-    #             filterset=GenericFilterSet,
-    #             fields=self.filterset_fields,
-    #         )
-    #     return None
+    @property
+    def filterset_class(self):
+        # If you have defined filterset_fields, build the FilterSet on the fly.
+        if self.filterset_fields:
+            return filterset_factory(
+                model=self.model,
+                filterset=GenericFilterSet,
+                fields=self.filterset_fields,
+            )
+        return None
 
     def get_queryset(self) -> models.query.QuerySet:
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
@@ -835,6 +889,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
     model = Vulnerability
     filterset_fields = [
         "folder",
+        "assets",
         "status",
         "severity",
         "risk_scenarios",
@@ -1218,7 +1273,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ref_id=scenario.ref_id,
                 )
 
-                for field in ["applied_controls", "threats", "assets"]:
+                for field in [
+                    "applied_controls",
+                    "threats",
+                    "assets",
+                    "existing_applied_controls",
+                ]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
@@ -4177,6 +4237,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
+        show_documentation_score = audit.show_documentation_score
         for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
             entry = {
@@ -4187,9 +4248,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "description": req_node.description,
                 "compliance_result": req.result,
                 "requirement_progress": req.status,
-                "score": req.score,
                 "observations": req.observation,
             }
+            if show_documentation_score:
+                entry["implementation_score"] = req.score
+                entry["documentation_score"] = req.documentation_score
+            else:
+                entry["score"] = req.score
             entries.append(entry)
 
         df = pd.DataFrame(entries)
@@ -4700,30 +4765,52 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True)
     def export(self, request, pk):
+        def sanitize_filename(name):
+            return regex.sub(r"[^\p{L}\p{N}\p{M}\-_.]+", "_", name)
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
             (index_content, evidences) = generate_html(compliance_assessment)
-            zip_name = f"{compliance_assessment.name.replace('/', '-')}-{compliance_assessment.framework.name.replace('/', '-')}-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.zip"
-            with zipfile.ZipFile(zip_name, "w") as zipf:
-                for evidence in evidences:
-                    if evidence.attachment:
-                        if default_storage.exists(evidence.attachment.name):
-                            zipf.writestr(
-                                os.path.join(
-                                    "evidences",
-                                    os.path.basename(evidence.attachment.name),
-                                ),
-                                default_storage.open(evidence.attachment.name).read(),
-                            )
-                zipf.writestr("index.html", index_content)
+            zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
-            response = FileResponse(open(zip_name, "rb"), as_attachment=True)
-            response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
-            os.remove(zip_name)
-            return response
+            # Create temporary file that will be automatically deleted
+            temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
+
+            try:
+                with zipfile.ZipFile(temp_file, "w") as zipf:
+                    for evidence in evidences:
+                        if evidence.attachment and default_storage.exists(
+                            evidence.attachment.name
+                        ):
+                            with default_storage.open(
+                                evidence.attachment.name
+                            ) as attachment_file:
+                                zipf.writestr(
+                                    os.path.join(
+                                        "evidences",
+                                        os.path.basename(evidence.attachment.name),
+                                    ),
+                                    attachment_file.read(),
+                                )
+                    zipf.writestr("index.html", index_content)
+
+                # Seek to beginning for reading
+                temp_file.seek(0)
+
+                # Create response - FileResponse will handle closing the temp_file
+                response = FileResponse(
+                    temp_file, as_attachment=True, filename=zip_name
+                )
+                return response
+
+            except Exception:
+                # Clean up on error
+                temp_file.close()
+                raise
+
         else:
             return Response({"error": "Permission denied"})
 

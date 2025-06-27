@@ -75,6 +75,7 @@
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
+		badge?: import('svelte').Snippet<[string, { [key: string]: any }]>;
 		actions?: import('svelte').Snippet<[any]>;
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
@@ -115,6 +116,7 @@
 		optButton,
 		selectButton,
 		addButton,
+		badge,
 		actions,
 		actionsBody,
 		actionsHead,
@@ -170,7 +172,7 @@
 			};
 		}),
 		{
-			rowsPerPage: pagination ? numberRowsPerPage : undefined,
+			rowsPerPage: pagination ? numberRowsPerPage : 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
 			totalRows: source?.meta?.count
 		}
 	);
@@ -401,7 +403,9 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+					{#if fields.length === 0 || fields.includes(key)}
+						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+					{/if}
 				{/each}
 				{#if displayActions}
 					<th class="{regionHeadCell} select-none text-end"></th>
@@ -509,6 +513,7 @@
 															{safeTranslate(value ?? '-')}
 														{/if}
 													{/if}
+													{@render badge?.(key, row)}
 												</span>
 											{/if}
 										</td>
