@@ -224,14 +224,12 @@ class GenericFilterSet(df.FilterSet):
                 "filter_class": df.ModelMultipleChoiceFilter,
                 "extra": lambda f: {
                     "queryset": f.remote_field.model.objects.all(),
-                    "to_field_name": f.remote_field.field_name,
                 },
             },
             models.ManyToManyField: {
                 "filter_class": df.ModelMultipleChoiceFilter,
                 "extra": lambda f: {
                     "queryset": f.remote_field.model.objects.all(),
-                    "to_field_name": f.remote_field.set_field_name,
                 },
             },
         }
@@ -911,6 +909,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
     model = Vulnerability
     filterset_fields = [
         "folder",
+        "assets",
         "status",
         "severity",
         "risk_scenarios",
