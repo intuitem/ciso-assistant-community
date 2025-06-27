@@ -961,5 +961,8 @@
 			}
 		}
 	],
+	"allowPat": "Persönliche Zugriffstoken (PAT) erlauben",
+	"allowPatHelpText": "Aktivieren Sie die Verwendung persönlicher Zugriffstoken (PAT) zur API-Authentifizierung. Dies ermöglicht es Benutzern, Token für den programmgesteuerten Zugriff zu erstellen, ohne ihre Passwörter zu verwenden.",
+	"patCreationNotAllowed": "PAT-Erstellung ist nicht erlaubt. Bitte kontaktieren Sie Ihren Administrator.",
 	"matchingScenarios": "Übereinstimmende Szenarien"
 }

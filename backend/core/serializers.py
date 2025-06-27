@@ -775,6 +775,7 @@ class UserReadSerializer(BaseModelSerializer):
             "date_joined",
             "user_groups",
             "keep_local_login",
+            "allow_pat",
             "is_third_party",
         ]
 
@@ -793,6 +794,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "date_joined",
             "user_groups",
             "keep_local_login",
+            "allow_pat",
             "is_third_party",
             "is_local",
         ]

@@ -961,5 +961,8 @@
 			}
 		}
 	],
+	"allowPat": "Permitir tokens de acceso personal (PAT)",
+	"allowPatHelpText": "Habilite el uso de tokens de acceso personal (PAT) para la autenticación de API. Esto permite a los usuarios generar tokens para el acceso programático sin usar sus contraseñas.",
+	"patCreationNotAllowed": "La creación de PAT no está permitida. Por favor contacte a su administrador.",
 	"matchingScenarios": "Escenarios coincidentes"
 }

@@ -958,5 +958,8 @@
 			}
 		}
 	],
+	"allowPat": "Persoonlijke toegangstokens (PAT) toestaan",
+	"allowPatHelpText": "Schakel het gebruik van persoonlijke toegangstokens (PAT) in voor API-authenticatie. Hiermee kunnen gebruikers tokens genereren voor programmatische toegang zonder hun wachtwoord te gebruiken.",
+	"patCreationNotAllowed": "Het aanmaken van PAT is niet toegestaan. Neem contact op met uw beheerder.",
 	"matchingScenarios": "Overeenkomende scenario's"
 }

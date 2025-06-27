@@ -123,6 +123,11 @@ class PersonalAccessTokenViewSet(views.APIView):
         return Response(data)
 
     def post(self, request, format=None):
+        if request.user.allow_pat is False:
+            return Response(
+                {"error": "You are not allowed to create Personal Access Tokens."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         token_limit_per_user = self.get_token_limit_per_user()
         name = request.data.get("name")
         try:
@@ -224,6 +229,7 @@ class CurrentUserView(views.APIView):
                 principal=request.user, recursive=True
             ),
             "root_folder_id": Folder.get_root_folder().id,
+            "allow_pat": request.user.allow_pat,
         }
         return Response(res_data, status=HTTP_200_OK)
 
