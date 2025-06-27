@@ -31,15 +31,18 @@
 
 	let suggestions = $state(false);
 
+	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
 				.then((r) => {
 					const implementation_groups = r['implementation_groups_definition'] || [];
-					model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
-						(group) => ({ label: group.name, value: group.ref_id })
-					);
+					implementationGroupsChoices = implementation_groups.map((group) => ({
+						label: group.name,
+						value: group.ref_id
+					}));
 					suggestions = r['reference_controls'].length > 0;
 				});
 		}
@@ -86,15 +89,15 @@
 	cacheLock={cacheLocks['framework']}
 	bind:cachedValue={formDataCache['framework']}
 	label={m.targetFramework()}
-	on:change={async (e) => handleFrameworkChange(e.detail)}
-	on:mount={async (e) => handleFrameworkChange(e.detail)}
+	onChange={async (e) => handleFrameworkChange(e)}
+	mount={async (e) => handleFrameworkChange(e)}
 />
-{#if model.selectOptions['selected_implementation_groups'] && model.selectOptions['selected_implementation_groups'].length}
+{#if implementationGroupsChoices.length > 0}
 	<AutocompleteSelect
 		multiple
 		translateOptions={false}
 		{form}
-		options={model.selectOptions['selected_implementation_groups']}
+		options={implementationGroupsChoices}
 		field="selected_implementation_groups"
 		cacheLock={cacheLocks['selected_implementation_groups']}
 		bind:cachedValue={formDataCache['selected_implementation_groups']}

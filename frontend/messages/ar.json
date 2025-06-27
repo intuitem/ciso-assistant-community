@@ -923,5 +923,6 @@
 				"countPlural=other": "أيام {count}"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "السيناريوهات المطابقة"
 }

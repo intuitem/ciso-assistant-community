@@ -206,7 +206,6 @@
 							<div
 								class="card bg-black text-gray-200 p-4 z-20"
 								style="color: {operationalScenario.likelihood.hexcolor}"
-								data-popup={'popupLikelihood'}
 							>
 								<p data-testid="likelihood-description" class="font-semibold">
 									{operationalScenario.likelihood.description}
@@ -240,7 +239,6 @@
 							<div
 								class="card bg-black text-gray-200 p-4 z-20"
 								style="color: {operationalScenario.gravity.hexcolor}"
-								data-popup={'popupGravity'}
 							>
 								<p data-testid="gravity-description" class="font-semibold">
 									{operationalScenario.gravity.description}
@@ -274,7 +272,6 @@
 							<div
 								class="card bg-black text-gray-200 p-4 z-20"
 								style="color: {operationalScenario.risk_level.hexcolor}"
-								data-popup={'popupriskLevel'}
 							>
 								<p data-testid="riskLevel-description" class="font-semibold">
 									{operationalScenario.risk_level.description}

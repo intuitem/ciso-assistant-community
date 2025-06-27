@@ -41,6 +41,10 @@
 
 <HiddenInput {form} field="applied_controls" />
 <HiddenInput {form} field="requirement_assessments" />
+<HiddenInput {form} field="findings" />
+<HiddenInput {form} field="findings_assessments" />
+<HiddenInput {form} field="timeline_entries" />
+
 <FileInput
 	{form}
 	allowPaste={true}

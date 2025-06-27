@@ -254,7 +254,7 @@
 														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 													>
 														<button
-															class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+															class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 															data-testid="select-button"
 															title={m.selectAsset()}
 															onclick={(_) => modalUpdateForm()}

@@ -650,8 +650,9 @@ def aggregate_risks_per_field(
     values = dict()
     for m in parsed_matrices:
         for i in range(len(m["risk"])):
-            if m["risk"][i][field] not in values:
-                values[m["risk"][i][field]] = dict()
+            k = get_referential_translation(m["risk"][i], field)
+            if k not in values:
+                values[k] = dict()
 
             if residual:
                 count = (
@@ -668,11 +669,11 @@ def aggregate_risks_per_field(
                     .count()
                 )  # What the second filter does ? Is this useful ?
 
-            if "count" not in values[m["risk"][i][field]]:
-                values[m["risk"][i][field]]["count"] = count
-                values[m["risk"][i][field]]["color"] = m["risk"][i]["hexcolor"]
-                continue
-            values[m["risk"][i][field]]["count"] += count
+            if "count" not in values[k]:
+                values[k]["count"] = count
+                values[k]["color"] = m["risk"][i]["hexcolor"]
+            else:
+                values[k]["count"] += count
     return values
 
 

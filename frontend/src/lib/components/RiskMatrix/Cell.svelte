@@ -7,7 +7,6 @@
 		cellData?: Array<any>;
 		dataItemComponent: any;
 		useBubbles?: boolean;
-		popupTarget?: string | undefined;
 	}
 
 	let { cell, cellData = [], dataItemComponent, useBubbles = true }: Props = $props();
@@ -64,7 +63,7 @@
 		{/snippet}
 		{#snippet content()}
 			<div class="card bg-surface-300">
-				<div class="max-h-56 overflow-y-scroll p-4">
+				<div class="p-4 max-h-56 overflow-y-auto">
 					{#each cellData as item}
 						{@const SvelteComponent = dataItemComponent}
 						<SvelteComponent data={item} />

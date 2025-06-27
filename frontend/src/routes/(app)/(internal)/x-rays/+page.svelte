@@ -67,7 +67,7 @@
 				listJustify="justify-center"
 			>
 				{#snippet list()}
-					<Tabs.Control value="compliance_assessments"
+					<Tabs.Control value="compliance_assessments" labelBase="inert px-2"
 						>{m.complianceAssessments()}
 						{#if perimeter.compliance_assessments.errors.length > 0}
 							<span class="badge preset-tonal-error"
@@ -85,7 +85,7 @@
 							>
 						{/if}
 					</Tabs.Control>
-					<Tabs.Control value="risk_assessments"
+					<Tabs.Control value="risk_assessments" labelBase="inert px-2"
 						>{m.riskAssessments()}
 						{#if perimeter.risk_assessments.errors.length > 0}
 							<span class="badge preset-tonal-error"
