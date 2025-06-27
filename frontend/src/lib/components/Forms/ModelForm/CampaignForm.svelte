@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -34,6 +35,7 @@
 	cacheLock={cacheLocks['frameworks']}
 	bind:cachedValue={formDataCache['frameworks']}
 	label={m.targetFramework()}
+	hidden={initialData.frameworks}
 />
 <AutocompleteSelect
 	multiple
@@ -51,13 +53,13 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
-<AutocompleteSelect
+<Select
 	{form}
-	field="status"
 	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
-	label={m.status()}
 />
 <AutocompleteSelect
 	{form}
