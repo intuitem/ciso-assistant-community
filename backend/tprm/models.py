@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import URLValidator
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.models import Assessment, ComplianceAssessment, Evidence, Asset
@@ -14,7 +15,12 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
 
     mission = models.TextField(blank=True)
-    reference_link = models.URLField(blank=True, null=True, max_length=2048)
+    reference_link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        validators=[URLValidator(schemes={"http", "https"})],
+    )
     owned_folders = models.ManyToManyField(
         "iam.Folder",
         related_name="owner",
