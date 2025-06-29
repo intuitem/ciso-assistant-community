@@ -95,7 +95,9 @@ export const URL_MODEL = [
 	'business-impact-analysis',
 	'escalation-thresholds',
 	'asset-assessments',
-	'asset-class'
+	'asset-class',
+	// campaigns,
+	'campaigns'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

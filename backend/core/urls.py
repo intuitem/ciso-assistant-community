@@ -49,6 +49,11 @@ router.register(
     ComplianceAssessmentViewSet,
     basename="compliance-assessments",
 )
+router.register(
+    r"campaigns",
+    CampaignViewSet,
+    basename="campaigns",
+)
 router.register(r"requirement-nodes", RequirementViewSet, basename="requirement-nodes")
 router.register(
     r"requirement-assessments",

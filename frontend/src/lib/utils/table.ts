@@ -1061,6 +1061,10 @@ export const listViewFields = {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
+	campaigns: {
+		head: ['name', 'description', 'framework', 'status'],
+		body: ['name', 'description', 'framework', 'status']
+	},
 	'task-templates': {
 		head: [
 			'name',

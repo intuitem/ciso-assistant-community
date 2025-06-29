@@ -232,6 +232,11 @@ export const navData = {
 					href: '/evidences'
 				},
 				{
+					name: 'campaigns',
+					fa_icon: 'fa-solid fa-receipt',
+					href: '/campaigns'
+				},
+				{
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
