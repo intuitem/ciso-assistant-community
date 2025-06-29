@@ -25,19 +25,17 @@
 </script>
 
 <p class="text-sm text-gray-500">{m.strategicScenarioHelpText()}</p>
-{#if context !== 'edit'}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="ro-to?is_selected=true"
-		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
-		optionsLabelField="str"
-		field="ro_to_couple"
-		cacheLock={cacheLocks['ro_to_couple']}
-		bind:cachedValue={formDataCache['ro_to_couple']}
-		label={m.roToCouple()}
-		hidden={initialData.ro_to_couple}
-	/>
-{/if}
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="ro-to?is_selected=true"
+	optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+	optionsLabelField="str"
+	field="ro_to_couple"
+	cacheLock={cacheLocks['ro_to_couple']}
+	bind:cachedValue={formDataCache['ro_to_couple']}
+	label={m.roToCouple()}
+/>
 <TextField
 	{form}
 	field="ref_id"
