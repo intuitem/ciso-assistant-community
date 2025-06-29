@@ -6,6 +6,7 @@
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+
 	interface Props {
 		data: PageData;
 		form: any;
@@ -16,7 +17,7 @@
 	// const modalStore: ModalStore = getModalStore();
 
 	let formElement: HTMLFormElement = $state();
-	let file: HTMLInputElement = $state();
+	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 
 	function modalConfirm(): void {
@@ -34,7 +35,12 @@
 			}
 		};
 
-		// if (file) modalStore.trigger(modal);
+		// Fixed: Check for files instead of file
+		if (files && files.length > 0) {
+			// modalStore.trigger(modal);
+			// For now, directly submit since modal is commented out
+			formElement.requestSubmit();
+		}
 	}
 
 	// Determine if domain selection should be disabled
@@ -49,7 +55,8 @@
 		selectedModel === 'Asset' || selectedModel === 'AppliedControl' || selectedModel === 'Perimeter'
 	);
 
-	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
+	// Fixed: Check files correctly
+	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
 
 	// Helper to check if the form has been processed (form action has run)
 	let formSubmitted = $derived(form !== null && form !== undefined);
@@ -76,13 +83,14 @@
 					<li>Click Upload</li>
 				</ol>
 			</div>
+			<!-- Fixed: Bind to files instead of value -->
 			<input
 				id="file"
 				type="file"
 				name="file"
 				accept={authorizedExtensions.join(',')}
 				required
-				bind:value={file}
+				bind:files
 			/>
 
 			<div class="rounded-lg p-4 mt-4 border-green-500 border-2">
