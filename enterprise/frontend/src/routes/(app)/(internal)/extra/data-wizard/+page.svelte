@@ -83,15 +83,48 @@
 					<li>Click Upload</li>
 				</ol>
 			</div>
-			<!-- Fixed: Bind to files instead of value -->
-			<input
-				id="file"
-				type="file"
-				name="file"
-				accept={authorizedExtensions.join(',')}
-				required
-				bind:files
-			/>
+			<!-- Custom styled file input -->
+			<div class="relative">
+				<input
+					id="file"
+					type="file"
+					name="file"
+					accept={authorizedExtensions.join(',')}
+					required
+					bind:files
+					class="sr-only"
+				/>
+				<label
+					for="file"
+					class="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center hover:border-gray-400 hover:bg-gray-100 transition-colors"
+					class:border-blue-500={files && files.length > 0}
+					class:bg-blue-50={files && files.length > 0}
+				>
+					<div class="space-y-2">
+						<div
+							class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100"
+						>
+							<i class="fas fa-file-excel text-green-600 text-xl"></i>
+						</div>
+						<div class="text-sm">
+							{#if files && files.length > 0}
+								<p class="font-medium text-blue-600">
+									<i class="fas fa-check-circle mr-1"></i>
+									{files[0].name}
+								</p>
+								<p class="text-gray-500">
+									{(files[0].size / 1024 / 1024).toFixed(2)} MB
+								</p>
+							{:else}
+								<p class="font-medium text-gray-900">
+									<span class="text-blue-600">Click to upload</span> or drag and drop
+								</p>
+								<p class="text-gray-500">Excel files (.xls, .xlsx) only</p>
+							{/if}
+						</div>
+					</div>
+				</label>
+			</div>
 
 			<div class="rounded-lg p-4 mt-4 border-green-500 border-2">
 				<!--Model radio-->
