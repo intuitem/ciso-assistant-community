@@ -40,6 +40,13 @@ def set_ciso_assistant_url(_, __, event_dict):
     return event_dict
 
 
+def lower_request_log_level(logger, method_name, event_dict):
+    if event_dict.get("event") in {"request_started", "request_finished"}:
+        print(event_dict)
+        event_dict["level"] = "debug"
+    return event_dict
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -81,6 +88,7 @@ structlog.configure(
         structlog.processors.TimeStamper(fmt="iso"),  # ISO 8601 timestamps
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
+        lower_request_log_level,
         structlog.stdlib.PositionalArgumentsFormatter(),
         # Include stack information in log entries
         structlog.processors.StackInfoRenderer(),
