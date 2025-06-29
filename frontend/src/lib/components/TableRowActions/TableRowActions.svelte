@@ -21,11 +21,13 @@
 
 	interface Props {
 		row: Record<string, any>;
-		model?: ModelMapEntry | undefined;
+		model?: ModelMapEntry;
 		detailURL: string;
-		editURL: string | undefined;
-		deleteForm: SuperValidated<AnyZodObject> | undefined;
-		URLModel: urlModel | string | undefined;
+		editURL?: string;
+		disableEdit?: boolean;
+		disableView?: boolean;
+		deleteForm?: SuperValidated<AnyZodObject> | null;
+		URLModel?: urlModel | string;
 		identifierField?: string;
 		preventDelete?: boolean;
 		preventEdit?: boolean;
@@ -41,7 +43,9 @@
 		model = undefined,
 		detailURL,
 		editURL,
-		deleteForm,
+		disableEdit = false,
+		disableView = false,
+		deleteForm = null,
 		URLModel,
 		identifierField = 'id',
 		preventDelete = false,
@@ -155,14 +159,15 @@
 				: false)
 	);
 
-	let displayDetail = $derived(detailURL);
+	let displayDetail = $derived(detailURL && !disableView);
 	let displayEdit = $derived(
 		canEditObject &&
+			!disableEdit &&
 			URLModel &&
 			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
 			editURL
 	);
-	let displayDelete = $derived(canDeleteObject && deleteForm !== undefined);
+	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
 </script>
 
 <span class={baseClass}>
