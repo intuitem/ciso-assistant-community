@@ -281,6 +281,17 @@
 	);
 </script>
 
+<svelte:head>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			height: auto;
+			overflow-y: auto;
+		}
+	</style>
+</svelte:head>
+
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
