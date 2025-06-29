@@ -4,7 +4,8 @@ ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
 name: adobe-ccf-v5 -> ISO/IEC 27001:2022
 description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
 copyright: intuitem
-version: 2
+version: 3
+publication_date: 2025-06-04
 provider: intuitem
 packager: intuitem
 dependencies:
@@ -200,17 +201,37 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-06
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       relationship: intersect
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-07
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       relationship: intersect
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-08
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       relationship: intersect
       rationale: null
       strength_of_relationship: null
@@ -505,7 +526,17 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       relationship: intersect
       rationale: null
       strength_of_relationship: null
@@ -515,7 +546,12 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       relationship: intersect
       rationale: null
       strength_of_relationship: null
@@ -530,7 +566,12 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-07
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       relationship: intersect
       rationale: null
       strength_of_relationship: null
@@ -690,7 +731,17 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       relationship: intersect
       rationale: null
       strength_of_relationship: null
@@ -745,7 +796,17 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-10
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       relationship: intersect
       rationale: null
       strength_of_relationship: null
@@ -785,7 +846,17 @@ objects:
       rationale: null
       strength_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+      rationale: null
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       relationship: intersect
       rationale: null
       strength_of_relationship: null
