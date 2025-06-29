@@ -1668,5 +1668,7 @@
 		}
 	],
 	"suggestedParentheses": "(suggested)",
-	"matchingScenarios": "Matching scenarios"
+	"matchingScenarios": "Matching scenarios",
+	"select": "Select",
+	"deselect": "Deselect"
 }
