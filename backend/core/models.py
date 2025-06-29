@@ -1752,7 +1752,11 @@ class Asset(
         max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_("type")
     )
     parent_assets = models.ManyToManyField(
-        "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
+        "self",
+        blank=True,
+        verbose_name=_("parent assets"),
+        symmetrical=False,
+        related_name="child_assets",
     )
     reference_link = models.URLField(
         null=True,
@@ -1827,7 +1831,7 @@ class Asset(
         return set(result)
 
     def get_children(self):
-        return Asset.objects.filter(parent_assets=self)
+        return self.child_assets.all()
 
     def get_descendants(self) -> set[Self]:
         children = self.get_children()
