@@ -43,8 +43,6 @@
 		// Fixed: Check for files instead of file
 		if (files && files.length > 0) {
 			modalStore.trigger(modal);
-			// For now, directly submit since modal is commented out
-			// formElement.requestSubmit();
 		}
 	}
 
@@ -73,19 +71,19 @@
 	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
-				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>Load excel data</h4>
+				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
-					>Templates and guidelines</a
+					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
 			</div>
 			<div class=" py-4">
 				<ol class="list-decimal list-inside">
-					<li>Select your file and make sure it matches the templates</li>
-					<li>Choose the corresponding model</li>
-					<li>Select the scope</li>
-					<li>Click Upload</li>
+					<li>{m.dataWizardSelectFile()}</li>
+					<li>{m.dataWizardChooseModel()}</li>
+					<li>{m.dataWizardSelectScope()}</li>
+					<li>{m.dataWizardClickUpload()}</li>
 				</ol>
 			</div>
 			<!-- Custom styled file input -->
@@ -122,9 +120,9 @@
 								</p>
 							{:else}
 								<p class="font-medium text-gray-900">
-									<span class="text-blue-600">Click to upload</span> or drag and drop
+									<span class="text-blue-600">{m.clickToUpload()}</span> {m.orDragAndDrop()}
 								</p>
-								<p class="text-gray-500">Excel files (.xls, .xlsx) only</p>
+								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
 							{/if}
 						</div>
 					</div>
@@ -134,7 +132,7 @@
 			<div class="rounded-lg p-4 mt-4 border-green-500 border-2">
 				<!--Model radio-->
 				<fieldset class="space-y-4">
-					<legend class="sr-only">Object</legend>
+					<legend class="sr-only">{m.object()}</legend>
 
 					<div>
 						<label
@@ -261,7 +259,7 @@
 			<div class="rounded-lg p-4 mt-4 border-pink-500 border-2">
 				<!--Select targets -->
 				<label for="folder" class="block text-sm font-medium text-gray-900"
-					>Select a fallback Domain (if not set on the file)</label
+					>{m.dataWizardSelectFallbackDomain()}</label
 				>
 				<select
 					id="folder"
@@ -274,7 +272,7 @@
 					{/each}
 				</select>
 				<label for="perimeter" class="block text-sm font-medium text-gray-900"
-					>Select a Perimeter</label
+					>{m.dataWizardSelectPerimeter()}</label
 				>
 				<select
 					id="perimeter"
@@ -288,7 +286,7 @@
 				</select>
 
 				<label for="framework" class="block text-sm font-medium text-gray-900"
-					>Select a Framework</label
+					>{m.dataWizardSelectFramework()}</label
 				>
 				<select
 					id="framework"
@@ -311,7 +309,7 @@
 		</form>
 	</div>
 	<div class="col-span-2 p-4">
-		Parsing results:
+    {m.dataWizardParsingResults()}
 		{#if formSubmitted}
 			<div class="col-span-full mb-4">
 				{#if form?.success}
