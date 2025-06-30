@@ -958,5 +958,6 @@
 			}
 		}
 	],
-	"matchingScenarios": "Overeenkomende scenario's"
+	"matchingScenarios": "Overeenkomende scenario's",
+	"fearedEventAssetHelpText": "Gedachte gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit."
 }

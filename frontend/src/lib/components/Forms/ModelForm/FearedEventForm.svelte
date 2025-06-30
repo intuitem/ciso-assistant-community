@@ -68,7 +68,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="assets?type=PR"
+	optionsEndpoint="assets"
 	optionsDetailedUrlParameters={[['ebios_rm_studies', initialData.ebios_rm_study]]}
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
