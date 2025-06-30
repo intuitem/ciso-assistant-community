@@ -6,7 +6,7 @@ ref_id: mapping-adobe-ccf-v5-to-nist-csf-1.1
 name: adobe-ccf-v5 -> NIST-CSF-1.1
 description: Mapping from Adobe CCF v5 to NIST CSF v1.1
 copyright: Adobe
-version: 2
+version: 1
 publication_date: 2025-06-30
 provider: Adobe
 packager: intuitem
