@@ -5,10 +5,10 @@ locale: en
 ref_id: mapping-adobe-ccf-v5-to-bsi-c5-2020
 name: adobe-ccf-v5 -> BSI-C5-2020
 description: Mapping from Adobe CCF v5 to BSI C5 Library
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Adobe
+version: 2
+publication_date: 2025-06-30
+provider: Adobe
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:adobe-ccf-v5

@@ -6,10 +6,10 @@ ref_id: mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastruct
 name: 'adobe-ccf-v5 -> Cyber Essentials: Requirements for IT infrastructure'
 description: 'Mapping from Adobe CCF v5 to Cyber Essentials: Requirements for IT infrastructure
   v3.1'
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Adobe
+version: 2
+publication_date: 2025-06-30
+provider: Adobe
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:adobe-ccf-v5
