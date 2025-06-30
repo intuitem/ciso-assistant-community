@@ -57,6 +57,7 @@
 		bind:cachedValue={formDataCache['baseline']}
 		label={m.baseline()}
 		optionsEndpoint="compliance-assessments"
+		disabled=true
 	/>
 {/if}
 {#if initialData.ebios_rm_studies}
