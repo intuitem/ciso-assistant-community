@@ -47,7 +47,7 @@
 	/* (all other styles here...) */
 	html,
 	body {
-		@apply h-full overflow-auto;
+		@apply h-auto overflow-auto;
 	}
 	.capitalize-first:first-letter {
 		@apply capitalize;
