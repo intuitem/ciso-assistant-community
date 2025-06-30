@@ -404,7 +404,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					{#if fields.length === 0 || fields.includes(heading)}
+					{#if fields.length === 0 || fields.includes(key)}
 						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
 					{/if}
 				{/each}
