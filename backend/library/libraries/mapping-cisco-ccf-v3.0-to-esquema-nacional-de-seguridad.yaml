@@ -6,10 +6,10 @@ ref_id: mapping-cisco-ccf-v3.0-to-esquema-nacional-de-seguridad
 name: cisco-ccf-v3.0 -> ENS
 description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Esquema Nacional
   de Seguridad (ENS)
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Cisco
+version: 2
+publication_date: 2025-06-30
+provider: Cisco
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:cisco-ccf-v3.0

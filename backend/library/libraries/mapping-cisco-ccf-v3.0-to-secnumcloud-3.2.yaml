@@ -7,10 +7,10 @@ name: cisco-ccf-v3.0 -> SecNumCloud v3.2
 description: "Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Prestataires\
   \ de services d\u2019informatique en nuage (SecNumCloud) - r\xE9f\xE9rentiel d\u2019\
   exigences"
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Cisco
+version: 2
+publication_date: 2025-06-30
+provider: Cisco
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:cisco-ccf-v3.0

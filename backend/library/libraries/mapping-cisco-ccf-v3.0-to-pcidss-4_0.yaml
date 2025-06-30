@@ -6,10 +6,10 @@ ref_id: mapping-cisco-ccf-v3.0-to-pcidss-4_0
 name: cisco-ccf-v3.0 -> PCI DSS 4.0
 description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Payment Card
   Industry Data Security Standard (PCI-DSS) 4.0
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Cisco
+version: 2
+publication_date: 2025-06-30
+provider: Cisco
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:cisco-ccf-v3.0

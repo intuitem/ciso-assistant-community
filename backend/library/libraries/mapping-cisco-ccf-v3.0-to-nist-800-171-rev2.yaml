@@ -6,10 +6,10 @@ ref_id: mapping-cisco-ccf-v3.0-to-nist-800-171-rev2
 name: cisco-ccf-v3.0 -> nist-800-171-rev2
 description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to NIST SP 800-171
   Rev. 2
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Cisco
+version: 2
+publication_date: 2025-06-30
+provider: Cisco
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:cisco-ccf-v3.0
