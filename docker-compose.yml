@@ -50,6 +50,7 @@ services:
       - HOST_HEADER=x-forwarded-host
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
+    restart: always
     depends_on:
       backend:
         condition: service_healthy
