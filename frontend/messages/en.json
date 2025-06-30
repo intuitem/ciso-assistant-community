@@ -920,7 +920,7 @@
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
 	"fixed": "Fixed",
-	"general": "general",
+	"general": "General",
 	"generalSettingsDescription": "Configure your general settings here.",
 	"securityObjectiveScale": "Security objective scale",
 	"generalSettingsUpdated": "General settings updated",
@@ -1667,6 +1667,13 @@
 			}
 		}
 	],
+	"serverURL": "Server URL",
+	"tokenAuthMethod": "Token auth method",
+	"oauthPKCEEnabled": "OAuth PKCE enabled",
 	"suggestedParentheses": "(suggested)",
-	"matchingScenarios": "Matching scenarios"
+	"matchingScenarios": "Matching scenarios",
+	"clientSecretAlreadySetHelpText": "The client secret is already set.",
+	"resetClientSecret": "Reset client secret",
+	"oidcTokenAuthMethodHelpText": "Optional token endpoint authentication method. If omitted, a method from the server's auth token method list is used",
+	"oidcPKCEEnabledHelpText": "Enable OAuth PKCE (Proof Key for Code Exchange) support. This is recommended for public clients."
 }

@@ -45,6 +45,7 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
+		disabled?: boolean;
 		mount?: (value: any) => void;
 	}
 
@@ -73,6 +74,7 @@
 		optionsSelf = null,
 		optionsSelfSelect = false,
 		allowUserOptions = false,
+		disabled = false,
 		onChange = () => {},
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
@@ -83,7 +85,7 @@
 	}: Props = $props();
 
 	let optionHashmap: Record<string, Option> = {};
-	let disabled = $state(false);
+	let _disabled = $state(disabled);
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
@@ -282,7 +284,8 @@
 	});
 
 	run(() => {
-		disabled = Boolean(selected.length && options.length === 1 && $constraints?.required);
+		_disabled =
+			disabled || Boolean(selected.length && options.length === 1 && $constraints?.required);
 	});
 
 	onDestroy(() => {
@@ -330,7 +333,7 @@
 			bind:selected
 			{options}
 			{...multiSelectOptions}
-			{disabled}
+			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
 		>

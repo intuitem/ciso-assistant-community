@@ -73,6 +73,7 @@ spec:
           echo "reverse_proxy /api/iam/sso/redirect/ localhost:8000" >> Caddyfile
           echo "reverse_proxy /api/accounts/saml/0/acs/ localhost:8000" >> Caddyfile
           echo "reverse_proxy /api/accounts/saml/0/acs/finish/ localhost:8000" >> Caddyfile
+          echo "reverse_proxy /api/accounts/oidc/openid_connect/login/callback/ localhost:8000" >> Caddyfile
           echo "reverse_proxy /* localhost:3000" >> Caddyfile
           echo "}" >> Caddyfile
           exec caddy run
