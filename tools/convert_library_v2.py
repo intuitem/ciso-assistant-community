@@ -1063,7 +1063,7 @@ def main():
 
         error_files = []    # Collect names of files that failed
         # Find all .xlsx files in the input directory (temp Excel files starting with "~$" are excluded)
-        xlsx_files = xlsx_files = [f for f in input_path.glob("*.xlsx") if not f.name.startswith("~$")]
+        xlsx_files = [f for f in input_path.glob("*.xlsx") if not f.name.startswith("~$")]
 
         if not xlsx_files:
             print(f"❌ [ERROR] No .xlsx files found in directory: \"{input_path}\". Abort...")
