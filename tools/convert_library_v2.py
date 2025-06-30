@@ -37,7 +37,7 @@ SCRIPT_VERSION = '2.1'
 # NOTE: So far, no compatibility mode has an impact on the mapping creation process.
 
 COMPATIBILITY_MODES = {
-    0: f"[v{SCRIPT_VERSION}] (DEFAULT) D'ont use any Compatibility Mode",
+    0: f"[v{SCRIPT_VERSION}] (DEFAULT) Don't use any Compatibility Mode",
     1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
     2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)"
     # Future modes can be added here with an integer key and description
