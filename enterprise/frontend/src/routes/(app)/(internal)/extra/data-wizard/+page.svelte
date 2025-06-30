@@ -4,8 +4,14 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
 	interface Props {
 		data: PageData;
 		form: any;
@@ -13,10 +19,10 @@
 
 	let { data, form }: Props = $props();
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	let formElement: HTMLFormElement = $state();
-	let file: HTMLInputElement = $state();
+	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 
 	function modalConfirm(): void {
@@ -34,7 +40,10 @@
 			}
 		};
 
-		// if (file) modalStore.trigger(modal);
+		// Fixed: Check for files instead of file
+		if (files && files.length > 0) {
+			modalStore.trigger(modal);
+		}
 	}
 
 	// Determine if domain selection should be disabled
@@ -49,7 +58,8 @@
 		selectedModel === 'Asset' || selectedModel === 'AppliedControl' || selectedModel === 'Perimeter'
 	);
 
-	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
+	// Fixed: Check files correctly
+	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
 
 	// Helper to check if the form has been processed (form action has run)
 	let formSubmitted = $derived(form !== null && form !== undefined);
@@ -61,34 +71,68 @@
 	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
-				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>Load excel data</h4>
+				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
-					>Templates and guidelines</a
+					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
 			</div>
 			<div class=" py-4">
 				<ol class="list-decimal list-inside">
-					<li>Select your file and make sure it matches the templates</li>
-					<li>Choose the corresponding model</li>
-					<li>Select the scope</li>
-					<li>Click Upload</li>
+					<li>{m.dataWizardSelectFile()}</li>
+					<li>{m.dataWizardChooseModel()}</li>
+					<li>{m.dataWizardSelectScope()}</li>
+					<li>{m.dataWizardClickUpload()}</li>
 				</ol>
 			</div>
-			<input
-				id="file"
-				type="file"
-				name="file"
-				accept={authorizedExtensions.join(',')}
-				required
-				bind:value={file}
-			/>
+			<!-- Custom styled file input -->
+			<div class="relative">
+				<input
+					id="file"
+					type="file"
+					name="file"
+					accept={authorizedExtensions.join(',')}
+					required
+					bind:files
+					class="sr-only"
+				/>
+				<label
+					for="file"
+					class="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center hover:border-gray-400 hover:bg-gray-100 transition-colors"
+					class:border-blue-500={files && files.length > 0}
+					class:bg-blue-50={files && files.length > 0}
+				>
+					<div class="space-y-2">
+						<div
+							class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100"
+						>
+							<i class="fas fa-file-excel text-green-600 text-xl"></i>
+						</div>
+						<div class="text-sm">
+							{#if files && files.length > 0}
+								<p class="font-medium text-blue-600">
+									<i class="fas fa-check-circle mr-1"></i>
+									{files[0].name}
+								</p>
+								<p class="text-gray-500">
+									{(files[0].size / 1024 / 1024).toFixed(2)} MB
+								</p>
+							{:else}
+								<p class="font-medium text-gray-900">
+									<span class="text-blue-600">{m.clickToUpload()}</span> {m.orDragAndDrop()}
+								</p>
+								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
+							{/if}
+						</div>
+					</div>
+				</label>
+			</div>
 
 			<div class="rounded-lg p-4 mt-4 border-green-500 border-2">
 				<!--Model radio-->
 				<fieldset class="space-y-4">
-					<legend class="sr-only">Object</legend>
+					<legend class="sr-only">{m.object()}</legend>
 
 					<div>
 						<label
@@ -215,7 +259,7 @@
 			<div class="rounded-lg p-4 mt-4 border-pink-500 border-2">
 				<!--Select targets -->
 				<label for="folder" class="block text-sm font-medium text-gray-900"
-					>Select a fallback Domain (if not set on the file)</label
+					>{m.dataWizardSelectFallbackDomain()}</label
 				>
 				<select
 					id="folder"
@@ -228,7 +272,7 @@
 					{/each}
 				</select>
 				<label for="perimeter" class="block text-sm font-medium text-gray-900"
-					>Select a Perimeter</label
+					>{m.dataWizardSelectPerimeter()}</label
 				>
 				<select
 					id="perimeter"
@@ -242,7 +286,7 @@
 				</select>
 
 				<label for="framework" class="block text-sm font-medium text-gray-900"
-					>Select a Framework</label
+					>{m.dataWizardSelectFramework()}</label
 				>
 				<select
 					id="framework"
@@ -265,7 +309,7 @@
 		</form>
 	</div>
 	<div class="col-span-2 p-4">
-		Parsing results:
+    {m.dataWizardParsingResults()}
 		{#if formSubmitted}
 			<div class="col-span-full mb-4">
 				{#if form?.success}
