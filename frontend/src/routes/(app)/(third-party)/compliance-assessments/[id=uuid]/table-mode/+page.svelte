@@ -551,11 +551,13 @@
 										form={docScoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
+										scores_definition={complianceAssessment.scores_definition}
 										field="documentation_score"
 										label={m.documentationScore()}
+										isDoc={true}
 										styles="w-full p-1"
 										onChange={(newScore) => {
-											requirementAssessment.score = newScore;
+											requirementAssessment.documentation_score = newScore;
 											updateScore(requirementAssessment);
 										}}
 										disabled={!requirementAssessment.is_scored ||
