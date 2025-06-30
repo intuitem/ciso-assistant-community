@@ -271,7 +271,7 @@
 		cachedValue = selected.map((option) => option.value);
 	});
 
-	run(() => {
+	$effect(() => {
 		// Only update value after options are loaded
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
