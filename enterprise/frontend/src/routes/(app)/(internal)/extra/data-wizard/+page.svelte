@@ -4,8 +4,13 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -14,7 +19,7 @@
 
 	let { data, form }: Props = $props();
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	let formElement: HTMLFormElement = $state();
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
@@ -37,9 +42,9 @@
 
 		// Fixed: Check for files instead of file
 		if (files && files.length > 0) {
-			// modalStore.trigger(modal);
+			modalStore.trigger(modal);
 			// For now, directly submit since modal is commented out
-			formElement.requestSubmit();
+			// formElement.requestSubmit();
 		}
 	}
 
