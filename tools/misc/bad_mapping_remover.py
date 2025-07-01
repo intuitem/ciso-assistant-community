@@ -43,7 +43,7 @@ def main(file_path, mapping_sheet_name="mappings_content"):
         sys.exit(1)
 
     if mapping_sheet_name not in sheets:
-        print("❌ [ERROR] Sheet \"requirement_mapping_set\" not found")
+        print(f"❌ [ERROR] Sheet \"{mapping_sheet_name}\" not found")
         sys.exit(1)
 
     sheet = wb[mapping_sheet_name]
@@ -118,7 +118,7 @@ def main(file_path, mapping_sheet_name="mappings_content"):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Usage: python filter_invalid_mappings.py <input_excel_file> [sheet_name]")
+        print("Usage: python bad_mapping_remover.py <input_excel_file> [sheet_name]")
         sys.exit(1)
     elif len(sys.argv) == 2:
         main(sys.argv[1])
