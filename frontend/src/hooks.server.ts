@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { safeTranslate } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
@@ -74,7 +74,6 @@ export const handle: Handle = async ({ event, resolve }) =>
 
 		const errorId = new URL(event.request.url).searchParams.get('error');
 		if (errorId) {
-			// setLocale(event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE);
 			setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
 			redirect(302, '/login');
 		}
@@ -115,10 +114,10 @@ export const handle: Handle = async ({ event, resolve }) =>
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-	// const currentLang = event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
+	const currentLang = event.locals.user?.preferences?.lang || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
-		// request.headers.set('Accept-Language', currentLang);
+		request.headers.set('Accept-Language', currentLang);
 
 		const token = event.cookies.get('token');
 		const csrfToken = event.cookies.get('csrftoken');
