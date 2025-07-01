@@ -41,7 +41,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 };
 
 export const actions: Actions = {
-	login: async ({ request, fetch, cookies }) => {
+	login: async ({ request, fetch, cookies, url }) => {
 		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) {
 			return fail(400, { form });
@@ -119,6 +119,9 @@ export const actions: Actions = {
 			path: '/',
 			secure: true
 		});
+		const next = url.searchParams.get('next');
+		const secureNext = getSecureRedirect(next) || '/';
+		redirect(302, secureNext);
 	},
 	mfaAuthenticate: async (event) => {
 		const formData = await event.request.formData();
