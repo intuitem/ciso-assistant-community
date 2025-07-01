@@ -61,7 +61,7 @@ importers:
         version: 0.12.0(svelte@5.34.8)
     devDependencies:
       '@inlang/paraglide-js':
-        specifier: ^2.1.0
+        specifier: ^2.0.6
         version: 2.1.0(babel-plugin-macros@3.1.0)
       '@inlang/plugin-message-format':
         specifier: ^2.2.0
