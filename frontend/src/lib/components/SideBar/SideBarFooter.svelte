@@ -59,14 +59,12 @@
 		event.preventDefault();
 		value = event?.target?.value;
 		setLocale(value);
-		fetch('/fe-api/user-preferences', {
+		await fetch('/fe-api/user-preferences', {
 			method: 'PATCH',
 			body: JSON.stringify({
 				lang: value
 			})
 		});
-		// sessionStorage.setItem('lang', value);
-		setCookie('PARAGLIDE_LOCALE', value);
 		window.location.reload();
 	}
 
