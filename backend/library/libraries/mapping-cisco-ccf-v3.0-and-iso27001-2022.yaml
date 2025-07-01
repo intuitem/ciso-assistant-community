@@ -1,14 +1,14 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-iso27001-2022
 locale: en
-ref_id: mapping-cisco-ccf-v3.0-to-iso27001-2022
-name: cisco-ccf-v3.0 -> ISO/IEC 27001:2022
-description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to International
+ref_id: mapping-cisco-ccf-v3.0-and-iso27001-2022
+name: cisco-ccf-v3.0 <-> ISO/IEC 27001:2022
+description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and International
   standard ISO/IEC 27001:2022
 copyright: Cisco
 version: 2
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Cisco
 packager: intuitem
 dependencies:
@@ -17,9 +17,9 @@ dependencies:
 objects:
   requirement_mapping_sets:
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-iso27001-2022
-    ref_id: mapping-cisco-ccf-v3.0-to-iso27001-2022
-    name: cisco-ccf-v3.0 -> ISO/IEC 27001:2022
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to International
+    ref_id: mapping-cisco-ccf-v3.0-and-iso27001-2022
+    name: cisco-ccf-v3.0 <-> ISO/IEC 27001:2022
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and International
       standard ISO/IEC 27001:2022
     source_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
@@ -2101,9 +2101,9 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       relationship: intersect
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-iso27001-2022-revert
-    ref_id: mapping-cisco-ccf-v3.0-to-iso27001-2022-revert
-    name: cisco-ccf-v3.0 -> ISO/IEC 27001:2022
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to International
+    ref_id: mapping-cisco-ccf-v3.0-and-iso27001-2022-revert
+    name: cisco-ccf-v3.0 <-> ISO/IEC 27001:2022
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and International
       standard ISO/IEC 27001:2022
     target_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     source_framework_urn: urn:intuitem:risk:framework:iso27001-2022

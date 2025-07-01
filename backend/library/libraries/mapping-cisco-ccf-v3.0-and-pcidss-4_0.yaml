@@ -1,14 +1,14 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-pcidss-4_0
 locale: en
-ref_id: mapping-cisco-ccf-v3.0-to-pcidss-4_0
-name: cisco-ccf-v3.0 -> PCI DSS 4.0
-description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Payment Card
-  Industry Data Security Standard (PCI-DSS) 4.0
+ref_id: mapping-cisco-ccf-v3.0-and-pcidss-4_0
+name: cisco-ccf-v3.0 <-> PCI DSS 4.0
+description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Payment
+  Card Industry Data Security Standard (PCI-DSS) 4.0
 copyright: Cisco
 version: 2
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Cisco
 packager: intuitem
 dependencies:
@@ -17,9 +17,9 @@ dependencies:
 objects:
   requirement_mapping_sets:
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-pcidss-4_0
-    ref_id: mapping-cisco-ccf-v3.0-to-pcidss-4_0
-    name: cisco-ccf-v3.0 -> PCI DSS 4.0
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Payment
+    ref_id: mapping-cisco-ccf-v3.0-and-pcidss-4_0
+    name: cisco-ccf-v3.0 <-> PCI DSS 4.0
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Payment
       Card Industry Data Security Standard (PCI-DSS) 4.0
     source_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     target_framework_urn: urn:intuitem:risk:framework:pcidss-4_0
@@ -1753,9 +1753,9 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:pcidss-4_0:9.2.2
       relationship: intersect
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-pcidss-4_0-revert
-    ref_id: mapping-cisco-ccf-v3.0-to-pcidss-4_0-revert
-    name: cisco-ccf-v3.0 -> PCI DSS 4.0
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Payment
+    ref_id: mapping-cisco-ccf-v3.0-and-pcidss-4_0-revert
+    name: cisco-ccf-v3.0 <-> PCI DSS 4.0
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Payment
       Card Industry Data Security Standard (PCI-DSS) 4.0
     target_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     source_framework_urn: urn:intuitem:risk:framework:pcidss-4_0

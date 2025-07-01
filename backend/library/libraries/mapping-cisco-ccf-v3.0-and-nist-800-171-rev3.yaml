@@ -1,14 +1,14 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-nist-800-171-rev3
 locale: en
-ref_id: mapping-cisco-ccf-v3.0-to-nist-800-171-rev3
-name: cisco-ccf-v3.0 -> nist-800-171-rev3
-description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to NIST SP 800-171
-  Rev. 3
+ref_id: mapping-cisco-ccf-v3.0-and-nist-800-171-rev3
+name: cisco-ccf-v3.0 <-> nist-800-171-rev3
+description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and NIST SP
+  800-171 Rev. 3
 copyright: Cisco
 version: 2
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Cisco
 packager: intuitem
 dependencies:
@@ -17,10 +17,10 @@ dependencies:
 objects:
   requirement_mapping_sets:
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-nist-800-171-rev3
-    ref_id: mapping-cisco-ccf-v3.0-to-nist-800-171-rev3
-    name: cisco-ccf-v3.0 -> nist-800-171-rev3
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to NIST SP
-      800-171 Rev. 3
+    ref_id: mapping-cisco-ccf-v3.0-and-nist-800-171-rev3
+    name: cisco-ccf-v3.0 <-> nist-800-171-rev3
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and NIST
+      SP 800-171 Rev. 3
     source_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     target_framework_urn: urn:intuitem:risk:framework:nist-800-171-rev3
     requirement_mappings:
@@ -1153,10 +1153,10 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.02
       relationship: intersect
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-nist-800-171-rev3-revert
-    ref_id: mapping-cisco-ccf-v3.0-to-nist-800-171-rev3-revert
-    name: cisco-ccf-v3.0 -> nist-800-171-rev3
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to NIST SP
-      800-171 Rev. 3
+    ref_id: mapping-cisco-ccf-v3.0-and-nist-800-171-rev3-revert
+    name: cisco-ccf-v3.0 <-> nist-800-171-rev3
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and NIST
+      SP 800-171 Rev. 3
     target_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     source_framework_urn: urn:intuitem:risk:framework:nist-800-171-rev3
     requirement_mappings:

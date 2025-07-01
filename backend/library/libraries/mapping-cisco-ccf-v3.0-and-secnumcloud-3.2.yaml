@@ -1,15 +1,15 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-secnumcloud-3.2
 locale: en
-ref_id: mapping-cisco-ccf-v3.0-to-secnumcloud-3.2
-name: cisco-ccf-v3.0 -> SecNumCloud v3.2
-description: "Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Prestataires\
+ref_id: mapping-cisco-ccf-v3.0-and-secnumcloud-3.2
+name: cisco-ccf-v3.0 <-> SecNumCloud v3.2
+description: "Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Prestataires\
   \ de services d\u2019informatique en nuage (SecNumCloud) - r\xE9f\xE9rentiel d\u2019\
   exigences"
 copyright: Cisco
 version: 2
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Cisco
 packager: intuitem
 dependencies:
@@ -18,9 +18,9 @@ dependencies:
 objects:
   requirement_mapping_sets:
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-secnumcloud-3.2
-    ref_id: mapping-cisco-ccf-v3.0-to-secnumcloud-3.2
-    name: cisco-ccf-v3.0 -> SecNumCloud v3.2
-    description: "Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Prestataires\
+    ref_id: mapping-cisco-ccf-v3.0-and-secnumcloud-3.2
+    name: cisco-ccf-v3.0 <-> SecNumCloud v3.2
+    description: "Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Prestataires\
       \ de services d\u2019informatique en nuage (SecNumCloud) - r\xE9f\xE9rentiel\
       \ d\u2019exigences"
     source_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
@@ -2085,9 +2085,9 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:secnumcloud-3.2:12.11.b
       relationship: intersect
   - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-secnumcloud-3.2-revert
-    ref_id: mapping-cisco-ccf-v3.0-to-secnumcloud-3.2-revert
-    name: cisco-ccf-v3.0 -> SecNumCloud v3.2
-    description: "Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to Prestataires\
+    ref_id: mapping-cisco-ccf-v3.0-and-secnumcloud-3.2-revert
+    name: cisco-ccf-v3.0 <-> SecNumCloud v3.2
+    description: "Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Prestataires\
       \ de services d\u2019informatique en nuage (SecNumCloud) - r\xE9f\xE9rentiel\
       \ d\u2019exigences"
     target_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
