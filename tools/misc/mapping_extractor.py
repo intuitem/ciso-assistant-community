@@ -71,7 +71,7 @@ def generate_mapping(source_file: str,
 
     # Try to read the source Excel sheet
     try:
-        df = pd.read_excel(source_file, sheet_name=source_sheet, header=header_row - 1)
+        df = pd.read_excel(source_file, sheet_name=source_sheet, header=header_row - 1, dtype=str)
     except Exception as e:
         raise RuntimeError(f"Failed to read Excel file \"{source_file}\" or sheet \"{source_sheet}\":\n\t\t {e}")
 
