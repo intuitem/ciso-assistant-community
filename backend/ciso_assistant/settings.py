@@ -28,7 +28,7 @@ VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 SCHEMA_VERSION = meta.SCHEMA_VERSION
 
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "WARNING")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
@@ -61,6 +61,11 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "django.server": {
+            "handlers": [],
+            "level": "WARNING",
+            "propagate": False,
+        },
     },
 }
 
