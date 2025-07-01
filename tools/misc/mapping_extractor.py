@@ -115,7 +115,7 @@ def generate_mapping(source_file: str,
         elif count > 1:
             msg = f"Column name \"{column_name}\" appears {count} times in the sheet. The exported column may not be the one expected."
             print(f"⚠️  [WARNING] {msg}")
-            print(f"💡 Tip: Consider renaming the column in Excel or specifying a unique name in the YAML.")
+            print("💡 Tip: Consider renaming the column in Excel or specifying a unique name in the YAML.")
             warnings_list.append(msg)
         
         
