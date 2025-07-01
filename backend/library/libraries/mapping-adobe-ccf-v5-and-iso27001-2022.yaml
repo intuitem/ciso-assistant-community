@@ -1,13 +1,13 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-to-iso27001-2022
 locale: en
-ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
-name: adobe-ccf-v5 -> ISO/IEC 27001:2022
-description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
+ref_id: mapping-adobe-ccf-v5-and-iso27001-2022
+name: adobe-ccf-v5 <-> ISO/IEC 27001:2022
+description: Mapping between Adobe CCF v5 and International standard ISO/IEC 27001:2022
 copyright: Adobe
 version: 3
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Adobe
 packager: intuitem
 dependencies:
@@ -16,9 +16,9 @@ dependencies:
 objects:
   requirement_mapping_sets:
   - urn: urn:intuitem:risk:req_mapping_set:adobe-ccf-v5
-    ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
-    name: adobe-ccf-v5 -> ISO/IEC 27001:2022
-    description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
+    ref_id: mapping-adobe-ccf-v5-and-iso27001-2022
+    name: adobe-ccf-v5 <-> ISO/IEC 27001:2022
+    description: Mapping between Adobe CCF v5 and International standard ISO/IEC 27001:2022
     source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
     target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:
@@ -659,9 +659,9 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       relationship: intersect
   - urn: urn:intuitem:risk:req_mapping_set:adobe-ccf-v5-revert
-    ref_id: mapping-adobe-ccf-v5-to-iso27001-2022-revert
-    name: adobe-ccf-v5 -> ISO/IEC 27001:2022
-    description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
+    ref_id: mapping-adobe-ccf-v5-and-iso27001-2022-revert
+    name: adobe-ccf-v5 <-> ISO/IEC 27001:2022
+    description: Mapping between Adobe CCF v5 and International standard ISO/IEC 27001:2022
     target_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
     source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:

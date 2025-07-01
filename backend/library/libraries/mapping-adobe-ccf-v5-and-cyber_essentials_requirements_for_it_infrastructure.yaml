@@ -1,14 +1,14 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
-urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastructure
+urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
 locale: en
-ref_id: mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastructure
-name: 'adobe-ccf-v5 -> Cyber Essentials: Requirements for IT infrastructure'
-description: 'Mapping from Adobe CCF v5 to Cyber Essentials: Requirements for IT infrastructure
-  v3.1'
+ref_id: mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+name: 'adobe-ccf-v5 <-> Cyber Essentials: Requirements for IT infrastructure'
+description: 'Mapping between Adobe CCF v5 and Cyber Essentials: Requirements for
+  IT infrastructure v3.1'
 copyright: Adobe
 version: 1
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Adobe
 packager: intuitem
 dependencies:
@@ -16,11 +16,11 @@ dependencies:
 - urn:intuitem:risk:library:cyber_essentials_requirements_for_it_infrastructure
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastructure
-    ref_id: mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastructure
-    name: 'adobe-ccf-v5 -> Cyber Essentials: Requirements for IT infrastructure'
-    description: 'Mapping from Adobe CCF v5 to Cyber Essentials: Requirements for
-      IT infrastructure v3.1'
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+    ref_id: mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+    name: 'adobe-ccf-v5 <-> Cyber Essentials: Requirements for IT infrastructure'
+    description: 'Mapping between Adobe CCF v5 and Cyber Essentials: Requirements
+      for IT infrastructure v3.1'
     source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
     target_framework_urn: urn:intuitem:risk:framework:cyber_essentials_requirements_for_it_infrastructure
     requirement_mappings:
@@ -1296,11 +1296,11 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
       target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
       relationship: intersect
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastructure-revert
-    ref_id: mapping-adobe-ccf-v5-to-cyber_essentials_requirements_for_it_infrastructure-revert
-    name: 'adobe-ccf-v5 -> Cyber Essentials: Requirements for IT infrastructure'
-    description: 'Mapping from Adobe CCF v5 to Cyber Essentials: Requirements for
-      IT infrastructure v3.1'
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure-revert
+    ref_id: mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure-revert
+    name: 'adobe-ccf-v5 <-> Cyber Essentials: Requirements for IT infrastructure'
+    description: 'Mapping between Adobe CCF v5 and Cyber Essentials: Requirements
+      for IT infrastructure v3.1'
     target_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
     source_framework_urn: urn:intuitem:risk:framework:cyber_essentials_requirements_for_it_infrastructure
     requirement_mappings:

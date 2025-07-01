@@ -1,14 +1,14 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
-urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-to-pcidss-4_0
+urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-and-pcidss-4_0
 locale: en
-ref_id: mapping-adobe-ccf-v5-to-pcidss-4_0
-name: adobe-ccf-v5 -> PCI DSS 4.0
-description: Mapping from Adobe CCF v5 to Payment Card Industry Data Security Standard
-  (PCI-DSS) 4.0
+ref_id: mapping-adobe-ccf-v5-and-pcidss-4_0
+name: adobe-ccf-v5 <-> PCI DSS 4.0
+description: Mapping between Adobe CCF v5 and Payment Card Industry Data Security
+  Standard (PCI-DSS) 4.0
 copyright: Adobe
 version: 1
-publication_date: 2025-06-30
+publication_date: 2025-07-01
 provider: Adobe
 packager: intuitem
 dependencies:
@@ -16,10 +16,10 @@ dependencies:
 - urn:intuitem:risk:library:pcidss-4_0
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-to-pcidss-4_0
-    ref_id: mapping-adobe-ccf-v5-to-pcidss-4_0
-    name: adobe-ccf-v5 -> PCI DSS 4.0
-    description: Mapping from Adobe CCF v5 to Payment Card Industry Data Security
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-pcidss-4_0
+    ref_id: mapping-adobe-ccf-v5-and-pcidss-4_0
+    name: adobe-ccf-v5 <-> PCI DSS 4.0
+    description: Mapping between Adobe CCF v5 and Payment Card Industry Data Security
       Standard (PCI-DSS) 4.0
     source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
     target_framework_urn: urn:intuitem:risk:framework:pcidss-4_0
@@ -2058,10 +2058,10 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-23
       target_requirement_urn: urn:intuitem:risk:req_node:pcidss-4_0:6.3.1
       relationship: intersect
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-to-pcidss-4_0-revert
-    ref_id: mapping-adobe-ccf-v5-to-pcidss-4_0-revert
-    name: adobe-ccf-v5 -> PCI DSS 4.0
-    description: Mapping from Adobe CCF v5 to Payment Card Industry Data Security
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-pcidss-4_0-revert
+    ref_id: mapping-adobe-ccf-v5-and-pcidss-4_0-revert
+    name: adobe-ccf-v5 <-> PCI DSS 4.0
+    description: Mapping between Adobe CCF v5 and Payment Card Industry Data Security
       Standard (PCI-DSS) 4.0
     target_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
     source_framework_urn: urn:intuitem:risk:framework:pcidss-4_0
