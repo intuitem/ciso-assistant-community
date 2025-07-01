@@ -107,7 +107,7 @@ def expand_mappings(df_source, node_id_list, exception_map, reverse=False):
             search_prefix = prefix
 
         # Find all node_ids that start with the prefix
-        matches = [node_id for node_id in node_id_list if node_id.startswith(search_prefix+".")]
+        matches = [node_id for node_id in node_id_list if node_id.startswith(search_prefix)]
 
         if not matches:
             warning_msg = f"No match found in reference for {input_column} \"{prefix}\" ({fixed_column}: \"{fixed_value}\") [row #{index+2}]"
