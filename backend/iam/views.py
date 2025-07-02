@@ -224,6 +224,7 @@ class CurrentUserView(views.APIView):
                 principal=request.user, recursive=True
             ),
             "root_folder_id": Folder.get_root_folder().id,
+            "preferences": request.user.preferences,
         }
         return Response(res_data, status=HTTP_200_OK)
 
