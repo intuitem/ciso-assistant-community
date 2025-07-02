@@ -1,4 +1,4 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-annex-technical-and-methodological-requirements-nis2-and-iso27001-2022
 locale: en
@@ -7,10 +7,16 @@ name: Annex-to-the-Implementing-Regulation-of-NIS2-on-Technical-and-methodologic
   <-> ISO/IEC 27001:2022
 description: Mapping between NIS2 technical and methodological requirements 2024/2690
   and International standard ISO/IEC 27001:2022
-copyright: EUROPEAN COMMISSION
+copyright: "\xA9 European Union Agency for Cybersecurity (ENISA), 2025\nUnless otherwise\
+  \ noted, the reuse of this document is authorised under the Creative Commons Attribution\
+  \ 4.0\nInternational (CC BY 4.0) licence (https://creativecommons.org/licenses/by/4.0/).\
+  \ This means that reuse is allowed,\nprovided appropriate credit is given and any\
+  \ changes are indicated. For any use or reproduction of elements that are\nnot owned\
+  \ by the European Union Agency for Cybersecurity, permission may need to be sought\
+  \ directly from the\nrespective rights holders."
 version: 1
 publication_date: 2025-07-02
-provider: EUROPEAN COMMISSION
+provider: ENISA
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:annex-technical-and-methodological-requirements-nis2
