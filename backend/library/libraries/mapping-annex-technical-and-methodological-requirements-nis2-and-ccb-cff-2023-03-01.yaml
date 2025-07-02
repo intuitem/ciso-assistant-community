@@ -8846,13 +8846,13 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4.3
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-7.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ip-11.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.2
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-11.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.1
@@ -18819,13 +18819,13 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4.3
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ip-11.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.2
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-11.2
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-3.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.1

@@ -2774,13 +2774,13 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4.3
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.1
@@ -5646,13 +5646,13 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.4.3
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:13.1.1
