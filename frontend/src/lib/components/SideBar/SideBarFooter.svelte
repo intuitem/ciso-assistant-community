@@ -61,8 +61,7 @@
 			body: JSON.stringify({
 				lang: value
 			})
-		});
-		setLocale(value);
+		}).then(() => setLocale(value));
 	}
 
 	async function modalBuildInfo() {

@@ -10,7 +10,7 @@ export default defineConfig({
 			outdir: './src/paraglide',
 			outputStructure: 'locale-modules',
 			cookieName: 'LOCALE',
-			strategy: ['custom-userPreference', 'cookie', 'baseLocale']
+			strategy: ['custom-userPreference', 'cookie', 'custom-fallback', 'baseLocale']
 		}),
 		tailwindcss(),
 		sveltekit()
