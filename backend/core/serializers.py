@@ -503,6 +503,9 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     treatment = serializers.CharField()
 
+    inherent_proba = serializers.JSONField(source="get_inherent_proba")
+    inherent_impact = serializers.JSONField(source="get_inherent_impact")
+    inherent_level = serializers.JSONField(source="get_inherent_risk")
     current_proba = serializers.JSONField(source="get_current_proba")
     current_impact = serializers.JSONField(source="get_current_impact")
     current_level = serializers.JSONField(source="get_current_risk")
