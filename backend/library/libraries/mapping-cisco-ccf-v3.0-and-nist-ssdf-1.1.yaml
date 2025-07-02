@@ -1,6 +1,6 @@
 convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
-urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-nist-ssdf-1.1
+urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
 locale: en
 ref_id: mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
 name: cisco-ccf-v3.0 <-> nist-ssdf-1.1
@@ -8,7 +8,7 @@ description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Secur
   Software Development Framework (SSDF)
 copyright: Cisco
 version: 2
-publication_date: 2025-07-01
+publication_date: 2025-07-02
 provider: Cisco
 packager: intuitem
 dependencies:
@@ -16,7 +16,7 @@ dependencies:
 - urn:intuitem:risk:library:nist-ssdf-1.1
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-nist-ssdf-1.1
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
     ref_id: mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
     name: cisco-ccf-v3.0 <-> nist-ssdf-1.1
     description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Secure
@@ -510,7 +510,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-359
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.4
       relationship: intersect
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-nist-ssdf-1.1-revert
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1-revert
     ref_id: mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1-revert
     name: cisco-ccf-v3.0 <-> nist-ssdf-1.1
     description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Secure

@@ -1,6 +1,6 @@
 convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
-urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-soc2-2017-rev-2022
+urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-and-soc2-2017-rev-2022
 locale: en
 ref_id: mapping-cisco-ccf-v3.0-and-soc2-2017-rev-2022
 name: cisco-ccf-v3.0 <-> SOC2-2017-Rev-2022
@@ -8,7 +8,7 @@ description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and SOC2-
   Trust Services Criteria (revision 2022)
 copyright: Cisco
 version: 2
-publication_date: 2025-07-01
+publication_date: 2025-07-02
 provider: Cisco
 packager: intuitem
 dependencies:
@@ -16,7 +16,7 @@ dependencies:
 - urn:intuitem:risk:library:soc2-2017-rev-2022
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-soc2-2017-rev-2022
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-soc2-2017-rev-2022
     ref_id: mapping-cisco-ccf-v3.0-and-soc2-2017-rev-2022
     name: cisco-ccf-v3.0 <-> SOC2-2017-Rev-2022
     description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and SOC2-2017
@@ -9672,7 +9672,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-320
       target_requirement_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.2.2
       relationship: intersect
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-soc2-2017-rev-2022-revert
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-soc2-2017-rev-2022-revert
     ref_id: mapping-cisco-ccf-v3.0-and-soc2-2017-rev-2022-revert
     name: cisco-ccf-v3.0 <-> SOC2-2017-Rev-2022
     description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and SOC2-2017
