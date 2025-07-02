@@ -1,6 +1,6 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
-import { ALLAUTH_API_URL, BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -25,15 +25,6 @@ interface AuthenticationFlow {
 	types: 'totp' | 'recovery_codes';
 }
 
-function makeRedirectURL(currentLang: string, preferedLang: string, url: URL): string {
-	const next = url.searchParams.get('next');
-	const secureNext = getSecureRedirect(next) || '/';
-	if (currentLang === preferedLang) {
-		return secureNext;
-	}
-	return secureNext ? `${secureNext}?refresh=1` : `/?refresh=1`;
-}
-
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
@@ -50,7 +41,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 };
 
 export const actions: Actions = {
-	login: async ({ request, url, fetch, cookies }) => {
+	login: async ({ request, fetch, cookies, url }) => {
 		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) {
 			return fail(400, { form });
@@ -128,23 +119,9 @@ export const actions: Actions = {
 			path: '/',
 			secure: true
 		});
-
-		const preferencesRes = await fetch(`${BASE_API_URL}/user-preferences/`);
-		const preferences = await preferencesRes.json();
-
-		const currentLang = cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
-		const preferedLang = preferences.lang || DEFAULT_LANGUAGE;
-
-		if (currentLang !== preferedLang) {
-			cookies.set('PARAGLIDE_LOCALE', preferedLang, {
-				httpOnly: false,
-				sameSite: 'lax',
-				path: '/',
-				secure: true
-			});
-		}
-
-		redirect(302, makeRedirectURL(currentLang, preferedLang, url));
+		const next = url.searchParams.get('next');
+		const secureNext = getSecureRedirect(next) || '/';
+		redirect(302, secureNext);
 	},
 	mfaAuthenticate: async (event) => {
 		const formData = await event.request.formData();
