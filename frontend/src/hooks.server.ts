@@ -1,12 +1,11 @@
+import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { safeTranslate } from '$lib/utils/i18n';
-import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
-import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setLocale } from '$paraglide/runtime';
-import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
+import { paraglideMiddleware } from '$paraglide/server';
 
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
@@ -58,53 +57,64 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 	return res.json();
 }
 
-export const handle: Handle = async ({ event, resolve }) => {
-	event.locals.featureFlags = loadFeatureFlags();
+export const handle: Handle = async ({ event, resolve }) =>
+	paraglideMiddleware(event.request, async ({ request: localizedRequest, locale }) => {
+		event.request = localizedRequest;
 
-	await ensureCsrfToken(event);
+		event.locals.featureFlags = loadFeatureFlags();
 
-	if (event.locals.user) return await resolve(event);
+		await ensureCsrfToken(event);
 
-	const errorId = new URL(event.request.url).searchParams.get('error');
-	if (errorId) {
-		setLocale(event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE);
-		setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
-		redirect(302, '/login');
-	}
+		if (event.locals.user)
+			return await resolve(event, {
+				transformPageChunk: ({ html }) => {
+					return html.replace('%lang%', locale);
+				}
+			});
 
-	const user = await validateUserSession(event);
-	if (user) {
-		event.locals.user = user;
-		const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {
-			credentials: 'include',
-			headers: {
-				'content-type': 'application/json',
-				Authorization: `Token ${event.cookies.get('token')}`
-			}
-		});
-		event.locals.settings = await generalSettings.json();
-
-		const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
-			credentials: 'include',
-			headers: {
-				'content-type': 'application/json',
-				Authorization: `Token ${event.cookies.get('token')}`
-			}
-		});
-		try {
-			event.locals.featureflags = await featureFlagSettings.json();
-		} catch (e) {
-			console.error('Error fetching feature flags', e);
-			event.locals.featureflags = {};
+		const errorId = new URL(event.request.url).searchParams.get('error');
+		if (errorId) {
+			setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
+			redirect(302, '/login');
 		}
-	}
 
-	return await resolve(event);
-};
+		const user = await validateUserSession(event);
+		if (user) {
+			event.locals.user = user;
+			const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {
+				credentials: 'include',
+				headers: {
+					'content-type': 'application/json',
+					Authorization: `Token ${event.cookies.get('token')}`
+				}
+			});
+			event.locals.settings = await generalSettings.json();
+
+			const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
+				credentials: 'include',
+				headers: {
+					'content-type': 'application/json',
+					Authorization: `Token ${event.cookies.get('token')}`
+				}
+			});
+			try {
+				event.locals.featureflags = await featureFlagSettings.json();
+			} catch (e) {
+				console.error('Error fetching feature flags', e);
+				event.locals.featureflags = {};
+			}
+		}
+
+		return await resolve(event, {
+			transformPageChunk: ({ html }) => {
+				return html.replace('%lang%', locale);
+			}
+		});
+	});
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-	const currentLang = event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
+	const currentLang = event.locals.user?.preferences?.lang || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
 		request.headers.set('Accept-Language', currentLang);

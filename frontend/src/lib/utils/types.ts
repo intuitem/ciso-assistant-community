@@ -18,6 +18,9 @@ export interface User {
 	accessible_domains: string[];
 	domain_permissions: Record<string, string[]>;
 	root_folder_id: string;
+	preferences: {
+		lang?: string;
+	};
 }
 
 export interface GlobalSettings {

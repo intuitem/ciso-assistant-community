@@ -21,7 +21,7 @@
 		"build-storybook": "storybook build"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "^2.0.6",
+		"@inlang/paraglide-js": "^2.1.0",
 		"@inlang/plugin-message-format": "^2.2.0",
 		"@playwright/test": "^1.53.1",
 		"@skeletonlabs/skeleton": "^3.1.3",
