@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:soc2-2017-rev-2022
 locale: en
 ref_id: SOC2-2017-Rev-2022
@@ -13,8 +15,8 @@ description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availa
   s operational, reporting, or compliance objectives; and (d) for a particular type\
   \ of information used by the entity. Link: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022"
 copyright: "\xA9 2023 Association of International Certified Professional Accountants\xAE"
-version: 2
-publication_date: 2025-01-12
+version: 3
+publication_date: 2025-07-02
 provider: AICPA
 packager: intuitem
 translations:
@@ -1443,22 +1445,31 @@ objects:
       ref_id: CC3.2.5
       description: "[COSO] Determines How to Respond to Risks \u2014 Risk assessment\
         \ includes considering how the risk should be managed and whether to accept,\
-        \ avoid, reduce, or share the risk. Identifies Threats to Objectives \u2014\
-        The entity identifies threats to the achievement of its objectives from intentional\
-        \ (including malicious) and unintentional acts and environmental events."
+        \ avoid, reduce, or share the risk."
       translations:
         es:
           description: "[COSO] Determina c\xF3mo responder a los riesgos - La evaluaci\xF3\
             n de riesgos incluye considerar c\xF3mo debe gestionarse el riesgo y si\
-            \ debe aceptarse, evitarse, reducirse o compartirse. Identifica las amenazas\
-            \ a los objetivos - La entidad identifica las amenazas a la consecuci\xF3\
-            n de sus objetivos derivadas de actos intencionados (incluidos los malintencionados)\
-            \ y no intencionados y de acontecimientos del entorno."
-    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.6
+            \ debe aceptarse, evitarse, reducirse o compartirse."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:true_cc3.2.6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       ref_id: CC3.2.6
+      description: "[TSC] Identifies Threats to Objectives \u2014The entity identifies\
+        \ threats to the achievement of its objectives from intentional (including\
+        \ malicious) and unintentional acts and environmental events."
+      translations:
+        es:
+          description: "[TSC] Identifica las amenazas a los objetivos - La entidad\
+            \ identifica las amenazas a la consecuci\xF3n de sus objetivos derivadas\
+            \ de actos intencionados (incluidos los malintencionados) y no intencionados\
+            \ y de acontecimientos del entorno."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
+      ref_id: CC3.2.7
       description: "[TSC] Identifies Vulnerability of System Components \u2014 The\
         \ entity identifies the vulnerabilities of system components, including system\
         \ processes, infrastructure, software, and other information assets."
@@ -1472,7 +1483,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      ref_id: CC3.2.7
+      ref_id: CC3.2.8
       description: "[TSC] Analyzes Threats and Vulnerabilities From Vendors, Business\
         \ Partners, and Other Parties \u2014 The entity's risk assessment process\
         \ includes the analysis of potential threats and vulnerabilities arising from\
@@ -1491,7 +1502,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
-      ref_id: CC3.2.8
+      ref_id: CC3.2.9
       description: "[TSC] Assesses the Significance of the Risks \u2014 The entity\
         \ assesses the significance of the identified risks, including (1) determining\
         \ the criticality of system components, including information assets, in achieving\
@@ -2017,8 +2028,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.2
       ref_id: CC5.2.1
-      description: "Determines Dependency Between the Use of Technology in Business\
-        \ Processes and Technology General Controls \u2014 Management understands\
+      description: "[COSO] Determines Dependency Between the Use of Technology in\
+        \ Business Processes and Technology General Controls \u2014 Management understands\
         \ and determines the dependency and linkage between business processes, automated\
         \ control activities, and technology general controls."
       translations:
@@ -2033,10 +2044,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.2
       ref_id: CC5.2.2
-      description: "Establishes Relevant Technology Infrastructure Control Activities\
-        \ \u2014 Management selects and develops control activities over the technology\
-        \ infrastructure, which are designed and implemented to help ensure the completeness,\
-        \ accuracy, and availability of technology processing."
+      description: "[COSO] Establishes Relevant Technology Infrastructure Control\
+        \ Activities \u2014 Management selects and develops control activities over\
+        \ the technology infrastructure, which are designed and implemented to help\
+        \ ensure the completeness, accuracy, and availability of technology processing."
       translations:
         es:
           description: "[COSO] Establece actividades de control relevantes sobre la\
@@ -2050,10 +2061,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.2
       ref_id: CC5.2.3
-      description: "Establishes Relevant Security Management Process Controls Activities\
-        \ \u2014 Management selects and develops control activities that are designed\
-        \ and implemented to restrict technology access rights to authorized users\
-        \ commensurate with their job responsibilities and to protect the entity\u2019\
+      description: "[COSO] Establishes Relevant Security Management Process Controls\
+        \ Activities \u2014 Management selects and develops control activities that\
+        \ are designed and implemented to restrict technology access rights to authorized\
+        \ users commensurate with their job responsibilities and to protect the entity\u2019\
         s assets from external threats."
       translations:
         es:
@@ -2068,10 +2079,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.2
       ref_id: CC5.2.4
-      description: "Establishes Relevant Technology Acquisition, Development, and\
-        \ Maintenance Process Control Activities \u2014 Management selects and develops\
-        \ control activities over the acquisition, development, and maintenance of\
-        \ technology and its infrastructure to achieve management\u2019s objectives."
+      description: "[COSO] Establishes Relevant Technology Acquisition, Development,\
+        \ and Maintenance Process Control Activities \u2014 Management selects and\
+        \ develops control activities over the acquisition, development, and maintenance\
+        \ of technology and its infrastructure to achieve management\u2019s objectives."
       translations:
         es:
           description: "[COSO] Establece actividades de control relevantes en la adquisici\xF3\
@@ -4457,10 +4468,10 @@ objects:
             \ PRESTACI\xD3N DE SERVICIOS O LA PRODUCCI\xD3N, FABRICACI\xD3N O DISTRIBUCI\xD3\
             N DE BIENES)"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.1
+      ref_id: PI1.1
       description: The entity obtains or generates, uses, and communicates relevant,
         quality information regarding the objectives related to processing, including
         definitions of data processed and product and service specifications, to support
@@ -4471,11 +4482,100 @@ objects:
             n pertinente y de calidad sobre los objetivos relacionados con el tratamiento,\
             \ incluidas las definiciones de los datos tratados y las especificaciones\
             \ de los productos y servicios, para respaldar el uso de productos y servicios."
-    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.1.1
       assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
+      ref_id: PI1.1.1
+      description: "Identifies Functional and Nonfunctional Requirements and Information\
+        \ Specifications \u2014 The entity identifies and communicates functional\
+        \ and nonfunctional re- quirements related to system processing and information\
+        \ specifications required to support the use of products and services."
+      translations:
+        es:
+          description: "Identifica los requisitos funcionales y no funcionales y las\
+            \ especificaciones de informaci\xF3n - La entidad identifica y comunica\
+            \ los requisitos funcionales y no funcionales relacionados con el procesamiento\
+            \ del sistema y las especificaciones de informaci\xF3n necesarias para\
+            \ respaldar el uso de productos y servicios."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
+      ref_id: PI1.1.2
+      description: "Defines Data Necessary to Support a Product or Service \u2014\
+        \ When data is provided as part of a service or product or as part of a reporting\
+        \ obligation related to a product or service:\n1. The definition and purpose\
+        \ of the data is available to the users of the data.\n2. The definition of\
+        \ the data includes the following information:\n    a. The population of events\
+        \ or instances included in the set of data\n    b. The nature of each element\
+        \ (for example, field) of the set of data (that is, the event or instance\
+        \ to which the data element relates, for example, transaction price of a sale\
+        \ of XYZ Corporation stock for the last trade in that stock on a given day)\n\
+        \    c. The sources of the data within the set\n    d. The units of measurement\
+        \ of data elements (for example, fields)\n    e. The accuracy, correctness,\
+        \ or precision of measurement\n    f. The uncertainty or confidence interval\
+        \ inherent in each data element and in the population of those elements\n\
+        \    g. The time periods over which the set of data was measured or the period\
+        \ of time during which the events the data relates to occurred\n    h. In\
+        \ addition to the date or period of time, the factors that determined the\
+        \ inclusion and exclusion of items in the data elements and population\n3.\
+        \ The definition of the data is complete and accurate.\n4. The description\
+        \ of the data identifies any information that is necessary to understand each\
+        \ data element and the population in a manner consistent with its definition\
+        \ and intended purpose (metadata) that has not been included within the data."
+      translations:
+        es:
+          description: "Define los datos necesarios para respaldar un producto o servicio\
+            \ - Cuando los datos se proporcionan como parte de un servicio o producto\
+            \ o como parte de una obligaci\xF3n de informaci\xF3n relacionada con\
+            \ un producto o servicio:\n1. La definici\xF3n y finalidad de los datos\
+            \ est\xE1 a disposici\xF3n de los usuarios de los mismos.\n2. La definici\xF3\
+            n de los datos incluye la siguiente informaci\xF3n:\n    un. La poblaci\xF3\
+            n de eventos o instancias incluidos en el conjunto de datos\n    b. La\
+            \ naturaleza de cada elemento (por ejemplo, campo) del conjunto de datos\
+            \ (es decir, el evento o instancia con el que se relaciona el elemento\
+            \ de datos, por ejemplo, el precio de transacci\xF3n de una venta de acciones\
+            \ de XYZ Corporation para la \xFAltima operaci\xF3n de esa acci\xF3n en\
+            \ un d\xEDa determinado)\n    c. Las fuentes de los datos dentro del conjunto\n\
+            \    d. Las unidades de medida de los elementos de datos (por ejemplo,\
+            \ campos)\n    e. La exactitud, exactitud o precisi\xF3n de la medici\xF3\
+            n\n    f. La incertidumbre o el intervalo de confianza inherente a cada\
+            \ elemento de datos y a la poblaci\xF3n de esos elementos\n    g. Los\
+            \ per\xEDodos de tiempo durante los cuales se midi\xF3 el conjunto de\
+            \ datos o el per\xEDodo de tiempo durante el cual ocurrieron los eventos\
+            \ a los que se refieren los datos\n    h. Adem\xE1s de la fecha o per\xED\
+            odo de tiempo, los factores que determinaron la inclusi\xF3n y exclusi\xF3\
+            n de \xEDtems en los elementos de datos y poblaci\xF3n\n3. La definici\xF3\
+            n de los datos es completa y precisa.\n4. La descripci\xF3n de los datos\
+            \ identifica cualquier informaci\xF3n que sea necesaria para comprender\
+            \ cada elemento de datos y la poblaci\xF3n de una manera coherente con\
+            \ su definici\xF3n y prop\xF3sito previsto (metadatos) que no se haya\
+            \ incluido en los datos."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
+      ref_id: PI1.1.3
+      description: "Defines Information Necessary to Support the Use of a Good or\
+        \ Product \u2014 When information provided by the entity is needed to use\
+        \ the good or product in accordance with its specifications:\n1. The required\
+        \ information is available to the user of the good or product.\n2. The required\
+        \ information is clearly identifiable.\n3. The required information is validated\
+        \ for completeness and accuracy"
+      translations:
+        es:
+          description: "Define la informaci\xF3n necesaria para respaldar el uso de\
+            \ un bien o producto - Cuando la informaci\xF3n proporcionada por la entidad\
+            \ es necesaria para usar el bien o producto de acuerdo con sus especificaciones:\n\
+            1. La informaci\xF3n requerida est\xE1 disponible para el usuario del\
+            \ bien o producto.\n2. La informaci\xF3n requerida es claramente identificable.\n\
+            3. Se valida la integridad y exactitud de la informaci\xF3n requerida"
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.2
+      ref_id: PI1.2
       description: "The entity implements policies and procedures over system inputs,\
         \ including controls over completeness and accuracy, to result in products,\
         \ services, and reporting to meet the entity\u2019s objectives."
@@ -4484,11 +4584,48 @@ objects:
           description: "La entidad aplica pol\xEDticas y procedimientos a las entradas\
             \ del sistema, incluidos controles de integridad y exactitud, para obtener\
             \ productos, servicios e informes que cumplan los objetivos de la entidad."
-    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.2.1
       assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
+      ref_id: PI1.2.1
+      description: "Defines Characteristics of Processing Inputs \u2014 The characteristics\
+        \ of processing inputs that are necessary to meet requirements are defined"
+      translations:
+        es:
+          description: "Define las caracter\xEDsticas de los insumos de procesamiento\
+            \ - Se definen las caracter\xEDsticas de los insumos de procesamiento\
+            \ que son necesarios para cumplir con los requisitos"
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
+      ref_id: PI1.2.2
+      description: "Evaluates Processing Inputs \u2014 Processing inputs are evaluated\
+        \ for compliance with defined input requirements."
+      translations:
+        es:
+          description: "Eval\xFAa las entradas de procesamiento - Las entradas de\
+            \ procesamiento se eval\xFAan para verificar el cumplimiento de los requisitos\
+            \ de entrada definidos."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
+      ref_id: PI1.2.3
+      description: "Creates and Maintains Records of System Inputs \u2014 Records\
+        \ of system input activities are created and maintained completely and accurately\
+        \ in a timely manner."
+      translations:
+        es:
+          description: Crea y mantiene registros de entradas del sistema - Los registros
+            de las actividades de entrada del sistema se crean y mantienen de manera
+            completa y precisa de manera oportuna.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.3
+      ref_id: PI1.3
       description: "The entity implements policies and procedures over system processing\
         \ to result in products, services, and reporting to meet the entity\u2019\
         s objectives."
@@ -4497,11 +4634,72 @@ objects:
           description: "La entidad aplica pol\xEDticas y procedimientos sobre el procesamiento\
             \ de sistemas para obtener productos, servicios e informes que cumplan\
             \ los objetivos de la entidad."
-    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.3.1
       assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+      ref_id: PI1.3.1
+      description: "Defines Processing Specifications \u2014 The processing specifications\
+        \ that are necessary to meet product or service requirements are defined."
+      translations:
+        es:
+          description: Define las especificaciones de procesamiento - Se definen las
+            especificaciones de procesamiento necesarias para cumplir con los requisitos
+            del producto o servicio.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+      ref_id: PI1.3.2
+      description: "Defines Processing Activities \u2014 Processing activities are\
+        \ defined to result in products or services that meet specifications."
+      translations:
+        es:
+          description: Define las actividades de procesamiento - Las actividades de
+            procesamiento se definen para dar como resultado productos o servicios
+            que cumplan con las especificaciones.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+      ref_id: PI1.3.3
+      description: "Detects and Corrects Processing or Production Activity Errors\
+        \ \u2014 Errors encountered in processing or production activities are detected\
+        \ and corrected in a timely manner."
+      translations:
+        es:
+          description: "Detecta y corrige errores en las actividades de procesamiento\
+            \ o producci\xF3n - Los errores encontrados en las actividades de procesamiento\
+            \ o producci\xF3n se detectan y corrigen de manera oportuna."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+      ref_id: PI1.3.4
+      description: "Records System Processing Activities \u2014 System processing\
+        \ activities are recorded completely and accurately in a timely manner."
+      translations:
+        es:
+          description: Actividades de procesamiento del sistema de registros - Las
+            actividades de procesamiento del sistema se registran de manera completa
+            y precisa de manera oportuna.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
+      ref_id: PI1.3.5
+      description: "Processes Inputs \u2014 Inputs are processed completely, accurately,\
+        \ and timely as authorized in accordance with defined processing activities."
+      translations:
+        es:
+          description: "Procesos de entradas - Las entradas se procesan de manera\
+            \ completa, precisa y oportuna seg\xFAn lo autorizado de acuerdo con las\
+            \ actividades de procesamiento definidas."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.4
+      ref_id: PI1.4
       description: "The entity implements policies and procedures to make available\
         \ or deliver output completely, accurately, and timely in accordance with\
         \ specifications to meet the entity\u2019s objectives."
@@ -4511,11 +4709,61 @@ objects:
             \ a disposici\xF3n o entregar resultados de forma completa, precisa y\
             \ puntual de acuerdo con las especificaciones para cumplir los objetivos\
             \ de la entidad."
-    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.4.1
       assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
+      ref_id: PI1.4.1
+      description: "Protects Output \u2014 Output is protected when stored or delivered,\
+        \ or both, to prevent theft, destruction, corruption, or deterioration that\
+        \ would prevent output from meeting specifications."
+      translations:
+        es:
+          description: "Protege la salida - La salida est\xE1 protegida cuando se\
+            \ almacena o se entrega, o ambas, para evitar robos, destrucci\xF3n, corrupci\xF3\
+            n o deterioro que impedir\xEDan que la salida cumpla con las especificaciones."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
+      ref_id: PI1.4.2
+      description: "Distributes Output Only to Intended Parties \u2014 Output is distributed\
+        \ or made available only to intended parties."
+      translations:
+        es:
+          description: "Distribuye la salida solo a las partes previstas - La salida\
+            \ se distribuye o se pone a disposici\xF3n solo de las partes previstas."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
+      ref_id: PI1.4.3
+      description: "Distributes Output Completely and Accurately \u2014 Procedures\
+        \ are in place to provide for the completeness, accuracy, and timeliness of\
+        \ distributed output."
+      translations:
+        es:
+          description: "Distribuye la salida de forma completa y precisa - Existen\
+            \ procedimientos para garantizar la integridad, la precisi\xF3n y la puntualidad\
+            \ de la salida distribuida."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
+      ref_id: PI1.4.4
+      description: "Creates and Maintains Records of System Output Activities \u2014\
+        \ Records of system output activities are created and maintained completely\
+        \ and accurately in a timely manner."
+      translations:
+        es:
+          description: Crea y mantiene registros de las actividades de salida del
+            sistema - Los registros de las actividades de salida del sistema se crean
+            y mantienen de manera completa y precisa de manera oportuna.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
+      assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
-      ref_id: PP1.5
+      ref_id: PI1.5
       description: "The entity implements policies and procedures to store inputs,\
         \ items in processing, and outputs completely, accurately, and timely in accordance\
         \ with system specifications to meet the entity\u2019s objectives."
@@ -4525,6 +4773,58 @@ objects:
             \ las entradas, los elementos en proceso y las salidas de forma completa,\
             \ precisa y oportuna de acuerdo con las especificaciones del sistema para\
             \ cumplir los objetivos de la entidad."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
+      ref_id: PI1.5.1
+      description: "Protects Stored Items \u2014 Stored items are protected to prevent\
+        \ theft, corruption, destruction, or deterioration that would prevent output\
+        \ from meeting specifications."
+      translations:
+        es:
+          description: "Protege los elementos almacenados - Los art\xEDculos almacenados\
+            \ est\xE1n protegidos para evitar robos, corrupci\xF3n, destrucci\xF3\
+            n o deterioro que impedir\xEDan que la producci\xF3n cumpla con las especificaciones."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
+      ref_id: PI1.5.2
+      description: "Archives and Protects System Records \u2014 System records are\
+        \ archived, and archives are protected against theft, corruption, destruction,\
+        \ or deterioration that would prevent them from being used."
+      translations:
+        es:
+          description: "Archiva y protege los registros del sistema - Los registros\
+            \ del sistema se archivan y los archivos se protegen contra el robo, la\
+            \ corrupci\xF3n, la destrucci\xF3n o el deterioro que impedir\xEDan su\
+            \ uso."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
+      ref_id: PI1.5.3
+      description: "Stores Data Completely and Accurately \u2014 Procedures are in\
+        \ place to provide for the complete, accurate, and timely storage of data."
+      translations:
+        es:
+          description: Almacena datos de forma completa y precisa - Existen procedimientos
+            para proporcionar el almacenamiento completo, preciso y oportuno de los
+            datos.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi1.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
+      ref_id: PI1.5.4
+      description: "Creates and Maintains Records of System Storage Activities \u2014\
+        \ Records of system storage activities are created and maintained completely\
+        \ and accurately in a timely manner."
+      translations:
+        es:
+          description: Crea y mantiene registros de las actividades de almacenamiento
+            del sistema - Los registros de las actividades de almacenamiento del sistema
+            se crean y mantienen de manera completa y precisa de manera oportuna.
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       assessable: false
       depth: 1
@@ -4545,7 +4845,7 @@ objects:
           description: "Criterios de privacidad relativos a la notificaci\xF3n y comunicaci\xF3\
             n de objetivos relacionados con la privacidad"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.0
       ref_id: P1.1
@@ -4563,6 +4863,117 @@ objects:
             \ en las pr\xE1cticas de privacidad de la entidad, incluidos los cambios\
             \ en el uso de la informaci\xF3n personal, para cumplir los objetivos\
             \ de la entidad relacionados con la privacidad."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.1
+      description: "Communicates to Data Subjects [C] \u2014 Notice is provided to\
+        \ data subjects regarding the following: \n- Purpose for collecting personal\
+        \ information \n- Choice and consent \n- Types of personal information collected\
+        \ \n- Methods of collection (for example, use of cookies or other tracking\
+        \ techniques) \n- Use, retention, and disposal \n- Access \n- Disclosure to\
+        \ third parties \n- Security for privacy \n- Quality, including data subjects\u2019\
+        \ responsibilities for quality \n- Monitoring and enforcement\nIf personal\
+        \ information is collected from sources other than the individual, such sources\
+        \ are described in the privacy notice."
+      translations:
+        es:
+          description: "Se comunica a los interesados [C] \u2014 Se proporciona un\
+            \ aviso a los interesados con respecto a lo siguiente: \n- Finalidad de\
+            \ la recopilaci\xF3n de informaci\xF3n personal \n- Elecci\xF3n y consentimiento\
+            \ \n- Tipos de informaci\xF3n personal recopilada \n- M\xE9todos de recopilaci\xF3\
+            n (por ejemplo, uso de cookies u otras t\xE9cnicas de seguimiento) \n\
+            - Uso, retenci\xF3n y eliminaci\xF3n \n-Acceso \n- Divulgaci\xF3n a terceros\
+            \ \n- Seguridad para la privacidad \n- Calidad, incluidas las responsabilidades\
+            \ de los interesados en materia de calidad \n- Supervisi\xF3n y aplicaci\xF3\
+            n de la ley\nSi la informaci\xF3n personal se recopila de fuentes distintas\
+            \ al individuo, dichas fuentes se describen en el aviso de privacidad."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.2
+      description: "Provides Notice to Data Subjects [C] \u2014 Notice is provided\
+        \ to data subjects\n(1) at or before the time personal information is collected\
+        \ or as soon as practical thereafter,\n(2) at or before the entity changes\
+        \ its privacy notice or as soon as practical thereafter, or\n(3) before personal\
+        \ information is used for new purposes not previously identified."
+      translations:
+        es:
+          description: "Notifica a los interesados [C] \u2014 Se notifica a los interesados\n\
+            (1) en el momento en que se recopila la informaci\xF3n personal o antes\
+            \ o tan pronto como sea posible a partir de entonces,\n(2) en o antes\
+            \ de que la entidad cambie su aviso de privacidad o tan pronto como sea\
+            \ posible a partir de entonces, o\n(3) antes de que la informaci\xF3n\
+            \ personal se utilice para nuevos fines no identificados anteriormente."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.3
+      description: "Covers Entities and Activities in Notice [C] \u2014 An objective\
+        \ description of the entities and activities covered is included in the entity\u2019\
+        s privacy notice."
+      translations:
+        es:
+          description: "Cubre Entidades y Actividades en el Aviso [C] \u2014 Se incluye\
+            \ una descripci\xF3n objetiva de las entidades y actividades cubiertas\
+            \ en el aviso de privacidad de la entidad."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.4
+      description: "Uses Clear Language and Presents a Current Privacy Notice in a\
+        \ Location Easily Found by Data Subjects [C] \u2014 The entity\u2019s privacy\
+        \ notice is current, dated, uses clear language, and is in a location that\
+        \ can be easily found by data subjects"
+      translations:
+        es:
+          description: "Utiliza un lenguaje claro y presenta un aviso de privacidad\
+            \ actualizado en un lugar f\xE1cilmente encontrado por los interesados.\
+            \ [C] \u2014 El aviso de privacidad de la entidad es actual, anticuado,\
+            \ utiliza un lenguaje claro y se encuentra en un lugar que los interesados\
+            \ pueden encontrar f\xE1cilmente."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.5
+      description: "Reviews the Privacy Notice [C] \u2014 A process is defined to\
+        \ periodically review the content of the privacy notice and to implement any\
+        \ identified updates."
+      translations:
+        es:
+          description: "Revisa el Aviso de Privacidad [C] \u2014 Se define un proceso\
+            \ para revisar peri\xF3dicamente el contenido del aviso de privacidad\
+            \ e implementar cualquier actualizaci\xF3n identificada."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.6
+      description: "Communicates Changes to Notice [C] \u2014 Data subjects are informed\
+        \ when changes are made to the privacy notice and the nature of such changes"
+      translations:
+        es:
+          description: "Comunica cambios en el aviso [C] \u2014 Se informa a los interesados\
+            \ cuando se realizan cambios en el aviso de privacidad y la naturaleza\
+            \ de dichos cambios"
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
+      ref_id: P1.1.7
+      description: "Retains Prior Notices [C] \u2014 Prior versions of the privacy\
+        \ notice are retained in accordance with internal requirements to document\
+        \ prior communications"
+      translations:
+        es:
+          description: "Conserva los avisos anteriores [C] \u2014 Las versiones anteriores\
+            \ del aviso de privacidad se conservan de acuerdo con los requisitos internos\
+            \ para documentar las comunicaciones anteriores"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.0
       assessable: false
       depth: 2
@@ -4574,7 +4985,7 @@ objects:
           description: "Criterios de privacidad relacionados con la elecci\xF3n y\
             \ el consentimiento"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.0
       ref_id: P2.1
@@ -4601,6 +5012,106 @@ objects:
             \ para determinar el consentimiento impl\xEDcito para la recogida, uso,\
             \ conservaci\xF3n, divulgaci\xF3n y eliminaci\xF3n de informaci\xF3n personal\
             \ est\xE1 documentada."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
+      ref_id: P2.1.1
+      description: "Collects Information by Fair and Lawful Means [P][C] \u2014 Methods\
+        \ of collecting personal information are reviewed by management before they\
+        \ are implemented to confirm that personal information is obtained\n(a) fairly,\
+        \ without intimidation or deception, and\n(b) lawfully, adhering to all relevant\
+        \ rules of law, whether derived from statute or common law, relating to the\
+        \ collection of personal information"
+      translations:
+        es:
+          description: "Recopila informaci\xF3n por medios justos y legales [P] [C]\
+            \ \u2014 Los m\xE9todos de recopilaci\xF3n de informaci\xF3n personal\
+            \ son revisados por la gerencia antes de que se implementen para confirmar\
+            \ que se obtiene informaci\xF3n personal\n(a) de manera justa, sin intimidaci\xF3\
+            n ni enga\xF1o, y\n(b) legalmente, adhiri\xE9ndose a todas las normas\
+            \ legales relevantes, ya sea derivadas de la ley o del derecho consuetudinario,\
+            \ relacionadas con la recopilaci\xF3n de informaci\xF3n personal"
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
+      ref_id: P2.1.2
+      description: "Communicates Consequences of Denying or Withdrawing Consent [C]\
+        \ \u2014 When personal information is collected, data subjects are informed\
+        \ of the consequences of refusing to provide personal information or denying\
+        \ or withdrawing consent to use personal information for purposes identified\
+        \ in the notice."
+      translations:
+        es:
+          description: "Comunica las consecuencias de denegar o retirar el consentimiento\
+            \ [C] \u2014 Cuando se recopila informaci\xF3n personal, se informa a\
+            \ los interesados de las consecuencias de negarse a proporcionar informaci\xF3\
+            n personal o de denegar o retirar el consentimiento para usar informaci\xF3\
+            n personal para los fines identificados en el aviso."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
+      ref_id: P2.1.3
+      description: "Obtains Implicit or Explicit Consent [C] \u2014 Implicit or explicit\
+        \ consent is obtained from data subjects at or before the time personal information\
+        \ is collected or soon thereafter. The individual\u2019s preferences expressed\
+        \ in his or her consent are confirmed and implemented."
+      translations:
+        es:
+          description: "Obtiene el consentimiento impl\xEDcito o expl\xEDcito [C]\
+            \ - El consentimiento impl\xEDcito o expl\xEDcito se obtiene de los interesados\
+            \ en el momento en que se recopila la informaci\xF3n personal o antes,\
+            \ o poco despu\xE9s. Las preferencias de la persona expresadas en su consentimiento\
+            \ se confirman e implementan."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
+      ref_id: P2.1.4
+      description: "Documents and Obtains Consent for New Purposes and Uses [C] \u2014\
+        \ If information that was previously collected is to be used for purposes\
+        \ not previously identified in the privacy notice, the new purpose is documented,\
+        \ the data subject is notified, and implicit or explicit consent is obtained\
+        \ prior to such new use or purpose."
+      translations:
+        es:
+          description: "Documenta y obtiene el consentimiento para nuevos fines y\
+            \ usos [C] \u2014 Si la informaci\xF3n que se recopil\xF3 anteriormente\
+            \ se va a utilizar para fines no identificados previamente en el aviso\
+            \ de privacidad, se documenta el nuevo prop\xF3sito, se notifica al titular\
+            \ de los datos y se obtiene el consentimiento impl\xEDcito o expl\xED\
+            cito antes de dicho nuevo uso o prop\xF3sito."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
+      ref_id: P2.1.5
+      description: "Obtains Explicit Consent for Sensitive Information [C] \u2014\
+        \ Explicit consent is ob- tained directly from the data subject when sensitive\
+        \ personal information is collected, used, or disclosed, unless a law or regulation\
+        \ specifically requires otherwise"
+      translations:
+        es:
+          description: "Obtiene el consentimiento expl\xEDcito para la informaci\xF3\
+            n confidencial [C] \u2014 El consentimiento expl\xEDcito se obtiene directamente\
+            \ del sujeto de los datos cuando se recopila, utiliza o divulga informaci\xF3\
+            n personal confidencial, a menos que una ley o reglamento exija espec\xED\
+            ficamente lo contrario"
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
+      ref_id: P2.1.6
+      description: "Obtains Consent for Data Transfers [C] \u2014 Consent is obtained\
+        \ before personal information is transferred to or from an individual\u2019\
+        s endpoint device."
+      translations:
+        es:
+          description: "Obtiene el consentimiento para las transferencias de datos\
+            \ [C] - El consentimiento se obtiene antes de que la informaci\xF3n personal\
+            \ se transfiera hacia o desde el dispositivo de punto final de una persona."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.0
       assessable: false
       depth: 2
@@ -4611,7 +5122,7 @@ objects:
         es:
           description: Criterios de privacidad relacionados con la recogida
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.0
       ref_id: P3.1
@@ -4621,6 +5132,67 @@ objects:
         es:
           description: "La informaci\xF3n personal se recoge de acuerdo con los objetivos\
             \ de la entidad en materia de privacidad."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
+      ref_id: P3.1.1
+      description: "Limits the Collection of Personal Information [P][C] \u2014 The\
+        \ collection of personal information is limited to that necessary to support\
+        \ the achievement of the entity\u2019s objectives."
+      translations:
+        es:
+          description: "Limita la recopilaci\xF3n de informaci\xF3n personal [P][C]\
+            \ \u2014 La recopilaci\xF3n de informaci\xF3n personal se limita a la\
+            \ necesaria para respaldar el logro de los objetivos de la entidad."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
+      ref_id: P3.1.2
+      description: "Collects Information by Fair and Lawful Means [P][C] \u2014 Methods\
+        \ of collecting personal information are reviewed by management before they\
+        \ are implemented to confirm that personal information is obtained\n(a) fairly,\
+        \ without intimidation or deception, and\n(b) lawfully, adhering to all relevant\
+        \ rules of law, whether derived from statute or common law, relating to the\
+        \ collection of personal information."
+      translations:
+        es:
+          description: "Recopila informaci\xF3n por medios justos y legales [P] [C]\
+            \ \u2014 Los m\xE9todos de recopilaci\xF3n de informaci\xF3n personal\
+            \ son revisados por la gerencia antes de que se implementen para confirmar\
+            \ que se obtiene informaci\xF3n personal\n(a) de manera justa, sin intimidaci\xF3\
+            n ni enga\xF1o, y\n(b) legalmente, adhiri\xE9ndose a todas las normas\
+            \ legales relevantes, ya sea derivadas de la ley o del derecho consuetudinario,\
+            \ relacionadas con la recopilaci\xF3n de informaci\xF3n personal."
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
+      ref_id: P3.1.3
+      description: "Collects Information From Reliable Sources [P][C] \u2014 Management\
+        \ confirms that third parties from whom personal information is collected\
+        \ (that is, sources other than the individual) are reliable sources that collect\
+        \ information fairly and lawfully"
+      translations:
+        es:
+          description: "Recopila informaci\xF3n de fuentes confiables [P] [C] \u2014\
+            \ La gerencia confirma que los terceros de quienes se recopila informaci\xF3\
+            n personal (es decir, fuentes distintas al individuo) son fuentes confiables\
+            \ que recopilan informaci\xF3n de manera justa y legal"
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
+      ref_id: P3.1.4
+      description: "Informs Data Subjects When Additional Information Is Acquired\
+        \ [P][C] \u2014 Data subjects are informed if the entity develops or acquires\
+        \ additional information about them for its use."
+      translations:
+        es:
+          description: "Informa a los titulares de los datos cuando se obtiene informaci\xF3\
+            n adicional [P][C] \u2014 Se informa a los interesados si la entidad desarrolla\
+            \ o adquiere informaci\xF3n adicional sobre ellos para su uso."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.2
       assessable: false
       depth: 3
