@@ -23,6 +23,7 @@
 	const sort = handler.getSort();
 	const update = () => {
 		handler.sort(orderBy);
+		console.debug('sorting by', $sort?.orderBy, $sort.direction);
 		handler.invalidate();
 	};
 
