@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
@@ -24,29 +22,16 @@
 			pageNumber: $pageNumber,
 			rowsPerPage: $rowsPerPage as number
 		};
+		page.url.searchParams.set('page', $pageNumber.toString());
 		handler.invalidate();
 	};
 
-	const listViewEndpointRegex = /^\/[a-zA-Z0-9_\-]+$/;
 	let currentEndpoint: string | null = $state(null);
 
-	// $effect(() => {
-	// 	if (
-	// 		page.url &&
-	// 		listViewEndpointRegex.test(page.url.pathname) &&
-	// 		currentEndpoint === page.url.pathname
-	// 	) {
-	// 		const endpoint = page.url.pathname;
-	// 		console.log('Setting page number to', $pageNumber, 'for endpoint', endpoint);
-	// 		$tableStates[endpoint] = { pageNumber: $pageNumber, rowsPerPage: $rowsPerPage as number };
-	// 	}
-	// });
-
 	afterNavigate(() => {
-		// The second condition prevents afterNavigate from being executed more than once when the URL changes.
 		if (page.url && page.url.pathname !== currentEndpoint) {
 			const endpoint = page.url.pathname;
-			let newPageNumber = $tableStates[endpoint]?.pageNumber ?? 1;
+			let newPageNumber = parseInt(page.url.searchParams.get('page') ?? '1');
 			setTimeout(() => {
 				console.debug('Setting page number to', newPageNumber, 'for endpoint', endpoint);
 				handler.setPage(newPageNumber);
