@@ -3,7 +3,7 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any
 urn: urn:intuitem:risk:library:tisax-v6.0.3
 locale: en
 ref_id: TISAX v6.0.3
-name: Trusted Information Security Assessment Exchange
+name: Trusted Information Security Assessment Exchange v6.0.3
 description: "ISA provides the basis for\n- a self-assessment to determine the state\
   \ of information security in an organization (e.g. company)\n- audits performed\
   \ by internal departments (e.g. Internal Audit, Information Security)\n- TISAX\u24C7\
@@ -25,19 +25,21 @@ copyright: "\xA9 2023 ENX Association, an Association according to the French La
   \ not part of the Creative Commons license. The complete and valid text of the license\
   \ is to be found in line 17ff."
 version: 1
-publication_date: 2025-06-26
+publication_date: 2025-07-02
 provider: VDA
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:tisax-v6.0.3
     ref_id: TISAX v6.0.3
-    name: Trusted Information Security Assessment Exchange
+    name: Trusted Information Security Assessment Exchange v6.0.3
     description: "ISA provides the basis for\n- a self-assessment to determine the\
       \ state of information security in an organization (e.g. company)\n- audits\
       \ performed by internal departments (e.g. Internal Audit, Information Security)\n\
       - TISAX\u24C7 Assessments (Trusted Information Security Assessment Exchange,\
       \ https://enx.com/tisax/)\nSource: https://portal.enx.com/isa6-en.xlsx"
+    min_score: 0
+    max_score: 5
     scores_definition:
     - score: 0
       name: Incomplete
