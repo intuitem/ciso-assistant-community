@@ -16,7 +16,6 @@
 	const pages = handler.getPages({ ellipsis: true });
 
 	const setPage = (value: 'previous' | 'next' | number) => {
-		console.debug('settings page to', value);
 		handler.setPage(value);
 		$tableStates[page.url.pathname] = {
 			pageNumber: $pageNumber,
@@ -33,7 +32,6 @@
 			const endpoint = page.url.pathname;
 			let newPageNumber = parseInt(page.url.searchParams.get('page') ?? '1');
 			setTimeout(() => {
-				console.debug('Setting page number to', newPageNumber, 'for endpoint', endpoint);
 				handler.setPage(newPageNumber);
 				handler.invalidate();
 			}, 300);

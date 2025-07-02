@@ -25,13 +25,11 @@
 		$tableStates[page.url.pathname] = { pageNumber: newPageNumber, rowsPerPage: $rowsPerPage };
 		handler.setPage(newPageNumber);
 
-		console.debug('Setting rows per page to', $rowsPerPage, 'and page number to', newPageNumber);
 		handler.invalidate();
 	};
 
 	$effect(() => {
 		if ($rowsPerPage && $rowCount?.start >= $rowCount?.total) {
-			console.debug('Setting page to last page due to row count change');
 			handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
 		}
 	});
@@ -40,9 +38,6 @@
 		const cachedValue = $tableStates[page.url.pathname]?.rowsPerPage ?? 10;
 
 		if ($rowsPerPage !== cachedValue) {
-			console.debug(
-				`Table state rowsPerPage (${$rowsPerPage}) does not match cached value (${cachedValue}), updating...`
-			);
 			rowsPerPage.set(cachedValue); // will trigger reactivity
 		}
 	});
