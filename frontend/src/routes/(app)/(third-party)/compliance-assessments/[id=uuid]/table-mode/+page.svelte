@@ -76,7 +76,7 @@
 
 	// svelte-ignore state_referenced_locally
 	requirementAssessments.forEach((ra) => {
-		hideSuggestionHashmap[ra.id] = true;
+		hideSuggestionHashmap[ra.id] = false;
 	});
 
 	let createdEvidence = $derived(form?.createdEvidence);
