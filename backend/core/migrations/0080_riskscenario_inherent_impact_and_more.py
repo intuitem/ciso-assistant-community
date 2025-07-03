@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0079_finding_evidences_findingsassessment_evidences'),
+        ("core", "0079_finding_evidences_findingsassessment_evidences"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='riskscenario',
-            name='inherent_impact',
-            field=models.SmallIntegerField(default=-1, verbose_name='inherent impact'),
+            model_name="riskscenario",
+            name="inherent_impact",
+            field=models.SmallIntegerField(default=-1, verbose_name="inherent impact"),
         ),
         migrations.AddField(
-            model_name='riskscenario',
-            name='inherent_level',
-            field=models.SmallIntegerField(default=-1, help_text='The risk level if no measures are applied. Automatically updated on Save, based on the chosen risk matrix', verbose_name='inherent level'),
+            model_name="riskscenario",
+            name="inherent_level",
+            field=models.SmallIntegerField(
+                default=-1,
+                help_text="The risk level if no measures are applied. Automatically updated on Save, based on the chosen risk matrix",
+                verbose_name="inherent level",
+            ),
         ),
         migrations.AddField(
-            model_name='riskscenario',
-            name='inherent_proba',
-            field=models.SmallIntegerField(default=-1, verbose_name='inherent probability'),
+            model_name="riskscenario",
+            name="inherent_proba",
+            field=models.SmallIntegerField(
+                default=-1, verbose_name="inherent probability"
+            ),
         ),
     ]
