@@ -10,6 +10,7 @@ from core.models import *
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
+from global_settings.utils import ff_is_enabled
 from iam.models import *
 
 from rest_framework import serializers
@@ -56,6 +57,15 @@ class SerializerFactory:
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
+    FLAGGED_FIELDS: dict[str, str] = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name, flag_name in self.FLAGGED_FIELDS.items():
+            if not ff_is_enabled(flag_name):
+                self.fields.pop(field_name)
+
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
@@ -482,6 +492,12 @@ class ThreatImportExportSerializer(BaseModelSerializer):
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {
+        "inherent_proba": "inherent_risk",
+        "inherent_impact": "inherent_risk",
+        "inherent_level": "inherent_risk",
+    }
+
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
     )
