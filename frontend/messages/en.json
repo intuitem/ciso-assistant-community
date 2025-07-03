@@ -1683,5 +1683,8 @@
 	"dataWizardParsingResults": "Parsing results:",
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
 	"dataWizardLoadExcelData": "Load excel data",
-	"inherentRisk": "Inherent Risk"
+	"inherentRisk": "Inherent Risk",
+	"inherentProba": "Inherent Probability",
+	"inherentImpact": "Inherent Impact",
+	"inherentLevel": "Inherent Level"
 }
