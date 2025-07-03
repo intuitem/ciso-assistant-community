@@ -13,7 +13,7 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 		const fromLogin = loginPageRegex.test(referer);
 		if (fromLogin) {
 			cookies.set('from_login', 'true', {
-				httpOnly: false,
+				httpOnly: true,
 				sameSite: 'lax',
 				path: '/',
 				secure: true

@@ -114,7 +114,7 @@ export const actions: Actions = {
 		});
 
 		cookies.set('show_first_login_modal', 'true', {
-			httpOnly: false,
+			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
 			secure: true

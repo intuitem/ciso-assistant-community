@@ -17,7 +17,7 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 		const data = await response.json();
 		csrfToken = data.csrfToken;
 		event.cookies.set('csrftoken', csrfToken, {
-			httpOnly: false,
+			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
 			secure: true
