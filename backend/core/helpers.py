@@ -1074,13 +1074,16 @@ def acceptances_to_review(user: User):
     return acceptances
 
 
-def build_scenario_clusters(risk_assessment: RiskAssessment):
+def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=False):
     risk_matrix = risk_assessment.risk_matrix.parse_json()
     grid = risk_matrix["grid"]
     risk_matrix_current = [
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
     risk_matrix_residual = [
+        [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
+    ]
+    risk_matrix_inherent = [
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
 
@@ -1091,8 +1094,18 @@ def build_scenario_clusters(risk_assessment: RiskAssessment):
             risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:
             risk_matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.ref_id)
+        if include_inherent:
+            if ri.inherent_level >= 0:
+                risk_matrix_inherent[ri.inherent_proba][ri.inherent_impact].add(
+                    ri.ref_id
+                )
 
-    return {"current": risk_matrix_current, "residual": risk_matrix_residual}
+    clusters = {"current": risk_matrix_current, "residual": risk_matrix_residual}
+
+    if include_inherent:
+        clusters["inherent"] = risk_matrix_inherent
+
+    return clusters
 
 
 def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
