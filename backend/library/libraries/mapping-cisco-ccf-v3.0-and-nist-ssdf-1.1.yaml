@@ -1,0 +1,1006 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
+locale: en
+ref_id: mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
+name: cisco-ccf-v3.0 <-> nist-ssdf-1.1
+description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Secure
+  Software Development Framework (SSDF)
+copyright: Cisco
+version: 2
+publication_date: 2025-07-02
+provider: Cisco
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:cisco-ccf-v3.0
+- urn:intuitem:risk:library:nist-ssdf-1.1
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
+    ref_id: mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1
+    name: cisco-ccf-v3.0 <-> nist-ssdf-1.1
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Secure
+      Software Development Framework (SSDF)
+    source_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
+    target_framework_urn: urn:intuitem:risk:framework:nist-ssdf-1.1
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-37
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-39
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-39
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-68
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-68
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-69
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-79
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-80
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-83
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-83
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-83
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-95
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-98
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-98
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-98
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-115
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-116
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-120
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-120
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-120
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-125
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-125
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-127
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-138
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-138
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-140
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-140
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-140
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-141
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-151
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-151
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-151
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-157
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-157
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-163
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-164
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-165
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-169
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-170
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-181
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-181
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-184
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-202
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-225
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-225
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-225
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-244
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-244
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-244
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-295
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-296
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-296
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-296
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-298
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-305
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-312
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-312
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-329
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-329
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-337
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-338
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-338
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-338
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-340
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-340
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-340
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-341
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-341
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-355
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-355
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-359
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-359
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.4
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1-revert
+    ref_id: mapping-cisco-ccf-v3.0-and-nist-ssdf-1.1-revert
+    name: cisco-ccf-v3.0 <-> nist-ssdf-1.1
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and Secure
+      Software Development Framework (SSDF)
+    target_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
+    source_framework_urn: urn:intuitem:risk:framework:nist-ssdf-1.1
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-33
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-37
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-39
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-39
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-68
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-68
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-69
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-79
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-80
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-83
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-83
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-83
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-95
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-98
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-98
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-98
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-112
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-115
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-116
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-117
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-120
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-120
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-120
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-125
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-125
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-127
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-135
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-141
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-151
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-151
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-151
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-157
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-157
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-169
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-181
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-181
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-184
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-202
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-295
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-296
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-296
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-296
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-298
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-303
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-305
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-310
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-312
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-312
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-329
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-329
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-335
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-336
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-337
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-338
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-338
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-338
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-339
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-340
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-340
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-340
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-341
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-341
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-355
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-355
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-359
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:rv.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-359
+      relationship: intersect
