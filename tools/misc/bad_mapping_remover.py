@@ -1,3 +1,34 @@
+"""
+Bad Mapping Remover v0.1
+
+This script cleans a mapping Excel file by removing invalid mapping lines.
+It checks whether the node IDs referenced in the mapping sheet actually exist
+in the 'source' and 'target' sheets.
+
+Usage:
+    python bad_mapping_remover.py <input_excel_file> [mapping_sheet_name]
+
+Arguments:
+    - input_excel_file        Path to the Excel file to process.
+    - mapping_sheet_name      Optional name of the sheet containing mappings (default: "mappings_content").
+
+Requirements:
+    - The Excel file must contain at least three sheets: "source", "target", and the mapping sheet.
+    - The "source" and "target" sheets must have a column named "node_id".
+    - The mapping sheet must have columns "source_node_id" and "target_node_id".
+
+Functionality:
+    - Removes rows from the mapping sheet where "source_node_id" or "target_node_id" do not exist
+      in their respective sheets.
+    - Outputs a summary of removed IDs and duplicates.
+    - Saves a new Excel file with "_filtered" appended to the original filename.
+
+Example:
+    python bad_mapping_remover.py my_mapping.xlsx
+    python bad_mapping_remover.py my_mapping.xlsx my_custom_sheet
+"""
+
+
 import openpyxl
 import sys
 from collections import Counter
