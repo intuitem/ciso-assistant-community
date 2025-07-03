@@ -352,9 +352,9 @@
 								</div>
 								<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
 									{#if !hideSuggestionHashmap[requirementAssessment.id]}
-										<i class="fa-solid fa-eye"></i>
+										<i class="fa-solid fa-chevron-up"></i>
 									{:else}
-										<i class="fa-solid fa-eye-slash"></i>
+										<i class="fa-solid fa-chevron-down"></i>
 									{/if}
 								</button>
 							</h2>
