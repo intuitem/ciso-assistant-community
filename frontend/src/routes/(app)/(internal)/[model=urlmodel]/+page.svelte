@@ -117,7 +117,7 @@
 						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
-									class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
@@ -211,6 +211,17 @@
 						</span>
 					</div>
 				{/snippet}
+				{#snippet badge(key, row)}
+					{#if URLModel === 'risk-assessments'}
+						{#if key === 'perimeter' && row.meta.ebios_rm_study}
+							<span
+								class="badge inline-block bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-md border border-amber-200 rotate-[-6deg] font-semibold uppercase tracking-wide"
+								>ebios-rm</span
+							>
+						{/if}
+					{/if}
+				{/snippet}
+				{#if URLModel === 'risk-assessments'}{/if}
 			</ModelTable>
 		{/key}
 	</div>
