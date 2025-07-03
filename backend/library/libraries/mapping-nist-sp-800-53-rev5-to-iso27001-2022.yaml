@@ -1,23 +1,31 @@
-urn: urn:intuitem:risk:library:mapping-nist-sp-800-53-rev5-to-iso27001-2022
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-nist-sp-800-53-rev5-and-iso27001-2022
 locale: en
-ref_id: mapping-nist-sp-800-53-rev5-to-iso27001-2022
-name: NIST-SP-800-53-rev5 -> ISO/IEC 27001:2022
-description: Mapping from NIST SP 800-53 revision 5 to International standard ISO/IEC
-  27001:2022
-copyright: intuitem
+ref_id: mapping-nist-sp-800-53-rev5-and-iso27001-2022
+name: NIST-SP-800-53-rev5 <-> ISO/IEC 27001:2022
+description: Mapping between NIST SP 800-53 revision 5 and International standard
+  ISO/IEC 27001:2022
+copyright: 'NIST
+
+  Contact: sec-cert@nist.gov
+
+  https://csrc.nist.gov/projects/olir/informative-reference-catalog/details?referenceId=155#/
+
+  https://csrc.nist.gov/csrc/media/Projects/olir/documents/submissions/sp800-53r5-to-iso-27001-mapping-2022-OLIR-2023-10-12-UPDATED.xlsx'
 version: 1
-publication_date: 2025-06-02
-provider: intuitem
+publication_date: 2025-07-03
+provider: NIST
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:nist-sp-800-53-rev5
 - urn:intuitem:risk:library:iso27001-2022
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-nist-sp-800-53-rev5-to-iso27001-2022
-    ref_id: mapping-nist-sp-800-53-rev5-to-iso27001-2022
-    name: NIST-SP-800-53-rev5 -> ISO/IEC 27001:2022
-    description: Mapping from NIST SP 800-53 revision 5 to International standard
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-nist-sp-800-53-rev5-and-iso27001-2022
+    ref_id: mapping-nist-sp-800-53-rev5-and-iso27001-2022
+    name: NIST-SP-800-53-rev5 <-> ISO/IEC 27001:2022
+    description: Mapping between NIST SP 800-53 revision 5 and International standard
       ISO/IEC 27001:2022
     source_framework_urn: urn:intuitem:risk:framework:nist-sp-800-53-rev5
     target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
@@ -345,9 +353,6 @@ objects:
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:ca-1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:ca-2
-      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:ca-2
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
@@ -1951,10 +1956,10 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:sr-7
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       relationship: intersect
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-nist-sp-800-53-rev5-to-iso27001-2022-revert
-    ref_id: mapping-nist-sp-800-53-rev5-to-iso27001-2022-revert
-    name: NIST-SP-800-53-rev5 -> ISO/IEC 27001:2022
-    description: Mapping from NIST SP 800-53 revision 5 to International standard
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-nist-sp-800-53-rev5-and-iso27001-2022-revert
+    ref_id: mapping-nist-sp-800-53-rev5-and-iso27001-2022-revert
+    name: NIST-SP-800-53-rev5 <-> ISO/IEC 27001:2022
+    description: Mapping between NIST SP 800-53 revision 5 and International standard
       ISO/IEC 27001:2022
     target_framework_urn: urn:intuitem:risk:framework:nist-sp-800-53-rev5
     source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
@@ -2282,9 +2287,6 @@ objects:
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       target_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:ca-1
-      relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:ca-2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-sp-800-53-rev5:ca-2
