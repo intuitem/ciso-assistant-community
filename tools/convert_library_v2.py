@@ -1,18 +1,24 @@
 """
-convert_library_v2.py — Build a CISO Assistant YAML library from a v2 Excel file
+Convert Library v2 - Build a CISO Assistant YAML library from a v2 Excel file
 
 This script processes an Excel file in v2 format (with *_meta and *_content tabs),
 extracts all declared objects, and generates a fully structured YAML library.
 
 Usage:
-    python convert_library_v2.py path/to/library.xlsx [--compat]
+    python convert_library_v2.py path/to/library.xlsx [--compat MODE] [--output out.yaml] [--verbose]
+    python convert_library_v2.py path/to/folder --bulk [--compat MODE] [--output-dir out_folder] [--verbose]
 
 Arguments:
-    --compat  Use legacy URN fallback logic (for requirements without ref_id)
+    --compat       Specify compatibility mode number.
+                   Refer to the COMPATIBILITY_MODES dictionary in the script for available modes and their descriptions.
+    --verbose      Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.
+    --output       Custom output file name (only for single file mode). Adds '.yaml' if missing.
+    --bulk         Enable bulk mode to process all .xlsx files in a directory.
+    --output-dir   Destination directory for YAML files (only valid with --bulk).
 
-Note: the urn_id column can be defined to force an urn suffix. This can be useful to fix ref_id errors
-    
+Note: the "urn_id" column can be defined to force an urn suffix. This can be useful to fix "ref_id" errors
 """
+
 
 import sys
 import re
@@ -31,7 +37,7 @@ SCRIPT_VERSION = '2.1'
 # NOTE: So far, no compatibility mode has an impact on the mapping creation process.
 
 COMPATIBILITY_MODES = {
-    0: f"[v{SCRIPT_VERSION}] (DEFAULT) D'ont use any Compatibility Mode",
+    0: f"[v{SCRIPT_VERSION}] (DEFAULT) Don't use any Compatibility Mode",
     1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
     2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)"
     # Future modes can be added here with an integer key and description
@@ -1005,7 +1011,7 @@ def create_library(input_file: str, output_file: str, compat_mode: int = 0, verb
     # Step 6: Export to YAML
     print(f"✅ YAML saved as: \"{output_file}\"")
     if not verbose:
-        print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain behaviors.")
+        print("💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain behaviors.")
 
     with open(output_file, "w", encoding="utf-8") as f:
         yaml.dump(library, f, sort_keys=False, allow_unicode=False)
@@ -1018,6 +1024,9 @@ def main():
     parser.add_argument("-c", "--compat", type=int, choices=COMPATIBILITY_MODES.keys(),
                         help="Compatibility mode number:\n    " + "\n    ".join(f"{k} = {v}" for k,v in COMPATIBILITY_MODES.items()))
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.")
+    parser.add_argument("--output", type=str, help="Custom output file name (only used in non-bulk mode).")
+    parser.add_argument("--bulk", action="store_true", help="Enable bulk mode to process all .xlsx files in a directory.")
+    parser.add_argument("--output-dir", type=str, help="Output directory for YAML files (only used with --bulk mode).")
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
@@ -1025,20 +1034,85 @@ def main():
         print(f"❌ [ERROR] File not found: {input_path}")
         sys.exit(1)
     
-    # Check compat mode
+    # Determine compatibility mode (default to 0 if not provided)
     compat_mode = args.compat if args.compat else 0
     if compat_mode not in COMPATIBILITY_MODES:
         print(f"❌ [ERROR] Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}")
         sys.exit(1)
-    
-    output_path = Path(input_path.stem + ".yaml")
-    
-    try:
-        create_library(str(input_path), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
-    except Exception as e:
-        print(f"❌ [ERROR] {e}")
-        print(f"💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
-        sys.exit(1)
+
+    # --- BULK MODE ------------------------------------------------------------
+    if args.bulk:
+        if args.output:
+            print("❌ [ERROR] The option \"--output\" cannot be used with \"--bulk\" mode.")
+            sys.exit(1)
+
+        if not input_path.is_dir():
+            print("❌ [ERROR] Bulk mode requires a directory as input")
+            sys.exit(1)
+
+        # Validate output directory and create it if needed
+        if args.output_dir:
+            output_dir = Path(args.output_dir)
+            try:
+                output_dir.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                print(f"❌ [ERROR] Cannot create output directory: \"{output_dir}\": {e}")
+                sys.exit(1)
+        else:
+            output_dir = Path.cwd()  # Use current working directory as default
+
+        error_files = []    # Collect names of files that failed
+        # Find all .xlsx files in the input directory (temp Excel files starting with "~$" are excluded)
+        xlsx_files = [f for f in input_path.glob("*.xlsx") if not f.name.startswith("~$")]
+
+        if not xlsx_files:
+            print(f"❌ [ERROR] No .xlsx files found in directory: \"{input_path}\". Abort...")
+            sys.exit(1)
+
+        for i, file in enumerate(xlsx_files):
+            output_path = output_dir / (file.stem + ".yaml")  # Output file path
+            try:
+                print(f"\n▶️  Processing file [{i + 1}/{len(xlsx_files)}]: \"{file}\"")
+                create_library(str(file), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
+            except Exception as e:
+                print(f"❌ [ERROR] Failed to process \"{file}\": {e}")
+                error_files.append(file.name)
+
+        # Summary at the end of bulk processing
+        print("\n📋 Bulk mode completed!")
+        
+        if error_files:
+            print(f"❌ The following file{'s' if len(error_files)>1 else ''} failed to process:")
+            for f in error_files:
+                print(f"   - {f}")
+                if not args.verbose:
+                    print("💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
+            sys.exit(1)
+        else:
+            print("✅ All files processed successfully!")
+            sys.exit(0)
+
+    # --- SINGLE FILE MODE -----------------------------------------------------
+    else:
+        if args.output_dir:
+            print("❌ [ERROR] The option \"--output-dir\" can only be used with \"--bulk\" mode.")
+            sys.exit(1)
+
+        # Determine output file path (add .yaml if missing)
+        if args.output:
+            output_path = Path(args.output)
+            if output_path.suffix != ".yaml":
+                output_path = output_path.name + ".yaml"
+        else:
+            output_path = Path(input_path.stem + ".yaml")
+
+        try:
+            create_library(str(input_path), str(output_path), compat_mode=compat_mode, verbose=args.verbose)
+        except Exception as e:
+            print(f"❌ [ERROR] {e}")
+            if not args.verbose:
+                print("💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
