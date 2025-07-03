@@ -258,6 +258,7 @@
 					'ref_id',
 					'name',
 					'threats',
+					'inherent_level',
 					'existing_applied_controls',
 					'current_level',
 					'applied_controls',
