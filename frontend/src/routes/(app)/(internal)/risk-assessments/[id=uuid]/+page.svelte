@@ -80,7 +80,7 @@
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
-		risk: 'current' | 'residual'
+		risk: 'current' | 'residual' | 'inherent'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
@@ -280,6 +280,24 @@
 	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
+			{#if page.data?.featureflags?.inherent_risk}
+				<div class="flex-1">
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+
+					<RiskMatrix
+						riskMatrix={risk_assessment.risk_matrix}
+						matrixName={'inherent'}
+						data={buildRiskCluster(
+							risk_assessment.risk_scenarios,
+							risk_assessment.risk_matrix,
+							'inherent'
+						)}
+						dataItemComponent={RiskScenarioItem}
+						{showRisks}
+						{useBubbles}
+					/>
+				</div>
+			{/if}
 			<div class="flex-1">
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
