@@ -1687,5 +1687,6 @@
 	"inherentRisk": "Inherent Risk",
 	"inherentProba": "Inherent Probability",
 	"inherentImpact": "Inherent Impact",
-	"inherentLevel": "Inherent Level"
+	"inherentLevel": "Inherent Level",
+	"inherentRiskLevelPerScenario": "Inherent risk level per scenario"
 }

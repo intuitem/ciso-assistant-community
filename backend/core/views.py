@@ -2163,7 +2163,14 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def count_per_level(self, request):
         folder_id = request.query_params.get("folder", None)
         return Response(
-            {"results": risks_count_per_level(request.user, None, folder_id)}
+            {
+                "results": risks_count_per_level(
+                    request.user,
+                    None,
+                    folder_id,
+                    include_inherent=ff_is_enabled("inherent_risk"),
+                )
+            }
         )
 
     @action(detail=False, name="Get risk scenarios count per status")
