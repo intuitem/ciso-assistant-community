@@ -1,26 +1,26 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
-urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-to-fedramp-rev5
+urn: urn:intuitem:risk:library:mapping-cisco-ccf-v3.0-and-fedramp-rev5
 locale: en
-ref_id: mapping-cisco-ccf-v3.0-to-fedramp-rev5
-name: cisco-ccf-v3.0 -> GSA-FEDRAMP-rev5
-description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to GSA FedRAMP
+ref_id: mapping-cisco-ccf-v3.0-and-fedramp-rev5
+name: cisco-ccf-v3.0 <-> GSA-FEDRAMP-rev5
+description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and GSA FedRAMP
   rev5
-copyright: intuitem
-version: 1
-publication_date: 2025-06-25
-provider: intuitem
+copyright: Cisco
+version: 2
+publication_date: 2025-07-02
+provider: Cisco
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:cisco-ccf-v3.0
 - urn:intuitem:risk:library:fedramp-rev5
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-fedramp-rev5
-    ref_id: mapping-cisco-ccf-v3.0-to-fedramp-rev5
-    name: cisco-ccf-v3.0 -> GSA-FEDRAMP-rev5
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to GSA FedRAMP
-      rev5
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-fedramp-rev5
+    ref_id: mapping-cisco-ccf-v3.0-and-fedramp-rev5
+    name: cisco-ccf-v3.0 <-> GSA-FEDRAMP-rev5
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and GSA
+      FedRAMP rev5
     source_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     target_framework_urn: urn:intuitem:risk:framework:fedramp-rev5
     requirement_mappings:
@@ -2409,11 +2409,11 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:cisco-ccf-v3.0:ccf-359
       target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-3
       relationship: intersect
-  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-to-fedramp-rev5-revert
-    ref_id: mapping-cisco-ccf-v3.0-to-fedramp-rev5-revert
-    name: cisco-ccf-v3.0 -> GSA-FEDRAMP-rev5
-    description: Mapping from Cisco Cloud Controls Framework (CCF) v3.0 to GSA FedRAMP
-      rev5
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cisco-ccf-v3.0-and-fedramp-rev5-revert
+    ref_id: mapping-cisco-ccf-v3.0-and-fedramp-rev5-revert
+    name: cisco-ccf-v3.0 <-> GSA-FEDRAMP-rev5
+    description: Mapping between Cisco Cloud Controls Framework (CCF) v3.0 and GSA
+      FedRAMP rev5
     target_framework_urn: urn:intuitem:risk:framework:cisco-ccf-v3.0
     source_framework_urn: urn:intuitem:risk:framework:fedramp-rev5
     requirement_mappings:
