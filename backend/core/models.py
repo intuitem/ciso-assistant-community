@@ -3561,6 +3561,14 @@ class RiskScenario(NameDescriptionMixin):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def save(self, *args, **kwargs):
+        if self.inherent_proba >= 0 and self.inherent_impact >= 0:
+            self.inherent_level = risk_scoring(
+                self.inherent_proba,
+                self.inherent_impact,
+                self.risk_assessment.risk_matrix,
+            )
+        else:
+            self.inherent_level = -1
         if self.current_proba >= 0 and self.current_impact >= 0:
             self.current_level = risk_scoring(
                 self.current_proba,

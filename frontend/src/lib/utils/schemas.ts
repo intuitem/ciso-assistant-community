@@ -132,6 +132,8 @@ export const RiskScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	applied_controls: z.string().uuid().optional().array().optional(),
 	existing_applied_controls: z.string().uuid().optional().array().optional(),
+	inherent_proba: z.number().optional(),
+	inherent_impact: z.number().optional(),
 	current_proba: z.number().optional(),
 	current_impact: z.number().optional(),
 	residual_proba: z.number().optional(),

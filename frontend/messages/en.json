@@ -1688,5 +1688,7 @@
 	"inherentProba": "Inherent Probability",
 	"inherentImpact": "Inherent Impact",
 	"inherentLevel": "Inherent Level",
-	"inherentRiskLevelPerScenario": "Inherent risk level per scenario"
+	"inherentRiskLevelPerScenario": "Inherent risk level per scenario",
+	"inherentRiskLevel": "Inherent risk level",
+	"inherentRiskLevelHelpText": "The inherent risk level is the risk level before any controls are applied"
 }
