@@ -1,5 +1,5 @@
 ---
-description: Configure Single Sign-On with different SAML or OpenID C providers
+description: Configure Single Sign-On with different SAML or OpenID Connect providers
 ---
 
 # SSO
