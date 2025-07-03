@@ -16,7 +16,7 @@ description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availa
   \ of information used by the entity. Link: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022"
 copyright: "\xA9 2023 Association of International Certified Professional Accountants\xAE"
 version: 3
-publication_date: 2025-07-02
+publication_date: 2025-07-03
 provider: AICPA
 packager: intuitem
 translations:
@@ -4468,7 +4468,7 @@ objects:
             \ PRESTACI\xD3N DE SERVICIOS O LA PRODUCCI\xD3N, FABRICACI\xD3N O DISTRIBUCI\xD3\
             N DE BIENES)"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PI1.1
@@ -4572,7 +4572,7 @@ objects:
             \ bien o producto.\n2. La informaci\xF3n requerida es claramente identificable.\n\
             3. Se valida la integridad y exactitud de la informaci\xF3n requerida"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PI1.2
@@ -4622,7 +4622,7 @@ objects:
             de las actividades de entrada del sistema se crean y mantienen de manera
             completa y precisa de manera oportuna.
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PI1.3
@@ -4696,7 +4696,7 @@ objects:
             \ completa, precisa y oportuna seg\xFAn lo autorizado de acuerdo con las\
             \ actividades de procesamiento definidas."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PI1.4
@@ -4760,7 +4760,7 @@ objects:
             sistema - Los registros de las actividades de salida del sistema se crean
             y mantienen de manera completa y precisa de manera oportuna.
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
-      assessable: false
+      assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PI1.5
@@ -4845,7 +4845,7 @@ objects:
           description: "Criterios de privacidad relativos a la notificaci\xF3n y comunicaci\xF3\
             n de objetivos relacionados con la privacidad"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.1
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.0
       ref_id: P1.1
@@ -4985,7 +4985,7 @@ objects:
           description: "Criterios de privacidad relacionados con la elecci\xF3n y\
             \ el consentimiento"
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.1
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.0
       ref_id: P2.1
@@ -5122,7 +5122,7 @@ objects:
         es:
           description: Criterios de privacidad relacionados con la recogida
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.1
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.0
       ref_id: P3.1
