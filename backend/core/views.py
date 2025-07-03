@@ -132,6 +132,7 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
+from global_settings.utils import ff_is_enabled
 
 import structlog
 
@@ -1107,6 +1108,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "residual_risk",
                 "treatment",
             ]
+            if ff_is_enabled("inherent_risk"):
+                # insert inherent_risk just before existing_controls
+                columns.insert(columns.index("existing_controls"), "inherent_impact")
+                columns.insert(columns.index("existing_controls"), "inherent_proba")
+                columns.insert(columns.index("existing_controls"), "inherent_level")
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
@@ -1136,6 +1142,19 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
+                if ff_is_enabled("inherent_risk"):
+                    row.insert(
+                        columns.index("inherent_impact"),
+                        scenario.get_inherent_impact()["name"],
+                    )
+                    row.insert(
+                        columns.index("inherent_proba"),
+                        scenario.get_inherent_proba()["name"],
+                    )
+                    row.insert(
+                        columns.index("inherent_level"),
+                        scenario.get_inherent_risk()["name"],
+                    )
                 writer.writerow(row)
 
             return response
@@ -1163,12 +1182,23 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "swap_axes": "_swapaxes" if swap_axes else "",
                 "flip_vertical": "_vflip" if flip_vertical else "",
             }
+            ff_settings = GlobalSettings.objects.filter(
+                name=GlobalSettings.Names.FEATURE_FLAGS
+            ).first()
+            if ff_settings is None:
+                feature_flags = {}
+            else:
+                feature_flags = ff_settings.value
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
-                "ri_clusters": build_scenario_clusters(risk_assessment),
+                "ri_clusters": build_scenario_clusters(
+                    risk_assessment,
+                    include_inherent=ff_settings.value.get("inherent_risk", False),
+                ),
                 "risk_matrix": risk_assessment.risk_matrix,
                 "settings": matrix_settings,
+                "feature_flags": feature_flags,
             }
             html = render_to_string("core/ra_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
