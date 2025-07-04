@@ -948,7 +948,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
                 if operational_scenario.is_selected
             ]:
-                risk_scenario = RiskScenario.objects.create(
+                risk_scenario = RiskScenario(
                     risk_assessment=instance,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
@@ -964,15 +964,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                             ],
                         )
                     ),
-                    current_proba=operational_scenario.likelihood,
-                    current_impact=operational_scenario.gravity,
                 )
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                risk_scenario.save()
+
                 risk_scenario.assets.set(operational_scenario.get_assets())
                 risk_scenario.threats.set(operational_scenario.threats.all())
                 risk_scenario.existing_applied_controls.set(
                     operational_scenario.get_applied_controls()
                 )
-                risk_scenario.save()
         instance.save()
         return super().perform_create(serializer)
 
