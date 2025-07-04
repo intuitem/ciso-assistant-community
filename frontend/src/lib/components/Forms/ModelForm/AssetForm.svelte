@@ -132,6 +132,7 @@
 	optionsEndpoint="assets"
 	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"
+	pathField="path"
 	optionsSelf={object}
 	field="parent_assets"
 	cacheLock={cacheLocks['parent_assets']}
