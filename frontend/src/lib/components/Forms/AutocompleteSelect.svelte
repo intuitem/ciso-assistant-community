@@ -185,7 +185,7 @@
 							})
 						: [];
 
-				const fullLabel = `${path.length ? path.join(' / ') + ' / ' : ''}${extraParts.length ? extraParts.join(' / ') + ' / ' : ''}${mainLabel}`;
+				const fullLabel = `${path.length ? path.join('/') + '/' : ''}${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
 
 				return {
 					label: fullLabel,
