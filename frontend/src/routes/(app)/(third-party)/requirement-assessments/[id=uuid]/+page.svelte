@@ -72,7 +72,7 @@
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
 
-	let tabSet = $state(page.data.user.is_third_party ? 1 : 0);
+	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
@@ -250,28 +250,37 @@
 		</div>
 	{/if}
 	<div>
-		<Tabs>
-			{#if !page.data.user.is_third_party}
-				<Tabs.Control value="compliance_assessments_tab">{m.appliedControls()}</Tabs.Control>
-			{/if}
-			<Tabs.Controls.Control value="risk_assessments_tab">{m.evidences()}</Tabs.Controls.Control>
-			{#snippet panel()}
-				{#if tabSet === 0 && !page.data.user.is_third_party}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle"></i>
-						<p>{m.requirementAppliedControlHelpText()}</p>
-					</div>
-					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-						<ModelTable
-							source={data.tables['applied-controls']}
-							hideFilters={true}
-							URLModel="applied-controls"
-							baseEndpoint="/applied-controls?requirement_assessments={page.data
-								.requirementAssessment.id}"
-						/>
-					</div>
+		<Tabs
+			value={group}
+			onValueChange={(e) => {
+				group = e.value;
+			}}
+		>
+			{#snippet list()}
+				{#if !page.data.user.is_third_party}
+					<Tabs.Control value="applied_controls">{m.appliedControls()}</Tabs.Control>
 				{/if}
-				{#if tabSet === 1}
+				<Tabs.Control value="evidence">{m.evidences()}</Tabs.Control>
+			{/snippet}
+			{#snippet content()}
+				<Tabs.Panel value="applied_controls">
+					{#if !page.data.user.is_third_party}
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementAppliedControlHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['applied-controls']}
+								hideFilters={true}
+								URLModel="applied-controls"
+								baseEndpoint="/applied-controls?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					{/if}
+				</Tabs.Panel>
+				<Tabs.Panel value="evidence">
 					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 						<i class="fa-solid fa-info-circle"></i>
 						<p>{m.requirementEvidenceHelpText()}</p>
@@ -284,7 +293,7 @@
 							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
 						/>
 					</div>
-				{/if}
+				</Tabs.Panel>
 			{/snippet}
 		</Tabs>
 	</div>
