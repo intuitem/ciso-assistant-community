@@ -4152,8 +4152,9 @@ class CampaignViewSet(BaseModelViewSet):
                 framework_implementation_groups = None
                 if campaign.selected_implementation_groups:
                     framework_implementation_groups = [
-                        group['value'] for group in campaign.selected_implementation_groups 
-                        if group['framework'] == str(framework.id)
+                        group["value"]
+                        for group in campaign.selected_implementation_groups
+                        if group["framework"] == str(framework.id)
                     ]
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
@@ -4161,7 +4162,9 @@ class CampaignViewSet(BaseModelViewSet):
                     perimeter=perimeter,
                     framework=framework,
                     folder=perimeter.folder,
-                    selected_implementation_groups=framework_implementation_groups if framework_implementation_groups else None,
+                    selected_implementation_groups=framework_implementation_groups
+                    if framework_implementation_groups
+                    else None,
                 )
                 compliance_assessment.create_requirement_assessments()
 

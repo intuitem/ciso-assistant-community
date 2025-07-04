@@ -37,15 +37,14 @@
 					const response = await fetch(`/frameworks/${id}`);
 					const data = await response.json();
 					const groups = data['implementation_groups_definition'] || [];
-					return groups.map(group => ({ ...group, framework_id: id }));
+					return groups.map((group) => ({ ...group, framework_id: id }));
 				})
 			);
 			implementationGroupsChoices = implementationGroups.flat().map((group) => ({
 				label: group.name,
 				value: { value: group.ref_id, framework: group.framework_id }
 			}));
-		}
-		else {
+		} else {
 			implementationGroupsChoices = [];
 		}
 	}
