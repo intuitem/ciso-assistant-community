@@ -25,6 +25,30 @@
 		object = {},
 		context
 	}: Props = $props();
+
+	let implementationGroupsChoices = $state<
+		{ label: string; value: { id: string; framework: string } }[]
+	>([]);
+
+	async function handleFrameworkChange(ids: string[]) {
+		if (ids) {
+			const implementationGroups = await Promise.all(
+				ids.map(async (id) => {
+					const response = await fetch(`/frameworks/${id}`);
+					const data = await response.json();
+					const groups = data['implementation_groups_definition'] || [];
+					return groups.map(group => ({ ...group, framework_id: id }));
+				})
+			);
+			implementationGroupsChoices = implementationGroups.flat().map((group) => ({
+				label: group.name,
+				value: { value: group.ref_id, framework: group.framework_id }
+			}));
+		}
+		else {
+			implementationGroupsChoices = [];
+		}
+	}
 </script>
 
 <AutocompleteSelect
@@ -36,7 +60,21 @@
 	bind:cachedValue={formDataCache['frameworks']}
 	label={m.targetFramework()}
 	hidden={initialData.frameworks}
+	onChange={async (e) => handleFrameworkChange(e)}
+	mount={async (e) => handleFrameworkChange(e)}
 />
+{#if implementationGroupsChoices.length > 0}
+	<AutocompleteSelect
+		multiple
+		translateOptions={false}
+		{form}
+		options={implementationGroupsChoices}
+		field="selected_implementation_groups"
+		cacheLock={cacheLocks['selected_implementation_groups']}
+		bind:cachedValue={formDataCache['selected_implementation_groups']}
+		label={m.selectedImplementationGroups()}
+	/>
+{/if}
 <AutocompleteSelect
 	multiple
 	{form}
