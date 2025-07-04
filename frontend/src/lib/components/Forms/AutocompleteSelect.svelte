@@ -39,6 +39,7 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
+		pathField?: string;
 		optionsSuggestions?: any[];
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
@@ -71,6 +72,7 @@
 		optionsValueField = 'id',
 		browserCache = 'default',
 		optionsExtraFields = [],
+		pathField = '',
 		optionsSuggestions = [],
 		optionsSelf = null,
 		optionsSelfSelect = false,
@@ -176,8 +178,14 @@
 					return value !== undefined ? value.toString() : '';
 				});
 
-				const fullLabel =
-					optionsExtraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
+				const path: string[] =
+					pathField && object?.[pathField]
+						? object[pathField].map((obj: { str: string; id: string }) => {
+								return obj.str;
+							})
+						: [];
+
+				const fullLabel = `${path.length ? path.join(' / ') + ' / ' : ''}${extraParts.length ? extraParts.join(' / ') + ' / ' : ''}${mainLabel}`;
 
 				return {
 					label: fullLabel,
