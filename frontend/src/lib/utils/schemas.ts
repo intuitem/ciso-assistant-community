@@ -174,6 +174,7 @@ export const AppliedControlSchema = z.object({
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	stakeholders: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0),
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional()
@@ -330,7 +331,10 @@ export const EvidenceSchema = z.object({
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	findings: z.string().optional().array().optional(),
-	findings_assessment: z.string().optional().array().optional(),
+	findings_assessments: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	timeline_entries: z.string().optional().array().optional(),
 
 	link: z
 		.string()

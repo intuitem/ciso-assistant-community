@@ -9,7 +9,7 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.utils import time_state
-from ebios_rm.models import EbiosRMStudy
+from ebios_rm.models import EbiosRMStudy, Stakeholder
 from iam.models import *
 
 from rest_framework import serializers
@@ -559,6 +559,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    stakeholders = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Stakeholder.objects.all()
+    )
 
     def create(self, validated_data: Any):
         applied_control = super().create(validated_data)
@@ -1014,6 +1017,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
+    )
+    timeline_entries = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TimelineEntry.objects.all(), required=False
     )
 
     class Meta:

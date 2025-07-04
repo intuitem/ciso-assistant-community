@@ -1,0 +1,93 @@
+name: CLI Tests (CLICA)
+permissions:
+  contents: read
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+      - "cli/**"
+      - ".github/workflows/cli-tests.yml"
+  workflow_dispatch:
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  GITHUB_WORKFLOW: github_actions
+  PYTHON_VERSION: "3.12"
+  UBUNTU_VERSION: "ubuntu-24.04"
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      cli-directory: ./cli
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      - name: Install CLI requirements
+        working-directory: ${{ env.cli-directory }}
+        run: |
+          uv venv
+          uv pip install -r requirements.txt
+          uv pip install pytest pytest-html pytest-cov pytest-mock
+      - name: Set up test environment
+        working-directory: ${{ env.cli-directory }}
+        run: |
+          # Create test .env files with dummy values for testing
+          echo "TOKEN=test-token-12345" > .clica.env.test
+          echo "VERIFY_CERTIFICATE=false" >> .clica.env.test
+          echo "API_URL=http://localhost:8000/api" >> .clica.env.test
+          
+          echo "TOKEN=test-token-12345" > .mcp.env.test
+          echo "VERIFY_CERTIFICATE=false" >> .mcp.env.test
+          echo "API_URL=http://localhost:8000/api" >> .mcp.env.test
+      - name: Run CLI tests
+        working-directory: ${{ env.cli-directory }}
+        run: |
+          source .venv/bin/activate
+          pytest tests/ -v --html=pytest-report.html --self-contained-html --cov=. --cov-report=html --cov-report=term-missing
+      - name: Set current date as env variable
+        if: ${{ !cancelled() }}
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        if: ${{ !cancelled() }}
+        run: |
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-cli-test-report-${{ matrix.python-version }}
+          path: |
+            ${{ env.cli-directory }}/pytest-report.html
+            ${{ env.cli-directory }}/htmlcov/
+          retention-days: 5
+      - name: Upload coverage reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-cli-coverage-${{ matrix.python-version }}
+          path: ${{ env.cli-directory }}/htmlcov/
+          retention-days: 5
+      - name: Display test summary
+        if: ${{ !cancelled() }}
+        working-directory: ${{ env.cli-directory }}
+        run: |
+          echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Python version: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests executed in: ${{ env.cli-directory }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Check the uploaded artifacts for detailed test reports and coverage information." >> $GITHUB_STEP_SUMMARY
