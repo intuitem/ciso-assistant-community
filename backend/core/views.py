@@ -2,6 +2,8 @@ import csv
 import json
 import mimetypes
 import re
+from django_filters.filterset import filterset_factory
+from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
@@ -99,8 +101,6 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
-    RoleCodename,
-    UserGroupCodename,
     compare_schema_versions,
     _generate_occurrences,
     _create_task_dict,
@@ -148,16 +148,68 @@ MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
 class GenericFilterSet(df.FilterSet):
+    @classmethod
+    def filter_for_lookup(cls, field, lookup_type):
+        DEFAULTS = dict(cls.FILTER_DEFAULTS)
+        if hasattr(cls, "_meta"):
+            DEFAULTS.update(cls._meta.filter_overrides)
+
+        data = try_dbfield(DEFAULTS.get, field.__class__) or {}
+        filter_class = data.get("filter_class")
+        params = data.get("extra", lambda field: {})(field)
+
+        # if there is no filter class, exit early
+        if not filter_class:
+            return None, {}
+
+        # perform lookup specific checks
+        if lookup_type == "exact" and getattr(field, "choices", None):
+            return df.MultipleChoiceFilter, {"choices": field.choices, **params}
+
+        if lookup_type == "isnull":
+            data = try_dbfield(DEFAULTS.get, models.BooleanField)
+
+            filter_class = data.get("filter_class")
+            params = data.get("extra", lambda field: {})(field)
+            return filter_class, params
+
+        if lookup_type == "in":
+
+            class ConcreteInFilter(df.BaseInFilter, filter_class):
+                pass
+
+            ConcreteInFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteInFilter, params
+
+        if lookup_type == "range":
+
+            class ConcreteRangeFilter(df.BaseRangeFilter, filter_class):
+                pass
+
+            ConcreteRangeFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteRangeFilter, params
+
+        return filter_class, params
+
     class Meta:
         model = None  # This will be set dynamically via filterset_factory.
-        fields = "__all__"
         filter_overrides = {
-            models.CharField: {
-                "filter_class": df.MultipleChoiceFilter,
+            models.ForeignKey: {
+                "filter_class": df.ModelMultipleChoiceFilter,
                 "extra": lambda f: {
-                    "lookup_expr": "icontains",
-                    # If your model field defines choices, they will be used:
-                    "choices": f.choices if hasattr(f, "choices") else None,
+                    "queryset": f.remote_field.model.objects.all(),
+                },
+            },
+            models.ManyToManyField: {
+                "filter_class": df.ModelMultipleChoiceFilter,
+                "extra": lambda f: {
+                    "queryset": f.remote_field.model.objects.all(),
                 },
             },
         }
@@ -177,16 +229,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     serializers_module = "core.serializers"
 
-    # @property
-    # def filterset_class(self):
-    #     # If you have defined filterset_fields, build the FilterSet on the fly.
-    #     if self.filterset_fields:
-    #         return filterset_factory(
-    #             model=self.model,
-    #             filterset=GenericFilterSet,
-    #             fields=self.filterset_fields,
-    #         )
-    #     return None
+    @property
+    def filterset_class(self):
+        # If you have defined filterset_fields, build the FilterSet on the fly.
+        if self.filterset_fields:
+            return filterset_factory(
+                model=self.model,
+                filterset=GenericFilterSet,
+                fields=self.filterset_fields,
+            )
+        return None
 
     def get_queryset(self) -> models.query.QuerySet:
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
@@ -837,6 +889,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
     model = Vulnerability
     filterset_fields = [
         "folder",
+        "assets",
         "status",
         "severity",
         "risk_scenarios",
@@ -1157,9 +1210,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control
-                ) if applied_control.status else context["no status"].append(
-                    applied_control
-                )
+                ) if applied_control.status else context["--"].append(applied_control)
             data = {
                 "status_text": status,
                 "color_map": color_map,
@@ -1220,7 +1271,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ref_id=scenario.ref_id,
                 )
 
-                for field in ["applied_controls", "threats", "assets"]:
+                for field in [
+                    "applied_controls",
+                    "threats",
+                    "assets",
+                    "existing_applied_controls",
+                ]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
@@ -4179,6 +4235,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
+        show_documentation_score = audit.show_documentation_score
         for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
             entry = {
@@ -4189,9 +4246,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "description": req_node.description,
                 "compliance_result": req.result,
                 "requirement_progress": req.status,
-                "score": req.score,
                 "observations": req.observation,
             }
+            if show_documentation_score:
+                entry["implementation_score"] = req.score
+                entry["documentation_score"] = req.documentation_score
+            else:
+                entry["score"] = req.score
             entries.append(entry)
 
         df = pd.DataFrame(entries)
@@ -4391,9 +4452,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control
-                ) if applied_control.status else context["no status"].append(
-                    applied_control
-                )
+                ) if applied_control.status else context["--"].append(applied_control)
             data = {
                 "status_text": status,
                 "color_map": color_map,
