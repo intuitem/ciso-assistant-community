@@ -7,7 +7,7 @@ YAML files, builds a structured Excel workbook with mapping sheets, and saves it
 under a filename derived from the two frameworks' reference IDs.
 
 Usage:
-    python prepare_mapping.py source.yaml target.yaml
+    python prepare_mapping_v2.py source.yaml target.yaml
 """
 
 
@@ -41,6 +41,8 @@ def load_and_validate_yaml(path, label):
         raise KeyError(f"{label} file is missing the \"urn\" field.")
     if "objects" not in data or "framework" not in data["objects"]:
         raise KeyError(f"{label} file is missing the \"objects.framework\" structure.")
+    if "locale" not in data:
+        raise KeyError(f'{label} file is missing the "locale" field.')
 
     return data
 
@@ -183,7 +185,7 @@ def generate_mapping_excel(source_yaml, target_yaml):
 
 def main():
 
-    parser = argparse.ArgumentParser(prog="prepare_mapping.py", description="Prepare a mapping Excel file for CISO Assistant")
+    parser = argparse.ArgumentParser(prog="prepare_mapping_v2.py", description="Prepare a mapping Excel file for CISO Assistant")
     parser.add_argument("source_yaml", help="Source YAML file")
     parser.add_argument("target_yaml", help="Target YAML file")
     args = parser.parse_args()
