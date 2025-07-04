@@ -1409,7 +1409,7 @@ class RequirementMapping(models.Model):
         return RequirementMapping.Coverage.PARTIAL
 
 
-class Qualification(ReferentialObjectMixin, I18nObjectMixin):
+class Qualification(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
     DEFAULT_QUALIFICATIONS = [
         {
             "abbreviation": "C",

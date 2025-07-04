@@ -29,6 +29,7 @@
 		multiple?: boolean;
 		nullable?: boolean;
 		mandatory?: boolean;
+		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
 		options?: Option[];
@@ -61,6 +62,7 @@
 		multiple = false,
 		nullable = false,
 		mandatory = false,
+		disabled = false,
 		hidden = false,
 		translateOptions = true,
 		options = [],
@@ -217,9 +219,10 @@
 
 	$effect(() => {
 		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
-			selected = options.filter((item) =>
-				Array.isArray($value) ? $value.includes(item.value) : item.value === $value
-			);
+			const valueArray = Array.isArray($value) ? $value : [$value];
+			if (valueArray.length !== 0) {
+				selected = options.filter((item) => valueArray.includes(item.value));
+			}
 		}
 	});
 

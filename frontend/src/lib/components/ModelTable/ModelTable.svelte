@@ -37,7 +37,7 @@
 	import Th from './Th.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers } from '$lib/utils/stores';
+	import { tableHandlers, tableStates } from '$lib/utils/stores';
 
 	interface Props {
 		// Props
@@ -61,6 +61,10 @@
 		regionFoot?: string;
 		regionFootCell?: string;
 		displayActions?: boolean;
+		disableCreate?: boolean;
+		disableEdit?: boolean;
+		disableDelete?: boolean;
+		disableView?: boolean;
 		identifierField?: string;
 		deleteForm?: SuperValidated<AnyZodObject> | undefined;
 		URLModel?: urlModel | undefined;
@@ -89,7 +93,7 @@
 		rowsPerPage = true,
 		rowCount = true,
 		pagination = true,
-		numberRowsPerPage = 10,
+		numberRowsPerPage = $tableStates[page.url.pathname]?.rowsPerPage ?? 10,
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
@@ -102,6 +106,10 @@
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
+		disableCreate = false,
+		disableEdit = false,
+		disableDelete = false,
+		disableView = false,
 		identifierField = 'id',
 		deleteForm = undefined,
 		URLModel = undefined,
@@ -172,7 +180,9 @@
 			};
 		}),
 		{
-			rowsPerPage: pagination ? numberRowsPerPage : 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
+			rowsPerPage: pagination
+				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
+				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
 			totalRows: source?.meta?.count
 		}
 	);
@@ -265,12 +275,14 @@
 
 	$effect(() => {
 		if (page.form?.form?.posted && page.form?.form?.valid) {
+			console.debug('Form posted, invalidating table');
 			handler.invalidate();
 		}
 	});
 
 	$effect(() => {
 		if (invalidateTable) {
+			console.debug('Invalidating table due to filter change');
 			handler.invalidate();
 			_goto(page.url);
 			invalidateTable = false;
@@ -388,7 +400,7 @@
 			{#if canSelectObject}
 				{@render selectButton?.()}
 			{/if}
-			{#if canCreateObject}
+			{#if canCreateObject && !disableCreate}
 				{@render addButton?.()}
 			{/if}
 		</div>
@@ -527,7 +539,7 @@
 											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
 											{@const actionsURLModel = URLModel}
 											<TableRowActions
-												{deleteForm}
+												deleteForm={disableDelete ? null : deleteForm}
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
@@ -537,6 +549,8 @@
 												{row}
 												hasBody={actionsBody}
 												{identifierField}
+												{disableEdit}
+												{disableView}
 												preventDelete={preventDelete(row)}
 												preventEdit={preventEdit(row)}
 											>
