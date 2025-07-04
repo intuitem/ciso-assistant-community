@@ -135,7 +135,7 @@ def batch_create(model, items, folder_id):
     "--create_all",
     required=False,
     is_flag=True,
-    default=True,
+    default=False,
     help="Create all associated objects (threats, assets)",
 )
 def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
@@ -217,6 +217,8 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
         data = {
             "ref_id": scenario.ref_id,
             "name": scenario.name,
+            "description": scenario.description,
+            "justification": scenario.justification,
             "risk_assessment": ra_id,
             "treatment": str(scenario.treatment).lower(),
         }
