@@ -1669,6 +1669,7 @@
 		}
 	],
 	"serverURL": "Server URL",
+	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Token auth method",
 	"oauthPKCEEnabled": "OAuth PKCE enabled",
 	"suggestedParentheses": "(suggested)",

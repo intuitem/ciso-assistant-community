@@ -118,6 +118,7 @@
 					{form}
 					field="server_url"
 					label={m.serverURL()}
+					helpText={m.oidcConfiguration()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['server_url']}
 				/>
