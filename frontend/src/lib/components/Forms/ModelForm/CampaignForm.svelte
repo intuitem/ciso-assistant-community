@@ -48,6 +48,14 @@
 <TextField
 	type="date"
 	{form}
+	field="start_date"
+	label={m.startDate()}
+	cacheLock={cacheLocks['start_date']}
+	bind:cachedValue={formDataCache['start_date']}
+/>
+<TextField
+	type="date"
+	{form}
 	field="due_date"
 	label={m.dueDate()}
 	cacheLock={cacheLocks['due_date']}

@@ -24,7 +24,9 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		const el = document.getElementById(chart_id);
+		if (!el) return;
+		const chart = echarts.init(el, null, { renderer: 'svg' });
 
 		const option = {
 			series: [
@@ -93,11 +95,11 @@
 
 		chart.setOption(option);
 
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
+		const handleResize = () => chart.resize();
+		window.addEventListener('resize', handleResize);
 
 		return () => {
+			window.removeEventListener('resize', handleResize);
 			chart.dispose();
 		};
 	});

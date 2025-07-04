@@ -67,6 +67,8 @@ READER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    # campaigns,
+    "view_campaign",
 ]
 
 APPROVER_PERMISSIONS_LIST = [

@@ -1655,5 +1655,6 @@
 			}
 		}
 	],
-	"matchingScenarios": "Scénarios correspondants"
+	"matchingScenarios": "Scénarios correspondants",
+	"associatedCampaigns": "Campagnes associées"
 }

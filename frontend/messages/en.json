@@ -1689,5 +1689,6 @@
 	"dataWizardSelectFramework": "Select a Framework",
 	"dataWizardParsingResults": "Parsing results:",
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
-	"dataWizardLoadExcelData": "Load excel data"
+	"dataWizardLoadExcelData": "Load excel data",
+	"associatedCampaigns": "Associated campaigns"
 }

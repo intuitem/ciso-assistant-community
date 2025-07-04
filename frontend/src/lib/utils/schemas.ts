@@ -329,6 +329,7 @@ export const CampaignSchema = z.object({
 	frameworks: z.array(z.string()),
 	perimeters: z.array(z.string()),
 	status: z.string().optional().nullable(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	folder: z.string()
 });
