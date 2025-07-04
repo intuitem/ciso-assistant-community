@@ -183,10 +183,7 @@ def generate_mapping_excel(source_yaml, target_yaml):
 
 def main():
 
-    parser = argparse.ArgumentParser(
-        prog="prepare_mapping.py",
-        description="Prepare a mapping Excel file for CISO Assistant",
-    )
+    parser = argparse.ArgumentParser(prog="prepare_mapping.py", description="Prepare a mapping Excel file for CISO Assistant")
     parser.add_argument("source_yaml", help="Source YAML file")
     parser.add_argument("target_yaml", help="Target YAML file")
     args = parser.parse_args()
