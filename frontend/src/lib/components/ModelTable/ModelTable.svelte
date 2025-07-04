@@ -61,6 +61,10 @@
 		regionFoot?: string;
 		regionFootCell?: string;
 		displayActions?: boolean;
+		disableCreate?: boolean;
+		disableEdit?: boolean;
+		disableDelete?: boolean;
+		disableView?: boolean;
 		identifierField?: string;
 		deleteForm?: SuperValidated<AnyZodObject> | undefined;
 		URLModel?: urlModel | undefined;
@@ -102,6 +106,10 @@
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
+		disableCreate = false,
+		disableEdit = false,
+		disableDelete = false,
+		disableView = false,
 		identifierField = 'id',
 		deleteForm = undefined,
 		URLModel = undefined,
@@ -413,7 +421,7 @@
 			{#if canSelectObject}
 				{@render selectButton?.()}
 			{/if}
-			{#if canCreateObject}
+			{#if canCreateObject && !disableCreate}
 				{@render addButton?.()}
 			{/if}
 		</div>
@@ -552,7 +560,7 @@
 											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
 											{@const actionsURLModel = URLModel}
 											<TableRowActions
-												{deleteForm}
+												deleteForm={disableDelete ? null : deleteForm}
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
@@ -562,6 +570,8 @@
 												{row}
 												hasBody={actionsBody}
 												{identifierField}
+												{disableEdit}
+												{disableView}
 												preventDelete={preventDelete(row)}
 												preventEdit={preventEdit(row)}
 											>
