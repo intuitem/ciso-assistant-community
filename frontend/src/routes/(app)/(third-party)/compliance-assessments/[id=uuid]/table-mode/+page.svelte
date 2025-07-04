@@ -76,7 +76,7 @@
 
 	// svelte-ignore state_referenced_locally
 	requirementAssessments.forEach((ra) => {
-		hideSuggestionHashmap[ra.id] = true;
+		hideSuggestionHashmap[ra.id] = false;
 	});
 
 	let createdEvidence = $derived(form?.createdEvidence);
@@ -352,9 +352,9 @@
 								</div>
 								<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
 									{#if !hideSuggestionHashmap[requirementAssessment.id]}
-										<i class="fa-solid fa-eye"></i>
+										<i class="fa-solid fa-chevron-down"></i>
 									{:else}
-										<i class="fa-solid fa-eye-slash"></i>
+										<i class="fa-solid fa-chevron-right"></i>
 									{/if}
 								</button>
 							</h2>
