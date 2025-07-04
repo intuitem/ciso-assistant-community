@@ -72,7 +72,7 @@
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
 
-	let group = $state(page.data.user.is_third_party ? 'evidences' : 'applied_controls');
+	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
