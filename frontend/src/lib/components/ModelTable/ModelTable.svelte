@@ -203,7 +203,12 @@
 	$tableHandlers[baseEndpoint] = handler;
 
 	handler.onChange((state: State) =>
-		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
+		loadTableData({
+			state,
+			URLModel,
+			endpoint: baseEndpoint,
+			fields: Object.keys(tableSource.head)
+		})
 	);
 
 	onMount(() => {
