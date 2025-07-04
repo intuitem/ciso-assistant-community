@@ -14,17 +14,46 @@ Usage:
 import openpyxl
 import argparse
 import yaml
+import os
+import sys
+
+
+
+def load_and_validate_yaml(path, label):
+    """Load a YAML file and ensure required structure exists."""
+    
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"{label} file not found: \"{path}\"")
+    if not os.path.isfile(path):
+        raise IsADirectoryError(f"{label} path is not a file: \"{path}\"")
+
+    with open(path, "r", encoding="utf-8") as f:
+        try:
+            data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise ValueError(f"{label} file is not valid YAML\n\t   {e}")
+
+    if not isinstance(data, dict):
+        raise TypeError(f"{label} file must be a YAML dictionary")
+
+    # Basic structure check
+    if "urn" not in data:
+        raise KeyError(f"{label} file is missing the \"urn\" field.")
+    if "objects" not in data or "framework" not in data["objects"]:
+        raise KeyError(f"{label} file is missing the \"objects.framework\" structure.")
+
+    return data
 
 
 def generate_mapping_excel(source_yaml, target_yaml):
+
     packager = "intuitem"
 
-    print(f"⌛ Parsing \"{source_yaml}\" & \"{target_yaml}\"...")
-    # Load YAML files
-    with open(source_yaml, "r", encoding="utf-8") as file:
-        source = yaml.safe_load(file)
-    with open(target_yaml, "r", encoding="utf-8") as file:
-        target = yaml.safe_load(file)
+    print(f"⌛ Parsing \"{os.path.basename(source_yaml)}\" and \"{os.path.basename(target_yaml)}\"...")
+
+    # Load and validate YAML files
+    source = load_and_validate_yaml(source_yaml, "Source")
+    target = load_and_validate_yaml(target_yaml, "Target")
 
     # Extract metadata from source and target libraries and frameworks
     source_library_urn = source["urn"]
@@ -144,11 +173,16 @@ def generate_mapping_excel(source_yaml, target_yaml):
         ])
 
     # Save the workbook to disk
-    wb_output.save(output_file_name)
+    try:
+        wb_output.save(output_file_name)
+    except Exception as e:
+        raise IOError(f"Failed to save Excel file \"{output_file_name}\"\n\t   {e}")
+    
     print(f"✅ Excel file created successfully: \"{output_file_name}\"")
 
 
 def main():
+
     parser = argparse.ArgumentParser(
         prog="prepare_mapping.py",
         description="Prepare a mapping Excel file for CISO Assistant",
@@ -157,7 +191,11 @@ def main():
     parser.add_argument("target_yaml", help="Target YAML file")
     args = parser.parse_args()
 
-    generate_mapping_excel(args.source_yaml, args.target_yaml)
+    try:
+        generate_mapping_excel(args.source_yaml, args.target_yaml)
+    except Exception as e:
+        print(f"❌ [ERROR] {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
