@@ -62,7 +62,7 @@
 	onChange={async (e) => handleFrameworkChange(e)}
 	mount={async (e) => handleFrameworkChange(e)}
 />
-{#if implementationGroupsChoices.length > 0}
+{#if implementationGroupsChoices.length > 0 && !initialData.frameworks}
 	<AutocompleteSelect
 		multiple
 		translateOptions={false}
