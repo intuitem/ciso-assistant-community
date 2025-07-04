@@ -69,5 +69,5 @@
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
 	hidden={initialData.folder}
-	helpText="Domain that the campaign will be linked to"
+	helpText={m.campaignDomainHelpText()}
 />

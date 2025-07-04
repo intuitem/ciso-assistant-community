@@ -4382,7 +4382,8 @@ class ComplianceAssessment(Assessment):
             [
                 r
                 for r in requirement_assessments
-                if r.result != RequirementAssessment.Result.NOT_ASSESSED
+                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
+                or r.score != None
             ]
         )
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
