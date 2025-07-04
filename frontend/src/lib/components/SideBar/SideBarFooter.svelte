@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
-	import { locales, getLocale, setLocale } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';
-	import { setCookie } from '$lib/utils/cookies';
+	import { getLocale, locales, setLocale } from '$paraglide/runtime';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import { createEventDispatcher, onMount } from 'svelte';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { createEventDispatcher, onMount } from 'svelte';
 	const dispatch = createEventDispatcher();
 
 	const language: any = {
@@ -28,7 +27,8 @@
 		indonesian: m.indonesian(),
 		danish: m.danish(),
 		hungarian: m.hungarian(),
-		ukrainian: m.ukrainian()
+		ukrainian: m.ukrainian(),
+		greek: m.greek()
 	};
 
 	const modalStore = getModalStore();
@@ -51,23 +51,19 @@
 		id: 'Bahasa Indonesia',
 		da: 'Dansk',
 		hu: 'Magyar',
-		uk: 'Українська'
+		uk: 'Українська',
+		el: 'Ελληνικά'
 	};
 
 	let value = $state(getLocale());
 	async function handleLocaleChange(event: Event) {
-		event.preventDefault();
 		value = event?.target?.value;
-		setLocale(value);
-		fetch('/fe-api/user-preferences', {
+		await fetch('/fe-api/user-preferences', {
 			method: 'PATCH',
 			body: JSON.stringify({
 				lang: value
 			})
-		});
-		// sessionStorage.setItem('lang', value);
-		setCookie('PARAGLIDE_LOCALE', value);
-		window.location.reload();
+		}).then(() => setLocale(value));
 	}
 
 	async function modalBuildInfo() {

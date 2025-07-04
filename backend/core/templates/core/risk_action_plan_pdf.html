@@ -22,7 +22,7 @@
     {{ status }}
     {% for status, applied_controls in context.items %}
         {% for status_color, color in color_map.items %}
-            {% if status_color == status and status == "no status" %}
+            {% if status_color == status and status == "--" %}
                 <p class="flex p-2 m-2 text-lg font-semibold justify-center" style="background-color: {{color}}">{% trans "No status" %}</p>
             {% else %}
                 {% for text in status_text %}

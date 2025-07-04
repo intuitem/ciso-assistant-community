@@ -29,6 +29,7 @@
 		multiple?: boolean;
 		nullable?: boolean;
 		mandatory?: boolean;
+		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
 		options?: Option[];
@@ -60,6 +61,7 @@
 		multiple = false,
 		nullable = false,
 		mandatory = false,
+		disabled = false,
 		hidden = false,
 		translateOptions = true,
 		options = [],
@@ -83,7 +85,7 @@
 	}: Props = $props();
 
 	let optionHashmap: Record<string, Option> = {};
-	let disabled = $state(false);
+	let _disabled = $state(disabled);
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
@@ -215,9 +217,10 @@
 
 	$effect(() => {
 		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
-			selected = options.filter((item) =>
-				Array.isArray($value) ? $value.includes(item.value) : item.value === $value
-			);
+			const valueArray = Array.isArray($value) ? $value : [$value];
+			if (valueArray.length !== 0) {
+				selected = options.filter((item) => valueArray.includes(item.value));
+			}
 		}
 	});
 
@@ -282,7 +285,8 @@
 	});
 
 	run(() => {
-		disabled = Boolean(selected.length && options.length === 1 && $constraints?.required);
+		_disabled =
+			disabled || Boolean(selected.length && options.length === 1 && $constraints?.required);
 	});
 
 	onDestroy(() => {
@@ -330,7 +334,7 @@
 			bind:selected
 			{options}
 			{...multiSelectOptions}
-			{disabled}
+			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
 		>
