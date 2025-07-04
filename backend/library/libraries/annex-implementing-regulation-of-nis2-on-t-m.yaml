@@ -1,4 +1,4 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:annex-technical-and-methodological-requirements-nis2
 locale: en
@@ -13,8 +13,8 @@ description: ANNEX to the Commission Implementing Regulation laying down rules f
   managed security service providers, providers of online market places, of online
   search engines and of social networking services platforms, and trust service providers
 copyright: EUROPEAN COMMISSION
-version: 7
-publication_date: 2025-07-02
+version: 8
+publication_date: 2025-07-04
 provider: EUROPEAN COMMISSION
 packager: intuitem
 translations:
@@ -10195,6 +10195,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5
+      ref_id: 12.5.1
       description: "The relevant entities shall establish, implement and apply procedures\
         \ which ensure that their assets which are under custody of personnel are\
         \ deposited, returned or deleted upon termination of employment, and shall\
