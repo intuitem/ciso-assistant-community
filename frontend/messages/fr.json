@@ -1621,7 +1621,7 @@
 	"campaign": "Campagne",
 	"campaigns": "Campagnes",
 	"addCampaign": "Démarrer une campagne",
-  "campaignDomainHelpText":"Le domaine auquel la campagne sera attachée.",
+	"campaignDomainHelpText": "Le domaine auquel la campagne sera attachée.",
 	"averageProgress": "Progression moyenne",
 	"daysRemaining": "Jours restants",
 	"associatedFindingsAssessments": "Suivis associés",
