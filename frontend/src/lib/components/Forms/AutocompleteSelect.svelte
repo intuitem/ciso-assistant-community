@@ -76,7 +76,6 @@
 		optionsSelf = null,
 		optionsSelfSelect = false,
 		allowUserOptions = false,
-		disabled = false,
 		onChange = () => {},
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
