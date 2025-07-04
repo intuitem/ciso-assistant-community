@@ -5,6 +5,3 @@ click
 pyyaml
 icecream
 dotenv
-pytest
-
-
