@@ -30,29 +30,6 @@ translations:
   fr:
     name: "Mitre ATT&CK v16 - Menaces et mesures d\u2019att\xE9nuation"
     description: "Mitre ATT&CK v16 - Menaces et mesures d\u2019att\xE9nuation"
-    copyright: "Conditions d\u2019utilisation\nLICENCE\nMITRE Corporation (MITRE)\
-      \ vous accorde par la pr\xE9sente une licence non exclusive et libre de droits\
-      \ pour utiliser ATT&CK\xAE \xE0 des fins de recherche, de d\xE9veloppement et\
-      \ commerciales. Toute copie que vous faites \xE0 ces fins est autoris\xE9e \xE0\
-      \ condition que vous reproduisiez la d\xE9signation de droit d\u2019auteur de\
-      \ MITRE et la pr\xE9sente licence dans une telle copie.\n\" \xA9 2022 La soci\xE9\
-      t\xE9 MITRE. Cette \u0153uvre est reproduite et distribu\xE9e avec la permission\
-      \ de The MITRE Corporation.\nAVERTISSEMENTS\nMITRE ne pr\xE9tend pas qu\u2019\
-      ATT&CK \xE9num\xE8re toutes les possibilit\xE9s pour les types d\u2019actions\
-      \ et de comportements document\xE9s dans le cadre de son mod\xE8le d\u2019adversaire\
-      \ et de son cadre de techniques. L\u2019utilisation des informations contenues\
-      \ dans ATT&CK pour aborder ou couvrir des cat\xE9gories compl\xE8tes de techniques\
-      \ ne garantira pas une couverture d\xE9fensive compl\xE8te, car il peut y avoir\
-      \ des techniques non divulgu\xE9es ou des variations de techniques existantes\
-      \ non document\xE9es par ATT&CK.\nTOUS LES DOCUMENTS ET LES INFORMATIONS QU\u2019\
-      ILS CONTIENNENT SONT FOURNIS \xAB EN L\u2019\xC9TAT \xBB ET LE CONTRIBUTEUR,\
-      \ L\u2019ORGANISATION QU\u2019IL REPR\xC9SENTE OU QUI EST PARRAIN\xC9E PAR (LE\
-      \ CAS \xC9CH\xC9ANT), LA MITRE CORPORATION, SON CONSEIL D\u2019ADMINISTRATION,\
-      \ SES DIRIGEANTS, SES AGENTS ET SES EMPLOY\xC9S, D\xC9CLINENT TOUTE GARANTIE,\
-      \ EXPRESSE OU IMPLICITE, Y COMPRIS, MAIS SANS S\u2019Y LIMITER, TOUTE GARANTIE\
-      \ QUE L\u2019UTILISATION DES INFORMATIONS QU\u2019ILS CONTIENNENT N\u2019ENFREINDRA\
-      \ AUCUN DROIT OU TOUTE GARANTIE IMPLICITE DE QUALIT\xC9 MARCHANDE OU D\u2019\
-      AD\xC9QUATION \xC0 UN PARTICULIER BUT."
 objects:
   reference_controls:
   - urn: urn:intuitem:risk:function:mitre-attack:m1031
