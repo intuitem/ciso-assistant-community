@@ -61,6 +61,10 @@
 		regionFoot?: string;
 		regionFootCell?: string;
 		displayActions?: boolean;
+		disableCreate?: boolean;
+		disableEdit?: boolean;
+		disableDelete?: boolean;
+		disableView?: boolean;
 		identifierField?: string;
 		deleteForm?: SuperValidated<AnyZodObject> | undefined;
 		URLModel?: urlModel | undefined;
@@ -75,6 +79,7 @@
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
+		badge?: import('svelte').Snippet<[string, { [key: string]: any }]>;
 		actions?: import('svelte').Snippet<[any]>;
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
@@ -101,6 +106,10 @@
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
+		disableCreate = false,
+		disableEdit = false,
+		disableDelete = false,
+		disableView = false,
 		identifierField = 'id',
 		deleteForm = undefined,
 		URLModel = undefined,
@@ -115,6 +124,7 @@
 		optButton,
 		selectButton,
 		addButton,
+		badge,
 		actions,
 		actionsBody,
 		actionsHead,
@@ -170,7 +180,7 @@
 			};
 		}),
 		{
-			rowsPerPage: pagination ? numberRowsPerPage : undefined,
+			rowsPerPage: pagination ? numberRowsPerPage : 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
 			totalRows: source?.meta?.count
 		}
 	);
@@ -199,19 +209,6 @@
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
 	const preventEdit = (row: TableSource) => forcePreventEdit;
-
-	const filterInitialData = page.url.searchParams.entries();
-
-	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
-		SPA: true,
-		validators: zod(z.object({})),
-		dataType: 'json',
-		invalidateAll: false,
-		applyAction: false,
-		resetForm: false,
-		taintedMessage: false,
-		validationMethod: 'auto'
-	});
 
 	const tableURLModel = URLModel;
 
@@ -251,6 +248,27 @@
 				}
 			}
 		}
+	});
+
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params to filter initial data
+	for (const [key, value] of page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
+	const zodFiltersObject = {};
+	Object.keys(filters).forEach((k) => {
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
+	});
+	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
+		SPA: true,
+		validators: zod(z.object(zodFiltersObject)),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
 	});
 
 	$effect(() => {
@@ -322,7 +340,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap border-collapse {classesBase}">
+<div class="table-wrap {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -340,7 +358,7 @@
 					<i class="fa-solid fa-filter mr-2"></i>
 					{m.filters()}
 					{#if filterCount}
-						<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+						<span class="text-sm">{filterCount}</span>
 					{/if}
 				{/snippet}
 				{#snippet content()}
@@ -378,7 +396,7 @@
 			{#if canSelectObject}
 				{@render selectButton?.()}
 			{/if}
-			{#if canCreateObject}
+			{#if canCreateObject && !disableCreate}
 				{@render addButton?.()}
 			{/if}
 		</div>
@@ -393,7 +411,9 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+					{#if fields.length === 0 || fields.includes(key)}
+						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+					{/if}
 				{/each}
 				{#if displayActions}
 					<th class="{regionHeadCell} select-none text-end"></th>
@@ -401,7 +421,7 @@
 			</tr>
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="table-body w-full border-b border-b-surface-200-800 {regionBody}">
+			<tbody class="table-body w-full border-b border-b-surface-100-900 {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
 					<ContextMenu.Trigger asChild>
@@ -501,6 +521,7 @@
 															{safeTranslate(value ?? '-')}
 														{/if}
 													{/if}
+													{@render badge?.(key, row)}
 												</span>
 											{/if}
 										</td>
@@ -514,7 +535,7 @@
 											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
 											{@const actionsURLModel = URLModel}
 											<TableRowActions
-												{deleteForm}
+												deleteForm={disableDelete ? null : deleteForm}
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
@@ -524,6 +545,8 @@
 												{row}
 												hasBody={actionsBody}
 												{identifierField}
+												{disableEdit}
+												{disableView}
 												preventDelete={preventDelete(row)}
 												preventEdit={preventEdit(row)}
 											>
@@ -603,15 +626,3 @@
 		{/if}
 	</footer>
 </div>
-
-<style>
-	tbody {
-		& > :not(:last-child) {
-			border-color: var(--color-surface-200-800);
-		}
-		& > :not(:last-child) {
-			border-top-width: 0px;
-			border-bottom-width: 0px !important;
-		}
-	}
-</style>

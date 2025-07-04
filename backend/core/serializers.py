@@ -9,7 +9,7 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.utils import time_state
-from ebios_rm.models import EbiosRMStudy
+from ebios_rm.models import EbiosRMStudy, Stakeholder
 from iam.models import *
 
 from rest_framework import serializers
@@ -559,6 +559,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    stakeholders = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Stakeholder.objects.all()
+    )
 
     def create(self, validated_data: Any):
         applied_control = super().create(validated_data)
@@ -601,7 +604,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
 
-class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
+class ActionPlanSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
     priority = serializers.CharField(source="get_priority_display")
@@ -619,6 +622,13 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = AppliedControl
+        fields = "__all__"
+
+
+class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
     requirement_assessments = serializers.SerializerMethodField(
         method_name="get_requirement_assessments"
     )
@@ -657,6 +667,49 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
             "cost",
             "ranking_score",
             "requirement_assessments",
+            "reference_control",
+            "evidences",
+            "owner",
+        ]
+
+
+class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
+    risk_scenarios = serializers.SerializerMethodField(method_name="get_risk_scenarios")
+
+    def get_risk_scenarios(self, obj):
+        pk = self.context.get("pk")
+        if pk is None:
+            return None
+        risk_scenarios = RiskScenario.objects.filter(
+            risk_assessment=pk, applied_controls=obj
+        )
+        return [
+            {
+                "str": str(req.ref_id + " - " + req.name),
+                "id": str(req.id),
+            }
+            for req in risk_scenarios
+        ]
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "status",
+            "eta",
+            "expiry_date",
+            "priority",
+            "category",
+            "csf_function",
+            "effort",
+            "control_impact",
+            "cost",
+            "ranking_score",
+            "risk_scenarios",
             "reference_control",
             "evidences",
             "owner",
@@ -964,6 +1017,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
+    )
+    timeline_entries = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TimelineEntry.objects.all(), required=False
     )
 
     class Meta:

@@ -3,17 +3,16 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
-	import { toCamelCase } from '$lib/utils/locales';
 	import { run } from 'svelte/legacy';
 
 	interface Option {
 		label: string;
 		value: string | number;
 		suggested?: boolean;
+		translatedLabel?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -30,6 +29,7 @@
 		multiple?: boolean;
 		nullable?: boolean;
 		mandatory?: boolean;
+		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
 		options?: Option[];
@@ -46,6 +46,7 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
+		mount?: (value: any) => void;
 	}
 
 	let {
@@ -60,6 +61,7 @@
 		multiple = false,
 		nullable = false,
 		mandatory = false,
+		disabled = false,
 		hidden = false,
 		translateOptions = true,
 		options = [],
@@ -78,11 +80,12 @@
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
 		},
-		cachedValue = $bindable()
+		cachedValue = $bindable(),
+		mount = () => null
 	}: Props = $props();
 
 	let optionHashmap: Record<string, Option> = {};
-	let disabled = $state(false);
+	let _disabled = $state(disabled);
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
@@ -100,11 +103,10 @@
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !px-2 !flex',
+		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
 		closeDropdownOnSelect: !multiple
 	};
 
-	const dispatch = createEventDispatcher();
 	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 	async function fetchOptions() {
@@ -183,7 +185,8 @@
 					suggested: optionsSuggestions?.some(
 						(s) =>
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
-					)
+					),
+					translatedLabel: safeTranslate(fullLabel)
 				};
 			})
 			.filter(
@@ -194,7 +197,7 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
-				return 0;
+				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
 
@@ -205,7 +208,7 @@
 
 	onMount(async () => {
 		await fetchOptions();
-		dispatch('mount', $value);
+		mount($value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);
@@ -214,9 +217,10 @@
 
 	$effect(() => {
 		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
-			selected = options.filter((item) =>
-				Array.isArray($value) ? $value.includes(item.value) : item.value === $value
-			);
+			const valueArray = Array.isArray($value) ? $value : [$value];
+			if (valueArray.length !== 0) {
+				selected = options.filter((item) => valueArray.includes(item.value));
+			}
 		}
 	});
 
@@ -230,9 +234,9 @@
 			}
 		}
 
-		// dispatch('change', $value);
-		$effect(() => onChange($value));
-		dispatch('cache', selected);
+		// change($value);
+		$effect(async () => await onChange($value));
+		// dispatch('cache', selected);
 	}
 
 	function arraysEqual(
@@ -281,7 +285,8 @@
 	});
 
 	run(() => {
-		disabled = Boolean(selected.length && options.length === 1 && $constraints?.required);
+		_disabled =
+			disabled || Boolean(selected.length && options.length === 1 && $constraints?.required);
 	});
 
 	onDestroy(() => {
@@ -318,28 +323,31 @@
 		class="control overflow-x-clip flex items-center space-x-2"
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
-		<input type="hidden" name={field} value={$value ? $value : ''} />
+		{#if Array.isArray($value)}
+			{#each $value as val}
+				<input type="hidden" name={field} value={val} />
+			{/each}
+		{:else if $value}
+			<input type="hidden" name={field} value={$value} />
+		{/if}
 		<MultiSelect
 			bind:selected
 			{options}
 			{...multiSelectOptions}
-			{disabled}
+			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
 		>
 			{#snippet children(option)}
 				{#if option.option.suggested}
-					<span class="text-indigo-600">{option.option.label}</span>
-					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && option.label}
+					<span class="text-primary-600">{option.option.label}</span>
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+				{:else if translateOptions && option.option}
 					{#if field === 'ro_to_couple'}
-						{safeTranslate(toCamelCase(option.label.split(' - ')[0]))} - {option.label.split(
-							'-'
-						)[1]}
+						{@const [firstPart, ...restParts] = option.option.label.split(' - ')}
+						{safeTranslate(firstPart)} - {restParts.join(' - ')}
 					{:else}
-						{m[toCamelCase(option.value)]
-							? safeTranslate(option.value)
-							: safeTranslate(option.label)}
+						{option.option.translatedLabel}
 					{/if}
 				{:else}
 					{option.option.label || option.option}

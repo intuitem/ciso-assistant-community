@@ -17,6 +17,8 @@
 	"indonesian": "Indonesian",
 	"danish": "Danish",
 	"hungarian": "Hungarian",
+	"ukrainian": "Ukrainian",
+	"greek": "Greek",
 	"addThreat": "Add threat",
 	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
@@ -1665,5 +1667,21 @@
 				"countPlural=other": "{count} Days"
 			}
 		}
-	]
+	],
+	"suggestedParentheses": "(suggested)",
+	"matchingScenarios": "Matching scenarios",
+	"clickToUpload": "Click to upload",
+	"orDragAndDrop": "or drag and drop",
+	"dataWizardSelectFile": "Select your file and make sure it matches the templates",
+	"dataWizardChooseModel": "Choose the corresponding model",
+	"dataWizardSelectScope": "Select the scope",
+	"dataWizardClickUpload": "Click Upload",
+	"fileAcceptExcelOnly": "Excel files (.xls, .xlsx) only",
+	"object": "Object",
+	"dataWizardSelectFallbackDomain": "Select a fallback Domain (if not set on the file)",
+	"dataWizardSelectPerimeter": "Select a Perimeter",
+	"dataWizardSelectFramework": "Select a Framework",
+	"dataWizardParsingResults": "Parsing results:",
+	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
+	"dataWizardLoadExcelData": "Load excel data"
 }

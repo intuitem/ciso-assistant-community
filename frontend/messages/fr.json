@@ -17,6 +17,8 @@
 	"indonesian": "Indonésien",
 	"danish": "Danois",
 	"hungarian": "Hongrois",
+	"ukrainian": "Ukrainien",
+	"greek": "Grec",
 	"addThreat": "Ajouter une menace",
 	"addVulnerability": "Ajouter une vulnérabilité",
 	"addReferenceControl": "Ajouter une mesure de référence",
@@ -1646,5 +1648,6 @@
 				"countPlural=other": "{count} Jours"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Scénarios correspondants"
 }

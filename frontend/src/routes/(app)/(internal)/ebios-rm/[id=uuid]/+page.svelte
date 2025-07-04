@@ -131,7 +131,7 @@
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/action-plan?next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			}
@@ -201,13 +201,13 @@
 					<button class="flex flex-col text-left hover:text-purple-800" onclick={modalCreateForm}>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-6 ring-4 ring-white"
 							>
 								<i class="fa-solid fa-check"></i>
 							</span>
 						{:else}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-6 ring-4 ring-white"
 							>
 								<i class="fa-solid fa-clipboard-check"></i>
 							</span>
