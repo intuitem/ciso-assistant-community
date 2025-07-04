@@ -37,7 +37,7 @@
 	import Th from './Th.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers } from '$lib/utils/stores';
+	import { tableHandlers, tableStates } from '$lib/utils/stores';
 
 	interface Props {
 		// Props
@@ -93,7 +93,7 @@
 		rowsPerPage = true,
 		rowCount = true,
 		pagination = true,
-		numberRowsPerPage = 10,
+		numberRowsPerPage = $tableStates[page.url.pathname]?.rowsPerPage ?? 10,
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
@@ -180,7 +180,9 @@
 			};
 		}),
 		{
-			rowsPerPage: pagination ? numberRowsPerPage : 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
+			rowsPerPage: pagination
+				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
+				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
 			totalRows: source?.meta?.count
 		}
 	);
@@ -273,12 +275,14 @@
 
 	$effect(() => {
 		if (page.form?.form?.posted && page.form?.form?.valid) {
+			console.debug('Form posted, invalidating table');
 			handler.invalidate();
 		}
 	});
 
 	$effect(() => {
 		if (invalidateTable) {
+			console.debug('Invalidating table due to filter change');
 			handler.invalidate();
 			_goto(page.url);
 			invalidateTable = false;
