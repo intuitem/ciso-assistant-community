@@ -127,7 +127,7 @@ def generate_mapping_excel(source_yaml, target_yaml):
     # Populate source node IDs for mapping rows (initially only source side filled)
     for node in source_framework["requirement_nodes"]:
         if node["assessable"]:
-            node_id = node["urn"].split(":")[-1]
+            node_id = node["urn"].split(source_node_base_urn + ":")[-1]
             ws_mappings.append([node_id])
 
     # === Sheet: guidelines (instructions for mapping) ===
@@ -150,7 +150,7 @@ def generate_mapping_excel(source_yaml, target_yaml):
     ws_source = wb_output.create_sheet("source")
     ws_source.append(["node_id", "assessable", "urn", "ref_id", "name", "description"])
     for node in source_framework["requirement_nodes"]:
-        node_id = node["urn"].split(":")[-1] if node["assessable"] else ""
+        node_id = node["urn"].split(source_node_base_urn + ":")[-1] if node["assessable"] else ""
         ws_source.append([
             node_id,
             node["assessable"],
@@ -164,7 +164,7 @@ def generate_mapping_excel(source_yaml, target_yaml):
     ws_target = wb_output.create_sheet("target")
     ws_target.append(["node_id", "assessable", "urn", "ref_id", "name", "description"])
     for node in target_framework["requirement_nodes"]:
-        node_id = node["urn"].split(":")[-1] if node["assessable"] else ""
+        node_id = node["urn"].split(target_node_base_urn + ":")[-1] if node["assessable"] else ""
         ws_target.append([
             node_id,
             node["assessable"],
