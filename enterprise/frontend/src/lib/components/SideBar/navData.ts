@@ -366,7 +366,7 @@ export const navData = {
 					name: 'dataWizard',
 					fa_icon: 'fa-solid fa-hat-wizard',
 					href: '/extra/data-wizard',
-					permissions: ['change_globalsettings']
+					permissions: ['change_folder']
 				},
 				{
 					name: 'backupRestore',
