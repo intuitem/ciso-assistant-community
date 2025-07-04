@@ -290,7 +290,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
 					permissions: [
-            'view_appliedcontrol'
+            'view_appliedcontrol',
 						'view_entity',
 						'view_solution',
 						'view_entityassessment'
