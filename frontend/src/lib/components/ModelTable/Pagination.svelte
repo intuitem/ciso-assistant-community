@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 	import { afterNavigate } from '$app/navigation';
+	import { tableStates } from '$lib/utils/stores';
 	interface Props {
 		handler: DataHandler;
 	}
@@ -18,36 +17,24 @@
 
 	const setPage = (value: 'previous' | 'next' | number) => {
 		handler.setPage(value);
+		$tableStates[page.url.pathname] = {
+			pageNumber: $pageNumber,
+			rowsPerPage: $rowsPerPage as number
+		};
+		page.url.searchParams.set('page', $pageNumber.toString());
 		handler.invalidate();
 	};
 
-	const listViewEndpointRegex = /^\/[a-zA-Z0-9_\-]+$/;
 	let currentEndpoint: string | null = $state(null);
 
-	run(() => {
-		if (
-			$page.url &&
-			listViewEndpointRegex.test($page.url.pathname) &&
-			currentEndpoint === $page.url.pathname
-		) {
-			const endpoint = $page.url.pathname;
-			const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
-			cache[endpoint] = [$pageNumber, $rowsPerPage];
-			localStorage.setItem('pageNumberCache', JSON.stringify(cache));
-		}
-	});
-
 	afterNavigate(() => {
-		// The second condition prevents afterNavigate from being executed more than once when the URL changes.
-		if ($page.url && $page.url.pathname !== currentEndpoint) {
-			const endpoint = $page.url.pathname;
-			let newPageNumber = 1;
-			if (listViewEndpointRegex.test(endpoint)) {
-				const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
-				const [savedPageNumber] = cache[endpoint] ?? [];
-				newPageNumber = Number(savedPageNumber ?? '1');
-			}
-			handler.setPage(newPageNumber);
+		if (page.url && page.url.pathname !== currentEndpoint) {
+			const endpoint = page.url.pathname;
+			let newPageNumber = parseInt(page.url.searchParams.get('page') ?? '1');
+			setTimeout(() => {
+				handler.setPage(newPageNumber);
+				handler.invalidate();
+			}, 300);
 			currentEndpoint = endpoint;
 		}
 	});
