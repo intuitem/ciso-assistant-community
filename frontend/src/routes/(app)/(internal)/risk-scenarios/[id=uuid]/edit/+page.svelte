@@ -231,46 +231,48 @@
 		</div>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-black mb-2">{m.inherentRisk()}</h4>
-			<div class="flex flex-row space-x-8 justify-between">
-				<div class="flex w-1/2">
-					<div class="flex flex-row space-x-4 my-auto">
-						<div class="min-w-36">
-							<Select
-								form={_form}
-								options={data.probabilityChoices}
-								color_map={probabilityColorMap}
-								field="inherent_proba"
-								label={m.inherentProba()}
-							/>
-						</div>
-						<i class="fa-solid fa-xmark mt-8"></i>
-						<div class="min-w-36">
-							<Select
-								form={_form}
-								options={data.impactChoices}
-								color_map={impactColorMap}
-								field="inherent_impact"
-								label={m.inherentImpact()}
-							/>
-						</div>
-						<i class="fa-solid fa-equals mt-8"></i>
-						<div class="min-w-38">
-							<RiskLevel
-								form={_form}
-								field="inherent_risk_level"
-								label={m.inherentRiskLevel()}
-								riskMatrix={data.riskMatrix}
-								probabilityField="inherent_proba"
-								impactField="inherent_impact"
-								helpText={m.inherentRiskLevelHelpText()}
-							/>
+		{#if page.data?.featureflags?.inherent_risk}
+			<div class="card px-4 py-2 bg-white shadow-lg">
+				<h4 class="h4 font-black mb-2">{m.inherentRisk()}</h4>
+				<div class="flex flex-row space-x-8 justify-between">
+					<div class="flex w-1/2">
+						<div class="flex flex-row space-x-4 my-auto">
+							<div class="min-w-36">
+								<Select
+									form={_form}
+									options={data.probabilityChoices}
+									color_map={probabilityColorMap}
+									field="inherent_proba"
+									label={m.inherentProba()}
+								/>
+							</div>
+							<i class="fa-solid fa-xmark mt-8"></i>
+							<div class="min-w-36">
+								<Select
+									form={_form}
+									options={data.impactChoices}
+									color_map={impactColorMap}
+									field="inherent_impact"
+									label={m.inherentImpact()}
+								/>
+							</div>
+							<i class="fa-solid fa-equals mt-8"></i>
+							<div class="min-w-38">
+								<RiskLevel
+									form={_form}
+									field="inherent_risk_level"
+									label={m.inherentRiskLevel()}
+									riskMatrix={data.riskMatrix}
+									probabilityField="inherent_proba"
+									impactField="inherent_impact"
+									helpText={m.inherentRiskLevelHelpText()}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-black mb-2">{m.currentRisk()}</h4>
