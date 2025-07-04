@@ -367,10 +367,6 @@
 			}}
 		>
 			{#snippet option({ option })}
-				{#if option.suggested}
-					<span class="text-primary-600">{option.label}</span>
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{/if}
 				{#if option.path}
 					<span>
 						{#each option.path as item}
@@ -380,7 +376,10 @@
 						{/each}
 					</span>
 				{/if}
-				{#if translateOptions && option}
+				{#if option.suggested}
+					<span class="text-primary-600">{option.label}</span>
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+				{:else if translateOptions && option}
 					{#if field === 'ro_to_couple'}
 						{@const [firstPart, ...restParts] = option.label.split(' - ')}
 						{safeTranslate(firstPart)} - {restParts.join(' - ')}
@@ -392,14 +391,10 @@
 				{/if}
 			{/snippet}
 			{#snippet selectedItem({ option })}
-				{#if option.suggested}
-					<span class="text-primary-600">{option.label}</span>
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{/if}
 				{#if option.path}
 					<span>
 						{#each option.path as item, idx}
-							<span class="text-surface-300 font-light">
+							<span class="text-xs font-light">
 								{item}
 								{#if idx < option.path.length - 1}
 									&nbsp;/
@@ -408,7 +403,10 @@
 						{/each}
 					</span>
 				{/if}
-				{#if translateOptions && option}
+				{#if option.suggested}
+					<span class="text-primary-600">{option.label}</span>
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+				{:else if translateOptions && option}
 					{#if field === 'ro_to_couple'}
 						{@const [firstPart, ...restParts] = option.label.split(' - ')}
 						{safeTranslate(firstPart)} - {restParts.join(' - ')}
