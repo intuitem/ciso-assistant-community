@@ -84,3 +84,32 @@ class FieldsRelatedField(serializers.RelatedField):
             if nested_value and isinstance(nested_value, models.Model):
                 return self.to_representation(nested_value, fields=sub_fields)
             return None  # or some other default value as appropriate
+
+
+class PathField(serializers.Field):
+    """
+    A custom serializer field to represent a path from a list of objects.
+
+    This field takes a list of objects (e.g., folders) and
+    serializes them into a list of dictionaries, each containing the
+    object's ID and its string representation.
+    """
+
+    def to_representation(self, value):
+        """
+        Transforms the list of path objects into a serializable format.
+
+        Args:
+            value: The list of objects returned by the source method
+                   (e.g., `get_folder_full_path`).
+
+        Returns:
+            A list of dictionaries, e.g.,
+            [{'id': 'some_uuid', 'str': 'Folder Name'}, ...]
+        """
+        # Ensure the source attribute returns an iterable
+        if not hasattr(value, "__iter__"):
+            return []
+
+        # Serialize each object in the path
+        return [{"id": item.id, "str": str(item)} for item in value]

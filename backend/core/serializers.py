@@ -7,7 +7,11 @@ from django.db import models
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
-from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
+from core.serializer_fields import (
+    FieldsRelatedField,
+    HashSlugRelatedField,
+    PathField,
+)
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from iam.models import *
@@ -333,6 +337,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 
 
 class AssetReadSerializer(AssetWriteSerializer):
+    path = PathField(source="get_folder_full_path", read_only=True)
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
     children_assets = FieldsRelatedField(["id"], many=True)

@@ -241,6 +241,12 @@ class FolderMixin(models.Model):
         default=Folder.get_root_folder_id,
     )
 
+    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+        folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
+        if include_root:
+            return folders
+        return folders[1:] if len(folders) > 1 else folders
+
     class Meta:
         abstract = True
 
