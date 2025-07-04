@@ -345,6 +345,8 @@
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
+			duplicates={false}
+			key={JSON.stringify}
 		>
 			{#snippet children(option)}
 				{#if option.option.suggested}
