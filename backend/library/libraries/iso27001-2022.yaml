@@ -1,4 +1,4 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:iso27001-2022
 locale: en
@@ -8,8 +8,8 @@ description: "Information security, cybersecurity and privacy protection \u2014 
   \ security management systems \u2014 Requirements"
 copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
   full standard from https://www.iso.org/standard/27001
-version: 11
-publication_date: 2025-06-19
+version: 12
+publication_date: 2025-07-03
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -33,6 +33,13 @@ translations:
       \ Ledningssystem f\xF6r informationss\xE4kerhet \u2013 Krav"
     copyright: "Detta \xE4r huvuddragen i ISO27001-2022-standarden. Du kan k\xF6pa\
       \ hela standarden fr\xE5n https://www.iso.org/standard/27001"
+  es:
+    name: Norma internacional ISO/IEC 27001:2022
+    description: "Seguridad de la informaci\xF3n, ciberseguridad y protecci\xF3n de\
+      \ la privacidad \u2014 Sistemas de gesti\xF3n de la seguridad de la informaci\xF3\
+      n \u2014 Requisitos"
+    copyright: "Este es el esquema de la norma ISO27001-2022. Puede comprar el est\xE1\
+      ndar completo en https://www.iso.org/standard/27001"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -64,6 +71,13 @@ objects:
           kerhetsprinciper som \xE4r anpassade till organisationens m\xE5l. \xC5tg\xE4\
           rderna omfattar att definiera omfattning, s\xE4tta upp m\xE5l och s\xE4\
           kerst\xE4lla anpassning till efterlevnadskraven."
+      es:
+        name: "Pol\xEDticas de seguridad de la informaci\xF3n"
+        description: "Este control establece y mantiene pol\xEDticas de seguridad\
+          \ de la informaci\xF3n alineadas con los objetivos de la organizaci\xF3\
+          n. Las medidas incluyen la definici\xF3n del alcance, el establecimiento\
+          \ de objetivos y la garant\xEDa de la alineaci\xF3n con los requisitos de\
+          \ cumplimiento."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.2
     ref_id: A.5.2
     name: Information security roles and responsibilities
@@ -93,6 +107,12 @@ objects:
           \ f\xF6r informationss\xE4kerhet f\xF6r att s\xE4kerst\xE4lla ansvarsskyldighet.\
           \ \xC5tg\xE4rderna omfattar tydlig dokumentation av ansvarsomr\xE5den, periodiska\
           \ granskningar och verkst\xE4llighetsmekanismer."
+      es:
+        name: "Funciones y responsabilidades de la seguridad de la informaci\xF3n"
+        description: "Este control define y asigna roles y responsabilidades para\
+          \ la seguridad de la informaci\xF3n para garantizar la responsabilidad.\
+          \ Las medidas incluyen documentaci\xF3n clara de las responsabilidades,\
+          \ revisiones peri\xF3dicas y mecanismos de cumplimiento."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.3
     ref_id: A.5.3
     name: Segregation of duties
@@ -119,6 +139,12 @@ objects:
           \ f\xF6r att minska risken f\xF6r fel, bedr\xE4gerier och obeh\xF6rig \xE5\
           tkomst. \xC5tg\xE4rderna omfattar rollseparation, \xE5tkomstbegr\xE4nsningar\
           \ och regelbundna granskningar."
+      es:
+        name: "Segregaci\xF3n de funciones"
+        description: "Este control garantiza la segregaci\xF3n de funciones para reducir\
+          \ el riesgo de errores, fraudes y accesos no autorizados. Las medidas incluyen\
+          \ la separaci\xF3n de roles, restricciones de acceso y auditor\xEDas peri\xF3\
+          dicas."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.4
     ref_id: A.5.4
     name: Management responsibilities
@@ -146,6 +172,12 @@ objects:
           r informationss\xE4kerhet \xE4r tydligt definierat och implementerat. \xC5\
           tg\xE4rderna inkluderar att s\xE4tta upp m\xE5l, f\xF6rdela resurser och\
           \ \xF6vervaka efterlevnaden."
+      es:
+        name: "Responsabilidades de gesti\xF3n"
+        description: "Este control garantiza que las responsabilidades de gesti\xF3\
+          n para la seguridad de la informaci\xF3n est\xE9n claramente definidas e\
+          \ implementadas. Las medidas incluyen el establecimiento de objetivos, la\
+          \ asignaci\xF3n de recursos y la supervisi\xF3n del cumplimiento."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.5
     ref_id: A.5.5
     name: Contact with authorities
@@ -174,6 +206,13 @@ objects:
           \ myndigheter under informationss\xE4kerhetsincidenter. \xC5tg\xE4rderna\
           \ inkluderar att uppr\xE4tta kontaktprotokoll, uppr\xE4tth\xE5lla uppdaterade\
           \ kontaktlistor och tilldela ansvar."
+      es:
+        name: Contacto con las autoridades
+        description: "Este control garantiza la comunicaci\xF3n oportuna con las autoridades\
+          \ pertinentes durante los incidentes de seguridad de la informaci\xF3n.\
+          \ Las medidas incluyen el establecimiento de protocolos de contacto, el\
+          \ mantenimiento de listas de contactos actualizadas y la asignaci\xF3n de\
+          \ responsabilidades."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.6
     ref_id: A.5.6
     name: Contact with special interest groups
@@ -199,6 +238,12 @@ objects:
         description: "Denna kontroll underl\xE4ttar kontakt med s\xE4rskilda intressegrupper\
           \ f\xF6r att h\xE5lla sig informerade om s\xE4kerhetstrender och praxis.\
           \ \xC5tg\xE4rderna inkluderar deltagande i forum, medlemskap och samarbetsinitiativ."
+      es:
+        name: "Contacto con grupos de inter\xE9s especial"
+        description: "Este control facilita el contacto con grupos de inter\xE9s especial\
+          \ para mantenerse informado sobre las tendencias y pr\xE1cticas de seguridad.\
+          \ Las medidas incluyen la participaci\xF3n en foros, membres\xEDas e iniciativas\
+          \ de colaboraci\xF3n."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.7
     ref_id: A.5.7
     name: Threat intelligence
@@ -227,6 +272,12 @@ objects:
           \ utvecklas och underh\xE5lls f\xF6r att identifiera och minimera s\xE4\
           kerhetsrisker. \xC5tg\xE4rderna omfattar \xF6vervakning av hotfl\xF6den,\
           \ analys av trender och delning av anv\xE4ndbara insikter."
+      es:
+        name: Inteligencia de amenazas
+        description: "Este control garantiza que la inteligencia de amenazas se desarrolle\
+          \ y mantenga para identificar y mitigar los riesgos de seguridad. Las medidas\
+          \ incluyen la supervisi\xF3n de fuentes de amenazas, el an\xE1lisis de tendencias\
+          \ y el intercambio de informaci\xF3n procesable."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.8
     ref_id: A.5.8
     name: Information security in project management
@@ -253,6 +304,12 @@ objects:
         description: "Den h\xE4r kontrollen inf\xF6rlivar informationss\xE4kerhet\
           \ i projektledningsmetoderna. \xC5tg\xE4rderna omfattar riskbed\xF6mningar,\
           \ efterlevnadsgranskningar och s\xE4kerhetskontroller under projektets livscykel."
+      es:
+        name: "Seguridad de la informaci\xF3n en la gesti\xF3n de proyectos"
+        description: "Este control incorpora la seguridad de la informaci\xF3n en\
+          \ las pr\xE1cticas de gesti\xF3n de proyectos. Las medidas incluyen evaluaciones\
+          \ de riesgos, revisiones de cumplimiento y puntos de control de seguridad\
+          \ durante los ciclos de vida del proyecto."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.9
     ref_id: A.5.9
     name: Inventory of information and other associated assets
@@ -278,6 +335,12 @@ objects:
           \ av information och tillh\xF6rande tillg\xE5ngar uppr\xE4tth\xE5lls. \xC5\
           tg\xE4rderna inkluderar tillg\xE5ngssp\xE5rning, periodiska revisioner och\
           \ klassificering efter k\xE4nslighet."
+      es:
+        name: "Inventario de informaci\xF3n y otros activos asociados"
+        description: "Este control garantiza que se mantenga un inventario preciso\
+          \ de la informaci\xF3n y los activos asociados. Las medidas incluyen el\
+          \ seguimiento de activos, auditor\xEDas peri\xF3dicas y clasificaci\xF3\
+          n por sensibilidad."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.10
     ref_id: A.5.10
     name: Acceptable use of information and other associated assets
@@ -307,6 +370,12 @@ objects:
           \ information och associerade tillg\xE5ngar f\xF6r att s\xE4kerst\xE4lla\
           \ korrekt hantering. \xC5tg\xE4rderna omfattar dokumenterade policyer, anv\xE4\
           ndarutbildning och tvingande mekanismer."
+      es:
+        name: "Uso aceptable de la informaci\xF3n y otros activos asociados"
+        description: "Este control define el uso aceptable de la informaci\xF3n y\
+          \ los activos asociados para garantizar un manejo adecuado. Las medidas\
+          \ incluyen pol\xEDticas documentadas, capacitaci\xF3n de usuarios y mecanismos\
+          \ de cumplimiento."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.11
     ref_id: A.5.11
     name: Return of assets
@@ -333,6 +402,12 @@ objects:
           \ av tillg\xE5ngar n\xE4r anst\xE4llda eller entrepren\xF6rer l\xE4mnar\
           \ eller byter roll. \xC5tg\xE4rderna omfattar checklistor, tillg\xE5ngssp\xE5\
           rning och inaktiveringsprotokoll."
+      es:
+        name: "Devoluci\xF3n de activos"
+        description: "Este control garantiza la devoluci\xF3n segura de los activos\
+          \ cuando los empleados o contratistas se van o cambian de funci\xF3n. Las\
+          \ medidas incluyen listas de comprobaci\xF3n, seguimiento de activos y protocolos\
+          \ de desmantelamiento."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.12
     ref_id: A.5.12
     name: Classification of information
@@ -361,6 +436,12 @@ objects:
           \ baserat p\xE5 dess k\xE4nslighet och v\xE4rde f\xF6r att s\xE4kerst\xE4\
           lla l\xE4mpligt skydd. M\xE5tten omfattar klassificeringsscheman, \xE5tkomstbegr\xE4\
           nsningar och riktlinjer f\xF6r etikettering."
+      es:
+        name: "Clasificaci\xF3n de la informaci\xF3n"
+        description: "Este control garantiza que la informaci\xF3n se clasifique en\
+          \ funci\xF3n de su sensibilidad y valor para garantizar una protecci\xF3\
+          n adecuada. Las medidas incluyen esquemas de clasificaci\xF3n, restricciones\
+          \ de acceso y pautas de etiquetado."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.13
     ref_id: A.5.13
     name: Labelling of information
@@ -386,6 +467,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent m\xE4rkning\
           \ av information f\xF6r att \xE5terspegla dess klassificerings- och hanteringskrav.\
           \ \xC5tg\xE4rderna inkluderar standardiserade mallar, utbildning och revisioner."
+      es:
+        name: "Etiquetado de la informaci\xF3n"
+        description: "Este control garantiza un etiquetado coherente de la informaci\xF3\
+          n para reflejar sus requisitos de clasificaci\xF3n y manejo. Las medidas\
+          \ incluyen plantillas estandarizadas, capacitaci\xF3n y auditor\xEDas."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.14
     ref_id: A.5.14
     name: Information transfer
@@ -412,6 +498,11 @@ objects:
           ring av information mellan system eller organisationer. \xC5tg\xE4rderna\
           \ inkluderar kryptering, \xE5tkomstkontroller och s\xE4kra \xF6verf\xF6\
           ringsprotokoll."
+      es:
+        name: "Transferencia de informaci\xF3n"
+        description: "Este control establece procesos seguros para la transferencia\
+          \ de informaci\xF3n entre sistemas u organizaciones. Las medidas incluyen\
+          \ cifrado, controles de acceso y protocolos de transferencia segura."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.15
     ref_id: A.5.15
     name: Access control
@@ -440,6 +531,12 @@ objects:
           \ f\xF6r \xE5tkomstkontroll f\xF6r att begr\xE4nsa \xE5tkomsten till beh\xF6\
           riga personer. \xC5tg\xE4rderna omfattar rollbaserad \xE5tkomst, multifaktorautentisering\
           \ och periodiska granskningar."
+      es:
+        name: Control de acceso
+        description: "Este control implementa y mantiene mecanismos de control de\
+          \ acceso para restringir el acceso a las personas autorizadas. Las medidas\
+          \ incluyen el acceso basado en roles, la autenticaci\xF3n multifactor y\
+          \ las revisiones peri\xF3dicas."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.16
     ref_id: A.5.16
     name: Identity management
@@ -468,6 +565,12 @@ objects:
           \ p\xE5 ett s\xE4kert s\xE4tt f\xF6r att garantera korrekt och tillf\xF6\
           rlitlig \xE5tkomst till system. \xC5tg\xE4rderna omfattar identitetsverifiering,\
           \ livscykelhantering och \xE5tkomstetablering."
+      es:
+        name: "Gesti\xF3n de identidades"
+        description: "Este control garantiza que las identidades se gestionen de forma\
+          \ segura para garantizar un acceso preciso y fiable a los sistemas. Las\
+          \ medidas incluyen la verificaci\xF3n de identidad, la gesti\xF3n del ciclo\
+          \ de vida y el aprovisionamiento de acceso."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.17
     ref_id: A.5.17
     name: Authentication information
@@ -494,6 +597,12 @@ objects:
           \ exempel l\xF6senord, f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst. \xC5\
           tg\xE4rderna omfattar kryptering, s\xE4ker lagring och periodiska l\xF6\
           senordsuppdateringar."
+      es:
+        name: "Informaci\xF3n de autenticaci\xF3n"
+        description: "Este control protege la informaci\xF3n de autenticaci\xF3n,\
+          \ como las contrase\xF1as, para evitar el acceso no autorizado. Las medidas\
+          \ incluyen cifrado, almacenamiento seguro y actualizaciones peri\xF3dicas\
+          \ de contrase\xF1as."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.18
     ref_id: A.5.18
     name: Access rights
@@ -522,6 +631,12 @@ objects:
           ttigheter regelbundet granskas och hanteras s\xE5 att de \xF6verensst\xE4\
           mmer med roller och ansvarsomr\xE5den. \xC5tg\xE4rderna omfattar periodiska\
           \ granskningar, \xE5terkallande av \xE5tkomst och automatiserad \xE5tkomsthantering."
+      es:
+        name: Derechos de acceso
+        description: "Este control garantiza que los derechos de acceso se revisen\
+          \ y administren peri\xF3dicamente para alinearlos con las funciones y responsabilidades.\
+          \ Las medidas incluyen auditor\xEDas peri\xF3dicas, revocaci\xF3n de acceso\
+          \ y gesti\xF3n automatizada del acceso."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.19
     ref_id: A.5.19
     name: Information security in supplier relationships
@@ -548,6 +663,12 @@ objects:
           \ \xE4r inb\xE4ddad i leverant\xF6rsrelationer och processer. \xC5tg\xE4\
           rderna omfattar due diligence, s\xE4kerhetsgranskningar och l\xF6pande \xF6\
           vervakning."
+      es:
+        name: "Seguridad de la informaci\xF3n en las relaciones con los proveedores"
+        description: "Este control garantiza que la seguridad de la informaci\xF3\
+          n est\xE9 integrada en las relaciones y los procesos con los proveedores.\
+          \ Las medidas incluyen la diligencia debida, las revisiones de seguridad\
+          \ y el monitoreo continuo."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.20
     ref_id: A.5.20
     name: Addressing information security within supplier agreements
@@ -576,6 +697,12 @@ objects:
           \ leverant\xF6rsavtal. \xC5tg\xE4rderna omfattar uttryckliga kontraktsklausuler,\
           \ efterlevnadsrevisioner och definierade p\xE5f\xF6ljder f\xF6r \xF6vertr\xE4\
           delser."
+      es:
+        name: "Abordar la seguridad de la informaci\xF3n en los acuerdos con los proveedores"
+        description: "Este control aborda los requisitos de seguridad de la informaci\xF3\
+          n dentro de los acuerdos con los proveedores. Las medidas incluyen cl\xE1\
+          usulas contractuales expl\xEDcitas, auditor\xEDas de cumplimiento y sanciones\
+          \ definidas por infracciones."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.21
     ref_id: A.5.21
     name: Managing information security in the ICT supply chain
@@ -605,6 +732,13 @@ objects:
           rs\xF6rjningskedjan f\xF6r att s\xE4kerst\xE4lla s\xE4kerheten f\xF6r tj\xE4\
           nster och komponenter. \xC5tg\xE4rderna inkluderar riskbed\xF6mningar, leverant\xF6\
           rsutv\xE4rderingar och protokoll f\xF6r incidenthantering."
+      es:
+        name: "Gesti\xF3n de la seguridad de la informaci\xF3n en la cadena de suministro\
+          \ de las TIC"
+        description: "Este control gestiona los riesgos de seguridad de la informaci\xF3\
+          n en la cadena de suministro de TIC para garantizar la seguridad de los\
+          \ servicios y componentes. Las medidas incluyen evaluaciones de riesgos,\
+          \ evaluaciones de proveedores y protocolos de respuesta a incidentes."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.22
     ref_id: A.5.22
     name: Monitor, review and change management of supplier services
@@ -633,6 +767,12 @@ objects:
           \ \xF6vervakas, granskas och justeras f\xF6r att uppr\xE4tth\xE5lla informationss\xE4\
           kerheten. \xC5tg\xE4rderna omfattar serviceavtal, periodiska granskningar\
           \ och kontraktsuppdateringar."
+      es:
+        name: Supervisar, revisar y gestionar el cambio de los servicios de los proveedores
+        description: "Este control garantiza que los servicios de los proveedores\
+          \ se supervisen, revisen y ajusten para mantener la seguridad de la informaci\xF3\
+          n. Las medidas incluyen acuerdos de nivel de servicio, revisiones peri\xF3\
+          dicas y actualizaciones de contratos."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.23
     ref_id: A.5.23
     name: Information security for use of cloud services
@@ -660,6 +800,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller s\xE4ker anv\xE4ndning\
           \ av molntj\xE4nster genom att hantera associerade risker. \xC5tg\xE4rderna\
           \ omfattar datakryptering, \xE5tkomstkontroller och granskningar av providerefterlevnad."
+      es:
+        name: "Seguridad de la informaci\xF3n para el uso de servicios en la nube"
+        description: Este control garantiza el uso seguro de los servicios en la nube
+          al abordar los riesgos asociados. Las medidas incluyen cifrado de datos,
+          controles de acceso y revisiones de cumplimiento de proveedores.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.24
     ref_id: A.5.24
     name: Information security incident management planning and preparation
@@ -688,6 +833,13 @@ objects:
           rberedelse f\xF6r hantering av informationss\xE4kerhetsincidenter. \xC5\
           tg\xE4rderna omfattar incidenthanteringsplaner, tr\xE4nings\xF6vningar och\
           \ kommunikationsprotokoll."
+      es:
+        name: "Planificaci\xF3n y preparaci\xF3n de la gesti\xF3n de incidentes de\
+          \ seguridad de la informaci\xF3n"
+        description: "Este control garantiza una planificaci\xF3n y preparaci\xF3\
+          n adecuadas para la gesti\xF3n de incidentes de seguridad de la informaci\xF3\
+          n. Las medidas incluyen planes de respuesta a incidentes, ejercicios de\
+          \ capacitaci\xF3n y protocolos de comunicaci\xF3n."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.25
     ref_id: A.5.25
     name: Assessment and decision on information security events
@@ -717,6 +869,13 @@ objects:
           \ besluta om \xE5tg\xE4rder relaterade till informationss\xE4kerhetsh\xE4\
           ndelser. \xC5tg\xE4rderna omfattar grundorsaksanalys, riskbed\xF6mning och\
           \ \xE5tg\xE4rdsplaner."
+      es:
+        name: "Evaluaci\xF3n y decisi\xF3n sobre eventos de seguridad de la informaci\xF3\
+          n"
+        description: "Este control establece procesos para evaluar y decidir sobre\
+          \ acciones relacionadas con eventos de seguridad de la informaci\xF3n. Las\
+          \ medidas incluyen an\xE1lisis de causa ra\xEDz, evaluaci\xF3n de riesgos\
+          \ y planes de mitigaci\xF3n."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.26
     ref_id: A.5.26
     name: Response to information security incidents
@@ -744,6 +903,12 @@ objects:
           \ p\xE5 informationss\xE4kerhetsincidenter f\xF6r att minimera p\xE5verkan\
           \ och \xE5terh\xE4mta sig snabbt. \xC5tg\xE4rderna omfattar incidentrapportering,\
           \ eskaleringsprotokoll och strategier f\xF6r att begr\xE4nsa spridningen."
+      es:
+        name: "Respuesta a incidentes de seguridad de la informaci\xF3n"
+        description: "Este control garantiza una respuesta eficaz a los incidentes\
+          \ de seguridad de la informaci\xF3n para minimizar el impacto y recuperarse\
+          \ r\xE1pidamente. Las medidas incluyen informes de incidentes, protocolos\
+          \ de escalada y estrategias de contenci\xF3n."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.27
     ref_id: A.5.27
     name: Learning from information security incidents
@@ -773,6 +938,12 @@ objects:
           kerhetsincidenter dokumenteras och implementeras f\xF6r att f\xF6rb\xE4\
           ttra processerna. \xC5tg\xE4rderna omfattar granskningar efter incidenter,\
           \ handlingsplaner och policyuppdateringar."
+      es:
+        name: "Aprender de los incidentes de seguridad de la informaci\xF3n"
+        description: "Este control garantiza que las lecciones aprendidas de los incidentes\
+          \ de seguridad de la informaci\xF3n se documenten e implementen para mejorar\
+          \ los procesos. Las medidas incluyen revisiones posteriores al incidente,\
+          \ planes de acci\xF3n y actualizaciones de pol\xEDticas."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.28
     ref_id: A.5.28
     name: Collection of evidence
@@ -801,6 +972,12 @@ objects:
           \ och bevaras under s\xE4kerhetsincidenter f\xF6r att st\xF6dja unders\xF6\
           kningar. \xC5tg\xE4rderna omfattar sp\xE5rbarhetsprocedurer, s\xE4ker lagring\
           \ och \xE5tkomstkontroller."
+      es:
+        name: "Recopilaci\xF3n de pruebas"
+        description: Este control garantiza que las pruebas se recopilen y conserven
+          durante los incidentes de seguridad para respaldar las investigaciones.
+          Las medidas incluyen procedimientos de cadena de custodia, almacenamiento
+          seguro y controles de acceso.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.29
     ref_id: A.5.29
     name: Information security during disruption
@@ -828,6 +1005,12 @@ objects:
           \ uppr\xE4tth\xE5lls under st\xF6rningar f\xF6r att garantera kontinuiteten\
           \ i verksamheten. \xC5tg\xE4rderna omfattar beredskapsplaner, s\xE4kerhetskopieringssystem\
           \ och mekanismer f\xF6r redundans."
+      es:
+        name: "Seguridad de la informaci\xF3n durante la interrupci\xF3n"
+        description: "Este control asegura que la seguridad de la informaci\xF3n se\
+          \ mantenga durante las interrupciones para garantizar la continuidad de\
+          \ las operaciones. Las medidas incluyen planes de contingencia, sistemas\
+          \ de respaldo y mecanismos de conmutaci\xF3n por error."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.30
     ref_id: A.5.30
     name: ICT readiness for business continuity
@@ -856,6 +1039,12 @@ objects:
           r aff\xE4rskontinuitet f\xF6r att minimera driftstopp under st\xF6rningar.\
           \ \xC5tg\xE4rderna omfattar testning av \xE5terst\xE4llningsplaner, redundanta\
           \ system och haveriberedskapsplatser."
+      es:
+        name: "Preparaci\xF3n de las TIC para la continuidad de las actividades"
+        description: "Este control garantiza la preparaci\xF3n de las TIC para la\
+          \ continuidad del negocio a fin de minimizar el tiempo de inactividad durante\
+          \ las interrupciones. Las medidas incluyen probar planes de recuperaci\xF3\
+          n, sistemas redundantes y sitios de recuperaci\xF3n ante desastres."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.31
     ref_id: A.5.31
     name: Legal, statutory, regulatory and contractual requirements
@@ -882,6 +1071,12 @@ objects:
         description: "Denna kontroll s\xE4kerst\xE4ller efterlevnad av juridiska,\
           \ lagstadgade, regulatoriska och avtalsenliga informationss\xE4kerhetskrav.\
           \ \xC5tg\xE4rderna omfattar policygranskningar, revisioner och bevisdokumentation."
+      es:
+        name: Requisitos legales, estatutarios, reglamentarios y contractuales
+        description: "Este control garantiza el cumplimiento de los requisitos legales,\
+          \ estatutarios, reglamentarios y contractuales de seguridad de la informaci\xF3\
+          n. Las medidas incluyen revisiones de pol\xEDticas, auditor\xEDas y documentaci\xF3\
+          n de evidencias."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.32
     ref_id: A.5.32
     name: Intellectual property rights
@@ -908,6 +1103,12 @@ objects:
           \ skyddas genom l\xE4mpliga informationss\xE4kerhets\xE5tg\xE4rder. \xC5\
           tg\xE4rderna omfattar \xE5tkomstbegr\xE4nsningar, kryptering och juridiska\
           \ avtal."
+      es:
+        name: Derechos de propiedad intelectual
+        description: "Este control garantiza que los derechos de propiedad intelectual\
+          \ est\xE9n protegidos a trav\xE9s de medidas de seguridad de la informaci\xF3\
+          n adecuadas. Las medidas incluyen restricciones de acceso, cifrado y acuerdos\
+          \ legales."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.33
     ref_id: A.5.33
     name: Protection of records
@@ -936,6 +1137,12 @@ objects:
           \ lagras och skyddas p\xE5 ett s\xE4kert s\xE4tt f\xF6r att f\xF6rhindra\
           \ f\xF6rlust eller obeh\xF6rig \xE5tkomst. \xC5tg\xE4rderna omfattar kvarh\xE5\
           llningsprinciper, s\xE4ker lagring och \xE5tkomstkontroller."
+      es:
+        name: "Protecci\xF3n de registros"
+        description: "Este control garantiza que los registros se almacenen y protejan\
+          \ de forma segura para evitar p\xE9rdidas o accesos no autorizados. Las\
+          \ medidas incluyen pol\xEDticas de retenci\xF3n, almacenamiento seguro y\
+          \ controles de acceso."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.34
     ref_id: A.5.34
     name: Privacy and protection of PII
@@ -963,6 +1170,12 @@ objects:
         description: "Den h\xE4r kontrollen skyddar sekretessen och s\xE4kerst\xE4\
           ller s\xE4ker hantering av personligt identifierbar information (PII). \xC5\
           tg\xE4rderna omfattar anonymisering, kryptering och efterlevnad av integritetslagar."
+      es:
+        name: "Privacidad y protecci\xF3n de la informaci\xF3n personal"
+        description: "Este control protege la privacidad y garantiza el manejo seguro\
+          \ de la informaci\xF3n de identificaci\xF3n personal (PII). Las medidas\
+          \ incluyen la anonimizaci\xF3n, el cifrado y el cumplimiento de las leyes\
+          \ de privacidad."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.35
     ref_id: A.5.35
     name: Independent review of information security
@@ -989,6 +1202,12 @@ objects:
           \ informationss\xE4kerhet f\xF6r att utv\xE4rdera effektivitet och efterlevnad.\
           \ \xC5tg\xE4rderna omfattar bland annat externa revisioner, riskbed\xF6\
           mningar och uppf\xF6ljnings\xE5tg\xE4rder."
+      es:
+        name: "Revisi\xF3n independiente de la seguridad de la informaci\xF3n"
+        description: "Este control garantiza revisiones independientes de la seguridad\
+          \ de la informaci\xF3n para evaluar la eficacia y el cumplimiento. Las medidas\
+          \ incluyen auditor\xEDas externas, evaluaciones de riesgos y acciones de\
+          \ seguimiento."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.36
     ref_id: A.5.36
     name: Compliance with policies, rules and standards for information security
@@ -1018,6 +1237,13 @@ objects:
           \ policyer, regler och standarder f\xF6r informationss\xE4kerhet. \xC5tg\xE4\
           rderna omfattar regelbunden utbildning, policygranskningar och verkst\xE4\
           llighetsmekanismer."
+      es:
+        name: "Cumplimiento de pol\xEDticas, reglas y est\xE1ndares de seguridad de\
+          \ la informaci\xF3n"
+        description: "Este control garantiza el cumplimiento de todas las pol\xED\
+          ticas, reglas y est\xE1ndares de seguridad de la informaci\xF3n. Las medidas\
+          \ incluyen capacitaci\xF3n peri\xF3dica, revisiones de pol\xEDticas y mecanismos\
+          \ de aplicaci\xF3n."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.37
     ref_id: A.5.37
     name: Documented operating procedures
@@ -1044,6 +1270,12 @@ objects:
           \ driftsprocedurer f\xF6r att s\xE4kerst\xE4lla konsekvens i s\xE4kerhetsrutinerna.\
           \ \xC5tg\xE4rderna omfattar bland annat processdokumentation, versionskontroll\
           \ och tillg\xE4nglighet."
+      es:
+        name: Procedimientos operativos documentados
+        description: "Este control desarrolla y mantiene procedimientos operativos\
+          \ documentados para garantizar la coherencia en las pr\xE1cticas de seguridad.\
+          \ Las medidas incluyen la documentaci\xF3n del proceso, el control de versiones\
+          \ y la accesibilidad."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.1
     ref_id: A.6.1
     name: Screening
@@ -1073,6 +1305,13 @@ objects:
           \ f\xF6r att verifiera kandidaternas l\xE4mplighet f\xF6re anst\xE4llning.\
           \ \xC5tg\xE4rderna inkluderar bakgrundskontroller, identitetsverifiering\
           \ och bed\xF6mning av kvalifikationer f\xF6r att minska s\xE4kerhetsriskerna."
+      es:
+        name: Chequeo
+        description: "Este control asegura la implementaci\xF3n de procesos de selecci\xF3\
+          n para verificar la idoneidad de los candidatos antes de su contrataci\xF3\
+          n. Las medidas incluyen verificaciones de antecedentes, verificaci\xF3n\
+          \ de identidad y evaluaci\xF3n de calificaciones para reducir los riesgos\
+          \ de seguridad."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.2
     ref_id: A.6.2
     name: Terms and conditions of employment
@@ -1100,6 +1339,12 @@ objects:
           \ ing\xE5r ett ansvar f\xF6r informationss\xE4kerhet. \xC5tg\xE4rderna omfattar\
           \ uttryckliga klausuler om konfidentialitet, efterlevnad av policyer och\
           \ konsekvenser vid \xF6vertr\xE4delser."
+      es:
+        name: "T\xE9rminos y condiciones de empleo"
+        description: "Este control garantiza que los t\xE9rminos y condiciones de\
+          \ empleo incluyan responsabilidades en materia de seguridad de la informaci\xF3\
+          n. Las medidas incluyen cl\xE1usulas expl\xEDcitas sobre confidencialidad,\
+          \ cumplimiento de pol\xEDticas y consecuencias por infracciones."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.3
     ref_id: A.6.3
     name: Information security awareness, education and training
@@ -1129,6 +1374,13 @@ objects:
           \ medvetenhet, utbildning och tr\xE4ning om informationss\xE4kerhet. \xC5\
           tg\xE4rderna inkluderar schemalagda utbildningssessioner, e-learningprogram\
           \ och simulerade phishing-\xF6vningar."
+      es:
+        name: "Concienciaci\xF3n, educaci\xF3n y formaci\xF3n en materia de seguridad\
+          \ de la informaci\xF3n"
+        description: "Este control garantiza que los empleados reciban concienciaci\xF3\
+          n, educaci\xF3n y formaci\xF3n peri\xF3dicas sobre la seguridad de la informaci\xF3\
+          n. Las medidas incluyen sesiones de capacitaci\xF3n programadas, programas\
+          \ de aprendizaje electr\xF3nico y ejercicios simulados de phishing."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.4
     ref_id: A.6.4
     name: Disciplinary process
@@ -1157,6 +1409,12 @@ objects:
           r att hantera brott mot informationss\xE4kerhetspolicyer. \xC5tg\xE4rderna\
           \ omfattar tydliga riktlinjer, eskaleringsf\xF6rfaranden och konsekvent\
           \ till\xE4mpning f\xF6r att uppr\xE4tth\xE5lla ansvarsskyldigheten."
+      es:
+        name: Proceso disciplinario
+        description: "Este control establece un proceso disciplinario para abordar\
+          \ las violaciones de las pol\xEDticas de seguridad de la informaci\xF3n.\
+          \ Las medidas incluyen directrices claras, procedimientos de escalamiento\
+          \ y una aplicaci\xF3n coherente para mantener la rendici\xF3n de cuentas."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.5
     ref_id: A.6.5
     name: Responsibilities after termination or change of employment
@@ -1189,6 +1447,13 @@ objects:
           \ upps\xE4gning eller roll\xE4ndringar. \xC5tg\xE4rderna omfattar \xE5terkallande\
           \ av \xE5tkomstr\xE4ttigheter, insamling av organisationstillg\xE5ngar och\
           \ genomf\xF6rande av avslutningsintervjuer."
+      es:
+        name: "Responsabilidades despu\xE9s de la terminaci\xF3n o cambio de empleo"
+        description: "Este control garantiza que las responsabilidades relacionadas\
+          \ con la seguridad de la informaci\xF3n se definan y apliquen despu\xE9\
+          s de la terminaci\xF3n o los cambios de rol. Las medidas incluyen la revocaci\xF3\
+          n de los derechos de acceso, la recopilaci\xF3n de activos de la organizaci\xF3\
+          n y la realizaci\xF3n de entrevistas de salida."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.6
     ref_id: A.6.6
     name: Confidentiality or non-disclosure agreements
@@ -1219,6 +1484,12 @@ objects:
           \ undertecknade avtal vid anst\xE4llningens b\xF6rjan, periodiska p\xE5\
           minnelser och verkst\xE4llighet av r\xE4ttsliga \xE5tg\xE4rder vid \xF6\
           vertr\xE4delser."
+      es:
+        name: "Acuerdos de confidencialidad o no divulgaci\xF3n"
+        description: "Este control implementa acuerdos de confidencialidad o no divulgaci\xF3\
+          n para proteger la informaci\xF3n confidencial. Las medidas incluyen acuerdos\
+          \ firmados al comienzo del empleo, recordatorios peri\xF3dicos y la aplicaci\xF3\
+          n de acciones legales en caso de violaciones."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.7
     ref_id: A.6.7
     name: Remote working
@@ -1247,6 +1518,12 @@ objects:
           kerhetsrisker under distansarbete. \xC5tg\xE4rderna omfattar s\xE4ker \xE5\
           tkomst till f\xF6retagssystem, obligatorisk anv\xE4ndning av VPN:er och\
           \ policyer f\xF6r hantering av k\xE4nsliga data p\xE5 distans."
+      es:
+        name: Trabajo a distancia
+        description: "Este control garantiza la gesti\xF3n segura de los riesgos de\
+          \ seguridad de la informaci\xF3n durante el trabajo a distancia. Las medidas\
+          \ incluyen acceso seguro a los sistemas corporativos, uso obligatorio de\
+          \ VPN y pol\xEDticas para el manejo de datos confidenciales de forma remota."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.8
     ref_id: A.6.8
     name: Information security event reporting
@@ -1277,6 +1554,13 @@ objects:
           \ kanaler f\xF6r incidentrapportering, kampanjer f\xF6r att \xF6ka medvetenheten\
           \ och uppf\xF6ljningsf\xF6rfaranden f\xF6r att unders\xF6ka och hantera\
           \ rapporterade h\xE4ndelser."
+      es:
+        name: "Informes de eventos de seguridad de la informaci\xF3n"
+        description: "Este control garantiza que los empleados puedan informar r\xE1\
+          pidamente sobre los eventos de seguridad de la informaci\xF3n. Las medidas\
+          \ incluyen canales de notificaci\xF3n de incidentes, campa\xF1as de concienciaci\xF3\
+          n y procedimientos de seguimiento para investigar y abordar los eventos\
+          \ denunciados."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.1
     ref_id: A.7.1
     name: Physical security perimeters
@@ -1307,6 +1591,12 @@ objects:
           \ \xC5tg\xE4rderna inkluderar barri\xE4rer, \xE5tkomstkontroller och \xF6\
           vervakningssystem f\xF6r att s\xE4kerst\xE4lla att endast beh\xF6riga personer\
           \ kan komma in."
+      es:
+        name: "Per\xEDmetros de seguridad f\xEDsica"
+        description: "Este control establece per\xEDmetros de seguridad f\xEDsica\
+          \ para proteger las \xE1reas cr\xEDticas del acceso no autorizado. Las medidas\
+          \ incluyen barreras, controles de acceso y sistemas de monitoreo para garantizar\
+          \ que solo las personas autorizadas puedan ingresar."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.2
     ref_id: A.7.2
     name: Physical entry
@@ -1334,6 +1624,12 @@ objects:
           \ kontrolleras och \xF6vervakas f\xF6r att f\xF6rhindra obeh\xF6rig \xE5\
           tkomst. \xC5tg\xE4rderna inkluderar passerkortssystem, s\xE4kerhetspersonal\
           \ och bes\xF6ksloggar."
+      es:
+        name: "Entrada f\xEDsica"
+        description: "Este control garantiza que los puntos de entrada f\xEDsicos\
+          \ est\xE9n controlados y supervisados para evitar el acceso no autorizado.\
+          \ Las medidas incluyen sistemas de credenciales, personal de seguridad y\
+          \ registros de visitantes."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.3
     ref_id: A.7.3
     name: Securing offices, rooms and facilities
@@ -1361,6 +1657,12 @@ objects:
           \ anl\xE4ggningar \xE4r skyddade f\xF6r att skydda information och resurser.\
           \ \xC5tg\xE4rderna inkluderar l\xE5sta d\xF6rrar, begr\xE4nsade omr\xE5\
           den och \xF6vervakningssystem."
+      es:
+        name: Asegurar oficinas, salas e instalaciones
+        description: "Este control garantiza que las oficinas, las salas y las instalaciones\
+          \ est\xE9n protegidas para proteger la informaci\xF3n y los recursos. Las\
+          \ medidas incluyen puertas cerradas, \xE1reas restringidas y sistemas de\
+          \ vigilancia."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.4
     ref_id: A.7.4
     name: Physical security monitoring
@@ -1386,6 +1688,12 @@ objects:
         description: "Den h\xE4r kontrollen implementerar fysisk s\xE4kerhets\xF6\
           vervakning f\xF6r att identifiera och reagera snabbt p\xE5 hot. \xC5tg\xE4\
           rderna inkluderar CCTV-system, r\xF6relsedetektorer och varningar i realtid."
+      es:
+        name: "Supervisi\xF3n de la seguridad f\xEDsica"
+        description: "Este control implementa la supervisi\xF3n de la seguridad f\xED\
+          sica para detectar y responder r\xE1pidamente a las amenazas. Las medidas\
+          \ incluyen sistemas de CCTV, detectores de movimiento y alertas en tiempo\
+          \ real."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.5
     ref_id: A.7.5
     name: Protecting against physical and environmental threats
@@ -1412,6 +1720,12 @@ objects:
           \ milj\xF6m\xE4ssiga hot. \xC5tg\xE4rderna omfattar brandsl\xE4ckningssystem,\
           \ temperaturkontroller och barri\xE4rer f\xF6r att f\xF6rhindra \xF6versv\xE4\
           mningar."
+      es:
+        name: "Protecci\xF3n contra amenazas f\xEDsicas y ambientales"
+        description: "Este control protege los sistemas y recursos de las amenazas\
+          \ f\xEDsicas y ambientales. Las medidas incluyen sistemas de extinci\xF3\
+          n de incendios, controles de temperatura y barreras de prevenci\xF3n de\
+          \ inundaciones."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.6
     ref_id: A.7.6
     name: Working In secure areas
@@ -1439,6 +1753,11 @@ objects:
           den hanteras f\xF6r att endast till\xE5ta auktoriserad \xE5tkomst. \xC5\
           tg\xE4rderna omfattar bland annat system f\xF6r \xE5tkomstkontroll, eskorter\
           \ av bes\xF6kare och aktivitets\xF6vervakning."
+      es:
+        name: "Trabajar en \xE1reas seguras"
+        description: "Este control garantiza que las \xE1reas seguras se administren\
+          \ para permitir solo el acceso autorizado. Las medidas incluyen sistemas\
+          \ de control de acceso, escolta de visitantes y monitoreo de actividad."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.7
     ref_id: A.7.7
     name: Clear desk and clear screen
@@ -1468,6 +1787,12 @@ objects:
           \ och genomskinlig sk\xE4rm. \xC5tg\xE4rderna inkluderar att l\xE5sa k\xE4\
           nsliga dokument och automatiskt l\xE5sa sk\xE4rmar n\xE4r de inte anv\xE4\
           nds."
+      es:
+        name: Escritorio claro y pantalla clara
+        description: "Este control garantiza que la informaci\xF3n confidencial no\
+          \ quede expuesta mediante la adopci\xF3n de pol\xEDticas de escritorio y\
+          \ pantalla claras. Las medidas incluyen el bloqueo de documentos confidenciales\
+          \ y el bloqueo autom\xE1tico de pantallas cuando no est\xE1n en uso."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.8
     ref_id: A.7.8
     name: Equipment siting and protection
@@ -1495,6 +1820,11 @@ objects:
           \ och skyddad f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst eller skada.\
           \ \xC5tg\xE4rderna inkluderar s\xE4ker montering, l\xE5sta sk\xE5p och omr\xE5\
           den med begr\xE4nsad \xE5tkomst."
+      es:
+        name: "Ubicaci\xF3n y protecci\xF3n de equipos"
+        description: "Este control garantiza que el equipo est\xE9 posicionado y protegido\
+          \ para evitar el acceso no autorizado o el da\xF1o. Las medidas incluyen\
+          \ montaje seguro, gabinetes cerrados con llave y \xE1reas de acceso restringido."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.9
     ref_id: A.7.9
     name: Security of assets off-premises
@@ -1522,6 +1852,12 @@ objects:
           \ anv\xE4nds eller lagras utanf\xF6r lokalerna skyddas f\xF6r att uppr\xE4\
           tth\xE5lla konfidentialitet och integritet. \xC5tg\xE4rderna omfattar kryptering,\
           \ s\xE4ker transport och \xE5tkomstsp\xE5rning."
+      es:
+        name: Seguridad de los activos fuera de las instalaciones
+        description: "Este control garantiza que los activos utilizados o almacenados\
+          \ fuera de las instalaciones est\xE9n protegidos para mantener la confidencialidad\
+          \ y la integridad. Las medidas incluyen cifrado, transporte seguro y seguimiento\
+          \ de acceso."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.10
     ref_id: A.7.10
     name: Storage media
@@ -1546,6 +1882,11 @@ objects:
         description: "Den h\xE4r kontrollen skyddar lagringsmedia f\xF6r att f\xF6\
           rhindra obeh\xF6rig \xE5tkomst eller manipulering. \xC5tg\xE4rderna omfattar\
           \ s\xE4ker lagring, kryptering och \xE5tkomstbegr\xE4nsningar."
+      es:
+        name: Medios de almacenamiento
+        description: "Este control protege los medios de almacenamiento para evitar\
+          \ el acceso no autorizado o la manipulaci\xF3n. Las medidas incluyen almacenamiento\
+          \ seguro, cifrado y restricciones de acceso."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.11
     ref_id: A.7.11
     name: Supporting utilities
@@ -1573,6 +1914,12 @@ objects:
           \ till exempel kraft- och kylsystem, \xE4r tillf\xF6rlitliga och skyddade\
           \ mot avbrott. \xC5tg\xE4rderna omfattar bland annat redundanta system och\
           \ fysisk s\xE4kerhet."
+      es:
+        name: "Apoyo a los servicios p\xFAblicos"
+        description: "Este control garantiza que los servicios p\xFAblicos de apoyo,\
+          \ como los sistemas de energ\xEDa y refrigeraci\xF3n, sean fiables y est\xE9\
+          n protegidos contra interrupciones. Las medidas incluyen sistemas redundantes\
+          \ y seguridad f\xEDsica."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.12
     ref_id: A.7.12
     name: Cabling security
@@ -1598,6 +1945,11 @@ objects:
         description: "Denna kontroll s\xE4kerst\xE4ller att kablarna \xE4r s\xE4krade\
           \ f\xF6r att f\xF6rhindra obeh\xF6rig avlyssning eller skada. \xC5tg\xE4\
           rderna inkluderar skyddsledningar, korrekt m\xE4rkning och s\xE4ker dragning."
+      es:
+        name: Seguridad del cableado
+        description: "Este control garantiza que los cables est\xE9n asegurados para\
+          \ evitar intercepciones o da\xF1os no autorizados. Las medidas incluyen\
+          \ conductos de protecci\xF3n, etiquetado adecuado y enrutamiento seguro."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.13
     ref_id: A.7.13
     name: Equipment maintenance
@@ -1626,6 +1978,11 @@ objects:
           lls f\xF6r att garantera korrekt funktion och f\xF6rhindra fel. \xC5tg\xE4\
           rderna inkluderar regelbunden service, s\xE4kra underh\xE5llsrutiner och\
           \ beh\xF6rig personal\xE5tkomst."
+      es:
+        name: Mantenimiento de equipos
+        description: "Este control asegura el mantenimiento de los equipos para garantizar\
+          \ su correcto funcionamiento y evitar fallos. Las medidas incluyen servicio\
+          \ regular, pr\xE1cticas de mantenimiento seguras y acceso de personal autorizado."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.14
     ref_id: A.7.14
     name: Secure disposal or re-use of equipment
@@ -1654,6 +2011,12 @@ objects:
           teranv\xE4ndning av utrustning f\xF6r att skydda k\xE4nslig information.\
           \ \xC5tg\xE4rderna inkluderar datasanering, fysisk f\xF6rst\xF6relse och\
           \ certifierade bortskaffningsprocesser."
+      es:
+        name: "Eliminaci\xF3n o reutilizaci\xF3n segura de equipos"
+        description: "Este control garantiza la eliminaci\xF3n segura o la reutilizaci\xF3\
+          n de equipos para proteger la informaci\xF3n confidencial. Las medidas incluyen\
+          \ la desinfecci\xF3n de datos, la destrucci\xF3n f\xEDsica y los procesos\
+          \ de eliminaci\xF3n certificados."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.1
     ref_id: A.8.1
     name: User end point devices
@@ -1682,6 +2045,13 @@ objects:
           \ som b\xE4rbara datorer, station\xE4ra datorer och mobila enheter genom\
           \ att implementera s\xE4kerhets\xE5tg\xE4rder som slutpunktsidentifiering,\
           \ kryptering och s\xE4kra konfigurationer f\xF6r att minimera risker."
+      es:
+        name: Dispositivos de punto final de usuario
+        description: "Este control garantiza la protecci\xF3n de los dispositivos\
+          \ de punto final, como equipos port\xE1tiles, equipos de escritorio y dispositivos\
+          \ m\xF3viles, mediante la implementaci\xF3n de medidas de seguridad como\
+          \ la detecci\xF3n de puntos de conexi\xF3n, el cifrado y las configuraciones\
+          \ seguras para minimizar los riesgos."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.2
     ref_id: A.8.2
     name: Privileged access rights
@@ -1712,6 +2082,13 @@ objects:
           \ f\xF6r att f\xF6rhindra missbruk och f\xF6rb\xE4ttra s\xE4kerheten. \xC5\
           tg\xE4rderna omfattar rollbaserade \xE5tkomstkontroller, periodiska granskningar\
           \ och strikt kontohantering."
+      es:
+        name: Derechos de acceso privilegiados
+        description: "Este control garantiza que los derechos de acceso privilegiado\
+          \ se concedan, administren y supervisen cuidadosamente para evitar el uso\
+          \ indebido y mejorar la seguridad. Las medidas incluyen controles de acceso\
+          \ basados en roles, revisiones peri\xF3dicas y una estricta gesti\xF3n de\
+          \ cuentas."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.3
     ref_id: A.8.3
     name: Information access restriction
@@ -1739,6 +2116,12 @@ objects:
           \ information baserat p\xE5 principer som du beh\xF6ver veta. \xC5tg\xE4\
           rderna omfattar anv\xE4ndarautentisering, rollbaserade beh\xF6righeter och\
           \ regelbundna \xE5tkomstgranskningar."
+      es:
+        name: "Restricci\xF3n de acceso a la informaci\xF3n"
+        description: "Este control restringe el acceso a la informaci\xF3n confidencial\
+          \ en funci\xF3n de los principios de necesidad de conocer. Las medidas incluyen\
+          \ la autenticaci\xF3n de usuarios, los permisos basados en roles y las revisiones\
+          \ peri\xF3dicas del acceso."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.4
     ref_id: A.8.4
     name: Access to source code
@@ -1766,6 +2149,12 @@ objects:
           \ genom att f\xF6rhindra obeh\xF6rig visning, \xE4ndring eller exponering.\
           \ \xC5tg\xE4rderna omfattar versionskontroll, s\xE4kra lagringsplatser och\
           \ begr\xE4nsad \xE5tkomst f\xF6r utvecklare."
+      es:
+        name: "Acceso al c\xF3digo fuente"
+        description: "Este control protege el acceso al c\xF3digo fuente al evitar\
+          \ la visualizaci\xF3n, modificaci\xF3n o exposici\xF3n no autorizadas. Las\
+          \ medidas incluyen control de versiones, repositorios seguros y acceso restringido\
+          \ para desarrolladores."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.5
     ref_id: A.8.5
     name: Secure authentication
@@ -1791,6 +2180,11 @@ objects:
         description: "Den h\xE4r kontrollen implementerar starka autentiseringsmekanismer,\
           \ till exempel multifaktorautentisering, f\xF6r att verifiera anv\xE4ndaridentiteter\
           \ och f\xF6rhindra obeh\xF6rig \xE5tkomst."
+      es:
+        name: "Autenticaci\xF3n segura"
+        description: "Este control implementa mecanismos de autenticaci\xF3n seguros,\
+          \ como la autenticaci\xF3n multifactor, para verificar las identidades de\
+          \ los usuarios y evitar el acceso no autorizado."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.6
     ref_id: A.8.6
     name: Capacity management
@@ -1818,6 +2212,12 @@ objects:
           \ f\xF6r att ge tillr\xE4cklig prestanda och f\xF6rhindra st\xF6rningar.\
           \ \xC5tg\xE4rderna omfattar bland annat \xF6vervakning av resursanv\xE4\
           ndning och planering f\xF6r framtida behov."
+      es:
+        name: "Gesti\xF3n de la capacidad"
+        description: "Este control garantiza que la capacidad del sistema se gestione\
+          \ para proporcionar un rendimiento adecuado y evitar interrupciones. Las\
+          \ medidas incluyen el seguimiento del uso de los recursos y la planificaci\xF3\
+          n de las necesidades futuras."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.7
     ref_id: A.8.7
     name: Protection against malware
@@ -1842,6 +2242,11 @@ objects:
         description: "Den h\xE4r kontrollen distribuerar \xE5tg\xE4rder som antivirusprogram,\
           \ verktyg f\xF6r hotidentifiering och regelbundna uppdateringar f\xF6r att\
           \ skydda system fr\xE5n skadlig kod och skadliga attacker."
+      es:
+        name: "Protecci\xF3n contra malware"
+        description: "Este control implementa medidas como software antivirus, herramientas\
+          \ de detecci\xF3n de amenazas y actualizaciones peri\xF3dicas para proteger\
+          \ los sistemas contra malware y ataques maliciosos."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.8
     ref_id: A.8.8
     name: Management of technical vulnerabilities
@@ -1867,6 +2272,12 @@ objects:
         description: "Den h\xE4r kontrollen identifierar, utv\xE4rderar och \xE5tg\xE4\
           rdar tekniska s\xE5rbarheter snabbt f\xF6r att minimera s\xE4kerhetsriskerna.\
           \ \xC5tg\xE4rderna inkluderar s\xE5rbarhetsskanning och patchhantering."
+      es:
+        name: "Gesti\xF3n de vulnerabilidades t\xE9cnicas"
+        description: "Este control identifica, eval\xFAa y corrige las vulnerabilidades\
+          \ t\xE9cnicas con prontitud para minimizar los riesgos de seguridad. Las\
+          \ medidas incluyen el an\xE1lisis de vulnerabilidades y la gesti\xF3n de\
+          \ parches."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.9
     ref_id: A.8.9
     name: Configuration management
@@ -1889,6 +2300,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent hantering\
           \ av systemkonfigurationer f\xF6r att uppr\xE4tth\xE5lla s\xE4kerhetsinst\xE4\
           llningar och f\xF6rhindra obeh\xF6riga \xE4ndringar."
+      es:
+        name: "Gesti\xF3n de la configuraci\xF3n"
+        description: "Este control garantiza una gesti\xF3n coherente de las configuraciones\
+          \ del sistema para mantener la configuraci\xF3n de seguridad y evitar cambios\
+          \ no autorizados."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.10
     ref_id: A.8.10
     name: Information deletion
@@ -1913,6 +2329,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att k\xE4nslig information\
           \ tas bort p\xE5 ett s\xE4kert s\xE4tt n\xE4r den inte l\xE4ngre beh\xF6\
           vs f\xF6r att f\xF6rhindra obeh\xF6rig \xE5terst\xE4llning eller exponering."
+      es:
+        name: "Eliminaci\xF3n de informaci\xF3n"
+        description: "Este control garantiza que la informaci\xF3n confidencial se\
+          \ elimine de forma segura cuando ya no sea necesaria para evitar la recuperaci\xF3\
+          n o exposici\xF3n no autorizada."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.11
     ref_id: A.8.11
     name: Data masking
@@ -1936,6 +2357,11 @@ objects:
         description: "Den h\xE4r kontrollen skyddar k\xE4nslig information under bearbetning\
           \ eller visning med hj\xE4lp av datamaskeringstekniker f\xF6r att d\xF6\
           lja data fr\xE5n obeh\xF6riga anv\xE4ndare."
+      es:
+        name: Enmascaramiento de datos
+        description: "Este control protege la informaci\xF3n confidencial durante\
+          \ el procesamiento o la visualizaci\xF3n mediante el uso de t\xE9cnicas\
+          \ de enmascaramiento de datos para ocultar los datos de usuarios no autorizados."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.12
     ref_id: A.8.12
     name: Data leakage prevention
@@ -1959,6 +2385,11 @@ objects:
         description: "Den h\xE4r kontrollen implementerar mekanismer f\xF6r att f\xF6\
           rhindra oavsiktlig exponering av k\xE4nsliga data via e-post, flyttbara\
           \ medier eller andra kanaler."
+      es:
+        name: "Prevenci\xF3n de fuga de datos"
+        description: "Este control implementa mecanismos para evitar la exposici\xF3\
+          n accidental de datos confidenciales a trav\xE9s de correo electr\xF3nico,\
+          \ medios extra\xEDbles u otros canales."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.13
     ref_id: A.8.13
     name: Information backup
@@ -1982,6 +2413,11 @@ objects:
         description: "Denna kontroll s\xE4kerst\xE4ller att kritisk information s\xE4\
           kerhetskopieras regelbundet och s\xE4kert f\xF6r att s\xE4kerst\xE4lla dess\
           \ tillg\xE4nglighet i h\xE4ndelse av incidenter eller katastrofer."
+      es:
+        name: "Copia de seguridad de la informaci\xF3n"
+        description: "Este control garantiza que la informaci\xF3n cr\xEDtica se respalde\
+          \ de forma regular y segura para garantizar su disponibilidad en caso de\
+          \ incidentes o desastres."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.14
     ref_id: A.8.14
     name: Redundancy of information processing facilities
@@ -2005,6 +2441,12 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att redundans \xE4\
           r inbyggd i bearbetningsanl\xE4ggningar f\xF6r att uppr\xE4tth\xE5lla tillg\xE4\
           nglighet och drift under systemfel eller n\xF6dsituationer."
+      es:
+        name: "Redundancia de las instalaciones de procesamiento de la informaci\xF3\
+          n"
+        description: "Este control garantiza que la redundancia est\xE9 integrada\
+          \ en las instalaciones de procesamiento para mantener la disponibilidad\
+          \ y las operaciones durante fallas o emergencias del sistema."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.15
     ref_id: A.8.15
     name: Logging
@@ -2027,6 +2469,11 @@ objects:
         description: "Den h\xE4r kontrollen m\xF6jligg\xF6r loggning av aktiviteter\
           \ i system f\xF6r att st\xF6dja \xF6vervakning, incidentidentifiering och\
           \ kriminaltekniska unders\xF6kningar."
+      es:
+        name: Registro
+        description: "Este control permite el registro de actividades dentro de los\
+          \ sistemas para respaldar el monitoreo, la detecci\xF3n de incidentes y\
+          \ las investigaciones forenses."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.16
     ref_id: A.8.16
     name: Monitoring activities
@@ -2049,6 +2496,10 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller kontinuerlig \xF6vervakning\
           \ av systemaktiviteter f\xF6r att identifiera, svara p\xE5 och minimera\
           \ s\xE4kerhetshot."
+      es:
+        name: Seguimiento de las actividades
+        description: "Este control garantiza la supervisi\xF3n continua de las actividades\
+          \ del sistema para detectar, responder y mitigar las amenazas de seguridad."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.17
     ref_id: A.8.17
     name: Clock synchronization
@@ -2071,6 +2522,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att systemklockorna\
           \ \xE4r synkroniserade f\xF6r att uppr\xE4tth\xE5lla korrekta och konsekventa\
           \ tidsst\xE4mplar f\xF6r loggar och andra kritiska processer."
+      es:
+        name: "Sincronizaci\xF3n de reloj"
+        description: "Este control garantiza que los relojes del sistema est\xE9n\
+          \ sincronizados para mantener marcas de tiempo precisas y coherentes para\
+          \ los registros y otros procesos cr\xEDticos."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.18
     ref_id: A.8.18
     name: Use of privileged utility programs
@@ -2093,6 +2549,10 @@ objects:
         description: "Den h\xE4r kontrollen begr\xE4nsar och \xF6vervakar anv\xE4\
           ndningen av privilegierade verktygsprogram f\xF6r att f\xF6rhindra missbruk\
           \ och obeh\xF6riga \xE5tg\xE4rder."
+      es:
+        name: Uso de programas de utilidad privilegiados
+        description: Este control restringe y supervisa el uso de programas de utilidad
+          con privilegios para evitar el uso indebido y las acciones no autorizadas.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.19
     ref_id: A.8.19
     name: Installation of software on operational systems
@@ -2116,6 +2576,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att programvaruinstallation\
           \ p\xE5 operativsystem hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att f\xF6\
           rhindra s\xE5rbarheter eller obeh\xF6riga \xE4ndringar."
+      es:
+        name: "Instalaci\xF3n de software en sistemas operativos"
+        description: "Este control garantiza que la instalaci\xF3n de software en\
+          \ los sistemas operativos se gestione de forma segura para evitar vulnerabilidades\
+          \ o cambios no autorizados."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.20
     ref_id: A.8.20
     name: Networks security
@@ -2141,6 +2606,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller n\xE4tverkss\xE4kerhet\
           \ genom brandv\xE4ggar, intr\xE5ngsidentifieringssystem och \xE5tkomstkontroller\
           \ f\xF6r att skydda mot obeh\xF6rig \xE5tkomst och attacker."
+      es:
+        name: Seguridad de las redes
+        description: "Este control garantiza la seguridad de la red a trav\xE9s de\
+          \ firewalls, sistemas de detecci\xF3n de intrusos y controles de acceso\
+          \ para proteger contra accesos y ataques no autorizados."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.21
     ref_id: A.8.21
     name: Security of network services
@@ -2163,6 +2633,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att n\xE4tverkstj\xE4\
           nster skyddas f\xF6r att uppr\xE4tth\xE5lla konfidentialitet, integritet\
           \ och tillg\xE4nglighet under anv\xE4ndning."
+      es:
+        name: Seguridad de los servicios de red
+        description: "Este control garantiza que los servicios de red est\xE9n protegidos\
+          \ para mantener la confidencialidad, la integridad y la disponibilidad durante\
+          \ el uso."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.22
     ref_id: A.8.22
     name: Segregation of networks
@@ -2185,6 +2660,10 @@ objects:
         description: "Den h\xE4r kontrollen implementerar n\xE4tverkssegregering f\xF6\
           r att begr\xE4nsa spridningen av hot och minimera effekten av potentiella\
           \ intr\xE5ng."
+      es:
+        name: "Segregaci\xF3n de redes"
+        description: "Este control implementa la segregaci\xF3n de la red para limitar\
+          \ la propagaci\xF3n de amenazas y minimizar el impacto de posibles infracciones."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.23
     ref_id: A.8.23
     name: Web filtering
@@ -2207,6 +2686,10 @@ objects:
         description: "Den h\xE4r kontrollen anv\xE4nder webbfiltreringsverktyg f\xF6\
           r att blockera obeh\xF6rigt eller skadligt inneh\xE5ll fr\xE5n att n\xE5\
           s via Internet."
+      es:
+        name: Filtrado web
+        description: "Este control usa herramientas de filtrado web para bloquear\
+          \ el acceso a contenido no autorizado o da\xF1ino a trav\xE9s de Internet."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.24
     ref_id: A.8.24
     name: Use of cryptography
@@ -2229,6 +2712,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att kryptografiska\
           \ tekniker till\xE4mpas f\xF6r att skydda datakonfidentialitet, integritet\
           \ och \xE4kthet."
+      es:
+        name: "Uso de la criptograf\xEDa"
+        description: "Este control garantiza que se apliquen t\xE9cnicas criptogr\xE1\
+          ficas para proteger la confidencialidad, integridad y autenticidad de los\
+          \ datos."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.25
     ref_id: A.8.25
     name: Secure development life cycle
@@ -2252,6 +2740,11 @@ objects:
         description: "Den h\xE4r kontrollen integrerar s\xE4kerhet i alla steg i utvecklingslivscykeln\
           \ f\xF6r att s\xE4kerst\xE4lla att system och program skapas p\xE5 ett s\xE4\
           kert s\xE4tt."
+      es:
+        name: Ciclo de vida de desarrollo seguro
+        description: Este control integra la seguridad en todas las etapas del ciclo
+          de vida del desarrollo para garantizar que los sistemas y las aplicaciones
+          se construyan de forma segura.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.26
     ref_id: A.8.26
     name: Application security requirements
@@ -2272,6 +2765,10 @@ objects:
         name: "S\xE4kerhetskrav f\xF6r program"
         description: "Den h\xE4r kontrollen definierar och till\xE4mpar s\xE4kerhetskrav\
           \ f\xF6r program f\xF6r att skydda mot s\xE4kerhetsrisker."
+      es:
+        name: Requisitos de seguridad de las aplicaciones
+        description: Este control define y aplica los requisitos de seguridad de las
+          aplicaciones para protegerse contra vulnerabilidades.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.27
     ref_id: A.8.27
     name: Secure system architecture and engineering principles
@@ -2295,6 +2792,10 @@ objects:
         name: "S\xE4ker systemarkitektur och tekniska principer"
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kra designprinciper\
           \ anv\xE4nds under utvecklingen av systemarkitekturer."
+      es:
+        name: "Arquitectura de sistemas seguros y principios de ingenier\xEDa"
+        description: "Este control garantiza que se adopten los principios de dise\xF1\
+          o seguro durante el desarrollo de las arquitecturas de sistemas."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.28
     ref_id: A.8.28
     name: Secure coding
@@ -2315,6 +2816,10 @@ objects:
         name: "S\xE4ker kodning"
         description: "Den h\xE4r kontrollen implementerar s\xE4kra kodningsmetoder\
           \ f\xF6r att minimera s\xE5rbarheter i utvecklad programvara."
+      es:
+        name: "Codificaci\xF3n segura"
+        description: "Este control implementa pr\xE1cticas de codificaci\xF3n seguras\
+          \ para minimizar las vulnerabilidades en el software desarrollado."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.29
     ref_id: A.8.29
     name: Security testing in development and acceptance
@@ -2337,6 +2842,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetstestning\
           \ utf\xF6rs under utvecklings- och godk\xE4nnandefaserna f\xF6r att identifiera\
           \ svagheter."
+      es:
+        name: "Pruebas de seguridad en desarrollo y aceptaci\xF3n"
+        description: "Este control garantiza que las pruebas de seguridad se lleven\
+          \ a cabo durante las fases de desarrollo y aceptaci\xF3n para identificar\
+          \ los puntos d\xE9biles."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.30
     ref_id: A.8.30
     name: Outsourced development
@@ -2359,6 +2869,10 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetsrisker\
           \ hanteras effektivt n\xE4r utvecklingen l\xE4ggs ut p\xE5 entreprenad till\
           \ tredjepartsleverant\xF6rer."
+      es:
+        name: Desarrollo externalizado
+        description: Este control garantiza que los riesgos de seguridad se gestionen
+          de forma eficaz cuando el desarrollo se externaliza a proveedores externos.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.31
     ref_id: A.8.31
     name: Separation of development, test and production environments
@@ -2385,6 +2899,11 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att utvecklings-, test-\
           \ och produktionsmilj\xF6er \xE4r \xE5tskilda f\xF6r att f\xF6rhindra oavsiktliga\
           \ interaktioner och obeh\xF6rig \xE5tkomst."
+      es:
+        name: "Separaci\xF3n de los entornos de desarrollo, prueba y producci\xF3n"
+        description: "Este control garantiza que los entornos de desarrollo, prueba\
+          \ y producci\xF3n est\xE9n segregados para evitar interacciones no deseadas\
+          \ y accesos no autorizados."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.32
     ref_id: A.8.32
     name: Change management
@@ -2407,6 +2926,10 @@ objects:
         description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att \xE4ndringar i\
           \ systemen hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att minimera risker\
           \ och uppr\xE4tth\xE5lla driftstabiliteten."
+      es:
+        name: "Gesti\xF3n del cambio"
+        description: Este control garantiza que los cambios en los sistemas se gestionen
+          de forma segura para minimizar los riesgos y mantener la estabilidad operativa.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.33
     ref_id: A.8.33
     name: Test information
@@ -2428,6 +2951,10 @@ objects:
         name: Information om provningen
         description: "Denna kontroll skyddar testdata f\xF6r att f\xF6rhindra exponering\
           \ av k\xE4nslig eller konfidentiell information under testprocesser."
+      es:
+        name: "Informaci\xF3n de la prueba"
+        description: "Este control protege los datos de prueba para evitar la exposici\xF3\
+          n de informaci\xF3n sensible o confidencial durante los procesos de prueba."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.34
     ref_id: A.8.34
     name: Protection of information systems during audit testing
@@ -2461,6 +2988,14 @@ objects:
           ckage eller st\xF6rningar. \xC5tg\xE4rderna omfattar anv\xE4ndning av icke-produktionsmilj\xF6\
           er, \xE5tkomstbegr\xE4nsningar och konfidentialitetsavtal f\xF6r att uppr\xE4\
           tth\xE5lla systemets s\xE4kerhet och integritet."
+      es:
+        name: "Protecci\xF3n de los sistemas de informaci\xF3n durante las pruebas\
+          \ de auditor\xEDa"
+        description: "Este control garantiza que los sistemas y los datos est\xE9\
+          n protegidos durante las auditor\xEDas al evitar el acceso no autorizado,\
+          \ la fuga de datos o las interrupciones. Las medidas incluyen el uso de\
+          \ entornos que no son de producci\xF3n, restricciones de acceso y acuerdos\
+          \ de confidencialidad para mantener la seguridad y la integridad del sistema."
   framework:
     urn: urn:intuitem:risk:framework:iso27001-2022
     ref_id: ISO/IEC 27001:2022
@@ -2482,6 +3017,11 @@ objects:
         name: Internationell standard ISO/IEC 27001:2022
         description: "Informationss\xE4kerhet, cybers\xE4kerhet och integritetsskydd\
           \ \u2013 Ledningssystem f\xF6r informationss\xE4kerhet \u2013 Krav"
+      es:
+        name: Norma internacional ISO/IEC 27001:2022
+        description: "Seguridad de la informaci\xF3n, ciberseguridad y protecci\xF3\
+          n de la privacidad \u2014 Sistemas de gesti\xF3n de la seguridad de la informaci\xF3\
+          n \u2014 Requisitos"
     implementation_groups_definition:
     - ref_id: Clauses
       name: Clauses
@@ -2504,6 +3044,8 @@ objects:
           name: "Ustanoven\xED"
         sv:
           name: Klausuler
+        es:
+          name: "Cl\xE1usulas"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
       depth: 2
@@ -2519,6 +3061,8 @@ objects:
           name: Kontext organizace
         sv:
           name: Organisationens sammanhang
+        es:
+          name: "Contexto de la organizaci\xF3n"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
       assessable: true
       depth: 3
@@ -2550,6 +3094,12 @@ objects:
           description: "Identifiera interna och externa faktorer som p\xE5verkar organisationens\
             \ f\xF6rm\xE5ga att uppn\xE5 informationss\xE4kerhetsm\xE5l, vilket s\xE4\
             kerst\xE4ller att ISMS \xE4r anpassat till sitt sammanhang."
+        es:
+          name: "Comprender la organizaci\xF3n y su contexto"
+          description: "Identificar los factores internos y externos que influyen\
+            \ en la capacidad de la organizaci\xF3n para alcanzar los objetivos de\
+            \ seguridad de la informaci\xF3n, asegurando que el SGSI est\xE9 alineado\
+            \ con su contexto."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
       depth: 3
@@ -2580,6 +3130,11 @@ objects:
           description: "Analysera behoven och f\xF6rv\xE4ntningarna hos intresserade\
             \ parter f\xF6r att inf\xF6rliva dem i ISMS och ta itu med relevanta informationss\xE4\
             kerhetskrav."
+        es:
+          name: Comprender las necesidades y expectativas de las partes interesadas
+          description: "Analizar las necesidades y expectativas de las partes interesadas\
+            \ para incorporarlas al SGSI y abordar los requisitos de seguridad de\
+            \ la informaci\xF3n pertinentes."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
       depth: 3
@@ -2611,6 +3166,12 @@ objects:
           description: "Definiera omfattningen av ISMS genom att ta h\xE4nsyn till\
             \ interna och externa faktorer, intressenternas behov och beroenden inom\
             \ den operativa milj\xF6n."
+        es:
+          name: "Determinaci\xF3n del alcance del sistema de gesti\xF3n de la seguridad\
+            \ de la informaci\xF3n"
+          description: Defina el alcance del SGSI teniendo en cuenta los factores
+            internos y externos, las necesidades de las partes interesadas y las dependencias
+            dentro del entorno operativo.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
       depth: 3
@@ -2639,6 +3200,11 @@ objects:
           description: "Bygg, k\xF6r och f\xF6rb\xE4ttra kontinuerligt ett ISMS f\xF6\
             r att effektivt hantera informationss\xE4kerhetsrisker och uppfylla organisatoriska\
             \ m\xE5l."
+        es:
+          name: "Sistema de gesti\xF3n de seguridad de la informaci\xF3n"
+          description: "Cree, ejecute y mejore continuamente un SGSI para gestionar\
+            \ eficazmente los riesgos de seguridad de la informaci\xF3n y cumplir\
+            \ los objetivos de la organizaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
       depth: 2
@@ -2654,6 +3220,8 @@ objects:
           name: "V\u016Fd\u010D\xED role"
         sv:
           name: Ledarskap
+        es:
+          name: Liderazgo
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       assessable: true
       depth: 3
@@ -2690,6 +3258,11 @@ objects:
           description: "Visa ledarskap och engagemang genom att st\xF6dja ISMS, anpassa\
             \ det till organisatoriska m\xE5l, f\xF6rdela resurser, fr\xE4mja en s\xE4\
             kerhetskultur och driva st\xE4ndiga f\xF6rb\xE4ttringar."
+        es:
+          name: Liderazgo y compromiso
+          description: "Demostrar liderazgo y compromiso apoyando el SGSI, aline\xE1\
+            ndolo con los objetivos de la organizaci\xF3n, asignando recursos, promoviendo\
+            \ una cultura de seguridad e impulsando la mejora continua."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       assessable: true
       depth: 3
@@ -2723,6 +3296,12 @@ objects:
             \ organisationens m\xE5l och strategiska inriktning, som beskriver \xE5\
             taganden om efterlevnad, st\xE4ndiga f\xF6rb\xE4ttringar och fr\xE4mjande\
             \ av informationss\xE4kerhet."
+        es:
+          name: "Pol\xEDtica"
+          description: "Establecer una pol\xEDtica de seguridad de la informaci\xF3\
+            n alineada con los objetivos y la direcci\xF3n estrat\xE9gica de la organizaci\xF3\
+            n, delineando los compromisos de cumplimiento, mejora continua y promoci\xF3\
+            n de la seguridad de la informaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
       depth: 3
@@ -2753,6 +3332,11 @@ objects:
           description: "Definiera, tilldela och kommunicera roller, ansvar och befogenheter\
             \ f\xF6r att s\xE4kerst\xE4lla en effektiv implementering och drift av\
             \ ISMS, med ansvarsskyldighet anpassad till organisatoriska m\xE5l."
+        es:
+          name: "Funciones, responsabilidades y autoridades de la organizaci\xF3n"
+          description: "Definir, asignar y comunicar roles, responsabilidades y autoridades\
+            \ para garantizar la implementaci\xF3n y operaci\xF3n efectivas del SGSI,\
+            \ con una rendici\xF3n de cuentas alineada con los objetivos organizacionales."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
       depth: 2
@@ -2768,6 +3352,8 @@ objects:
           name: "Pl\xE1nov\xE1n\xED"
         sv:
           name: Planering
+        es:
+          name: "Planificaci\xF3n"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       assessable: false
       depth: 3
@@ -2783,6 +3369,8 @@ objects:
           name: "\u010Cinnosti zam\u011B\u0159en\xE9 na rizika a p\xEDle\u017Eitosti"
         sv:
           name: "\xC5tg\xE4rder f\xF6r att hantera risker och m\xF6jligheter"
+        es:
+          name: Acciones para abordar los riesgos y las oportunidades
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
       assessable: true
       depth: 4
@@ -2818,6 +3406,12 @@ objects:
             kerhetsrisker och m\xF6jligheter, med h\xE4nsyn till interna och externa\
             \ faktorer, intressenternas behov och till\xE4mpliga krav f\xF6r att s\xE4\
             kerst\xE4lla att ISMS uppn\xE5r sina m\xE5l."
+        es:
+          name: General
+          description: "Establecer un proceso para identificar los riesgos y oportunidades\
+            \ de seguridad de la informaci\xF3n, teniendo en cuenta los factores internos\
+            \ y externos, las necesidades de las partes interesadas y los requisitos\
+            \ aplicables para garantizar que el SGSI logre sus objetivos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
       assessable: true
       depth: 4
@@ -2854,6 +3448,13 @@ objects:
             \ f\xF6r att utv\xE4rdera hot mot konfidentialitet, integritet och tillg\xE4\
             nglighet, vilket s\xE4kerst\xE4ller konsekventa och tillf\xF6rlitliga\
             \ resultat."
+        es:
+          name: "Requisito de evaluaci\xF3n de riesgos de seguridad de la informaci\xF3\
+            n"
+          description: "Establecer un proceso para evaluar los riesgos de seguridad\
+            \ de la informaci\xF3n a intervalos planificados, utilizando criterios\
+            \ definidos para evaluar las amenazas a la confidencialidad, integridad\
+            \ y disponibilidad, garantizando resultados consistentes y confiables."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
       assessable: true
       depth: 4
@@ -2889,6 +3490,12 @@ objects:
             kerhetsrisker genom att v\xE4lja l\xE4mpliga kontroller, s\xE4kerst\xE4\
             lla anpassning till kriterier f\xF6r riskacceptans och dokumentera dem\
             \ i en riskhanteringsplan."
+        es:
+          name: "Tratamiento de riesgos de seguridad de la informaci\xF3n"
+          description: "Defina un proceso para abordar los riesgos de seguridad de\
+            \ la informaci\xF3n identificados mediante la selecci\xF3n de controles\
+            \ adecuados, asegurando la alineaci\xF3n con los criterios de aceptaci\xF3\
+            n de riesgos y document\xE1ndolos en un plan de tratamiento de riesgos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
       assessable: true
       depth: 3
@@ -2928,6 +3535,13 @@ objects:
             \ med ISMS och strategiska m\xE5l, och planera \xE5tg\xE4rder som beskriver\
             \ ansvar, resurser, tidslinjer och utv\xE4rderingsmetoder f\xF6r att uppn\xE5\
             \ dem."
+        es:
+          name: "Objetivos de seguridad de la informaci\xF3n y planificaci\xF3n para\
+            \ alcanzarlos"
+          description: "Establezca objetivos medibles de seguridad de la informaci\xF3\
+            n alineados con el SGSI y las metas estrat\xE9gicas, y planifique acciones\
+            \ que detallen las responsabilidades, los recursos, los plazos y los m\xE9\
+            todos de evaluaci\xF3n para alcanzarlos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
       assessable: true
       depth: 3
@@ -2959,6 +3573,12 @@ objects:
           description: "Planera \xE4ndringar i ISMS systematiskt f\xF6r att s\xE4\
             kerst\xE4lla anpassning till informationss\xE4kerhetskrav, s\xF6ml\xF6\
             s integration i befintliga processer och effektiv riskhantering."
+        es:
+          name: "Planificaci\xF3n de cambios"
+          description: "Planifique los cambios en el SGSI de forma sistem\xE1tica\
+            \ para garantizar la alineaci\xF3n con los requisitos de seguridad de\
+            \ la informaci\xF3n, la integraci\xF3n perfecta en los procesos existentes\
+            \ y la gesti\xF3n eficaz de los riesgos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
       depth: 2
@@ -2974,6 +3594,8 @@ objects:
           name: Podpora
         sv:
           name: "St\xF6d"
+        es:
+          name: Apoyo
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
       assessable: true
       depth: 3
@@ -3006,6 +3628,11 @@ objects:
             \ bygga, driva och kontinuerligt f\xF6rb\xE4ttra ISMS, vilket s\xE4kerst\xE4\
             ller att det fungerar effektivt och \xE4r i linje med organisationens\
             \ m\xE5l."
+        es:
+          name: Recursos
+          description: "Proporcionar los recursos necesarios para construir, ejecutar\
+            \ y mejorar continuamente el SGSI, asegurando su funcionamiento eficaz\
+            \ y su alineaci\xF3n con los objetivos de la organizaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
       assessable: true
       depth: 3
@@ -3039,6 +3666,11 @@ objects:
             dv\xE4ndiga kompetensen genom l\xE4mplig utbildning, tr\xE4ning eller\
             \ erfarenhet f\xF6r att kunna fullg\xF6ra sina uppgifter p\xE5 ett effektivt\
             \ s\xE4tt."
+        es:
+          name: Competencia
+          description: "Asegurar que el personal involucrado en el SGSI posea la competencia\
+            \ necesaria a trav\xE9s de la educaci\xF3n, capacitaci\xF3n o experiencia\
+            \ apropiada para cumplir con sus responsabilidades de manera efectiva."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
       assessable: true
       depth: 3
@@ -3071,6 +3703,11 @@ objects:
           description: "Fr\xE4mja medvetenhet bland relevant personal om ISMS, deras\
             \ roll i informationss\xE4kerhet och vikten av att f\xF6lja s\xE4kerhetspolicyer\
             \ och krav."
+        es:
+          name: Conciencia
+          description: "Promover la concienciaci\xF3n entre el personal pertinente\
+            \ sobre el SGSI, su papel en la seguridad de la informaci\xF3n y la importancia\
+            \ del cumplimiento de las pol\xEDticas y requisitos de seguridad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
       assessable: true
       depth: 3
@@ -3100,6 +3737,11 @@ objects:
           description: "Etablera effektiva interna och externa kommunikationsprocesser\
             \ f\xF6r att s\xE4kerst\xE4lla ett snabbt och l\xE4mpligt utbyte av information\
             \ som \xE4r relevant f\xF6r ISMS och dess m\xE5l."
+        es:
+          name: "Comunicaci\xF3n"
+          description: "Establecer procesos efectivos de comunicaci\xF3n interna y\
+            \ externa, asegurando el intercambio oportuno y adecuado de informaci\xF3\
+            n relevante para el SGSI y sus objetivos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: false
       depth: 3
@@ -3115,6 +3757,8 @@ objects:
           name: "Dokumentovan\xE9 informace"
         sv:
           name: Dokumenterad information
+        es:
+          name: "Informaci\xF3n documentada"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
       assessable: true
       depth: 4
@@ -3143,6 +3787,11 @@ objects:
           description: "Dokumentera ISMS efter behov f\xF6r att s\xE4kerst\xE4lla\
             \ effektiv planering, drift, kontroll av processer och anpassning till\
             \ organisationens krav."
+        es:
+          name: General
+          description: "Documente el SGSI seg\xFAn sea necesario para garantizar una\
+            \ planificaci\xF3n, operaci\xF3n y control efectivos de los procesos y\
+            \ la alineaci\xF3n con los requisitos de la organizaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
       depth: 4
@@ -3170,6 +3819,11 @@ objects:
           name: Skapa och uppdatera dokumenterad information
           description: "Se till att ISMS-dokumentationen skapas, uppdateras och kontrolleras\
             \ p\xE5 l\xE4mpligt s\xE4tt, inklusive korrekt godk\xE4nnande och versionshantering."
+        es:
+          name: "Creaci\xF3n y actualizaci\xF3n de informaci\xF3n documentada"
+          description: "Aseg\xFArese de que la documentaci\xF3n del SGSI se cree,\
+            \ actualice y controle adecuadamente, incluida la aprobaci\xF3n adecuada\
+            \ y la gesti\xF3n de versiones."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
       depth: 4
@@ -3199,6 +3853,11 @@ objects:
           description: "G\xF6r ISMS-dokumentationen tillg\xE4nglig och anv\xE4ndbar\
             \ f\xF6r dem som beh\xF6ver den, samtidigt som den skyddas fr\xE5n obeh\xF6\
             rig \xE5tkomst eller f\xF6rlust."
+        es:
+          name: "Control de la informaci\xF3n documentada"
+          description: "Haga que la documentaci\xF3n del SGSI sea accesible y utilizable\
+            \ para quienes la necesiten, al tiempo que la protege contra el acceso\
+            \ no autorizado o la p\xE9rdida."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
       depth: 2
@@ -3214,6 +3873,8 @@ objects:
           name: Provoz
         sv:
           name: Verksamhet
+        es:
+          name: Operaciones
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
       assessable: true
       depth: 3
@@ -3243,6 +3904,11 @@ objects:
           description: "Planera och kontrollera ISMS-processer, s\xE4kerst\xE4lla\
             \ \xF6verensst\xE4mmelse med krav och g\xF6ra n\xF6dv\xE4ndiga justeringar\
             \ f\xF6r att hantera risker och m\xF6jligheter."
+        es:
+          name: "Planificaci\xF3n y control operativo"
+          description: Planificar y controlar los procesos del SGSI, asegurando la
+            coherencia con los requisitos y realizando los ajustes necesarios para
+            hacer frente a los riesgos y oportunidades.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
       assessable: true
       depth: 3
@@ -3273,6 +3939,11 @@ objects:
           description: "Implementera riskbed\xF6mningsprocessen f\xF6r att identifiera,\
             \ utv\xE4rdera och prioritera informationss\xE4kerhetsrisker enligt definitionen\
             \ i ISMS-ramverket."
+        es:
+          name: "Evaluaci\xF3n de riesgos de seguridad de la informaci\xF3n"
+          description: "Implementar el proceso de evaluaci\xF3n de riesgos para identificar,\
+            \ evaluar y priorizar los riesgos de seguridad de la informaci\xF3n tal\
+            \ como se definen en el marco del SGSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
       assessable: true
       depth: 3
@@ -3306,6 +3977,12 @@ objects:
             \ implementera l\xE4mpliga kontroller f\xF6r att hantera identifierade\
             \ risker, vilket s\xE4kerst\xE4ller anpassning till organisationens kriterier\
             \ f\xF6r riskacceptans."
+        es:
+          name: "Tratamiento de riesgos de seguridad de la informaci\xF3n"
+          description: "Aplicar el proceso de tratamiento de riesgos seleccionando\
+            \ e implementando controles adecuados para abordar los riesgos identificados,\
+            \ asegurando la alineaci\xF3n con los criterios de aceptaci\xF3n de riesgos\
+            \ de la organizaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
       assessable: false
       depth: 2
@@ -3321,6 +3998,8 @@ objects:
           name: "Hodnocen\xED v\xFDkonnosti"
         sv:
           name: "Utv\xE4rdering av prestanda"
+        es:
+          name: "Evaluaci\xF3n del desempe\xF1o"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
       assessable: true
       depth: 3
@@ -3351,6 +4030,11 @@ objects:
           description: "\xD6vervaka, m\xE4ta, analysera och utv\xE4rdera ISMS:s prestanda\
             \ och effektivitet med hj\xE4lp av l\xE4mpliga metoder i linje med organisationens\
             \ m\xE5l."
+        es:
+          name: "Seguimiento, medici\xF3n, an\xE1lisis, evaluaci\xF3n"
+          description: "Monitorear, medir, analizar y evaluar el desempe\xF1o y la\
+            \ efectividad del SGSI utilizando m\xE9todos apropiados alineados con\
+            \ los objetivos de la organizaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       assessable: false
       depth: 3
@@ -3366,6 +4050,8 @@ objects:
           name: "Intern\xED audit"
         sv:
           name: Internrevision
+        es:
+          name: "Auditor\xEDa interna"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       assessable: true
       depth: 4
@@ -3396,6 +4082,11 @@ objects:
           description: "Genomf\xF6r interna revisioner med planerade intervall f\xF6\
             r att s\xE4kerst\xE4lla att ISMS uppfyller kraven i ISO/IEC 27001 och\
             \ implementeras och underh\xE5lls effektivt."
+        es:
+          name: General
+          description: "Llevar a cabo auditor\xEDas internas a intervalos planificados\
+            \ para garantizar que el SGSI cumple con los requisitos de la norma ISO/IEC\
+            \ 27001 y se implementa y mantiene de manera efectiva."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
       depth: 4
@@ -3426,6 +4117,11 @@ objects:
           description: "Planera och genomf\xF6ra interna revisioner, inklusive att\
             \ definiera kriterier, omfattning, metoder och ansvar, och rapportera\
             \ resultaten till relevant ledning."
+        es:
+          name: "Programa de auditor\xEDa interna"
+          description: "Planificar y realizar auditor\xEDas internas, incluida la\
+            \ definici\xF3n de criterios, alcance, m\xE9todos y responsabilidades,\
+            \ e informar de los resultados a la direcci\xF3n pertinente."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: false
       depth: 3
@@ -3441,6 +4137,8 @@ objects:
           name: "P\u0159ezkoum\xE1n\xED veden\xEDm"
         sv:
           name: "Ledningens genomg\xE5ng"
+        es:
+          name: "Revisi\xF3n por la direcci\xF3n"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
       assessable: true
       depth: 4
@@ -3469,6 +4167,11 @@ objects:
           description: "Granska ISMS med j\xE4mna mellanrum f\xF6r att s\xE4kerst\xE4\
             lla dess l\xE4mplighet, tillr\xE4cklighet och effektivitet n\xE4r det\
             \ g\xE4ller att uppn\xE5 organisatoriska m\xE5l."
+        es:
+          name: General
+          description: "Revisar peri\xF3dicamente el SGSI para garantizar su idoneidad,\
+            \ adecuaci\xF3n y eficacia en el logro de los objetivos de la organizaci\xF3\
+            n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
       depth: 4
@@ -3498,6 +4201,11 @@ objects:
           description: "Inkludera indata som revisionsresultat, ISMS-prestanda, riskstatus,\
             \ f\xF6rb\xE4ttringsm\xF6jligheter och n\xF6dv\xE4ndiga \xE4ndringar i\
             \ ledningens granskning."
+        es:
+          name: "Insumos para el examen de la gesti\xF3n"
+          description: "Incluya insumos como los resultados de la auditor\xEDa, el\
+            \ rendimiento del SGSI, el estado del riesgo, las oportunidades de mejora\
+            \ y los cambios necesarios en la revisi\xF3n por la direcci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
       depth: 4
@@ -3525,6 +4233,11 @@ objects:
           name: "Resultat av ledningens genomg\xE5ng"
           description: "Dokumentera resultaten av ledningens genomg\xE5ngar, inklusive\
             \ beslut om f\xF6rb\xE4ttringar, ISMS-f\xF6r\xE4ndringar och resurskrav."
+        es:
+          name: "Resultados de la revisi\xF3n por la direcci\xF3n"
+          description: "Documentar los resultados de las revisiones de gesti\xF3n,\
+            \ incluidas las decisiones sobre mejoras, cambios en el SGSI y requisitos\
+            \ de recursos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
       depth: 2
@@ -3540,6 +4253,8 @@ objects:
           name: "Zlep\u0161ov\xE1n\xED"
         sv:
           name: "F\xF6rb\xE4ttring"
+        es:
+          name: Mejora
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       assessable: true
       depth: 3
@@ -3568,6 +4283,11 @@ objects:
           description: "Identifiera och agera p\xE5 m\xF6jligheter till st\xE4ndiga\
             \ f\xF6rb\xE4ttringar f\xF6r att f\xF6rb\xE4ttra ISMS:s effektivitet och\
             \ anpassning till organisatoriska m\xE5l."
+        es:
+          name: Mejora continua
+          description: "Identificar y actuar sobre las oportunidades de mejora continua\
+            \ para mejorar la eficacia del SGSI y su alineaci\xF3n con los objetivos\
+            \ de la organizaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
       depth: 3
@@ -3603,6 +4323,11 @@ objects:
           description: "Ta itu med avvikelser genom att vidta korrigerande \xE5tg\xE4\
             rder, identifiera grundorsaker och implementera \xE5tg\xE4rder f\xF6r\
             \ att f\xF6rhindra upprepning samtidigt som du dokumenterar processen."
+        es:
+          name: No conformidad y acciones correctivas
+          description: "Aborde las no conformidades tomando medidas correctivas, identificando\
+            \ las causas ra\xEDz e implementando medidas para evitar que se repitan\
+            \ mientras documenta el proceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
@@ -3617,6 +4342,8 @@ objects:
           name: "Prohl\xE1\u0161en\xED o aplikovatelnosti"
         sv:
           name: "Uttalande om till\xE4mplighet"
+        es:
+          name: "Declaraci\xF3n de aplicabilidad"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
       depth: 2
@@ -3632,6 +4359,8 @@ objects:
           name: "Organiza\u010Dn\xED kontroly"
         sv:
           name: Organisatoriska kontroller
+        es:
+          name: Controles organizativos
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
       assessable: true
       depth: 3
@@ -3666,6 +4395,13 @@ objects:
             kerhetsprinciper som \xE4r anpassade till organisationens m\xE5l. \xC5\
             tg\xE4rderna omfattar att definiera omfattning, s\xE4tta upp m\xE5l och\
             \ s\xE4kerst\xE4lla anpassning till efterlevnadskraven."
+        es:
+          name: "Pol\xEDticas de seguridad de la informaci\xF3n"
+          description: "Este control establece y mantiene pol\xEDticas de seguridad\
+            \ de la informaci\xF3n alineadas con los objetivos de la organizaci\xF3\
+            n. Las medidas incluyen la definici\xF3n del alcance, el establecimiento\
+            \ de objetivos y la garant\xEDa de la alineaci\xF3n con los requisitos\
+            \ de cumplimiento."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
       assessable: true
       depth: 3
@@ -3702,6 +4438,13 @@ objects:
             \ ansvar f\xF6r informationss\xE4kerhet f\xF6r att s\xE4kerst\xE4lla ansvarsskyldighet.\
             \ \xC5tg\xE4rderna omfattar tydlig dokumentation av ansvarsomr\xE5den,\
             \ periodiska granskningar och verkst\xE4llighetsmekanismer."
+        es:
+          name: "Funciones y responsabilidades de la seguridad de la informaci\xF3\
+            n"
+          description: "Este control define y asigna roles y responsabilidades para\
+            \ la seguridad de la informaci\xF3n para garantizar la responsabilidad.\
+            \ Las medidas incluyen documentaci\xF3n clara de las responsabilidades,\
+            \ revisiones peri\xF3dicas y mecanismos de cumplimiento."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
       assessable: true
       depth: 3
@@ -3734,6 +4477,12 @@ objects:
             \ f\xF6r att minska risken f\xF6r fel, bedr\xE4gerier och obeh\xF6rig\
             \ \xE5tkomst. \xC5tg\xE4rderna omfattar rollseparation, \xE5tkomstbegr\xE4\
             nsningar och regelbundna granskningar."
+        es:
+          name: "Segregaci\xF3n de funciones"
+          description: "Este control garantiza la segregaci\xF3n de funciones para\
+            \ reducir el riesgo de errores, fraudes y accesos no autorizados. Las\
+            \ medidas incluyen la separaci\xF3n de roles, restricciones de acceso\
+            \ y auditor\xEDas peri\xF3dicas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
       assessable: true
       depth: 3
@@ -3768,6 +4517,12 @@ objects:
             r informationss\xE4kerhet \xE4r tydligt definierat och implementerat.\
             \ \xC5tg\xE4rderna inkluderar att s\xE4tta upp m\xE5l, f\xF6rdela resurser\
             \ och \xF6vervaka efterlevnaden."
+        es:
+          name: "Responsabilidades de gesti\xF3n"
+          description: "Este control garantiza que las responsabilidades de gesti\xF3\
+            n para la seguridad de la informaci\xF3n est\xE9n claramente definidas\
+            \ e implementadas. Las medidas incluyen el establecimiento de objetivos,\
+            \ la asignaci\xF3n de recursos y la supervisi\xF3n del cumplimiento."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
       assessable: true
       depth: 3
@@ -3803,6 +4558,13 @@ objects:
             \ relevanta myndigheter under informationss\xE4kerhetsincidenter. \xC5\
             tg\xE4rderna inkluderar att uppr\xE4tta kontaktprotokoll, uppr\xE4tth\xE5\
             lla uppdaterade kontaktlistor och tilldela ansvar."
+        es:
+          name: Contacto con las autoridades
+          description: "Este control garantiza la comunicaci\xF3n oportuna con las\
+            \ autoridades pertinentes durante los incidentes de seguridad de la informaci\xF3\
+            n. Las medidas incluyen el establecimiento de protocolos de contacto,\
+            \ el mantenimiento de listas de contactos actualizadas y la asignaci\xF3\
+            n de responsabilidades."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       assessable: true
       depth: 3
@@ -3834,6 +4596,12 @@ objects:
           description: "Denna kontroll underl\xE4ttar kontakt med s\xE4rskilda intressegrupper\
             \ f\xF6r att h\xE5lla sig informerade om s\xE4kerhetstrender och praxis.\
             \ \xC5tg\xE4rderna inkluderar deltagande i forum, medlemskap och samarbetsinitiativ."
+        es:
+          name: "Contacto con grupos de inter\xE9s especial"
+          description: "Este control facilita el contacto con grupos de inter\xE9\
+            s especial para mantenerse informado sobre las tendencias y pr\xE1cticas\
+            \ de seguridad. Las medidas incluyen la participaci\xF3n en foros, membres\xED\
+            as e iniciativas de colaboraci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
       assessable: true
       depth: 3
@@ -3868,6 +4636,12 @@ objects:
             \ utvecklas och underh\xE5lls f\xF6r att identifiera och minimera s\xE4\
             kerhetsrisker. \xC5tg\xE4rderna omfattar \xF6vervakning av hotfl\xF6den,\
             \ analys av trender och delning av anv\xE4ndbara insikter."
+        es:
+          name: Inteligencia de amenazas
+          description: "Este control garantiza que la inteligencia de amenazas se\
+            \ desarrolle y mantenga para identificar y mitigar los riesgos de seguridad.\
+            \ Las medidas incluyen la supervisi\xF3n de fuentes de amenazas, el an\xE1\
+            lisis de tendencias y el intercambio de informaci\xF3n procesable."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
       assessable: true
       depth: 3
@@ -3902,6 +4676,12 @@ objects:
             \ i projektledningsmetoderna. \xC5tg\xE4rderna omfattar riskbed\xF6mningar,\
             \ efterlevnadsgranskningar och s\xE4kerhetskontroller under projektets\
             \ livscykel."
+        es:
+          name: "Seguridad de la informaci\xF3n en la gesti\xF3n de proyectos"
+          description: "Este control incorpora la seguridad de la informaci\xF3n en\
+            \ las pr\xE1cticas de gesti\xF3n de proyectos. Las medidas incluyen evaluaciones\
+            \ de riesgos, revisiones de cumplimiento y puntos de control de seguridad\
+            \ durante los ciclos de vida del proyecto."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       assessable: true
       depth: 3
@@ -3933,6 +4713,12 @@ objects:
             \ av information och tillh\xF6rande tillg\xE5ngar uppr\xE4tth\xE5lls.\
             \ \xC5tg\xE4rderna inkluderar tillg\xE5ngssp\xE5rning, periodiska revisioner\
             \ och klassificering efter k\xE4nslighet."
+        es:
+          name: "Inventario de informaci\xF3n y otros activos asociados"
+          description: "Este control garantiza que se mantenga un inventario preciso\
+            \ de la informaci\xF3n y los activos asociados. Las medidas incluyen el\
+            \ seguimiento de activos, auditor\xEDas peri\xF3dicas y clasificaci\xF3\
+            n por sensibilidad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
       assessable: true
       depth: 3
@@ -3969,6 +4755,12 @@ objects:
             \ av information och associerade tillg\xE5ngar f\xF6r att s\xE4kerst\xE4\
             lla korrekt hantering. \xC5tg\xE4rderna omfattar dokumenterade policyer,\
             \ anv\xE4ndarutbildning och tvingande mekanismer."
+        es:
+          name: "Uso aceptable de la informaci\xF3n y otros activos asociados"
+          description: "Este control define el uso aceptable de la informaci\xF3n\
+            \ y los activos asociados para garantizar un manejo adecuado. Las medidas\
+            \ incluyen pol\xEDticas documentadas, capacitaci\xF3n de usuarios y mecanismos\
+            \ de cumplimiento."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       assessable: true
       depth: 3
@@ -4002,6 +4794,12 @@ objects:
             mning av tillg\xE5ngar n\xE4r anst\xE4llda eller entrepren\xF6rer l\xE4\
             mnar eller byter roll. \xC5tg\xE4rderna omfattar checklistor, tillg\xE5\
             ngssp\xE5rning och inaktiveringsprotokoll."
+        es:
+          name: "Devoluci\xF3n de activos"
+          description: "Este control garantiza la devoluci\xF3n segura de los activos\
+            \ cuando los empleados o contratistas se van o cambian de funci\xF3n.\
+            \ Las medidas incluyen listas de comprobaci\xF3n, seguimiento de activos\
+            \ y protocolos de desmantelamiento."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
       assessable: true
       depth: 3
@@ -4036,6 +4834,12 @@ objects:
             \ baserat p\xE5 dess k\xE4nslighet och v\xE4rde f\xF6r att s\xE4kerst\xE4\
             lla l\xE4mpligt skydd. M\xE5tten omfattar klassificeringsscheman, \xE5\
             tkomstbegr\xE4nsningar och riktlinjer f\xF6r etikettering."
+        es:
+          name: "Clasificaci\xF3n de la informaci\xF3n"
+          description: "Este control garantiza que la informaci\xF3n se clasifique\
+            \ en funci\xF3n de su sensibilidad y valor para garantizar una protecci\xF3\
+            n adecuada. Las medidas incluyen esquemas de clasificaci\xF3n, restricciones\
+            \ de acceso y pautas de etiquetado."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
       assessable: true
       depth: 3
@@ -4068,6 +4872,11 @@ objects:
             rkning av information f\xF6r att \xE5terspegla dess klassificerings- och\
             \ hanteringskrav. \xC5tg\xE4rderna inkluderar standardiserade mallar,\
             \ utbildning och revisioner."
+        es:
+          name: "Etiquetado de la informaci\xF3n"
+          description: "Este control garantiza un etiquetado coherente de la informaci\xF3\
+            n para reflejar sus requisitos de clasificaci\xF3n y manejo. Las medidas\
+            \ incluyen plantillas estandarizadas, capacitaci\xF3n y auditor\xEDas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
       assessable: true
       depth: 3
@@ -4100,6 +4909,11 @@ objects:
             verf\xF6ring av information mellan system eller organisationer. \xC5tg\xE4\
             rderna inkluderar kryptering, \xE5tkomstkontroller och s\xE4kra \xF6verf\xF6\
             ringsprotokoll."
+        es:
+          name: "Transferencia de informaci\xF3n"
+          description: "Este control establece procesos seguros para la transferencia\
+            \ de informaci\xF3n entre sistemas u organizaciones. Las medidas incluyen\
+            \ cifrado, controles de acceso y protocolos de transferencia segura."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       assessable: true
       depth: 3
@@ -4134,6 +4948,12 @@ objects:
             \ f\xF6r \xE5tkomstkontroll f\xF6r att begr\xE4nsa \xE5tkomsten till beh\xF6\
             riga personer. \xC5tg\xE4rderna omfattar rollbaserad \xE5tkomst, multifaktorautentisering\
             \ och periodiska granskningar."
+        es:
+          name: Control de acceso
+          description: "Este control implementa y mantiene mecanismos de control de\
+            \ acceso para restringir el acceso a las personas autorizadas. Las medidas\
+            \ incluyen el acceso basado en roles, la autenticaci\xF3n multifactor\
+            \ y las revisiones peri\xF3dicas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       assessable: true
       depth: 3
@@ -4168,6 +4988,12 @@ objects:
             \ p\xE5 ett s\xE4kert s\xE4tt f\xF6r att garantera korrekt och tillf\xF6\
             rlitlig \xE5tkomst till system. \xC5tg\xE4rderna omfattar identitetsverifiering,\
             \ livscykelhantering och \xE5tkomstetablering."
+        es:
+          name: "Gesti\xF3n de identidades"
+          description: "Este control garantiza que las identidades se gestionen de\
+            \ forma segura para garantizar un acceso preciso y fiable a los sistemas.\
+            \ Las medidas incluyen la verificaci\xF3n de identidad, la gesti\xF3n\
+            \ del ciclo de vida y el aprovisionamiento de acceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       assessable: true
       depth: 3
@@ -4200,6 +5026,12 @@ objects:
             \ exempel l\xF6senord, f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst.\
             \ \xC5tg\xE4rderna omfattar kryptering, s\xE4ker lagring och periodiska\
             \ l\xF6senordsuppdateringar."
+        es:
+          name: "Informaci\xF3n de autenticaci\xF3n"
+          description: "Este control protege la informaci\xF3n de autenticaci\xF3\
+            n, como las contrase\xF1as, para evitar el acceso no autorizado. Las medidas\
+            \ incluyen cifrado, almacenamiento seguro y actualizaciones peri\xF3dicas\
+            \ de contrase\xF1as."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       assessable: true
       depth: 3
@@ -4234,6 +5066,12 @@ objects:
             ttigheter regelbundet granskas och hanteras s\xE5 att de \xF6verensst\xE4\
             mmer med roller och ansvarsomr\xE5den. \xC5tg\xE4rderna omfattar periodiska\
             \ granskningar, \xE5terkallande av \xE5tkomst och automatiserad \xE5tkomsthantering."
+        es:
+          name: Derechos de acceso
+          description: "Este control garantiza que los derechos de acceso se revisen\
+            \ y administren peri\xF3dicamente para alinearlos con las funciones y\
+            \ responsabilidades. Las medidas incluyen auditor\xEDas peri\xF3dicas,\
+            \ revocaci\xF3n de acceso y gesti\xF3n automatizada del acceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
       assessable: true
       depth: 3
@@ -4266,6 +5104,12 @@ objects:
             \ \xE4r inb\xE4ddad i leverant\xF6rsrelationer och processer. \xC5tg\xE4\
             rderna omfattar due diligence, s\xE4kerhetsgranskningar och l\xF6pande\
             \ \xF6vervakning."
+        es:
+          name: "Seguridad de la informaci\xF3n en las relaciones con los proveedores"
+          description: "Este control garantiza que la seguridad de la informaci\xF3\
+            n est\xE9 integrada en las relaciones y los procesos con los proveedores.\
+            \ Las medidas incluyen la diligencia debida, las revisiones de seguridad\
+            \ y el monitoreo continuo."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
       assessable: true
       depth: 3
@@ -4300,6 +5144,13 @@ objects:
             \ leverant\xF6rsavtal. \xC5tg\xE4rderna omfattar uttryckliga kontraktsklausuler,\
             \ efterlevnadsrevisioner och definierade p\xE5f\xF6ljder f\xF6r \xF6vertr\xE4\
             delser."
+        es:
+          name: "Abordar la seguridad de la informaci\xF3n en los acuerdos con los\
+            \ proveedores"
+          description: "Este control aborda los requisitos de seguridad de la informaci\xF3\
+            n dentro de los acuerdos con los proveedores. Las medidas incluyen cl\xE1\
+            usulas contractuales expl\xEDcitas, auditor\xEDas de cumplimiento y sanciones\
+            \ definidas por infracciones."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       assessable: true
       depth: 3
@@ -4335,6 +5186,13 @@ objects:
             rs\xF6rjningskedjan f\xF6r att s\xE4kerst\xE4lla s\xE4kerheten f\xF6r\
             \ tj\xE4nster och komponenter. \xC5tg\xE4rderna inkluderar riskbed\xF6\
             mningar, leverant\xF6rsutv\xE4rderingar och protokoll f\xF6r incidenthantering."
+        es:
+          name: "Gesti\xF3n de la seguridad de la informaci\xF3n en la cadena de suministro\
+            \ de las TIC"
+          description: "Este control gestiona los riesgos de seguridad de la informaci\xF3\
+            n en la cadena de suministro de TIC para garantizar la seguridad de los\
+            \ servicios y componentes. Las medidas incluyen evaluaciones de riesgos,\
+            \ evaluaciones de proveedores y protocolos de respuesta a incidentes."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       assessable: true
       depth: 3
@@ -4372,6 +5230,13 @@ objects:
             nster \xF6vervakas, granskas och justeras f\xF6r att uppr\xE4tth\xE5lla\
             \ informationss\xE4kerheten. \xC5tg\xE4rderna omfattar serviceavtal, periodiska\
             \ granskningar och kontraktsuppdateringar."
+        es:
+          name: Supervisar, revisar y gestionar el cambio de los servicios de los
+            proveedores
+          description: "Este control garantiza que los servicios de los proveedores\
+            \ se supervisen, revisen y ajusten para mantener la seguridad de la informaci\xF3\
+            n. Las medidas incluyen acuerdos de nivel de servicio, revisiones peri\xF3\
+            dicas y actualizaciones de contratos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
       assessable: true
       depth: 3
@@ -4407,6 +5272,11 @@ objects:
             ndning av molntj\xE4nster genom att hantera associerade risker. \xC5tg\xE4\
             rderna omfattar datakryptering, \xE5tkomstkontroller och granskningar\
             \ av providerefterlevnad."
+        es:
+          name: "Seguridad de la informaci\xF3n para el uso de servicios en la nube"
+          description: Este control garantiza el uso seguro de los servicios en la
+            nube al abordar los riesgos asociados. Las medidas incluyen cifrado de
+            datos, controles de acceso y revisiones de cumplimiento de proveedores.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
       assessable: true
       depth: 3
@@ -4441,6 +5311,13 @@ objects:
             rberedelse f\xF6r hantering av informationss\xE4kerhetsincidenter. \xC5\
             tg\xE4rderna omfattar incidenthanteringsplaner, tr\xE4nings\xF6vningar\
             \ och kommunikationsprotokoll."
+        es:
+          name: "Planificaci\xF3n y preparaci\xF3n de la gesti\xF3n de incidentes\
+            \ de seguridad de la informaci\xF3n"
+          description: "Este control garantiza una planificaci\xF3n y preparaci\xF3\
+            n adecuadas para la gesti\xF3n de incidentes de seguridad de la informaci\xF3\
+            n. Las medidas incluyen planes de respuesta a incidentes, ejercicios de\
+            \ capacitaci\xF3n y protocolos de comunicaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
       assessable: true
       depth: 3
@@ -4477,6 +5354,13 @@ objects:
             \ och besluta om \xE5tg\xE4rder relaterade till informationss\xE4kerhetsh\xE4\
             ndelser. \xC5tg\xE4rderna omfattar grundorsaksanalys, riskbed\xF6mning\
             \ och \xE5tg\xE4rdsplaner."
+        es:
+          name: "Evaluaci\xF3n y decisi\xF3n sobre eventos de seguridad de la informaci\xF3\
+            n"
+          description: "Este control establece procesos para evaluar y decidir sobre\
+            \ acciones relacionadas con eventos de seguridad de la informaci\xF3n.\
+            \ Las medidas incluyen an\xE1lisis de causa ra\xEDz, evaluaci\xF3n de\
+            \ riesgos y planes de mitigaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
       assessable: true
       depth: 3
@@ -4510,6 +5394,12 @@ objects:
             \ p\xE5 informationss\xE4kerhetsincidenter f\xF6r att minimera p\xE5verkan\
             \ och \xE5terh\xE4mta sig snabbt. \xC5tg\xE4rderna omfattar incidentrapportering,\
             \ eskaleringsprotokoll och strategier f\xF6r att begr\xE4nsa spridningen."
+        es:
+          name: "Respuesta a incidentes de seguridad de la informaci\xF3n"
+          description: "Este control garantiza una respuesta eficaz a los incidentes\
+            \ de seguridad de la informaci\xF3n para minimizar el impacto y recuperarse\
+            \ r\xE1pidamente. Las medidas incluyen informes de incidentes, protocolos\
+            \ de escalada y estrategias de contenci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       assessable: true
       depth: 3
@@ -4545,6 +5435,12 @@ objects:
             \ informationss\xE4kerhetsincidenter dokumenteras och implementeras f\xF6\
             r att f\xF6rb\xE4ttra processerna. \xC5tg\xE4rderna omfattar granskningar\
             \ efter incidenter, handlingsplaner och policyuppdateringar."
+        es:
+          name: "Aprender de los incidentes de seguridad de la informaci\xF3n"
+          description: "Este control garantiza que las lecciones aprendidas de los\
+            \ incidentes de seguridad de la informaci\xF3n se documenten e implementen\
+            \ para mejorar los procesos. Las medidas incluyen revisiones posteriores\
+            \ al incidente, planes de acci\xF3n y actualizaciones de pol\xEDticas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
       assessable: true
       depth: 3
@@ -4579,6 +5475,12 @@ objects:
             \ in och bevaras under s\xE4kerhetsincidenter f\xF6r att st\xF6dja unders\xF6\
             kningar. \xC5tg\xE4rderna omfattar sp\xE5rbarhetsprocedurer, s\xE4ker\
             \ lagring och \xE5tkomstkontroller."
+        es:
+          name: "Recopilaci\xF3n de pruebas"
+          description: Este control garantiza que las pruebas se recopilen y conserven
+            durante los incidentes de seguridad para respaldar las investigaciones.
+            Las medidas incluyen procedimientos de cadena de custodia, almacenamiento
+            seguro y controles de acceso.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
       assessable: true
       depth: 3
@@ -4612,6 +5514,12 @@ objects:
             \ uppr\xE4tth\xE5lls under st\xF6rningar f\xF6r att garantera kontinuiteten\
             \ i verksamheten. \xC5tg\xE4rderna omfattar beredskapsplaner, s\xE4kerhetskopieringssystem\
             \ och mekanismer f\xF6r redundans."
+        es:
+          name: "Seguridad de la informaci\xF3n durante la interrupci\xF3n"
+          description: "Este control asegura que la seguridad de la informaci\xF3\
+            n se mantenga durante las interrupciones para garantizar la continuidad\
+            \ de las operaciones. Las medidas incluyen planes de contingencia, sistemas\
+            \ de respaldo y mecanismos de conmutaci\xF3n por error."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
       assessable: true
       depth: 3
@@ -4647,6 +5555,12 @@ objects:
             r aff\xE4rskontinuitet f\xF6r att minimera driftstopp under st\xF6rningar.\
             \ \xC5tg\xE4rderna omfattar testning av \xE5terst\xE4llningsplaner, redundanta\
             \ system och haveriberedskapsplatser."
+        es:
+          name: "Preparaci\xF3n de las TIC para la continuidad de las actividades"
+          description: "Este control garantiza la preparaci\xF3n de las TIC para la\
+            \ continuidad del negocio a fin de minimizar el tiempo de inactividad\
+            \ durante las interrupciones. Las medidas incluyen probar planes de recuperaci\xF3\
+            n, sistemas redundantes y sitios de recuperaci\xF3n ante desastres."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       assessable: true
       depth: 3
@@ -4679,6 +5593,12 @@ objects:
           description: "Denna kontroll s\xE4kerst\xE4ller efterlevnad av juridiska,\
             \ lagstadgade, regulatoriska och avtalsenliga informationss\xE4kerhetskrav.\
             \ \xC5tg\xE4rderna omfattar policygranskningar, revisioner och bevisdokumentation."
+        es:
+          name: Requisitos legales, estatutarios, reglamentarios y contractuales
+          description: "Este control garantiza el cumplimiento de los requisitos legales,\
+            \ estatutarios, reglamentarios y contractuales de seguridad de la informaci\xF3\
+            n. Las medidas incluyen revisiones de pol\xEDticas, auditor\xEDas y documentaci\xF3\
+            n de evidencias."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
       assessable: true
       depth: 3
@@ -4712,6 +5632,12 @@ objects:
             \ skyddas genom l\xE4mpliga informationss\xE4kerhets\xE5tg\xE4rder. \xC5\
             tg\xE4rderna omfattar \xE5tkomstbegr\xE4nsningar, kryptering och juridiska\
             \ avtal."
+        es:
+          name: Derechos de propiedad intelectual
+          description: "Este control garantiza que los derechos de propiedad intelectual\
+            \ est\xE9n protegidos a trav\xE9s de medidas de seguridad de la informaci\xF3\
+            n adecuadas. Las medidas incluyen restricciones de acceso, cifrado y acuerdos\
+            \ legales."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
       assessable: true
       depth: 3
@@ -4746,6 +5672,12 @@ objects:
             \ lagras och skyddas p\xE5 ett s\xE4kert s\xE4tt f\xF6r att f\xF6rhindra\
             \ f\xF6rlust eller obeh\xF6rig \xE5tkomst. \xC5tg\xE4rderna omfattar kvarh\xE5\
             llningsprinciper, s\xE4ker lagring och \xE5tkomstkontroller."
+        es:
+          name: "Protecci\xF3n de registros"
+          description: "Este control garantiza que los registros se almacenen y protejan\
+            \ de forma segura para evitar p\xE9rdidas o accesos no autorizados. Las\
+            \ medidas incluyen pol\xEDticas de retenci\xF3n, almacenamiento seguro\
+            \ y controles de acceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
       assessable: true
       depth: 3
@@ -4780,6 +5712,12 @@ objects:
             ller s\xE4ker hantering av personligt identifierbar information (PII).\
             \ \xC5tg\xE4rderna omfattar anonymisering, kryptering och efterlevnad\
             \ av integritetslagar."
+        es:
+          name: "Privacidad y protecci\xF3n de la informaci\xF3n personal"
+          description: "Este control protege la privacidad y garantiza el manejo seguro\
+            \ de la informaci\xF3n de identificaci\xF3n personal (PII). Las medidas\
+            \ incluyen la anonimizaci\xF3n, el cifrado y el cumplimiento de las leyes\
+            \ de privacidad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
       assessable: true
       depth: 3
@@ -4813,6 +5751,12 @@ objects:
             \ informationss\xE4kerhet f\xF6r att utv\xE4rdera effektivitet och efterlevnad.\
             \ \xC5tg\xE4rderna omfattar bland annat externa revisioner, riskbed\xF6\
             mningar och uppf\xF6ljnings\xE5tg\xE4rder."
+        es:
+          name: "Revisi\xF3n independiente de la seguridad de la informaci\xF3n"
+          description: "Este control garantiza revisiones independientes de la seguridad\
+            \ de la informaci\xF3n para evaluar la eficacia y el cumplimiento. Las\
+            \ medidas incluyen auditor\xEDas externas, evaluaciones de riesgos y acciones\
+            \ de seguimiento."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
       assessable: true
       depth: 3
@@ -4848,6 +5792,13 @@ objects:
             \ policyer, regler och standarder f\xF6r informationss\xE4kerhet. \xC5\
             tg\xE4rderna omfattar regelbunden utbildning, policygranskningar och verkst\xE4\
             llighetsmekanismer."
+        es:
+          name: "Cumplimiento de pol\xEDticas, reglas y est\xE1ndares de seguridad\
+            \ de la informaci\xF3n"
+          description: "Este control garantiza el cumplimiento de todas las pol\xED\
+            ticas, reglas y est\xE1ndares de seguridad de la informaci\xF3n. Las medidas\
+            \ incluyen capacitaci\xF3n peri\xF3dica, revisiones de pol\xEDticas y\
+            \ mecanismos de aplicaci\xF3n."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       assessable: true
       depth: 3
@@ -4880,6 +5831,12 @@ objects:
             \ driftsprocedurer f\xF6r att s\xE4kerst\xE4lla konsekvens i s\xE4kerhetsrutinerna.\
             \ \xC5tg\xE4rderna omfattar bland annat processdokumentation, versionskontroll\
             \ och tillg\xE4nglighet."
+        es:
+          name: Procedimientos operativos documentados
+          description: "Este control desarrolla y mantiene procedimientos operativos\
+            \ documentados para garantizar la coherencia en las pr\xE1cticas de seguridad.\
+            \ Las medidas incluyen la documentaci\xF3n del proceso, el control de\
+            \ versiones y la accesibilidad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       assessable: false
       depth: 2
@@ -4895,6 +5852,8 @@ objects:
           name: "Kontroly v oblasti lidsk\xFDch zdroj\u016F"
         sv:
           name: "Kontroller f\xF6r personer"
+        es:
+          name: Controles de personas
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       assessable: true
       depth: 3
@@ -4931,6 +5890,13 @@ objects:
             \ f\xF6r att verifiera kandidaternas l\xE4mplighet f\xF6re anst\xE4llning.\
             \ \xC5tg\xE4rderna inkluderar bakgrundskontroller, identitetsverifiering\
             \ och bed\xF6mning av kvalifikationer f\xF6r att minska s\xE4kerhetsriskerna."
+        es:
+          name: Chequeo
+          description: "Este control asegura la implementaci\xF3n de procesos de selecci\xF3\
+            n para verificar la idoneidad de los candidatos antes de su contrataci\xF3\
+            n. Las medidas incluyen verificaciones de antecedentes, verificaci\xF3\
+            n de identidad y evaluaci\xF3n de calificaciones para reducir los riesgos\
+            \ de seguridad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       assessable: true
       depth: 3
@@ -4965,6 +5931,12 @@ objects:
             \ ing\xE5r ett ansvar f\xF6r informationss\xE4kerhet. \xC5tg\xE4rderna\
             \ omfattar uttryckliga klausuler om konfidentialitet, efterlevnad av policyer\
             \ och konsekvenser vid \xF6vertr\xE4delser."
+        es:
+          name: "T\xE9rminos y condiciones de empleo"
+          description: "Este control garantiza que los t\xE9rminos y condiciones de\
+            \ empleo incluyan responsabilidades en materia de seguridad de la informaci\xF3\
+            n. Las medidas incluyen cl\xE1usulas expl\xEDcitas sobre confidencialidad,\
+            \ cumplimiento de pol\xEDticas y consecuencias por infracciones."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
       assessable: true
       depth: 3
@@ -5000,6 +5972,13 @@ objects:
             \ regelbunden medvetenhet, utbildning och tr\xE4ning om informationss\xE4\
             kerhet. \xC5tg\xE4rderna inkluderar schemalagda utbildningssessioner,\
             \ e-learningprogram och simulerade phishing-\xF6vningar."
+        es:
+          name: "Concienciaci\xF3n, educaci\xF3n y formaci\xF3n en materia de seguridad\
+            \ de la informaci\xF3n"
+          description: "Este control garantiza que los empleados reciban concienciaci\xF3\
+            n, educaci\xF3n y formaci\xF3n peri\xF3dicas sobre la seguridad de la\
+            \ informaci\xF3n. Las medidas incluyen sesiones de capacitaci\xF3n programadas,\
+            \ programas de aprendizaje electr\xF3nico y ejercicios simulados de phishing."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       assessable: true
       depth: 3
@@ -5034,6 +6013,12 @@ objects:
             r att hantera brott mot informationss\xE4kerhetspolicyer. \xC5tg\xE4rderna\
             \ omfattar tydliga riktlinjer, eskaleringsf\xF6rfaranden och konsekvent\
             \ till\xE4mpning f\xF6r att uppr\xE4tth\xE5lla ansvarsskyldigheten."
+        es:
+          name: Proceso disciplinario
+          description: "Este control establece un proceso disciplinario para abordar\
+            \ las violaciones de las pol\xEDticas de seguridad de la informaci\xF3\
+            n. Las medidas incluyen directrices claras, procedimientos de escalamiento\
+            \ y una aplicaci\xF3n coherente para mantener la rendici\xF3n de cuentas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       assessable: true
       depth: 3
@@ -5073,6 +6058,13 @@ objects:
             \ upps\xE4gning eller roll\xE4ndringar. \xC5tg\xE4rderna omfattar \xE5\
             terkallande av \xE5tkomstr\xE4ttigheter, insamling av organisationstillg\xE5\
             ngar och genomf\xF6rande av avslutningsintervjuer."
+        es:
+          name: "Responsabilidades despu\xE9s de la terminaci\xF3n o cambio de empleo"
+          description: "Este control garantiza que las responsabilidades relacionadas\
+            \ con la seguridad de la informaci\xF3n se definan y apliquen despu\xE9\
+            s de la terminaci\xF3n o los cambios de rol. Las medidas incluyen la revocaci\xF3\
+            n de los derechos de acceso, la recopilaci\xF3n de activos de la organizaci\xF3\
+            n y la realizaci\xF3n de entrevistas de salida."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       assessable: true
       depth: 3
@@ -5109,6 +6101,12 @@ objects:
             \ undertecknade avtal vid anst\xE4llningens b\xF6rjan, periodiska p\xE5\
             minnelser och verkst\xE4llighet av r\xE4ttsliga \xE5tg\xE4rder vid \xF6\
             vertr\xE4delser."
+        es:
+          name: "Acuerdos de confidencialidad o no divulgaci\xF3n"
+          description: "Este control implementa acuerdos de confidencialidad o no\
+            \ divulgaci\xF3n para proteger la informaci\xF3n confidencial. Las medidas\
+            \ incluyen acuerdos firmados al comienzo del empleo, recordatorios peri\xF3\
+            dicos y la aplicaci\xF3n de acciones legales en caso de violaciones."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
       assessable: true
       depth: 3
@@ -5145,6 +6143,13 @@ objects:
             \ omfattar s\xE4ker \xE5tkomst till f\xF6retagssystem, obligatorisk anv\xE4\
             ndning av VPN:er och policyer f\xF6r hantering av k\xE4nsliga data p\xE5\
             \ distans."
+        es:
+          name: Trabajo a distancia
+          description: "Este control garantiza la gesti\xF3n segura de los riesgos\
+            \ de seguridad de la informaci\xF3n durante el trabajo a distancia. Las\
+            \ medidas incluyen acceso seguro a los sistemas corporativos, uso obligatorio\
+            \ de VPN y pol\xEDticas para el manejo de datos confidenciales de forma\
+            \ remota."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
       assessable: true
       depth: 3
@@ -5182,6 +6187,13 @@ objects:
             \ omfattar kanaler f\xF6r incidentrapportering, kampanjer f\xF6r att \xF6\
             ka medvetenheten och uppf\xF6ljningsf\xF6rfaranden f\xF6r att unders\xF6\
             ka och hantera rapporterade h\xE4ndelser."
+        es:
+          name: "Informes de eventos de seguridad de la informaci\xF3n"
+          description: "Este control garantiza que los empleados puedan informar r\xE1\
+            pidamente sobre los eventos de seguridad de la informaci\xF3n. Las medidas\
+            \ incluyen canales de notificaci\xF3n de incidentes, campa\xF1as de concienciaci\xF3\
+            n y procedimientos de seguimiento para investigar y abordar los eventos\
+            \ denunciados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       assessable: false
       depth: 2
@@ -5197,6 +6209,8 @@ objects:
           name: "Kontroly v oblasti fyzick\xE9 bezpe\u010Dnosti"
         sv:
           name: Fysiska kontroller
+        es:
+          name: "Controles f\xEDsicos"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
       assessable: true
       depth: 3
@@ -5234,6 +6248,12 @@ objects:
             \ \xC5tg\xE4rderna inkluderar barri\xE4rer, \xE5tkomstkontroller och \xF6\
             vervakningssystem f\xF6r att s\xE4kerst\xE4lla att endast beh\xF6riga\
             \ personer kan komma in."
+        es:
+          name: "Per\xEDmetros de seguridad f\xEDsica"
+          description: "Este control establece per\xEDmetros de seguridad f\xEDsica\
+            \ para proteger las \xE1reas cr\xEDticas del acceso no autorizado. Las\
+            \ medidas incluyen barreras, controles de acceso y sistemas de monitoreo\
+            \ para garantizar que solo las personas autorizadas puedan ingresar."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
       assessable: true
       depth: 3
@@ -5267,6 +6287,12 @@ objects:
             \ kontrolleras och \xF6vervakas f\xF6r att f\xF6rhindra obeh\xF6rig \xE5\
             tkomst. \xC5tg\xE4rderna inkluderar passerkortssystem, s\xE4kerhetspersonal\
             \ och bes\xF6ksloggar."
+        es:
+          name: "Entrada f\xEDsica"
+          description: "Este control garantiza que los puntos de entrada f\xEDsicos\
+            \ est\xE9n controlados y supervisados para evitar el acceso no autorizado.\
+            \ Las medidas incluyen sistemas de credenciales, personal de seguridad\
+            \ y registros de visitantes."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
       assessable: true
       depth: 3
@@ -5300,6 +6326,12 @@ objects:
             \ anl\xE4ggningar \xE4r skyddade f\xF6r att skydda information och resurser.\
             \ \xC5tg\xE4rderna inkluderar l\xE5sta d\xF6rrar, begr\xE4nsade omr\xE5\
             den och \xF6vervakningssystem."
+        es:
+          name: Asegurar oficinas, salas e instalaciones
+          description: "Este control garantiza que las oficinas, las salas y las instalaciones\
+            \ est\xE9n protegidas para proteger la informaci\xF3n y los recursos.\
+            \ Las medidas incluyen puertas cerradas, \xE1reas restringidas y sistemas\
+            \ de vigilancia."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
       assessable: true
       depth: 3
@@ -5331,6 +6363,12 @@ objects:
           description: "Den h\xE4r kontrollen implementerar fysisk s\xE4kerhets\xF6\
             vervakning f\xF6r att identifiera och reagera snabbt p\xE5 hot. \xC5tg\xE4\
             rderna inkluderar CCTV-system, r\xF6relsedetektorer och varningar i realtid."
+        es:
+          name: "Supervisi\xF3n de la seguridad f\xEDsica"
+          description: "Este control implementa la supervisi\xF3n de la seguridad\
+            \ f\xEDsica para detectar y responder r\xE1pidamente a las amenazas. Las\
+            \ medidas incluyen sistemas de CCTV, detectores de movimiento y alertas\
+            \ en tiempo real."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       assessable: true
       depth: 3
@@ -5363,6 +6401,12 @@ objects:
             \ och milj\xF6m\xE4ssiga hot. \xC5tg\xE4rderna omfattar brandsl\xE4ckningssystem,\
             \ temperaturkontroller och barri\xE4rer f\xF6r att f\xF6rhindra \xF6versv\xE4\
             mningar."
+        es:
+          name: "Protecci\xF3n contra amenazas f\xEDsicas y ambientales"
+          description: "Este control protege los sistemas y recursos de las amenazas\
+            \ f\xEDsicas y ambientales. Las medidas incluyen sistemas de extinci\xF3\
+            n de incendios, controles de temperatura y barreras de prevenci\xF3n de\
+            \ inundaciones."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       assessable: true
       depth: 3
@@ -5397,6 +6441,11 @@ objects:
             den hanteras f\xF6r att endast till\xE5ta auktoriserad \xE5tkomst. \xC5\
             tg\xE4rderna omfattar bland annat system f\xF6r \xE5tkomstkontroll, eskorter\
             \ av bes\xF6kare och aktivitets\xF6vervakning."
+        es:
+          name: "Trabajar en \xE1reas seguras"
+          description: "Este control garantiza que las \xE1reas seguras se administren\
+            \ para permitir solo el acceso autorizado. Las medidas incluyen sistemas\
+            \ de control de acceso, escolta de visitantes y monitoreo de actividad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
       assessable: true
       depth: 3
@@ -5432,6 +6481,12 @@ objects:
             \ och genomskinlig sk\xE4rm. \xC5tg\xE4rderna inkluderar att l\xE5sa k\xE4\
             nsliga dokument och automatiskt l\xE5sa sk\xE4rmar n\xE4r de inte anv\xE4\
             nds."
+        es:
+          name: Escritorio claro y pantalla clara
+          description: "Este control garantiza que la informaci\xF3n confidencial\
+            \ no quede expuesta mediante la adopci\xF3n de pol\xEDticas de escritorio\
+            \ y pantalla claras. Las medidas incluyen el bloqueo de documentos confidenciales\
+            \ y el bloqueo autom\xE1tico de pantallas cuando no est\xE1n en uso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
       assessable: true
       depth: 3
@@ -5466,6 +6521,12 @@ objects:
             \ och skyddad f\xF6r att f\xF6rhindra obeh\xF6rig \xE5tkomst eller skada.\
             \ \xC5tg\xE4rderna inkluderar s\xE4ker montering, l\xE5sta sk\xE5p och\
             \ omr\xE5den med begr\xE4nsad \xE5tkomst."
+        es:
+          name: "Ubicaci\xF3n y protecci\xF3n de equipos"
+          description: "Este control garantiza que el equipo est\xE9 posicionado y\
+            \ protegido para evitar el acceso no autorizado o el da\xF1o. Las medidas\
+            \ incluyen montaje seguro, gabinetes cerrados con llave y \xE1reas de\
+            \ acceso restringido."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
       assessable: true
       depth: 3
@@ -5499,6 +6560,12 @@ objects:
             \ som anv\xE4nds eller lagras utanf\xF6r lokalerna skyddas f\xF6r att\
             \ uppr\xE4tth\xE5lla konfidentialitet och integritet. \xC5tg\xE4rderna\
             \ omfattar kryptering, s\xE4ker transport och \xE5tkomstsp\xE5rning."
+        es:
+          name: Seguridad de los activos fuera de las instalaciones
+          description: "Este control garantiza que los activos utilizados o almacenados\
+            \ fuera de las instalaciones est\xE9n protegidos para mantener la confidencialidad\
+            \ y la integridad. Las medidas incluyen cifrado, transporte seguro y seguimiento\
+            \ de acceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
       assessable: true
       depth: 3
@@ -5529,6 +6596,11 @@ objects:
           description: "Den h\xE4r kontrollen skyddar lagringsmedia f\xF6r att f\xF6\
             rhindra obeh\xF6rig \xE5tkomst eller manipulering. \xC5tg\xE4rderna omfattar\
             \ s\xE4ker lagring, kryptering och \xE5tkomstbegr\xE4nsningar."
+        es:
+          name: Medios de almacenamiento
+          description: "Este control protege los medios de almacenamiento para evitar\
+            \ el acceso no autorizado o la manipulaci\xF3n. Las medidas incluyen almacenamiento\
+            \ seguro, cifrado y restricciones de acceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       assessable: true
       depth: 3
@@ -5562,6 +6634,12 @@ objects:
             \ till exempel kraft- och kylsystem, \xE4r tillf\xF6rlitliga och skyddade\
             \ mot avbrott. \xC5tg\xE4rderna omfattar bland annat redundanta system\
             \ och fysisk s\xE4kerhet."
+        es:
+          name: "Apoyo a los servicios p\xFAblicos"
+          description: "Este control garantiza que los servicios p\xFAblicos de apoyo,\
+            \ como los sistemas de energ\xEDa y refrigeraci\xF3n, sean fiables y est\xE9\
+            n protegidos contra interrupciones. Las medidas incluyen sistemas redundantes\
+            \ y seguridad f\xEDsica."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
       assessable: true
       depth: 3
@@ -5594,6 +6672,11 @@ objects:
             krade f\xF6r att f\xF6rhindra obeh\xF6rig avlyssning eller skada. \xC5\
             tg\xE4rderna inkluderar skyddsledningar, korrekt m\xE4rkning och s\xE4\
             ker dragning."
+        es:
+          name: Seguridad del cableado
+          description: "Este control garantiza que los cables est\xE9n asegurados\
+            \ para evitar intercepciones o da\xF1os no autorizados. Las medidas incluyen\
+            \ conductos de protecci\xF3n, etiquetado adecuado y enrutamiento seguro."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
       assessable: true
       depth: 3
@@ -5628,6 +6711,12 @@ objects:
             lls f\xF6r att garantera korrekt funktion och f\xF6rhindra fel. \xC5tg\xE4\
             rderna inkluderar regelbunden service, s\xE4kra underh\xE5llsrutiner och\
             \ beh\xF6rig personal\xE5tkomst."
+        es:
+          name: Mantenimiento de equipos
+          description: "Este control asegura el mantenimiento de los equipos para\
+            \ garantizar su correcto funcionamiento y evitar fallos. Las medidas incluyen\
+            \ servicio regular, pr\xE1cticas de mantenimiento seguras y acceso de\
+            \ personal autorizado."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
       assessable: true
       depth: 3
@@ -5662,6 +6751,12 @@ objects:
             \ \xE5teranv\xE4ndning av utrustning f\xF6r att skydda k\xE4nslig information.\
             \ \xC5tg\xE4rderna inkluderar datasanering, fysisk f\xF6rst\xF6relse och\
             \ certifierade bortskaffningsprocesser."
+        es:
+          name: "Eliminaci\xF3n o reutilizaci\xF3n segura de equipos"
+          description: "Este control garantiza la eliminaci\xF3n segura o la reutilizaci\xF3\
+            n de equipos para proteger la informaci\xF3n confidencial. Las medidas\
+            \ incluyen la desinfecci\xF3n de datos, la destrucci\xF3n f\xEDsica y\
+            \ los procesos de eliminaci\xF3n certificados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       assessable: false
       depth: 2
@@ -5677,6 +6772,8 @@ objects:
           name: "Technologick\xE9 kontroly"
         sv:
           name: Tekniska kontroller
+        es:
+          name: "Controles tecnol\xF3gicos"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
       assessable: true
       depth: 3
@@ -5711,6 +6808,13 @@ objects:
             \ som b\xE4rbara datorer, station\xE4ra datorer och mobila enheter genom\
             \ att implementera s\xE4kerhets\xE5tg\xE4rder som slutpunktsidentifiering,\
             \ kryptering och s\xE4kra konfigurationer f\xF6r att minimera risker."
+        es:
+          name: Dispositivos de punto final de usuario
+          description: "Este control garantiza la protecci\xF3n de los dispositivos\
+            \ de punto final, como equipos port\xE1tiles, equipos de escritorio y\
+            \ dispositivos m\xF3viles, mediante la implementaci\xF3n de medidas de\
+            \ seguridad como la detecci\xF3n de puntos de conexi\xF3n, el cifrado\
+            \ y las configuraciones seguras para minimizar los riesgos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
       assessable: true
       depth: 3
@@ -5747,6 +6851,13 @@ objects:
             \ f\xF6r att f\xF6rhindra missbruk och f\xF6rb\xE4ttra s\xE4kerheten.\
             \ \xC5tg\xE4rderna omfattar rollbaserade \xE5tkomstkontroller, periodiska\
             \ granskningar och strikt kontohantering."
+        es:
+          name: Derechos de acceso privilegiados
+          description: "Este control garantiza que los derechos de acceso privilegiado\
+            \ se concedan, administren y supervisen cuidadosamente para evitar el\
+            \ uso indebido y mejorar la seguridad. Las medidas incluyen controles\
+            \ de acceso basados en roles, revisiones peri\xF3dicas y una estricta\
+            \ gesti\xF3n de cuentas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
       assessable: true
       depth: 3
@@ -5780,6 +6891,12 @@ objects:
             nslig information baserat p\xE5 principer som du beh\xF6ver veta. \xC5\
             tg\xE4rderna omfattar anv\xE4ndarautentisering, rollbaserade beh\xF6righeter\
             \ och regelbundna \xE5tkomstgranskningar."
+        es:
+          name: "Restricci\xF3n de acceso a la informaci\xF3n"
+          description: "Este control restringe el acceso a la informaci\xF3n confidencial\
+            \ en funci\xF3n de los principios de necesidad de conocer. Las medidas\
+            \ incluyen la autenticaci\xF3n de usuarios, los permisos basados en roles\
+            \ y las revisiones peri\xF3dicas del acceso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
       assessable: true
       depth: 3
@@ -5813,6 +6930,12 @@ objects:
             \ genom att f\xF6rhindra obeh\xF6rig visning, \xE4ndring eller exponering.\
             \ \xC5tg\xE4rderna omfattar versionskontroll, s\xE4kra lagringsplatser\
             \ och begr\xE4nsad \xE5tkomst f\xF6r utvecklare."
+        es:
+          name: "Acceso al c\xF3digo fuente"
+          description: "Este control protege el acceso al c\xF3digo fuente al evitar\
+            \ la visualizaci\xF3n, modificaci\xF3n o exposici\xF3n no autorizadas.\
+            \ Las medidas incluyen control de versiones, repositorios seguros y acceso\
+            \ restringido para desarrolladores."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
       assessable: true
       depth: 3
@@ -5844,6 +6967,11 @@ objects:
           description: "Den h\xE4r kontrollen implementerar starka autentiseringsmekanismer,\
             \ till exempel multifaktorautentisering, f\xF6r att verifiera anv\xE4\
             ndaridentiteter och f\xF6rhindra obeh\xF6rig \xE5tkomst."
+        es:
+          name: "Autenticaci\xF3n segura"
+          description: "Este control implementa mecanismos de autenticaci\xF3n seguros,\
+            \ como la autenticaci\xF3n multifactor, para verificar las identidades\
+            \ de los usuarios y evitar el acceso no autorizado."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
       assessable: true
       depth: 3
@@ -5877,6 +7005,12 @@ objects:
             \ f\xF6r att ge tillr\xE4cklig prestanda och f\xF6rhindra st\xF6rningar.\
             \ \xC5tg\xE4rderna omfattar bland annat \xF6vervakning av resursanv\xE4\
             ndning och planering f\xF6r framtida behov."
+        es:
+          name: "Gesti\xF3n de la capacidad"
+          description: "Este control garantiza que la capacidad del sistema se gestione\
+            \ para proporcionar un rendimiento adecuado y evitar interrupciones. Las\
+            \ medidas incluyen el seguimiento del uso de los recursos y la planificaci\xF3\
+            n de las necesidades futuras."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
       assessable: true
       depth: 3
@@ -5907,6 +7041,11 @@ objects:
           description: "Den h\xE4r kontrollen distribuerar \xE5tg\xE4rder som antivirusprogram,\
             \ verktyg f\xF6r hotidentifiering och regelbundna uppdateringar f\xF6\
             r att skydda system fr\xE5n skadlig kod och skadliga attacker."
+        es:
+          name: "Protecci\xF3n contra malware"
+          description: "Este control implementa medidas como software antivirus, herramientas\
+            \ de detecci\xF3n de amenazas y actualizaciones peri\xF3dicas para proteger\
+            \ los sistemas contra malware y ataques maliciosos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
       assessable: true
       depth: 3
@@ -5938,6 +7077,12 @@ objects:
           description: "Den h\xE4r kontrollen identifierar, utv\xE4rderar och \xE5\
             tg\xE4rdar tekniska s\xE5rbarheter snabbt f\xF6r att minimera s\xE4kerhetsriskerna.\
             \ \xC5tg\xE4rderna inkluderar s\xE5rbarhetsskanning och patchhantering."
+        es:
+          name: "Gesti\xF3n de vulnerabilidades t\xE9cnicas"
+          description: "Este control identifica, eval\xFAa y corrige las vulnerabilidades\
+            \ t\xE9cnicas con prontitud para minimizar los riesgos de seguridad. Las\
+            \ medidas incluyen el an\xE1lisis de vulnerabilidades y la gesti\xF3n\
+            \ de parches."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       assessable: true
       depth: 3
@@ -5966,6 +7111,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller konsekvent hantering\
             \ av systemkonfigurationer f\xF6r att uppr\xE4tth\xE5lla s\xE4kerhetsinst\xE4\
             llningar och f\xF6rhindra obeh\xF6riga \xE4ndringar."
+        es:
+          name: "Gesti\xF3n de la configuraci\xF3n"
+          description: "Este control garantiza una gesti\xF3n coherente de las configuraciones\
+            \ del sistema para mantener la configuraci\xF3n de seguridad y evitar\
+            \ cambios no autorizados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
       assessable: true
       depth: 3
@@ -5996,6 +7146,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att k\xE4nslig information\
             \ tas bort p\xE5 ett s\xE4kert s\xE4tt n\xE4r den inte l\xE4ngre beh\xF6\
             vs f\xF6r att f\xF6rhindra obeh\xF6rig \xE5terst\xE4llning eller exponering."
+        es:
+          name: "Eliminaci\xF3n de informaci\xF3n"
+          description: "Este control garantiza que la informaci\xF3n confidencial\
+            \ se elimine de forma segura cuando ya no sea necesaria para evitar la\
+            \ recuperaci\xF3n o exposici\xF3n no autorizada."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
       assessable: true
       depth: 3
@@ -6027,6 +7182,11 @@ objects:
           description: "Den h\xE4r kontrollen skyddar k\xE4nslig information under\
             \ bearbetning eller visning med hj\xE4lp av datamaskeringstekniker f\xF6\
             r att d\xF6lja data fr\xE5n obeh\xF6riga anv\xE4ndare."
+        es:
+          name: Enmascaramiento de datos
+          description: "Este control protege la informaci\xF3n confidencial durante\
+            \ el procesamiento o la visualizaci\xF3n mediante el uso de t\xE9cnicas\
+            \ de enmascaramiento de datos para ocultar los datos de usuarios no autorizados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
       assessable: true
       depth: 3
@@ -6056,6 +7216,11 @@ objects:
           description: "Den h\xE4r kontrollen implementerar mekanismer f\xF6r att\
             \ f\xF6rhindra oavsiktlig exponering av k\xE4nsliga data via e-post, flyttbara\
             \ medier eller andra kanaler."
+        es:
+          name: "Prevenci\xF3n de fuga de datos"
+          description: "Este control implementa mecanismos para evitar la exposici\xF3\
+            n accidental de datos confidenciales a trav\xE9s de correo electr\xF3\
+            nico, medios extra\xEDbles u otros canales."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
       assessable: true
       depth: 3
@@ -6086,6 +7251,11 @@ objects:
           description: "Denna kontroll s\xE4kerst\xE4ller att kritisk information\
             \ s\xE4kerhetskopieras regelbundet och s\xE4kert f\xF6r att s\xE4kerst\xE4\
             lla dess tillg\xE4nglighet i h\xE4ndelse av incidenter eller katastrofer."
+        es:
+          name: "Copia de seguridad de la informaci\xF3n"
+          description: "Este control garantiza que la informaci\xF3n cr\xEDtica se\
+            \ respalde de forma regular y segura para garantizar su disponibilidad\
+            \ en caso de incidentes o desastres."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
       assessable: true
       depth: 3
@@ -6116,6 +7286,12 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att redundans \xE4\
             r inbyggd i bearbetningsanl\xE4ggningar f\xF6r att uppr\xE4tth\xE5lla\
             \ tillg\xE4nglighet och drift under systemfel eller n\xF6dsituationer."
+        es:
+          name: "Redundancia de las instalaciones de procesamiento de la informaci\xF3\
+            n"
+          description: "Este control garantiza que la redundancia est\xE9 integrada\
+            \ en las instalaciones de procesamiento para mantener la disponibilidad\
+            \ y las operaciones durante fallas o emergencias del sistema."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
       assessable: true
       depth: 3
@@ -6144,6 +7320,11 @@ objects:
           description: "Den h\xE4r kontrollen m\xF6jligg\xF6r loggning av aktiviteter\
             \ i system f\xF6r att st\xF6dja \xF6vervakning, incidentidentifiering\
             \ och kriminaltekniska unders\xF6kningar."
+        es:
+          name: Registro
+          description: "Este control permite el registro de actividades dentro de\
+            \ los sistemas para respaldar el monitoreo, la detecci\xF3n de incidentes\
+            \ y las investigaciones forenses."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3
@@ -6172,6 +7353,10 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller kontinuerlig \xF6\
             vervakning av systemaktiviteter f\xF6r att identifiera, svara p\xE5 och\
             \ minimera s\xE4kerhetshot."
+        es:
+          name: Seguimiento de las actividades
+          description: "Este control garantiza la supervisi\xF3n continua de las actividades\
+            \ del sistema para detectar, responder y mitigar las amenazas de seguridad."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
       assessable: true
       depth: 3
@@ -6200,6 +7385,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att systemklockorna\
             \ \xE4r synkroniserade f\xF6r att uppr\xE4tth\xE5lla korrekta och konsekventa\
             \ tidsst\xE4mplar f\xF6r loggar och andra kritiska processer."
+        es:
+          name: "Sincronizaci\xF3n de reloj"
+          description: "Este control garantiza que los relojes del sistema est\xE9\
+            n sincronizados para mantener marcas de tiempo precisas y coherentes para\
+            \ los registros y otros procesos cr\xEDticos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
       assessable: true
       depth: 3
@@ -6228,6 +7418,10 @@ objects:
           description: "Den h\xE4r kontrollen begr\xE4nsar och \xF6vervakar anv\xE4\
             ndningen av privilegierade verktygsprogram f\xF6r att f\xF6rhindra missbruk\
             \ och obeh\xF6riga \xE5tg\xE4rder."
+        es:
+          name: Uso de programas de utilidad privilegiados
+          description: Este control restringe y supervisa el uso de programas de utilidad
+            con privilegios para evitar el uso indebido y las acciones no autorizadas.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       assessable: true
       depth: 3
@@ -6257,6 +7451,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att programvaruinstallation\
             \ p\xE5 operativsystem hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att\
             \ f\xF6rhindra s\xE5rbarheter eller obeh\xF6riga \xE4ndringar."
+        es:
+          name: "Instalaci\xF3n de software en sistemas operativos"
+          description: "Este control garantiza que la instalaci\xF3n de software en\
+            \ los sistemas operativos se gestione de forma segura para evitar vulnerabilidades\
+            \ o cambios no autorizados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
       assessable: true
       depth: 3
@@ -6288,6 +7487,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller n\xE4tverkss\xE4\
             kerhet genom brandv\xE4ggar, intr\xE5ngsidentifieringssystem och \xE5\
             tkomstkontroller f\xF6r att skydda mot obeh\xF6rig \xE5tkomst och attacker."
+        es:
+          name: Seguridad de las redes
+          description: "Este control garantiza la seguridad de la red a trav\xE9s\
+            \ de firewalls, sistemas de detecci\xF3n de intrusos y controles de acceso\
+            \ para proteger contra accesos y ataques no autorizados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
       assessable: true
       depth: 3
@@ -6316,6 +7520,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att n\xE4tverkstj\xE4\
             nster skyddas f\xF6r att uppr\xE4tth\xE5lla konfidentialitet, integritet\
             \ och tillg\xE4nglighet under anv\xE4ndning."
+        es:
+          name: Seguridad de los servicios de red
+          description: "Este control garantiza que los servicios de red est\xE9n protegidos\
+            \ para mantener la confidencialidad, la integridad y la disponibilidad\
+            \ durante el uso."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
       assessable: true
       depth: 3
@@ -6344,6 +7553,10 @@ objects:
           description: "Den h\xE4r kontrollen implementerar n\xE4tverkssegregering\
             \ f\xF6r att begr\xE4nsa spridningen av hot och minimera effekten av potentiella\
             \ intr\xE5ng."
+        es:
+          name: "Segregaci\xF3n de redes"
+          description: "Este control implementa la segregaci\xF3n de la red para limitar\
+            \ la propagaci\xF3n de amenazas y minimizar el impacto de posibles infracciones."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
       assessable: true
       depth: 3
@@ -6372,6 +7585,10 @@ objects:
           description: "Den h\xE4r kontrollen anv\xE4nder webbfiltreringsverktyg f\xF6\
             r att blockera obeh\xF6rigt eller skadligt inneh\xE5ll fr\xE5n att n\xE5\
             s via Internet."
+        es:
+          name: Filtrado web
+          description: "Este control usa herramientas de filtrado web para bloquear\
+            \ el acceso a contenido no autorizado o da\xF1ino a trav\xE9s de Internet."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       assessable: true
       depth: 3
@@ -6400,6 +7617,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att kryptografiska\
             \ tekniker till\xE4mpas f\xF6r att skydda datakonfidentialitet, integritet\
             \ och \xE4kthet."
+        es:
+          name: "Uso de la criptograf\xEDa"
+          description: "Este control garantiza que se apliquen t\xE9cnicas criptogr\xE1\
+            ficas para proteger la confidencialidad, integridad y autenticidad de\
+            \ los datos."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
       assessable: true
       depth: 3
@@ -6429,6 +7651,11 @@ objects:
           description: "Den h\xE4r kontrollen integrerar s\xE4kerhet i alla steg i\
             \ utvecklingslivscykeln f\xF6r att s\xE4kerst\xE4lla att system och program\
             \ skapas p\xE5 ett s\xE4kert s\xE4tt."
+        es:
+          name: Ciclo de vida de desarrollo seguro
+          description: Este control integra la seguridad en todas las etapas del ciclo
+            de vida del desarrollo para garantizar que los sistemas y las aplicaciones
+            se construyan de forma segura.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
       assessable: true
       depth: 3
@@ -6455,6 +7682,10 @@ objects:
           name: "S\xE4kerhetskrav f\xF6r program"
           description: "Den h\xE4r kontrollen definierar och till\xE4mpar s\xE4kerhetskrav\
             \ f\xF6r program f\xF6r att skydda mot s\xE4kerhetsrisker."
+        es:
+          name: Requisitos de seguridad de las aplicaciones
+          description: Este control define y aplica los requisitos de seguridad de
+            las aplicaciones para protegerse contra vulnerabilidades.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
       assessable: true
       depth: 3
@@ -6484,6 +7715,10 @@ objects:
           name: "S\xE4ker systemarkitektur och tekniska principer"
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kra designprinciper\
             \ anv\xE4nds under utvecklingen av systemarkitekturer."
+        es:
+          name: "Arquitectura de sistemas seguros y principios de ingenier\xEDa"
+          description: "Este control garantiza que se adopten los principios de dise\xF1\
+            o seguro durante el desarrollo de las arquitecturas de sistemas."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
       assessable: true
       depth: 3
@@ -6510,6 +7745,10 @@ objects:
           name: "S\xE4ker kodning"
           description: "Den h\xE4r kontrollen implementerar s\xE4kra kodningsmetoder\
             \ f\xF6r att minimera s\xE5rbarheter i utvecklad programvara."
+        es:
+          name: "Codificaci\xF3n segura"
+          description: "Este control implementa pr\xE1cticas de codificaci\xF3n seguras\
+            \ para minimizar las vulnerabilidades en el software desarrollado."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
       assessable: true
       depth: 3
@@ -6538,6 +7777,11 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetstestning\
             \ utf\xF6rs under utvecklings- och godk\xE4nnandefaserna f\xF6r att identifiera\
             \ svagheter."
+        es:
+          name: "Pruebas de seguridad en desarrollo y aceptaci\xF3n"
+          description: "Este control garantiza que las pruebas de seguridad se lleven\
+            \ a cabo durante las fases de desarrollo y aceptaci\xF3n para identificar\
+            \ los puntos d\xE9biles."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
       assessable: true
       depth: 3
@@ -6566,6 +7810,10 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att s\xE4kerhetsrisker\
             \ hanteras effektivt n\xE4r utvecklingen l\xE4ggs ut p\xE5 entreprenad\
             \ till tredjepartsleverant\xF6rer."
+        es:
+          name: Desarrollo externalizado
+          description: Este control garantiza que los riesgos de seguridad se gestionen
+            de forma eficaz cuando el desarrollo se externaliza a proveedores externos.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
       assessable: true
       depth: 3
@@ -6598,6 +7846,12 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att utvecklings-,\
             \ test- och produktionsmilj\xF6er \xE4r \xE5tskilda f\xF6r att f\xF6rhindra\
             \ oavsiktliga interaktioner och obeh\xF6rig \xE5tkomst."
+        es:
+          name: "Separaci\xF3n de los entornos de desarrollo, prueba y producci\xF3\
+            n"
+          description: "Este control garantiza que los entornos de desarrollo, prueba\
+            \ y producci\xF3n est\xE9n segregados para evitar interacciones no deseadas\
+            \ y accesos no autorizados."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
       assessable: true
       depth: 3
@@ -6626,6 +7880,10 @@ objects:
           description: "Den h\xE4r kontrollen s\xE4kerst\xE4ller att \xE4ndringar\
             \ i systemen hanteras p\xE5 ett s\xE4kert s\xE4tt f\xF6r att minimera\
             \ risker och uppr\xE4tth\xE5lla driftstabiliteten."
+        es:
+          name: "Gesti\xF3n del cambio"
+          description: Este control garantiza que los cambios en los sistemas se gestionen
+            de forma segura para minimizar los riesgos y mantener la estabilidad operativa.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
       assessable: true
       depth: 3
@@ -6653,6 +7911,10 @@ objects:
           name: Information om provningen
           description: "Denna kontroll skyddar testdata f\xF6r att f\xF6rhindra exponering\
             \ av k\xE4nslig eller konfidentiell information under testprocesser."
+        es:
+          name: "Informaci\xF3n de la prueba"
+          description: "Este control protege los datos de prueba para evitar la exposici\xF3\
+            n de informaci\xF3n sensible o confidencial durante los procesos de prueba."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
       assessable: true
       depth: 3
@@ -6692,3 +7954,11 @@ objects:
             ckage eller st\xF6rningar. \xC5tg\xE4rderna omfattar anv\xE4ndning av\
             \ icke-produktionsmilj\xF6er, \xE5tkomstbegr\xE4nsningar och konfidentialitetsavtal\
             \ f\xF6r att uppr\xE4tth\xE5lla systemets s\xE4kerhet och integritet."
+        es:
+          name: "Protecci\xF3n de los sistemas de informaci\xF3n durante las pruebas\
+            \ de auditor\xEDa"
+          description: "Este control garantiza que los sistemas y los datos est\xE9\
+            n protegidos durante las auditor\xEDas al evitar el acceso no autorizado,\
+            \ la fuga de datos o las interrupciones. Las medidas incluyen el uso de\
+            \ entornos que no son de producci\xF3n, restricciones de acceso y acuerdos\
+            \ de confidencialidad para mantener la seguridad y la integridad del sistema."
