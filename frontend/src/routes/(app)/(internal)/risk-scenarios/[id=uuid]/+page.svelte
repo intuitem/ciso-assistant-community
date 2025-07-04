@@ -179,46 +179,50 @@
 			baseEndpoint="/security-exceptions?risk_scenarios={page.params.id}"
 		/>
 	</div>
-	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
-		<div class="flex flex-col w-1/2">
-			<h4 class="h4 font-semibold">{m.inherentRisk()}</h4>
+
+	{#if page.data?.featureflags?.inherent_risk}
+		<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
+			<div class="flex flex-col w-1/2">
+				<h4 class="h4 font-semibold">{m.inherentRisk()}</h4>
+			</div>
+			<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
+				<p class="flex flex-col">
+					<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
+					<span
+						class="text-sm text-center font-semibold p-2 rounded-md w-20"
+						style="background-color: {color_map[data.scenario.inherent_proba]}"
+					>
+						{safeTranslate(data.scenario.inherent_proba.name)}
+					</span>
+				</p>
+				<i class="fa-solid fa-xmark mt-5"></i>
+				<p class="flex flex-col">
+					<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
+					<span
+						class="text-sm text-center font-semibold p-2 rounded-md w-20"
+						style="background-color: {color_map[data.scenario.inherent_impact]}"
+					>
+						{safeTranslate(data.scenario.inherent_impact.name)}
+					</span>
+				</p>
+				<i class="fa-solid fa-equals mt-5"></i>
+				<p class="flex flex-col">
+					<span class="text-sm font-semibold text-gray-400 whitespace-nowrap"
+						>{m.inherentRiskLevel()}</span
+					>
+					<span
+						class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+							data.scenario.inherent_level.hexcolor
+						)}"
+						style="background-color: {data.scenario.inherent_level.hexcolor}"
+					>
+						{safeTranslate(data.scenario.inherent_level.name)}
+					</span>
+				</p>
+			</div>
 		</div>
-		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
-			<p class="flex flex-col">
-				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
-				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
-					style="background-color: {color_map[data.scenario.inherent_proba]}"
-				>
-					{safeTranslate(data.scenario.inherent_proba.name)}
-				</span>
-			</p>
-			<i class="fa-solid fa-xmark mt-5"></i>
-			<p class="flex flex-col">
-				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
-				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
-					style="background-color: {color_map[data.scenario.inherent_impact]}"
-				>
-					{safeTranslate(data.scenario.inherent_impact.name)}
-				</span>
-			</p>
-			<i class="fa-solid fa-equals mt-5"></i>
-			<p class="flex flex-col">
-				<span class="text-sm font-semibold text-gray-400 whitespace-nowrap"
-					>{m.inherentRiskLevel()}</span
-				>
-				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
-						data.scenario.inherent_level.hexcolor
-					)}"
-					style="background-color: {data.scenario.inherent_level.hexcolor}"
-				>
-					{safeTranslate(data.scenario.inherent_level.name)}
-				</span>
-			</p>
-		</div>
-	</div>
+	{/if}
+
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
 		<div class="flex flex-col w-1/2">
 			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
