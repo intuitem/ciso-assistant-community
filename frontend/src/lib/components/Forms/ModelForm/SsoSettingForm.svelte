@@ -1,12 +1,15 @@
 <script lang="ts">
-	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import { page } from '$app/state';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
+	import type { SuperValidated } from 'sveltekit-superforms';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -17,7 +20,23 @@
 
 	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), data = {} }: Props = $props();
 
+	const formStore = form.form;
+
+	const oidcAuthMethods = [
+		'client_secret_basic',
+		'client_secret_post',
+		'client_secret_jwt',
+		'private_key_jwt',
+		'none'
+	];
+
+	const oidcAuthMethodOptions = oidcAuthMethods.map((method) => ({
+		label: method,
+		value: method
+	}));
+
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
+	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
 </script>
 
 <Accordion
@@ -26,7 +45,6 @@
 	multiple
 >
 	<Checkbox {form} field="is_enabled" label={m.enableSSO()} helpText={m.enableSSOHelpText()} />
-	<!-- Incomplete Translation -->
 	<Checkbox
 		{form}
 		field="force_sso"
@@ -37,30 +55,29 @@
 	<span class="text-orange-500 italic text-sm"
 		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
 	>
-	<AutocompleteSelect
+	<RadioGroup
 		{form}
 		hidden={model.selectOptions['provider'].length < 2}
 		field="provider"
 		cacheLock={cacheLocks['provider']}
-		options={model.selectOptions['provider']}
+		possibleOptions={model.selectOptions['provider']}
 		label={m.provider()}
 		disabled={!data.is_enabled}
 	/>
 	{#if data.provider !== 'saml'}
 		<Accordion.Item value="idp">
 			{#snippet control()}
-				{m.IdPConfiguration()}
+				<span class="font-semibold">{m.IdPConfiguration()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<TextField
+				<HiddenInput
 					{form}
 					field="provider_name"
 					label={m.name()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['provider_name']}
 				/>
-				<TextField
-					hidden
+				<HiddenInput
 					{form}
 					field="provider_id"
 					label={m.providerID()}
@@ -75,23 +92,60 @@
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['client_id']}
 				/>
-				{#if data.provider !== 'saml'}
+				{#if showSecretField}
 					<TextField
 						{form}
+						type="password"
 						field="secret"
 						label={m.secret()}
 						helpText={m.secretHelpText()}
 						disabled={!data.is_enabled}
 						cacheLock={cacheLocks['secret']}
 					/>
-					<TextField
-						{form}
-						field="key"
-						label={m.key()}
-						disabled={!data.is_enabled}
-						cacheLock={cacheLocks['key']}
-					/>
+				{:else}
+					<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
+						<p>{m.clientSecretAlreadySetHelpText()}</p>
+						<button
+							class="btn preset-filled"
+							onclick={() => {
+								showSecretField = true;
+								$formStore.secret = '';
+							}}>{m.resetClientSecret()}</button
+						>
+					</div>
 				{/if}
+				<TextField
+					{form}
+					field="server_url"
+					label={m.serverURL()}
+					helpText={m.oidcConfiguration()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['server_url']}
+				/>
+			{/snippet}
+		</Accordion.Item>
+		<Accordion.Item value="oidcAdvanced">
+			{#snippet control()}
+				<span class="font-semibold">{m.advancedSettings()}</span>
+			{/snippet}
+			{#snippet panel()}
+				<Select
+					{form}
+					field="token_auth_method"
+					label={m.tokenAuthMethod()}
+					disabled={!data.is_enabled}
+					options={oidcAuthMethodOptions}
+					cacheLock={cacheLocks['token_auth_method']}
+					helpText={m.oidcTokenAuthMethodHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="oauth_pkce_enabled"
+					label={m.oauthPKCEEnabled()}
+					disabled={!data.is_enabled}
+					cacheLock={cacheLocks['oauth_pkce_enabled']}
+					helpText={m.oidcPKCEEnabledHelpText()}
+				/>
 			{/snippet}
 		</Accordion.Item>
 	{/if}
@@ -163,7 +217,7 @@
 			{/snippet}
 		</Accordion.Item>
 
-		<Accordion.Item value="advanced"
+		<Accordion.Item value="samlAdvanced"
 			>{#snippet control()}
 				<span class="font-semibold">{m.advancedSettings()}</span>
 			{/snippet}
