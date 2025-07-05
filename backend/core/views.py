@@ -369,7 +369,7 @@ class PerimeterFilter(df.FilterSet):
 
     class Meta:
         model = Perimeter
-        fields = ["folder", "lc_status"]
+        fields = ["folder", "lc_status", "campaigns"]
 
 
 class PerimeterViewSet(BaseModelViewSet):
@@ -380,6 +380,7 @@ class PerimeterViewSet(BaseModelViewSet):
     model = Perimeter
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
+    filterset_fields = ["folder", "campaigns"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -4119,6 +4120,55 @@ class QualificationViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
+class CampaignViewSet(BaseModelViewSet):
+    model = Campaign
+
+    filterset_fields = ["folder", "frameworks", "perimeters"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Campaign.Status.choices))
+
+    @action(detail=True, name="Get campaign metrics")
+    def metrics(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Campaign
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        campaign = self.get_object()
+        return Response(campaign.metrics())
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        campaign = serializer.instance
+        frameworks = serializer.instance.frameworks.all()
+        for perimeter in campaign.perimeters.all():
+            for framework in frameworks:
+                framework_implementation_groups = None
+                if campaign.selected_implementation_groups:
+                    framework_implementation_groups = [
+                        group["value"]
+                        for group in campaign.selected_implementation_groups
+                        if group["framework"] == str(framework.id)
+                    ]
+                compliance_assessment = ComplianceAssessment.objects.create(
+                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
+                    campaign=campaign,
+                    perimeter=perimeter,
+                    framework=framework,
+                    folder=perimeter.folder,
+                    selected_implementation_groups=framework_implementation_groups
+                    if framework_implementation_groups
+                    else None,
+                )
+                compliance_assessment.create_requirement_assessments()
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
@@ -4129,6 +4179,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "folder",
         "framework",
         "perimeter",
+        "campaign",
         "status",
         "ebios_rm_studies",
         "assets",
