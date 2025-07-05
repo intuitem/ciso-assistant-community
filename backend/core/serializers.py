@@ -1073,10 +1073,42 @@ class AttachmentUploadSerializer(serializers.Serializer):
         fields = ["attachment"]
 
 
+class CampaignReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    compliance_assessments = FieldsRelatedField(many=True)
+    perimeters = FieldsRelatedField(many=True)
+    frameworks = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
+    framework = FieldsRelatedField(
+        [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
+    )
+
+    class Meta:
+        model = Campaign
+        fields = "__all__"
+
+
+class CampaignWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = "__all__"
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
+
+
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    campaign = FieldsRelatedField()
     framework = FieldsRelatedField(
         [
             "id",

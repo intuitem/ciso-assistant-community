@@ -324,6 +324,19 @@ export const ComplianceAssessmentSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
+export const CampaignSchema = z.object({
+	...NameDescriptionMixin,
+	frameworks: z.array(z.string()),
+	selected_implementation_groups: z
+		.array(z.object({ value: z.string(), framework: z.string() }))
+		.optional(),
+	perimeters: z.array(z.string()),
+	status: z.string().optional().nullable(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
+});
+
 export const EvidenceSchema = z.object({
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
@@ -838,6 +851,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
+	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,

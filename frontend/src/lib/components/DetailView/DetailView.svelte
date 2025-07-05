@@ -61,7 +61,8 @@
 			'expiration_date',
 			'timestamp',
 			'reported_at',
-			'due_date'
+			'due_date',
+			'start_date'
 		],
 		widgets,
 		actions
