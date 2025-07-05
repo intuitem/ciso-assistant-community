@@ -224,7 +224,7 @@
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
 					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
+					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
