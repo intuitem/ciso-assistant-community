@@ -163,9 +163,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
-			{ field: 'perimeter', urlModel: 'entity-assessments' }
+			{ field: 'perimeter', urlModel: 'entity-assessments' },
+			{ field: 'perimeters', urlModel: 'campaigns' }
 		],
-		filters: [{ field: 'lc_status' }, { field: 'folder' }]
+		filters: [{ field: 'lc_status' }, { field: 'folder' }, { field: 'campaigns' }]
 	},
 	'risk-matrices': {
 		name: 'riskmatrix',
@@ -554,6 +555,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'campaign', urlModel: 'campaigns', endpointUrl: 'campaigns' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
@@ -1171,6 +1173,40 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'folder', urlModel: 'folders' }
+		]
+	},
+	campaigns: {
+		name: 'campaign',
+		localName: 'campaign',
+		localNamePlural: 'campaigns',
+		verboseName: 'Campaign',
+		verboseNamePlural: 'Campaigns',
+		selectFields: [{ field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'perimeters', urlModel: 'perimeters' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
+			{ field: 'campaigns', urlModel: 'perimeters', disableAddDeleteButtons: true }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'status' },
+			{ field: 'start_date' },
+			{ field: 'due_date' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
+		filters: [
+			{ field: 'status' },
+			{ field: 'framework' },
+			{ field: 'folder' },
+			{ field: 'perimeters' }
 		]
 	}
 };

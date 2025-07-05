@@ -107,7 +107,7 @@
 	"description": "Description",
 	"parentDomain": "Domaine parent",
 	"ref": "Réf.",
-	"refId": "ID de référence",
+	"refId": "ID",
 	"businessValue": "Valeur métier",
 	"email": "E-mail",
 	"firstName": "Prénom",
@@ -1287,7 +1287,7 @@
 	"attackPathStakeholdersHelpText": "Parties prenantes impactées par le chemin d'attaque",
 	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude",
 	"percentageDisplay": "{number} %",
-	"reviewProgress": "Avancement de la revue",
+	"reviewProgress": "Avancement",
 	"ecosystemRadar": "Radar de l'écosystème",
 	"criticalitySemiColon": "Criticité :",
 	"cyberReliability": "Fiabilité cyber",
@@ -1618,6 +1618,12 @@
 	"mappingSuggested": "Suggestion de mapping",
 	"mappingSuggestedHelpText": "Suggestions de mapping basées sur les référentiels chargés",
 	"mappingSuggestionTeasing": "Les mappings sont maintenant suggérés ! Vous pouvez utiliser les filtres pour explorer les suggestions basées sur les référentiels chargés.",
+	"campaign": "Campagne",
+	"campaigns": "Campagnes",
+	"addCampaign": "Démarrer une campagne",
+	"campaignDomainHelpText": "Le domaine auquel la campagne sera attachée.",
+	"averageProgress": "Progression moyenne",
+	"daysRemaining": "Jours restants",
 	"associatedFindingsAssessments": "Suivis associés",
 	"hourCount": [
 		{
@@ -1649,6 +1655,8 @@
 			}
 		}
 	],
+	"matchingScenarios": "Scénarios correspondants",
+	"associatedCampaigns": "Campagnes associées",
 	"serverURL": "URL serveur",
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Méthode d’authentification par token",

@@ -107,7 +107,7 @@
 	"description": "Description",
 	"parentDomain": "Parent domain",
 	"ref": "Reference",
-	"refId": "Reference ID",
+	"refId": "ID",
 	"businessValue": "Business value",
 	"email": "Email",
 	"firstName": "First name",
@@ -1317,7 +1317,7 @@
 	"attackPathStakeholdersHelpText": "Stakeholders involved in the attack path",
 	"attackPathIsSelectedHelpText": "Selection of the attack path for the study",
 	"percentageDisplay": "{number}%",
-	"reviewProgress": "Review progress",
+	"reviewProgress": "Progress",
 	"ecosystemRadar": "Ecosystem radar",
 	"criticalitySemiColon": "Criticality:",
 	"cyberReliability": "Cyber reliability",
@@ -1637,6 +1637,12 @@
 	"mappingSuggestionTeasing": "Mappings are now suggested! You can use the filters to explore suggestions based on loaded frameworks.",
 	"errorCreatingPersonalAccessToken": "An error occurred while creating the personal access token.",
 	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user.",
+	"campaign": "Campaign",
+	"campaigns": "Campaigns",
+	"addCampaign": "Start a campaign",
+	"campaignDomainHelpText": "The domain that the campaign will be attached to.",
+	"averageProgress": "Average progress",
+	"daysRemaining": "Days remaining",
 	"associatedFindingsAssessments": "Associated follow-ups",
 	"hourCount": [
 		{
@@ -1691,5 +1697,6 @@
 	"dataWizardSelectFramework": "Select a Framework",
 	"dataWizardParsingResults": "Parsing results:",
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
-	"dataWizardLoadExcelData": "Load excel data"
+	"dataWizardLoadExcelData": "Load excel data",
+	"associatedCampaigns": "Associated campaigns"
 }
