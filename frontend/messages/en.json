@@ -1683,5 +1683,12 @@
 	"dataWizardSelectFramework": "Select a Framework",
 	"dataWizardParsingResults": "Parsing results:",
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
-	"dataWizardLoadExcelData": "Load excel data"
+	"dataWizardLoadExcelData": "Load excel data",
+	"inherentRisk": "Inherent Risk",
+	"inherentProba": "Inherent Probability",
+	"inherentImpact": "Inherent Impact",
+	"inherentLevel": "Inherent Level",
+	"inherentRiskLevelPerScenario": "Inherent risk level per scenario",
+	"inherentRiskLevel": "Inherent risk level",
+	"inherentRiskLevelHelpText": "The inherent risk level is the risk level before any controls are applied"
 }

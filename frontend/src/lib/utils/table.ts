@@ -3,6 +3,7 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import { getModelInfo, URL_MODEL_MAP } from './crud';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -354,6 +355,14 @@ const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'inherent_level'
+	}
+};
+
 // TODO: TEST THIS
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -578,6 +587,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
@@ -589,6 +599,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
@@ -1108,3 +1119,38 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
+
+export const getListViewFields = ({
+	key,
+	featureFlags
+}: {
+	key: string;
+	featureFlags: string[];
+}) => {
+	if (!Object.keys(listViewFields).includes(key)) {
+		throw new Error(`Model ${key} is not supported`);
+	}
+	const entry = listViewFields[key];
+	const model = getModelInfo(key);
+	if (!key) {
+		// Model does not exist in URL_MODEL_MAP, nothing to do
+		return entry;
+	}
+	const indicesToPop = entry.body.map((field: string) => {
+		model?.flaggedFields &&
+		Object.hasOwn(model.flaggedFields, field) &&
+		featureFlags.includes(model.flaggedFields[field])
+			? -1
+			: entry.body.indexOf(field);
+	});
+	return {
+		...entry,
+		head: entry.head
+			.filter((_: string, index: number) => !indicesToPop.includes(index))
+			.reduce((obj: Record<string, any>, k: string, index: number) => {
+				obj[k] = listViewFields[key].head[index];
+				return obj;
+			}, {}),
+		body: entry.body.filter((_: string, index: number) => !indicesToPop.includes(index))
+	};
+};

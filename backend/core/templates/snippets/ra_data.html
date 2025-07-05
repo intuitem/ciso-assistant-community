@@ -84,6 +84,14 @@
     <div class="bg-white p-6 mb-8 shadow rounded-lg page-break">
         <h2 class="text-xl font-semibold mb-6">{% trans "Risk matrix view" %}</h2>
         {% with template_name='snippets/risk_matrix'|stringformat:"s"|add:settings.swap_axes|add:settings.flip_vertical|add:'.html' %}
+            {% if ri_clusters.inherent %}
+            {# inherent Risk Matrix #}
+            <div class="mb-8 shadow rounded-lg p-6">
+                <h3 class="font-bold text-lg mb-4">{% trans "Inherent" %}</h3>
+                {% include template_name with enriched_data=ri_clusters.inherent %}
+            </div>
+            {% endif %}
+
             {# Current Risk Matrix #}
             <div class="mb-8 shadow rounded-lg p-6">
                 <h3 class="font-bold text-lg mb-4">{% trans "Current" %}</h3>
