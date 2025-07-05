@@ -1670,6 +1670,8 @@
 	],
 	"suggestedParentheses": "(suggested)",
 	"matchingScenarios": "Matching scenarios",
+	"select": "Select",
+	"deselect": "Deselect",
 	"clickToUpload": "Click to upload",
 	"orDragAndDrop": "or drag and drop",
 	"dataWizardSelectFile": "Select your file and make sure it matches the templates",

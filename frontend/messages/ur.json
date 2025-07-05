@@ -924,5 +924,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "مطابق منظرنامے"
+	"matchingScenarios": "مطابق منظرنامے",
+	"select": "منتخب کریں",
+	"deselect": "انتخاب ختم کریں"
 }

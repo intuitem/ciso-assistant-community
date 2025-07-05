@@ -961,5 +961,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Übereinstimmende Szenarien"
+	"matchingScenarios": "Übereinstimmende Szenarien",
+	"select": "Auswählen",
+	"deselect": "Abwählen"
 }

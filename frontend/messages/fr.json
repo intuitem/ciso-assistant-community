@@ -1649,5 +1649,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Scénarios correspondants"
+	"matchingScenarios": "Scénarios correspondants",
+	"select": "Sélectionner",
+	"deselect": "Désélectionner"
 }

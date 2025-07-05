@@ -925,5 +925,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "मैचिंग परिदृश्य"
+	"matchingScenarios": "मैचिंग परिदृश्य",
+	"select": "चुनें",
+	"deselect": "चयन रद्द करें"
 }
