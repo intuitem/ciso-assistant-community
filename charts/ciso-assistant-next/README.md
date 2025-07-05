@@ -58,6 +58,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.image.repository | string | `"intuitem/ciso-assistant-community/backend"` | Repository to use for the backend |
 | backend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the backend |
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
+| backend.initContainers | list | `[]` | Init containers to run before the backend |
 | backend.name | string | `"backend"` | Backend container name |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
 | backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
@@ -91,6 +92,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | frontend.image.repository | string | `"intuitem/ciso-assistant-community/frontend"` | Repository to use for the frontend |
 | frontend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the frontend |
 | frontend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
+| frontend.initContainers | list | `[]` | Init containers to run before the frontend |
 | frontend.name | string | `"frontend"` | Frontend container name |
 | frontend.podAnnotations | object | `{}` | Frontend pod annotations |
 | frontend.replicas | int | `1` | The number of frontend pods to run |
