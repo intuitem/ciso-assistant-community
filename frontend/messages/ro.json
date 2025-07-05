@@ -953,5 +953,6 @@
 			}
 		}
 	],
-	"matchingScenarios": "Scenarii potrivite"
+	"matchingScenarios": "Scenarii potrivite",
+	"fearedEventAssetHelpText": "Evenimentele temute sunt în general legate de valori de afaceri (active principale). Activele de sprijin sunt permise aici pentru flexibilitate."
 }

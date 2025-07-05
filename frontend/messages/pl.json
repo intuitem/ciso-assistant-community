@@ -953,5 +953,6 @@
 			}
 		}
 	],
-	"matchingScenarios": "Dopasowane scenariusze"
+	"matchingScenarios": "Dopasowane scenariusze",
+	"fearedEventAssetHelpText": "Zdarzenia obawiane są zwykle powiązane z wartościami biznesowymi (podstawowe aktywa). Aktywa wspierające są tu dozwolone ze względu na elastyczność."
 }
