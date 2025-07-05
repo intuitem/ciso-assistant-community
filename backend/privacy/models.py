@@ -6,6 +6,7 @@ from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectM
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
 from django.db.models import Count
+from django.core.validators import URLValidator
 
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
@@ -365,7 +366,9 @@ class DataContractor(NameDescriptionFolderMixin):
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(
+        blank=True, validators=[URLValidator(schemes={"http", "https"})]
+    )
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -387,7 +390,9 @@ class DataTransfer(NameDescriptionFolderMixin):
         max_length=255, choices=LEGAL_BASIS_CHOICES, blank=True
     )
     guarantees = models.TextField(blank=True)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(
+        blank=True, validators=[URLValidator(schemes={"http", "https"})]
+    )
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

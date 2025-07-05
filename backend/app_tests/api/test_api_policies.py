@@ -159,7 +159,7 @@ class TestPolicysAuthenticated:
                 "name": "new " + POLICY_NAME,
                 "description": "new " + POLICY_DESCRIPTION,
                 "status": POLICY_STATUS2._value_,
-                "link": "new " + POLICY_LINK,
+                "link": POLICY_LINK + "?new=1",
                 "eta": "2025-01-01",
                 "effort": POLICY_EFFORT2[0],
                 "folder": str(folder.id),
