@@ -58,7 +58,19 @@ class AccountAdapter(DefaultAccountAdapter):
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
-        email_address = next(iter(sociallogin.account.extra_data.values()))[0]
+        extra = sociallogin.account.extra_data
+        # Primary lookup
+        email_address = extra.get("email") or extra.get("email_address")
+        # Fallback: first string value containing '@'
+        if not email_address:
+            email_address = next(
+                (v for v in extra.values() if isinstance(v, str) and "@" in v), None
+            )
+
+        if not email_address:
+            return Response(
+                {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
+            )
         try:
             user = User.objects.get(email=email_address)
             sociallogin.user = user

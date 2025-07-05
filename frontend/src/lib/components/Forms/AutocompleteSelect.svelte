@@ -47,6 +47,7 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
+		disabled?: boolean;
 		mount?: (value: any) => void;
 	}
 
