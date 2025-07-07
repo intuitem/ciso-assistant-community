@@ -54,7 +54,6 @@
 	options={model.selectOptions['legal_basis']}
 	cacheLock={cacheLocks['legal_basis']}
 	bind:cachedValue={formDataCache['legal_basis']}
-	translateOptions={true}
 	label={m.legalBasis()}
 />
 <AutocompleteSelect
