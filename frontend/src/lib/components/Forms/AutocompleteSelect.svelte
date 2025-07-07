@@ -91,7 +91,12 @@
 		options = options.map((option) => {
 			return {
 				...option,
-				translatedLabel: safeTranslate(option.label)
+				translatedLabel:
+					safeTranslate(option.label) !== option.label
+						? safeTranslate(option.label)
+						: safeTranslate(option.value) !== option.value
+							? safeTranslate(option.value)
+							: option.label
 			};
 		});
 	}
