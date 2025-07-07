@@ -1666,5 +1666,6 @@
 	"clientSecretAlreadySetHelpText": "Le secret client est déjà défini.",
 	"resetClientSecret": "Effacer le secret client",
 	"oidcTokenAuthMethodHelpText": "Méthode facultative d'authentification au point de terminaison du token. Si elle est omise, une méthode de la liste des méthodes d’authentification du serveur sera utilisée",
-	"oidcPKCEEnabledHelpText": "Activer la prise en charge d’OAuth PKCE (Proof Key for Code Exchange). Recommandé pour les clients publics."
+	"oidcPKCEEnabledHelpText": "Activer la prise en charge d’OAuth PKCE (Proof Key for Code Exchange). Recommandé pour les clients publics.",
+	"recentlyUpdatedAudits": "Audits récemment mis à jour"
 }
