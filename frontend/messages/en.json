@@ -1705,5 +1705,7 @@
 	"inherentRiskLevelPerScenario": "Inherent risk level per scenario",
 	"inherentRiskLevel": "Inherent risk level",
 	"inherentRiskLevelHelpText": "The inherent risk level is the risk level before any controls are applied",
-	"associatedCampaigns": "Associated campaigns"
+	"associatedCampaigns": "Associated campaigns",
+	"associatedCampaigns": "Associated campaigns",
+	"recentlyUpdatedAudits": "Recently updated audits"
 }

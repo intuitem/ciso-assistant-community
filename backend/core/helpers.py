@@ -909,7 +909,9 @@ def build_audits_stats(user, folder_id=None):
     data = list()
     names = list()
     uuids = list()
-    for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
+    for audit in ComplianceAssessment.objects.filter(id__in=object_ids).order_by(
+        "-updated_at"
+    )[:10]:
         data.append([rs[0] for rs in audit.get_requirements_result_count()])
         names.append(audit.name)
         uuids.append(audit.id)
@@ -1262,7 +1264,6 @@ def get_folder_content(folder: Folder, include_perimeters=True):
         entry = {
             "name": f.name,
             "uuid": f.id,
-            "itemStyle": {"color": "#8338ec"},
         }
         children = get_folder_content(f, include_perimeters=include_perimeters)
         if len(children) > 0:
@@ -1273,19 +1274,15 @@ def get_folder_content(folder: Folder, include_perimeters=True):
             content.append(
                 {
                     "name": p.name,
-                    "symbol": "circle",
-                    "itemStyle": {"color": "#3a86ff"},
                     "children": [
                         {
                             "name": "Audits",
-                            "symbol": "diamond",
                             "value": ComplianceAssessment.objects.filter(
                                 perimeter=p
                             ).count(),
                         },
                         {
                             "name": "Risk assessments",
-                            "symbol": "diamond",
                             "value": RiskAssessment.objects.filter(perimeter=p).count(),
                         },
                     ],

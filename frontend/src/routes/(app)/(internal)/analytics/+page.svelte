@@ -173,6 +173,7 @@
 									names={metrics.audits_stats.names}
 									data={metrics.audits_stats.data}
 									uuids={metrics.audits_stats.uuids}
+									title={m.recentlyUpdatedAudits()}
 								/>
 							</div>
 							<!---->

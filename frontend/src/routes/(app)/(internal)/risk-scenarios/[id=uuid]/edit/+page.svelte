@@ -112,13 +112,6 @@
 		(probability) => probability.hexcolor
 	);
 	const impactColorMap = data.riskMatrix.impact.map((impact) => impact.hexcolor);
-
-	const translatedQualificationChoices = data.qualificationChoices.map((choice) => {
-		return {
-			...choice,
-			translatedLabel: safeTranslate(choice.label)
-		};
-	});
 </script>
 
 <div>
@@ -419,7 +412,7 @@
 				<div class="w-1/2">
 					<AutocompleteSelect
 						form={_form}
-						options={translatedQualificationChoices}
+						options={data.qualificationChoices}
 						multiple={true}
 						field="qualifications"
 						label={m.qualification()}

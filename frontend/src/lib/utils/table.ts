@@ -769,22 +769,12 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'framework',
-			'assets',
-			'evidences',
 			'description',
 			'perimeter',
-			'reviewProgress'
+			'reviewProgress',
+			'updated_at'
 		],
-		body: [
-			'ref_id',
-			'name',
-			'framework',
-			'assets',
-			'evidences',
-			'description',
-			'perimeter',
-			'progress'
-		],
+		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
