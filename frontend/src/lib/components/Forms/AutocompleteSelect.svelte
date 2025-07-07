@@ -87,6 +87,20 @@
 		mount = () => null
 	}: Props = $props();
 
+	if (translateOptions) {
+		options = options.map((option) => {
+			return {
+				...option,
+				translatedLabel:
+					safeTranslate(option.label) !== option.label
+						? safeTranslate(option.label)
+						: safeTranslate(option.value) !== option.value
+							? safeTranslate(option.value)
+							: option.label
+			};
+		});
+	}
+
 	let optionHashmap: Record<string, Option> = {};
 	let _disabled = $state(disabled);
 
