@@ -1698,5 +1698,6 @@
 	"dataWizardParsingResults": "Parsing results:",
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
 	"dataWizardLoadExcelData": "Load excel data",
-	"associatedCampaigns": "Associated campaigns"
+	"associatedCampaigns": "Associated campaigns",
+	"recentlyUpdatedAudits": "Recently updated audits"
 }

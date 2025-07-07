@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Self, Union, List
 import statistics
 
+from django.utils import timezone
 from icecream import ic
 from auditlog.registry import auditlog
 
@@ -4597,6 +4598,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
+
+        self.compliance_assessment.updated_at = timezone.now()
+        self.compliance_assessment.save(update_fields=["updated_at"])
+
         self.compliance_assessment.upsert_daily_metrics()
 
 
