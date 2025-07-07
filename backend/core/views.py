@@ -1200,7 +1200,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "risk_assessment": risk_assessment,
                 "ri_clusters": build_scenario_clusters(
                     risk_assessment,
-                    include_inherent=ff_settings.value.get("inherent_risk", False),
+                    include_inherent=feature_flags.get("inherent_risk", False),
                 ),
                 "risk_matrix": risk_assessment.risk_matrix,
                 "settings": matrix_settings,
