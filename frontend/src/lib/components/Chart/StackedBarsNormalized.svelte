@@ -8,6 +8,7 @@
 		data: any;
 		names: any;
 		uuids: any;
+		title?: string;
 	}
 
 	let {
@@ -16,7 +17,8 @@
 		classesContainer = '',
 		data,
 		names,
-		uuids
+		uuids,
+		title = 'chart title'
 	}: Props = $props();
 
 	function truncateString(maxLength: number) {
@@ -40,10 +42,9 @@
 		const grid = {
 			left: 150,
 			right: 10,
-			top: 50,
+			top: 80,
 			bottom: 50
 		};
-
 		const seriesNames = [
 			'not assessed',
 			'partially compliant',
@@ -91,9 +92,12 @@
 
 		var option = {
 			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+			title: { text: title },
 			legend: {
 				selectedMode: false,
-				formatter: (name) => getSeriesLabel(name)
+				formatter: (name) => getSeriesLabel(name),
+				top: 35,
+				left: 'center'
 			},
 			grid,
 			xAxis: {
