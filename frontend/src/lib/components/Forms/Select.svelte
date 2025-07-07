@@ -103,20 +103,12 @@
 				<option value={defaultValue} selected>--</option>
 			{/if}
 			{#each options || [] as option}
-				{#if option.translatedLabel}
-					<option
-						value={option.translatedLabel}
-						style="background-color: {color_map[option.translatedLabel]}"
-					>
-						{option.translatedLabel}
-					</option>
-				{:else}
-					<option value={option.value} style="background-color: {color_map[option.value]}">
-						{m[toCamelCase(option.value)]
+				<option value={option.value} style="background-color: {color_map[option.value]}">
+					{option.translatedLabel ||
+						(m[toCamelCase(option.value)]
 							? safeTranslate(option.value)
-							: safeTranslate(option.label)}
-					</option>
-				{/if}
+							: safeTranslate(option.label))}
+				</option>
 			{/each}
 		</select>
 	</div>
