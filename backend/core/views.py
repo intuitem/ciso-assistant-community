@@ -967,8 +967,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ),
                 )
                 if ff_is_enabled("inherent_risk"):
-                    risk_scenario.current_proba = operational_scenario.likelihood
-                    risk_scenario.current_impact = operational_scenario.gravity
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
                 else:
                     risk_scenario.current_proba = operational_scenario.likelihood
                     risk_scenario.current_impact = operational_scenario.gravity
