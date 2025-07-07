@@ -1006,7 +1006,16 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'findings_assessment',
+			'severity',
+			'owner',
+			'status',
+			'applied_controls',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1014,6 +1023,7 @@ export const listViewFields = {
 			'severity',
 			'owner',
 			'status',
+			'applied_controls',
 			'filtering_labels'
 		],
 		filters: { filtering_labels: LABELS_FILTER }
