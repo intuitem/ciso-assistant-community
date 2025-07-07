@@ -18,7 +18,6 @@
 	interface Option {
 		label: unknown;
 		value: unknown;
-		translatedLabel?: string;
 	}
 
 	interface Props {
@@ -104,10 +103,7 @@
 			{/if}
 			{#each options || [] as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{option.translatedLabel ||
-						(m[toCamelCase(option.value)]
-							? safeTranslate(option.value)
-							: safeTranslate(option.label))}
+					{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
 				</option>
 			{/each}
 		</select>
