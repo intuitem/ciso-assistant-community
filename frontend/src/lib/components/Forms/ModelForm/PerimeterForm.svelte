@@ -46,4 +46,5 @@
 	label={m.lcStatus()}
 	cacheLock={cacheLocks['lc_status']}
 	bind:cachedValue={formDataCache['lc_status']}
+	disableDoubleDash
 />
