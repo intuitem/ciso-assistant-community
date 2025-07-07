@@ -119,6 +119,7 @@
 <Select
 	{form}
 	options={model.selectOptions['type']}
+	disableDoubleDash={true}
 	field="type"
 	label="Type"
 	cacheLock={cacheLocks['type']}
