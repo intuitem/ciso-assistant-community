@@ -1,0 +1,333 @@
+"""
+Script to recreate a structured Excel (V2 format) from a given YAML file.
+
+Usage:
+    python recreate_excel_from_yaml.py input.yaml [output.xlsx]
+
+Arguments:
+    input.yaml       Path to the input YAML file containing the data.
+    output.xlsx      (Optional) Path to the output Excel file to generate.
+                     If not provided, defaults to 'convert_<input_basename>.xlsx'.
+
+Description:
+    This script parses the input YAML file, extracts the defined objects and metadata,
+    and reconstructs the original Excel file structure with multiple sheets such as
+    'library_meta', 'framework_meta', 'framework_content', and others.
+
+    It handles special cases like answer definitions, implementation groups,
+    scores, and risk matrices, replicating the structure expected in the V2 Excel format.
+
+WARNING:
+    The generated Excel file should be carefully verified before being used again
+    as input for "convert_library_v2.py" to ensure data integrity and compatibility.
+
+Example:
+    python recreate_excel_from_yaml.py my_data.yaml
+"""
+
+
+
+import argparse
+import os
+import yaml
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
+
+
+def write_sheet(ws, header, rows):
+    ws.append(header)
+    for row in rows:
+        ws.append([row.get(col, "") for col in header])
+
+def recreate_excel_from_yaml(yaml_path, output_excel_path):
+    
+    print(f'⌛ Processing "{os.path.basename(yaml_path)}"...')
+    
+    # Attempt to load YAML file, raise an error if file is missing or YAML is invalid
+    try:
+        with open(yaml_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"YAML file not found: \"{yaml_path}\"")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing YAML file: {e}")
+
+    wb = Workbook()
+    wb.remove(wb.active)  # Remove default sheet
+
+    # --- library_meta (first sheet) ---
+    library_meta_ws = wb.create_sheet(title="library_meta", index=0)
+    library_meta_ws.append(["type", "library"])
+    
+    translations_block = data.get("translations", {})
+
+    for k, v in data.items():
+        if k == "objects":
+            break
+        if not isinstance(v, (list, dict)):
+            library_meta_ws.append([k, v])
+
+    # Add translations: name[xx], description[xx], copyright[xx]
+    for lang, fields in translations_block.items():
+        for field in fields:
+            if field in fields:
+                key = f"{field}[{lang}]"
+                val = fields[field]
+                library_meta_ws.append([key, val])
+
+    # --- Process other tabs ---
+    for obj_key, obj_value in data.get("objects", {}).items():
+        if obj_key == "requirement_mapping_sets":
+            continue  # Ignored as requested
+
+        if obj_key == "framework":
+            
+             # --- framework_meta sheet ---
+            meta_data = obj_value.copy()
+            content = meta_data.pop("requirement_nodes", [])
+            if "implementation_groups_definition" in meta_data:
+                ig_defs = meta_data.pop("implementation_groups_definition")
+            else:
+                ig_defs = None
+                
+            if "scores_definition" in meta_data:
+                scores_def = meta_data.pop("scores_definition")
+            else:
+                scores_def = None
+
+
+            framework_translations = meta_data.pop("translations", {})
+
+            meta_ws = wb.create_sheet(title="framework_meta")
+            meta_ws.append(["type", "framework"])
+            
+            base_urn = None
+            for k, v in meta_data.items():
+                if isinstance(v, list) or isinstance(v, dict):
+                    continue
+                meta_ws.append([k, v])
+                
+                if k == "urn":
+                    base_urn = v.replace("framework", "req_node")
+                    meta_ws.append(["base_urn", base_urn])
+
+            # Add translations: name[xx], description[xx]
+            for lang, fields in framework_translations.items():
+                for field in ("name", "description"):
+                    if field in fields:
+                        key = f"{field}[{lang}]"
+                        val = fields[field]
+                        meta_ws.append([key, val])
+            
+            if ig_defs:
+                meta_ws.append(["implementation_groups_definition", "implementation_groups"])
+            if scores_def:
+                meta_ws.append(["scores_definition", "scores"])
+                
+
+            # --- framework_content sheet ---
+            content_ws = wb.create_sheet(title="framework_content")
+            headers = [
+                "assessable", "depth", "ref_id", "urn_id", "name", "description",
+                "annotation", "typical_evidence", "questions", "answer",
+                "implementation_groups", "reference_controls", "threats", "urn", "parent_urn"
+            ]
+
+            # Extract translation columns grouped by language, e.g., name[fr], description[fr]
+            lang_to_fields = {}
+
+            for node in content:
+                translations = node.get("translations", {})
+                for lang_code, lang_fields in translations.items():
+                    if lang_code not in lang_to_fields:
+                        lang_to_fields[lang_code] = set()
+                    for field in lang_fields:
+                        lang_to_fields[lang_code].add(field)
+
+            # Sort by lang, then by field name for each lang
+            translation_columns = []
+            for lang in sorted(lang_to_fields):
+                for field in sorted(lang_to_fields[lang]):
+                    translation_columns.append(f"{field}[{lang}]")
+            
+            full_headers = headers + translation_columns
+
+
+            rows = []
+            answer_definitions = {}  # Store answer definitions for answers_content
+
+            for node in content:
+                row = {key: node.get(key, "") for key in headers}
+
+                # Convert "assessable" to "x" if true
+                val = row.get("assessable", "")
+                if isinstance(val, bool) and val is True:
+                    row["assessable"] = "x"
+                elif isinstance(val, str) and val.strip().lower() == "true":
+                    row["assessable"] = "x"
+                else:
+                    row["assessable"] = ""
+
+                # Compute urn_id from urn and base_urn
+                if base_urn and row.get("urn"):
+                    row["urn_id"] = row["urn"].removeprefix(base_urn + ":")
+
+                # Join lists with commas
+                for field in ["implementation_groups", "threats", "reference_controls"]:
+                    if field in node:
+                        row[field] = ", ".join(node[field])
+
+                # --- Handle questions and answers ---
+                questions = node.get("questions", {})
+                question_texts = []
+                answer_values = []
+
+                for qkey in sorted(questions):  # Sort question:1, question:2, ...
+                    q = questions[qkey]
+                    q_text = q.get("text", "").strip()
+                    q_type = q.get("type", "").strip()
+
+                    if not q_text or not q_type:
+                        continue
+
+                    question_texts.append(q_text)
+
+                    if q_type in ["text", "date"]:
+                        answer_id = q_type.upper()
+                        answer_values.append(answer_id)
+                        if answer_id not in answer_definitions:
+                            answer_definitions[answer_id] = {
+                                "id": answer_id,
+                                "question_type": q_type
+                            }
+                    elif q_type in ["unique_choice", "multiple_choice"]:
+                        choices = q.get("choices", [])
+                        values = [str(c["value"]).strip().lower() for c in choices if "value" in c]
+                        answer_id = f"{q_type}_{''.join(values)}"
+                        answer_values.append(answer_id)
+                        if answer_id not in answer_definitions:
+                            answer_definitions[answer_id] = {
+                                "id": answer_id,
+                                "question_type": q_type,
+                                "question_choices": "\n".join(c["value"] for c in choices if "value" in c)
+                            }
+
+                if question_texts:
+                    row["questions"] = "\n".join(question_texts)
+                if answer_values:
+                    row["answer"] = "\n".join(answer_values)
+                # --- End questions/answers block ---
+
+                # Add translations as field[lang] = value
+                for key in translation_columns:
+                    if "[" in key and key.endswith("]"):
+                        field, lang = key[:-1].split("[")
+                        row[key] = node.get("translations", {}).get(lang, {}).get(field, "")
+
+
+                rows.append(row)
+
+            write_sheet(content_ws, full_headers, rows)
+            
+            
+            # Remove empty columns from the framework_content sheet
+            col_idx = 1
+            while col_idx <= content_ws.max_column:
+                col_letter = get_column_letter(col_idx)
+                # Check if all cells (excluding header) in the column are empty
+                if all((content_ws.cell(row=row_idx, column=col_idx).value in [None, ""]) for row_idx in range(2, content_ws.max_row + 1)):
+                    content_ws.delete_cols(col_idx)
+                    # Stay at the same index since columns shift left after deletion
+                else:
+                    col_idx += 1
+                    
+
+            # --- Write answers_content if needed ---
+            if answer_definitions:
+                meta_ws.append(["scores_definition", "scores"])
+                answer_meta_ws = wb.create_sheet(title="answers_meta")
+                answer_meta_ws.append(["type", "answers"])
+                answer_meta_ws.append(["name", "answers"])
+                
+                answers_content_ws = wb.create_sheet("answers_content")
+                headers = ["id", "question_type", "question_choices"]
+                rows = []
+                for v in answer_definitions.values():
+                    row = {k: v.get(k, "") for k in headers}
+                    rows.append(row)
+                write_sheet(answers_content_ws, headers, rows)
+
+            # --- (optional) Sheets: implementation_groups_meta & implementation_groups_content ---
+            if ig_defs:
+                ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
+                ig_meta_ws.append(["type", "implementation_groups"])
+                ig_meta_ws.append(["name", "implementation_groups"])
+                
+                ig_content_ws = wb.create_sheet(title="implementation_groups_content")
+                
+                ig_content_rows = []
+                for ig in ig_defs:
+                    ig_content_rows.append(ig)
+                if ig_content_rows:
+                    ig_headers = list(ig_content_rows[0].keys())
+                    write_sheet(ig_content_ws, ig_headers, ig_content_rows)
+                    
+            # --- (optional) Sheets: scores_meta & scores_content ---
+            if scores_def:
+                scores_meta_ws = wb.create_sheet(title="scores_meta")
+                scores_meta_ws.append(["type", "scores"])
+                scores_meta_ws.append(["name", "scores"])
+                
+                scores_content_ws = wb.create_sheet(title="scores_content")
+                
+                scores_content_rows = []
+                for scores in scores_def:
+                    scores_content_rows.append(scores)
+                if scores_content_rows:
+                    scores_headers = list(scores_content_rows[0].keys())
+                    write_sheet(scores_content_ws, scores_headers, scores_content_rows)
+                    
+
+        elif obj_key == "risk_matrix":
+            for i, matrix in enumerate(obj_value):
+                sheetname = f"risk_matrix_meta_{i+1}" if len(obj_value) > 1 else "risk_matrix_meta"
+                ws = wb.create_sheet(sheetname)
+                meta_rows = [{"key": k, "value": v} for k, v in matrix.items() if not isinstance(v, list)]
+                write_sheet(ws, ["key", "value"], meta_rows)
+
+                if "levels" in matrix:
+                    levels_ws = wb.create_sheet(sheetname.replace("_meta", "_levels"))
+                    write_sheet(levels_ws, list(matrix["levels"][0].keys()), matrix["levels"])
+
+    # Try saving the workbook, raise error on failure
+    try:
+        wb.save(output_excel_path)
+    except Exception as e:
+        raise IOError(f"Failed to save Excel file: {e}")
+    print(f"✅ Excel recreated: \"{output_excel_path}\"")
+
+
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description="Recreate a structured V2 Excel file from YAML.")
+    parser.add_argument("yaml_path", help="Path to input YAML file")
+    parser.add_argument("output_excel", nargs="?", help="Path to output Excel file (optional, defaults to YAML filename with .xlsx)")
+
+    args = parser.parse_args()
+
+    # Determine default Excel filename if not provided
+    if args.output_excel:
+        output_excel = args.output_excel
+        if not output_excel.lower().endswith(".xlsx"):
+            output_excel += ".xlsx"
+    else:
+        base_name = os.path.splitext(os.path.basename(args.yaml_path))[0]
+        output_excel = "convert_" + base_name + ".xlsx"
+
+    # Wrap call in try/except to catch and report errors cleanly
+    try:
+        recreate_excel_from_yaml(args.yaml_path, output_excel)
+    except Exception as e:
+        print(f"❌ [ERROR] {e}")
+        exit(1)
