@@ -1107,7 +1107,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
 			{ field: 'findings', urlModel: 'applied-controls' },
-			{ field: 'findings', urlModel: 'evidences' },
+			{ field: 'findings', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
