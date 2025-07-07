@@ -2488,6 +2488,10 @@ class Incident(NameDescriptionMixin, FolderMixin):
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
 
+    def get_events(self):
+        events = TimelineEntry.objects.filter(incident=self).order_by("timestamp")
+        return events
+
 
 class TimelineEntry(AbstractBaseModel, FolderMixin):
     """

@@ -22,6 +22,10 @@ from django.db.models import (
 )
 from django.db.models.functions import Greatest, Coalesce
 
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from datetime import datetime
+
 
 from collections import defaultdict
 import pytz
@@ -5564,6 +5568,229 @@ class IncidentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get detection channel choices")
     def detection(self, request):
         return Response(dict(Incident.Detection.choices))
+
+    @action(detail=True, methods=["get"], url_path="gen_postmortem")
+    def gen_postmortem(self, request, pk=None):
+        mode = request.query_params.get("mode", "jso")
+        incident = self.get_object()
+        events = incident.get_events()
+
+        if mode == "md":
+            markdown_content = self.prepare_markdown_data(incident, events)
+            response = HttpResponse(markdown_content, content_type="text/markdown")
+            response["Content-Disposition"] = (
+                f'attachment; filename="incident_{incident.ref_id or incident.id}_postmortem.md"'
+            )
+            return response
+
+        elif mode == "pdf":
+            pdf_data = self.generate_pdf(incident, events)  # To be implemented
+            response = HttpResponse(pdf_data, content_type="application/pdf")
+            response["Content-Disposition"] = (
+                f'attachment; filename="incident_{incident.ref_id or incident.id}_postmortem.pdf"'
+            )
+            return response
+
+        return Response(self.prepare_json_data(incident, events))
+
+    def prepare_markdown_data(self, incident, events):
+        """Prepare incident data formatted as markdown"""
+
+        # Calculate incident duration
+        if events:
+            start_time = events.first().timestamp
+            # Find last event or use current time if ongoing
+            if incident.status in [incident.Status.RESOLVED, incident.Status.CLOSED]:
+                end_time = events.last().timestamp
+            else:
+                end_time = (
+                    timezone.now()
+                )  # Use timezone.now() instead of datetime.now()
+            duration = end_time - start_time
+        else:
+            start_time = incident.reported_at or incident.created_at
+            end_time = timezone.now()  # Use timezone.now() instead of datetime.now()
+            duration = end_time - start_time
+
+        # Group events by type for better organization
+        event_groups = {
+            "detection": [],
+            "mitigation": [],
+            "observation": [],
+            "severity_changed": [],
+            "status_changed": [],
+        }
+
+        for event in events:
+            event_type = event.entry_type.lower()
+            if event_type in event_groups:
+                event_groups[event_type].append(event)
+
+        # Get severity and status display names
+        severity_display = incident.get_severity_display()
+        status_display = incident.get_status_display()
+        detection_display = (
+            incident.get_detection_display() if incident.detection else "Unknown"
+        )
+
+        # Prepare markdown content
+        markdown_content = f"""# Incident Postmortem: {incident.name}
+
+## Incident Summary
+
+- **Incident ID:** {incident.ref_id or incident.id}
+- **Reference ID:** {incident.ref_id or "N/A"}
+- **Reported:** {start_time.strftime("%Y-%m-%d %H:%M:%S UTC")}
+- **Duration:** {str(duration).split(".")[0]}
+- **Severity:** {severity_display}
+- **Status:** {status_display}
+- **Detection:** {detection_display}
+
+## Description
+
+{incident.description or "No description provided"}
+
+## Affected Assets
+
+"""
+
+        # Add affected assets
+        assets = incident.assets.all()
+        if assets:
+            for asset in assets:
+                markdown_content += f"- {asset.name}\n"
+        else:
+            markdown_content += "- No assets specified\n"
+
+        markdown_content += "\n"
+
+        # Add threats if any
+        threats = incident.threats.all()
+        if threats:
+            markdown_content += "## Related Threats\n\n"
+            for threat in threats:
+                markdown_content += f"- {threat.name}\n"
+            markdown_content += "\n"
+
+        # Add external link if provided
+        if incident.link:
+            markdown_content += (
+                f"## External Reference\n\n[{incident.link}]({incident.link})\n\n"
+            )
+
+        # Add detailed timeline
+        markdown_content += "## Timeline\n\n"
+
+        for event in events:
+            timestamp = event.timestamp.strftime("%Y-%m-%d %H:%M:%S UTC")
+            event_type = event.get_entry_type_display()
+            author_name = event.author if event.author else "System"
+
+            markdown_content += f"- *{timestamp}* - **{event.entry}**\n\n"
+            markdown_content += f"\t- *{event_type}*\n\n"
+            markdown_content += f"\t- *{author_name}*\n\n"
+
+            markdown_content += f"\t- Notes: {event.observation}\n"
+
+            # Add evidences if any
+            evidences = event.evidences.all()
+            if evidences:
+                markdown_content += "\t- **Evidence:**\n"
+                for evidence in evidences:
+                    markdown_content += f"\t\t- {evidence.name}\n"
+
+            markdown_content += "\n"
+
+        # Add template sections for completion
+        markdown_content += """## Impact Assessment
+
+- **Users Affected:** [To be filled]
+- **Systems Affected:** [To be filled]
+- **Business Impact:** [To be filled]
+- **Financial Impact:** [To be filled]
+
+## Root Cause Analysis
+
+[To be filled based on investigation findings]
+
+## Action Items
+
+### Immediate Actions
+- [ ] [Action item 1]
+- [ ] [Action item 2]
+
+### Long-term Actions
+- [ ] [Action item 1]
+- [ ] [Action item 2]
+
+## Lessons Learned
+
+[To be filled]
+
+## Prevention Measures
+
+[To be filled]
+
+## Communication Timeline
+
+[To be filled - internal and external communications]
+
+---
+*Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}*
+"""
+
+        return markdown_content
+
+    def prepare_json_data(self, incident, events):
+        """Prepare incident data as JSON for API response"""
+        return {
+            "incident_id": incident.id,
+            "ref_id": incident.ref_id,
+            "name": incident.name,
+            "description": incident.description,
+            "severity": incident.get_severity_display(),
+            "status": incident.get_status_display(),
+            "detection": incident.get_detection_display()
+            if incident.detection
+            else None,
+            "reported_at": incident.reported_at.isoformat()
+            if incident.reported_at
+            else None,
+            "created_at": incident.created_at.isoformat()
+            if hasattr(incident, "created_at")
+            else None,
+            "link": incident.link,
+            "owners": [
+                {
+                    "id": owner.id,
+                    "username": owner.username,
+                    "full_name": owner.get_full_name(),
+                }
+                for owner in incident.owners.all()
+            ],
+            "assets": [
+                {"id": asset.id, "name": asset.name} for asset in incident.assets.all()
+            ],
+            "threats": [
+                {"id": threat.id, "name": threat.name}
+                for threat in incident.threats.all()
+            ],
+            "timeline": [
+                {
+                    "id": event.id,
+                    "timestamp": event.timestamp.isoformat(),
+                    "entry_type": event.get_entry_type_display(),
+                    "entry": event.entry,
+                    "observation": event.observation,
+                    "author": event.author.email if event.author else None,
+                    "evidences": [
+                        {"id": evidence.id, "name": evidence.name}
+                        for evidence in event.evidences.all()
+                    ],
+                }
+                for event in events
+            ],
+        }
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()
