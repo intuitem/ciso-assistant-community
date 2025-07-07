@@ -17,6 +17,8 @@
 	"indonesian": "Indonésien",
 	"danish": "Danois",
 	"hungarian": "Hongrois",
+	"ukrainian": "Ukrainien",
+	"greek": "Grec",
 	"addThreat": "Ajouter une menace",
 	"addVulnerability": "Ajouter une vulnérabilité",
 	"addReferenceControl": "Ajouter une mesure de référence",
@@ -105,7 +107,7 @@
 	"description": "Description",
 	"parentDomain": "Domaine parent",
 	"ref": "Réf.",
-	"refId": "ID de référence",
+	"refId": "ID",
 	"businessValue": "Valeur métier",
 	"email": "E-mail",
 	"firstName": "Prénom",
@@ -1285,7 +1287,7 @@
 	"attackPathStakeholdersHelpText": "Parties prenantes impactées par le chemin d'attaque",
 	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude",
 	"percentageDisplay": "{number} %",
-	"reviewProgress": "Avancement de la revue",
+	"reviewProgress": "Avancement",
 	"ecosystemRadar": "Radar de l'écosystème",
 	"criticalitySemiColon": "Criticité :",
 	"cyberReliability": "Fiabilité cyber",
@@ -1616,6 +1618,12 @@
 	"mappingSuggested": "Suggestion de mapping",
 	"mappingSuggestedHelpText": "Suggestions de mapping basées sur les référentiels chargés",
 	"mappingSuggestionTeasing": "Les mappings sont maintenant suggérés ! Vous pouvez utiliser les filtres pour explorer les suggestions basées sur les référentiels chargés.",
+	"campaign": "Campagne",
+	"campaigns": "Campagnes",
+	"addCampaign": "Démarrer une campagne",
+	"campaignDomainHelpText": "Le domaine auquel la campagne sera attachée.",
+	"averageProgress": "Progression moyenne",
+	"daysRemaining": "Jours restants",
 	"associatedFindingsAssessments": "Suivis associés",
 	"hourCount": [
 		{
@@ -1647,5 +1655,16 @@
 			}
 		}
 	],
-	"matchingScenarios": "Scénarios correspondants"
+	"matchingScenarios": "Scénarios correspondants",
+	"associatedCampaigns": "Campagnes associées",
+	"serverURL": "URL serveur",
+	"oidcConfiguration": "openid-configuration",
+	"tokenAuthMethod": "Méthode d’authentification par token",
+	"oauthPKCEEnabled": "OAuth PKCE activé",
+	"suggestedParentheses": "(suggéré)",
+	"matchingScenarios": "Scénarios correspondants",
+	"clientSecretAlreadySetHelpText": "Le secret client est déjà défini.",
+	"resetClientSecret": "Effacer le secret client",
+	"oidcTokenAuthMethodHelpText": "Méthode facultative d'authentification au point de terminaison du token. Si elle est omise, une méthode de la liste des méthodes d’authentification du serveur sera utilisée",
+	"oidcPKCEEnabledHelpText": "Activer la prise en charge d’OAuth PKCE (Proof Key for Code Exchange). Recommandé pour les clients publics."
 }

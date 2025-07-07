@@ -725,8 +725,8 @@ export const listViewFields = {
 		body: ['name', 'description']
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
+		head: ['email', 'firstName', 'lastName', 'userGroups', 'keep_local_login', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'user_groups', 'keep_local_login', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -1060,6 +1060,10 @@ export const listViewFields = {
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
+	campaigns: {
+		head: ['name', 'description', 'framework', 'status'],
+		body: ['name', 'description', 'framework', 'status']
 	},
 	'task-templates': {
 		head: [

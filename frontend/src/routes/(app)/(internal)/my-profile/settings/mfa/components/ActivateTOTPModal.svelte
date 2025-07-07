@@ -48,7 +48,10 @@
 				<h4 class="h4">{m.step({ number: 1 })}</h4>
 				<p class="text-surface-900">{$modalStore[0].body ?? '(body missing)'}</p>
 				<QR
-					data={totp.totp_url}
+					data={totp.totp_url.replace(
+						/issuer=[^&]+/,
+						'issuer=' + encodeURIComponent('CISO Assistant')
+					)}
 					anchorInnerFill="black"
 					anchorOuterFill="black"
 					width="400"

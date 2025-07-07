@@ -51,6 +51,7 @@
 	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
 	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
+	import CampaignForm from './ModelForm/CampaignForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -342,6 +343,8 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'campaigns'}
+			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'assets'}
 			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}

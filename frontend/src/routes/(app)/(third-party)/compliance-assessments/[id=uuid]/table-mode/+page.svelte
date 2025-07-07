@@ -66,7 +66,7 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	const requirementAssessments = $derived(data.requirement_assessments);
+	const requirementAssessments = $state(data.requirement_assessments);
 	const complianceAssessment = $state(data.compliance_assessment);
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -76,7 +76,7 @@
 
 	// svelte-ignore state_referenced_locally
 	requirementAssessments.forEach((ra) => {
-		hideSuggestionHashmap[ra.id] = true;
+		hideSuggestionHashmap[ra.id] = false;
 	});
 
 	let createdEvidence = $derived(form?.createdEvidence);
@@ -285,17 +285,17 @@
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
-		{#if !(questionnaireOnly ? hasQuestions : !hasQuestions)}
-			<div
-				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
+		<div
+			class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
+		>
+			<a
+				href="/compliance-assessments/{complianceAssessment.id}"
+				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<a
-					href="/compliance-assessments/{complianceAssessment.id}"
-					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-				>
-					<i class="fa-solid fa-arrow-left"></i>
-					<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
-				</a>
+				<i class="fa-solid fa-arrow-left"></i>
+				<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
+			</a>
+			{#if !(questionnaireOnly ? hasQuestions : !hasQuestions)}
 				<div class="flex items-center justify-center space-x-4">
 					{#if questionnaireMode}
 						<p class="font-bold text-sm">{m.assessmentMode()}</p>
@@ -318,8 +318,8 @@
 						{/if}
 					</Switch>
 				</div>
-			</div>
-		{/if}
+			{/if}
+		</div>
 		{#each requirementAssessments as requirementAssessment, i}
 			<div class="w-2"></div>
 
@@ -352,9 +352,9 @@
 								</div>
 								<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
 									{#if !hideSuggestionHashmap[requirementAssessment.id]}
-										<i class="fa-solid fa-eye"></i>
+										<i class="fa-solid fa-chevron-down"></i>
 									{:else}
-										<i class="fa-solid fa-eye-slash"></i>
+										<i class="fa-solid fa-chevron-right"></i>
 									{/if}
 								</button>
 							</h2>
@@ -538,7 +538,7 @@
 												checkboxComponent="switch"
 												classes="h-full flex flex-row items-center justify-center my-1"
 												classesContainer="h-full flex flex-row items-center space-x-4"
-												onChange={async (isChecked) => {
+												onChange={async () => {
 													requirementAssessment.is_scored = !requirementAssessment.is_scored;
 													await update(requirementAssessment, 'is_scored');
 												}}
@@ -551,11 +551,13 @@
 										form={docScoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
+										scores_definition={complianceAssessment.scores_definition}
 										field="documentation_score"
 										label={m.documentationScore()}
+										isDoc={true}
 										styles="w-full p-1"
 										onChange={(newScore) => {
-											requirementAssessment.score = newScore;
+											requirementAssessment.documentation_score = newScore;
 											updateScore(requirementAssessment);
 										}}
 										disabled={!requirementAssessment.is_scored ||
