@@ -67,6 +67,8 @@ READER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    # campaigns,
+    "view_campaign",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -114,6 +116,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    # campaigns,
+    "view_campaign",
     # privacy,
     "view_processing",
     "view_processingnature",
@@ -272,6 +276,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "view_campaign",
     # privacy,
     "add_processing",
     "change_processing",
@@ -459,6 +465,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
     # privacy,
     "add_processing",
     "change_processing",
@@ -712,6 +723,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

@@ -36,8 +36,8 @@
 		cachedValue = $bindable(),
 		field,
 		valuePath = field,
-		key,
-		labelKey
+		key = 'value',
+		labelKey = 'label'
 	}: Props = $props();
 
 	const { value } = form ? formFieldProxy(form, valuePath) : {};

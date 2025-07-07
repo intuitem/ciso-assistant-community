@@ -39,6 +39,7 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
+		pathField?: string;
 		optionsSuggestions?: any[];
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
@@ -46,6 +47,7 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
+		disabled?: boolean;
 		mount?: (value: any) => void;
 	}
 
@@ -71,6 +73,7 @@
 		optionsValueField = 'id',
 		browserCache = 'default',
 		optionsExtraFields = [],
+		pathField = '',
 		optionsSuggestions = [],
 		optionsSelf = null,
 		optionsSelfSelect = false,
@@ -176,8 +179,14 @@
 					return value !== undefined ? value.toString() : '';
 				});
 
-				const fullLabel =
-					optionsExtraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
+				const path: string[] =
+					pathField && object?.[pathField]
+						? object[pathField].map((obj: { str: string; id: string }) => {
+								return obj.str;
+							})
+						: [];
+
+				const fullLabel = `${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
 
 				return {
 					label: fullLabel,
@@ -186,7 +195,8 @@
 						(s) =>
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
 					),
-					translatedLabel: safeTranslate(fullLabel)
+					translatedLabel: safeTranslate(fullLabel),
+					path
 				};
 			})
 			.filter(
@@ -205,6 +215,19 @@
 		if (field) return obj[path]?.[field];
 		return path.split('.').reduce((o, p) => (o || {})[p], obj);
 	}
+
+	// Get the search key from an option object or the option itself
+	// if it's a string or number
+	export const getSearchTarget = (opt: Option) => {
+		if (opt instanceof Object) {
+			if (opt.label === undefined) {
+				const opt_str = JSON.stringify(opt);
+				console.error(`MultiSelect option ${opt_str} is an object but has no label key`);
+			}
+			return opt?.path ? [...opt.path, opt.label].join('') : opt.label;
+		}
+		return `${opt}`;
+	};
 
 	onMount(async () => {
 		await fetchOptions();
@@ -337,20 +360,62 @@
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
+			duplicates={false}
+			key={JSON.stringify}
+			filterFunc={(opt, searchText) => {
+				if (!searchText) return true;
+				return `${getSearchTarget(opt)}`.toLowerCase().includes(searchText.toLowerCase());
+			}}
 		>
-			{#snippet children(option)}
-				{#if option.option.suggested}
-					<span class="text-primary-600">{option.option.label}</span>
+			{#snippet option({ option })}
+				{#if option.path}
+					<span>
+						{#each option.path as item}
+							<span class="text-surface-500 font-light">
+								{item} /&nbsp;
+							</span>
+						{/each}
+					</span>
+				{/if}
+				{#if option.suggested}
+					<span class="text-primary-600">{option.label}</span>
 					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{:else if translateOptions && option.option}
+				{:else if translateOptions && option}
 					{#if field === 'ro_to_couple'}
-						{@const [firstPart, ...restParts] = option.option.label.split(' - ')}
+						{@const [firstPart, ...restParts] = option.label.split(' - ')}
 						{safeTranslate(firstPart)} - {restParts.join(' - ')}
 					{:else}
-						{option.option.translatedLabel}
+						{option.translatedLabel}
 					{/if}
 				{:else}
-					{option.option.label || option.option}
+					{option.label || option}
+				{/if}
+			{/snippet}
+			{#snippet selectedItem({ option })}
+				{#if option.path}
+					<span>
+						{#each option.path as item, idx}
+							<span class="text-xs font-light">
+								{item}
+								{#if idx < option.path.length - 1}
+									&nbsp;/
+								{/if}&nbsp;
+							</span>
+						{/each}
+					</span>
+				{/if}
+				{#if option.suggested}
+					<span class="text-primary-600">{option.label}</span>
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+				{:else if translateOptions && option}
+					{#if field === 'ro_to_couple'}
+						{@const [firstPart, ...restParts] = option.label.split(' - ')}
+						{safeTranslate(firstPart)} - {restParts.join(' - ')}
+					{:else}
+						{option.translatedLabel}
+					{/if}
+				{:else}
+					{option.label || option}
 				{/if}
 			{/snippet}
 		</MultiSelect>

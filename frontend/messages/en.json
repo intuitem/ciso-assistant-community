@@ -107,7 +107,7 @@
 	"description": "Description",
 	"parentDomain": "Parent domain",
 	"ref": "Reference",
-	"refId": "Reference ID",
+	"refId": "ID",
 	"businessValue": "Business value",
 	"email": "Email",
 	"firstName": "First name",
@@ -921,7 +921,7 @@
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
 	"fixed": "Fixed",
-	"general": "general",
+	"general": "General",
 	"generalSettingsDescription": "Configure your general settings here.",
 	"securityObjectiveScale": "Security objective scale",
 	"generalSettingsUpdated": "General settings updated",
@@ -1317,7 +1317,7 @@
 	"attackPathStakeholdersHelpText": "Stakeholders involved in the attack path",
 	"attackPathIsSelectedHelpText": "Selection of the attack path for the study",
 	"percentageDisplay": "{number}%",
-	"reviewProgress": "Review progress",
+	"reviewProgress": "Progress",
 	"ecosystemRadar": "Ecosystem radar",
 	"criticalitySemiColon": "Criticality:",
 	"cyberReliability": "Cyber reliability",
@@ -1637,6 +1637,12 @@
 	"mappingSuggestionTeasing": "Mappings are now suggested! You can use the filters to explore suggestions based on loaded frameworks.",
 	"errorCreatingPersonalAccessToken": "An error occurred while creating the personal access token.",
 	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user.",
+	"campaign": "Campaign",
+	"campaigns": "Campaigns",
+	"addCampaign": "Start a campaign",
+	"campaignDomainHelpText": "The domain that the campaign will be attached to.",
+	"averageProgress": "Average progress",
+	"daysRemaining": "Days remaining",
 	"associatedFindingsAssessments": "Associated follow-ups",
 	"hourCount": [
 		{
@@ -1668,8 +1674,16 @@
 			}
 		}
 	],
+	"serverURL": "Server URL",
+	"oidcConfiguration": "openid-configuration",
+	"tokenAuthMethod": "Token auth method",
+	"oauthPKCEEnabled": "OAuth PKCE enabled",
 	"suggestedParentheses": "(suggested)",
 	"matchingScenarios": "Matching scenarios",
+	"clientSecretAlreadySetHelpText": "The client secret is already set.",
+	"resetClientSecret": "Reset client secret",
+	"oidcTokenAuthMethodHelpText": "Optional token endpoint authentication method. If omitted, a method from the server's auth token method list is used",
+	"oidcPKCEEnabledHelpText": "Enable OAuth PKCE (Proof Key for Code Exchange) support. This is recommended for public clients.",
 	"clickToUpload": "Click to upload",
 	"orDragAndDrop": "or drag and drop",
 	"dataWizardSelectFile": "Select your file and make sure it matches the templates",
@@ -1690,5 +1704,6 @@
 	"inherentLevel": "Inherent Level",
 	"inherentRiskLevelPerScenario": "Inherent risk level per scenario",
 	"inherentRiskLevel": "Inherent risk level",
-	"inherentRiskLevelHelpText": "The inherent risk level is the risk level before any controls are applied"
+	"inherentRiskLevelHelpText": "The inherent risk level is the risk level before any controls are applied",
+	"associatedCampaigns": "Associated campaigns"
 }

@@ -80,7 +80,7 @@ export class PageDetail extends BasePage {
 					} else if (key === 'ref_id') {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
-							.toHaveText('Reference ID');
+							.toHaveText('ID');
 					} else if (key === 'owners') {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
