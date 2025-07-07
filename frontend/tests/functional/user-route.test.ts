@@ -213,9 +213,7 @@ test('user usual routine actions are working correctly', async ({
 			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: vars.riskAssessmentVersion,
 			status: 'Done',
-			risk_matrix: vars.matrix.displayName,
-			eta: '2025-01-01',
-			due_date: '2025-05-01'
+			risk_matrix: vars.matrix.displayName
 		});
 
 		//TODO assert that the risk assessment data are displayed in the table
