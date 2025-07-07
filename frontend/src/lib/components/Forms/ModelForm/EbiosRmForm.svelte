@@ -186,9 +186,15 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[
-			['folder', 'str'],
-			['type', '']
+			['folder', 'str']
 		]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type',
+				}
+			]
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		cacheLock={cacheLocks['assets']}

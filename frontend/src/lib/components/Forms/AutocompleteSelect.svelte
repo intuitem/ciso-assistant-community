@@ -38,6 +38,16 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
+		optionsInfoFields?: {
+			fields: {
+				field: string; // Field name in the object
+				path?: string; // Optional, used for nested fields};
+				when?: (value: any) => boolean;
+				display?: (value: any) => string;
+			}[],
+			position?: 'suffix' | 'prefix'; // Default: 'suffix'
+			separator?: string; // Default: ' '
+		};
 		optionsSuggestions?: any[];
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
@@ -69,6 +79,11 @@
 		optionsValueField = 'id',
 		browserCache = 'default',
 		optionsExtraFields = [],
+		optionsInfoFields = {
+			fields: [],
+			position: 'suffix',
+			separator: ' '
+		},
 		optionsSuggestions = [],
 		optionsSelf = null,
 		optionsSelfSelect = false,
@@ -174,8 +189,26 @@
 					return value !== undefined ? value.toString() : '';
 				});
 
-				const fullLabel =
-					optionsExtraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
+				const parts = [...extraParts, mainLabel].filter(Boolean);
+				let fullLabel = $state(parts.join('/'));
+
+				if (optionsInfoFields) {
+					const infoParts = optionsInfoFields.fields
+						.map((infoField) => {
+							const val = getNestedValue(object, infoField.field, infoField.path || '');
+							return typeof infoField.when === 'function' ? infoField.display(val) : val
+						})
+						.filter(Boolean);
+
+					if (infoParts.length > 0) {
+						if (optionsInfoFields.position === 'prefix') {
+							fullLabel = infoParts.join(optionsInfoFields.separator || ' ') + ' ' + fullLabel;
+						} else {
+							console.log('infoParts', infoParts);
+							fullLabel += ' ' + infoParts.join(optionsInfoFields.separator || ' ');
+						}
+					}
+				}
 
 				return {
 					label: fullLabel,
@@ -221,7 +254,7 @@
 		}
 	});
 
-	function handleSelectChange() {
+	async function handleSelectChange() {
 		if (allowUserOptions && selectedValues.length > 0) {
 			for (const val of selectedValues) {
 				if (!options.some((opt) => opt.value === val)) {
@@ -232,7 +265,7 @@
 		}
 
 		// change($value);
-		$effect(async () => await onChange($value));
+		await onChange($value)
 		// dispatch('cache', selected);
 	}
 
