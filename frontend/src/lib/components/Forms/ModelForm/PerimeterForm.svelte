@@ -5,6 +5,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -21,6 +22,13 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
+
+	const translatedStatus = model.selectOptions['lc_status'].map((status) => {
+		return {
+			...status,
+			translatedLabel: safeTranslate(status.label)
+		};
+	});
 </script>
 
 <AutocompleteSelect
@@ -41,7 +49,8 @@
 />
 <Select
 	{form}
-	options={model.selectOptions['lc_status']}
+	disableDoubleDash={true}
+	options={translatedStatus}
 	field="lc_status"
 	label={m.lcStatus()}
 	cacheLock={cacheLocks['lc_status']}
