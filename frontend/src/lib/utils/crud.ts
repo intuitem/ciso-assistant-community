@@ -149,7 +149,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
-			{ field: 'folder', urlModel: 'entities' }
+			{ field: 'folder', urlModel: 'entities' },
+			{ field: 'folder', urlModel: 'assets' }
 		]
 	},
 	perimeters: {

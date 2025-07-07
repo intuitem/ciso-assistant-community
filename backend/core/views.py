@@ -621,6 +621,8 @@ class AssetViewSet(BaseModelViewSet):
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
+            # Use domain.name/asset.name as unique key to handle duplicate asset names across domains
+            asset_key = f"{asset.folder.name}/{asset.name}"
             nodes.append(
                 {
                     "name": asset.name,
@@ -630,19 +632,33 @@ class AssetViewSet(BaseModelViewSet):
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
-            nodes_idx[asset.name] = N
+            nodes_idx[asset_key] = N
             N += 1
+
+        # Add links between assets and their domains
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            asset_key = f"{asset.folder.name}/{asset.name}"
+            links.append(
+                {
+                    "source": nodes_idx[asset.folder.name],
+                    "target": nodes_idx[asset_key],
+                    "value": "contains",
+                }
+            )
+
+        # Add links between assets (existing relationships)
+        for asset in Asset.objects.filter(id__in=viewable_assets):
+            asset_key = f"{asset.folder.name}/{asset.name}"
             for relationship in asset.parent_assets.all():
+                relationship_key = f"{relationship.folder.name}/{relationship.name}"
                 links.append(
                     {
-                        "source": nodes_idx[relationship.name],
-                        "target": nodes_idx[asset.name],
+                        "source": nodes_idx[relationship_key],
+                        "target": nodes_idx[asset_key],
                         "value": "supported by",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
-
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
