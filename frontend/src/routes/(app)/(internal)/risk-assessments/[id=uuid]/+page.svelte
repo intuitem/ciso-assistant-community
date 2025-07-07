@@ -279,9 +279,9 @@
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
+		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
 			{#if page.data?.featureflags?.inherent_risk}
-				<div class="flex-1">
+				<div>
 					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
 
 					<RiskMatrix
@@ -293,12 +293,11 @@
 							'inherent'
 						)}
 						dataItemComponent={RiskScenarioItem}
-						{showRisks}
 						{useBubbles}
 					/>
 				</div>
 			{/if}
-			<div class="flex-1">
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
 				<RiskMatrix
@@ -306,11 +305,10 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
 					{useBubbles}
 				/>
 			</div>
-			<div class="flex-1">
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 
 				<RiskMatrix
@@ -318,7 +316,7 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>
