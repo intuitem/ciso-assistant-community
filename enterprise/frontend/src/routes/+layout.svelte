@@ -92,30 +92,36 @@
 	});
 
 	const clientSettings = $page.data.clientSettings;
-	let favicon = $derived(`data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}`);
+	let favicon = $state($faviconB64?.hash ? `data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}` : undefined);
 	let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
+
+  if (typeof window !== 'undefined') {
+		// stash the value...
+		const _favicon = favicon;
+
+		// unset it...
+		favicon = undefined;
+
+		$effect(() => {
+			// ...and reset after we've mounted
+			favicon = _favicon;
+		});
+	}
 
 	onMount(async () => {
 		if (!clientSettings?.settings?.favicon) {
 			return;
 		}
-		if (faviconHash !== $faviconB64.hash) {
+		if (faviconHash !== $faviconB64?.hash) {
 			console.log('favicon changed, fetching new favicon...');
 			const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
 			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
 		}
 	});
-
-	run(() => {
-		if (browser && $page.url.searchParams.has('refresh')) {
-			$page.url.searchParams.delete('refresh');
-			window.location.href = $page.url.href;
-		}
-	});
 </script>
 
 <svelte:head>
-  <link rel="icon" href={favicon?.url ?? favicon} />
+  <link rel="icon" href={favicon ?? '/favicon.ico'} />
 </svelte:head>
 
 <Modal components={modalRegistry} />
