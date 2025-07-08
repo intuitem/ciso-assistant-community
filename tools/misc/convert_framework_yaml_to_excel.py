@@ -364,7 +364,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 write_sheet(answers_content_ws, headers, rows)
 
 
-            # --- (optional) [SHEETS] implementation_groups_meta & implementation_groups_content ---
+            # --- [SHEETS] implementation_groups_meta & implementation_groups_content ---
             if ig_defs:
                 ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
                 ig_meta_ws.append(["type", "implementation_groups"])
@@ -379,7 +379,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     write_sheet(ig_content_ws, ig_headers, ig_content_rows)
 
    
-            # --- (optional) [SHEETS] scores_meta & scores_content ---
+            # --- [SHEETS] scores_meta & scores_content ---
             if scores_def:
                 scores_meta_ws = wb.create_sheet(title="scores_meta")
                 scores_meta_ws.append(["type", "scores"])
@@ -393,9 +393,11 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     scores_headers = list(scores_content_rows[0].keys())
                     write_sheet(scores_content_ws, scores_headers, scores_content_rows)
 
+        # --- [SHEETS] reference_controls_meta & reference_controls_content ---
         elif obj_key == "reference_controls":
             process_reference_controls(wb, obj_value)
 
+        # --- [SHEETS] threats_meta & threats_content ---
         elif obj_key == "threats":
             process_threats(wb, obj_value)
 
@@ -409,6 +411,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 if "levels" in matrix:
                     levels_ws = wb.create_sheet(sheetname.replace("_meta", "_levels"))
                     write_sheet(levels_ws, list(matrix["levels"][0].keys()), matrix["levels"])
+
 
     # Try saving the workbook, raise error on failure
     try:
