@@ -209,8 +209,14 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
     for k, v in data.items():
         if k == "objects":
             break
-        if not isinstance(v, (list, dict)):
+        
+        if k == "dependencies":
+            deps_str = ", ".join(str(dep) for dep in v)
+            library_meta_ws.append([k, deps_str])
+            
+        elif not isinstance(v, (list, dict)):
             library_meta_ws.append([k, v])
+
 
     write_translation_rows(library_meta_ws, translations_block, fields=("name", "description", "copyright"))
 
@@ -220,7 +226,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
 
         if obj_key == "framework":
             
-             # --- [SHEET] framework_meta ---
+             # --- [Sheet] framework_meta ---
             meta_data = obj_value.copy()
             content = meta_data.pop("requirement_nodes", [])
             if "implementation_groups_definition" in meta_data:
@@ -257,7 +263,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 meta_ws.append(["scores_definition", "scores"])
 
 
-            # --- [SHEET] framework_content ---
+            # --- [Sheet] framework_content ---
             content_ws = wb.create_sheet(title="framework_content")
             headers = [
                 "assessable", "depth", "ref_id", "urn_id", "name", "description",
@@ -350,7 +356,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
             remove_empty_columns(content_ws)
 
             if answer_definitions:
-                meta_ws.append(["scores_definition", "scores"])
+                meta_ws.append(["answers_definition", "answers"])
                 answer_meta_ws = wb.create_sheet(title="answers_meta")
                 answer_meta_ws.append(["type", "answers"])
                 answer_meta_ws.append(["name", "answers"])
@@ -364,7 +370,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 write_sheet(answers_content_ws, headers, rows)
 
 
-            # --- [SHEETS] implementation_groups_meta & implementation_groups_content ---
+            # --- [Sheets] implementation_groups_meta & implementation_groups_content ---
             if ig_defs:
                 ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
                 ig_meta_ws.append(["type", "implementation_groups"])
@@ -379,7 +385,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     write_sheet(ig_content_ws, ig_headers, ig_content_rows)
 
    
-            # --- [SHEETS] scores_meta & scores_content ---
+            # --- [Sheets] scores_meta & scores_content ---
             if scores_def:
                 scores_meta_ws = wb.create_sheet(title="scores_meta")
                 scores_meta_ws.append(["type", "scores"])
@@ -393,11 +399,11 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     scores_headers = list(scores_content_rows[0].keys())
                     write_sheet(scores_content_ws, scores_headers, scores_content_rows)
 
-        # --- [SHEETS] reference_controls_meta & reference_controls_content ---
+        # --- [Sheets] reference_controls_meta & reference_controls_content ---
         elif obj_key == "reference_controls":
             process_reference_controls(wb, obj_value)
 
-        # --- [SHEETS] threats_meta & threats_content ---
+        # --- [Sheets] threats_meta & threats_content ---
         elif obj_key == "threats":
             process_threats(wb, obj_value)
 
