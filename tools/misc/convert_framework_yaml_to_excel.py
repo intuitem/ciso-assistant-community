@@ -17,11 +17,19 @@ Description:
     'library_meta', 'framework_meta', 'framework_content', and others.
 
     It handles the following cases: framework, answers, implementation groups,
-    scores, threats and reference controls replicating the structure expected in the V2 Excel format.
+    scores, threats and reference controls, replicating the structure expected in the V2 Excel format.
 
 WARNING:
-    The generated Excel file should be carefully verified before being used again
-    as input for "convert_library_v2.py" to ensure data integrity and compatibility.
+    The generated Excel file is not guaranteed to be directly compatible with
+    "convert_library_v2.py". Manual adjustments and verification may be required
+    to ensure correctness and compatibility.
+
+Limitations:
+    This script does not recreate the "urn_prefix" sheet nor any risk matrices.
+
+Info:
+    If you are trying to convert a mapping YAML file to Excel, please use the script
+    "convert_mapping_yaml_to_excel.py" instead.
 
 Example:
     python recreate_excel_from_yaml.py my_data.yaml
