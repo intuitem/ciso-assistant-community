@@ -14,8 +14,8 @@ Description:
     and reconstructs the original Excel file structure with multiple sheets such as
     'library_meta', 'framework_meta', 'framework_content', and others.
 
-    It handles special cases like answer definitions, implementation groups,
-    scores, and risk matrices, replicating the structure expected in the V2 Excel format.
+    It handles the following cases: framework, answers, implementation groups,
+    scores, threats and reference controls replicating the structure expected in the V2 Excel format.
 
 WARNING:
     The generated Excel file should be carefully verified before being used again
@@ -285,8 +285,16 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
     write_translation_rows(library_meta_ws, translations_block, fields=("name", "description", "copyright"))
 
     for obj_key, obj_value in data.get("objects", {}).items():
-        if obj_key == "requirement_mapping_sets":
-            continue
+        
+        # --- [WARNING] Risk Matrices ---
+        if obj_key == "risk_matrix":
+            print("⚠️  [WARNING] This script can't handle risk matrices")
+        
+        # --- [WARNING] Mappings --- 
+        if obj_key == "requirement_mapping_sets" or obj_key == "requirement_mapping_set":
+            print("⚠️  [WARNING] This script can't handle mappings")
+            print('💡 Tip: Use "convert_mapping_yaml_to_excel.py" to convert a YAML mapping into an Excel mapping')
+    
 
         if obj_key == "framework":
             
@@ -426,17 +434,6 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
         # --- [Sheets] threats_meta & threats_content ---
         elif obj_key == "threats":
             process_threats(wb, obj_value)
-
-        elif obj_key == "risk_matrix":
-            for i, matrix in enumerate(obj_value):
-                sheetname = f"risk_matrix_meta_{i+1}" if len(obj_value) > 1 else "risk_matrix_meta"
-                ws = wb.create_sheet(sheetname)
-                meta_rows = [{"key": k, "value": v} for k, v in matrix.items() if not isinstance(v, list)]
-                write_sheet(ws, ["key", "value"], meta_rows)
-
-                if "levels" in matrix:
-                    levels_ws = wb.create_sheet(sheetname.replace("_meta", "_levels"))
-                    write_sheet(levels_ws, list(matrix["levels"][0].keys()), matrix["levels"])
 
 
     # Try saving the workbook, raise error on failure
