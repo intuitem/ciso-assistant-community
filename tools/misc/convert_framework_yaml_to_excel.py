@@ -31,15 +31,13 @@ import argparse
 import os
 import yaml
 from openpyxl import Workbook
-from openpyxl.utils import get_column_letter
-
 
 
 def write_sheet(ws, header, rows):
     ws.append(header)
     for row in rows:
-        ws.append([row.get(col, "") for col in header])
-        
+        ws.append([str(row.get(col, "") or "") for col in header])
+
 
 def extract_translation_columns(objects_list):
     lang_to_fields = {}
@@ -58,12 +56,45 @@ def extract_translation_columns(objects_list):
     return translation_columns
 
 
+def extract_translation_values(obj, translation_columns):
+    row = {}
+    for key in translation_columns:
+        if "[" in key and key.endswith("]"):
+            field, lang = key[:-1].split("[")
+            row[key] = obj.get("translations", {}).get(lang, {}).get(field, "")
+    return row
+
+
+def write_translation_rows(ws, translations, fields=("name", "description", "copyright")):
+    for lang, field_map in translations.items():
+        for field in fields:
+            if field in field_map:
+                key = f"{field}[{lang}]"
+                val = field_map[field]
+                ws.append([str(key), str(val)])
+
+
+def remove_empty_columns(ws):
+    col_idx = 1
+    while col_idx <= ws.max_column:
+        if all((ws.cell(row=row_idx, column=col_idx).value in [None, ""]) for row_idx in range(2, ws.max_row + 1)):
+            ws.delete_cols(col_idx)
+        else:
+            col_idx += 1
+
+
+def convert_list_fields_to_string(row, obj, fields):
+    for field in fields:
+        if field in obj:
+            row[field] = ", ".join(obj[field])
+
+
 def process_reference_controls(wb, ref_controls):
+
     ref_cont_meta_ws = wb.create_sheet(title="reference_controls_meta")
     ref_cont_meta_ws.append(["type", "reference_controls"])
     ref_cont_meta_ws.append(["base_urn", "???"])
-    
-    
+
     headers = ["ref_id", "name", "csf_function", "category", "description", "annotation"]
     translation_columns = extract_translation_columns(ref_controls)
     full_headers = headers + translation_columns
@@ -73,25 +104,11 @@ def process_reference_controls(wb, ref_controls):
 
     for ctrl in ref_controls:
         row = {key: ctrl.get(key, "") for key in headers}
-
-        # Add translations
-        for key in translation_columns:
-            if "[" in key and key.endswith("]"):
-                field, lang = key[:-1].split("[")
-                row[key] = ctrl.get("translations", {}).get(lang, {}).get(field, "")
-
+        row.update(extract_translation_values(ctrl, translation_columns))
         rows.append(row)
 
     write_sheet(content_ws, full_headers, rows)
-
-    # Remove empty columns
-    col_idx = 1
-    while col_idx <= content_ws.max_column:
-        col_letter = get_column_letter(col_idx)
-        if all((content_ws.cell(row=row_idx, column=col_idx).value in [None, ""]) for row_idx in range(2, content_ws.max_row + 1)):
-            content_ws.delete_cols(col_idx)
-        else:
-            col_idx += 1
+    remove_empty_columns(content_ws)
 
 
 def recreate_excel_from_yaml(yaml_path, output_excel_path):
@@ -113,7 +130,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
     # --- [First Sheet] library_meta ---
     library_meta_ws = wb.create_sheet(title="library_meta", index=0)
     library_meta_ws.append(["type", "library"])
-    
+
     translations_block = data.get("translations", {})
 
     for k, v in data.items():
@@ -122,18 +139,11 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
         if not isinstance(v, (list, dict)):
             library_meta_ws.append([k, v])
 
-    # Add translations: name[xx], description[xx], copyright[xx]
-    for lang, fields in translations_block.items():
-        for field in fields:
-            if field in fields:
-                key = f"{field}[{lang}]"
-                val = fields[field]
-                library_meta_ws.append([key, val])
+    write_translation_rows(library_meta_ws, translations_block, fields=("name", "description", "copyright"))
 
-    # --- Process other tabs ---
     for obj_key, obj_value in data.get("objects", {}).items():
         if obj_key == "requirement_mapping_sets":
-            continue  # Ignored as requested
+            continue
 
         if obj_key == "framework":
             
@@ -155,30 +165,24 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
 
             meta_ws = wb.create_sheet(title="framework_meta")
             meta_ws.append(["type", "framework"])
-            
+
             base_urn = None
             for k, v in meta_data.items():
                 if isinstance(v, list) or isinstance(v, dict):
                     continue
-                meta_ws.append([k, v])
+                meta_ws.append([str(k), str(v)])
                 
                 if k == "urn":
                     base_urn = v.replace("framework", "req_node")
                     meta_ws.append(["base_urn", base_urn])
 
-            # Add translations: name[xx], description[xx]
-            for lang, fields in framework_translations.items():
-                for field in ("name", "description"):
-                    if field in fields:
-                        key = f"{field}[{lang}]"
-                        val = fields[field]
-                        meta_ws.append([key, val])
-            
+            write_translation_rows(meta_ws, framework_translations, fields=("name", "description"))
+
             if ig_defs:
                 meta_ws.append(["implementation_groups_definition", "implementation_groups"])
             if scores_def:
                 meta_ws.append(["scores_definition", "scores"])
-                
+
 
             # --- [SHEET] framework_content ---
             content_ws = wb.create_sheet(title="framework_content")
@@ -204,10 +208,8 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
             for lang in sorted(lang_to_fields):
                 for field in sorted(lang_to_fields[lang]):
                     translation_columns.append(f"{field}[{lang}]")
-            
+
             full_headers = headers + translation_columns
-
-
             rows = []
             answer_definitions = {}  # Store answer definitions for answers_content
 
@@ -227,17 +229,13 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 if base_urn and row.get("urn"):
                     row["urn_id"] = row["urn"].removeprefix(base_urn + ":")
 
-                # Join lists with commas
-                for field in ["implementation_groups", "threats", "reference_controls"]:
-                    if field in node:
-                        row[field] = ", ".join(node[field])
+                convert_list_fields_to_string(row, node, ["implementation_groups", "threats", "reference_controls"])
 
-                # --- Handle questions and answers ---
                 questions = node.get("questions", {})
                 question_texts = []
                 answer_values = []
 
-                for qkey in sorted(questions):  # Sort question:1, question:2, ...
+                for qkey in sorted(questions):
                     q = questions[qkey]
                     q_text = q.get("text", "").strip()
                     q_type = q.get("type", "").strip()
@@ -271,39 +269,19 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     row["questions"] = "\n".join(question_texts)
                 if answer_values:
                     row["answer"] = "\n".join(answer_values)
-                # --- End questions/answers block ---
 
-                # Add translations as field[lang] = value
-                for key in translation_columns:
-                    if "[" in key and key.endswith("]"):
-                        field, lang = key[:-1].split("[")
-                        row[key] = node.get("translations", {}).get(lang, {}).get(field, "")
-
-
+                row.update(extract_translation_values(node, translation_columns))
                 rows.append(row)
 
             write_sheet(content_ws, full_headers, rows)
-            
-            
-            # Remove empty columns from the framework_content sheet
-            col_idx = 1
-            while col_idx <= content_ws.max_column:
-                col_letter = get_column_letter(col_idx)
-                # Check if all cells (excluding header) in the column are empty
-                if all((content_ws.cell(row=row_idx, column=col_idx).value in [None, ""]) for row_idx in range(2, content_ws.max_row + 1)):
-                    content_ws.delete_cols(col_idx)
-                    # Stay at the same index since columns shift left after deletion
-                else:
-                    col_idx += 1
-                    
+            remove_empty_columns(content_ws)
 
-            # --- Write answers_content if needed ---
             if answer_definitions:
                 meta_ws.append(["scores_definition", "scores"])
                 answer_meta_ws = wb.create_sheet(title="answers_meta")
                 answer_meta_ws.append(["type", "answers"])
                 answer_meta_ws.append(["name", "answers"])
-                
+
                 answers_content_ws = wb.create_sheet("answers_content")
                 headers = ["id", "question_type", "question_choices"]
                 rows = []
@@ -312,39 +290,38 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     rows.append(row)
                 write_sheet(answers_content_ws, headers, rows)
 
+
             # --- (optional) [SHEETS] implementation_groups_meta & implementation_groups_content ---
             if ig_defs:
                 ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
                 ig_meta_ws.append(["type", "implementation_groups"])
                 ig_meta_ws.append(["name", "implementation_groups"])
-                
+
                 ig_content_ws = wb.create_sheet(title="implementation_groups_content")
-                
                 ig_content_rows = []
                 for ig in ig_defs:
                     ig_content_rows.append(ig)
                 if ig_content_rows:
                     ig_headers = list(ig_content_rows[0].keys())
                     write_sheet(ig_content_ws, ig_headers, ig_content_rows)
-                    
+
+   
             # --- (optional) [SHEETS] scores_meta & scores_content ---
             if scores_def:
                 scores_meta_ws = wb.create_sheet(title="scores_meta")
                 scores_meta_ws.append(["type", "scores"])
                 scores_meta_ws.append(["name", "scores"])
-                
+
                 scores_content_ws = wb.create_sheet(title="scores_content")
-                
                 scores_content_rows = []
                 for scores in scores_def:
                     scores_content_rows.append(scores)
                 if scores_content_rows:
                     scores_headers = list(scores_content_rows[0].keys())
                     write_sheet(scores_content_ws, scores_headers, scores_content_rows)
-                    
+
         elif obj_key == "reference_controls":
             process_reference_controls(wb, obj_value)
-                    
 
         elif obj_key == "risk_matrix":
             for i, matrix in enumerate(obj_value):
@@ -366,7 +343,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
 
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser(description="Recreate a structured V2 Excel file from YAML.")
     parser.add_argument("yaml_path", help="Path to input YAML file")
     parser.add_argument("output_excel", nargs="?", help="Path to output Excel file (optional, defaults to YAML filename with .xlsx)")
