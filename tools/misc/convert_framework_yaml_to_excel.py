@@ -33,10 +33,12 @@ import yaml
 from openpyxl import Workbook
 
 
+
 def write_sheet(ws, header, rows):
     ws.append(header)
     for row in rows:
         ws.append([str(row.get(col, "") or "") for col in header])
+
 
 
 def extract_translation_columns(objects_list):
@@ -56,6 +58,7 @@ def extract_translation_columns(objects_list):
     return translation_columns
 
 
+
 def extract_translation_values(obj, translation_columns):
     row = {}
     for key in translation_columns:
@@ -63,6 +66,7 @@ def extract_translation_values(obj, translation_columns):
             field, lang = key[:-1].split("[")
             row[key] = obj.get("translations", {}).get(lang, {}).get(field, "")
     return row
+
 
 
 def write_translation_rows(ws, translations, fields=("name", "description", "copyright")):
@@ -74,6 +78,7 @@ def write_translation_rows(ws, translations, fields=("name", "description", "cop
                 ws.append([str(key), str(val)])
 
 
+
 def remove_empty_columns(ws):
     col_idx = 1
     while col_idx <= ws.max_column:
@@ -83,32 +88,72 @@ def remove_empty_columns(ws):
             col_idx += 1
 
 
+
 def convert_list_fields_to_string(row, obj, fields):
     for field in fields:
         if field in obj:
             row[field] = ", ".join(obj[field])
 
 
+
 def process_reference_controls(wb, ref_controls):
 
+    # Create the meta sheet
     ref_cont_meta_ws = wb.create_sheet(title="reference_controls_meta")
     ref_cont_meta_ws.append(["type", "reference_controls"])
     ref_cont_meta_ws.append(["base_urn", "???"])
 
+    # Define base columns
     headers = ["ref_id", "name", "csf_function", "category", "description", "annotation"]
+
+    # Extract translation columns
     translation_columns = extract_translation_columns(ref_controls)
     full_headers = headers + translation_columns
 
+    # Create the content sheet
     content_ws = wb.create_sheet(title="reference_controls_content")
     rows = []
 
+    # Fill the rows
     for ctrl in ref_controls:
         row = {key: ctrl.get(key, "") for key in headers}
         row.update(extract_translation_values(ctrl, translation_columns))
         rows.append(row)
 
+    # Write and clean
     write_sheet(content_ws, full_headers, rows)
     remove_empty_columns(content_ws)
+
+
+
+def process_threats(wb, threats):
+
+    # Create the meta sheet
+    threats_meta_ws = wb.create_sheet(title="threats_meta")
+    threats_meta_ws.append(["type", "threats"])
+    threats_meta_ws.append(["base_urn", "???"])
+
+    # Define base columns
+    headers = ["ref_id", "name", "description", "annotation"]
+
+    # Extract translation columns
+    translation_columns = extract_translation_columns(threats)
+    full_headers = headers + translation_columns
+
+    # Create the content sheet
+    content_ws = wb.create_sheet(title="threats_content")
+    rows = []
+
+    # Fill the rows
+    for threat in threats:
+        row = {key: threat.get(key, "") for key in headers}
+        row.update(extract_translation_values(threat, translation_columns))
+        rows.append(row)
+
+    # Write and clean
+    write_sheet(content_ws, full_headers, rows)
+    remove_empty_columns(content_ws)
+
 
 
 def recreate_excel_from_yaml(yaml_path, output_excel_path):
@@ -322,6 +367,9 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
 
         elif obj_key == "reference_controls":
             process_reference_controls(wb, obj_value)
+
+        elif obj_key == "threats":
+            process_threats(wb, obj_value)
 
         elif obj_key == "risk_matrix":
             for i, matrix in enumerate(obj_value):
