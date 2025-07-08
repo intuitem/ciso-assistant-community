@@ -118,6 +118,70 @@ def calculate_base_urn(items):
 
 
 
+def process_implementation_groups(wb, ig_defs):
+
+    ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
+    ig_meta_ws.append(["type", "implementation_groups"])
+    ig_meta_ws.append(["name", "implementation_groups"])
+
+    ig_content_ws = wb.create_sheet(title="implementation_groups_content")
+    ig_content_rows = list(ig_defs)  # shallow copy
+
+    # Extract translation columns
+    translation_columns = extract_translation_columns(ig_content_rows)
+
+    # Add translation values into each row
+    for row in ig_content_rows:
+        row.update(extract_translation_values(row, translation_columns))
+        row.pop("translations", None)
+
+    if ig_content_rows:
+        ig_headers = list(ig_content_rows[0].keys())
+        write_sheet(ig_content_ws, ig_headers, ig_content_rows)
+
+
+
+def process_scores(wb, scores_def):
+
+    scores_meta_ws = wb.create_sheet(title="scores_meta")
+    scores_meta_ws.append(["type", "scores"])
+    scores_meta_ws.append(["name", "scores"])
+
+    scores_content_ws = wb.create_sheet(title="scores_content")
+    scores_content_rows = list(scores_def)  # shallow copy
+
+    # Extract translation columns
+    translation_columns = extract_translation_columns(scores_content_rows)
+
+    # Add translation values into each row
+    for row in scores_content_rows:
+        row.update(extract_translation_values(row, translation_columns))
+        row.pop("translations", None)
+
+    if scores_content_rows:
+        scores_headers = list(scores_content_rows[0].keys())
+        write_sheet(scores_content_ws, scores_headers, scores_content_rows)
+
+
+
+def write_answers_sheet(wb, meta_ws, answer_definitions):
+    
+    meta_ws.append(["answers_definition", "answers"])
+    
+    answer_meta_ws = wb.create_sheet(title="answers_meta")
+    answer_meta_ws.append(["type", "answers"])
+    answer_meta_ws.append(["name", "answers"])
+
+    answers_content_ws = wb.create_sheet("answers_content")
+    headers = ["id", "question_type", "question_choices"]
+    rows = []
+    for v in answer_definitions.values():
+        row = {k: v.get(k, "") for k in headers}
+        rows.append(row)
+    write_sheet(answers_content_ws, headers, rows)
+
+
+
 def process_reference_controls(wb, ref_controls):
 
     # Calculate base_urn
@@ -271,22 +335,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 "implementation_groups", "reference_controls", "threats", "urn", "parent_urn"
             ]
 
-            # Extract translation columns grouped by language, e.g., name[fr], description[fr]
-            lang_to_fields = {}
-
-            for node in content:
-                translations = node.get("translations", {})
-                for lang_code, lang_fields in translations.items():
-                    if lang_code not in lang_to_fields:
-                        lang_to_fields[lang_code] = set()
-                    for field in lang_fields:
-                        lang_to_fields[lang_code].add(field)
-
-            # Sort by lang, then by field name for each lang
-            translation_columns = []
-            for lang in sorted(lang_to_fields):
-                for field in sorted(lang_to_fields[lang]):
-                    translation_columns.append(f"{field}[{lang}]")
+            translation_columns = extract_translation_columns(content)
 
             full_headers = headers + translation_columns
             rows = []
@@ -355,49 +404,20 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
             write_sheet(content_ws, full_headers, rows)
             remove_empty_columns(content_ws)
 
-            if answer_definitions:
-                meta_ws.append(["answers_definition", "answers"])
-                answer_meta_ws = wb.create_sheet(title="answers_meta")
-                answer_meta_ws.append(["type", "answers"])
-                answer_meta_ws.append(["name", "answers"])
 
-                answers_content_ws = wb.create_sheet("answers_content")
-                headers = ["id", "question_type", "question_choices"]
-                rows = []
-                for v in answer_definitions.values():
-                    row = {k: v.get(k, "") for k in headers}
-                    rows.append(row)
-                write_sheet(answers_content_ws, headers, rows)
+            # --- [Sheets] answers_meta & answers_content ---
+            if answer_definitions:
+                write_answers_sheet(wb, meta_ws, answer_definitions)
 
 
             # --- [Sheets] implementation_groups_meta & implementation_groups_content ---
             if ig_defs:
-                ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
-                ig_meta_ws.append(["type", "implementation_groups"])
-                ig_meta_ws.append(["name", "implementation_groups"])
-
-                ig_content_ws = wb.create_sheet(title="implementation_groups_content")
-                ig_content_rows = []
-                for ig in ig_defs:
-                    ig_content_rows.append(ig)
-                if ig_content_rows:
-                    ig_headers = list(ig_content_rows[0].keys())
-                    write_sheet(ig_content_ws, ig_headers, ig_content_rows)
+                process_implementation_groups(wb, ig_defs)
 
    
             # --- [Sheets] scores_meta & scores_content ---
             if scores_def:
-                scores_meta_ws = wb.create_sheet(title="scores_meta")
-                scores_meta_ws.append(["type", "scores"])
-                scores_meta_ws.append(["name", "scores"])
-
-                scores_content_ws = wb.create_sheet(title="scores_content")
-                scores_content_rows = []
-                for scores in scores_def:
-                    scores_content_rows.append(scores)
-                if scores_content_rows:
-                    scores_headers = list(scores_content_rows[0].keys())
-                    write_sheet(scores_content_ws, scores_headers, scores_content_rows)
+                process_scores(wb, scores_def)
 
         # --- [Sheets] reference_controls_meta & reference_controls_content ---
         elif obj_key == "reference_controls":
