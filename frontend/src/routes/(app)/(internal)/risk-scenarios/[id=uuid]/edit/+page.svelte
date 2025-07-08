@@ -144,10 +144,11 @@
 				</div>
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
-				<div class="flex flex-row justify-between">
+				<div class="flex flex-row justify-between items-stretch">
 					<div class=" px-2 w-2/3">
 						<AutocompleteSelect
 							form={_form}
+							baseClass="flex-1"
 							multiple
 							optionsEndpoint="users?is_third_party=false"
 							optionsLabelField="email"
@@ -157,7 +158,7 @@
 					</div>
 					<div class="w-1/3">
 						<Select
-							class="h-14"
+							class="flex-1"
 							form={_form}
 							options={data.treatmentChoices}
 							field="treatment"
@@ -416,6 +417,7 @@
 						multiple={true}
 						field="qualifications"
 						label={m.qualification()}
+						baseClass="flex-1"
 					/>
 				</div>
 				<div class="w-1/2">
@@ -424,7 +426,7 @@
 						options={strengthOfKnowledgeFormChoices}
 						field="strength_of_knowledge"
 						label={m.strengthOfKnowledge()}
-						class="h-14"
+						class="flex-1"
 					/>
 				</div>
 			</div>
