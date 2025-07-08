@@ -4,7 +4,7 @@ YAML to Excel Framework Converter v0.3
 Script to recreate a structured Excel (V2 format) from a given YAML file.
 
 Usage:
-    python recreate_excel_from_yaml.py input.yaml [output.xlsx]
+    python convert_framework_yaml_to_excel.py input.yaml [output.xlsx]
 
 Arguments:
     input.yaml       Path to the input YAML file containing the data.
@@ -30,9 +30,12 @@ Limitations:
 Info:
     If you are trying to convert a mapping YAML file to Excel, please use the script
     "convert_mapping_yaml_to_excel.py" instead.
+    
+Requirements:
+    Python 3.9 or higher (uses str.removeprefix)
 
 Example:
-    python recreate_excel_from_yaml.py my_data.yaml
+    python convert_framework_yaml_to_excel.py my_data.yaml
 """
 
 
