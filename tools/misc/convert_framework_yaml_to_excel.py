@@ -39,6 +39,60 @@ def write_sheet(ws, header, rows):
     ws.append(header)
     for row in rows:
         ws.append([row.get(col, "") for col in header])
+        
+
+def extract_translation_columns(objects_list):
+    lang_to_fields = {}
+    for obj in objects_list:
+        translations = obj.get("translations", {})
+        for lang_code, lang_fields in translations.items():
+            if lang_code not in lang_to_fields:
+                lang_to_fields[lang_code] = set()
+            for field in lang_fields:
+                lang_to_fields[lang_code].add(field)
+
+    translation_columns = []
+    for lang in sorted(lang_to_fields):
+        for field in sorted(lang_to_fields[lang]):
+            translation_columns.append(f"{field}[{lang}]")
+    return translation_columns
+
+
+def process_reference_controls(wb, ref_controls):
+    ref_cont_meta_ws = wb.create_sheet(title="reference_controls_meta")
+    ref_cont_meta_ws.append(["type", "reference_controls"])
+    ref_cont_meta_ws.append(["base_urn", "???"])
+    
+    
+    headers = ["ref_id", "name", "csf_function", "category", "description", "annotation"]
+    translation_columns = extract_translation_columns(ref_controls)
+    full_headers = headers + translation_columns
+
+    content_ws = wb.create_sheet(title="reference_controls_content")
+    rows = []
+
+    for ctrl in ref_controls:
+        row = {key: ctrl.get(key, "") for key in headers}
+
+        # Add translations
+        for key in translation_columns:
+            if "[" in key and key.endswith("]"):
+                field, lang = key[:-1].split("[")
+                row[key] = ctrl.get("translations", {}).get(lang, {}).get(field, "")
+
+        rows.append(row)
+
+    write_sheet(content_ws, full_headers, rows)
+
+    # Remove empty columns
+    col_idx = 1
+    while col_idx <= content_ws.max_column:
+        col_letter = get_column_letter(col_idx)
+        if all((content_ws.cell(row=row_idx, column=col_idx).value in [None, ""]) for row_idx in range(2, content_ws.max_row + 1)):
+            content_ws.delete_cols(col_idx)
+        else:
+            col_idx += 1
+
 
 def recreate_excel_from_yaml(yaml_path, output_excel_path):
     
@@ -56,7 +110,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
     wb = Workbook()
     wb.remove(wb.active)  # Remove default sheet
 
-    # --- library_meta (first sheet) ---
+    # --- [First Sheet] library_meta ---
     library_meta_ws = wb.create_sheet(title="library_meta", index=0)
     library_meta_ws.append(["type", "library"])
     
@@ -83,7 +137,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
 
         if obj_key == "framework":
             
-             # --- framework_meta sheet ---
+             # --- [SHEET] framework_meta ---
             meta_data = obj_value.copy()
             content = meta_data.pop("requirement_nodes", [])
             if "implementation_groups_definition" in meta_data:
@@ -126,7 +180,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 meta_ws.append(["scores_definition", "scores"])
                 
 
-            # --- framework_content sheet ---
+            # --- [SHEET] framework_content ---
             content_ws = wb.create_sheet(title="framework_content")
             headers = [
                 "assessable", "depth", "ref_id", "urn_id", "name", "description",
@@ -258,7 +312,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     rows.append(row)
                 write_sheet(answers_content_ws, headers, rows)
 
-            # --- (optional) Sheets: implementation_groups_meta & implementation_groups_content ---
+            # --- (optional) [SHEETS] implementation_groups_meta & implementation_groups_content ---
             if ig_defs:
                 ig_meta_ws = wb.create_sheet(title="implementation_groups_meta")
                 ig_meta_ws.append(["type", "implementation_groups"])
@@ -273,7 +327,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                     ig_headers = list(ig_content_rows[0].keys())
                     write_sheet(ig_content_ws, ig_headers, ig_content_rows)
                     
-            # --- (optional) Sheets: scores_meta & scores_content ---
+            # --- (optional) [SHEETS] scores_meta & scores_content ---
             if scores_def:
                 scores_meta_ws = wb.create_sheet(title="scores_meta")
                 scores_meta_ws.append(["type", "scores"])
@@ -287,6 +341,9 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 if scores_content_rows:
                     scores_headers = list(scores_content_rows[0].keys())
                     write_sheet(scores_content_ws, scores_headers, scores_content_rows)
+                    
+        elif obj_key == "reference_controls":
+            process_reference_controls(wb, obj_value)
                     
 
         elif obj_key == "risk_matrix":
