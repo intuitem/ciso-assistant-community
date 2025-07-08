@@ -1,4 +1,6 @@
 """
+YAML to Excel Framework Converter v0.3
+
 Script to recreate a structured Excel (V2 format) from a given YAML file.
 
 Usage:
@@ -26,11 +28,31 @@ Example:
 """
 
 
+SCRIPT_VERSION = '0.3'
+
 
 import argparse
 import os
 import yaml
 from openpyxl import Workbook
+from openpyxl.styles import Font
+
+
+
+def write_info_sheet(wb, yaml_path):
+    
+    ws_info = wb.create_sheet("info", 0)  # Insert at first position
+
+    yaml_filename = os.path.basename(yaml_path)
+
+    ws_info["A1"] = f"YAML to Excel Framework Converter v{SCRIPT_VERSION}"
+    ws_info["A1"].font = Font(size=48, bold=True)
+
+    ws_info["A2"] = f"Source file : {yaml_filename}"
+    ws_info["A2"].font = Font(size=15)
+
+    ws_info["A3"] = ('Please verify and potentially adjust this Excel before using it as input to "convert_library_v2.py".')
+    ws_info["A3"].font = Font(size=20, italic=True)
 
 
 
@@ -263,9 +285,12 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
 
     wb = Workbook()
     wb.remove(wb.active)  # Remove default sheet
+    
+    # --- [Info Sheet] ---
+    write_info_sheet(wb, yaml_path)
 
     # --- [First Sheet] library_meta ---
-    library_meta_ws = wb.create_sheet(title="library_meta", index=0)
+    library_meta_ws = wb.create_sheet(title="library_meta")
     library_meta_ws.append(["type", "library"])
 
     translations_block = data.get("translations", {})
