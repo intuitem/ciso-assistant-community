@@ -96,12 +96,37 @@ def convert_list_fields_to_string(row, obj, fields):
 
 
 
+def calculate_base_urn(items):
+    if len(items) < 2:
+        return "???"
+
+    urn1 = items[0].get("urn", "")
+    urn2 = items[1].get("urn", "")
+
+    # Find common prefix by parts (split by ':')
+    parts1 = urn1.split(":")
+    parts2 = urn2.split(":")
+
+    common_parts = []
+    for p1, p2 in zip(parts1, parts2):
+        if p1 == p2:
+            common_parts.append(p1)
+        else:
+            break
+
+    return ":".join(common_parts) if common_parts else "???"
+
+
+
 def process_reference_controls(wb, ref_controls):
+
+    # Calculate base_urn
+    base_urn = calculate_base_urn(ref_controls)
 
     # Create the meta sheet
     ref_cont_meta_ws = wb.create_sheet(title="reference_controls_meta")
     ref_cont_meta_ws.append(["type", "reference_controls"])
-    ref_cont_meta_ws.append(["base_urn", "???"])
+    ref_cont_meta_ws.append(["base_urn", str(base_urn)])
 
     # Define base columns
     headers = ["ref_id", "name", "csf_function", "category", "description", "annotation"]
@@ -127,11 +152,14 @@ def process_reference_controls(wb, ref_controls):
 
 
 def process_threats(wb, threats):
+    
+    # Calculate base_urn
+    base_urn = calculate_base_urn(threats)
 
     # Create the meta sheet
     threats_meta_ws = wb.create_sheet(title="threats_meta")
     threats_meta_ws.append(["type", "threats"])
-    threats_meta_ws.append(["base_urn", "???"])
+    threats_meta_ws.append(["base_urn", str(base_urn)])
 
     # Define base columns
     headers = ["ref_id", "name", "description", "annotation"]
