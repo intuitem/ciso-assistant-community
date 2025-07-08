@@ -1316,7 +1316,7 @@
 	"operationalScenarioIsSelectedHelpText": "Wybór scenariusza operacyjnego badania",
 	"attackPathStakeholdersHelpText": "Zainteresowane strony zaangażowane w ścieżkę ataku",
 	"attackPathIsSelectedHelpText": "Wybór ścieżki ataku do badania",
-	"percentageDisplay": "{numer}%",
+	"percentageDisplay": "{number}%",
 	"reviewProgress": "Postęp",
 	"ecosystemRadar": "Radar ekosystemu",
 	"criticalitySemiColon": "Krytyczność:",
