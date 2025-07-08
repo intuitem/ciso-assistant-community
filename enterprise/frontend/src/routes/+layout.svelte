@@ -104,7 +104,12 @@
 
 		$effect(() => {
 			// ...and reset after we've mounted
-			favicon = _favicon;
+      // IMPORTANT: if show_images_unauthenticated is true, we show the favicon
+      if (clientSettings?.settings?.show_images_unauthenticated || $page.data?.user) {
+          favicon = _favicon;
+          return;
+      }
+      favicon = '/favicon.ico';
 		});
 	}
 
@@ -118,6 +123,7 @@
 			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
 		}
 	});
+
 </script>
 
 <svelte:head>
