@@ -55,6 +55,14 @@
 	{form}
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		color: 'blue'
+	}}
 	field="assets"
 	label={m.assets()}
 />

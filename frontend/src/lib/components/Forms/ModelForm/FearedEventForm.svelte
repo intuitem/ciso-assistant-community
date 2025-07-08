@@ -70,10 +70,15 @@
 	{form}
 	optionsEndpoint="assets"
 	optionsDetailedUrlParameters={[['ebios_rm_studies', initialData.ebios_rm_study]]}
-	optionsExtraFields={[
-		['folder', 'str'],
-		['type', '']
-	]}
+	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		color: 'blue'
+	}}
 	optionsLabelField="auto"
 	field="assets"
 	label={m.assets()}

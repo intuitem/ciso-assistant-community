@@ -152,10 +152,15 @@
 			{form}
 			optionsEndpoint="assets"
 			optionsLabelField="auto"
-			optionsExtraFields={[
-				['folder', 'str'],
-				['type', '']
-			]}
+			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type'
+					}
+				],
+				color: 'blue'
+			}}
 			field="assets"
 			label={m.assets()}
 			helpText={m.studyAssetHelpText()}
@@ -185,15 +190,14 @@
 		multiple
 		{form}
 		optionsEndpoint="assets"
-		optionsExtraFields={[
-			['folder', 'str']
-		]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsInfoFields={{
 			fields: [
 				{
-					field: 'type',
+					field: 'type'
 				}
-			]
+			],
+			color: 'blue'
 		}}
 		optionsLabelField="auto"
 		field="assets"

@@ -123,6 +123,14 @@
 			multiple
 			optionsEndpoint="assets"
 			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type'
+					}
+				],
+				color: 'blue'
+			}}
 			field="assets"
 			cacheLock={cacheLocks['assets']}
 			bind:cachedValue={formDataCache['assets']}

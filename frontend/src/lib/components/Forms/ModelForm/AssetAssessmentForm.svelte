@@ -35,6 +35,14 @@
 	{form}
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		color: 'blue'
+	}}
 	field="asset"
 	cacheLock={cacheLocks['asset']}
 	bind:cachedValue={formDataCache['asset']}
@@ -47,6 +55,14 @@
 	multiple
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		color: 'blue'
+	}}
 	field="dependencies"
 	cacheLock={cacheLocks['dependencies']}
 	bind:cachedValue={formDataCache['dependencies']}
