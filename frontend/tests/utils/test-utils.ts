@@ -567,7 +567,7 @@ export class TestContent {
 					description: '',
 					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
-					assets: [vars.folderName + '/' + vars.assetName],
+					assets: [vars.folderName + '/' + vars.assetName + ' ' + 'Support'],
 					current_proba: 'High',
 					current_impact: 'Medium',
 					applied_controls: [vars.folderName + '/' + vars.appliedControlName],
