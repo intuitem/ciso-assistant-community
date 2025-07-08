@@ -14,7 +14,6 @@
 	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import ParaglideJsProvider from './ParaglideJsProvider.svelte';
 	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
 	import {
 		initializeToastStore,
@@ -119,14 +118,12 @@
   <link rel="icon" href={favicon?.url ?? favicon} />
 </svelte:head>
 
-<ParaglideJsProvider>
-	<Modal components={modalRegistry} />
-	<Toast />
-	<CommandPalette />
-	{@render children?.()}
+<Modal components={modalRegistry} />
+<Toast />
+<CommandPalette />
+{@render children?.()}
 
-	{#if $flash}
-		{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
-		<div style:background-color={bg} class="flash">{$flash.message}</div>
-	{/if}
-</ParaglideJsProvider>
+{#if $flash}
+  {@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
+  <div style:background-color={bg} class="flash">{$flash.message}</div>
+{/if}

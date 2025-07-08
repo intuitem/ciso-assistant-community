@@ -98,7 +98,8 @@ interface ForeignKeyField {
 	urlParams?: string;
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
-	disableAddDeleteButtons?: boolean;
+	disableCreate?: boolean;
+	disableDelete?: boolean;
 }
 
 interface Field {
@@ -148,7 +149,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
-			{ field: 'folder', urlModel: 'entities' }
+			{ field: 'folder', urlModel: 'entities' },
+			{ field: 'folder', urlModel: 'assets' }
 		]
 	},
 	perimeters: {
@@ -162,9 +164,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
-			{ field: 'perimeter', urlModel: 'entity-assessments' }
+			{ field: 'perimeter', urlModel: 'entity-assessments' },
+			{ field: 'perimeters', urlModel: 'campaigns' }
 		],
-		filters: [{ field: 'lc_status' }, { field: 'folder' }]
+		filters: [{ field: 'lc_status' }, { field: 'folder' }, { field: 'campaigns' }]
 	},
 	'risk-matrices': {
 		name: 'riskmatrix',
@@ -282,11 +285,22 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
-				disableAddDeleteButtons: true
+				disableCreate: true,
+				disableDelete: true
 			},
-			{ field: 'applied_controls', urlModel: 'risk-scenarios', disableAddDeleteButtons: true },
-			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true },
-			{ field: 'applied_controls', urlModel: 'assets', disableAddDeleteButtons: true }
+			{
+				field: 'applied_controls',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'findings',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{ field: 'applied_controls', urlModel: 'assets', disableCreate: true, disableDelete: true }
 		],
 		selectFields: [
 			{ field: 'status' },
@@ -409,9 +423,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
 		reverseForeignKeyFields: [
-			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'assets', urlModel: 'vulnerabilities', disableAddDeleteButtons: false },
-			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: false }
+			{
+				field: 'assets',
+				urlModel: 'compliance-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{ field: 'assets', urlModel: 'vulnerabilities' },
+			{ field: 'assets', urlModel: 'solutions' }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -501,11 +520,31 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessments', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'findings-assessments', disableAddDeleteButtons: true },
-			{ field: 'evidences', urlModel: 'findings', disableAddDeleteButtons: true }
+			{
+				field: 'evidences',
+				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'evidences',
+				urlModel: 'compliance-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'evidences',
+				urlModel: 'requirement-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'evidences',
+				urlModel: 'findings-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true }
 		]
 	},
 	'compliance-assessments': {
@@ -517,6 +556,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'campaign', urlModel: 'campaigns', endpointUrl: 'campaigns' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
@@ -1000,15 +1040,36 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
-			{ field: 'security_exceptions', urlModel: 'applied-controls', disableAddDeleteButtons: true },
-			{ field: 'security_exceptions', urlModel: 'assets', disableAddDeleteButtons: true },
-			{ field: 'security_exceptions', urlModel: 'vulnerabilities', disableAddDeleteButtons: true },
+			{
+				field: 'security_exceptions',
+				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'security_exceptions',
+				urlModel: 'assets',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'security_exceptions',
+				urlModel: 'vulnerabilities',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'security_exceptions',
 				urlModel: 'requirement-assessments',
-				disableAddDeleteButtons: true
+				disableCreate: true,
+				disableDelete: true
 			},
-			{ field: 'security_exceptions', urlModel: 'risk-scenarios', disableAddDeleteButtons: true }
+			{
+				field: 'security_exceptions',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			}
 		]
 	},
 	'findings-assessments': {
@@ -1045,8 +1106,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
-			{ field: 'findings', urlModel: 'evidences' },
-			{ field: 'findings', urlModel: 'applied-controls' }
+			{ field: 'findings', urlModel: 'applied-controls' },
+			{ field: 'findings', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
@@ -1099,7 +1160,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'task_template', urlModel: 'task-nodes', disableAddDeleteButtons: true }
+			{ field: 'task_template', urlModel: 'task-nodes', disableCreate: true, disableDelete: true }
 		]
 	},
 	'task-nodes': {
@@ -1113,6 +1174,40 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'folder', urlModel: 'folders' }
+		]
+	},
+	campaigns: {
+		name: 'campaign',
+		localName: 'campaign',
+		localNamePlural: 'campaigns',
+		verboseName: 'Campaign',
+		verboseNamePlural: 'Campaigns',
+		selectFields: [{ field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'perimeters', urlModel: 'perimeters' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
+			{ field: 'campaigns', urlModel: 'perimeters', disableAddDeleteButtons: true }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'status' },
+			{ field: 'start_date' },
+			{ field: 'due_date' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
+		filters: [
+			{ field: 'status' },
+			{ field: 'framework' },
+			{ field: 'folder' },
+			{ field: 'perimeters' }
 		]
 	}
 };

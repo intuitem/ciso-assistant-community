@@ -42,6 +42,7 @@
 <Select
 	{form}
 	options={model.selectOptions['lc_status']}
+	disableDoubleDash={true}
 	field="lc_status"
 	label={m.lcStatus()}
 	cacheLock={cacheLocks['lc_status']}

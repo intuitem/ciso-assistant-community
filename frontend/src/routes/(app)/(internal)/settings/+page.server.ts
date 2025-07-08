@@ -116,7 +116,7 @@ export const actions: Actions = {
 		const endpoint = `${BASE_API_URL}/settings/sso/`;
 
 		const requestInitOptions: RequestInit = {
-			method: 'PUT',
+			method: 'PATCH',
 			body: JSON.stringify(form.data)
 		};
 

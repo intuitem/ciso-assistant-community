@@ -119,6 +119,7 @@
 <Select
 	{form}
 	options={model.selectOptions['type']}
+	disableDoubleDash={true}
 	field="type"
 	label="Type"
 	cacheLock={cacheLocks['type']}
@@ -132,6 +133,7 @@
 	optionsEndpoint="assets"
 	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"
+	pathField="path"
 	optionsSelf={object}
 	field="parent_assets"
 	cacheLock={cacheLocks['parent_assets']}

@@ -324,6 +324,19 @@ export const ComplianceAssessmentSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
+export const CampaignSchema = z.object({
+	...NameDescriptionMixin,
+	frameworks: z.array(z.string()),
+	selected_implementation_groups: z
+		.array(z.object({ value: z.string(), framework: z.string() }))
+		.optional(),
+	perimeters: z.array(z.string()),
+	status: z.string().optional().nullable(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
+});
+
 export const EvidenceSchema = z.object({
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
@@ -379,10 +392,9 @@ export const SSOSettingsSchema = z.object({
 	force_sso: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
-	provider_name: z.string(),
+	provider_name: z.string().optional(),
 	client_id: z.string(),
 	secret: z.string().optional(),
-	key: z.string().optional(),
 
 	// SAML specific fields
 	attribute_mapping_uid: z
@@ -416,7 +428,19 @@ export const SSOSettingsSchema = z.object({
 	want_attribute_statement: z.boolean().optional().nullable(),
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
-	want_name_id_encrypted: z.boolean().optional().nullable()
+	want_name_id_encrypted: z.boolean().optional().nullable(),
+	server_url: z.string().optional().nullable(),
+	token_auth_method: z
+		.enum([
+			'client_secret_basic',
+			'client_secret_post',
+			'client_secret_jwt',
+			'private_key_jwt',
+			'none'
+		])
+		.optional()
+		.nullable(),
+	oauth_pkce_enabled: z.boolean().optional().default(false)
 });
 
 export const EntitiesSchema = z.object({
@@ -827,6 +851,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
+	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,

@@ -361,7 +361,7 @@
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
 						class="text-sm font-medium text-gray-800 capitalize-first"
@@ -639,7 +639,7 @@
 				closeOnInteractOutside={false}
 			>
 				{#snippet trigger()}
-					<i class="fa-solid fa-filter mr-2" />
+					<i class="fa-solid fa-filter mr-2"></i>
 					{m.filters()}
 					{#if filterCount}
 						<span class="text-xs">{filterCount}</span>

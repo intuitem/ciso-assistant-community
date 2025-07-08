@@ -758,22 +758,12 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'framework',
-			'assets',
-			'evidences',
 			'description',
 			'perimeter',
-			'reviewProgress'
+			'reviewProgress',
+			'updated_at'
 		],
-		body: [
-			'ref_id',
-			'name',
-			'framework',
-			'assets',
-			'evidences',
-			'description',
-			'perimeter',
-			'progress'
-		],
+		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1016,7 +1006,16 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'findings_assessment',
+			'severity',
+			'owner',
+			'status',
+			'applied_controls',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1024,6 +1023,7 @@ export const listViewFields = {
 			'severity',
 			'owner',
 			'status',
+			'applied_controls',
 			'filtering_labels'
 		],
 		filters: { filtering_labels: LABELS_FILTER }
@@ -1060,6 +1060,10 @@ export const listViewFields = {
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
+	campaigns: {
+		head: ['name', 'description', 'framework', 'status'],
+		body: ['name', 'description', 'framework', 'status']
 	},
 	'task-templates': {
 		head: [

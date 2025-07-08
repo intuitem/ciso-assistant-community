@@ -5,7 +5,9 @@ import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Union, List
+import statistics
 
+from django.utils import timezone
 from icecream import ic
 from auditlog.registry import auditlog
 
@@ -1409,7 +1411,7 @@ class RequirementMapping(models.Model):
         return RequirementMapping.Coverage.PARTIAL
 
 
-class Qualification(ReferentialObjectMixin, I18nObjectMixin):
+class Qualification(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
     DEFAULT_QUALIFICATIONS = [
         {
             "abbreviation": "C",
@@ -3592,6 +3594,55 @@ class RiskScenario(NameDescriptionMixin):
         self.risk_assessment.upsert_daily_metrics()
 
 
+class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+    # name description and due date are inherited
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_PROGRESS = "in_progress", _("In progress")
+        IN_REVIEW = "in_review", _("In review")
+        DONE = "done", _("Done")
+        DEPRECATED = "deprecated", _("Deprecated")
+
+    frameworks = models.ManyToManyField(Framework, related_name="campaigns")
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+        blank=True,
+        null=True,
+    )
+    selected_implementation_groups = models.JSONField(
+        blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Start date"),
+    )
+    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns")
+
+    class Meta:
+        verbose_name = "Campaign"
+        verbose_name_plural = "Campaigns"
+
+    def metrics(self):
+        if ComplianceAssessment.objects.filter(campaign=self).count() == 0:
+            return {"avg_progress": 0, "days_remaining": "--"}
+        avg_progress = statistics.mean(
+            [
+                ca.get_progress()
+                for ca in ComplianceAssessment.objects.filter(campaign=self)
+            ]
+        )
+        days_remaining = "--"
+        if self.due_date:
+            today = date.today()
+            days_remaining = (self.due_date - today).days
+        data = {"avg_progress": avg_progress, "days_remaining": days_remaining}
+        return data
+
+
 class ComplianceAssessment(Assessment):
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
@@ -3615,6 +3666,14 @@ class ComplianceAssessment(Assessment):
         verbose_name=_("Related assets"),
         blank=True,
         help_text=_("Assets related to the compliance assessment"),
+        related_name="compliance_assessments",
+    )
+
+    campaign = models.ForeignKey(
+        Campaign,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name="compliance_assessments",
     )
 
@@ -4324,7 +4383,8 @@ class ComplianceAssessment(Assessment):
             [
                 r
                 for r in requirement_assessments
-                if r.result != RequirementAssessment.Result.NOT_ASSESSED
+                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
+                or r.score != None
             ]
         )
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
@@ -4538,6 +4598,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
+
+        self.compliance_assessment.updated_at = timezone.now()
+        self.compliance_assessment.save(update_fields=["updated_at"])
+
         self.compliance_assessment.upsert_daily_metrics()
 
 

@@ -61,7 +61,8 @@
 			'expiration_date',
 			'timestamp',
 			'reported_at',
-			'due_date'
+			'due_date',
+			'start_date'
 		],
 		widgets,
 		actions
@@ -549,10 +550,12 @@
 								(item) => item.urlModel === urlmodel
 							)}
 							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
-							{#if model.table && !model.disableAddDeleteButtons}
+							{#if model.table}
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
 									source={model.table}
+									disableCreate={model.disableCreate}
+									disableDelete={model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
@@ -567,13 +570,6 @@
 										>
 									{/snippet}
 								</ModelTable>
-							{:else if model.table}
-								<ModelTable
-									source={model.table}
-									URLModel={urlmodel}
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
-									fields={fieldsToUse}
-								/>
 							{/if}
 						{/key}
 					</Tabs.Panel>
