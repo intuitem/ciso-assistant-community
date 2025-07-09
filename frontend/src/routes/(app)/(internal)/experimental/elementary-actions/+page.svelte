@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
-	import { GraphLayoutType, GraphNodeShape } from '@unovis/ts';
+	import { GraphLayoutType, GraphNodeShape, GraphLinkArrowStyle } from '@unovis/ts';
 
 	type NodeDatum = {
 		id: string;
@@ -13,12 +13,6 @@
 	// Configuration constant for maximum line length
 	const MAX_LINE_LENGTH = 30;
 
-	/**
-	 * Helper function to wrap text based on maximum line length
-	 * @param text - The text to wrap
-	 * @param maxLength - Maximum characters per line
-	 * @returns Array of wrapped lines
-	 */
 	function wrapText(text: string, maxLength: number = MAX_LINE_LENGTH): string[] {
 		if (!text) return [];
 
@@ -57,11 +51,6 @@
 		return wrappedLines;
 	}
 
-	/**
-	 * Process node data to apply text wrapping
-	 * @param nodes - Array of node data
-	 * @returns Processed nodes with wrapped text
-	 */
 	function processNodesWithWrapping(nodes: NodeDatum[]): NodeDatum[] {
 		return nodes.map((node) => ({
 			...node,
@@ -71,31 +60,32 @@
 
 	const rawData = {
 		nodes: [
-			{ id: 'blk-00', label: 'space is cool, really really cool', group: 'grp0' },
+			{ id: 'blk-00', label: 'space is cool, really really cool', group: 'grp0', icon: '&#xf0c2;' },
+			{ id: 'blk-03', label: 'this is nice', group: 'grp0', icon: '&#xe4e5;' },
+			{ id: 'blk-04', label: 'this is pretty', group: 'grp0', icon: '&#xf3cd;' },
 			{
 				id: 'blk-01',
 				label: 'Ea ut fugiat ullamco deserunt et consequat adipisicing veniam sunt nulla sit qui.',
-				group: 'grp0'
+				group: 'grp0',
+				icon: '&#xf233;'
 			},
 			{
 				id: 'blk-02',
 				label: 'Reconnaissance interne réseaux bureautique & IT site de Paris',
-				group: 'grp1'
+				group: 'grp1',
+				icon: '&#xf1b3;'
 			},
 			{
-				id: 'blk-11',
-				label:
-					'Irure aliqua cillum consequat consectetur tempor fugiat exercita<D-b>tion ad ex mollit culpa.',
-				group: 'grp2'
+				id: 'blk-022',
+				label: 'Reconnaissance interne réseaux bureautique & IT site de Paris',
+				group: 'grp1',
+				icon: '&#xf6ff;'
 			},
-			{
-				id: 'blk-12',
-				label:
-					'Irure aliqua cillum consequat consectetur tempor fugiat exercitation ad ex mollit culpa.',
-				group: 'grp3'
-			},
+			{ id: 'blk-11', label: 'short', group: 'grp2', icon: '&#xf1b2;' },
+			{ id: 'blk-12', label: 'abc', group: 'grp3', icon: '&#xf15b;' },
 			{
 				id: 'blk-13',
+				icon: '&#xf084;',
 				label: "Création et maintien d'un canal d'exfiltration via un poste Internet",
 				group: 'grp3'
 			},
@@ -120,9 +110,9 @@
 	const panels = [
 		{
 			label: 'Connaître',
-			nodes: ['blk-00', 'blk-01'],
+			nodes: ['blk-00', 'blk-01', 'blk-03', 'blk-04'],
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
-			sideIconSymbol: '🔍',
+			sideIconSymbol: '&#xf002;',
 			sideIconShape: 'circle',
 			sideIconFontSize: 30,
 			dashedOutline: true,
@@ -130,9 +120,9 @@
 		},
 		{
 			label: 'Rentrer',
-			nodes: ['blk-02'],
+			nodes: ['blk-02', 'blk-022'],
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
-			sideIconSymbol: '🔐',
+			sideIconSymbol: '&#xf504;',
 			sideIconShape: 'circle',
 			sideIconFontSize: 30,
 			dashedOutline: true,
@@ -142,7 +132,7 @@
 			label: 'Trouver',
 			nodes: ['blk-11'],
 			padding: { top: 50, right: 50, bottom: 50, left: 50 },
-			sideIconSymbol: '🎯',
+			sideIconSymbol: '&#xf140;',
 			sideIconShape: 'circle',
 			sideIconFontSize: 30,
 			dashedOutline: true,
@@ -152,7 +142,7 @@
 			label: 'Exploiter',
 			nodes: ['blk-12', 'blk-13', 'blk-14'],
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
-			sideIconSymbol: '💥',
+			sideIconSymbol: '&#xe4e9;',
 			sideIconShape: 'circle',
 			sideIconFontSize: 30,
 			borderColor: 'red',
@@ -164,21 +154,22 @@
 	const nodeShape = GraphNodeShape.Square;
 	const nodeStrokeWidth = 2;
 	const nodeStroke = '#4D179A';
-	const nodeSize = 60;
+	const nodeSize = 60; // Increased size to accommodate multiline text
 	const nodeFill = '#FFFFFF';
 	const linkStroke = '#8FA1B9';
+	const linkArrow = GraphLinkArrowStyle.Single; // Enable single arrow heads on links
+	const linkFlow = false; // animation
+	const linkArrowColor = '#4D179A'; // Make arrows more visible with darker color
+	const linkArrowSize = 8; // Make arrows larger for better visibility
 	const layoutParallelGroupSpacing = 200;
 	const layoutType = GraphLayoutType.Parallel;
 
-	// Custom function to add multiline labels after default rendering
+	// Custom function to add labels after default rendering
 	const onRenderComplete = (g, nodes, links, config) => {
-		// Remove existing custom labels first
 		g.selectAll('.custom-multiline-label').remove();
 
-		// Add multiline labels for each node using the data
 		nodes.forEach((node) => {
-			if (node.label && node.label.includes('\n')) {
-				// Find the node group by iterating through DOM nodes
+			if (node.label) {
 				const allNodeGroups = g.selectAll('g').nodes();
 				let targetGroup = null;
 
@@ -191,9 +182,15 @@
 				}
 
 				if (targetGroup) {
-					const lines = node.label.split('\n');
+					const lines = node.label.split('\n').filter((line) => line.trim() !== '');
+
+					if (lines.length === 0 && node.label.trim()) {
+						lines.push(node.label.trim());
+					}
+
 					const lineHeight = 12;
-					const startY = config.nodeSize / 2 + 20;
+					const totalHeight = lines.length * lineHeight;
+					const startY = config.nodeSize / 2 + 25 - totalHeight / 2 + lineHeight;
 
 					lines.forEach((line, i) => {
 						targetGroup
@@ -205,7 +202,7 @@
 							.attr('font-size', '10px')
 							.attr('fill', '#0F1E57')
 							.style('font-family', 'var(--vis-font-family)')
-							.text(line);
+							.text(line.trim());
 					});
 				}
 			}
@@ -216,7 +213,7 @@
 	const nodeIcon = (n: NodeDatum) => n.icon || ''; // Enable icons
 </script>
 
-<div class=" bg-linear-to-br from-slate-100 to-white">
+<div class="bg-white">
 	<VisSingleContainer {data} height={'80vh'}>
 		<VisGraph
 			{nodeShape}
@@ -232,6 +229,17 @@
 			disableZoom
 			{layoutParallelGroupSpacing}
 			{linkStroke}
+			{linkArrow}
+			{linkFlow}
+			{linkArrowColor}
+			{linkArrowSize}
 		/>
 	</VisSingleContainer>
 </div>
+
+<style>
+	:global(.custom-multiline-label) {
+		font-family: var(--vis-font-family);
+		pointer-events: none;
+	}
+</style>
