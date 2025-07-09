@@ -13,8 +13,8 @@ description: ANNEX to the Commission Implementing Regulation laying down rules f
   managed security service providers, providers of online market places, of online
   search engines and of social networking services platforms, and trust service providers
 copyright: EUROPEAN COMMISSION
-version: 8
-publication_date: 2025-07-04
+version: 9
+publication_date: 2025-07-09
 provider: EUROPEAN COMMISSION
 packager: intuitem
 translations:
@@ -949,11 +949,11 @@ objects:
             ri\xED rizik;"
         it:
           description: valutare i rischi identificati in base ai criteri di rischio;
-    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
+    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
-      ref_id: 2.1.2;g
+      ref_id: 2.1.2.g
       description: identify and prioritise appropriate risk treatment options and
         measures;
       translations:
