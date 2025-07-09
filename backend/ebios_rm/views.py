@@ -10,6 +10,9 @@ from .models import (
     StrategicScenario,
     AttackPath,
     OperationalScenario,
+    ElementaryAction,
+    OperatingMode,
+    KillChain
 )
 from .serializers import EbiosRMStudyReadSerializer
 from django.utils.decorators import method_decorator
@@ -37,6 +40,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
+    
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get quotation method choices")
+    def quotation_method(self, request):
+        return Response(dict(EbiosRMStudy.QuotationMethod.choices))
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -239,3 +247,38 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         )
         choices = undefined | _choices
         return Response(choices)
+
+class ElementaryActionViewSet(BaseModelViewSet):
+    model = ElementaryAction
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get icon choices")
+    def icon(self, request):
+        return Response(dict(ElementaryAction.Icon.choices))
+
+
+class OperatingModeViewSet(BaseModelViewSet):
+    model = OperatingMode
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=True, name="Get likelihood choices")
+    def likelihood(self, request, pk):
+        instance: AttackPath = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [x["name"] for x in instance.parsed_matrix["probability"]],
+            )
+        )
+        choices = undefined | _choices
+        return Response(choices)
+
+
+class KillChainViewSet(BaseModelViewSet):
+    model = KillChain
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get logic operators choices")
+    def logic_operator(self, request):
+        return Response(dict(KillChain.LogicOperator.choices))

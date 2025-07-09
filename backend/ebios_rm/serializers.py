@@ -11,6 +11,9 @@ from .models import (
     StrategicScenario,
     AttackPath,
     OperationalScenario,
+    ElementaryAction,
+    OperatingMode,
+    KillChain
 )
 from rest_framework import serializers
 
@@ -362,3 +365,47 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class ElementaryActionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = ElementaryAction
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class ElementaryActionReadSerializer(BaseModelSerializer):
+    icon = serializers.CharField(source="get_icon_display")
+    threat = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    
+    class Meta:
+        model = ElementaryAction
+        fields = "__all__"
+        
+
+class OperatingModeWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = OperatingMode
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class OperatingModeReadSerializer(BaseModelSerializer):
+    operational_scenario = FieldsRelatedField()
+    elementary_actions = FieldsRelatedField(many=True)
+
+
+    class Meta:
+        model = OperatingMode
+        fields = "__all__"
+        
+
+class KillChainWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = KillChain
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class KillChainReadSerializer(BaseModelSerializer):
+    operating_mode = FieldsRelatedField()
+    elementary_action = FieldsRelatedField()
+    antecedents = FieldsRelatedField(many=True)
