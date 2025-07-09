@@ -46,7 +46,6 @@
 	cacheLock={cacheLocks['threat']}
 	bind:cachedValue={formDataCache['threat']}
 	label={m.threat()}
-	hidden={initialData.threat}
 />
 <Select
     {form}
