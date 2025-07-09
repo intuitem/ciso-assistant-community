@@ -844,10 +844,22 @@ class KillChain(AbstractBaseModel, FolderMixin):
         AND = "AND", "AND"
         OR = "OR", "OR"
     
+    class AttackStage(models.TextChoices):
+        KNOW = "know", "Know"
+        ENTER = "enter", "Enter"
+        DISCOVER = "discover", "Discover"
+        EXPLOIT = "exploit", "Exploit"
+    
     operating_mode = models.ForeignKey(OperatingMode, on_delete=models.CASCADE, related_name="kill_chain_steps")
     elementary_action = models.ForeignKey(ElementaryAction, on_delete=models.PROTECT, related_name="as_kill_chain")
     is_highlighted = models.BooleanField(default=False)
-    attack_stage = models.CharField(max_length=255)
+    attack_stage = models.CharField(
+        max_length=20,
+        choices=AttackStage.choices,
+        default=AttackStage.KNOW,
+        verbose_name="Attack Stage",
+        help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')"
+    )
     logic_operator = models.CharField(max_length=10, choices=LogicOperator.choices, blank=True, null=True, help_text="Logic operator to apply between antecedents")
 
     antecedents = models.ManyToManyField(

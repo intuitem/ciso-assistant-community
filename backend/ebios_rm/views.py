@@ -282,3 +282,8 @@ class KillChainViewSet(BaseModelViewSet):
     @action(detail=False, name="Get logic operators choices")
     def logic_operator(self, request):
         return Response(dict(KillChain.LogicOperator.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get attack stage choices")
+    def attack_stage(self, request):
+        return Response(dict(KillChain.AttackStage.choices))
