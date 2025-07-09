@@ -1005,7 +1005,7 @@ export const listViewFields = {
 		head: ['ref_id', 'likelihood'],
 		body: ['ref_id', 'likelihood'],
 	},
-	'kill_chains': {
+	'kill-chains': {
 		head: ['elementary_action', 'attack_stage', 'antecedents'],
 		body: ['elementary_action', 'attack_stage', 'antecedents'],
 	},

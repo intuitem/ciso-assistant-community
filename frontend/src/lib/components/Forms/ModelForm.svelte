@@ -54,6 +54,7 @@
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
+	import KillChainForm from './ModelForm/KillChainForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -468,6 +469,15 @@
 			/>
 		{:else if URLModel === 'operating-modes'}
 			<OperatingModeForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={model.initialData}
+				{context}
+			/>
+		{:else if URLModel === 'kill-chains'}
+			<KillChainForm
 				{form}
 				{model}
 				{cacheLocks}

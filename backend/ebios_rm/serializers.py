@@ -420,3 +420,7 @@ class KillChainReadSerializer(BaseModelSerializer):
     operating_mode = FieldsRelatedField()
     elementary_action = FieldsRelatedField()
     antecedents = FieldsRelatedField(many=True)
+    
+    class Meta:
+        model = KillChain
+        fields = "__all__"

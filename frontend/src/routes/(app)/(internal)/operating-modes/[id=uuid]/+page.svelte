@@ -75,7 +75,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.selectAsset()
+			title: m.selectElementaryActions()
 		};
 		modalStore.trigger(modal);
 	}
@@ -121,12 +121,15 @@
                             </h4>
                         </div>
                         {#if model.table}
+                            {@const field = data.model.reverseForeignKeyFields.find(
+								(item) => item.urlModel === urlmodel
+							)}
                             <ModelTable
                                 source={model.table}
                                 deleteForm={model.deleteForm}
                                 URLModel={urlmodel}
                                 canSelectObject={canEditObject}
-                                baseEndpoint="/elementary-actions?operating_modes={page.params.id}"
+                                baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
                             >
                                 {#snippet selectButton()}
                                     <div>

@@ -76,6 +76,7 @@ export const URL_MODEL = [
 	'operational-scenarios',
 	'elementary-actions',
 	'operating-modes',
+	'kill-chains',
 	// qualifications
 	'qualifications',
 	'processings',

@@ -852,6 +852,15 @@ export const OperatingModeSchema = z.object({
 	likelihood: z.number().optional().default(-1),
 });
 
+export const KillChainSchema = z.object({
+	operating_mode: z.string().uuid(),
+	elementary_action: z.string().uuid(),
+	is_highlighted: z.boolean().default(false),
+	attack_stage: z.string().optional().default('know'),
+	antecedents: z.string().uuid().optional().array().optional(),
+	logic_operator: z.string().optional().nullable(),
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -905,7 +914,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'task-templates': TaskTemplateSchema,
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,
-	'operating-modes': OperatingModeSchema
+	'operating-modes': OperatingModeSchema,
+	'kill-chains': KillChainSchema,
 };
 
 export const modelSchema = (model: string) => {

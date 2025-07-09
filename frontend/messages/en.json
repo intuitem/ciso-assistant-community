@@ -1705,11 +1705,22 @@
 	"manual": "Manual",
 	"express": "Express",
 	"elementaryActions": "Elementary actions",
+	"elementaryAction": "Elementary action",
 	"addElementaryAction": "Add elementary action",
 	"associatedElementaryActions": "Associated elementary actions",
 	"selectElementaryActions": "Select elementary actions",
 	"icon": "Icon",
 	"operatingModes": "Operating modes",
+	"operatingMode": "Operating mode",
 	"associatedOperatingModes": "Associated operating modes",
-	"addOperatingMode": "Add operating mode"
+	"addOperatingMode": "Add operating mode",
+	"attackStage": "Attack stage",
+	"antecedents": "Antecedents",
+	"antecedentsHelpText": "Antecedents are not applicable for actions in the 'Know' stage, as they represent the initial steps of the attack path.",
+	"logicOperator": "Logic operator",
+	"isHighlighted": "Is highlighted",
+	"killChains": "Kill chains",
+	"killChain": "Kill chain",
+	"associatedKillChains": "Associated kill chains",
+	"addKillChain": "Add kill chain"
 }

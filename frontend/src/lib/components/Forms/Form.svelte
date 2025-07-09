@@ -64,7 +64,7 @@
 	const { form, message, tainted, delayed, errors, allErrors, enhance } = _form;
 </script>
 
-{#if true}
+{#if debug}
 	<SuperDebug data={$form} />
 	<SuperDebug data={$tainted} />
 	<SuperDebug data={$errors} />

@@ -1068,6 +1068,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'operating_modes',
 				urlModel: 'elementary-actions',
 				endpointUrl: 'ebios-rm/elementary-actions',
+			},
+			{
+				field: 'operating_mode',
+				urlModel: 'kill-chains',
+				endpointUrl: 'ebios-rm/kill-chains',
 			}
 		]
 			
