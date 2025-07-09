@@ -5,6 +5,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
+	import Select from '../Select.svelte';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -106,6 +107,15 @@
 			label={m.version()}
 			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['quotation_method']}
+			field="quotation_method"
+			disableDoubleDash
+			label={m.quotationMethod()}
+			cacheLock={cacheLocks['quotation_method']}
+			bind:cachedValue={formDataCache['quotation_method']}
 		/>
 		<TextField
 			{form}

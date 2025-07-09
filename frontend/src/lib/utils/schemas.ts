@@ -618,6 +618,7 @@ export const personalDataSchema = z.object({
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
+	quotation_method: z.string().optional().default('manual'),
 	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),

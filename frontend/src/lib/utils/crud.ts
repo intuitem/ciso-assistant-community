@@ -889,7 +889,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' }
 		],
-		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }]
+		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }],
+		selectFields: [
+			{ field: 'quotation_method' }
+		]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',

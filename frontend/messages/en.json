@@ -1699,5 +1699,9 @@
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
 	"dataWizardLoadExcelData": "Load excel data",
 	"associatedCampaigns": "Associated campaigns",
-	"recentlyUpdatedAudits": "Recently updated audits"
+	"recentlyUpdatedAudits": "Recently updated audits",
+	"quotationMethod": "Quotation method",
+	"quotationMethodSemiColon": "Quotation method:",
+	"manual": "Manual",
+	"express": "Express"
 }

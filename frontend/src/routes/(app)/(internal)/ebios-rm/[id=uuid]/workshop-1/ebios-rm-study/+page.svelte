@@ -150,6 +150,10 @@
 					>{ebiosRmStudy.risk_matrix.str}</Anchor
 				>
 			</span>
+			<span class="text-sm text-gray-500"
+				>{m.quotationMethodSemiColon()}
+				{safeTranslate(ebiosRmStudy.quotation_method)}
+			</span>
 		</div>
 		<div
 			id="activityOne"
