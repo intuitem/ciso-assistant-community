@@ -25,14 +25,11 @@ print(f'⌛ Parsing "{input_file_name}"...')
 
 # Define variable to load the dataframe
 try:
-    if not os.path.isfile(input_file_name):
-        raise FileNotFoundError(f'File not found: "{input_file_name}"')
-
     dataframe = openpyxl.load_workbook(input_file_name)
     print(f'✅ Excel file loaded successfully: "{input_file_name}"')
 
-except FileNotFoundError as e:
-    print(f'❌ [ERROR] {e}')
+except FileNotFoundError:
+    print(f'❌ [ERROR] File not found: "{input_file_name}"')
     sys.exit(1)
 except PermissionError:
     print(f'❌ [ERROR] Permission denied while accessing "{input_file_name}"')
