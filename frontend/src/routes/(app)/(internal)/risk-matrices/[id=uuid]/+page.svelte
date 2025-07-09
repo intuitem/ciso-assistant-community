@@ -59,4 +59,4 @@
 	</div>
 </div>
 
-<RiskMatrix {riskMatrix} {showRisks} wrapperClass="mt-8" />
+<RiskMatrix {riskMatrix} showLegend={showRisks} wrapperClass="mt-8" />

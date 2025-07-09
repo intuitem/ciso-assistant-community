@@ -116,6 +116,8 @@ interface SelectField {
 	formNestedField?: string;
 }
 
+type FeatureFlag = string;
+
 export interface ModelMapEntry {
 	name: string;
 	localName: string;
@@ -124,6 +126,7 @@ export interface ModelMapEntry {
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
 	listViewUrlParams?: string;
+	flaggedFields?: Record<string, FeatureFlag>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
@@ -224,6 +227,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'riskScenarios',
 		verboseName: 'Risk scenario',
 		verboseNamePlural: 'Risk scenarios',
+		flaggedFields: {
+			inherent_proba: 'inherent_risk',
+			inherent_impact: 'inherent_risk',
+			inherent_level: 'inherent_risk'
+		},
 		foreignKeyFields: [
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
