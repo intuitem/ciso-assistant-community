@@ -80,6 +80,7 @@ export const URL_MODEL = [
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
+	'elementary-actions',
 	// privacy,
 	'processings',
 	'purposes',

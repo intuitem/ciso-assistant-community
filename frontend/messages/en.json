@@ -1703,5 +1703,8 @@
 	"quotationMethod": "Quotation method",
 	"quotationMethodSemiColon": "Quotation method:",
 	"manual": "Manual",
-	"express": "Express"
+	"express": "Express",
+	"elementaryActions": "Elementary actions",
+	"addElementaryAction": "Add elementary action",
+	"icon": "Icon"
 }

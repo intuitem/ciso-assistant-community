@@ -9,6 +9,9 @@ from ebios_rm.views import (
     StrategicScenarioViewSet,
     AttackPathViewSet,
     OperationalScenarioViewSet,
+    ElementaryActionViewSet,
+    OperatingModeViewSet,
+    KillChainViewSet
 )
 
 router = routers.DefaultRouter()
@@ -26,6 +29,9 @@ router.register(
     OperationalScenarioViewSet,
     basename="operational-scenarios",
 )
+router.register(r"elementary-actions", ElementaryActionViewSet, basename="elementary-actions")
+router.register(r"operating-modes", OperatingModeViewSet, basename="operating-modes")
+router.register(r"kill-chains", KillChainViewSet, basename="kill-chains")
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -836,6 +836,14 @@ export const AuthTokenCreateSchema = z.object({
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
+export const ElementaryActionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	threat: z.string().uuid().optional(),
+	icon: z.string().optional().nullable(),
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -887,7 +895,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'task-templates': TaskTemplateSchema,
-	'task-nodes': TaskNodeSchema
+	'task-nodes': TaskNodeSchema,
+	'elementary-actions': ElementaryActionSchema,
 };
 
 export const modelSchema = (model: string) => {

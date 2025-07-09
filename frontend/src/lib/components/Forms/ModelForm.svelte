@@ -52,6 +52,7 @@
 	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
+	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -455,6 +456,15 @@
 			<TaskTemplateForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'elementary-actions'}
+			<ElementaryActionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

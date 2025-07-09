@@ -370,7 +370,7 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
 class ElementaryActionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ElementaryAction
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class ElementaryActionReadSerializer(BaseModelSerializer):

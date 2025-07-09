@@ -786,6 +786,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
     icon = models.CharField(
         max_length=100,
         blank=True,
+        null=True,
         choices=Icon.choices,
         verbose_name="Icon",
         help_text="Icon representing the elementary action",

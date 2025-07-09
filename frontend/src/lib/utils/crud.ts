@@ -1030,6 +1030,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
 	},
+	'elementary-actions': {
+		endpointUrl: 'ebios-rm/elementary-actions',
+		name: 'elementaryaction',
+		localName: 'elementaryAction',
+		localNamePlural: 'elementaryActions',
+		verboseName: 'Elementary action',
+		verboseNamePlural: 'Elementary actions',
+		foreignKeyFields: [
+			{ field: 'threat', urlModel: 'threats' },
+			{ field: 'folder', urlModel: 'folders' },
+		],
+		selectFields: [{ field: 'icon' }],
+	},
 	'security-exceptions': {
 		name: 'securityexception',
 		localName: 'securityException',

@@ -997,6 +997,10 @@ export const listViewFields = {
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
+	'elementary-actions': {
+		head: ['ref_id', 'name', 'description', 'threat'],
+		body: ['ref_id', 'name', 'description', 'threat']
+	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']
