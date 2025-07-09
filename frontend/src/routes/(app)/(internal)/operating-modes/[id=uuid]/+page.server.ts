@@ -1,5 +1,3 @@
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { getModelInfo } from '$lib/utils/crud';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
@@ -7,11 +5,10 @@ import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/action
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 import { getModelInfo } from '$lib/utils/crud';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultWriteFormAction } from '$lib/utils/actions';
 import type { Actions } from '@sveltejs/kit';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 

@@ -1,29 +1,15 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import type { PageData, ActionData } from './$types';
+	import type { PageData } from './$types';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry } from '$lib/utils/crud';
-	import { getModelInfo } from '$lib/utils/crud.js';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime.js';
 
-	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	import { onMount } from 'svelte';
-
-	import { goto } from '$app/navigation';
-	import { listViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
 		getModalStore,
