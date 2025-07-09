@@ -1,21 +1,36 @@
 <script lang="ts">
+	import { label } from '$paraglide/messages';
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
 	import { GraphLayoutType, GraphNodeShape } from '@unovis/ts';
 
-	export type NodeDatum = {
+	type NodeDatum = {
 		id: string;
+		label: string;
 		group?: string;
 		subGroup?: string;
 	};
 
-	export const data = {
+	const data = {
 		nodes: [
-			{ id: 'blk-00', group: 'grp0', icon: '&#xf0c2;' },
-			{ id: 'blk-01', group: 'grp0', icon: '&#xf233;' },
-			{ id: 'blk-02', group: 'grp1', icon: '&#xf1b3;' },
+			{ id: 'blk-00', label: 'space is cool, really really cool', group: 'grp0' },
+			{
+				id: 'blk-01',
+				label:
+					'Ea ut fugiat ullamco deserunt et consequat\n adipisicing veniam sunt nulla sit qui.',
+				group: 'grp0'
+			},
+			{
+				id: 'blk-02',
+				label: 'Reconnaissance interne réseaux bureautique & IT site de Paris',
+				group: 'grp1'
+			},
 			{ id: 'blk-11', group: 'grp2' },
 			{ id: 'blk-12', group: 'grp3' }, // Keep them all in the same group
-			{ id: 'blk-13', group: 'grp3' },
+			{
+				id: 'blk-13',
+				label: 'Création et maintien d’un canal d’exfiltration via un poste Internet',
+				group: 'grp3'
+			},
 			{ id: 'blk-14', group: 'grp3', icon: '💎' }
 		],
 		links: [
@@ -28,60 +43,77 @@
 		]
 	};
 
-	export const panels = [
+	const panels = [
 		{
-			label: 'connaitre',
+			label: 'Connaître',
 			nodes: ['blk-00', 'blk-01'],
-			padding: { top: 50, right: 50, bottom: 50, left: 50 }, // Increased vertical padding
-			sideIconSymbol: '📋',
+			padding: { top: 50, right: 60, bottom: 50, left: 60 }, // Increased vertical padding
+			sideIconSymbol: '🔍',
 			sideIconShape: 'circle',
-			sideIconShapeSize: 60,
-			color: '#E3116C',
+			sideIconFontSize: 30,
+			dashedOutline: true,
 			borderColor: 'pink'
 		},
 		{
-			label: 'rentrer',
+			label: 'Rentrer',
 			nodes: ['blk-02'],
-			padding: { top: 50, right: 50, bottom: 50, left: 50 }, // Increased vertical padding
+			padding: { top: 50, right: 60, bottom: 50, left: 60 }, // Increased vertical padding
 			sideIconSymbol: '🔐',
 			sideIconShape: 'circle',
-			sideIconShapeSize: 60,
+			sideIconFontSize: 30,
+			dashedOutline: true,
 			borderColor: 'violet'
 		},
 		{
-			label: 'trouver',
+			label: 'Trouver',
 			nodes: ['blk-11'],
 			padding: { top: 50, right: 50, bottom: 50, left: 50 }, // Increased vertical padding
 			sideIconSymbol: '🎯',
 			sideIconShape: 'circle',
-			sideIconShapeSize: 60,
+			sideIconFontSize: 30,
+			dashedOutline: true,
 			borderColor: 'orange'
 		},
 		{
-			label: 'exploiter',
+			label: 'Exploiter',
 			nodes: ['blk-12', 'blk-13', 'blk-14'],
-			padding: { top: 50, right: 50, bottom: 50, left: 50 }, // Increased vertical padding
+			padding: { top: 50, right: 60, bottom: 50, left: 60 }, // Increased vertical padding
 			sideIconSymbol: '💥',
 			sideIconShape: 'circle',
-			sideIconShapeSize: 60,
-			borderColor: 'red'
+			sideIconFontSize: 30,
+			borderColor: 'red',
+			dashedOutline: true
 		}
 	];
 	const nodeShape = GraphNodeShape.Square;
 	const nodeStrokeWidth = 2;
+	const nodeStroke = '#4D179A';
+	const nodeSize = 60;
+	const nodeFill = '#FFFFFF';
+	const linkStroke = '#8FA1B9';
 	const layoutParallelGroupSpacing = 320;
-	const nodeLabel = (n: NodeDatum) => n.id;
+	const nodeLabel = (n: NodeDatum) => n.label ?? n.id;
 	const layoutType = GraphLayoutType.Parallel;
+	const nodeLabelTrimLength = 40;
+	const nodeLabelTrim = true;
 </script>
 
-<VisSingleContainer {data} height={'80vh'}>
-	<VisGraph
-		{nodeShape}
-		{nodeStrokeWidth}
-		{nodeLabel}
-		{layoutType}
-		{panels}
-		disableZoom
-		{layoutParallelGroupSpacing}
-	/>
-</VisSingleContainer>
+<div class=" bg-slate-50">
+	<VisSingleContainer {data} height={'80vh'}>
+		<VisGraph
+			{nodeShape}
+			{nodeStroke}
+			{nodeSize}
+			{nodeFill}
+			{nodeStrokeWidth}
+			{nodeLabel}
+			{nodeLabelTrim}
+			{nodeLabelTrimLength}
+			{layoutType}
+			{panels}
+			disableZoom
+			{layoutParallelGroupSpacing}
+			{linkStroke}
+		/>
+	</VisSingleContainer>
+</div>
