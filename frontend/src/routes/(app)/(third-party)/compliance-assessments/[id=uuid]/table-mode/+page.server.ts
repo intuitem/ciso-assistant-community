@@ -14,8 +14,8 @@ export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
-	const [compliance_assessment, tableMode] = await Promise.all(
-		[endpoint, `${endpoint}requirements_list/`].map((endpoint) =>
+	const [compliance_assessment, tableMode, scores] = await Promise.all(
+		[endpoint, `${endpoint}requirements_list/`, `${endpoint}global_score/`].map((endpoint) =>
 			fetch(endpoint).then((res) => res.json())
 		)
 	);
@@ -89,6 +89,7 @@ export const load = (async ({ fetch, params }) => {
 	return {
 		URLModel,
 		compliance_assessment,
+		scores,
 		requirement_assessments,
 		requirements,
 		evidenceModel,
