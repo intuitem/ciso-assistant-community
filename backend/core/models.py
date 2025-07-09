@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List
+from typing import Any, Self, Type, Union, List
 import statistics
 
 from django.utils import timezone
@@ -426,56 +426,78 @@ class LibraryUpdater:
             if (error_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
                 return error_msg
 
-    def update_threats(self):
-        for threat in self.threats:
-            normalized_urn = threat["urn"].lower()
-            Threat.objects.update_or_create(
-                urn=normalized_urn,
-                defaults=threat,
-                create_defaults={
-                    **self.referential_object_dict,
-                    **self.i18n_object_dict,
-                    **threat,
-                    "library": self.old_library,
-                },
+    def _synchronize_related_objects(
+        self,
+        *,
+        model_class: Type[models.Model],
+        incoming_data: list[dict[str, Any]],
+        unique_field: str = "urn",
+    ) -> list:
+        """Generic and database-agnostic method to synchronize related objects."""
+        if not incoming_data:
+            model_class.objects.filter(library=self.old_library).update(library=None)
+            return []
+
+        incoming_ids = {item[unique_field].lower() for item in incoming_data}
+
+        model_class.objects.filter(library=self.old_library).exclude(
+            **{f"{unique_field}__in": incoming_ids}
+        ).update(library=None)
+
+        existing_obj_map = {
+            getattr(obj, unique_field): obj
+            for obj in model_class.objects.filter(
+                **{f"{unique_field}__in": incoming_ids}
             )
+        }
 
-    def update_reference_controls(self) -> list["ReferenceControl"]:
-        incoming_urns = {rc["urn"].lower() for rc in self.reference_controls}
-
-        # unlink controls that are not in the incoming data
-        self.old_library.reference_controls.exclude(urn__in=incoming_urns).update(
-            library=None
-        )
-
-        controls_to_upsert = []
+        to_create, to_update = [], []
         update_fields = set()
 
-        for rc_data in self.reference_controls:
-            normalized_urn = rc_data["urn"].lower()
-            update_fields.update(rc_data.keys())
+        for item_data in incoming_data:
+            normalized_id = item_data[unique_field].lower()
+            update_fields.update(item_data.keys())
 
-            instance_data = {
-                **self.referential_object_dict,
-                **self.i18n_object_dict,
-                **rc_data,
-                "urn": normalized_urn,
-                "library": self.old_library,
-            }
-            controls_to_upsert.append(ReferenceControl(**instance_data))
+            if normalized_id in existing_obj_map:
+                instance = existing_obj_map[normalized_id]
+                for key, value in item_data.items():
+                    setattr(instance, key, value)
+                instance.library = self.old_library
+                to_update.append(instance)
+            else:
+                create_data = {
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **item_data,
+                    unique_field: normalized_id,
+                    "library": self.old_library,
+                }
+                to_create.append(model_class(**create_data))
 
-        if controls_to_upsert:
-            # Add 'library' to the set of fields to be updated.
+        created_objects = (
+            list(model_class.objects.bulk_create(to_create)) if to_create else []
+        )
+        if to_update:
             update_fields.add("library")
+            model_class.objects.bulk_update(to_update, list(update_fields))
 
-            return ReferenceControl.objects.bulk_create(
-                controls_to_upsert,
-                update_conflicts=True,
-                unique_fields=["urn"],
-                update_fields=list(update_fields),
-            )
+        return created_objects
 
-        return list(ReferenceControl.objects.none())
+    def update_reference_controls(self) -> list["ReferenceControl"]:
+        """Synchronizes reference controls by delegating to the generic helper."""
+        return self._synchronize_related_objects(
+            model_class=ReferenceControl,
+            incoming_data=self.reference_controls,
+            unique_field="urn",
+        )
+
+    def update_threats(self) -> list["Threat"]:
+        """Synchronizes threats by delegating to the generic helper."""
+        return self._synchronize_related_objects(
+            model_class=Threat,
+            incoming_data=self.threats,
+            unique_field="urn",
+        )
 
     def update_frameworks(self):
         for new_framework in self.new_frameworks:
