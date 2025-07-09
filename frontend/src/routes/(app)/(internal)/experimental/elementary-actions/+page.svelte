@@ -114,6 +114,7 @@
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf002;',
 			sideIconShape: 'circle',
+			sideIconSymbolColor: 'pink',
 			sideIconFontSize: 30,
 			dashedOutline: true,
 			borderColor: 'pink'
@@ -124,6 +125,7 @@
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf504;',
 			sideIconShape: 'circle',
+			sideIconSymbolColor: 'violet',
 			sideIconFontSize: 30,
 			dashedOutline: true,
 			borderColor: 'violet'
@@ -134,6 +136,7 @@
 			padding: { top: 50, right: 50, bottom: 50, left: 50 },
 			sideIconSymbol: '&#xf140;',
 			sideIconShape: 'circle',
+			sideIconSymbolColor: 'orange',
 			sideIconFontSize: 30,
 			dashedOutline: true,
 			borderColor: 'orange'
@@ -144,6 +147,7 @@
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xe4e9;',
 			sideIconShape: 'circle',
+			sideIconSymbolColor: 'red',
 			sideIconFontSize: 30,
 			borderColor: 'red',
 			dashedOutline: true
