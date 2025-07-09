@@ -842,15 +842,15 @@ export const ElementaryActionSchema = z.object({
 	ref_id: z.string().optional(),
 	threat: z.string().uuid().optional(),
 	icon: z.string().optional().nullable(),
-	operating_modes: z.string().uuid().optional().array().optional(),
+	operating_modes: z.string().uuid().optional().array().optional()
 });
 
 export const OperatingModeSchema = z.object({
-	name: nameSchema,
+	...NameDescriptionMixin,
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
 	elementary_actions: z.string().uuid().optional().array().optional(),
-	likelihood: z.number().optional().default(-1),
+	likelihood: z.number().optional().default(-1)
 });
 
 export const KillChainSchema = z.object({
@@ -859,7 +859,7 @@ export const KillChainSchema = z.object({
 	is_highlighted: z.boolean().default(false),
 	attack_stage: z.string().optional().default('know'),
 	antecedents: z.string().uuid().optional().array().optional(),
-	logic_operator: z.string().optional().nullable(),
+	logic_operator: z.string().optional().nullable()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -916,7 +916,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,
 	'operating-modes': OperatingModeSchema,
-	'kill-chains': KillChainSchema,
+	'kill-chains': KillChainSchema
 };
 
 export const modelSchema = (model: string) => {

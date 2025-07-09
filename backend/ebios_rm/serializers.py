@@ -13,7 +13,7 @@ from .models import (
     OperationalScenario,
     ElementaryAction,
     OperatingMode,
-    KillChain
+    KillChain,
 )
 from rest_framework import serializers
 
@@ -375,7 +375,7 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
-    
+
     class Meta:
         model = ElementaryAction
         exclude = ["created_at", "updated_at"]
@@ -385,11 +385,11 @@ class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
     threat = FieldsRelatedField()
     folder = FieldsRelatedField()
-    
+
     class Meta:
         model = ElementaryAction
         fields = "__all__"
-        
+
 
 class OperatingModeWriteSerializer(BaseModelSerializer):
     class Meta:
@@ -402,13 +402,11 @@ class OperatingModeReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     elementary_actions = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
-    str = serializers.CharField(source="__str__")
-
 
     class Meta:
         model = OperatingMode
         fields = "__all__"
-        
+
 
 class KillChainWriteSerializer(BaseModelSerializer):
     class Meta:
@@ -420,7 +418,7 @@ class KillChainReadSerializer(BaseModelSerializer):
     operating_mode = FieldsRelatedField()
     elementary_action = FieldsRelatedField()
     antecedents = FieldsRelatedField(many=True)
-    
+
     class Meta:
         model = KillChain
         fields = "__all__"

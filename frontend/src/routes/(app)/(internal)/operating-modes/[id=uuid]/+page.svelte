@@ -1,12 +1,12 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
-    import { page } from '$app/state';
+	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-    import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry } from '$lib/utils/crud';
@@ -32,7 +32,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 
-    const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -40,10 +40,9 @@
 
 	let { data }: Props = $props();
 
-
 	let group = $state(Object.keys(data.relatedModels)[0]);
 
-    function modalCreateForm(model: Record<string, any>): void {
+	function modalCreateForm(model: Record<string, any>): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -61,14 +60,14 @@
 		modalStore.trigger(modal);
 	}
 
-    function modalUpdateForm(): void {
+	function modalUpdateForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
 				form: data.updateForm,
 				model: data.model,
 				object: data.object,
-				context: 'selectElementaryActions',
+				context: 'selectElementaryActions'
 			}
 		};
 		let modal: ModalSettings = {
@@ -80,8 +79,8 @@
 		modalStore.trigger(modal);
 	}
 
-    const user = page.data.user;
-    const canEditObject: boolean = canPerformAction({
+	const user = page.data.user;
+	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
 		model: data.model.name,
@@ -94,78 +93,75 @@
 
 <DetailView {data} displayModelTable={false} />
 {#if Object.keys(data.relatedModels).length > 0}
-    <div class="card shadow-lg mt-8 bg-white w-full">
-        <Tabs
-            value={group}
-            onValueChange={(e) => {
-                group = e.value;
-            }}
-            listJustify="justify-center"
-        >
-            {#snippet list()}
-                {#each Object.entries(data.relatedModels) as [urlmodel, model]}
-                    <Tabs.Control value={urlmodel}>
-                        {safeTranslate(model.info.localNamePlural)}
-                        {#if model.table.body.length > 0}
-                            <span class="badge preset-tonal-secondary">{model.table.body.length}</span>
-                        {/if}
-                    </Tabs.Control>
-                {/each}
-            {/snippet}
-            {#snippet content()}
-                {#each Object.entries(data.relatedModels) as [urlmodel, model]}
-                    <Tabs.Panel value={urlmodel}>
-                        <div class="flex flex-row justify-between px-4 py-2">
-                            <h4 class="font-semibold lowercase capitalize-first my-auto">
-                                {safeTranslate('associated-' + model.info.localNamePlural)}
-                            </h4>
-                        </div>
-                        {#if model.table}
-                            {@const field = data.model.reverseForeignKeyFields.find(
+	<div class="card shadow-lg mt-8 bg-white w-full">
+		<Tabs
+			value={group}
+			onValueChange={(e) => {
+				group = e.value;
+			}}
+			listJustify="justify-center"
+		>
+			{#snippet list()}
+				{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+					<Tabs.Control value={urlmodel}>
+						{safeTranslate(model.info.localNamePlural)}
+						{#if model.table.body.length > 0}
+							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+						{/if}
+					</Tabs.Control>
+				{/each}
+			{/snippet}
+			{#snippet content()}
+				{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+					<Tabs.Panel value={urlmodel}>
+						<div class="flex flex-row justify-between px-4 py-2">
+							<h4 class="font-semibold lowercase capitalize-first my-auto">
+								{safeTranslate('associated-' + model.info.localNamePlural)}
+							</h4>
+						</div>
+						{#if model.table}
+							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-                            <ModelTable
-                                source={model.table}
-                                deleteForm={model.deleteForm}
-                                URLModel={urlmodel}
-                                canSelectObject={canEditObject}
-                                baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
-                            >
-                                {#snippet selectButton()}
-                                    <div>
-                                        <span
-                                            class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-                                        >
-                                            <button
-                                                class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-                                                data-testid="select-button"
-                                                title={m.selectElementaryActions()}
-                                                onclick={(_) => modalUpdateForm()}
-                                                ><i class="fa-solid fa-hand-pointer"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                {/snippet}
-                                {#snippet addButton()}
-                                    <div>
-                                        <span
-                                            class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-                                        >
-                                            <button
-                                                class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-                                                data-testid="add-button"
-                                                title={safeTranslate('add-' + data.model.localName)}
-                                                onclick={(_) => modalCreateForm(model)}
-                                                ><i class="fa-solid fa-file-circle-plus"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                {/snippet}
-                            </ModelTable>
-                        {/if}
-                    </Tabs.Panel>
-                {/each}
-            {/snippet}
-        </Tabs>
-    </div>
+							<ModelTable
+								source={model.table}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								canSelectObject={canEditObject}
+								baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
+								disableDelete={field?.disableDelete ?? false}
+							>
+								{#snippet selectButton()}
+									<div>
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-button"
+												title={m.selectElementaryActions()}
+												onclick={(_) => modalUpdateForm()}
+												><i class="fa-solid fa-hand-pointer"></i>
+											</button>
+										</span>
+									</div>
+								{/snippet}
+								{#snippet addButton()}
+									<div>
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+												data-testid="add-button"
+												title={safeTranslate('add-' + data.model.localName)}
+												onclick={(_) => modalCreateForm(model)}
+												><i class="fa-solid fa-file-circle-plus"></i>
+											</button>
+										</span>
+									</div>
+								{/snippet}
+							</ModelTable>
+						{/if}
+					</Tabs.Panel>
+				{/each}
+			{/snippet}
+		</Tabs>
+	</div>
 {/if}

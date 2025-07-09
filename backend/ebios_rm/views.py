@@ -12,7 +12,7 @@ from .models import (
     OperationalScenario,
     ElementaryAction,
     OperatingMode,
-    KillChain
+    KillChain,
 )
 from .serializers import EbiosRMStudyReadSerializer
 from django.utils.decorators import method_decorator
@@ -40,7 +40,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
-    
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get quotation method choices")
     def quotation_method(self, request):
@@ -248,9 +248,10 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+
 class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
-    
+
     filterset_fields = ["operating_modes"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -261,7 +262,7 @@ class ElementaryActionViewSet(BaseModelViewSet):
 
 class OperatingModeViewSet(BaseModelViewSet):
     model = OperatingMode
-    
+
     filterset_fields = ["operational_scenario"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -281,7 +282,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
 class KillChainViewSet(BaseModelViewSet):
     model = KillChain
-    
+
     filterset_fields = ["operating_mode"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

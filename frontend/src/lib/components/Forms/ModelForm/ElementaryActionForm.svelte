@@ -48,12 +48,12 @@
 	label={m.threat()}
 />
 <Select
-    {form}
-    options={model.selectOptions['icon']}
-    field="icon"
-    label={m.icon()}
-    cacheLock={cacheLocks['icon']}
-    bind:cachedValue={formDataCache['icon']}
+	{form}
+	options={model.selectOptions['icon']}
+	field="icon"
+	label={m.icon()}
+	cacheLock={cacheLocks['icon']}
+	bind:cachedValue={formDataCache['icon']}
 />
 <AutocompleteSelect
 	{form}

@@ -28,13 +28,6 @@
 </script>
 
 {#if context !== 'selectElementaryActions'}
-	<TextField
-		{form}
-		field="name"
-		label={m.name()}
-		cacheLock={cacheLocks['name']}
-		bind:cachedValue={formDataCache['name']}
-	/>
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="operational-scenarios"
@@ -61,12 +54,12 @@
 		helpText={m.likelihoodHelpText()}
 	/>
 {/if}
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="elementary-actions"
-		field="elementary_actions"
-		cacheLock={cacheLocks['elementary_actions']}
-		bind:cachedValue={formDataCache['elementary_actions']}
-		label={m.elementaryActions()}
-	/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="elementary-actions"
+	field="elementary_actions"
+	cacheLock={cacheLocks['elementary_actions']}
+	bind:cachedValue={formDataCache['elementary_actions']}
+	label={m.elementaryActions()}
+/>

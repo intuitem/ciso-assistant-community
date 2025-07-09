@@ -890,9 +890,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_entity', urlModel: 'entities' }
 		],
 		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }],
-		selectFields: [
-			{ field: 'quotation_method' }
-		]
+		selectFields: [{ field: 'quotation_method' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',
@@ -1032,10 +1030,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'operational_scenario',
 				urlModel: 'operating-modes',
-				endpointUrl: 'ebios-rm/operating-modes',
+				endpointUrl: 'ebios-rm/operating-modes'
 			}
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }],
+		selectFields: [
+			{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }
+		]
 	},
 	'elementary-actions': {
 		endpointUrl: 'ebios-rm/elementary-actions',
@@ -1046,9 +1046,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Elementary actions',
 		foreignKeyFields: [
 			{ field: 'threat', urlModel: 'threats' },
-			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'icon' }],
+		selectFields: [{ field: 'icon' }]
 	},
 	'operating-modes': {
 		endpointUrl: 'ebios-rm/operating-modes',
@@ -1068,14 +1068,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'operating_modes',
 				urlModel: 'elementary-actions',
 				endpointUrl: 'ebios-rm/elementary-actions',
+				disableDelete: true
 			},
 			{
 				field: 'operating_mode',
 				urlModel: 'kill-chains',
-				endpointUrl: 'ebios-rm/kill-chains',
+				endpointUrl: 'ebios-rm/kill-chains'
 			}
 		]
-			
 	},
 	'kill-chains': {
 		endpointUrl: 'ebios-rm/kill-chains',
@@ -1087,9 +1087,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'operating_mode', urlModel: 'operating-modes' },
 			{ field: 'elementary_action', urlModel: 'elementary-actions' },
-			{ field: 'antecedents', urlModel: 'elementary-actions'}
+			{ field: 'antecedents', urlModel: 'elementary-actions' }
 		],
-		selectFields: [{ field: 'attack_stage' }, { field: 'logic_operator'}],
+		selectFields: [{ field: 'attack_stage' }, { field: 'logic_operator' }]
 	},
 	'security-exceptions': {
 		name: 'securityexception',

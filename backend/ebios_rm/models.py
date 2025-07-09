@@ -58,7 +58,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
-    
+
     class QuotationMethod(models.TextChoices):
         MANUAL = "manual", "Manual"
         EXPRESS = "express", "Express"
@@ -168,13 +168,15 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Metadata"),
         validators=[JSONSchemaInstanceValidator(META_JSONSCHEMA)],
     )
-    
+
     quotation_method = models.CharField(
         max_length=100,
         choices=QuotationMethod.choices,
         default=QuotationMethod.MANUAL,
         verbose_name=_("Quotation method"),
-        help_text=_("Method used to quote the study (e.g., 'fixed price', 'time and material')"),
+        help_text=_(
+            "Method used to quote the study (e.g., 'fixed price', 'time and material')"
+        ),
     )
 
     fields_to_check = ["name", "version"]
@@ -781,7 +783,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         related_name="elementary_actions",
         help_text=_("Threat that the elementary action is derived from"),
         null=True,
-        blank=True
+        blank=True,
     )
     icon = models.CharField(
         max_length=100,
@@ -791,14 +793,14 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         verbose_name="Icon",
         help_text="Icon representing the elementary action",
     )
-    
+
     fields_to_check = ["name"]
 
-class OperatingMode(AbstractBaseModel, FolderMixin):
-    name = models.CharField(
-        max_length=255, verbose_name=_("Name"), help_text="Name of the operating mode"
+
+class OperatingMode(NameDescriptionMixin, FolderMixin):
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="Reference ID"
     )
-    ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
     operational_scenario = models.ForeignKey(
         OperationalScenario,
         verbose_name=_("Operational scenario"),
@@ -813,16 +815,13 @@ class OperatingMode(AbstractBaseModel, FolderMixin):
         blank=True,
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
-    
+
     fields_to_check = ["operational_scenario", "ref_id"]
 
     class Meta:
         verbose_name = "Operating Mode"
         verbose_name_plural = "Operating Modes"
         ordering = ["created_at"]
-    
-    def __str__(self):
-        return f"{self.operational_scenario.attack_path.name} - {self.ref_id}"
 
     def save(self, *args, **kwargs):
         self.folder = self.operational_scenario.folder
@@ -846,43 +845,54 @@ class KillChain(AbstractBaseModel, FolderMixin):
     class LogicOperator(models.TextChoices):
         AND = "AND", "AND"
         OR = "OR", "OR"
-    
+
     class AttackStage(models.TextChoices):
         KNOW = "know", "Know"
         ENTER = "enter", "Enter"
         DISCOVER = "discover", "Discover"
         EXPLOIT = "exploit", "Exploit"
-    
-    operating_mode = models.ForeignKey(OperatingMode, on_delete=models.CASCADE, related_name="kill_chain_steps")
-    elementary_action = models.ForeignKey(ElementaryAction, on_delete=models.PROTECT, related_name="as_kill_chain")
+
+    operating_mode = models.ForeignKey(
+        OperatingMode, on_delete=models.CASCADE, related_name="kill_chain_steps"
+    )
+    elementary_action = models.ForeignKey(
+        ElementaryAction, on_delete=models.PROTECT, related_name="as_kill_chain"
+    )
     is_highlighted = models.BooleanField(default=False)
     attack_stage = models.CharField(
         max_length=20,
         choices=AttackStage.choices,
         default=AttackStage.KNOW,
         verbose_name="Attack Stage",
-        help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')"
+        help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')",
     )
-    logic_operator = models.CharField(max_length=10, choices=LogicOperator.choices, blank=True, null=True, help_text="Logic operator to apply between antecedents")
+    logic_operator = models.CharField(
+        max_length=10,
+        choices=LogicOperator.choices,
+        blank=True,
+        null=True,
+        help_text="Logic operator to apply between antecedents",
+    )
 
     antecedents = models.ManyToManyField(
         ElementaryAction,
-        related_name='kill_chain_antecedents',
+        related_name="kill_chain_antecedents",
         blank=True,
         help_text="Elementary actions that are antecedents to this action in the kill chain",
     )
-    
+
     class Meta:
         verbose_name = "Kill Chain"
         verbose_name_plural = "Kill Chains"
         ordering = ["created_at"]
-    
+
     def save(self, *args, **kwargs):
         self.folder = self.operating_mode.folder
         super().save(*args, **kwargs)
 
     def clean(self):
         from django.core.exceptions import ValidationError
+
         if self.elementary_action in self.antecedents.all():
             raise ValidationError("An elementary action cannot be its own antecedent.")
 

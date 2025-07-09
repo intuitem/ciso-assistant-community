@@ -459,14 +459,7 @@
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'elementary-actions'}
-			<ElementaryActionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-			/>
+			<ElementaryActionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'operating-modes'}
 			<OperatingModeForm
 				{form}
