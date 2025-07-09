@@ -138,7 +138,7 @@
 				interactive={false}
 			/>
 			{#each riskMatricesPreview(riskMatrices) as riskMatrix}
-				<RiskMatrix {riskMatrix} {showRisks} wrapperClass="mt-8" />
+				<RiskMatrix {riskMatrix} showLegend={showRisks} wrapperClass="mt-8" />
 			{/each}
 		</Dropdown>
 	{/if}

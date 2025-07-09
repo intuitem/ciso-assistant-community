@@ -7,25 +7,22 @@
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
+	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import ComposerSelect from './ComposerSelect.svelte';
-	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import CounterCard from './CounterCard.svelte';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
-
-	const risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
@@ -475,6 +472,18 @@
 							</div>
 						{/if}
 						<div class="flex flex-wrap lg:flex-nowrap">
+							{#if page.data?.featureflags?.inherent_risk}
+								<div class="h-96 flex-col grow lg:flex-1">
+									<span class="text-sm font-semibold">{m.inherentRiskLevelPerScenario()}</span>
+
+									<DonutChart
+										s_label={m.inherentRisk()}
+										name="inherent_risk_level"
+										values={data.risks_count_per_level.inherent}
+										colors={data.risks_count_per_level.inherent.map((object) => object.color)}
+									/>
+								</div>
+							{/if}
 							<div class="h-96 flex-col grow lg:flex-1">
 								<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
