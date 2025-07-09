@@ -46,6 +46,7 @@
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
+    localStorage.removeItem('favicon')
 	}
 </script>
 
