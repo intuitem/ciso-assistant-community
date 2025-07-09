@@ -6,6 +6,12 @@
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { getModalStore, type ModalComponent, type ModalSettings, type ModalStore } from '$lib/components/Modals/stores';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+
+	const modalStore: ModalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -42,6 +48,26 @@
 			model: model.name,
 			domain: operational_scenarios.folder?.id
 		});
+	
+	function modalCreateForm(model: Record<string, any>): void {
+		let modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: model.createForm,
+				model: model,
+				debug: false
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + model.info.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	let group = $state(Object.keys(data.relatedModels)[0]);
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -162,6 +188,63 @@
 					{/if}
 				</ul>
 			</div>
+			{#if Object.keys(data.relatedModels).length > 0}
+				<div class="card shadow-lg mt-8 bg-white w-full">
+					<Tabs
+						value={group}
+						onValueChange={(e) => {
+							group = e.value;
+						}}
+						listJustify="justify-center"
+					>
+						{#snippet list()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Control value={urlmodel}>
+									{safeTranslate(model.info.localNamePlural)}
+									{#if model.table.body.length > 0}
+										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+									{/if}
+								</Tabs.Control>
+							{/each}
+						{/snippet}
+						{#snippet content()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Panel value={urlmodel}>
+									<div class="flex flex-row justify-between px-4 py-2">
+										<h4 class="font-semibold lowercase capitalize-first my-auto">
+											{safeTranslate('associated-' + model.info.localNamePlural)}
+										</h4>
+									</div>
+									{#if model.table}
+										<ModelTable
+											source={model.table}
+											deleteForm={model.deleteForm}
+											URLModel={urlmodel}
+											baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
+										>
+											{#snippet addButton()}
+												<div>
+													<span
+														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													>
+														<button
+															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+															data-testid="add-button"
+															title={safeTranslate('add-' + data.model.localName)}
+															onclick={(_) => modalCreateForm(model)}
+															><i class="fa-solid fa-file-circle-plus"></i>
+														</button>
+													</span>
+												</div>
+											{/snippet}
+										</ModelTable>
+									{/if}
+								</Tabs.Panel>
+							{/each}
+						{/snippet}
+					</Tabs>
+				</div>
+			{/if}
 		</div>
 		<div
 			id="activityTwo"

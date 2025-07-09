@@ -53,6 +53,7 @@
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -463,6 +464,15 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
+				{context}
+			/>
+		{:else if URLModel === 'operating-modes'}
+			<OperatingModeForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={model.initialData}
 				{context}
 			/>
 		{/if}

@@ -844,6 +844,13 @@ export const ElementaryActionSchema = z.object({
 	icon: z.string().optional().nullable(),
 });
 
+export const OperatingModeSchema = z.object({
+	operational_scenario: z.string().uuid(),
+	ref_id: z.string().optional(),
+	elementary_actions: z.string().uuid().optional().array().optional(),
+	likelihood: z.number().optional().default(-1),
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -897,6 +904,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'task-templates': TaskTemplateSchema,
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,
+	'operating-modes': OperatingModeSchema
 };
 
 export const modelSchema = (model: string) => {

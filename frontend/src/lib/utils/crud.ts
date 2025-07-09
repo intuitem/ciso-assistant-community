@@ -1028,7 +1028,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				detail: true
 			}
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+		reverseForeignKeyFields: [
+			{
+				field: 'operational_scenario',
+				urlModel: 'operating-modes',
+				endpointUrl: 'ebios-rm/operating-modes',
+			}
+		],
+		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }],
 	},
 	'elementary-actions': {
 		endpointUrl: 'ebios-rm/elementary-actions',
@@ -1042,6 +1049,21 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 		],
 		selectFields: [{ field: 'icon' }],
+	},
+	'operating-modes': {
+		endpointUrl: 'ebios-rm/operating-modes',
+		name: 'operatingmode',
+		localName: 'operatingMode',
+		localNamePlural: 'operatingModes',
+		verboseName: 'Operating mode',
+		verboseNamePlural: 'Operating modes',
+		foreignKeyFields: [
+			{ field: 'operational_scenario', urlModel: 'operational-scenarios' },
+			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+			
 	},
 	'security-exceptions': {
 		name: 'securityexception',

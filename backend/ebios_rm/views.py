@@ -259,6 +259,8 @@ class ElementaryActionViewSet(BaseModelViewSet):
 
 class OperatingModeViewSet(BaseModelViewSet):
     model = OperatingMode
+    
+    filterset_fields = ["operational_scenario"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get likelihood choices")

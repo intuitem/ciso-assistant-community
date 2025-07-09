@@ -1001,6 +1001,10 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'description', 'threat'],
 		body: ['ref_id', 'name', 'description', 'threat']
 	},
+	'operating-modes': {
+		head: ['ref_id', 'likelihood'],
+		body: ['ref_id', 'likelihood'],
+	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']

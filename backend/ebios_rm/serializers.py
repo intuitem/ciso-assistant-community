@@ -391,7 +391,10 @@ class OperatingModeWriteSerializer(BaseModelSerializer):
 
 class OperatingModeReadSerializer(BaseModelSerializer):
     operational_scenario = FieldsRelatedField()
+    folder = FieldsRelatedField()
     elementary_actions = FieldsRelatedField(many=True)
+    likelihood = serializers.JSONField(source="get_likelihood_display")
+    str = serializers.CharField(source="__str__")
 
 
     class Meta:
