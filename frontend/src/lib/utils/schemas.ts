@@ -846,6 +846,7 @@ export const ElementaryActionSchema = z.object({
 });
 
 export const OperatingModeSchema = z.object({
+	name: nameSchema,
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
 	elementary_actions: z.string().uuid().optional().array().optional(),

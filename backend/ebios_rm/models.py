@@ -795,6 +795,9 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
 class OperatingMode(AbstractBaseModel, FolderMixin):
+    name = models.CharField(
+        max_length=255, verbose_name=_("Name"), help_text="Name of the operating mode"
+    )
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
     operational_scenario = models.ForeignKey(
         OperationalScenario,

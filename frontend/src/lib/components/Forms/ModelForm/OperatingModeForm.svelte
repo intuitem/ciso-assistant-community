@@ -28,6 +28,13 @@
 </script>
 
 {#if context !== 'selectElementaryActions'}
+	<TextField
+		{form}
+		field="name"
+		label={m.name()}
+		cacheLock={cacheLocks['name']}
+		bind:cachedValue={formDataCache['name']}
+	/>
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="operational-scenarios"
