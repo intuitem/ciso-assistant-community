@@ -949,7 +949,7 @@ objects:
             ri\xED rizik;"
         it:
           description: valutare i rischi identificati in base ai criteri di rischio;
-    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2
