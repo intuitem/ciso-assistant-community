@@ -82,6 +82,7 @@ test('switching locale works properly', async ({ logedPage, analyticsPage, sideB
 			await sideBar.languageSelect.selectOption(locale);
 			await logedPage.hasTitle(m.analytics({}, { locale }));
 		}
+		await page.waitForTimeout(3000);
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 		await expect(sideBar.languageSelect).toBeVisible();
