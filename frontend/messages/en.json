@@ -116,6 +116,7 @@
 	"csfFunction": "CSF Function",
 	"eta": "ETA",
 	"referenceControl": "Reference control",
+	"referenceControlHelpText": "This serves as a template and would override some fields values (category, CSF function, etc.)",
 	"appliedControl": "Applied control",
 	"provider": "Provider",
 	"providerColon": "Provider:",

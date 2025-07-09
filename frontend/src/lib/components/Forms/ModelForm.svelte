@@ -237,6 +237,7 @@
 				cacheLock={cacheLocks['reference_control']}
 				bind:cachedValue={formDataCache['reference_control']}
 				label={m.referenceControl()}
+				helpText={m.referenceControlHelpText()}
 				nullable={true}
 				onChange={async (e) => {
 					if (e) {

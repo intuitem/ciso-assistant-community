@@ -116,6 +116,7 @@
 	"csfFunction": "Fonction",
 	"eta": "ETA",
 	"referenceControl": "Mesure de référence",
+	"referenceControlHelpText": "Ceci sert de modèle et remplacera les valeurs de certains champs (catégorie, fonction CSF, etc.)",
 	"appliedControl": "Mesure appliquée",
 	"provider": "Fournisseur",
 	"providerColon": "Fournisseur :",
