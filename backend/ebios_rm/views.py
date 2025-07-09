@@ -250,6 +250,8 @@ class OperationalScenarioViewSet(BaseModelViewSet):
 
 class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
+    
+    filterset_fields = ["operating_modes"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get icon choices")

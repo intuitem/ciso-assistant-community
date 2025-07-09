@@ -40,8 +40,6 @@ export const load: PageServerLoad = async (event) => {
 		console.error(`Failed to fetch data for likelihood: ${likelihoodChoicesResponse.statusText}`);
 	}
 
-	console.log()
-
 	return { ...detail, table };
 };
 

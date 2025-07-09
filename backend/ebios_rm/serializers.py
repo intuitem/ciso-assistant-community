@@ -368,6 +368,14 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class ElementaryActionWriteSerializer(BaseModelSerializer):
+    operating_modes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=OperatingMode.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    
     class Meta:
         model = ElementaryAction
         exclude = ["created_at", "updated_at"]

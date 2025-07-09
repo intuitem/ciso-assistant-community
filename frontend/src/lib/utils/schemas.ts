@@ -842,6 +842,7 @@ export const ElementaryActionSchema = z.object({
 	ref_id: z.string().optional(),
 	threat: z.string().uuid().optional(),
 	icon: z.string().optional().nullable(),
+	operating_modes: z.string().uuid().optional().array().optional(),
 });
 
 export const OperatingModeSchema = z.object({

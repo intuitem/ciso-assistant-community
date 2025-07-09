@@ -1706,6 +1706,8 @@
 	"express": "Express",
 	"elementaryActions": "Elementary actions",
 	"addElementaryAction": "Add elementary action",
+	"associatedElementaryActions": "Associated elementary actions",
+	"selectElementaryActions": "Select elementary actions",
 	"icon": "Icon",
 	"operatingModes": "Operating modes",
 	"associatedOperatingModes": "Associated operating modes",

@@ -12,6 +12,9 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		context?: {
+			selectElementaryActions?: boolean;
+		};
 	}
 
 	let {
@@ -19,35 +22,38 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		context = {}
 	}: Props = $props();
 </script>
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="operational-scenarios"
-	field="operational_scenario"
-	cacheLock={cacheLocks['operational_scenario']}
-	bind:cachedValue={formDataCache['operational_scenario']}
-	label={m.operationalScenario()}
-	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<Select
-    {form}
-    options={model.selectOptions['likelihood']}
-    field="likelihood"
-    label={m.likelihood()}
-    cacheLock={cacheLocks['likelihood']}
-    bind:cachedValue={formDataCache['likelihood']}
-    helpText={m.likelihoodHelpText()}
-/>
+{#if context.selectElementaryActions}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="operational-scenarios"
+		field="operational_scenario"
+		cacheLock={cacheLocks['operational_scenario']}
+		bind:cachedValue={formDataCache['operational_scenario']}
+		label={m.operationalScenario()}
+		hidden
+	/>
+	<TextField
+		{form}
+		field="ref_id"
+		label={m.refId()}
+		cacheLock={cacheLocks['ref_id']}
+		bind:cachedValue={formDataCache['ref_id']}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['likelihood']}
+		field="likelihood"
+		label={m.likelihood()}
+		cacheLock={cacheLocks['likelihood']}
+		bind:cachedValue={formDataCache['likelihood']}
+		helpText={m.likelihoodHelpText()}
+	/>
+{/if}
 <AutocompleteSelect
     {form}
     multiple

@@ -1062,8 +1062,29 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }],
+		reverseForeignKeyFields: [
+			{
+				field: 'operating_modes',
+				urlModel: 'elementary-actions',
+				endpointUrl: 'ebios-rm/elementary-actions',
+			}
+		]
 			
+	},
+	'kill-chains': {
+		endpointUrl: 'ebios-rm/kill-chains',
+		name: 'killchain',
+		localName: 'killChain',
+		localNamePlural: 'killChains',
+		verboseName: 'Kill chain',
+		verboseNamePlural: 'Kill chains',
+		foreignKeyFields: [
+			{ field: 'operating_mode', urlModel: 'operating-modes' },
+			{ field: 'elementary_action', urlModel: 'elementary-actions' },
+			{ field: 'antecedents', urlModel: 'elementary-actions'}
+		],
+		selectFields: [{ field: 'attack_stage' }, { field: 'logic_operator'}],
 	},
 	'security-exceptions': {
 		name: 'securityexception',

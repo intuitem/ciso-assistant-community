@@ -56,3 +56,12 @@
     cacheLock={cacheLocks['icon']}
     bind:cachedValue={formDataCache['icon']}
 />
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="operating-modes"
+	field="operating_modes"
+	cacheLock={cacheLocks['operating_modes']}
+	bind:cachedValue={formDataCache['operating_modes']}
+	label={m.operatingModes()}
+	hidden
+/>
