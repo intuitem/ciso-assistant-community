@@ -27,7 +27,7 @@
 	}: Props = $props();
 </script>
 
-{#if context.selectElementaryActions}
+{#if context !== 'selectElementaryActions'}
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="operational-scenarios"
@@ -53,13 +53,22 @@
 		bind:cachedValue={formDataCache['likelihood']}
 		helpText={m.likelihoodHelpText()}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="elementary-actions"
+		field="elementary_actions"
+		cacheLock={cacheLocks['elementary_actions']}
+		bind:cachedValue={formDataCache['elementary_actions']}
+		label={m.elementaryActions()}
+	/>
 {/if}
-<AutocompleteSelect
-    {form}
-    multiple
-    optionsEndpoint="elementary-actions"
-    field="elementary_actions"
-    cacheLock={cacheLocks['elementary_actions']}
-    bind:cachedValue={formDataCache['elementary_actions']}
-    label={m.elementaryActions()}
-/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="elementary-actions"
+		field="elementary_actions"
+		cacheLock={cacheLocks['elementary_actions']}
+		bind:cachedValue={formDataCache['elementary_actions']}
+		label={m.elementaryActions()}
+	/>
