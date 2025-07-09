@@ -1,4 +1,4 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-annex-technical-and-methodological-requirements-nis2-and-ccb-cff-2023-03-01
 locale: en
@@ -14,8 +14,8 @@ copyright: "\xA9 European Union Agency for Cybersecurity (ENISA), 2025\nUnless o
   \ changes are indicated. For any use or reproduction of elements that are\nnot owned\
   \ by the European Union Agency for Cybersecurity, permission may need to be sought\
   \ directly from the\nrespective rights holders."
-version: 1
-publication_date: 2025-07-02
+version: 2
+publication_date: 2025-07-09
 provider: ENISA
 packager: intuitem
 dependencies:
@@ -452,7 +452,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-4.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-4.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -494,7 +494,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-5.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-5.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -536,7 +536,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-4.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-4.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -578,7 +578,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -620,7 +620,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -662,7 +662,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-6.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-6.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -704,7 +704,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -746,7 +746,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-2.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-2.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -788,7 +788,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-3.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-3.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -830,7 +830,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-2.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-2.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -872,7 +872,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-3.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-3.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -914,7 +914,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -956,7 +956,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -998,7 +998,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -1040,7 +1040,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -1082,7 +1082,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-1.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-1.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -1124,7 +1124,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -1166,7 +1166,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4.1
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10425,7 +10425,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-4.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.gv-4.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10467,7 +10467,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-5.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_id.ra-5.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10509,7 +10509,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-4.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.be-4.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10551,7 +10551,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10593,7 +10593,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10635,7 +10635,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-6.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-6.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10677,7 +10677,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10719,7 +10719,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-2.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-2.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10761,7 +10761,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-3.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.rm-3.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10803,7 +10803,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-2.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-2.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10845,7 +10845,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-3.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.sc-3.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10887,7 +10887,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-7.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10929,7 +10929,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -10971,7 +10971,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -11013,7 +11013,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -11055,7 +11055,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-1.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-1.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -11097,7 +11097,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -11139,7 +11139,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4.1
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4.1
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h

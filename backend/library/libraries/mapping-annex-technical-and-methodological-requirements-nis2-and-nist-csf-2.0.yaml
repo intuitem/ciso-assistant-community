@@ -1,4 +1,4 @@
-convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
   Mode}'
 urn: urn:intuitem:risk:library:mapping-annex-technical-and-methodological-requirements-nis2-and-nist-csf-2.0
 locale: en
@@ -14,8 +14,8 @@ copyright: "\xA9 European Union Agency for Cybersecurity (ENISA), 2025\nUnless o
   \ changes are indicated. For any use or reproduction of elements that are\nnot owned\
   \ by the European Union Agency for Cybersecurity, permission may need to be sought\
   \ directly from the\nrespective rights holders."
-version: 1
-publication_date: 2025-07-02
+version: 2
+publication_date: 2025-07-09
 provider: ENISA
 packager: intuitem
 dependencies:
@@ -542,7 +542,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -584,7 +584,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -626,7 +626,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -668,7 +668,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -710,7 +710,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -752,7 +752,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -794,7 +794,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -836,7 +836,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -878,7 +878,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -920,7 +920,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -962,7 +962,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -1004,7 +1004,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -1046,7 +1046,7 @@ objects:
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+    - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7281,7 +7281,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7323,7 +7323,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7365,7 +7365,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7407,7 +7407,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7449,7 +7449,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7491,7 +7491,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7533,7 +7533,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7575,7 +7575,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7617,7 +7617,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7659,7 +7659,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7701,7 +7701,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7743,7 +7743,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
@@ -7785,7 +7785,7 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.f
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
-      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g
+      target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       target_requirement_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.h
