@@ -440,26 +440,42 @@ class LibraryUpdater:
                 },
             )
 
-    def update_reference_controls(self):
-        old_reference_controls = self.old_library.reference_controls.all()
-        for reference_control in old_reference_controls:
-            if reference_control.urn.lower() not in {
-                rc["urn"].lower() for rc in self.reference_controls
-            }:
-                reference_control.library = None
-                reference_control.save()
-        for reference_control in self.reference_controls:
-            normalized_urn = reference_control["urn"].lower()
-            ReferenceControl.objects.update_or_create(
-                urn=normalized_urn,
-                defaults=reference_control,
-                create_defaults={
-                    **self.referential_object_dict,
-                    **self.i18n_object_dict,
-                    **reference_control,
-                    "library": self.old_library,
-                },
+    def update_reference_controls(self) -> list["ReferenceControl"]:
+        incoming_urns = {rc["urn"].lower() for rc in self.reference_controls}
+
+        # unlink controls that are not in the incoming data
+        self.old_library.reference_controls.exclude(urn__in=incoming_urns).update(
+            library=None
+        )
+
+        controls_to_upsert = []
+        update_fields = set()
+
+        for rc_data in self.reference_controls:
+            normalized_urn = rc_data["urn"].lower()
+            update_fields.update(rc_data.keys())
+
+            instance_data = {
+                **self.referential_object_dict,
+                **self.i18n_object_dict,
+                **rc_data,
+                "urn": normalized_urn,
+                "library": self.old_library,
+            }
+            controls_to_upsert.append(ReferenceControl(**instance_data))
+
+        if controls_to_upsert:
+            # Add 'library' to the set of fields to be updated.
+            update_fields.add("library")
+
+            return ReferenceControl.objects.bulk_create(
+                controls_to_upsert,
+                update_conflicts=True,
+                unique_fields=["urn"],
+                update_fields=list(update_fields),
             )
+
+        return list(ReferenceControl.objects.none())
 
     def update_frameworks(self):
         for new_framework in self.new_frameworks:
