@@ -441,6 +441,13 @@ class LibraryUpdater:
             )
 
     def update_reference_controls(self):
+        old_reference_controls = self.old_library.reference_controls.all()
+        for reference_control in old_reference_controls:
+            if reference_control.urn.lower() not in {
+                rc["urn"].lower() for rc in self.reference_controls
+            }:
+                reference_control.library = None
+                reference_control.save()
         for reference_control in self.reference_controls:
             normalized_urn = reference_control["urn"].lower()
             ReferenceControl.objects.update_or_create(
