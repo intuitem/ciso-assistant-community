@@ -14,6 +14,8 @@
 		name?: string;
 		zoom?: number;
 		color?: any;
+		maxLegendItems?: number; // New prop to control legend items
+		legendPosition?: 'top' | 'bottom' | 'left' | 'right'; // New prop for legend position
 	}
 
 	let {
@@ -37,7 +39,9 @@
 			'#fc8452',
 			'#9a60b4',
 			'#ea7ccc'
-		]
+		],
+		maxLegendItems = 20, // Default max legend items
+		legendPosition = 'left' // Default legend position
 	}: Props = $props();
 
 	let searchQuery = $state('');
@@ -89,99 +93,195 @@
 		};
 	};
 
-	const getChartOptions = () => ({
-		legend: [
-			{
-				data: data.categories.map(function (a) {
-					return a.name;
-				})
+	// Function to get legend configuration based on number of categories
+	const getLegendConfig = () => {
+		const categories = data.categories || [];
+		const hasMany = categories.length > maxLegendItems;
+
+		// Base legend configuration
+		const legendConfig = {
+			data: categories.map(function (a) {
+				return a.name;
+			}),
+			type: hasMany ? 'scroll' : 'plain', // Use scroll type for many items
+			orient: legendPosition === 'left' || legendPosition === 'right' ? 'vertical' : 'horizontal',
+			...getLegendPositioning()
+		};
+
+		// Add scroll configuration if needed
+		if (hasMany) {
+			if (legendPosition === 'top' || legendPosition === 'bottom') {
+				legendConfig.scrollDataIndex = 0;
+				legendConfig.pageButtonItemGap = 5;
+				legendConfig.pageButtonGap = 30;
+				legendConfig.pageButtonPosition = 'end';
+				legendConfig.pageFormatter = '{current}/{total}';
+				legendConfig.pageIconColor = '#2f4554';
+				legendConfig.pageIconInactiveColor = '#aaa';
+				legendConfig.pageIconSize = 15;
+				legendConfig.pageTextStyle = {
+					color: '#666'
+				};
+			} else {
+				// For vertical legends, limit height
+				legendConfig.height = '60%';
 			}
-		],
-		tooltip: {
-			formatter: getCustomEdgeFormatter(),
-			label: {
-				position: 'right',
-				show: true
-			},
-			enterable: false,
-			triggerOn: 'mousemove',
-			backgroundColor: 'rgba(255, 255, 255, 0.95)',
-			borderColor: '#ccc',
-			borderWidth: 1,
-			extraCssText: 'box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);',
-			textStyle: {
-				color: '#333'
-			}
-		},
-		title: {
-			text: title,
-			subtext: 'Force layout',
-			top: '30',
-			left: 'right'
-		},
-		color: color,
-		series: [
-			{
-				type: 'graph',
-				layout: layout,
-				symbolSize: 20,
-				animation: false,
-				zoom: zoom,
-				animationDurationUpdate: 1500,
-				animationEasingUpdate: 'quinticInOut',
-				edgeSymbol: ['circle', 'arrow'],
+		}
+
+		return legendConfig;
+	};
+
+	// Function to get legend positioning based on legendPosition prop
+	const getLegendPositioning = () => {
+		switch (legendPosition) {
+			case 'top':
+				return {
+					top: 10,
+					left: 'center'
+				};
+			case 'bottom':
+				return {
+					bottom: 10,
+					left: 'center'
+				};
+			case 'left':
+				return {
+					left: 10,
+					top: 'middle'
+				};
+			case 'right':
+				return {
+					right: 10,
+					top: 'middle'
+				};
+			default:
+				return {
+					top: 10,
+					left: 'center'
+				};
+		}
+	};
+
+	// Function to calculate dynamic spacing based on legend and title
+	const calculateSpacing = () => {
+		const categories = data.categories || [];
+		const hasMany = categories.length > maxLegendItems;
+		const hasTitle = title && title.trim().length > 0;
+
+		// Calculate legend height/width based on position and items
+		let legendSpace = 0;
+		if (legendPosition === 'top' || legendPosition === 'bottom') {
+			// For horizontal legends, calculate based on wrapping
+			const itemsPerRow = Math.floor(12); // Approximate items per row
+			const rows = Math.ceil(Math.min(categories.length, maxLegendItems) / itemsPerRow);
+			legendSpace = hasMany ? 60 : Math.max(30, rows * 25);
+		} else {
+			// For vertical legends
+			legendSpace = hasMany ? 200 : 150;
+		}
+
+		// Title space
+		const titleSpace = hasTitle ? 60 : 20;
+
+		return { legendSpace, titleSpace };
+	};
+
+	const getChartOptions = () => {
+		const { legendSpace, titleSpace } = calculateSpacing();
+
+		return {
+			legend: getLegendConfig(),
+			tooltip: {
+				formatter: getCustomEdgeFormatter(),
 				label: {
 					position: 'right',
-					formatter: '{b}',
-					show: false
+					show: true
 				},
-				draggable: true,
-				roam: true,
-				data: data.nodes.map(function (node, idx) {
-					node.id = idx;
-					return node;
-				}),
-				emphasis: {
-					focus: 'adjacency',
+				enterable: false,
+				triggerOn: 'mousemove',
+				backgroundColor: 'rgba(255, 255, 255, 0.95)',
+				borderColor: '#ccc',
+				borderWidth: 1,
+				extraCssText: 'box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);',
+				textStyle: {
+					color: '#333'
+				}
+			},
+			title: {
+				text: title,
+				subtext: 'Force layout',
+				top: legendPosition === 'top' ? legendSpace + 10 : 10,
+				left: 'right'
+			},
+			color: color,
+			series: [
+				{
+					type: 'graph',
+					layout: layout,
+					symbolSize: 20,
+					animation: false,
+					zoom: zoom,
+					animationDurationUpdate: 1500,
+					animationEasingUpdate: 'quinticInOut',
+					edgeSymbol: ['circle', 'arrow'],
 					label: {
 						position: 'right',
-						show: true
-					}
-				},
-				selectedMode: 'series',
-				select: {
-					itemStyle: {
-						borderColor: '#666',
-						borderWidth: 2
+						formatter: '{b}',
+						show: false
 					},
-					label: {
-						show: true
+					draggable: true,
+					roam: true,
+					// Add explicit positioning for the graph
+					top: legendPosition === 'top' ? legendSpace + titleSpace : titleSpace,
+					bottom: legendPosition === 'bottom' ? legendSpace + 20 : 20,
+					left: legendPosition === 'left' ? legendSpace + 20 : 20,
+					right: legendPosition === 'right' ? legendSpace + 20 : 20,
+					data: data.nodes.map(function (node, idx) {
+						node.id = idx;
+						return node;
+					}),
+					emphasis: {
+						focus: 'adjacency',
+						label: {
+							position: 'right',
+							show: true
+						}
+					},
+					selectedMode: 'series',
+					select: {
+						itemStyle: {
+							borderColor: '#666',
+							borderWidth: 2
+						},
+						label: {
+							show: true
+						}
+					},
+					categories: data.categories,
+					force: {
+						edgeLength: edgeLength,
+						repulsion: 200,
+						gravity: 0.05,
+						layoutAnimation: true,
+						friction: 0.1,
+						initLayout: initLayout
+					},
+					labelLayout: {
+						hideOverlap: true
+					},
+					edgeLabel: {
+						show: false // Hide permanent edge labels
+					},
+					edges: data.links,
+					lineStyle: {
+						curveness: 0.2,
+						color: 'source',
+						width: 1.5
 					}
-				},
-				categories: data.categories,
-				force: {
-					edgeLength: edgeLength,
-					repulsion: 200,
-					gravity: 0.05,
-					layoutAnimation: true,
-					friction: 0.1,
-					initLayout: initLayout
-				},
-				labelLayout: {
-					hideOverlap: true
-				},
-				edgeLabel: {
-					show: false // Hide permanent edge labels
-				},
-				edges: data.links,
-				lineStyle: {
-					curveness: 0.2,
-					color: 'source',
-					width: 1.5
 				}
-			}
-		]
-	});
+			]
+		};
+	};
 
 	const handleNodeEmphasis = (nodeId: number | null) => {
 		if (!chart) return;
