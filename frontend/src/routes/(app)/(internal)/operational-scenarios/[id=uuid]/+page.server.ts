@@ -30,12 +30,13 @@ export const load: PageServerLoad = async (event) => {
 	const likelihoodChoicesResponse = await event.fetch(likelihoodChoicesEndpoint);
 
 	if (likelihoodChoicesResponse.ok) {
-		detail.relatedModels['operating-modes'].selectOptions['likelihood'] = await likelihoodChoicesResponse.json().then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: parseInt(key)
-			}))
-		);
+		detail.relatedModels['operating-modes'].selectOptions['likelihood'] =
+			await likelihoodChoicesResponse.json().then((data) =>
+				Object.entries(data).map(([key, value]) => ({
+					label: value,
+					value: parseInt(key)
+				}))
+			);
 	} else {
 		console.error(`Failed to fetch data for likelihood: ${likelihoodChoicesResponse.statusText}`);
 	}

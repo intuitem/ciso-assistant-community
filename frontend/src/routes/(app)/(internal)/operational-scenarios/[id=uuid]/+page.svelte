@@ -8,7 +8,12 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getModalStore, type ModalComponent, type ModalSettings, type ModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	const modalStore: ModalStore = getModalStore();
@@ -48,7 +53,7 @@
 			model: model.name,
 			domain: operational_scenarios.folder?.id
 		});
-	
+
 	function modalCreateForm(model: Record<string, any>): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,

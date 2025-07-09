@@ -1003,11 +1003,11 @@ export const listViewFields = {
 	},
 	'operating-modes': {
 		head: ['ref_id', 'likelihood'],
-		body: ['ref_id', 'likelihood'],
+		body: ['ref_id', 'likelihood']
 	},
 	'kill-chains': {
 		head: ['elementary_action', 'attack_stage', 'antecedents'],
-		body: ['elementary_action', 'attack_stage', 'antecedents'],
+		body: ['elementary_action', 'attack_stage', 'antecedents']
 	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
