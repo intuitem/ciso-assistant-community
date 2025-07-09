@@ -85,49 +85,48 @@
 
 	let { children }: Props = $props();
 
-	const faviconB64 = persisted('favicon', {
-		data: '',
-		hash: '',
-		mimeType: ''
-	});
+	// const faviconB64 = persisted('favicon', {
+	// 	data: '',
+	// 	hash: '',
+	// 	mimeType: ''
+	// });
 
 	const clientSettings = $page.data.clientSettings;
-	let favicon = $state($faviconB64?.hash ? `data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}` : undefined);
-	let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
-
-  if (typeof window !== 'undefined') {
-		// stash the value...
-		const _favicon = favicon;
-
-		// unset it...
-		favicon = undefined;
-
-		$effect(() => {
-			// ...and reset after we've mounted
-      // IMPORTANT: if show_images_unauthenticated is true, we show the favicon
-      if (clientSettings?.settings?.show_images_unauthenticated || $page.data?.user) {
-          favicon = _favicon;
-          return;
-      }
-      favicon = '/favicon.ico';
-		});
-	}
-
-	onMount(async () => {
-		if (!clientSettings?.settings?.favicon) {
-			return;
-		}
-		if (faviconHash !== $faviconB64?.hash) {
-			console.log('favicon changed, fetching new favicon...');
-			const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
-			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
-		}
-	});
-
+	// let favicon = $state($faviconB64?.hash ? `data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}` : undefined);
+	// let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
+	//
+	//  if (typeof window !== 'undefined') {
+	// 	// stash the value...
+	// 	const _favicon = favicon;
+	//
+	// 	// unset it...
+	// 	favicon = undefined;
+	//
+	// 	$effect(() => {
+	// 		// ...and reset after we've mounted
+	//      // IMPORTANT: if show_images_unauthenticated is true, we show the favicon
+	//      if (clientSettings?.settings?.show_images_unauthenticated || $page.data?.user) {
+	//          favicon = _favicon;
+	//          return;
+	//      }
+	//      favicon = '/favicon.ico';
+	// 	});
+	// }
+	//
+	// onMount(async () => {
+	// 	if (!clientSettings?.settings?.favicon) {
+	// 		return;
+	// 	}
+	// 	if (faviconHash !== $faviconB64?.hash) {
+	// 		console.log('favicon changed, fetching new favicon...');
+	// 		const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
+	// 		faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
+	// 	}
+	// });
 </script>
 
 <svelte:head>
-  <link rel="icon" href={favicon ?? '/favicon.ico'} />
+  <link rel="icon" type={clientSettings?.settings?.favicon_mime_type ?? 'image/x-icon'} href='/favicon' />
 </svelte:head>
 
 <Modal components={modalRegistry} />
