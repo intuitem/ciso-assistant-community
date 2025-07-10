@@ -68,6 +68,7 @@
 	options={model.selectOptions['logic_operator']}
 	field="logic_operator"
 	label={m.logicOperator()}
+	helpText={m.logicOperatorHelpText()}
 	cacheLock={cacheLocks['logic_operator']}
 	bind:cachedValue={formDataCache['logic_operator']}
 	disabled={formDataCache['antecedents'] && formDataCache['antecedents'].length <= 1}

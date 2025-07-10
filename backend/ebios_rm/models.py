@@ -653,10 +653,10 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         KEY = "key", "Key"
     
     class AttackStage(models.IntegerChoices):
-        KNOW = 0, "know"
-        ENTER = 1, "enter"
-        DISCOVER = 2, "discover"
-        EXPLOIT = 3, "exploit"
+        KNOW = 0, "ebiosReconnaissance"
+        ENTER = 1, "ebiosInitialAccess"
+        DISCOVER = 2, "ebiosDiscovery"
+        EXPLOIT = 3, "ebiosExploitation"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
     threat = models.ForeignKey(
