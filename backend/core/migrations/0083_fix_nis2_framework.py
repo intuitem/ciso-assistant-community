@@ -23,7 +23,7 @@ def fix_nis2_framework(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0081_campaign_complianceassessment_campaign"),
+        ("core", "0082_riskscenario_inherent_impact_and_more"),
     ]
 
     operations = [
