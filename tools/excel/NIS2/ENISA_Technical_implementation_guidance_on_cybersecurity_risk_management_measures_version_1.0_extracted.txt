@@ -5255,8 +5255,7 @@ Logs from email filters.
 
 TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
-6.10 
-VULNERABILITY HANDLING AND DISCLOSURE 
+6.10 VULNERABILITY HANDLING AND DISCLOSURE 
 6.10.1. The relevant entities shall obtain information about technical vulnerabilities in their network and information
 systems, evaluate their exposure to such vulnerabilities and take appropriate measures to manage the vulnerabilities.
 GUIDANCE
@@ -6137,8 +6136,7 @@ June 2025, version 1.0
 10. 
 HUMAN RESOURCES 
 SECURITY
-10.1 
-HUMAN RESOURCES SECURITY 
+10.1 HUMAN RESOURCES SECURITY 
 10.1.1. For the purpose of Article 21(2), point (i) of Directive (EU) 2022/2555, the relevant entities shall ensure that their
 employees and direct suppliers and service providers, wherever applicable, understand and commit to their security
 responsibilities, as appropriate for the offered services and the job and in line with the relevant entities’ policy on the
@@ -6282,8 +6280,7 @@ EXAMPLES OF EVIDENCE
 Up-to-date list of employees and their assignment to roles.
 • 
 Records of the review process, including the criteria used, the findings and any changes made.
-10.2 
-VERIFICATION OF BACKGROUND 
+10.2 VERIFICATION OF BACKGROUND 
 10.2.1. The relevant entities shall ensure to the extent feasible verification of the background of their employees and
 where applicable of direct suppliers and service providers in accordance with point 5.1.4, if necessary for their role,
 responsibilities and authorisations.
@@ -6383,8 +6380,7 @@ EXAMPLES OF EVIDENCE
 Records of background verification for roles requiring ongoing clearance.
 • 
 Review comments or change logs of the procedure.
-10.3 
-TERMINATION OR CHANGE OF EMPLOYMENT PROCEDURES  
+10.3 TERMINATION OR CHANGE OF EMPLOYMENT PROCEDURES  
 10.3.1. The relevant entities shall ensure that network and information system security responsibilities and duties that
 remain valid after termination or change of employment of their employees are contractually defined and enforced.
 GUIDANCE
@@ -6457,8 +6453,7 @@ Documentation of the process for personnel changes, including responsibilities f
 description of rights of access and possession of assets for each role, and procedures for briefing and
 training personnel in new roles (e.g. standardised checklists used during the termination process to ensure
 all necessary steps are taken).
-10.4 
-DISCIPLINARY PROCESS  
+10.4 DISCIPLINARY PROCESS  
 10.4.1. The relevant entities shall establish, communicate and maintain a disciplinary process for handling violations of
 network and information system security policies. The process shall take into consideration relevant legal, statutory,
 contractual and business requirements.
@@ -6547,8 +6542,7 @@ TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
 11. 
 ACCESS CONTROL
-11.1 
-ACCESS CONTROL POLICY  
+11.1 ACCESS CONTROL POLICY  
 11.1.1. For the purpose of Article 21(2), point (i) of Directive (EU) 2022/2555, the relevant entities shall establish,
 document and implement logical and physical access control policies for the access to their network and information
 systems, based on business requirements as well as network and information system security requirements.
@@ -6689,8 +6683,7 @@ during modifications.
 • 
 Access control system configurations showing the adoption of MAC, DAC, RBAC or ABAC depending on
 business needs.
-11.2 
-MANAGEMENT OF ACCESS RIGHTS  
+11.2 MANAGEMENT OF ACCESS RIGHTS  
 11.2.1. The relevant entities shall provide, modify, remove and document access rights to network and information
 systems in accordance with the access control policy referred to in point 11.1.
 11.2.2. The relevant entities shall:
@@ -6862,8 +6855,7 @@ Segregation of duties matrix.
 
 TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
-11.3 
-PRIVILEGED ACCOUNTS AND SYSTEM ADMINISTRATION ACCOUNTS  
+11.3 PRIVILEGED ACCOUNTS AND SYSTEM ADMINISTRATION ACCOUNTS  
 11.3.1. The relevant entities shall maintain policies for management of privileged accounts and system administration
 accounts as part of the access control policy referred to in point 11.1.
 GUIDANCE
@@ -6976,8 +6968,7 @@ access, session logging, context-aware controls (e.g. location, device complianc
 
 TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
-11.4 
-ADMINISTRATION SYSTEMS  
+11.4 ADMINISTRATION SYSTEMS  
 11.4.1. The relevant entities shall restrict and control the use of system administration systems in accordance with the
 access control policy referred to in point 11.1.
 GUIDANCE
@@ -7067,8 +7058,7 @@ unauthorized access.
 • 
 User training records meaning evidence that personnel have been trained in the proper use of system
 administration systems, for example training materials, attendance records or completion certificates.
-11.5 
-IDENTIFICATION 
+11.5 IDENTIFICATION 
 11.5.1. The relevant entities shall manage the full life cycle of identities of network and information systems and their
 users.
 GUIDANCE
@@ -7209,8 +7199,7 @@ Evidence of the systems in place, such as IAM solutions.
 
 TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
-11.6 
-AUTHENTICATION 
+11.6 AUTHENTICATION 
 11.6.1. The relevant entities shall implement secure authentication procedures and technologies based on access
 restrictions and the policy on access control.
 GUIDANCE
@@ -7433,8 +7422,7 @@ Documentation of training sessions for employees on secure authentication practi
 • 
 Records of awareness programmes or communications to employees about the importance of secure
 authentication.
-11.7 
-MULTI-FACTOR AUTHENTICATION 
+11.7 MULTI-FACTOR AUTHENTICATION 
 11.7.1. The relevant entities shall ensure that users are authenticated by multiple authentication factors or continuous
 authentication mechanisms for accessing the entities’ network and information systems, where appropriate, in
 accordance with the classification of the asset to be accessed.
@@ -7572,8 +7560,7 @@ TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
 12. 
 ASSET MANAGEMENT
-12.1 
-ASSET CLASSIFICATION  
+12.1 ASSET CLASSIFICATION  
 12.1.1. For the purpose of Article 21(2), point (i) of Directive (EU) 2022/2555, the relevant entities shall lay down
 classification levels of all assets, including information, in scope of their network and information systems for the level
 of protection required.
@@ -7658,8 +7645,7 @@ Communicate to personnel the classification of assets and associated protection 
 EXAMPLES OF EVIDENCE
 • 
 Personnel knowing classification levels and protection requirements for each level.
-12.2 
-HANDLING OF ASSETS 
+12.2 HANDLING OF ASSETS 
 12.2.1. The relevant entities shall establish, implement and apply a policy for the proper handling of assets, including
 information, in accordance with their network and information security policy and shall communicate the policy on proper
 handling of assets to anyone who uses or handles assets.
@@ -7749,8 +7735,7 @@ EXAMPLES OF EVIDENCE
 Up-to date policy for asset handling
 • 
 Records of reviews or history of changes.
-12.3 
-REMOVABLE MEDIA POLICY 
+12.3 REMOVABLE MEDIA POLICY 
 12.3.1. The relevant entities shall establish, implement and apply a policy on the management of removable storage
 media and communicate it to their employees and third parties who handle removable storage media at the relevant
 entities’ premises or other locations where the removable media is connected to the relevant entities’ network and
@@ -7840,8 +7825,7 @@ EXAMPLES OF EVIDENCE
 Up-to date removable media policy.
 • 
 Records of reviews or history of changes.
-12.4 
-ASSET INVENTORY 
+12.4 ASSET INVENTORY 
 12.4.1. The relevant entities shall develop and maintain a complete, accurate, up-to-date and consistent inventory of
 their assets. They shall record changes to the entries in the inventory in a traceable manner.
 GUIDANCE
@@ -7949,9 +7933,7 @@ inventory.
 EXAMPLES OF EVIDENCE
 • 
 Configuration settings of the asset management tool.
-12.5 
-DEPOSIT, RETURN OR DELETION OF ASSETS UPON TERMINATION OF 
-EMPLOYMENT 
+12.5 DEPOSIT, RETURN OR DELETION OF ASSETS UPON TERMINATION OF EMPLOYMENT 
 The relevant entities shall establish, implement and apply procedures which ensure that their assets which are under
 custody of personnel are deposited, returned or deleted upon termination of employment and shall document the
 deposit, return and deletion of those assets. Where the deposit, return or deletion of assets is not possible, the relevant
@@ -8049,8 +8031,7 @@ June 2025, version 1.0
 13. 
 ENVIRONMENTAL AND 
 PHYSICAL SECURITY
-13.1 
-SUPPORTING UTILITIES 
+13.1 SUPPORTING UTILITIES 
 13.1.1. For the purpose of Article 21(2)(c) of Directive (EU) 2022/2555, the relevant entities shall prevent loss, damage
 or compromise of network and information systems or interruption to their operations due to the failure and disruption
 of supporting utilities.
@@ -8169,8 +8150,7 @@ TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
 • 
 Logs demonstrating detection and recording of any utility failures or disruptions.
-13.2 
-PROTECTION AGAINST PHYSICAL AND ENVIRONMENTAL THREATS 
+13.2  PROTECTION AGAINST PHYSICAL AND ENVIRONMENTAL THREATS 
 13.2.1. For the purpose of Article 21(2)(e) of Directive (EU) 2022/2555, the relevant entities shall prevent or reduce the
 consequences of events originating from physical and environmental threats, such as natural disasters and other
 intentional or unintentional threats, based on the results of the risk assessment carried out pursuant to point 2.1.
@@ -8307,8 +8287,7 @@ Documented physical and environmental security policy, including a description o
 and information systems in scope.
 • 
 Results of periodic simulations and awareness raising activities.
-13.3 
-PERIMETER AND PHYSICAL ACCESS CONTROL 
+13.3  PERIMETER AND PHYSICAL ACCESS CONTROL 
 13.3.1. For the purpose of Article 21(2)(i) of Directive (EU) 2022/2555, the relevant entities shall prevent and monitor
 unauthorised physical access, damage and interference to their network and information systems.
 GUIDANCE
