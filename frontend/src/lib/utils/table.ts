@@ -1000,8 +1000,8 @@ export const listViewFields = {
 		}
 	},
 	'operational-scenarios': {
-		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
-		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		head: ['is_selected', 'attackPath', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'attack_path', 'operating_modes_description', 'threats', 'likelihood'],
 		filters: {
 			threats: THREAT_FILTER,
 			likelihood: RISK_PROBABILITY_FILTER,
