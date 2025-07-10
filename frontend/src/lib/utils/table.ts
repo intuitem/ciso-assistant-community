@@ -1009,16 +1009,16 @@ export const listViewFields = {
 		}
 	},
 	'elementary-actions': {
-		head: ['ref_id', 'name', 'description', 'threat'],
-		body: ['ref_id', 'name', 'description', 'threat']
+		head: ['ref_id', 'domain', 'name', 'attack_stage', 'threat'],
+		body: ['ref_id', 'domain', 'name', 'attack_stage', 'threat']
 	},
 	'operating-modes': {
 		head: ['ref_id', 'name', 'likelihood'],
 		body: ['ref_id', 'name', 'likelihood']
 	},
 	'kill-chains': {
-		head: ['elementary_action', 'attack_stage', 'antecedents'],
-		body: ['elementary_action', 'attack_stage', 'antecedents']
+		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],

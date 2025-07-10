@@ -387,6 +387,7 @@ class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
     threat = FieldsRelatedField()
     folder = FieldsRelatedField()
+    attack_stage = serializers.CharField(source="get_attack_stage_display")
 
     class Meta:
         model = ElementaryAction
@@ -419,10 +420,13 @@ class KillChainWriteSerializer(BaseModelSerializer):
     def validate(self, attrs):
         elementary_action = attrs.get("elementary_action")
         antecedents = attrs.get("antecedents", [])
-        attack_stage = attrs.get("attack_stage")
+        attack_stage = elementary_action.attack_stage
         
-        if attack_stage == KillChain.AttackStage.KNOW and antecedents:
+        if attack_stage == ElementaryAction.AttackStage.KNOW and antecedents:
             raise serializers.ValidationError("Antecedents cannot be selected in attack stage 'Know'.")
+        
+        if attack_stage != ElementaryAction.AttackStage.KNOW and not antecedents:
+            raise serializers.ValidationError("Antecedents must be selected for attack stages other than 'Know'.")
         
         if elementary_action in antecedents:
             raise serializers.ValidationError("An elementary action cannot be its own antecedent.")
@@ -434,7 +438,7 @@ class KillChainWriteSerializer(BaseModelSerializer):
                     elementary_action=antecedent
                 ).exists():
                     raise serializers.ValidationError(
-                        f"Antecedent '{antecedent}' has not been used in the operating mode yet"
+                        f"Antecedent '{antecedent}' has not been used in the operating mde yet"
                     )
 
                 antecedent_kill_chain = KillChain.objects.filter(
@@ -442,10 +446,9 @@ class KillChainWriteSerializer(BaseModelSerializer):
                     elementary_action=antecedent
                 ).first()
 
-                if antecedent_kill_chain and KillChain.AttackStage.compare_stages(
-                    antecedent_kill_chain.attack_stage, attack_stage) < 0:
+                if antecedent_kill_chain and antecedent.attack_stage > attack_stage:
                     raise serializers.ValidationError(
-                        {'attack_stage': f"The attack stage needs to be the same or after the attack stage '{antecedent_kill_chain.attack_stage}' of the antecedent '{antecedent}'"}
+                        {"antecedents": f"The attack stage of the antecedent '{antecedent}' needs to be the same or before the attack stage of the elementary action"}
                     )
         
 
@@ -457,6 +460,7 @@ class KillChainReadSerializer(BaseModelSerializer):
     operating_mode = FieldsRelatedField()
     elementary_action = FieldsRelatedField()
     antecedents = FieldsRelatedField(many=True)
+    attack_stage = serializers.CharField()
 
     class Meta:
         model = KillChain

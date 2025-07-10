@@ -651,6 +651,12 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         NETWORK = "network", "Network"
         DATABASE = "database", "Database"
         KEY = "key", "Key"
+    
+    class AttackStage(models.IntegerChoices):
+        KNOW = 0, "know"
+        ENTER = 1, "enter"
+        DISCOVER = 2, "discover"
+        EXPLOIT = 3, "exploit"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
     threat = models.ForeignKey(
@@ -661,6 +667,12 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         help_text=_("Threat that the elementary action is derived from"),
         null=True,
         blank=True,
+    )
+    attack_stage = models.SmallIntegerField(
+        choices=AttackStage.choices,
+        default=AttackStage.KNOW,
+        verbose_name="Attack Stage",
+        help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')",
     )
     icon = models.CharField(
         max_length=100,
@@ -887,32 +899,6 @@ class KillChain(AbstractBaseModel, FolderMixin):
         AND = "AND", "AND"
         OR = "OR", "OR"
 
-    class AttackStage(models.TextChoices):
-        KNOW = "know", "Know"
-        ENTER = "enter", "Enter"
-        DISCOVER = "discover", "Discover"
-        EXPLOIT = "exploit", "Exploit"
-
-        @classmethod
-        def compare_stages(cls, stage1, stage2):
-            """
-            Compare two attack stages and return their relative order.
-            Returns:
-                -1 if stage1 is earlier than stage2
-                 0 if stage1 is the same as stage2
-                 1 if stage1 is later than stage2
-            """
-            stages_order = [cls.KNOW, cls.ENTER, cls.DISCOVER, cls.EXPLOIT]
-            index1 = stages_order.index(stage1)
-            index2 = stages_order.index(stage2)
-
-            if index1 < index2:
-                return 1
-            elif index1 > index2:
-                return -1
-            else:
-                return 0
-
     operating_mode = models.ForeignKey(
         OperatingMode, on_delete=models.CASCADE, related_name="kill_chain_steps"
     )
@@ -920,13 +906,6 @@ class KillChain(AbstractBaseModel, FolderMixin):
         ElementaryAction, on_delete=models.PROTECT, related_name="as_kill_chain"
     )
     is_highlighted = models.BooleanField(default=False)
-    attack_stage = models.CharField(
-        max_length=20,
-        choices=AttackStage.choices,
-        default=AttackStage.KNOW,
-        verbose_name="Attack Stage",
-        help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')",
-    )
     logic_operator = models.CharField(
         max_length=10,
         choices=LogicOperator.choices,
@@ -941,6 +920,10 @@ class KillChain(AbstractBaseModel, FolderMixin):
         blank=True,
         help_text="Elementary actions that are antecedents to this action in the kill chain",
     )
+    
+    @property
+    def attack_stage(self):
+        return self.elementary_action.get_attack_stage_display()
 
     class Meta:
         verbose_name = "Kill Chain"

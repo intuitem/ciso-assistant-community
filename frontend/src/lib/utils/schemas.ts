@@ -845,6 +845,7 @@ export const ElementaryActionSchema = z.object({
 	ref_id: z.string().optional(),
 	threat: z.string().uuid().optional(),
 	icon: z.string().optional().nullable(),
+	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
 });
 
@@ -860,7 +861,6 @@ export const KillChainSchema = z.object({
 	operating_mode: z.string().uuid(),
 	elementary_action: z.string().uuid(),
 	is_highlighted: z.boolean().default(false),
-	attack_stage: z.string().optional().default('know'),
 	antecedents: z.string().uuid().optional().array().optional(),
 	logic_operator: z.string().optional().nullable()
 });

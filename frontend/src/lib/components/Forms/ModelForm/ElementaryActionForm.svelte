@@ -32,6 +32,15 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
+<Select
+	{form}
+	options={model.selectOptions['attack_stage']}
+	field="attack_stage"
+	label={m.attackStage()}
+	disableDoubleDash
+	cacheLock={cacheLocks['attack_stage']}
+	bind:cachedValue={formDataCache['attack_stage']}
+/>
 <TextField
 	{form}
 	field="ref_id"

@@ -52,22 +52,12 @@
 	cacheLock={cacheLocks['is_highlighted']}
 	bind:cachedValue={formDataCache['is_highlighted']}
 />
-<Select
-	{form}
-	options={model.selectOptions['attack_stage']}
-	field="attack_stage"
-	label={m.attackStage()}
-	disableDoubleDash
-	cacheLock={cacheLocks['attack_stage']}
-	bind:cachedValue={formDataCache['attack_stage']}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="elementary-actions"
 	optionsDetailedUrlParameters={[['operating_modes', initialData['operating_mode']]]}
 	multiple
 	field="antecedents"
-	disabled={formDataCache['attack_stage'] === 'know'}
 	cacheLock={cacheLocks['antecedents']}
 	helpText={m.antecedentsHelpText()}
 	bind:cachedValue={formDataCache['antecedents']}

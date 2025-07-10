@@ -1730,5 +1730,9 @@
 	"killChains": "Kill chains",
 	"killChain": "Kill chain",
 	"associatedKillChains": "Associated kill chains",
-	"addKillChain": "Add kill chain"
+	"addKillChain": "Add kill chain",
+	"know": "Know",
+	"enter": "Enter",
+	"discover": "Discover",
+	"exploit": "Exploit"
 }
