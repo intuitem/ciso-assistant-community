@@ -127,17 +127,19 @@
 								disableDelete={field?.disableDelete ?? false}
 							>
 								{#snippet selectButton()}
-									<div>
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
-											<button
-												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-												data-testid="select-button"
-												title={m.selectElementaryActions()}
-												onclick={(_) => modalUpdateForm()}
-												><i class="fa-solid fa-hand-pointer"></i>
-											</button>
-										</span>
-									</div>
+									{#if urlmodel === 'elementary-actions'}
+										<div>
+											<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="select-button"
+													title={m.selectElementaryActions()}
+													onclick={(_) => modalUpdateForm()}
+													><i class="fa-solid fa-hand-pointer"></i>
+												</button>
+											</span>
+										</div>
+									{/if}
 								{/snippet}
 								{#snippet addButton()}
 									<div>
