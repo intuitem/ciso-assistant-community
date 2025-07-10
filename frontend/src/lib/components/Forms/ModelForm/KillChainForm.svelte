@@ -38,7 +38,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="elementary-actions"
-	optionsDetailedUrlParameters={[['operating_modes', initialData['operating_mode']]]}
+	optionsDetailedUrlParameters={[['operating_mode_available_actions', initialData['operating_mode']]]}
 	field="elementary_action"
 	cacheLock={cacheLocks['elementary_action']}
 	bind:cachedValue={formDataCache['elementary_action']}
@@ -80,4 +80,5 @@
 	label={m.logicOperator()}
 	cacheLock={cacheLocks['logic_operator']}
 	bind:cachedValue={formDataCache['logic_operator']}
+	disabled={formDataCache['antecedents'] && formDataCache['antecedents'].length <= 1}
 />

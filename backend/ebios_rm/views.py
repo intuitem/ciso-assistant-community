@@ -249,10 +249,29 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         return Response(choices)
 
 
+class ElementaryActionFilter(df.FilterSet):
+    operating_mode_available_actions = df.ModelChoiceFilter(
+        queryset=OperatingMode.objects.all(),
+        method="filter_operating_mode_available_actions",
+        label="Operating mode available actions",
+    )
+    
+    def filter_operating_mode_available_actions(self, queryset, name, value):  
+        operating_mode = value
+        used_elementary_actions = KillChain.objects.filter(
+            operating_mode=operating_mode
+        ).values_list('elementary_action', flat=True)
+        return queryset.exclude(id__in=used_elementary_actions)
+        
+
+    class Meta:
+        model = ElementaryAction
+        fields = ["operating_modes", "operating_mode_available_actions"]
+
 class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
 
-    filterset_fields = ["operating_modes"]
+    filterset_class = ElementaryActionFilter
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get icon choices")
