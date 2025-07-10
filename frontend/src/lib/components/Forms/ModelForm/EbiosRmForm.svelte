@@ -153,6 +153,14 @@
 			optionsEndpoint="assets"
 			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type'
+					}
+				],
+				classes: 'text-blue-500'
+			}}
 			field="assets"
 			label={m.assets()}
 			helpText={m.studyAssetHelpText()}
@@ -183,6 +191,14 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		cacheLock={cacheLocks['assets']}

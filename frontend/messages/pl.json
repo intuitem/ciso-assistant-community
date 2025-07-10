@@ -1677,6 +1677,8 @@
 			}
 		}
 	],
+	"matchingScenarios": "Dopasowane scenariusze",
+	"fearedEventAssetHelpText": "Zdarzenia obawiane są zwykle powiązane z wartościami biznesowymi (podstawowe aktywa). Aktywa wspierające są tu dozwolone ze względu na elastyczność.",
 	"serverURL": "URL serwera",
 	"oidcConfiguration": "Openid-Configuration",
 	"tokenAuthMethod": "Metoda tokenu",
