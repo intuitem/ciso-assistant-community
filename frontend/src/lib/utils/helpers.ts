@@ -174,7 +174,7 @@ export function normalizeSearchString(str: string): string {
 	return str
 		.toLowerCase()
 		.normalize('NFD') // Decompose accented characters
-		.replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+		.replace(/\p{Mn}/gu, '') // Remove combining marks (diacritics)
 		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
