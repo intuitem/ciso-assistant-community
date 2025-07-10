@@ -29,6 +29,21 @@ def format_text(text):
     
     return text
 
+def append_footnotes_to_cell(text, footnotes_dict):
+    if not text:
+        return text
+    matches = re.findall(r"\((\d+)\)", text)
+    added_notes = set()
+    first_add = True
+    
+    for num in matches:
+        if num in footnotes_dict and num not in added_notes:
+            if first_add:
+                first_add = False
+                text += "\n"
+            text += f"\n({num}) {footnotes_dict[num]}"
+            added_notes.add(num)
+    return text
 
 def extract_records(lines):
     records = []
@@ -37,6 +52,7 @@ def extract_records(lines):
     current_evidence = ""
     mode = None  # None, "guidance", "evidence"
     in_tips = False
+    footnotes = {}
 
     i = 0
     while i < len(lines):
@@ -69,16 +85,42 @@ def extract_records(lines):
                         i += 1
                         continue
 
-                    # Switch section
-                    if line.upper().startswith("GUIDANCE"):
+                    if re.match(r"^\(\d+\)", line):
+                        # Begin collecting footnotes until next page marker
+                        in_footnotes = True
+                        current_number = None
+                        
+                        while i < len(lines):
+                            line = clean_line(lines[i])
+                            if is_page_marker(line):
+                                in_footnotes = False
+                                current_number = None
+                                break  # stop reading footnotes at page marker
+                            
+                            if re.match(r"^\d+$", line):
+                                i += 1
+                                continue  # IGNORE lines with only a number
+                            
+                            match = re.match(r"^\((\d+)\)\s*(.*)", line)
+                            if match:
+                                current_number = match.group(1)
+                                content = match.group(2)
+                                footnotes[current_number] = content.strip()
+                            elif current_number:
+                                footnotes[current_number] += " " + line
+                            i += 1
+                        continue
+
+
+                    if line.startswith("GUIDANCE"):
                         mode = "guidance"
                         i += 1
                         continue
-                    elif line.upper().startswith("EXAMPLES OF EVIDENCE"):
+                    elif line.startswith("EXAMPLES OF EVIDENCE"):
                         mode = "evidence"
                         i += 1
                         continue
-                    elif line.upper().startswith("TIPS"):
+                    elif line.startswith("TIPS"):
                         in_tips = True
                         i += 1
                         continue
@@ -131,7 +173,11 @@ def extract_records(lines):
                                 i += 1
                                 continue
 
-                            # Switch section
+                            if re.match(r"^\(\d+\)", line):
+                                while i < len(lines) and not is_page_marker(clean_line(lines[i])):
+                                    i += 1
+                                continue
+
                             if line.upper().startswith("GUIDANCE"):
                                 mode = "guidance"
                                 i += 1
@@ -194,6 +240,12 @@ def extract_records(lines):
                 })
 
         i += 1
+
+    # print(footnotes)
+    # Add footnotes
+    for record in records:
+        record["annotation"] = append_footnotes_to_cell(record["annotation"], footnotes)
+        record["typical_evidence"] = append_footnotes_to_cell(record["typical_evidence"], footnotes)
 
     return records
 
