@@ -2,6 +2,7 @@
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
 	import { GraphLayoutType, GraphNodeShape, GraphLinkArrowStyle } from '@unovis/ts';
 
+	import { m } from '$paraglide/messages';
 	type NodeDatum = {
 		id: string;
 		label: string;
@@ -66,7 +67,7 @@
 	// Build panels with configurable node assignments
 	const panels = $derived([
 		{
-			label: 'Connaître',
+			label: m.ebiosReconnaissance(),
 			nodes: panelNodes.reconnaissance,
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf002;',
@@ -77,7 +78,7 @@
 			borderColor: 'pink'
 		},
 		{
-			label: 'Rentrer',
+			label: m.ebiosInitialAccess(),
 			nodes: panelNodes.initialAccess,
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf504;',
@@ -88,7 +89,7 @@
 			borderColor: 'violet'
 		},
 		{
-			label: 'Trouver',
+			label: m.ebiosDiscovery(),
 			nodes: panelNodes.discovery,
 			padding: { top: 50, right: 50, bottom: 50, left: 50 },
 			sideIconSymbol: '&#xf140;',
@@ -99,7 +100,7 @@
 			borderColor: 'orange'
 		},
 		{
-			label: 'Exploiter',
+			label: m.ebiosExploitation(),
 			nodes: panelNodes.exploitation,
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xe4e9;',
