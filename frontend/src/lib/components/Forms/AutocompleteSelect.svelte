@@ -217,10 +217,12 @@
 							})
 						: [];
 
-				const infoFields = optionsInfoFields.fields.map((f) => {
-					const value = getNestedValue(object, f.field, f.path);
-					return f.display ? f.display(value) : value;
-				});
+				const infoFields = optionsInfoFields.fields
+					.map((f) => {
+						const value = getNestedValue(object, f.field, f.path);
+						return f.display ? f.display(value) : value;
+					})
+					.filter(Boolean);
 
 				let infoString: { string: string; position: 'suffix' | 'prefix' } | undefined = undefined;
 				if (infoFields.length > 0) {
