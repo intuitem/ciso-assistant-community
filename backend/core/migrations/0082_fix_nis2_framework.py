@@ -2,23 +2,30 @@
 
 from django.db import migrations, models
 
+
 def fix_nis2_framework(apps, schema_editor):
-    Framework = apps.get_model("core", "Framework")
-    ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
-    framework=Framework.objects.get(urn='urn:intuitem:risk:framework:annex-technical-and-methodological-requirements-nis2')
-    framework.save()
-    print("custom migration for", framework.urn)
+    """fix inconsistent urn if present"""
+    RequirementNode = apps.get_model("core", "RequirementNode")
+    if node := RequirementNode.objects.filter(
+        urn="urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2;g"
+    ).first():
+        print("custom migration for", node.urn)
+        node.urn = "urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.g"
+        node.save()
+
+    elif node := RequirementNode.objects.filter(
+        urn="urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2_g"
+    ).first():
+        print("custom migration for", node.urn)
+        node.urn = "urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:2.1.2.g"
+        node.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0081_campaign_complianceassessment_campaign'),
+        ("core", "0081_campaign_complianceassessment_campaign"),
     ]
 
     operations = [
-                migrations.RunPython(fix_nis2_framework),
+        migrations.RunPython(fix_nis2_framework),
     ]
-
-
-
