@@ -81,6 +81,11 @@
 				group: 'grp1',
 				icon: '&#xf6ff;'
 			},
+			{
+				id: 'blk-023',
+				group: 'grp1',
+				icon: '|'
+			},
 			{ id: 'blk-11', label: 'short', group: 'grp2', icon: '&#xf1b2;' },
 			{ id: 'blk-12', label: 'abc', group: 'grp3', icon: '&#xf15b;' },
 			{
@@ -121,7 +126,7 @@
 		},
 		{
 			label: 'Rentrer',
-			nodes: ['blk-02', 'blk-022'],
+			nodes: ['blk-02', 'blk-022', 'blk-023'],
 			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf504;',
 			sideIconShape: 'circle',
