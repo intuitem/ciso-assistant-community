@@ -199,11 +199,6 @@ export const navData = {
 					href: '/ebios-rm'
 				},
 				{
-					name: 'elementaryActions',
-					fa_icon: 'fa-solid fa-gears',
-					href: '/elementary-actions'
-				},
-				{
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'

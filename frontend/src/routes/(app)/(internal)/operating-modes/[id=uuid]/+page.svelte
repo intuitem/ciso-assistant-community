@@ -147,7 +147,7 @@
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button"
-												title={safeTranslate('add-' + data.model.localName)}
+												title={safeTranslate('add-' + model.info.localName)}
 												onclick={(_) => modalCreateForm(model)}
 												><i class="fa-solid fa-file-circle-plus"></i>
 											</button>

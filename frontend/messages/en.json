@@ -1727,12 +1727,13 @@
 	"antecedentsHelpText": "Antecedents are not applicable for actions in the 'Know' stage, as they represent the initial steps of the attack path.",
 	"logicOperator": "Logic operator",
 	"isHighlighted": "Is highlighted",
-	"killChains": "Kill chains",
-	"killChain": "Kill chain",
-	"associatedKillChains": "Associated kill chains",
-	"addKillChain": "Add kill chain",
+	"killChains": "Kill chain",
+	"killChain": "Kill chain step",
+	"associatedKillChains": "Kill chain steps",
+	"addKillChain": "Add kill chain step",
 	"know": "Know",
 	"enter": "Enter",
 	"discover": "Discover",
-	"exploit": "Exploit"
+	"exploit": "Exploit",
+	"ebiosWs4_0": "Prepare elementary actions"
 }

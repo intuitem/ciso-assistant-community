@@ -37,7 +37,7 @@ INITIAL_META = {
         },
         {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
         {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
-        {"steps": [{"status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
         {
             "steps": [
                 {"status": "to_do"},
