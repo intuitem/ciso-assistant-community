@@ -443,9 +443,9 @@ class KillChainWriteSerializer(BaseModelSerializer):
                 ).first()
 
                 if antecedent_kill_chain and KillChain.AttackStage.compare_stages(
-                    antecedent_kill_chain.attack_stage, attack_stage) < 1:
+                    antecedent_kill_chain.attack_stage, attack_stage) < 0:
                     raise serializers.ValidationError(
-                        {'attack_stage': f"The attack stage needs to be after the attack stage '{antecedent_kill_chain.attack_stage}' of the antecedent '{antecedent}'"}
+                        {'attack_stage': f"The attack stage needs to be the same or after the attack stage '{antecedent_kill_chain.attack_stage}' of the antecedent '{antecedent}'"}
                     )
         
 
