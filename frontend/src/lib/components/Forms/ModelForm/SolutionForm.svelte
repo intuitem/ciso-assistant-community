@@ -59,7 +59,7 @@
 				field: 'type'
 			}
 		],
-		color: 'blue'
+		classes: 'text-blue-500'
 	}}
 	field="assets"
 	cacheLock={cacheLocks['assets']}

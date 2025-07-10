@@ -190,7 +190,7 @@
 								field: 'type'
 							}
 						],
-						color: 'blue'
+						classes: 'text-blue-500'
 					}}
 					field="assets"
 					optionsDetailedUrlParameters={[

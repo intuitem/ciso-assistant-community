@@ -44,13 +44,11 @@
 			fields: {
 				field: string; // Field name in the object
 				path?: string; // Optional, used for nested fields};
-				when?: (value: any) => boolean;
 				display?: (value: any) => string;
 			}[];
 			position?: 'suffix' | 'prefix'; // Default: 'suffix'
 			separator?: string; // Default: ' '
-			color?: string; // Optional, used for custom styling
-			badge?: boolean; // Optional, used for badge display
+			classes?: string; // Optional, used for custom styling
 		};
 		pathField?: string;
 		optionsSuggestions?: any[];
@@ -89,7 +87,8 @@
 		optionsInfoFields = {
 			fields: [],
 			position: 'suffix',
-			separator: ' '
+			separator: ' ',
+			classes: 'text-surface-500'
 		},
 		pathField = '',
 		optionsSuggestions = [],
@@ -218,13 +217,10 @@
 							})
 						: [];
 
-				const infoFields = optionsInfoFields.fields
-					.filter((f) => (f.when ? f.when(object) : true))
-					.map((f) => {
-						const value = getNestedValue(object, f.field, f.path);
-						return f.display ? f.display(value) : value;
-					})
-					.filter(Boolean);
+				const infoFields = optionsInfoFields.fields.map((f) => {
+					const value = getNestedValue(object, f.field, f.path);
+					return f.display ? f.display(value) : value;
+				});
 
 				let infoString: { string: string; position: 'suffix' | 'prefix' } | undefined = undefined;
 				if (infoFields.length > 0) {
@@ -405,21 +401,9 @@
 		>
 			{#snippet option({ option })}
 				{#if option.infoString?.position === 'prefix'}
-					{#if option.infoString.badge}
-						<span class="badge text-xs bg-{option.infoString.color}-100"
-							>&nbsp;
-							{option.infoString.string}
-						</span>
-					{:else if option.infoString.color}
-						<span class="text-xs text-{option.infoString.color}-500">
-							{option.infoString.string}
-						</span>
-					{:else}
-						<span class="text-xs text-surface-500"
-							>&nbsp;
-							{option.infoString.string}
-						</span>
-					{/if}
+					<span class="text-xs {option.infoString.classes}">
+						{option.infoString.string}
+					</span>
 				{/if}
 				{#if option.path}
 					<span>
@@ -441,21 +425,9 @@
 					{option.label || option}
 				{/if}
 				{#if option.infoString?.position === 'suffix'}
-					{#if option.infoString.badge}
-						<span class="badge text-xs bg-{option.infoString.color}-100"
-							>&nbsp;
-							{option.infoString.string}
-						</span>
-					{:else if option.infoString.color}
-						<span class="text-xs text-{option.infoString.color}-500">
-							{option.infoString.string}
-						</span>
-					{:else}
-						<span class="text-xs text-surface-500"
-							>&nbsp;
-							{option.infoString.string}
-						</span>
-					{/if}
+					<span class="text-xs {option.infoString.classes}">
+						{option.infoString.string}
+					</span>
 				{/if}
 				{#if option.suggested}
 					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>

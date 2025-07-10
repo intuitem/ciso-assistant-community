@@ -159,7 +159,7 @@
 						field: 'type'
 					}
 				],
-				color: 'blue'
+				classes: 'text-blue-500'
 			}}
 			field="assets"
 			label={m.assets()}
@@ -197,7 +197,7 @@
 					field: 'type'
 				}
 			],
-			color: 'blue'
+			classes: 'text-blue-500'
 		}}
 		optionsLabelField="auto"
 		field="assets"

@@ -137,7 +137,7 @@
 				field: 'type'
 			}
 		],
-		color: 'blue'
+		classes: 'text-blue-500'
 	}}
 	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"

@@ -41,7 +41,7 @@
 				field: 'type'
 			}
 		],
-		color: 'blue'
+		classes: 'text-blue-500'
 	}}
 	field="asset"
 	cacheLock={cacheLocks['asset']}
@@ -61,7 +61,7 @@
 				field: 'type'
 			}
 		],
-		color: 'blue'
+		classes: 'text-blue-500'
 	}}
 	field="dependencies"
 	cacheLock={cacheLocks['dependencies']}

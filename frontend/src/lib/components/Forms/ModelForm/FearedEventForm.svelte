@@ -77,7 +77,7 @@
 				field: 'type'
 			}
 		],
-		color: 'blue'
+		classes: 'text-blue-500'
 	}}
 	optionsLabelField="auto"
 	field="assets"
