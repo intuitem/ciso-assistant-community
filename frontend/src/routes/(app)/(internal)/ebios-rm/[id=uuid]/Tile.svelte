@@ -96,7 +96,7 @@
 											class="absolute flex items-center justify-center w-8 h-8 {step.status ===
 											'done'
 												? 'bg-success-200'
-												: 'bg-surface-200'} rounded-full -start-6 ring-4 ring-white"
+												: 'bg-surface-200'} rounded-full -start-4 ring-4 ring-white"
 										>
 											<i
 												class="fa-solid {step.status === 'done'
@@ -123,7 +123,7 @@
 										{#snippet trigger()}
 											<div class="text-gray-300 *:pointer-events-none">
 												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-6 ring-4 ring-white"
+													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
 												>
 													<i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
 												</span>
