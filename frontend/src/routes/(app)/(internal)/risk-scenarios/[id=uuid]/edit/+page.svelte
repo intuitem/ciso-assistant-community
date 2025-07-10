@@ -184,6 +184,14 @@
 					optionsEndpoint="assets"
 					optionsLabelField="auto"
 					optionsExtraFields={[['folder', 'str']]}
+					optionsInfoFields={{
+						fields: [
+							{
+								field: 'type'
+							}
+						],
+						classes: 'text-blue-500'
+					}}
 					field="assets"
 					optionsDetailedUrlParameters={[
 						['scope_folder_id', page.data.scenario.perimeter.folder.id]
