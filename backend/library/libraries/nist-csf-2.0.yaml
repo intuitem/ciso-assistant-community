@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:nist-csf-2.0
 locale: en
 ref_id: NIST-CSF-2.0
@@ -6,8 +8,8 @@ description: National Institute of Standards and Technology - Cybersecurity Fram
   (CSF 2.0)
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: 4
-publication_date: 2025-04-14
+version: 5
+publication_date: 2025-07-09
 provider: NIST
 packager: intuitem
 translations:
@@ -43,7 +45,7 @@ objects:
             e au niveau organisationnel.\nLes pratiques de gestion des risques sont\
             \ approuv\xE9es par la direction, mais ne sont peut-\xEAtre pas \xE9tablies\
             \ comme une politique \xE0 l\u2019\xE9chelle de l\u2019organisation."
-        sp:
+        es:
           name: Parcial
           description: "La aplicaci\xF3n de la estrategia de riesgo de ciberseguridad\
             \ organizacional se gestiona de manera ad hoc. Existe una conciencia limitada\
@@ -65,7 +67,7 @@ objects:
             \ aux risques cybers\xE9curit\xE9 au niveau de l\u2019organisation, mais\
             \ une approche globale pour les g\xE9rer n\u2019a pas \xE9t\xE9 mise en\
             \ place."
-        sp:
+        es:
           name: Informado sobre riesgos
           description: "Las pr\xE1cticas de gesti\xF3n de riesgos son aprobadas por\
             \ la gerencia, pero es posible que no se establezcan como una pol\xED\
@@ -89,7 +91,7 @@ objects:
             rement mises \xE0 jour en fonction de l\u2019application des processus\
             \ de gestion des risques, pour r\xE9pondre \xE0 l\u2019\xE9volution des\
             \ exigences m\xE9tiers ou missions, des menaces et du paysage technologique."
-        sp:
+        es:
           name: Repetible
           description: "Las pr\xE1cticas de gesti\xF3n de riesgos de la organizaci\xF3\
             n se aprueban formalmente y se expresan como pol\xEDtica. Las pr\xE1cticas\
@@ -116,7 +118,7 @@ objects:
             organisation adapte ses pratiques cybers\xE9curit\xE9 en fonction des\
             \ activit\xE9s pass\xE9es et pr\xE9sentes, y compris les retours d\u2019\
             exp\xE9rience et les indicateurs pr\xE9dictifs."
-        sp:
+        es:
           name: Adaptable
           description: "Existe un enfoque de toda la organizaci\xF3n para gestionar\
             \ los riesgos de ciberseguridad que utiliza pol\xEDticas, procesos y procedimientos\
@@ -138,13 +140,11 @@ objects:
           description: "La strat\xE9gie, les attentes et la politique de gestion des\
             \ risques de cybers\xE9curit\xE9 de l\u2019organisation sont \xE9tablies,\
             \ communiqu\xE9es et surveill\xE9es"
-          annotation: null
         es:
           name: GOBERNAR
           description: "Se establecen, comunican y supervisan la estrategia, las expectativas\
             \ y la pol\xEDtica de gesti\xF3n de riesgos de seguridad cibern\xE9tica\
             \ de la organizaci\xF3n."
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc
       assessable: false
       depth: 2
@@ -161,14 +161,12 @@ objects:
             \ d\xE9pendances et exigences l\xE9gales, r\xE9glementaires et contractuelles)\
             \ entourant les d\xE9cisions de gestion des risques de cybers\xE9curit\xE9\
             \ de l\u2019organisation sont comprises"
-          annotation: null
         es:
-          name: 'Contexto organizativo '
+          name: Contexto organizativo
           description: "Se comprenden las circunstancias - misi\xF3n, expectativas\
             \ de las partes interesadas, dependencias y requisitos legales, normativos\
             \ y contractuales - que afectan a las decisiones de gesti\xF3n de riesgos\
             \ de seguridad cibern\xE9tica de la organizaci\xF3n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
       assessable: true
       depth: 3
@@ -183,7 +181,6 @@ objects:
         that may impede that mission'
       translations:
         fr:
-          name: null
           description: "La mission organisationnelle est comprise et informe la gestion\
             \ des risques de cybers\xE9curit\xE9"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Partagez la mission de\
@@ -192,7 +189,6 @@ objects:
             \ fournir une base pour identifier les risques qui peuvent entraver cette\
             \ mission"
         es:
-          name: null
           description: "Se comprende la misi\xF3n de la organizaci\xF3n y se informa\
             \ sobre la gesti\xF3n de riesgos de seguridad cibern\xE9tica."
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Compartir la misi\xF3n de\
@@ -222,7 +218,6 @@ objects:
         of society)'
       translations:
         fr:
-          name: null
           description: "Les parties prenantes internes et externes sont comprises,\
             \ et leurs besoins et attentes en mati\xE8re de gestion des risques de\
             \ cybers\xE9curit\xE9 sont compris et pris en compte"
@@ -237,7 +232,6 @@ objects:
             \ attentes des organismes de r\xE9glementation en mati\xE8re de conformit\xE9\
             , attentes de la soci\xE9t\xE9 en mati\xE8re d'\xE9thique)"
         es:
-          name: null
           description: "Las partes interesadas internas y externas son comprendidas,\
             \ y sus necesidades y expectativas con respecto a la gesti\xF3n de riesgos\
             \ de seguridad cibern\xE9tica son comprendidas y consideradas."
@@ -273,7 +267,6 @@ objects:
         and contractual requirements'
       translations:
         fr:
-          name: null
           description: "Les exigences l\xE9gales, r\xE9glementaires et contractuelles\
             \ en mati\xE8re de cybers\xE9curit\xE9, y compris les obligations en mati\xE8\
             re de vie priv\xE9e et de libert\xE9s civiles, sont comprises et g\xE9\
@@ -289,7 +282,6 @@ objects:
             Ex3 : Aligner la strat\xE9gie de cybers\xE9curit\xE9 de l'organisation\
             \ sur les exigences l\xE9gales, r\xE9glementaires et contractuelles"
         es:
-          name: null
           description: "Se comprenden y gestionan los requisitos legales, normativos\
             \ y contractuales relativos a la seguridad cibern\xE9tica, incluidas las\
             \ obligaciones en materia de privacidad y libertades civiles."
@@ -326,7 +318,6 @@ objects:
         states (e.g., under attack, during recovery, normal operation)'
       translations:
         fr:
-          name: null
           description: "Les objectifs, capacit\xE9s et services critiques dont d\xE9\
             pendent les parties prenantes externes ou qu\u2019ils attendent de l\u2019\
             organisation sont compris et communiqu\xE9s"
@@ -343,7 +334,6 @@ objects:
             \ exemple, en cas d'attaque, pendant la r\xE9cup\xE9ration, en fonctionnement\
             \ normal)"
         es:
-          name: null
           description: "Se comprenden y comunican los objetivos, las capacidades y\
             \ los servicios cr\xEDticos de los que dependen las partes interesadas\
             \ externas o que esperan de la organizaci\xF3n"
@@ -376,7 +366,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les r\xE9sultats, les capacit\xE9s et les services dont d\xE9\
             pend l\u2019organisation sont compris et communiqu\xE9s"
           annotation: "Ex1 : Cr\xE9er un inventaire des d\xE9pendances de l'organisation\
@@ -388,7 +377,6 @@ objects:
             \ l'organisation, et partager ces informations avec le personnel appropri\xE9\
             \n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Se comprenden y comunican los resultados, capacidades y servicios\
             \ de los que depende la organizaci\xF3n"
           annotation: "Ex1: Crear un inventario de las dependencias de la organizaci\xF3\
@@ -414,14 +402,12 @@ objects:
             \ tol\xE9rance et d\u2019app\xE9tence au risque et les hypoth\xE8ses de\
             \ l\u2019organisation sont \xE9tablies, communiqu\xE9es et utilis\xE9\
             es pour soutenir les d\xE9cisions en mati\xE8re de risques op\xE9rationnels"
-          annotation: null
         es:
-          name: "Estrategia de gesti\xF3n de riesgos "
+          name: "Estrategia de gesti\xF3n de riesgos"
           description: "Se establecen, comunican y utilizan las prioridades, las restricciones,\
             \ las declaraciones de tolerancia y apetito por el riesgo y los supuestos\
             \ de la organizaci\xF3n para respaldar las decisiones sobre el riesgo\
             \ operativo"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
       assessable: true
       depth: 3
@@ -442,7 +428,6 @@ objects:
         measuring and managing risk and performance'
       translations:
         fr:
-          name: null
           description: "Les objectifs de gestion des risques sont \xE9tablis et accept\xE9\
             s par les parties prenantes organisationnelles"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Mettre \xE0 jour les\
@@ -456,7 +441,6 @@ objects:
             \ sur les objectifs de cybers\xE9curit\xE9 et les utilisent pour mesurer\
             \ et g\xE9rer les risques et les performances"
         es:
-          name: null
           description: "Los objetivos de la gesti\xF3n de riesgos son establecidos\
             \ y acordados por las partes interesadas de la organizaci\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Actualizar los objetivos\
@@ -489,7 +473,6 @@ objects:
         on known risk exposure and residual risk'
       translations:
         fr:
-          name: null
           description: "Les d\xE9clarations d\u2019app\xE9tence et de tol\xE9rance\
             \ au risque sont \xE9tablies, communiqu\xE9es et maintenues"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -502,7 +485,6 @@ objects:
             \ le risque en fonction de l'exposition au risque connue et du risque\
             \ r\xE9siduel"
         es:
-          name: null
           description: Se establecen, se comunican y se mantienen las declaraciones
             sobre el apetito de riesgo y la tolerancia al riesgo
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -531,7 +513,6 @@ objects:
         risk management'
       translations:
         fr:
-          name: null
           description: "Les activit\xE9s et les r\xE9sultats de la gestion des risques\
             \ de cybers\xE9curit\xE9 sont inclus dans les processus de gestion des\
             \ risques de l\u2019entreprise"
@@ -544,7 +525,6 @@ objects:
             \ des risques de cybers\xE9curit\xE9 dans le cadre de la gestion des risques\
             \ d'entreprise"
         es:
-          name: null
           description: "Las actividades y los resultados de la gesti\xF3n de riesgos\
             \ de seguridad cibern\xE9tica se incluyen en los procesos de gesti\xF3\
             n de riesgos de la empresa"
@@ -575,7 +555,6 @@ objects:
         services)'
       translations:
         fr:
-          name: null
           description: "Une orientation strat\xE9gique d\xE9crivant les options de\
             \ r\xE9ponse aux risques appropri\xE9es est \xE9tablie et communiqu\xE9\
             e"
@@ -588,7 +567,6 @@ objects:
             curit\xE9, confiage d'op\xE9rations financi\xE8res par un tiers au nom\
             \ de l'organisation, utilisation de services bas\xE9s sur le nuage public)"
         es:
-          name: null
           description: "Se establece y comunica una direcci\xF3n estrat\xE9gica que\
             \ describa las opciones adecuadas de respuesta al riesgo."
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Especificar los criterios\
@@ -618,7 +596,6 @@ objects:
         HR - will communicate with each other about cybersecurity risks'
       translations:
         fr:
-          name: null
           description: "Les lignes de communication au sein de l\u2019organisation\
             \ sont \xE9tablies pour les risques de cybers\xE9curit\xE9, y compris\
             \ les risques li\xE9s aux fournisseurs et autres tiers"
@@ -631,7 +608,6 @@ objects:
             \ la s\xE9curit\xE9 physique et les RH, communiqueront entre eux sur les\
             \ risques de cybers\xE9curit\xE9"
         es:
-          name: null
           description: "Se establecen l\xEDneas de comunicaci\xF3n en toda la organizaci\xF3\
             n para los riesgos de seguridad cibern\xE9tica, lo que incluye a los riesgos\
             \ de proveedores y otros terceros."
@@ -665,7 +641,6 @@ objects:
         and comparing cybersecurity risks'
       translations:
         fr:
-          name: null
           description: "Une m\xE9thode normalis\xE9e de calcul, de documentation,\
             \ de cat\xE9gorisation et de priorisation des risques de cybers\xE9curit\xE9\
             \ est \xE9tablie et communiqu\xE9e"
@@ -681,7 +656,6 @@ objects:
             \ en charge l'int\xE9gration, l'agr\xE9gation et la comparaison des risques\
             \ de cybers\xE9curit\xE9"
         es:
-          name: null
           description: "Se establece y comunica un m\xE9todo estandarizado para calcular,\
             \ documentar, categorizar y priorizar los riesgos de seguridad cibern\xE9\
             tica."
@@ -714,7 +688,6 @@ objects:
         risks'
       translations:
         fr:
-          name: null
           description: "Les opportunit\xE9s strat\xE9giques (c-\xE0-d., les risques\
             \ positifs) sont caract\xE9ris\xE9es et incluses dans les discussions\
             \ sur les risques de cybers\xE9curit\xE9 organisationnels"
@@ -726,7 +699,6 @@ objects:
             \ documenter et hi\xE9rarchiser les risques positifs par rapport aux risques\
             \ n\xE9gatifs"
         es:
-          name: null
           description: "Se caracterizan las oportunidades estrat\xE9gicas (es decir,\
             \ los riesgos positivos) y se incluyen en las discusiones sobre riesgos\
             \ de seguridad cibern\xE9tica de la organizaci\xF3n."
@@ -752,14 +724,12 @@ objects:
             re de cybers\xE9curit\xE9 visant \xE0 la responsabilisation, l\u2019\xE9\
             valuation des performances et l\u2019am\xE9lioration continue sont \xE9\
             tablis et communiqu\xE9s"
-          annotation: null
         es:
           name: Funciones, responsabilidades y autoridades
           description: "Se establecen y comunican las funciones, las responsabilidades\
             \ y las competencias en materia de seguridad cibern\xE9tica para fomentar\
             \ la rendici\xF3n de cuentas, la evaluaci\xF3n del desempe\xF1o y la mejora\
             \ continua."
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
       assessable: true
       depth: 3
@@ -784,7 +754,6 @@ objects:
         responsible for managing cybersecurity risk'
       translations:
         fr:
-          name: null
           description: "La direction organisationnelle est responsable des risques\
             \ li\xE9s \xE0 la cybers\xE9curit\xE9 et favorise une culture consciente\
             \ des risques, \xE9thique et en constante am\xE9lioration"
@@ -803,7 +772,6 @@ objects:
             \ gestion des risques li\xE9s \xE0 la cybers\xE9curit\xE9 disposent d'une\
             \ autorit\xE9 et d'une coordination ad\xE9quates."
         es:
-          name: null
           description: "El liderazgo organizativo es responsable de los riesgos de\
             \ seguridad cibern\xE9tica y fomenta una cultura consciente de los riesgos,\
             \ \xE9tica y de mejora continua."
@@ -844,7 +812,6 @@ objects:
         risk functions, and internal audit functions'
       translations:
         fr:
-          name: null
           description: "Les r\xF4les, responsabilit\xE9s et autorit\xE9s li\xE9s \xE0\
             \ la gestion des risques de cybers\xE9curit\xE9 sont \xE9tablis, communiqu\xE9\
             s, compris et appliqu\xE9s"
@@ -862,7 +829,6 @@ objects:
             re de cybers\xE9curit\xE9 au sein des op\xE9rations, des fonctions de\
             \ risque et des fonctions d'audit interne"
         es:
-          name: null
           description: "Se establecen, comunican, comprenden y aplican las funciones,\
             \ responsabilidades y autoridades relacionadas con la gesti\xF3n de riesgos\
             \ de seguridad cibern\xE9tica."
@@ -899,7 +865,6 @@ objects:
         to support the cybersecurity strategy'
       translations:
         fr:
-          name: null
           description: "Les ressources ad\xE9quates sont allou\xE9es en fonction de\
             \ la strat\xE9gie, des r\xF4les, des responsabilit\xE9s et des politiques\
             \ en mati\xE8re de risques de cybers\xE9curit\xE9"
@@ -912,7 +877,6 @@ objects:
             \ et des ressources techniques ad\xE9quats et suffisants pour soutenir\
             \ la strat\xE9gie de cybers\xE9curit\xE9"
         es:
-          name: null
           description: "Se asignan recursos adecuados de acuerdo con la estrategia\
             \ de riesgos de seguridad cibern\xE9tica, las funciones, las responsabilidades\
             \ y las pol\xEDticas."
@@ -945,7 +909,6 @@ objects:
         and uphold security policies as they relate to their roles'
       translations:
         fr:
-          name: null
           description: "La cybers\xE9curit\xE9 est incluse dans les pratiques en mati\xE8\
             res des ressources humaines"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Int\xE9grer les consid\xE9\
@@ -961,7 +924,6 @@ objects:
             \ du personnel en mati\xE8re de connaissances, d'adh\xE9sion et de respect\
             \ des politiques de s\xE9curit\xE9 li\xE9es \xE0 leurs r\xF4les"
         es:
-          name: null
           description: "La seguridad cibern\xE9tica se incluye en las pr\xE1cticas\
             \ de recursos humanos"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Integrar las consideraciones\
@@ -988,12 +950,10 @@ objects:
           name: Politique
           description: "La politique de cybers\xE9curit\xE9 organisationnelle est\
             \ \xE9tablie, communiqu\xE9e et appliqu\xE9e"
-          annotation: null
         es:
           name: "Pol\xEDtica"
           description: "La pol\xEDtica de seguridad cibern\xE9tica de la organizaci\xF3\
             n es establecida, comunicada y aplicada."
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
       assessable: true
       depth: 3
@@ -1020,7 +980,6 @@ objects:
         annually, and whenever policy is updated'
       translations:
         fr:
-          name: null
           description: "La politique de gestion des risques de cybers\xE9curit\xE9\
             \ est \xE9tablie en fonction du contexte organisationnel, de la strat\xE9\
             gie de cybers\xE9curit\xE9 et des priorit\xE9s, et est communiqu\xE9e\
@@ -1039,7 +998,6 @@ objects:
             \ r\xE9ception de la politique lors de son embauche, chaque ann\xE9e et\
             \ chaque fois que la politique est mise \xE0 jour"
         es:
-          name: null
           description: "La pol\xEDtica de gesti\xF3n de riesgos de seguridad cibern\xE9\
             tica se establece en base al contexto organizativo, la estrategia de seguridad\
             \ cibern\xE9tica y las prioridades, y es comunicada y aplicada"
@@ -1080,7 +1038,6 @@ objects:
         new contract requirements)'
       translations:
         fr:
-          name: null
           description: "La politique de gestion des risques de cybers\xE9curit\xE9\
             \ est revue, mise \xE0 jour, communiqu\xE9e et appliqu\xE9e pour refl\xE9\
             ter les changements dans les exigences, les menaces, la technologie et\
@@ -1100,7 +1057,6 @@ objects:
             \ et des changements apport\xE9s \xE0 l'entreprise (p. ex., acquisition\
             \ d'une nouvelle entreprise, nouvelles exigences contractuelles)"
         es:
-          name: null
           description: "La pol\xEDtica de gesti\xF3n de riesgos de seguridad cibern\xE9\
             tica se revisa, actualiza, comunica y aplica para reflejar los cambios\
             \ en los requisitos, las amenazas, la tecnolog\xEDa y la misi\xF3n de\
@@ -1134,14 +1090,12 @@ objects:
             \ des risques de cybers\xE9curit\xE9 \xE0 l\u2019\xE9chelle de l\u2019\
             organisation sont utilis\xE9s pour informer, am\xE9liorer et ajuster la\
             \ strat\xE9gie de gestion des risques"
-          annotation: null
         es:
           name: "Supervisi\xF3n"
           description: "Los resultados de las actividades de gesti\xF3n de riesgos\
             \ de seguridad cibern\xE9tica en toda la organizaci\xF3n y el rendimiento\
             \ se utilizan para informar, mejorar y ajustar la estrategia de gesti\xF3\
             n de riesgos"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
       assessable: true
       depth: 3
@@ -1158,7 +1112,6 @@ objects:
         or innovation should be adjusted'
       translations:
         fr:
-          name: null
           description: "Les r\xE9sultats de la strat\xE9gie de gestion des risques\
             \ de cybers\xE9curit\xE9 sont examin\xE9s pour \xE9clairer et ajuster\
             \ la strat\xE9gie et l\u2019orientation"
@@ -1169,7 +1122,6 @@ objects:
             \ de risque de cybers\xE9curit\xE9 qui entravent les op\xE9rations ou\
             \ l'innovation doivent \xEAtre ajust\xE9es"
         es:
-          name: null
           description: "Los resultados de la estrategia de gesti\xF3n de riesgos de\
             \ seguridad cibern\xE9tica se revisan para informar y ajustar la estrategia\
             \ y la direcci\xF3n"
@@ -1197,7 +1149,6 @@ objects:
         Ex3: Review strategy in light of cybersecurity incidents'
       translations:
         fr:
-          name: null
           description: "La strat\xE9gie de gestion des risques de cybers\xE9curit\xE9\
             \ est revue et ajust\xE9e pour garantir la couverture des exigences et\
             \ des risques organisationnels"
@@ -1209,7 +1160,6 @@ objects:
             \ des changements de politique sont n\xE9cessaires\nEx3 : Revoir la strat\xE9\
             gie \xE0 la lumi\xE8re des incidents de cybers\xE9curit\xE9"
         es:
-          name: null
           description: "La estrategia de gesti\xF3n de riesgos de seguridad cibern\xE9\
             tica se revisa y ajusta para garantizar la cobertura de los requisitos\
             \ y riesgos de la organizaci\xF3n"
@@ -1239,7 +1189,6 @@ objects:
         senior leadership'
       translations:
         fr:
-          name: null
           description: "La performance de la gestion des risques de cybers\xE9curit\xE9\
             \ organisationnelle est \xE9valu\xE9e et r\xE9vis\xE9e pour les ajustements\
             \ n\xE9cessaires"
@@ -1251,7 +1200,6 @@ objects:
             \ et l'impact potentiel\nEx3 : Recueillir et communiquer des mesures sur\
             \ la gestion des risques de cybers\xE9curit\xE9 avec la haute direction"
         es:
-          name: null
           description: "El rendimiento de la gesti\xF3n de riesgos de seguridad cibern\xE9\
             tica de la organizaci\xF3n se eval\xFAa y revisa para realizar los ajustes\
             \ necesarios"
@@ -1278,14 +1226,12 @@ objects:
             approvisionnement en mati\xE8re de cybers\xE9curit\xE9 sont identifi\xE9\
             s, \xE9tablis, g\xE9r\xE9s, surveill\xE9s et am\xE9lior\xE9s par les parties\
             \ prenantes de l\u2019organisation"
-          annotation: null
         es:
           name: "Gesti\xF3n de riesgos de la cadena de suministro en materia de\n\
-            seguridad cibern\xE9tica "
+            seguridad cibern\xE9tica"
           description: "Las partes interesadas de la organizaci\xF3n identifican,\
             \ establecen, gestionan, supervisan y mejoran los procesos de gesti\xF3\
             n de riesgos de la cadena de suministro cibern\xE9tica"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
       assessable: true
       depth: 3
@@ -1313,7 +1259,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Un programme, une strat\xE9gie, des objectifs, des politiques\
             \ et des processus de gestion des risques li\xE9s \xE0 la cha\xEEne d\u2019\
             approvisionnement en mati\xE8re de cybers\xE9curit\xE9 sont \xE9tablis\
@@ -1335,7 +1280,6 @@ objects:
             \ les services juridiques, les ressources humaines et l'ing\xE9nierie\n\
             3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Las partes interesadas de la organizaci\xF3n establecen y\
             \ acuerdan un programa, estrategia, objetivos, pol\xEDticas y procesos\
             \ de gesti\xF3n de riesgos de seguridad cibern\xE9tica en la cadena de\
@@ -1396,7 +1340,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les r\xF4les et responsabilit\xE9s en mati\xE8re de cybers\xE9\
             curit\xE9 pour les fournisseurs, les clients et les partenaires sont \xE9\
             tablis, communiqu\xE9s et coordonn\xE9s en interne et en externe"
@@ -1428,7 +1371,6 @@ objects:
             \ d'\xE9change d'information et de production de rapports entre l'organisation\
             \ et ses fournisseurs\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Se establecen, comunican y coordinan interna y externamente\
             \ las funciones y responsabilidades de seguridad cibern\xE9tica para proveedores,\
             \ clientes y colaboradores"
@@ -1478,7 +1420,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "La gestion des risques de la cha\xEEne d\u2019approvisionnement\
             \ en cybers\xE9curit\xE9 est int\xE9gr\xE9e aux processus de cybers\xE9\
             curit\xE9 et de gestion des risques d\u2019entreprise, d\u2019\xE9valuation\
@@ -1494,7 +1435,6 @@ objects:
             \ \xE0 la direction g\xE9n\xE9rale et les aborder au niveau de la gestion\
             \ des risques d'entreprise.\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "La gesti\xF3n de riesgos de la cadena de suministro de seguridad\
             \ cibern\xE9tica est\xE1 integrada en la seguridad cibern\xE9tica y la\
             \ gesti\xF3n de riesgos empresariales, la evaluaci\xF3n de riesgos y los\
@@ -1525,7 +1465,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les fournisseurs sont connus et prioris\xE9s par criticit\xE9"
           annotation: "Ex1 : \xC9laborer des crit\xE8res de criticit\xE9 des fournisseurs\
             \ bas\xE9s, par exemple, sur la sensibilit\xE9 des donn\xE9es trait\xE9\
@@ -1535,7 +1474,6 @@ objects:
             \ et hi\xE9rarchiser les fournisseurs en fonction des crit\xE8res de criticit\xE9\
             \n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: Los proveedores son conocidos y priorizados por criticidad
           annotation: "Ex1: Desarrollar criterios para la criticidad de los proveedores\
             \ basados, por ejemplo, en la sensibilidad de los datos procesados o en\
@@ -1591,7 +1529,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les exigences visant \xE0 s\u2019adresser aux risques de cybers\xE9\
             curit\xE9 dans les cha\xEEnes d\u2019approvisionnement sont \xE9tablies,\
             \ prioris\xE9es et int\xE9gr\xE9es dans les contrats et autres types d\u2019\
@@ -1627,7 +1564,6 @@ objects:
             \ et de leurs cha\xEEnes d'approvisionnement en ce qui concerne les risques\
             \ potentiels de cybers\xE9curit\xE9\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Los requisitos para abordar los riesgos de seguridad cibern\xE9\
             tica en las cadenas de suministro se establecen, priorizan e integran\
             \ en contratos y otros tipos de acuerdos con proveedores y otras terceras\
@@ -1683,7 +1619,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "La planification et la diligence raisonnable sont effectu\xE9\
             es pour r\xE9duire les risques avant d\u2019entrer dans des relations\
             \ formelles avec des fournisseurs ou d\u2019autres tiers"
@@ -1699,7 +1634,6 @@ objects:
             \ des produits critiques avant l'acquisition et l'utilisation\n3\xE8me\
             \ : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Se llevan a cabo la planificaci\xF3n y la diligencia debida\
             \ para reducir los riesgos antes de entablar relaciones formales con proveedores\
             \ u otros terceros"
@@ -1742,7 +1676,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les risques pos\xE9s par un fournisseur, ses produits et services\
             \ et d\u2019autres tiers sont compris, enregistr\xE9s, prioris\xE9s, \xE9\
             valu\xE9s, trait\xE9s et surveill\xE9s tout au long de la relation"
@@ -1763,7 +1696,6 @@ objects:
             \ et \xE0 la cha\xEEne d'approvisionnement pour assurer la continuit\xE9\
             \ des activit\xE9s\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Los riesgos planteados por un proveedor, sus productos y servicios\
             \ y otros terceros se comprenden, registran, priorizan, eval\xFAan, responden\
             \ y monitorean a lo largo de la relaci\xF3n"
@@ -1806,7 +1738,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les fournisseurs concern\xE9s et autres tiers sont inclus\
             \ dans les activit\xE9s de planification, de r\xE9ponse et de r\xE9cup\xE9\
             ration en cas d\u2019incident"
@@ -1822,7 +1753,6 @@ objects:
             \ des sessions collaboratives sur les le\xE7ons apprises avec les fournisseurs\
             \ critiques\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Los proveedores pertinentes y otros terceros se incluyen en\
             \ las actividades de planificaci\xF3n, respuesta y recuperaci\xF3n de\
             \ incidentes"
@@ -1863,7 +1793,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les pratiques de s\xE9curit\xE9 de la cha\xEEne d\u2019approvisionnement\
             \ sont int\xE9gr\xE9es aux programmes de cybers\xE9curit\xE9 et de gestion\
             \ des risques d\u2019entreprise, et leurs performances sont surveill\xE9\
@@ -1883,7 +1812,6 @@ objects:
             \ \xE0 niveau du mat\xE9riel critique pour d\xE9tecter les modifications\
             \ non autoris\xE9es\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Las pr\xE1cticas de seguridad de la cadena de suministro se\
             \ integran en los programas de seguridad cibern\xE9tica y de gesti\xF3\
             n de riesgos empresariales, y su rendimiento se monitorea a lo largo del\
@@ -1931,7 +1859,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les plans de gestion des risques de la cha\xEEne d\u2019approvisionnement\
             \ en mati\xE8re de cybers\xE9curit\xE9 comprennent des dispositions pour\
             \ les activit\xE9s qui se produisent apr\xE8s la conclusion d\u2019un\
@@ -1953,7 +1880,6 @@ objects:
             s \xE0 la r\xE9siliation d'un fournisseur\n3\xE8me : Risque de 3\xE8me\
             \ partie"
         es:
-          name: null
           description: "Los planes de gesti\xF3n de riesgos de la cadena de suministro\
             \ de seguridad cibern\xE9tica incluyen disposiciones para las actividades\
             \ que ocurren despu\xE9s de la conclusi\xF3n de un acuerdo de colaboraci\xF3\
@@ -1983,12 +1909,10 @@ objects:
           name: IDENTIFIER
           description: "Les risques de cybers\xE9curit\xE9 actuels de l\u2019organisation\
             \ sont compris"
-          annotation: null
         es:
           name: IDENTIFICAR
           description: "Se conocen los riesgos de seguridad cibern\xE9tica actuales\
             \ de la organizaci\xF3n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am
       assessable: false
       depth: 2
@@ -2007,7 +1931,6 @@ objects:
             \ d\u2019atteindre ses objectifs commerciaux sont identifi\xE9s et g\xE9\
             r\xE9s en fonction de leur importance relative par rapport aux objectifs\
             \ organisationnels et \xE0 la strat\xE9gie de risque de l\u2019organisation"
-          annotation: null
         es:
           name: "Gesti\xF3n de activos"
           description: "Los activos (p. ej., datos, hardware, software, sistemas,\
@@ -2015,7 +1938,6 @@ objects:
             n alcanzar sus objetivos empresariales se identifican y gestionan de acuerdo\
             \ con su importancia relativa para los objetivos organizativos y la estrategia\
             \ de riesgos de la organizaci\xF3n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
       assessable: true
       depth: 3
@@ -2031,7 +1953,6 @@ objects:
         update inventories'
       translations:
         fr:
-          name: null
           description: "Les inventaires du mat\xE9riel g\xE9r\xE9 par l\u2019organisation\
             \ sont maintenus"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Tenir \xE0 jour des inventaires\
@@ -2040,7 +1961,6 @@ objects:
             seaux pour d\xE9tecter le nouveau mat\xE9riel et mettre \xE0 jour automatiquement\
             \ les inventaires"
         es:
-          name: null
           description: "Se mantienen inventarios del hardware gestionado por la organizaci\xF3\
             n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Mantener inventarios para\
@@ -2066,7 +1986,6 @@ objects:
         Ex3: Maintain an inventory of the organization''s systems'
       translations:
         fr:
-          name: null
           description: "Les inventaires des logiciels, services et syst\xE8mes g\xE9\
             r\xE9s par l\u2019organisation sont maintenus"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Tenir \xE0 jour des inventaires\
@@ -2078,7 +1997,6 @@ objects:
             \ pour d\xE9tecter les modifications de l'inventaire des logiciels et\
             \ des services\nEx3 : Tenir un inventaire des syst\xE8mes de l'organisation"
         es:
-          name: null
           description: "Se mantienen inventarios de software, servicios y sistemas\
             \ gestionados por la organizaci\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Mantener inventarios para\
@@ -2112,7 +2030,6 @@ objects:
         that are typically used among authorized systems'
       translations:
         fr:
-          name: null
           description: "Les repr\xE9sentations des communications r\xE9seau autoris\xE9\
             es de l\u2019organisation et des flux de donn\xE9es r\xE9seau internes\
             \ et externes sont maintenues"
@@ -2127,7 +2044,6 @@ objects:
             \ r\xE9seau attendus qui sont g\xE9n\xE9ralement utilis\xE9s par les syst\xE8\
             mes autoris\xE9s"
         es:
-          name: null
           description: "Se mantienen representaciones de la comunicaci\xF3n de red\
             \ autorizada de la organizaci\xF3n y de los flujos de datos de red internos\
             \ y externos"
@@ -2158,7 +2074,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: Les inventaires des services fournis par les fournisseurs sont
             maintenus
           annotation: "Ex1 : Inventorier tous les services externes utilis\xE9s par\
@@ -2170,7 +2085,6 @@ objects:
             \ de la gestion des risques de cybers\xE9curit\xE9 de l'utilisation de\
             \ ce service par l'organisation\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: Se mantienen inventarios de los servicios prestados por los
             proveedores
           annotation: "Ex1: Inventario de todos los servicios externos utilizados\
@@ -2198,7 +2112,6 @@ objects:
         changes to the organization occur'
       translations:
         fr:
-          name: null
           description: "Les actifs sont prioris\xE9s en fonction de la classification,\
             \ de la criticit\xE9, des ressources et de l\u2019impact sur la mission"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : D\xE9finir les crit\xE8\
@@ -2207,7 +2120,6 @@ objects:
             \ et les mettre \xE0 jour p\xE9riodiquement ou lorsque des changements\
             \ importants surviennent dans l'organisation"
         es:
-          name: null
           description: "Se priorizan los activos en funci\xF3n de su clasificaci\xF3\
             n, criticidad, recursos e impacto en la misi\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Definir criterios para priorizar\
@@ -2238,7 +2150,6 @@ objects:
         designated data types'
       translations:
         fr:
-          name: null
           description: "Les inventaires de donn\xE9es et les m\xE9tadonn\xE9es correspondantes\
             \ pour les types de donn\xE9es d\xE9sign\xE9s sont maintenus"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Tenir \xE0 jour une liste\
@@ -2253,7 +2164,6 @@ objects:
             Ex4 : Suivez la provenance, le propri\xE9taire des donn\xE9es et la g\xE9\
             olocalisation de chaque instance de types de donn\xE9es d\xE9sign\xE9s"
         es:
-          name: null
           description: Se mantienen inventarios de datos y los metadatos correspondientes
             para los tipos de datos designados
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Mantener una lista de los\
@@ -2305,7 +2215,6 @@ objects:
         forms of data storage'
       translations:
         fr:
-          name: null
           description: "Les syst\xE8mes, mat\xE9riels, logiciels, services et donn\xE9\
             es sont g\xE9r\xE9s tout au long de leur cycle de vie"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -2331,7 +2240,6 @@ objects:
             \ m\xE9thodes de destruction du papier, des supports de stockage et d'autres\
             \ formes physiques de stockage de donn\xE9es"
         es:
-          name: null
           description: Los sistemas, el hardware, el software, los servicios y los
             datos se gestionan durante todo su ciclo de vida
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -2364,15 +2272,13 @@ objects:
         is understood by the organization
       translations:
         fr:
-          name: "\xC9valuation des risques "
+          name: "\xC9valuation des risques"
           description: "Le risque de cybers\xE9curit\xE9 pour l\u2019organisation,\
             \ les actifs et\nles individus est compris par l\u2019organisation"
-          annotation: null
         es:
-          name: "Evaluaci\xF3n de riesgos "
+          name: "Evaluaci\xF3n de riesgos"
           description: "La organizaci\xF3n comprende el riesgo de seguridad cibern\xE9\
             tica para la organizaci\xF3n, los activos y los individuos"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       assessable: true
       depth: 3
@@ -2400,7 +2306,6 @@ objects:
         to affect cybersecurity'
       translations:
         fr:
-          name: null
           description: "Les vuln\xE9rabilit\xE9s des actifs sont identifi\xE9es, valid\xE9\
             es et enregistr\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utiliser des technologies\
@@ -2419,7 +2324,6 @@ objects:
             \ pour d\xE9celer les faiblesses qui pourraient \xEAtre exploit\xE9es\
             \ pour affecter la cybers\xE9curit\xE9"
         es:
-          name: null
           description: Se identifican, validan y registran las vulnerabilidades de
             los activos
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Utilizar tecnolog\xEDas\
@@ -2454,7 +2358,6 @@ objects:
         of vulnerabilities that emerging technologies may have'
       translations:
         fr:
-          name: null
           description: "Les renseignements sur les cybermenaces sont re\xE7us de forums\
             \ et de sources de partage d\u2019informations"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Configurer des outils\
@@ -2467,7 +2370,6 @@ objects:
             \ sur les types de vuln\xE9rabilit\xE9s que les technologies \xE9mergentes\
             \ peuvent pr\xE9senter"
         es:
-          name: null
           description: "Se recibe informaci\xF3n sobre amenazas cibern\xE9ticas de\
             \ foros y fuentes de intercambio de informaci\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Configure herramientas y\
@@ -2498,7 +2400,6 @@ objects:
         Ex3: Implement processes for identifying internal threat actors'
       translations:
         fr:
-          name: null
           description: "Les menaces internes et externes \xE0 l\u2019organisation\
             \ sont identifi\xE9es et enregistr\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -2509,7 +2410,6 @@ objects:
             \ malveillants dans l'environnement\nEx3 : Mettre en \u0153uvre des processus\
             \ d'identification des auteurs de menace internes"
         es:
-          name: null
           description: "Se identifican y registran las amenazas internas y externas\
             \ a la organizaci\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -2540,7 +2440,6 @@ objects:
         systems'
       translations:
         fr:
-          name: null
           description: "Les impacts potentiels et les probabilit\xE9s des menaces\
             \ exploitant les vuln\xE9rabilit\xE9s sont identifi\xE9s et enregistr\xE9\
             s"
@@ -2554,7 +2453,6 @@ objects:
             \ compte des impacts potentiels des d\xE9faillances en cascade sur les\
             \ syst\xE8mes des syst\xE8mes"
         es:
-          name: null
           description: Se identifican y registran los impactos potenciales y las probabilidades
             de que las amenazas exploten las vulnerabilidades
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Los l\xEDderes empresariales\
@@ -2581,7 +2479,6 @@ objects:
         estimated likelihoods and impacts'
       translations:
         fr:
-          name: null
           description: "Les menaces, les vuln\xE9rabilit\xE9s, les probabilit\xE9\
             s et les impacts sont utilis\xE9s pour comprendre les risques inh\xE9\
             rents et informer la priorisation des r\xE9ponses aux risques."
@@ -2591,7 +2488,6 @@ objects:
             \ l'allocation des ressources et les investissements en cybers\xE9curit\xE9\
             \ en fonction des probabilit\xE9s et des impacts estim\xE9s"
         es:
-          name: null
           description: "Las amenazas, las vulnerabilidades, las probabilidades y los\
             \ impactos se utilizan para comprender el riesgo inherente e informar\
             \ sobre la priorizaci\xF3n de la respuesta al riesgo"
@@ -2623,7 +2519,6 @@ objects:
         order'
       translations:
         fr:
-          name: null
           description: "Les r\xE9ponses aux risques sont choisies, prioris\xE9es,\
             \ planifi\xE9es, suivies et communiqu\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Appliquer les crit\xE8\
@@ -2639,7 +2534,6 @@ objects:
             \ aux risques pr\xE9vues aux parties prenantes touch\xE9es par ordre de\
             \ priorit\xE9"
         es:
-          name: null
           description: Se eligen, priorizan, planifican, controlan y comunican las
             respuestas al riesgo
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Aplicar los criterios del\
@@ -2672,7 +2566,6 @@ objects:
         actions or milestones'
       translations:
         fr:
-          name: null
           description: "Les changements et les exceptions sont g\xE9r\xE9s, \xE9valu\xE9\
             s en termes d\u2019impact sur les risques, enregistr\xE9s et suivis"
           annotation: "Ex1 : Mettre en \u0153uvre et suivre les proc\xE9dures de documentation\
@@ -2685,7 +2578,6 @@ objects:
             \ les risques qui ont \xE9t\xE9 accept\xE9s en fonction des actions ou\
             \ des jalons futurs pr\xE9vus"
         es:
-          name: null
           description: "Se gestionan los cambios y las excepciones, se eval\xFAa su\
             \ impacto en el riesgo, se registran y se realiza su seguimiento"
           annotation: "Ex1: Implementar y seguir procedimientos para la documentaci\xF3\
@@ -2716,7 +2608,6 @@ objects:
         cybersecurity organizations'
       translations:
         fr:
-          name: null
           description: "Les processus de r\xE9ception, d\u2019analyse et de r\xE9\
             ponse aux divulgations de vuln\xE9rabilit\xE9s sont \xE9tablis"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -2729,7 +2620,6 @@ objects:
             \ les clients, les partenaires et les organisations gouvernementales de\
             \ cybers\xE9curit\xE9"
         es:
-          name: null
           description: Se establecen procesos para recibir, analizar y responder a
             las divulgaciones de vulnerabilidades
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -2753,7 +2643,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "L\u2019authenticit\xE9 et l\u2019int\xE9grit\xE9 du mat\xE9\
             riel et des logiciels sont \xE9valu\xE9es avant l\u2019acquisition et\
             \ l\u2019utilisation."
@@ -2761,7 +2650,6 @@ objects:
             \ des produits et services technologiques critiques avant l'acquisition\
             \ et l'utilisation\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Se eval\xFAa la autenticidad e integridad del hardware y software\
             \ antes de su adquisici\xF3n y uso"
           annotation: "Ex1: Evaluar la autenticidad y la ciberseguridad de los productos\
@@ -2777,14 +2665,12 @@ objects:
         cybersecurity requirements, including the supply chain'
       translations:
         fr:
-          name: null
           description: "Les fournisseurs critiques sont \xE9valu\xE9s avant l\u2019\
             acquisition"
           annotation: "Ex1 : Effectuer des \xE9valuations des risques li\xE9s aux\
             \ fournisseurs par rapport aux exigences commerciales et de cybers\xE9\
             curit\xE9 applicables, y compris la cha\xEEne d'approvisionnement"
         es:
-          name: null
           description: "Se eval\xFAan los proveedores cr\xEDticos antes de su adquisici\xF3\
             n"
           annotation: "Ex1: Realizar evaluaciones de riesgos de los proveedores en\
@@ -2804,13 +2690,11 @@ objects:
           description: "Les am\xE9liorations aux processus, proc\xE9dures et activit\xE9\
             s de gestion des risques de cybers\xE9curit\xE9 organisationnels sont\
             \ identifi\xE9es dans toutes les Fonctions du CSF."
-          annotation: null
         es:
           name: Mejora
           description: "Se identifican mejoras en los procesos, procedimientos y actividades\
             \ de gesti\xF3n de riesgos de seguridad cibern\xE9tica de la organizaci\xF3\
             n en todas las funciones del CSF"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
       assessable: true
       depth: 3
@@ -2829,7 +2713,6 @@ objects:
         through automated means'
       translations:
         fr:
-          name: null
           description: "Les am\xE9liorations sont identifi\xE9es \xE0 partir des \xE9\
             valuations"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Effectuer des auto-\xE9\
@@ -2840,7 +2723,6 @@ objects:
             Ex3 : \xC9valuer en permanence la conformit\xE9 aux exigences de cybers\xE9\
             curit\xE9 s\xE9lectionn\xE9es par des moyens automatis\xE9s"
         es:
-          name: null
           description: Las mejoras se identifican a partir de evaluaciones
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Realizar autoevaluaciones\
             \ de los servicios cr\xEDticos que tengan en cuenta las amenazas actuales\
@@ -2882,7 +2764,6 @@ objects:
         to inform improvements to the cybersecurity program'
       translations:
         fr:
-          name: null
           description: "Les am\xE9liorations sont identifi\xE9es \xE0 partir de tests\
             \ et d\u2019exercices de s\xE9curit\xE9, y compris ceux effectu\xE9s en\
             \ coordination avec les fournisseurs et les tiers concern\xE9s"
@@ -2908,7 +2789,6 @@ objects:
             \ \xE0 l'aide d'outils et de services de s\xE9curit\xE9 pour \xE9clairer\
             \ les am\xE9liorations du programme de cybers\xE9curit\xE9"
         es:
-          name: null
           description: "Las mejoras se identifican a partir de pruebas y ejercicios\
             \ de seguridad, lo que incluye a los realizados en coordinaci\xF3n con\
             \ proveedores y terceros pertinentes"
@@ -2948,7 +2828,6 @@ objects:
         Ex3: Use metrics to assess operational cybersecurity performance over time'
       translations:
         fr:
-          name: null
           description: "Les am\xE9liorations sont identifi\xE9es \xE0 partir de l\u2019\
             ex\xE9cution des processus op\xE9rationnels, des proc\xE9dures et des\
             \ activit\xE9s"
@@ -2959,7 +2838,6 @@ objects:
             Ex3 : Utiliser des indicateurs pour \xE9valuer les performances op\xE9\
             rationnelles en mati\xE8re de cybers\xE9curit\xE9 au fil du temps"
         es:
-          name: null
           description: "Las mejoras se identifican a partir de la ejecuci\xF3n de\
             \ procesos, procedimientos y actividades operativos"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Llevar a cabo sesiones colaborativas\
@@ -2995,7 +2873,6 @@ objects:
         significant improvements is identified'
       translations:
         fr:
-          name: null
           description: "Les plans de r\xE9ponse aux incidents et d\u2019autres plans\
             \ de cybers\xE9curit\xE9 qui affectent les op\xE9rations sont \xE9tablis,\
             \ communiqu\xE9s, maintenus et am\xE9lior\xE9s"
@@ -3017,7 +2894,6 @@ objects:
             \ chaque ann\xE9e ou lorsqu'un besoin d'am\xE9liorations importantes est\
             \ identifi\xE9"
         es:
-          name: null
           description: "Se establecen, comunican, mantienen y mejoran los planes de\
             \ respuesta a incidentes y otros planes de seguridad cibern\xE9tica que\
             \ afectan a las operaciones."
@@ -3047,12 +2923,10 @@ objects:
           name: "PROT\xC9GER"
           description: "Des mesures de protection sont utilis\xE9es pour g\xE9rer\
             \ les risques de cybers\xE9curit\xE9 de l\u2019organisation"
-          annotation: null
         es:
           name: PROTEGER
           description: "Se utilizan medidas de protecci\xF3n para gestionar los riesgos\
             \ de seguridad cibern\xE9tica de la organizaci\xF3n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa
       assessable: false
       depth: 2
@@ -3069,13 +2943,11 @@ objects:
           description: "L\u2019acc\xE8s aux actifs physiques et logiques est limit\xE9\
             \ aux utilisateurs, services et mat\xE9riels autoris\xE9s et g\xE9r\xE9\
             \ en fonction du risque \xE9valu\xE9 d\u2019acc\xE8s non autoris\xE9"
-          annotation: null
         es:
-          name: "Gesti\xF3n de identidades, autenticaci\xF3n y control de acceso "
+          name: "Gesti\xF3n de identidades, autenticaci\xF3n y control de acceso"
           description: "El acceso a los activos f\xEDsicos y l\xF3gicos se limita\
             \ a los usuarios, servicios y hardware autorizados y se gestiona de forma\
             \ proporcional al riesgo evaluado de acceso no autorizado"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
       assessable: true
       depth: 3
@@ -3099,7 +2971,6 @@ objects:
         and servicing purposes'
       translations:
         fr:
-          name: null
           description: "Les identit\xE9s et les informations d\u2019identification\
             \ des utilisateurs, services et mat\xE9riels autoris\xE9s sont g\xE9r\xE9\
             es par l\u2019organisation"
@@ -3116,7 +2987,6 @@ objects:
             \ physiquement le mat\xE9riel autoris\xE9 avec un identificateur \xE0\
             \ des fins d'inventaire et d'entretien"
         es:
-          name: null
           description: "La organizaci\xF3n gestiona las identidades y credenciales\
             \ de los usuarios, servicios y equipos autorizados"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Iniciar solicitudes de nuevo\
@@ -3146,7 +3016,6 @@ objects:
         Ex2: Issue a different credential for each person (i.e., no credential sharing)'
       translations:
         fr:
-          name: null
           description: "Les identit\xE9s sont v\xE9rifi\xE9es et li\xE9es aux informations\
             \ d\u2019identification en fonction du contexte des interactions"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -3156,7 +3025,6 @@ objects:
             Ex2 : \xC9mettre un justificatif d'identit\xE9 diff\xE9rent pour chaque\
             \ personne (c'est-\xE0-dire aucun partage d'identifiant)"
         es:
-          name: null
           description: "Las identidades est\xE1n comprobadas y vinculadas a credenciales\
             \ basadas en el contexto de las interacciones"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -3184,7 +3052,6 @@ objects:
         safety under emergency conditions'
       translations:
         fr:
-          name: null
           description: "Les utilisateurs, les services et le mat\xE9riel sont authentifi\xE9\
             s"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Exiger une authentification\
@@ -3196,7 +3063,6 @@ objects:
             der aux comptes essentiels \xE0 la protection de la s\xE9curit\xE9 en\
             \ cas d'urgence"
         es:
-          name: null
           description: "Los usuarios, servicios y hardware est\xE1n autenticados"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Requerir autenticaci\xF3\
             n multifactor\nEx2: Aplique pol\xEDticas para la seguridad m\xEDnima de\
@@ -3225,7 +3091,6 @@ objects:
         validation) of identity assertions'
       translations:
         fr:
-          name: null
           description: "Les affirmations d\u2019identit\xE9 sont prot\xE9g\xE9es,\
             \ transmises et v\xE9rifi\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Prot\xE9ger les assertions\
@@ -3241,7 +3106,6 @@ objects:
             \ v\xE9rification (par exemple, validation de signature) des assertions\
             \ d'identit\xE9"
         es:
-          name: null
           description: Las afirmaciones de identidad se protegen, transmiten y verifican
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Proteger las aserciones\
             \ de identidad que se utilizan para transmitir informaci\xF3n de autenticaci\xF3\
@@ -3278,7 +3142,6 @@ objects:
         functions to confirm proper separation of duties'
       translations:
         fr:
-          name: null
           description: "Les autorisations d\u2019acc\xE8s, les droits et les autorisations\
             \ sont d\xE9finis dans une politique, g\xE9r\xE9s, appliqu\xE9s et revus,\
             \ et int\xE8grent les principes du moindre privil\xE8ge et de la s\xE9\
@@ -3295,7 +3158,6 @@ objects:
             \ les privil\xE8ges associ\xE9s aux fonctions op\xE9rationnelles essentielles\
             \ pour confirmer la bonne s\xE9paration des t\xE2ches"
         es:
-          name: null
           description: "Los permisos de acceso, los derechos y las autorizaciones\
             \ se definen en una pol\xEDtica, se gestionan, se aplican y se revisan,\
             \ e incorporan los principios de privilegio m\xEDnimo y separaci\xF3n\
@@ -3332,7 +3194,6 @@ objects:
         business-critical assets'
       translations:
         fr:
-          name: null
           description: "L\u2019acc\xE8s physique aux actifs est g\xE9r\xE9, surveill\xE9\
             \ et appliqu\xE9 en fonction du risque"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -3345,7 +3206,6 @@ objects:
             \ et d'autres tiers dans des zones contenant des actifs critiques pour\
             \ l'entreprise"
         es:
-          name: null
           description: "El acceso f\xEDsico a los activos se gestiona, supervisa y\
             \ aplica de forma proporcional al riesgo"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -3369,13 +3229,11 @@ objects:
           description: "Le personnel de l\u2019organisation re\xE7oit une sensibilisation\
             \ et une formation \xE0 la cybers\xE9curit\xE9 afin qu\u2019il puisse\
             \ accomplir ses t\xE2ches li\xE9es \xE0 la cybers\xE9curit\xE9"
-          annotation: null
         es:
-          name: "Concienciaci\xF3n y capacitaci\xF3n "
+          name: "Concienciaci\xF3n y capacitaci\xF3n"
           description: "Se proporciona al personal de la organizaci\xF3n concienciaci\xF3\
             n y capacitaci\xF3n en seguridad cibern\xE9tica para que puedan realizar\
             \ sus tareas relacionadas con la seguridad cibern\xE9tica"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
       assessable: true
       depth: 3
@@ -3405,7 +3263,6 @@ objects:
         new practices'
       translations:
         fr:
-          name: null
           description: "Le personnel est sensibilis\xE9 et form\xE9 afin qu\u2019\
             il poss\xE8de les connaissances et les comp\xE9tences n\xE9cessaires pour\
             \ effectuer des t\xE2ches g\xE9n\xE9rales en tenant compte des risques\
@@ -3427,7 +3284,6 @@ objects:
             curit\xE9\nEx5 : Exiger des mises \xE0 jour annuelles pour renforcer les\
             \ pratiques existantes et introduire de nouvelles pratiques"
         es:
-          name: null
           description: "Se sensibiliza y capacita al personal para que disponga de\
             \ los conocimientos y habilidades necesarios para realizar tareas generales\
             \ teniendo en cuenta los riesgos de seguridad cibern\xE9tica"
@@ -3473,7 +3329,6 @@ objects:
         new practices'
       translations:
         fr:
-          name: null
           description: "Les personnes occupant des postes sp\xE9cialis\xE9s re\xE7\
             oivent une sensibilisation et une formation afin qu\u2019elles poss\xE8\
             dent les connaissances et les comp\xE9tences n\xE9cessaires pour effectuer\
@@ -3493,7 +3348,6 @@ objects:
             s\nEx4 : Exiger des mises \xE0 jour annuelles pour renforcer les pratiques\
             \ existantes et introduire de nouvelles pratiques"
         es:
-          name: null
           description: "Se sensibiliza y capacita a las personas que desempe\xF1an\
             \ funciones especializadas para que posean los conocimientos y aptitudes\
             \ necesarios para realizar las tareas pertinentes teniendo en cuenta los\
@@ -3524,13 +3378,11 @@ objects:
           description: "Les donn\xE9es sont g\xE9r\xE9es conform\xE9ment \xE0 la strat\xE9\
             gie de risque de l\u2019organisation afin de prot\xE9ger la confidentialit\xE9\
             , l\u2019int\xE9grit\xE9 et la disponibilit\xE9 des informations"
-          annotation: null
         es:
           name: Seguridad de datos
           description: "Los datos se gestionan de forma coherente con la estrategia\
             \ de riesgos de la organizaci\xF3n para proteger la confidencialidad,\
             \ integridad y disponibilidad de la informaci\xF3n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
       assessable: true
       depth: 3
@@ -3554,7 +3406,6 @@ objects:
         such as within locked offices or file cabinets'
       translations:
         fr:
-          name: null
           description: "La confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
             \ des donn\xE9es au repos sont prot\xE9g\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utilisez le chiffrement,\
@@ -3570,7 +3421,6 @@ objects:
             \ sensibles non crypt\xE9es, par exemple dans des bureaux verrouill\xE9\
             s ou des classeurs"
         es:
-          name: null
           description: "La confidencialidad, la integridad y la disponibilidad de\
             \ los datos en reposo est\xE1n protegidas"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: use el cifrado, las firmas\
@@ -3607,7 +3457,6 @@ objects:
         records) in development, testing, and other non-production environments'
       translations:
         fr:
-          name: null
           description: "La confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
             \ des donn\xE9es en transit sont prot\xE9g\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utilisez le cryptage,\
@@ -3623,7 +3472,6 @@ objects:
             \ de production (par exemple, les dossiers clients) dans les environnements\
             \ de d\xE9veloppement, de test et autres environnements hors production"
         es:
-          name: null
           description: "La confidencialidad, la integridad y la disponibilidad de\
             \ los datos en tr\xE1nsito est\xE1n protegidas"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Utilice el cifrado, las\
@@ -3654,7 +3502,6 @@ objects:
         platform'
       translations:
         fr:
-          name: null
           description: "La confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
             \ des donn\xE9es en cours d\u2019utilisation sont prot\xE9g\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Supprimez les donn\xE9\
@@ -3663,7 +3510,6 @@ objects:
             \ Prot\xE9ger les donn\xE9es en cours d'utilisation contre l'acc\xE8s\
             \ par d'autres utilisateurs et processus de la m\xEAme plateforme"
         es:
-          name: null
           description: "La confidencialidad, la integridad y la disponibilidad de\
             \ los datos en uso est\xE1n protegidas"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Eliminar los datos que deben\
@@ -3690,7 +3536,6 @@ objects:
         storage'
       translations:
         fr:
-          name: null
           description: "Les sauvegardes des donn\xE9es sont cr\xE9\xE9es, prot\xE9\
             g\xE9es, maintenues et test\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Sauvegardez en continu\
@@ -3703,7 +3548,6 @@ objects:
             \ de s\xE9paration g\xE9ographique et de g\xE9olocalisation pour le stockage\
             \ des sauvegardes de donn\xE9es"
         es:
-          name: null
           description: Se crean, protegen, mantienen y comprueban copias de seguridad
             de los datos
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Realice copias de seguridad\
@@ -3733,14 +3577,12 @@ objects:
             \ des plateformes physiques et virtuelles sont g\xE9r\xE9s conform\xE9\
             ment \xE0 la strat\xE9gie de risque de l\u2019organisation pour prot\xE9\
             ger leur confidentialit\xE9, leur int\xE9grit\xE9 et leur disponibilit\xE9"
-          annotation: null
         es:
           name: Seguridad de plataformas
           description: "El hardware, el software (p. ej., firmware, sistemas operativos,\
             \ aplicaciones) y los servicios de las plataformas f\xEDsicas y virtuales\
             \ se gestionan de acuerdo con la estrategia de riesgos de la organizaci\xF3\
             n para proteger su confidencialidad, integridad y disponibilidad"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
       assessable: true
       depth: 3
@@ -3759,7 +3601,6 @@ objects:
         Ex3: Monitor implemented software for deviations from approved baselines'
       translations:
         fr:
-          name: null
           description: "Les pratiques de gestion de la configuration sont \xE9tablies\
             \ et appliqu\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : \xC9tablir, tester, d\xE9\
@@ -3773,7 +3614,6 @@ objects:
             \ d\xE9tecter les \xE9carts par rapport aux lignes de base approuv\xE9\
             es"
         es:
-          name: null
           description: "Se establecen y aplican pr\xE1cticas de gesti\xF3n de la configuraci\xF3\
             n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Establecer, probar, implementar\
@@ -3812,7 +3652,6 @@ objects:
         support and obsolescence'
       translations:
         fr:
-          name: null
           description: "Le logiciel est maintenu, remplac\xE9 et supprim\xE9 en fonction\
             \ du risque"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Effectuer des correctifs\
@@ -3829,7 +3668,6 @@ objects:
             finir et mettre en \u0153uvre des plans de support de maintenance en fin\
             \ de vie et d'obsolescence des logiciels et des services"
         es:
-          name: null
           description: "Se mantiene, sustituye y elimina el software en funci\xF3\
             n del riesgo"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Realizar parches de rutina\
@@ -3864,7 +3702,6 @@ objects:
         Ex3: Perform hardware disposal in a secure, responsible, and auditable manner'
       translations:
         fr:
-          name: null
           description: "Le mat\xE9riel est entretenu, remplac\xE9 et retir\xE9 en\
             \ fonction du risque"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -3876,7 +3713,6 @@ objects:
             \ du mat\xE9riel\nEx3 : Effectuer la mise au rebut du mat\xE9riel de mani\xE8\
             re s\xE9curis\xE9e, responsable et v\xE9rifiable"
         es:
-          name: null
           description: "Se mantiene, sustituye y elimina el hardware en funci\xF3\
             n del riesgo"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -3903,7 +3739,6 @@ objects:
         Ex3: Configure log generators to record the data needed by zero-trust architectures'
       translations:
         fr:
-          name: null
           description: "Les enregistrements de journaux sont g\xE9n\xE9r\xE9s et mis\
             \ \xE0 disposition pour une surveillance continue"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Configurer tous les syst\xE8\
@@ -3915,7 +3750,6 @@ objects:
             rateurs de journaux pour enregistrer les donn\xE9es requises par les architectures\
             \ Zero Trust"
         es:
-          name: null
           description: "Se generen registros y se ponen a disposici\xF3n para una\
             \ supervisi\xF3n continua"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Configurar todos los sistemas\
@@ -3946,7 +3780,6 @@ objects:
         software only'
       translations:
         fr:
-          name: null
           description: "L\u2019installation et l\u2019ex\xE9cution de logiciels non\
             \ autoris\xE9s sont emp\xEAch\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Lorsque le risque le\
@@ -3959,7 +3792,6 @@ objects:
             \ pour autoriser l'installation de logiciels approuv\xE9s par l'organisation\
             \ uniquement"
         es:
-          name: null
           description: "Se impide la instalaci\xF3n y la ejecuci\xF3n de software\
             \ no autorizado"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Cuando el riesgo lo justifique,\
@@ -3989,7 +3821,6 @@ objects:
         of software once it is no longer needed'
       translations:
         fr:
-          name: null
           description: "Les pratiques de d\xE9veloppement de logiciels s\xE9curis\xE9\
             s sont int\xE9gr\xE9es et leurs performances sont surveill\xE9es tout\
             \ au long du cycle de vie du d\xE9veloppement logiciel"
@@ -4001,7 +3832,6 @@ objects:
             s dans les environnements de production et \xE9liminer en toute s\xE9\
             curit\xE9 les logiciels une fois qu'ils ne sont plus n\xE9cessaires"
         es:
-          name: null
           description: "Se integran pr\xE1cticas seguras de desarrollo de software\
             \ y se supervisa su rendimiento durante todo el ciclo de vida de desarrollo\
             \ del software"
@@ -4027,14 +3857,12 @@ objects:
             \ la strat\xE9gie de risque de l\u2019organisation pour prot\xE9ger la\
             \ confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9 des\
             \ actifs, ainsi que la r\xE9silience organisationnelle"
-          annotation: null
         es:
-          name: "Resistencia de la infraestructura tecnol\xF3gica "
+          name: "Resistencia de la infraestructura tecnol\xF3gica"
           description: "Las arquitecturas de seguridad se gestionan con la estrategia\
             \ de riesgos de la organizaci\xF3n a fin de proteger la confidencialidad,\
             \ la integridad y la disponibilidad de los activos, as\xED como la resiliencia\
             \ de la organizaci\xF3n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
       assessable: true
       depth: 3
@@ -4061,7 +3889,6 @@ objects:
         use production resources'
       translations:
         fr:
-          name: null
           description: "Les r\xE9seaux et les environnements sont prot\xE9g\xE9s contre\
             \ les acc\xE8s logiques et les utilisations non autoris\xE9s"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -4078,7 +3905,6 @@ objects:
             \ avant de les autoriser \xE0 acc\xE9der aux ressources de production\
             \ et \xE0 les utiliser"
         es:
-          name: null
           description: "Las redes y los entornos est\xE1n protegidos contra el acceso\
             \ l\xF3gico y el uso no autorizados"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -4112,7 +3938,6 @@ objects:
         systems on the organization''s behalf'
       translations:
         fr:
-          name: null
           description: "Les actifs technologiques de l\u2019organisation sont prot\xE9\
             g\xE9s contres les menaces environnementales"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -4124,7 +3949,6 @@ objects:
             \ les fournisseurs de services qui exploitent des syst\xE8mes au nom de\
             \ l'organisation."
         es:
-          name: null
           description: "Los activos tecnol\xF3gicos de la organizaci\xF3n est\xE1\
             n protegidos de las amenazas del entorno"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -4151,7 +3975,6 @@ objects:
         to improve system reliability'
       translations:
         fr:
-          name: null
           description: "Les m\xE9canismes sont mis en \u0153uvre pour satisfaire aux\
             \ exigences de r\xE9silience dans des situations normales et d\xE9favorables"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : \xC9viter les points\
@@ -4161,7 +3984,6 @@ objects:
             \ haute disponibilit\xE9 tels que le stockage redondant et les alimentations\
             \ pour am\xE9liorer la fiabilit\xE9 du syst\xE8me"
         es:
-          name: null
           description: Se implementan mecanismos para lograr los requisitos de resiliencia
             en situaciones normales y adversas
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Evitar puntos \xFAnicos\
@@ -4181,7 +4003,6 @@ objects:
         Ex2: Forecast future needs, and scale resources accordingly'
       translations:
         fr:
-          name: null
           description: "Les capacit\xE9 de ressources ad\xE9quate pour assurer la\
             \ disponibilit\xE9 sont maintenues"
           annotation: "Ex1 : Surveiller l'utilisation du stockage, de l'alimentation,\
@@ -4189,7 +4010,6 @@ objects:
             \ : Pr\xE9voir les besoins futurs et faire \xE9voluer les ressources en\
             \ cons\xE9quence"
         es:
-          name: null
           description: Se mantiene una capacidad de recursos adecuada para garantizar
             la disponibilidad
           annotation: "Ex1: Supervise el uso del almacenamiento, la energ\xEDa, la\
@@ -4206,12 +4026,10 @@ objects:
           name: "D\xC9TECTER"
           description: "Les attaques et compromissions de cybers\xE9curit\xE9 possibles\
             \ sont d\xE9tect\xE9es et analys\xE9es"
-          annotation: null
         es:
           name: DETECTAR
           description: "Se detectan y analizan posibles ataques y situaciones comprometedoras\
             \ en materia de seguridad cibern\xE9tica."
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm
       assessable: false
       depth: 2
@@ -4226,12 +4044,10 @@ objects:
           description: "Les actifs sont surveill\xE9s pour d\xE9tecter des anomalies,\
             \ des indicateurs de compromission et d\u2019autres \xE9v\xE9nements potentiellement\
             \ ind\xE9sirables"
-          annotation: null
         es:
-          name: 'Monitoreo continuo '
+          name: Monitoreo continuo
           description: "Los activos se monitorean para encontrar anomal\xEDas, indicadores\
             \ de compromiso y otros acontecimientos potencialmente adversos"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
       assessable: true
       depth: 3
@@ -4254,7 +4070,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Les r\xE9seaux et services r\xE9seau sont surveill\xE9s pour\
             \ d\xE9tecter les \xE9v\xE9nements potentiellement ind\xE9sirables"
           annotation: "Ex1 : Surveiller les DNS, les BGP et d'autres services r\xE9\
@@ -4268,7 +4083,6 @@ objects:
             \ postures de s\xE9curit\xE9 \xE0 des fins de Zero Trust\n1er : Risque\
             \ de 1\xE8re partie"
         es:
-          name: null
           description: Las redes y los servicios de red se monitorean para detectar
             acontecimientos potencialmente adversos
           annotation: "Ex1: Supervise DNS, BGP y otros servicios de red en busca de\
@@ -4302,7 +4116,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "L\u2019environnement physique est surveill\xE9 pour d\xE9\
             tecter les \xE9v\xE9nements potentiellement ind\xE9sirables"
           annotation: "Ex1 : Surveillez les journaux des syst\xE8mes de contr\xF4\
@@ -4317,7 +4130,6 @@ objects:
             \ de syst\xE8mes d'alarme, de cam\xE9ras et d'agents de s\xE9curit\xE9\
             \n1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: "Se monitorea el entorno f\xEDsico para detectar posibles acontecimientos\
             \ adversos"
           annotation: "Ex1: Supervise los registros de los sistemas f\xEDsicos de\
@@ -4348,7 +4160,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "L\u2019activit\xE9 du personnel et l\u2019utilisation de la\
             \ technologie sont surveill\xE9es pour d\xE9tecter les \xE9v\xE9nements\
             \ potentiellement ind\xE9sirables"
@@ -4360,7 +4171,6 @@ objects:
             \ en permanence la technologie de tromperie, y compris les comptes d'utilisateurs,\
             \ pour toute utilisation\n1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: "Se monitorea la actividad del personal y el uso de la tecnolog\xED\
             a para detectar posibles acontecimientos adversos"
           annotation: "Ex1: Utilice software de an\xE1lisis de comportamiento para\
@@ -4386,7 +4196,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Les activit\xE9s et services des prestataires de services\
             \ externes sont surveill\xE9s pour d\xE9tecter les \xE9v\xE9nements potentiellement\
             \ ind\xE9sirables"
@@ -4397,7 +4206,6 @@ objects:
             \ de services pour d\xE9tecter les \xE9carts par rapport au comportement\
             \ attendu\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: Se monitorean las actividades y los servicios de los proveedores
             de servicios externos para detectar acontecimientos potencialmente adversos.
           annotation: "Ex1: Supervisar las actividades de administraci\xF3n y mantenimiento\
@@ -4431,7 +4239,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Le mat\xE9riel informatique et les logiciels, les environnements\
             \ d\u2019ex\xE9cution et leurs donn\xE9es sont surveill\xE9s pour d\xE9\
             tecter les \xE9v\xE9nements potentiellement ind\xE9sirables"
@@ -4451,7 +4258,6 @@ objects:
             \ les terminaux vers un environnement de conversion avant que l'acc\xE8\
             s ne soit autoris\xE9\n1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: "Se monitorean el hardware y el software inform\xE1ticos, los\
             \ entornos de ejecuci\xF3n y sus datos para detectar posibles acontecimientos\
             \ adversos"
@@ -4483,13 +4289,11 @@ objects:
             autres \xE9v\xE9nements potentiellement ind\xE9sirables sont analys\xE9\
             s pour caract\xE9riser les \xE9v\xE9nements et d\xE9tecter les incidents\
             \ de cybers\xE9curit\xE9"
-          annotation: null
         es:
           name: "An\xE1lisis de eventos adversos"
           description: "Se analizan anomal\xEDas, indicadores de compromiso y otros\
             \ acontecimientos potencialmente adversos para caracterizarlos y detectar\
             \ incidentes de seguridad cibern\xE9tica"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
       assessable: true
       depth: 3
@@ -4513,7 +4317,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Les \xE9v\xE9nements potentiellement ind\xE9sirables sont\
             \ analys\xE9s pour mieux comprendre les activit\xE9s associ\xE9es"
           annotation: "Ex1 : Utilisez la gestion des informations et des \xE9v\xE9\
@@ -4529,7 +4332,6 @@ objects:
             \ de journaux pour g\xE9n\xE9rer des rapports sur leurs r\xE9sultats\n\
             1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: Los acontecimientos potencialmente adversos se analizan para
             comprender mejor las actividades asociadas
           annotation: "Ex1: Utilice la administraci\xF3n de eventos e informaci\xF3\
@@ -4561,7 +4363,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Les informations sont corr\xE9l\xE9es \xE0 partir de sources\
             \ multiples"
           annotation: "Ex1 : Transf\xE9rer constamment les donn\xE9es de journal g\xE9\
@@ -4572,7 +4373,6 @@ objects:
             \ sur les cybermenaces pour aider \xE0 corr\xE9ler les \xE9v\xE9nements\
             \ entre les sources de journaux\n1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: "Se correlaciona la informaci\xF3n procedente de diversas fuentes"
           annotation: "Ex1: Transfiera constantemente datos de registro generados\
             \ por otras fuentes a un n\xFAmero relativamente peque\xF1o de servidores\
@@ -4595,7 +4395,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "L\u2019impact et la port\xE9e estim\xE9s des \xE9v\xE9nements\
             \ ind\xE9sirables sont compris"
           annotation: "Ex1 : Utiliser des SIEM ou d'autres outils pour estimer l'impact\
@@ -4603,7 +4402,6 @@ objects:
             \ cr\xE9e ses propres estimations de l'impact et de la port\xE9e.\n1er\
             \ : Risque de 1\xE8re partie"
         es:
-          name: null
           description: Se comprende el impacto estimado y el alcance de los acontecimientos
             adversos
           annotation: "Ex1: Utilice SIEM u otras herramientas para estimar el impacto\
@@ -4633,7 +4431,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Les informations sur les \xE9v\xE9nements ind\xE9sirables\
             \ sont fournies au personnel et aux outils autoris\xE9s"
           annotation: "Ex1 : Utilisez un logiciel de cybers\xE9curit\xE9 pour g\xE9\
@@ -4648,7 +4445,6 @@ objects:
             \ de tickets de l'organisation lorsque le personnel technique d\xE9couvre\
             \ des indicateurs de compromission\n1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: "La informaci\xF3n sobre acontecimientos adversos se proporciona\
             \ al personal y a las herramientas autorizadas"
           annotation: "Ex1: Utilice el software de ciberseguridad para generar alertas\
@@ -4680,7 +4476,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Les renseignements sur les cybermenaces et d\u2019autres informations\
             \ contextuelles sont int\xE9gr\xE9s dans l\u2019analyse"
           annotation: "Ex1 : Fournir en toute s\xE9curit\xE9 des flux de renseignements\
@@ -4692,7 +4487,6 @@ objects:
             \ aupr\xE8s de fournisseurs, de vendeurs et d'avis de s\xE9curit\xE9 tiers\n\
             1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: "La inteligencia sobre amenazas cibern\xE9ticas y otra informaci\xF3\
             n contextual se integran en el an\xE1lisis"
           annotation: "Ex1: Proporcionar de forma segura informaci\xF3n sobre inteligencia\
@@ -4718,7 +4512,6 @@ objects:
         1st: 1st Party Risk'
       translations:
         fr:
-          name: null
           description: "Les incidents sont d\xE9clar\xE9s lorsque les \xE9v\xE9nements\
             \ ind\xE9sirables r\xE9pondent aux crit\xE8res d\u2019incident d\xE9finis"
           annotation: "Ex1 : Appliquer les crit\xE8res d'incident aux caract\xE9ristiques\
@@ -4727,7 +4520,6 @@ objects:
             \ faux positifs connus lors de l'application des crit\xE8res d'incident\n\
             1er : Risque de 1\xE8re partie"
         es:
-          name: null
           description: Se declaran incidentes cuando los acontecimientos adversos
             cumplen con los criterios de incidente definidos
           annotation: "Ex1: Aplicar criterios de incidente a las caracter\xEDsticas\
@@ -4745,12 +4537,10 @@ objects:
           name: "R\xC9PONDRE"
           description: "Des mesures concernant un incident de cybers\xE9curit\xE9\
             \ d\xE9tect\xE9 sont prises"
-          annotation: null
         es:
           name: RESPONDER
           description: "Se toman medidas en relaci\xF3n con un incidente de seguridad\
             \ cibern\xE9tica detectado"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma
       assessable: false
       depth: 2
@@ -4763,12 +4553,10 @@ objects:
           name: Gestion des incidents
           description: "Les r\xE9ponses aux incidents de cybers\xE9curit\xE9 d\xE9\
             tect\xE9s sont g\xE9r\xE9es"
-          annotation: null
         es:
           name: "Gesti\xF3n de incidentes"
           description: "Se gestionan las respuestas a los incidentes de seguridad\
             \ cibern\xE9tica detectados"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
       assessable: true
       depth: 3
@@ -4789,7 +4577,6 @@ objects:
         3rd: 3rd Party Risk'
       translations:
         fr:
-          name: null
           description: "Le plan de r\xE9ponse aux incidents est ex\xE9cut\xE9 en coordination\
             \ avec les tiers concern\xE9s une fois qu\u2019un incident est d\xE9clar\xE9"
           annotation: "Ex1 : Les technologies de d\xE9tection signalent automatiquement\
@@ -4800,7 +4587,6 @@ objects:
             \ la r\xE9ponse aux incidents (par exemple, continuit\xE9 des activit\xE9\
             s et reprise apr\xE8s sinistre)\n3\xE8me : Risque de 3\xE8me partie"
         es:
-          name: null
           description: "Se ejecuta el plan de respuesta a incidentes en coordinaci\xF3\
             n con los terceros pertinentes una vez que se declara un incidente"
           annotation: "Ex1: Las tecnolog\xEDas de detecci\xF3n informan autom\xE1\
@@ -4825,7 +4611,6 @@ objects:
         Ex2: Apply criteria to estimate the severity of an incident'
       translations:
         fr:
-          name: null
           description: "Les rapports d\u2019incidents sont tri\xE9s et valid\xE9s"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner pr\xE9liminairement\
             \ les rapports d'incident pour confirmer qu'ils sont li\xE9s \xE0 la cybers\xE9\
@@ -4833,7 +4618,6 @@ objects:
             \ cas d'incident.\nEx2 : Appliquer des crit\xE8res pour estimer la gravit\xE9\
             \ d'un incident"
         es:
-          name: null
           description: Se clasifican y validan los informes de incidentes
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Revisar preliminarmente\
             \ los informes de incidentes para confirmar que est\xE1n relacionados\
@@ -4858,7 +4642,6 @@ objects:
         attacker or conduct a more thorough investigation'
       translations:
         fr:
-          name: null
           description: "Les incidents sont cat\xE9goris\xE9s et prioris\xE9s"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner et cat\xE9goriser\
             \ les incidents en fonction du type d'incident (par exemple, violation\
@@ -4869,7 +4652,6 @@ objects:
             \ n\xE9cessit\xE9 de se remettre rapidement d'un incident et la n\xE9\
             cessit\xE9 d'observer l'attaquant ou de mener une enqu\xEAte plus approfondie"
         es:
-          name: null
           description: Se clasifican y priorizan los incidentes
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Revise y clasifique los\
             \ incidentes en funci\xF3n del tipo de incidente (por ejemplo, violaci\xF3\
@@ -4893,7 +4675,6 @@ objects:
         and external stakeholders'
       translations:
         fr:
-          name: null
           description: "Les incidents sont escalad\xE9s ou augment\xE9s selon les\
             \ besoins"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Suivre et valider l'\xE9\
@@ -4901,7 +4682,6 @@ objects:
             l\xE9vation des incidents avec les parties prenantes internes et externes\
             \ d\xE9sign\xE9es"
         es:
-          name: null
           description: "Se escalan o elevan los incidentes seg\xFAn sea necesario"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Seguimiento y validaci\xF3\
             n del estado de todos los incidentes en curso\nEx2: Coordinar la escalada\
@@ -4923,7 +4703,6 @@ objects:
         into account'
       translations:
         fr:
-          name: null
           description: "Les crit\xE8res d\u2019initiation de la reprise apr\xE8s incident\
             \ sont appliqu\xE9s"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Appliquer des crit\xE8\
@@ -4933,7 +4712,6 @@ objects:
             \ en compte l'\xE9ventuelle perturbation op\xE9rationnelle des activit\xE9\
             s de r\xE9cup\xE9ration d'incident"
         es:
-          name: null
           description: "Se aplican los criterios para iniciar la recuperaci\xF3n de\
             \ incidentes"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Aplicar criterios de recuperaci\xF3\
@@ -4955,13 +4733,11 @@ objects:
           description: "Des enqu\xEAtes sont men\xE9es pour garantir une r\xE9ponse\
             \ efficace et soutenir les activit\xE9s criminalistiques et de r\xE9cup\xE9\
             ration"
-          annotation: null
         es:
-          name: "An\xE1lisis de incidentes "
+          name: "An\xE1lisis de incidentes"
           description: "Se llevan a cabo investigaciones con el fin de garantizar\
             \ una respuesta eficaz y apoyar las actividades forenses y de recuperaci\xF3\
             n"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
       assessable: true
       depth: 3
@@ -4983,7 +4759,6 @@ objects:
         behavior'
       translations:
         fr:
-          name: null
           description: "Une analyse est effectu\xE9e pour \xE9tablir ce qui s\u2019\
             est pass\xE9 lors d\u2019un incident et la cause profonde de l\u2019incident"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : D\xE9terminez la s\xE9\
@@ -4996,7 +4771,6 @@ objects:
             \ toute technologie de cyber-tromperie pour plus d'informations sur le\
             \ comportement de l'attaquant"
         es:
-          name: null
           description: "Se realizan an\xE1lisis para determinar lo que ocurri\xF3\
             \ durante un incidente y la causa ra\xEDz del mismo"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Determine la secuencia de\
@@ -5025,7 +4799,6 @@ objects:
         being reported'
       translations:
         fr:
-          name: null
           description: "Les actions effectu\xE9es au cours d\u2019une enqu\xEAte sont\
             \ enregistr\xE9es et l\u2019int\xE9grit\xE9 et la provenance des enregistrements\
             \ sont pr\xE9serv\xE9es"
@@ -5038,7 +4811,6 @@ objects:
             \ de pr\xE9server l'int\xE9grit\xE9 de la documentation et les sources\
             \ de toutes les informations signal\xE9es"
         es:
-          name: null
           description: "Se registran las acciones realizadas durante una investigaci\xF3\
             n y se preservan la integridad y la procedencia de los registros"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Exigir a cada respondedor\
@@ -5062,7 +4834,6 @@ objects:
         preservation and chain-of-custody procedures'
       translations:
         fr:
-          name: null
           description: "Les donn\xE9es et m\xE9tadonn\xE9es relatives aux incidents\
             \ sont collect\xE9es, et leur int\xE9grit\xE9 et leur provenance sont\
             \ pr\xE9serv\xE9es"
@@ -5072,7 +4843,6 @@ objects:
             \ heure de la collecte) en fonction des proc\xE9dures de pr\xE9servation\
             \ des preuves et de la cha\xEEne de possession"
         es:
-          name: null
           description: Se recopilan los datos y metadatos del incidente y se preservan
             su integridad y su procedencia
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Recopilar, preservar y salvaguardar\
@@ -5094,7 +4864,6 @@ objects:
         and evidence of persistence'
       translations:
         fr:
-          name: null
           description: "L\u2019ampleur d\u2019un incident est estim\xE9e et valid\xE9\
             e"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner d'autres cibles\
@@ -5103,7 +4872,6 @@ objects:
             \ outils sur les cibles pour rechercher des indicateurs de compromission\
             \ et des preuves de persistance"
         es:
-          name: null
           description: Se estima y valida la magnitud de un incidente.
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Revisar otros posibles objetivos\
             \ del incidente para buscar indicadores de compromiso y evidencia de persistencia\n\
@@ -5123,13 +4891,11 @@ objects:
           description: "Les activit\xE9s de r\xE9ponse sont coordonn\xE9es avec les\
             \ parties prenantes internes et externes, comme l\u2019exigent les lois,\
             \ les r\xE9glementations ou les politiques"
-          annotation: null
         es:
-          name: "Notificaci\xF3n y comunicaci\xF3n de la respuesta al incidente "
+          name: "Notificaci\xF3n y comunicaci\xF3n de la respuesta al incidente"
           description: "Las actividades de respuesta se coordinan con las partes interesadas\
             \ internas y externas, seg\xFAn lo exijan las leyes, las normativas o\
             \ las pol\xEDticas"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
       assessable: true
       depth: 3
@@ -5150,7 +4916,6 @@ objects:
         on criteria in the incident response plan and management approval'
       translations:
         fr:
-          name: null
           description: "Les parties prenantes internes et externes sont inform\xE9\
             es des incidents"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -5164,7 +4929,6 @@ objects:
             \ crit\xE8res du plan d'intervention en cas d'incident et de l'approbation\
             \ de la direction"
         es:
-          name: null
           description: Se notifican los incidentes a las partes interesadas internas
             y externas
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -5204,7 +4968,6 @@ objects:
         its critical suppliers'
       translations:
         fr:
-          name: null
           description: "Les informations sont partag\xE9es avec des parties prenantes\
             \ internes et externes d\xE9sign\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
@@ -5220,7 +4983,6 @@ objects:
             \ ses fournisseurs\nEx6 : Coordonner les m\xE9thodes de communication\
             \ de crise entre l'organisation et ses fournisseurs critiques"
         es:
-          name: null
           description: "La informaci\xF3n se comparte con las partes interesadas internas\
             \ y externas designadas"
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
@@ -5248,12 +5010,10 @@ objects:
           name: "Att\xE9nuation des incidents"
           description: "Les activit\xE9s sont r\xE9alis\xE9es pour emp\xEAcher l\u2019\
             expansion d\u2019un \xE9v\xE9nement et att\xE9nuer ses effets"
-          annotation: null
         es:
-          name: "Mitigaci\xF3n de incidentes "
+          name: "Mitigaci\xF3n de incidentes"
           description: "Se llevan a cabo actividades a fin de evitar la expansi\xF3\
             n de un incidente y mitigar sus efectos"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
       assessable: true
       depth: 3
@@ -5278,7 +5038,6 @@ objects:
         local area network (VLAN)'
       translations:
         fr:
-          name: null
           description: Les incidents sont contenus
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
             \ partie\nEx1 : Les technologies de cybers\xE9curit\xE9 (par exemple,\
@@ -5293,7 +5052,6 @@ objects:
             \ l'organisation\nEx4 : Transfert automatique des points de terminaison\
             \ compromis vers un r\xE9seau local virtuel (VLAN) de conversion"
         es:
-          name: null
           description: Se contienen los incidentes
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
             Ex1: Las tecnolog\xEDas de ciberseguridad (por ejemplo, software antivirus)\
@@ -5327,7 +5085,6 @@ objects:
         eradication actions on behalf of the organization'
       translations:
         fr:
-          name: null
           description: "Les incidents sont \xE9radiqu\xE9s"
           annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
             \ partie\nEx1 : Les technologies de cybers\xE9curit\xE9 et les fonctionnalit\xE9\
@@ -5339,7 +5096,6 @@ objects:
             \ (par exemple, un fournisseur de services de s\xE9curit\xE9 g\xE9r\xE9\
             s) \xE0 effectuer des actions d'\xE9radication au nom de l'organisation"
         es:
-          name: null
           description: Se erradican los incidentes
           annotation: "1\xBA: Riesgo de 1\xAA parte\n3\xBA: Riesgo de 3\xAA parte\n\
             Ex1: Las tecnolog\xEDas de ciberseguridad y las caracter\xEDsticas de\
@@ -5362,12 +5118,10 @@ objects:
           name: "R\xC9CUP\xC9RER"
           description: "Les actifs et les op\xE9rations affect\xE9s par un incident\
             \ de cybers\xE9curit\xE9 sont restaur\xE9s"
-          annotation: null
         es:
           name: RECUPERAR
           description: "Se restauran los activos y las operaciones afectados por un\
             \ incidente de seguridad cibern\xE9tica"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp
       assessable: false
       depth: 2
@@ -5382,13 +5136,11 @@ objects:
           description: "Les activit\xE9s de restauration sont effectu\xE9es pour garantir\
             \ la disponibilit\xE9 op\xE9rationnelle des syst\xE8mes et services affect\xE9\
             s par les incidents de cybers\xE9curit\xE9"
-          annotation: null
         es:
           name: "Ejecuci\xF3n del Plan de Recuperaci\xF3n de Incidentes"
           description: "Se realizan actividades de restauraci\xF3n que garantizan\
             \ la disponibilidad operativa de los sistemas y servicios afectados por\
             \ incidentes de seguridad cibern\xE9tica"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
       assessable: true
       depth: 3
@@ -5405,7 +5157,6 @@ objects:
         plans'
       translations:
         fr:
-          name: null
           description: "La partie r\xE9cup\xE9ration du plan de r\xE9ponse aux incidents\
             \ est ex\xE9cut\xE9e une fois lanc\xE9e \xE0 partir du processus de r\xE9\
             ponse aux incidents."
@@ -5416,7 +5167,6 @@ objects:
             \ des autorisations requises pour mettre en \u0153uvre chaque aspect des\
             \ plans."
         es:
-          name: null
           description: "La parte de recuperaci\xF3n del plan de respuesta a incidentes\
             \ se ejecuta una vez que se inicia desde el proceso de respuesta a incidentes"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Iniciar procedimientos de\
@@ -5439,7 +5189,6 @@ objects:
         needs and resources'
       translations:
         fr:
-          name: null
           description: "Les actions de r\xE9cup\xE9ration sont s\xE9lectionn\xE9es,\
             \ d\xE9limit\xE9es, prioris\xE9es et ex\xE9cut\xE9es"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : S\xE9lectionner les actions\
@@ -5448,7 +5197,6 @@ objects:
             \ : Modifier les mesures de r\xE9tablissement pr\xE9vues en fonction d'une\
             \ r\xE9\xE9valuation des besoins et des ressources organisationnelles"
         es:
-          name: null
           description: "Se seleccionan, delimitan, priorizan y llevan a cabo las acciones\
             \ de recuperaci\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Seleccione las acciones\
@@ -5469,7 +5217,6 @@ objects:
         and other integrity issues before use'
       translations:
         fr:
-          name: null
           description: "L\u2019int\xE9grit\xE9 des sauvegardes et autres actifs de\
             \ restauration est v\xE9rifi\xE9e avant de les utiliser pour la restauration"
           annotation: "1er : Risque de 1\xE8re partie\nEx1 : V\xE9rifiez les ressources\
@@ -5477,7 +5224,6 @@ objects:
             \ corruption de fichiers et d'autres probl\xE8mes d'int\xE9grit\xE9 avant\
             \ de les utiliser"
         es:
-          name: null
           description: "Se verifica la integridad de las copias de seguridad y otros\
             \ activos de restauraci\xF3n antes de usarlos para la restauraci\xF3n"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Compruebe los activos de\
@@ -5503,7 +5249,6 @@ objects:
         the restoration'
       translations:
         fr:
-          name: null
           description: "Les fonctions critiques de la mission et la gestion des risques\
             \ de cybers\xE9curit\xE9 sont consid\xE9r\xE9es pour \xE9tablir des normes\
             \ op\xE9rationnelles apr\xE8s incident."
@@ -5516,7 +5261,6 @@ objects:
             \ normales\nEx3 : Surveiller le rendement des syst\xE8mes restaur\xE9\
             s pour v\xE9rifier la pertinence de la restauration"
         es:
-          name: null
           description: "Se tienen en cuenta las funciones cr\xEDticas de la misi\xF3\
             n y la gesti\xF3n de riesgos de seguridad cibern\xE9tica para establecer\
             \ normas operativas posteriores al incidente"
@@ -5544,7 +5288,6 @@ objects:
         before putting a restored system online'
       translations:
         fr:
-          name: null
           description: "L\u2019int\xE9grit\xE9 des actifs restaur\xE9s est v\xE9rifi\xE9\
             e, les syst\xE8mes et services sont restaur\xE9s et l\u2019\xE9tat de\
             \ fonctionnement normal est confirm\xE9"
@@ -5554,7 +5297,6 @@ objects:
             Ex2 : V\xE9rifier l'exactitude et l'ad\xE9quation des actions de restauration\
             \ entreprises avant de mettre en ligne un syst\xE8me restaur\xE9"
         es:
-          name: null
           description: Se verifica la integridad de los activos restaurados, se restauran
             los sistemas y servicios y se confirma el estado operativo normal
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Compruebe los activos restaurados\
@@ -5577,7 +5319,6 @@ objects:
         Ex2: Declare the end of incident recovery once the criteria are met'
       translations:
         fr:
-          name: null
           description: "La fin de la reprise apr\xE8s incident est d\xE9clar\xE9e\
             \ sur la base de crit\xE8res et la documentation relative \xE0 l\u2019\
             incident est compl\xE9t\xE9e."
@@ -5587,7 +5328,6 @@ objects:
             Ex2 : D\xE9clarer la fin de la reprise d'incident une fois les crit\xE8\
             res remplis"
         es:
-          name: null
           description: "Se declara el fin de la recuperaci\xF3n del incidente sobre\
             \ la base de criterios y se completa la documentaci\xF3n relacionada con\
             \ el incidente"
@@ -5609,12 +5349,10 @@ objects:
           name: "Communication de r\xE9cup\xE9ration apr\xE8s incident"
           description: "Les activit\xE9s de restauration sont coordonn\xE9es avec\
             \ les parties internes et externes"
-          annotation: null
         es:
-          name: "Comunicaci\xF3n de la recuperaci\xF3n del incidente "
+          name: "Comunicaci\xF3n de la recuperaci\xF3n del incidente"
           description: "Se coordinan las actividades de restauraci\xF3n con las partes\
             \ internas y externas"
-          annotation: null
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
       assessable: true
       depth: 3
@@ -5639,7 +5377,6 @@ objects:
         suppliers'
       translations:
         fr:
-          name: null
           description: "Les activit\xE9s de r\xE9cup\xE9ration et les progr\xE8s r\xE9\
             alis\xE9s dans la restauration des capacit\xE9s op\xE9rationnelles sont\
             \ communiqu\xE9s aux parties prenantes internes et externes d\xE9sign\xE9\
@@ -5655,7 +5392,6 @@ objects:
             \ l'organisation et ses fournisseurs\nEx4 : Coordonner la communication\
             \ de crise entre l'organisation et ses fournisseurs critiques"
         es:
-          name: null
           description: "Las actividades de recuperaci\xF3n y los progresos en el restablecimiento\
             \ de las capacidades operativas se comunican a las partes interesadas\
             \ internas y externas designadas"
@@ -5685,7 +5421,6 @@ objects:
         a recurrence'
       translations:
         fr:
-          name: null
           description: "Les mises \xE0 jour publiques sur la r\xE9cup\xE9ration apr\xE8\
             s incident sont partag\xE9es \xE0 l\u2019aide de m\xE9thodes et de messages\
             \ approuv\xE9s."
@@ -5695,7 +5430,6 @@ objects:
             es.\nEx2 : Expliquer les mesures prises pour se remettre de l'incident\
             \ et \xE9viter qu'il ne se reproduise"
         es:
-          name: null
           description: "Las actualizaciones p\xFAblicas sobre la recuperaci\xF3n del\
             \ incidente se comparten mediante el uso de m\xE9todos y mensajes aprobados"
           annotation: "1\xBA: Riesgo de 1\xAA parte\nEx1: Siga los procedimientos\
