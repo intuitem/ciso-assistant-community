@@ -1417,8 +1417,7 @@ traffic in a 10-minute period on a specific port;
 o 
 access to systems and applications: three or more account lockouts within 15 minutes;
 o 
-privileged access: two or more instances of privilege escalation (e.g. normal user to admin) within
-24 hours (23);
+privileged access: two or more instances of privilege escalation (e.g. normal user to admin) within 24 hours (23);
 o 
 antivirus: malware is detected on multiple endpoints within a short timeframe;
 o 
@@ -1950,8 +1949,7 @@ Procedures for how to communicate the incident to the relevant authorities and t
 • 
 Procedures for how to communicate the incident to customers or how and when to involve a supplier (if
 applicable).
-3.5.4. The relevant entities shall log incident response activities in accordance with the procedures referred to in point
-3.2.1. and record evidence.
+3.5.4. The relevant entities shall log incident response activities in accordance with the procedures referred to in point 3.2.1. and record evidence.
 GUIDANCE
 • 
 Log incident response information which contains (indicative, non-exhaustive list):
