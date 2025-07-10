@@ -1263,7 +1263,7 @@
 	"likelihoodHelpText": "Estimation de la faisabilité ou de la probabilité qu’un risque se réalise",
 	"studyAssetHelpText": "Biens primaires (valeur métier) et supports relatifs à l'objet étudié",
 	"fearedEventHelpText": "Les événements redoutés doivent formuler / traduire les craintes des métiers",
-	"fearedEventAssetHelpText": "Biens primaires (valeur métier) affectés par l'évènement redouté",
+	"fearedEventAssetHelpText": "Les événements redoutés sont généralement liés aux valeurs métier (biens primaires). Les biens supports sont autorisés ici pour plus de flexibilité.",
 	"fearedEventQualificationHelpText": "Catégories d'impacts possibles",
 	"fearedEventIsSelectedHelpText": "Sélection de l'événement redouté pour l'étude",
 	"riskOriginHelpText": "Élément, personne, groupe de personnes ou organisation susceptible de générer un risque",

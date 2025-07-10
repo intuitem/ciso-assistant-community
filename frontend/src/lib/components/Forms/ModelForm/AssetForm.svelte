@@ -131,6 +131,14 @@
 	multiple
 	{form}
 	optionsEndpoint="assets"
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
 	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"
 	pathField="path"

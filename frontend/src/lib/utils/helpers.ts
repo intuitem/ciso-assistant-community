@@ -97,3 +97,85 @@ export function isDark(hexcolor: string): boolean {
 	const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 	return brightness < 128;
 }
+
+// Get the search key from an option object or the option itself
+// if it's a string or number
+export const getSearchTarget = (opt: Option): string => {
+	// Handle primitive values (string/number)
+	if (typeof opt === 'string' || typeof opt === 'number') {
+		return String(opt).trim();
+	}
+
+	// Handle non-object types
+	if (!opt || typeof opt !== 'object') {
+		return '';
+	}
+
+	// Validate object structure
+	if (opt.label === undefined) {
+		const opt_str = JSON.stringify(opt);
+		console.error(`MultiSelect option ${opt_str} is an object but has no label key`);
+		return '';
+	}
+
+	// Build searchable components
+	const components: string[] = [];
+
+	// Add path information (hierarchical context)
+	if (opt.path && Array.isArray(opt.path)) {
+		const pathString = opt.path
+			.filter(Boolean) // Remove empty/null values
+			.map((item) => String(item).trim())
+			.join(' ');
+		if (pathString) {
+			components.push(pathString);
+		}
+	}
+
+	// Add main label (primary searchable content)
+	const mainLabel = String(opt.label || '').trim();
+	if (mainLabel) {
+		components.push(mainLabel);
+	}
+
+	// Add translated label if different from main label
+	if (opt.translatedLabel && opt.translatedLabel !== opt.label) {
+		const translatedLabel = String(opt.translatedLabel).trim();
+		if (translatedLabel && translatedLabel !== mainLabel) {
+			components.push(translatedLabel);
+		}
+	}
+
+	// Add value if it's different from label (for ID-based searches)
+	if (opt.value !== undefined && opt.value !== opt.label) {
+		const valueString = String(opt.value).trim();
+		if (valueString && valueString !== mainLabel) {
+			components.push(valueString);
+		}
+	}
+
+	// Add info string content
+	if (opt.infoString?.string) {
+		const infoString = String(opt.infoString.string).trim();
+		if (infoString) {
+			components.push(infoString);
+		}
+	}
+
+	// Combine all components with spaces
+	const searchTarget = components.join(' ');
+
+	// Normalize the search target
+	return normalizeSearchString(searchTarget);
+};
+
+// Helper function to normalize search strings for better matching
+export function normalizeSearchString(str: string): string {
+	return str
+		.toLowerCase()
+		.normalize('NFD') // Decompose accented characters
+		.replace(/\p{Diacritic}/gu, '') // Remove combining marks (diacritics)
+		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
+		.replace(/\s+/g, ' ') // Collapse multiple spaces
+		.trim();
+}
