@@ -170,7 +170,7 @@ export const getSearchTarget = (opt: Option): string => {
 };
 
 // Helper function to normalize search strings for better matching
-function normalizeSearchString(str: string): string {
+export function normalizeSearchString(str: string): string {
 	return str
 		.toLowerCase()
 		.normalize('NFD') // Decompose accented characters
@@ -179,21 +179,3 @@ function normalizeSearchString(str: string): string {
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
 }
-
-// Enhanced AutocompleteSelect search function
-export const SmartSearch = (searchText: string) => {
-	if (!searchText) return () => true;
-
-	const normalizedSearch = normalizeSearchString(searchText);
-	const searchTerms = normalizedSearch.split(' ').filter(Boolean);
-
-	return (opt: Option): boolean => {
-		const target = getSearchTarget(opt);
-
-		// If no search terms, show all
-		if (searchTerms.length === 0) return true;
-
-		// All search terms must match (AND logic)
-		return searchTerms.every((term) => target.includes(term));
-	};
-};

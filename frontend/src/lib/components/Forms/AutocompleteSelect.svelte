@@ -3,7 +3,7 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { SmartSearch } from '$lib/utils/helpers';
+	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -352,6 +352,25 @@
 			updateMissingConstraint(field, false);
 		}
 	});
+
+	const searchTargetMap = $derived(new Map(options.map((opt) => [opt, getSearchTarget(opt)])));
+
+	const fastFilter = (opt: Option, searchText: string) => {
+		if (!searchText) {
+			return true;
+		}
+
+		const target = searchTargetMap.get(opt) || '';
+
+		const normalizedSearch = normalizeSearchString(searchText);
+		const searchTerms = normalizedSearch.split(' ').filter(Boolean);
+
+		if (searchTerms.length === 0) {
+			return true;
+		}
+
+		return searchTerms.every((term) => target.includes(term));
+	};
 </script>
 
 <div class={baseClass} {hidden}>
@@ -397,7 +416,7 @@
 			{allowUserOptions}
 			duplicates={false}
 			key={JSON.stringify}
-			filterFunc={(opt, searchText) => SmartSearch(searchText)(opt)}
+			filterFunc={fastFilter}
 		>
 			{#snippet option({ option })}
 				{#if option.infoString?.position === 'prefix'}
