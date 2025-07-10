@@ -1736,5 +1736,6 @@
 	"ebiosReconnaissance": "Reconnaissance",
 	"ebiosInitialAccess": "Initial Access",
 	"ebiosDiscovery": "Discovery",
-	"ebiosExploitation": "Exploitation"
+	"ebiosExploitation": "Exploitation",
+  "ebiosOperationalScenarioHelp": "Attack paths provide a high-level description of how a strategic scenario (from workshop 3) could unfold. While a strategic scenario may have multiple attack paths, each path translates into one operational scenario in workshop 4. You can then break down each operational scenario into multiple operating modes that combine elementary actions to describe a complete kill chain."
 }
