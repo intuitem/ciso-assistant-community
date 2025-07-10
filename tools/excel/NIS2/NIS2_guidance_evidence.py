@@ -301,7 +301,7 @@ def main():
     records = extract_records(lines)
 
     df = pd.DataFrame(records)
-    output_file = input_file.with_name(input_file.stem + "_output.xlsx")
+    output_file = input_file.with_name("NIS2_guidance_evidence_output.xlsx")
     df.to_excel(output_file, index=False)
     print(f"✅ Excel file saved to: {output_file}")
 
