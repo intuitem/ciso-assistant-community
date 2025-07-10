@@ -23,8 +23,29 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context = {}
+		context = {},
+		updated_fields = new Set()
 	}: Props = $props();
+
+	async function fetchDefaultRefId(operationalScenarioId: string) {
+		try {
+			const response = await fetch(
+				`/operating-modes/default-ref-id/?operational_scenario=${operationalScenarioId}`
+			);
+			console.log(response)
+			const result = await response.json();
+			if (response.ok && result.results) {
+				form.form.update((currentData) => {
+					updated_fields.add('ref_id');
+					return { ...currentData, ref_id: result.results };
+				});
+			} else {
+				console.error(result.error || 'Failed to fetch default ref_id');
+			}
+		} catch (error) {
+			console.error('Error fetching default ref_id:', error);
+		}
+	}
 </script>
 
 {#if context !== 'selectElementaryActions'}
@@ -36,6 +57,8 @@
 		bind:cachedValue={formDataCache['operational_scenario']}
 		label={m.operationalScenario()}
 		hidden
+		onChange={async (e) => fetchDefaultRefId(e)}
+		mount={async (e) => fetchDefaultRefId(e)}
 	/>
 	<TextField
 		{form}

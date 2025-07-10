@@ -732,6 +732,14 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         return OperationalScenario.format_likelihood(
             self.likelihood, self.parsed_matrix
         )
+    
+    @classmethod
+    def get_default_ref_id(cls, operational_scenario):
+        """return associated risk assessment id"""
+        opertaing_modes_ref_ids = [x.ref_id for x in operational_scenario.operating_modes.all()]
+        nb_opertaing_modes = len(opertaing_modes_ref_ids) + 1
+        candidates = [f"MO.{i:01d}" for i in range(1, nb_opertaing_modes + 1)]
+        return next(x for x in candidates if x not in opertaing_modes_ref_ids)
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):

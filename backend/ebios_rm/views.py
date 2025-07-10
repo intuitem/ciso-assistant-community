@@ -22,6 +22,9 @@ from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
 
+import structlog
+logger = structlog.get_logger(__name__)
+
 LONG_CACHE_TTL = 60  # mn
 
 
@@ -302,6 +305,36 @@ class OperatingModeViewSet(BaseModelViewSet):
         )
         choices = undefined | _choices
         return Response(choices)
+    
+    def _perform_write(self, serializer):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("operational_scenario"):
+            operational_scenario = serializer.validated_data["operational_scenario"]
+            ref_id = OperatingMode.get_default_ref_id(operational_scenario)
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
+    
+    @action(
+        detail=False, methods=["get"]
+    )
+    def default_ref_id(self, request):
+        operational_scenario_id = request.query_params.get("operational_scenario")
+        if not operational_scenario_id:
+            return Response(
+                {"error": "Missing 'operational_scenario' parameter."}, status=400
+            )
+        try:
+            operational_scenario = OperationalScenario.objects.get(pk=operational_scenario_id)
+
+            # Use the class method to compute the default ref_id
+            default_ref_id = OperatingMode.get_default_ref_id(operational_scenario)
+            return Response({"results": default_ref_id})
+        except Exception as e:
+            logger.error("Error in default_ref_id: %s", str(e))
+            return Response(
+                {"error": "Error in default_ref_id has occurred."}, status=400
+            )
 
 
 class KillChainViewSet(BaseModelViewSet):
