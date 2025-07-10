@@ -2,6 +2,7 @@
 	import { GraphLayoutType, GraphNodeShape } from '@unovis/ts';
 	import GraphComponent from './OperatingModeGraph.svelte';
 
+	import { m } from '$paraglide/messages';
 	const data = {
 		nodes: [
 			{ id: 'blk-00', label: 'space is cool, really really cool', group: 'grp0', icon: '&#xf0c2;' },
