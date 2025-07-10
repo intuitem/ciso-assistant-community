@@ -156,6 +156,14 @@
 		optionsEndpoint="assets"
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		field="assets"
 		label={m.assets()}
 	/>
