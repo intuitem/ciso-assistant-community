@@ -1002,8 +1002,8 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'threat']
 	},
 	'operating-modes': {
-		head: ['ref_id', 'likelihood'],
-		body: ['ref_id', 'likelihood']
+		head: ['ref_id', 'name', 'likelihood'],
+		body: ['ref_id', 'name', 'likelihood']
 	},
 	'kill-chains': {
 		head: ['elementary_action', 'attack_stage', 'antecedents'],

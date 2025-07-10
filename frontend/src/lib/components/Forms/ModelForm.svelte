@@ -436,6 +436,7 @@
 				{formDataCache}
 				{initialData}
 				{context}
+				{object}
 			/>
 		{:else if URLModel === 'security-exceptions'}
 			<SecurityExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />

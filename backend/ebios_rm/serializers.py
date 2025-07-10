@@ -322,6 +322,8 @@ class AttackPathImportExportSerializer(BaseModelSerializer):
 
 
 class OperationalScenarioWriteSerializer(BaseModelSerializer):
+    quotation_method = serializers.CharField(read_only=True)
+
     class Meta:
         model = OperationalScenario
         exclude = ["created_at", "updated_at", "folder"]
@@ -402,6 +404,7 @@ class OperatingModeReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     elementary_actions = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
+    ebios_rm_study = FieldsRelatedField()
 
     class Meta:
         model = OperatingMode

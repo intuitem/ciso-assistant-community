@@ -7,6 +7,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -77,6 +78,14 @@
 	});
 </script>
 
+<Anchor
+	breadcrumbAction="push"
+	href={`/ebios-rm/${data.data.ebios_rm_study.id}`}
+	class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+>
+	<i class="fa-solid fa-arrow-left"></i>
+	<p>{m.goBackToEbiosRmStudy()}</p>
+</Anchor>
 <DetailView {data} displayModelTable={false} />
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white w-full">

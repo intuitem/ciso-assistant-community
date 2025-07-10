@@ -24,7 +24,7 @@
 
 	let { data }: Props = $props();
 
-	const operationalScenario = data.data;
+	const operationalScenario = $derived(data.data);
 
 	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));
 

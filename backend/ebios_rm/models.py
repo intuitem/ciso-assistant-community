@@ -1,6 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 from auditlog.registry import auditlog
 
@@ -313,6 +315,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         AMATEUR = "amateur", _("Amateur")
         AVENGER = "avenger", _("Avenger")
         PATHOLOGICAL = "pathological", _("Pathological")
+        OTHER = "other", _("Other")
 
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
@@ -632,6 +635,91 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         return self.ro_to_couple.get_gravity()
 
 
+class ElementaryAction(NameDescriptionMixin, FolderMixin):
+    class Icon(models.TextChoices):
+        SERVER = "server", "Server"
+        COMPUTER = "computer", "Computer"
+        CLOUD = "cloud", "Cloud"
+        FILE = "file", "File"
+        DIAMOND = "diamond", "Diamond"
+        PHONE = "phone", "Phone"
+        CUBE = "cube", "Cube"
+        BLOCKS = "blocks", "Blocks"
+        SHAPES = "shapes", "Shapes"
+        NETWORK = "network", "Network"
+        DATABASE = "database", "Database"
+        KEY = "key", "Key"
+
+    ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
+    threat = models.ForeignKey(
+        Threat,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Threat"),
+        related_name="elementary_actions",
+        help_text=_("Threat that the elementary action is derived from"),
+        null=True,
+        blank=True,
+    )
+    icon = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        choices=Icon.choices,
+        verbose_name="Icon",
+        help_text="Icon representing the elementary action",
+    )
+
+    fields_to_check = ["name"]
+
+
+class OperatingMode(NameDescriptionMixin, FolderMixin):
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="Reference ID"
+    )
+    operational_scenario = models.ForeignKey(
+        "OperationalScenario",
+        verbose_name=_("Operational scenario"),
+        on_delete=models.CASCADE,
+        related_name="operating_modes",
+    )
+    elementary_actions = models.ManyToManyField(
+        ElementaryAction,
+        verbose_name=_("Elementary actions"),
+        related_name="operating_modes",
+        help_text=_("Elementary actions that are part of the operating mode"),
+        blank=True,
+    )
+    likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
+
+    fields_to_check = ["name", "operational_scenario", "ref_id"]
+
+    class Meta:
+        verbose_name = "Operating Mode"
+        verbose_name_plural = "Operating Modes"
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.operational_scenario.folder
+        super().save(*args, **kwargs)
+
+    @property
+    def ebios_rm_study(self):
+        return self.operational_scenario.ebios_rm_study
+
+    @property
+    def risk_matrix(self):
+        return self.operational_scenario.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
+    def get_likelihood_display(self):
+        return OperationalScenario.format_likelihood(
+            self.likelihood, self.parsed_matrix
+        )
+
+
 class OperationalScenario(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
@@ -661,6 +749,10 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+
+    @property
+    def quotation_method(self):
+        return self.ebios_rm_study.quotation_method
 
     class Meta:
         verbose_name = _("Operational scenario")
@@ -759,86 +851,33 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             "value": risk_index,
         }
 
+    @receiver([post_save, post_delete], sender=OperatingMode)
+    def update_likelihood_from_operating_modes(sender, instance, **kwargs):
+        if instance.operational_scenario.ebios_rm_study.quotation_method != "express":
+            return
 
-class ElementaryAction(NameDescriptionMixin, FolderMixin):
-    class Icon(models.TextChoices):
-        SERVER = "server", "Server"
-        COMPUTER = "computer", "Computer"
-        CLOUD = "cloud", "Cloud"
-        FILE = "file", "File"
-        DIAMOND = "diamond", "Diamond"
-        PHONE = "phone", "Phone"
-        CUBE = "cube", "Cube"
-        BLOCKS = "blocks", "Blocks"
-        SHAPES = "shapes", "Shapes"
-        NETWORK = "network", "Network"
-        DATABASE = "database", "Database"
-        KEY = "key", "Key"
-
-    ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
-    threat = models.ForeignKey(
-        Threat,
-        on_delete=models.SET_NULL,
-        verbose_name=_("Threat"),
-        related_name="elementary_actions",
-        help_text=_("Threat that the elementary action is derived from"),
-        null=True,
-        blank=True,
-    )
-    icon = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        choices=Icon.choices,
-        verbose_name="Icon",
-        help_text="Icon representing the elementary action",
-    )
-
-    fields_to_check = ["name"]
-
-
-class OperatingMode(NameDescriptionMixin, FolderMixin):
-    ref_id = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="Reference ID"
-    )
-    operational_scenario = models.ForeignKey(
-        OperationalScenario,
-        verbose_name=_("Operational scenario"),
-        on_delete=models.CASCADE,
-        related_name="operating_modes",
-    )
-    elementary_actions = models.ManyToManyField(
-        ElementaryAction,
-        verbose_name=_("Elementary actions"),
-        related_name="operating_modes",
-        help_text=_("Elementary actions that are part of the operating mode"),
-        blank=True,
-    )
-    likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
-
-    fields_to_check = ["operational_scenario", "ref_id"]
-
-    class Meta:
-        verbose_name = "Operating Mode"
-        verbose_name_plural = "Operating Modes"
-        ordering = ["created_at"]
-
-    def save(self, *args, **kwargs):
-        self.folder = self.operational_scenario.folder
-        super().save(*args, **kwargs)
-
-    @property
-    def risk_matrix(self):
-        return self.operational_scenario.risk_matrix
-
-    @property
-    def parsed_matrix(self):
-        return self.risk_matrix.parse_json_translated()
-
-    def get_likelihood_display(self):
-        return OperationalScenario.format_likelihood(
-            self.likelihood, self.parsed_matrix
+        max_likelihood = (
+            instance.operational_scenario.operating_modes.aggregate(
+                max_l=models.Max("likelihood")
+            )["max_l"]
+            if instance.operational_scenario.operating_modes.exists()
+            else -1
         )
+
+        instance.operational_scenario.likelihood = max_likelihood
+        instance.operational_scenario.save(update_fields=["likelihood"])
+
+    @receiver(post_save, sender=EbiosRMStudy)
+    def update_scenarios_likelihood_on_quotation_method_change(
+        sender, instance, **kwargs
+    ):
+        if instance.quotation_method != "express":
+            return
+
+        for scenario in instance.operational_scenarios.all():
+            scenario.update_likelihood_from_operating_modes(
+                instance=scenario.operating_modes.first()
+            )
 
 
 class KillChain(AbstractBaseModel, FolderMixin):

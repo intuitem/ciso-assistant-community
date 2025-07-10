@@ -152,7 +152,7 @@
 			</span>
 			<span class="text-sm text-gray-500"
 				>{m.quotationMethodSemiColon()}
-				{safeTranslate(ebiosRmStudy.quotation_method)}
+				<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method)}</span>
 			</span>
 		</div>
 		<div
