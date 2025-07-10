@@ -18,6 +18,12 @@ def is_useless_line(line):
     )
 
 def format_text(text):
+    # Handle the specific case '; and  ' (Square Bullet)
+    text = re.sub(r"; and\s+\s+", r"; and\n        * ", text)
+
+    # Handle sub-bullets starting with '' (Square Bullet) after :, ; or .
+    text = re.sub(r"(?<=[:;.\)])\s+\s+", r"\n        * ", text)
+    
     # Handle the specific case '; and o '
     text = re.sub(r"; and o\s+", r"; and\n    o ", text, flags=re.IGNORECASE)
     
@@ -43,6 +49,7 @@ def append_footnotes_to_cell(text, footnotes_dict):
                 text += "\n"
             text += f"\n({num}) {footnotes_dict[num]}"
             added_notes.add(num)
+            del footnotes_dict[num]
     return text
 
 def extract_records(lines):
@@ -93,6 +100,8 @@ def extract_records(lines):
                         while i < len(lines):
                             line = clean_line(lines[i])
                             if is_page_marker(line):
+                                if current_number:
+                                    footnotes[current_number] = format_text(footnotes[current_number])
                                 in_footnotes = False
                                 current_number = None
                                 break  # stop reading footnotes at page marker
@@ -103,6 +112,8 @@ def extract_records(lines):
                             
                             match = re.match(r"^\((\d+)\)\s*(.*)", line)
                             if match:
+                                if current_number:
+                                    footnotes[current_number] = format_text(footnotes[current_number])
                                 current_number = match.group(1)
                                 content = match.group(2)
                                 footnotes[current_number] = content.strip()
