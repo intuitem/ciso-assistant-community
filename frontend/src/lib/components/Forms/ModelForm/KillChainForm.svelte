@@ -39,6 +39,15 @@
 	{form}
 	optionsEndpoint="elementary-actions"
 	optionsDetailedUrlParameters={[['operating_mode_available_actions', initialData['operating_mode']]]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'attack_stage',
+				translate: true
+			}
+		],
+		classes: 'text-yellow-700'
+	}}
 	field="elementary_action"
 	cacheLock={cacheLocks['elementary_action']}
 	bind:cachedValue={formDataCache['elementary_action']}
@@ -56,6 +65,15 @@
 	{form}
 	optionsEndpoint="elementary-actions"
 	optionsDetailedUrlParameters={[['operating_modes', initialData['operating_mode']]]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'attack_stage',
+				translate: true
+			}
+		],
+		classes: 'text-yellow-700'
+	}}
 	multiple
 	field="antecedents"
 	cacheLock={cacheLocks['antecedents']}

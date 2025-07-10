@@ -264,7 +264,7 @@ class ElementaryActionFilter(df.FilterSet):
         used_elementary_actions = KillChain.objects.filter(
             operating_mode=operating_mode
         ).values_list('elementary_action', flat=True)
-        return queryset.exclude(id__in=used_elementary_actions)
+        return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
         
 
     class Meta:
