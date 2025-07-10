@@ -38,7 +38,9 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="elementary-actions"
-	optionsDetailedUrlParameters={[['operating_mode_available_actions', initialData['operating_mode']]]}
+	optionsDetailedUrlParameters={[
+		['operating_mode_available_actions', initialData['operating_mode']]
+	]}
 	optionsInfoFields={{
 		fields: [
 			{

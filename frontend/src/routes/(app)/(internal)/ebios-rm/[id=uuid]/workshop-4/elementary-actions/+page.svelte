@@ -29,7 +29,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model,
+				model: data.model
 			}
 		};
 		let modal: ModalSettings = {

@@ -82,7 +82,7 @@
 				<div>
 					<ol class="relative text-gray-500 border-s border-gray-200">
 						{#each steps as step, i}
-							<li class="flex flex-row justify-between mb-10 ms-6">
+							<li class="flex flex-row justify-between items-start gap-8 mb-10 ms-6">
 								{#if createRiskAnalysis && i === 0}
 									{@render addRiskAnalysis?.()}
 								{:else if !step.disabled}
