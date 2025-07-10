@@ -58,8 +58,8 @@ def extract_records(lines):
             tips_wrote_for_guidance = False
             tips_wrote_for_evidence = False
 
-            # If it's X.X.X → read inner blocks
             if ref_id.count('.') == 2:
+                # case X.X.X (unchanged)
                 in_tips = False
                 i += 1
                 while i < len(lines):
@@ -72,12 +72,10 @@ def extract_records(lines):
                     # Switch section
                     if line.upper().startswith("GUIDANCE"):
                         mode = "guidance"
-                        # in_tips = False
                         i += 1
                         continue
                     elif line.upper().startswith("EXAMPLES OF EVIDENCE"):
                         mode = "evidence"
-                        # in_tips = False
                         i += 1
                         continue
                     elif line.upper().startswith("TIPS"):
@@ -112,8 +110,83 @@ def extract_records(lines):
                     "typical_evidence": current_evidence.strip()
                 })
                 continue  # don't increment i again
+
+            elif ref_id.count('.') == 1:
+                # New case : ref_id = X.X and NOT followed by X.X.X.
+                # Peek next non-useless line to check if starts with X.X.X.
+                peek_i = i + 1
+                while peek_i < len(lines) and is_useless_line(clean_line(lines[peek_i])):
+                    peek_i += 1
+
+                if peek_i < len(lines):
+                    next_line = clean_line(lines[peek_i])
+                    if not re.match(r"^\d+(\.\d+){2}(\.)?\s", next_line):
+                        # It's the special case: X.X followed by guidance / evidence blocks without X.X.X
+                        in_tips = False
+                        i += 1
+                        while i < len(lines):
+                            line = clean_line(lines[i])
+
+                            if is_useless_line(line):
+                                i += 1
+                                continue
+
+                            # Switch section
+                            if line.upper().startswith("GUIDANCE"):
+                                mode = "guidance"
+                                i += 1
+                                continue
+                            elif line.upper().startswith("EXAMPLES OF EVIDENCE"):
+                                mode = "evidence"
+                                i += 1
+                                continue
+                            elif line.upper().startswith("TIPS"):
+                                in_tips = True
+                                i += 1
+                                continue
+                            elif re.match(r"^(\d+(\.\d+){0,2})(\.)?\s", line):
+                                break  # next reference
+
+                            # Add content
+                            if mode == "guidance":
+                                if in_tips and not tips_wrote_for_guidance:
+                                    current_annotation += "\n\n[TIPS]\n" + line
+                                    tips_wrote_for_guidance = True
+                                else:
+                                    current_annotation += " " + line
+                            elif mode == "evidence":
+                                if in_tips and not tips_wrote_for_evidence:
+                                    current_evidence += "\n\n[TIPS]\n" + line
+                                    tips_wrote_for_evidence = True
+                                else:
+                                    current_evidence += " " + line
+                            i += 1
+
+                        current_annotation = format_text(current_annotation)
+                        current_evidence = format_text(current_evidence)
+
+                        records.append({
+                            "ref_id": current_ref,
+                            "annotation": current_annotation.strip(),
+                            "typical_evidence": current_evidence.strip()
+                        })
+                        continue  # don't increment i again
+                    else:
+                        # next line is X.X.X, treat as simple X.X ref (no inner blocks)
+                        records.append({
+                            "ref_id": current_ref,
+                            "annotation": "",
+                            "typical_evidence": ""
+                        })
+                else:
+                    # no next line, treat as simple X.X ref
+                    records.append({
+                        "ref_id": current_ref,
+                        "annotation": "",
+                        "typical_evidence": ""
+                    })
             else:
-                # Simple reference X. or X.X
+                # simple reference X. or others without inner blocks
                 records.append({
                     "ref_id": current_ref,
                     "annotation": "",
