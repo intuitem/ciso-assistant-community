@@ -1698,5 +1698,7 @@
 	"ebiosInitialAccess": "Rentrer",
 	"ebiosDiscovery": "Trouver",
 	"ebiosExploitation": "Exploiter",
-  "ebiosOperationalScenarioHelp": "Les chemins d'attaque fournissent une description de haut niveau de la façon dont un scénario stratégique (de l'atelier 3) pourrait se dérouler. Bien qu'un scénario stratégique puisse avoir plusieurs chemins d'attaque, chaque chemin se traduit par un scénario opérationnel dans l'atelier 4. Vous pouvez ensuite décomposer chaque scénario opérationnel en plusieurs modes opératoires qui combinent des actions élémentaires pour décrire une chaîne de cyberattaque complète."
+  "ebiosOperationalScenarioHelp": "Les chemins d'attaque fournissent une description de haut niveau de la façon dont un scénario stratégique (de l'atelier 3) pourrait se dérouler. Bien qu'un scénario stratégique puisse avoir plusieurs chemins d'attaque, chaque chemin se traduit par un scénario opérationnel dans l'atelier 4. Vous pouvez ensuite décomposer chaque scénario opérationnel en plusieurs modes opératoires qui combinent des actions élémentaires pour décrire une chaîne de cyberattaque complète.",
+  "moVisual": "visuel"
+
 }

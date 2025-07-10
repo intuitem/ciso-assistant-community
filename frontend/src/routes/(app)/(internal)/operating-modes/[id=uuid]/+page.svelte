@@ -86,7 +86,18 @@
 	<i class="fa-solid fa-arrow-left"></i>
 	<p>{m.goBackToEbiosRmStudy()}</p>
 </Anchor>
-<DetailView {data} displayModelTable={false} />
+<DetailView {data} displayModelTable={false}>
+	{#snippet actions()}
+		<div class="flex flex-col space-y-2">
+			<Anchor
+				href={`${page.url.pathname}/visual`}
+				class="btn preset-filled-primary-500 h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-diagram-project mr-2"></i>{m.moVisual()}</Anchor
+			>
+		</div>
+	{/snippet}
+</DetailView>
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white w-full">
 		<Tabs
