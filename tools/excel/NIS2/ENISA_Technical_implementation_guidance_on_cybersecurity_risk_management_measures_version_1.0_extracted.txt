@@ -5700,7 +5700,7 @@ malicious software detection and on the risks and consequences of using unauthor
 Offer employees contact points and resources for additional advice.
 • 
 To implement the awareness raising programme, consult available sources, such as those from national
-or international cybersecurity organisations, ENISA’s AR-in-a-Box ( 78 ) and the Cybersecurity Skills
+or international cybersecurity organisations, ENISA’s AR-in-a-Box (78) and the Cybersecurity Skills
 Academy (79).
 EXAMPLES OF EVIDENCE
 • 
