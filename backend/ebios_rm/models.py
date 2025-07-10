@@ -738,7 +738,7 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         """return associated risk assessment id"""
         opertaing_modes_ref_ids = [x.ref_id for x in operational_scenario.operating_modes.all()]
         nb_opertaing_modes = len(opertaing_modes_ref_ids) + 1
-        candidates = [f"MO.{i:01d}" for i in range(1, nb_opertaing_modes + 1)]
+        candidates = [f"MO.{i:02d}" for i in range(1, nb_opertaing_modes + 1)]
         return next(x for x in candidates if x not in opertaing_modes_ref_ids)
 
 
