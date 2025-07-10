@@ -91,7 +91,7 @@
 			optionsEndpoint="attack-paths?is_selected=true&used=false"
 			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 			field="attack_path"
-			label={m.attackPath()}
+			label={m.attackPath() + ` (${m.strategicScenario()})`}
 		/>
 	{/if}
 </div>
