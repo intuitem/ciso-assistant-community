@@ -515,7 +515,7 @@
 									form={scoreForms[requirementAssessment.id]}
 									min_score={complianceAssessment.min_score}
 									max_score={complianceAssessment.max_score}
-									scores_definition={complianceAssessment.scores_definition}
+									scores_definition={data.scores.scores_definition}
 									field="score"
 									label={complianceAssessment.show_documentation_score
 										? m.implementationScore()
@@ -551,7 +551,7 @@
 										form={docScoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
-										scores_definition={complianceAssessment.scores_definition}
+										scores_definition={data.scores.scores_definition}
 										field="documentation_score"
 										label={m.documentationScore()}
 										isDoc={true}

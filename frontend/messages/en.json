@@ -116,6 +116,7 @@
 	"csfFunction": "CSF Function",
 	"eta": "ETA",
 	"referenceControl": "Reference control",
+	"referenceControlHelpText": "This serves as a template and would override some fields values (category, CSF function, etc.)",
 	"appliedControl": "Applied control",
 	"provider": "Provider",
 	"providerColon": "Provider:",
@@ -1698,5 +1699,13 @@
 	"dataWizardParsingResults": "Parsing results:",
 	"dataWizardTemplatesAndGuidelines": "Templates and guidelines",
 	"dataWizardLoadExcelData": "Load excel data",
-	"associatedCampaigns": "Associated campaigns"
+	"inherentRisk": "Inherent Risk",
+	"inherentProba": "Inherent Probability",
+	"inherentImpact": "Inherent Impact",
+	"inherentLevel": "Inherent Level",
+	"inherentRiskLevelPerScenario": "Inherent risk level per scenario",
+	"inherentRiskLevel": "Inherent risk level",
+	"inherentRiskLevelHelpText": "The inherent risk level is the risk level before any controls are applied",
+	"associatedCampaigns": "Associated campaigns",
+	"recentlyUpdatedAudits": "Recently updated audits"
 }

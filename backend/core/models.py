@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Self, Union, List
 import statistics
 
+from django.utils import timezone
 from icecream import ic
 from auditlog.registry import auditlog
 
@@ -3394,6 +3395,21 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Owner"),
         related_name="risk_scenarios",
     )
+    # inherent
+    inherent_proba = models.SmallIntegerField(
+        default=-1, verbose_name=_("inherent probability")
+    )
+    inherent_impact = models.SmallIntegerField(
+        default=-1, verbose_name=_("inherent impact")
+    )
+    inherent_level = models.SmallIntegerField(
+        default=-1,
+        verbose_name=_("inherent level"),
+        help_text=_(
+            "The risk level if no measures are applied. Automatically updated on Save, based on the chosen risk matrix"
+        ),
+    )
+
     # current
     current_proba = models.SmallIntegerField(
         default=-1, verbose_name=_("Current probability")
@@ -3478,95 +3494,69 @@ class RiskScenario(NameDescriptionMixin):
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
-    def get_current_risk(self):
-        if self.current_level < 0:
-            return {
+    def _get_risk_data(self, value: int, data_key: str):
+        """
+        A generic helper method to retrieve and format risk-related data.
+
+        Args:
+            value (int): The risk level, impact, or probability value.
+            data_key (str): The key to access in the risk matrix ('risk', 'impact', or 'probability').
+        """
+        # Handle the "not rated" case
+        if value < 0:
+            not_rated_response = {
                 "abbreviation": "--",
                 "name": "--",
                 "description": "not rated",
-                "hexcolor": "#A9A9A9",
                 "value": -1,
             }
+            # Add hexcolor only for the main risk level
+            if data_key == "risk":
+                not_rated_response["hexcolor"] = "#A9A9A9"
+            return not_rated_response
+
+        # Handle the rated case
         risk_matrix = self.get_matrix()
-        current_risk = {
-            **risk_matrix["risk"][self.current_level],
-            "value": self.current_level,
+        data = {
+            **risk_matrix[data_key][value],
+            "value": value,
         }
-        update_translations_in_object(current_risk)
-        return current_risk
+
+        # Apply translations only for the main risk level
+        if data_key == "risk":
+            update_translations_in_object(data)
+
+        return data
+
+    # --- Inherent Methods ---
+    def get_inherent_risk(self):
+        return self._get_risk_data(self.inherent_level, "risk")
+
+    def get_inherent_impact(self):
+        return self._get_risk_data(self.inherent_impact, "impact")
+
+    def get_inherent_proba(self):
+        return self._get_risk_data(self.inherent_proba, "probability")
+
+    # --- Current Methods ---
+    def get_current_risk(self):
+        return self._get_risk_data(self.current_level, "risk")
 
     def get_current_impact(self):
-        if self.current_impact < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["impact"][self.current_impact],
-            "value": self.current_impact,
-        }
+        return self._get_risk_data(self.current_impact, "impact")
 
     def get_current_proba(self):
-        if self.current_proba < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["probability"][self.current_proba],
-            "value": self.current_proba,
-        }
+        return self._get_risk_data(self.current_proba, "probability")
 
+    # --- Residual Methods ---
     def get_residual_risk(self):
-        if self.residual_level < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "hexcolor": "#A9A9A9",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        residual_risk = {
-            **risk_matrix["risk"][self.residual_level],
-            "value": self.residual_level,
-        }
-        update_translations_in_object(residual_risk)
-        return residual_risk
+        return self._get_risk_data(self.residual_level, "risk")
 
     def get_residual_impact(self):
-        if self.residual_impact < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["impact"][self.residual_impact],
-            "value": self.residual_impact,
-        }
+        return self._get_risk_data(self.residual_impact, "impact")
 
     def get_residual_proba(self):
-        if self.residual_proba < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["probability"][self.residual_proba],
-            "value": self.residual_proba,
-        }
+        return self._get_risk_data(self.residual_proba, "probability")
 
     def get_strength_of_knowledge(self):
         if self.strength_of_knowledge < 0:
@@ -3577,6 +3567,14 @@ class RiskScenario(NameDescriptionMixin):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def save(self, *args, **kwargs):
+        if self.inherent_proba >= 0 and self.inherent_impact >= 0:
+            self.inherent_level = risk_scoring(
+                self.inherent_proba,
+                self.inherent_impact,
+                self.risk_assessment.risk_matrix,
+            )
+        else:
+            self.inherent_level = -1
         if self.current_proba >= 0 and self.current_impact >= 0:
             self.current_level = risk_scoring(
                 self.current_proba,
@@ -4601,6 +4599,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
+
+        self.compliance_assessment.updated_at = timezone.now()
+        self.compliance_assessment.save(update_fields=["updated_at"])
+
         self.compliance_assessment.upsert_daily_metrics()
 
 

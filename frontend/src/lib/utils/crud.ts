@@ -116,6 +116,8 @@ interface SelectField {
 	formNestedField?: string;
 }
 
+type FeatureFlag = string;
+
 export interface ModelMapEntry {
 	name: string;
 	localName: string;
@@ -124,6 +126,7 @@ export interface ModelMapEntry {
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
 	listViewUrlParams?: string;
+	flaggedFields?: Record<string, FeatureFlag>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
@@ -149,7 +152,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
-			{ field: 'folder', urlModel: 'entities' }
+			{ field: 'folder', urlModel: 'entities' },
+			{ field: 'folder', urlModel: 'assets' }
 		]
 	},
 	perimeters: {
@@ -223,6 +227,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'riskScenarios',
 		verboseName: 'Risk scenario',
 		verboseNamePlural: 'Risk scenarios',
+		flaggedFields: {
+			inherent_proba: 'inherent_risk',
+			inherent_impact: 'inherent_risk',
+			inherent_level: 'inherent_risk'
+		},
 		foreignKeyFields: [
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
@@ -1105,8 +1114,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
-			{ field: 'findings', urlModel: 'evidences' },
-			{ field: 'findings', urlModel: 'applied-controls' }
+			{ field: 'findings', urlModel: 'applied-controls' },
+			{ field: 'findings', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
