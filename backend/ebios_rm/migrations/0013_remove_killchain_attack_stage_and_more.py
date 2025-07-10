@@ -2,12 +2,6 @@
 
 from django.db import migrations, models
 
-def modify_all_ebiosrmstudy(apps, schema_editor):
-    EbiosRmStudy = apps.get_model('ebios_rm', 'EbiosRmStudy')
-    for study in EbiosRmStudy.objects.all():
-        study.meta.workshops[3].steps.insert(0, {'status': 'to_do'})
-        study.save()
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -23,6 +17,5 @@ class Migration(migrations.Migration):
             model_name='elementaryaction',
             name='attack_stage',
             field=models.SmallIntegerField(choices=[(0, 'know'), (1, 'enter'), (2, 'discover'), (3, 'exploit')], default=0, help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')", verbose_name='Attack Stage'),
-        ),
-        migrations.RunPython(modify_all_ebiosrmstudy)
+        )
     ]

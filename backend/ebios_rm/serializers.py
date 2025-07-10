@@ -425,9 +425,6 @@ class KillChainWriteSerializer(BaseModelSerializer):
         if attack_stage == ElementaryAction.AttackStage.KNOW and antecedents:
             raise serializers.ValidationError("Antecedents cannot be selected in attack stage 'Know'.")
         
-        if attack_stage != ElementaryAction.AttackStage.KNOW and not antecedents:
-            raise serializers.ValidationError("Antecedents must be selected for attack stages other than 'Know'.")
-        
         if elementary_action in antecedents:
             raise serializers.ValidationError("An elementary action cannot be its own antecedent.")
         
