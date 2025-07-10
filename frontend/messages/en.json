@@ -1158,8 +1158,9 @@
 	"ebiosWs3_1": "Map the ecosystem",
 	"ebiosWs3_2": "Develop strategic scenarios",
 	"ebiosWs3_3": "Define security measures for the ecosystem",
-	"ebiosWs4_2": "Develop operational scenarios",
-	"ebiosWs4_3": "Evaluate the likelihood of operational scenarios",
+	"ebiosWs4_0": "Prepare elementary actions",
+	"ebiosWs4_1": "Develop operational scenarios",
+	"ebiosWs4_2": "Evaluate the likelihood of operational scenarios",
 	"ebiosWs5_1": "Generate the risk assessment",
 	"ebiosWs5_2": "Decide on risk treatment strategy",
 	"ebiosWs5_3": "Define security measures",
@@ -1735,6 +1736,5 @@
 	"ebiosReconnaissance": "Reconnaissance",
 	"ebiosInitialAccess": "Initial Access",
 	"ebiosDiscovery": "Discovery",
-	"ebiosExploitation": "Exploitation",
-	"ebiosWs4_1": "Prepare elementary actions"
+	"ebiosExploitation": "Exploitation"
 }
