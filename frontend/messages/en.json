@@ -1158,8 +1158,8 @@
 	"ebiosWs3_1": "Map the ecosystem",
 	"ebiosWs3_2": "Develop strategic scenarios",
 	"ebiosWs3_3": "Define security measures for the ecosystem",
-	"ebiosWs4_1": "Develop operational scenarios",
-	"ebiosWs4_2": "Evaluate the likelihood of operational scenarios",
+	"ebiosWs4_2": "Develop operational scenarios",
+	"ebiosWs4_3": "Evaluate the likelihood of operational scenarios",
 	"ebiosWs5_1": "Generate the risk assessment",
 	"ebiosWs5_2": "Decide on risk treatment strategy",
 	"ebiosWs5_3": "Define security measures",
@@ -1280,8 +1280,8 @@
 	"ebiosWs2_3_tooltip": "You need at least one RO/TO couple to select it",
 	"ebiosWs3_2_tooltip": "You need at least one selected RO/TO couple to elaborate a strategic scenario",
 	"ebiosWs3_3_tooltip": "You need at least one Stakeholder to define associated security measures",
-	"ebiosWs4_1_tooltip": "You need at least one selected Attack Path from a Strategic Scenario to elaborate an operational scenario",
-	"ebiosWs4_2_tooltip": "You need at least one Operational Scenario to evaluate its likelihood",
+	"ebiosWs4_2_tooltip": "You need at least one selected Attack Path from a Strategic Scenario to elaborate an operational scenario",
+	"ebiosWs4_3_tooltip": "You need at least one Operational Scenario to evaluate its likelihood",
 	"ebiosWs5_tooltip": "No risk assessment has been conducted yet",
 	"govern": "Govern",
 	"identify": "Identify",
@@ -1736,5 +1736,5 @@
 	"ebiosInitialAccess": "Initial Access",
 	"ebiosDiscovery": "Discovery",
 	"ebiosExploitation": "Exploitation",
-	"ebiosWs4_0": "Prepare elementary actions"
+	"ebiosWs4_1": "Prepare elementary actions"
 }
