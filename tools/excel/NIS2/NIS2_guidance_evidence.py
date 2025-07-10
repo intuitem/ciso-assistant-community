@@ -185,8 +185,34 @@ def extract_records(lines):
                                 continue
 
                             if re.match(r"^\(\d+\)", line):
-                                while i < len(lines) and not is_page_marker(clean_line(lines[i])):
+                                # Begin collecting footnotes until next page marker
+                                in_footnotes = True
+                                current_number = None
+                                
+                                while i < len(lines):
+                                    line = clean_line(lines[i])
+                                    if is_page_marker(line):
+                                        if current_number:
+                                            footnotes[current_number] = format_text(footnotes[current_number])
+                                        in_footnotes = False
+                                        current_number = None
+                                        break  # stop reading footnotes at page marker
+                                    
+                                    if re.match(r"^\d+$", line):
+                                        i += 1
+                                        continue  # IGNORE lines with only a number
+                                    
+                                    match = re.match(r"^\((\d+)\)\s*(.*)", line)
+                                    if match:
+                                        if current_number:
+                                            footnotes[current_number] = format_text(footnotes[current_number])
+                                        current_number = match.group(1)
+                                        content = match.group(2)
+                                        footnotes[current_number] = content.strip()
+                                    elif current_number:
+                                        footnotes[current_number] += " " + line
                                     i += 1
+                                    
                                 continue
 
                             if line.upper().startswith("GUIDANCE"):
@@ -252,7 +278,6 @@ def extract_records(lines):
 
         i += 1
 
-    # print(footnotes)
     # Add footnotes
     for record in records:
         record["annotation"] = append_footnotes_to_cell(record["annotation"], footnotes)
