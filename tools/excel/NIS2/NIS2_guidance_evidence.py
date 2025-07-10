@@ -131,7 +131,7 @@ def extract_records(lines):
                         mode = "evidence"
                         i += 1
                         continue
-                    elif line.startswith("TIPS"):
+                    elif line.startswith("TIPS") or line.startswith("TIP"):
                         in_tips = True
                         i += 1
                         continue
@@ -215,15 +215,15 @@ def extract_records(lines):
                                     
                                 continue
 
-                            if line.upper().startswith("GUIDANCE"):
+                            if line.startswith("GUIDANCE"):
                                 mode = "guidance"
                                 i += 1
                                 continue
-                            elif line.upper().startswith("EXAMPLES OF EVIDENCE"):
+                            elif line.startswith("EXAMPLES OF EVIDENCE"):
                                 mode = "evidence"
                                 i += 1
                                 continue
-                            elif line.upper().startswith("TIPS"):
+                            elif line.startswith("TIPS") or line.startswith("TIP"):
                                 in_tips = True
                                 i += 1
                                 continue
