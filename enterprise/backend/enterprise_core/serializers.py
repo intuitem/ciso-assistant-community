@@ -92,6 +92,8 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
     favicon_hash = serializers.CharField()
     logo = serializers.SerializerMethodField()
     favicon = serializers.SerializerMethodField()
+    logo_mime_type = serializers.CharField()
+    favicon_mime_type = serializers.CharField()
 
     def get_logo(self, obj):
         if obj.logo:
