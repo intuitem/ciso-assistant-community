@@ -1293,7 +1293,7 @@
 	"likelihoodHelpText": "Estimate of the feasibility or probability of a risk occurring",
 	"studyAssetHelpText": "Primary (business asset) and supporting assets relating to the object under study",
 	"fearedEventHelpText": "The feared events must express/translate the fears of the business",
-	"fearedEventAssetHelpText": "Primary asset (business value) affected by the feared event",
+	"fearedEventAssetHelpText": "Feared events are typically linked to business values (primary assets). Supporting assets are allowed here for flexibility.",
 	"fearedEventQualificationHelpText": "Possible impact categories",
 	"fearedEventIsSelectedHelpText": "Selection of the feared event for the study",
 	"riskOriginHelpText": "Element, person, group of persons or organisation likely to generate a risk",
