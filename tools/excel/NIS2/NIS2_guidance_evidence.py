@@ -17,6 +17,19 @@ def is_useless_line(line):
         or re.match(r"^\d+$", stripped)
     )
 
+def format_text(text):
+    # Handle the specific case '; and o '
+    text = re.sub(r"; and o\s+", r"; and\n    o ", text, flags=re.IGNORECASE)
+    
+    # Handle sub-bullets starting with 'o' after :, ; or .
+    text = re.sub(r"(?<=[:;.\)])\s+o\s+", r"\n    o ", text)
+    
+    # Add line break before each bullet point
+    text = re.sub(r"•", r"\n•", text)
+    
+    return text
+
+
 def extract_records(lines):
     records = []
     current_ref = None
@@ -76,18 +89,22 @@ def extract_records(lines):
 
                     # Add content
                     if mode == "guidance":
-                        if in_tips and tips_wrote_for_guidance == False:
-                            current_annotation += "\n[TIPS]\n" + line
+                        if in_tips and not tips_wrote_for_guidance:
+                            current_annotation += "\n\n[TIPS]\n" + line
                             tips_wrote_for_guidance = True
                         else:
                             current_annotation += " " + line
                     elif mode == "evidence":
-                        if in_tips and tips_wrote_for_evidence == False:
-                            current_evidence += "\n[TIPS]\n" + line
+                        if in_tips and not tips_wrote_for_evidence:
+                            current_evidence += "\n\n[TIPS]\n" + line
                             tips_wrote_for_evidence = True
                         else:
                             current_evidence += " " + line
                     i += 1
+                    
+                # Apply formatting at the end, on the full accumulated text
+                current_annotation = format_text(current_annotation)
+                current_evidence = format_text(current_evidence)
 
                 records.append({
                     "ref_id": current_ref,
