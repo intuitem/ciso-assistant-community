@@ -1077,8 +1077,8 @@ TECHNICAL IMPLEMENTATION GUIDANCE
 June 2025, version 1.0
 • 
 Set up a categorisation system for incidents, which refers to the scheme that the entity uses to identify the
-consequences and the priority of an incident, together with the criteria for categorising events as incidents
-(18). An indicative, non-exhaustive list of criteria might include one or more of the following:
+consequences and the priority of an incident, together with the criteria for categorising events as incidents(18). 
+An indicative, non-exhaustive list of criteria might include one or more of the following:
 o 
 impact on business operations,
 o 
@@ -1234,7 +1234,7 @@ o
 make sure that personnel are properly trained to handle and manage incidents;
 o 
 identify and consider all external stakeholders (e.g. operators, technology suppliers, free and
-open source ( 20) project contacts, national competent authorities or CSIRTs) necessary for
+open source (20) project contacts, national competent authorities or CSIRTs) necessary for
 incident handling.
 • 
 Changes in the policy should be communicated to the relevant personnel.
@@ -1500,7 +1500,7 @@ o
 Use authenticated NTP to prevent malicious entities from tampering with your time
 synchronization.
 o 
-Configure a central time server within the entity ( 25). This server should synchronize with a
+Configure a central time server within the entity (25). This server should synchronize with a
 reliable external time source and then distribute the time to all other systems within the network.
 o 
 Use multiple time sources to avoid a single point of failure.
@@ -2130,7 +2130,7 @@ CRISIS MANAGEMENT
 maintain a business continuity and disaster recovery plan to apply in the case of incidents.
 GUIDANCE
 • 
-Take into account industry-recognised standards when developing the business continuity ( 35) and
+Take into account industry-recognised standards when developing the business continuity (35) and
 disaster recovery plan.
 • 
 Create a list of natural disasters (e.g. hurricane, fire, flooding) and other occurrences (e.g. human error)
@@ -3093,7 +3093,7 @@ coordinated security risk assessments of critical supply chains carried out in a
 GUIDANCE
 • 
 Take into account any recommendations or guidance on supply chain security, published by the NIS
-Cooperation Group, established by the NIS2 Directive, Article 14 ( 42) and by the national competent
+Cooperation Group, established by the NIS2 Directive, Article 14 (42) and by the national competent
 authorities.
 (42) ‘NIS Cooperation Group’, https://digital-strategy.ec.europa.eu/en/policies/nis-cooperation-group.
 67
@@ -4564,7 +4564,7 @@ Hotfix deployments are used for critical patches that need to be applied immedia
 severe issues.
 • 
 Where appropriate and to reduce risks related to significant updates in important dependencies, consider
-performing a trial using release candidates ( 60) of these components, to get an early indication of
+performing a trial using release candidates (60) of these components, to get an early indication of
 incompatibilities or breaking changes, so they may be remedied. If any of these components are open
 source software, offer feedback about any issues found during this trial.
 EXAMPLES OF EVIDENCE
@@ -5011,7 +5011,7 @@ Risk assessments that justify the segmentation decisions.
 • 
 Interviews with IT and security staff to understand the rationale behind network segmentation.
 • 
-Up-to-date network diagrams showing segmentation into different networks or zones (e.g. DMZ ( 70),
+Up-to-date network diagrams showing segmentation into different networks or zones (e.g. DMZ (70),
 internal networks and guest networks).
 • 
 Verification that the diagrams align with business functions and risk profiles.
@@ -5820,7 +5820,7 @@ automated processes and tools. Part of this training should include notifying IT
 failures in automated processes and tools.
 o 
 Train relevant personnel in crisis management and business continuity procedures. Incorporate
-simulated events ( 82) into crisis management training to facilitate an effective response by
+simulated events (82) into crisis management training to facilitate an effective response by
 personnel in crisis situations.
 o 
 Train relevant personnel (e.g. system administrators and software developers) in the secure
@@ -6875,7 +6875,7 @@ access control policy referred to in point 11.1 of the Annex to the regulation (
 the necessary authority to carry out activities that require privileged access and based on the minimum
 requirement for their functional roles).
 • 
-Identify users who need privileged access  ( 91) to a network and information system (e.g. operating
+Identify users who need privileged access  (91) to a network and information system (e.g. operating
 systems, database management systems and applications). This should include any privileged physical
 access to, e.g. cryptographic codes, keys or devices and in line with point 13.3 of the Annex to the
 regulation.
@@ -7442,7 +7442,7 @@ authentication mechanisms for accessing the entities’ network and information 
 accordance with the classification of the asset to be accessed.
 GUIDANCE
 • 
-Select appropriate MFA ( 97)  methods and continuous authentication mechanisms based on the entity’s
+Select appropriate MFA (97)  methods and continuous authentication mechanisms based on the entity’s
 security needs and depending on the classification of the asset. It is also good practice to consider user
 convenience when selecting and implementing a solution:
 o 
