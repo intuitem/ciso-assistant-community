@@ -23,6 +23,8 @@ from core.validators import (
 from iam.models import FolderMixin, User
 from tprm.models import Entity
 
+from django.core.exceptions import ValidationError
+
 INITIAL_META = {
     "workshops": [
         {
@@ -891,6 +893,26 @@ class KillChain(AbstractBaseModel, FolderMixin):
         DISCOVER = "discover", "Discover"
         EXPLOIT = "exploit", "Exploit"
 
+        @classmethod
+        def compare_stages(cls, stage1, stage2):
+            """
+            Compare two attack stages and return their relative order.
+            Returns:
+                -1 if stage1 is earlier than stage2
+                 0 if stage1 is the same as stage2
+                 1 if stage1 is later than stage2
+            """
+            stages_order = [cls.KNOW, cls.ENTER, cls.DISCOVER, cls.EXPLOIT]
+            index1 = stages_order.index(stage1)
+            index2 = stages_order.index(stage2)
+
+            if index1 < index2:
+                return 1
+            elif index1 > index2:
+                return -1
+            else:
+                return 0
+
     operating_mode = models.ForeignKey(
         OperatingMode, on_delete=models.CASCADE, related_name="kill_chain_steps"
     )
@@ -930,11 +952,18 @@ class KillChain(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
     def clean(self):
-        from django.core.exceptions import ValidationError
+        existing = KillChain.objects.filter(
+            operating_mode=self.operating_mode,
+            elementary_action=self.elementary_action,
+        )
+        if self.pk:
+            existing = existing.exclude(pk=self.pk)
 
-        if self.elementary_action in self.antecedents.all():
-            raise ValidationError("An elementary action cannot be its own antecedent.")
-
+        if existing.exists():
+            raise ValidationError(
+                {'elementary_action':f"The elementary action '{self.elementary_action}' is already used in this operating mode's kill chain."}
+            )
+    
     def __str__(self):
         return f"KillChain: {self.attack_stage} - {self.elementary_action.ref_id}"
 

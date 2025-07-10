@@ -353,7 +353,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get write data")
     def object(self, request, pk):
         serializer_class = self.get_serializer_class(action="update")
-        print(serializer_class)
 
         return Response(serializer_class(super().get_object()).data)
 

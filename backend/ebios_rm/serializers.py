@@ -415,6 +415,42 @@ class KillChainWriteSerializer(BaseModelSerializer):
     class Meta:
         model = KillChain
         exclude = ["created_at", "updated_at", "folder"]
+    
+    def validate(self, attrs):
+        elementary_action = attrs.get("elementary_action")
+        antecedents = attrs.get("antecedents", [])
+        attack_stage = attrs.get("attack_stage")
+        
+        if attack_stage == KillChain.AttackStage.KNOW and antecedents:
+            raise serializers.ValidationError("Antecedents cannot be selected in attack stage 'Know'.")
+        
+        if elementary_action in antecedents:
+            raise serializers.ValidationError("An elementary action cannot be its own antecedent.")
+        
+        if antecedents:
+            for antecedent in antecedents:
+                if not KillChain.objects.filter(
+                    operating_mode=attrs.get("operating_mode"),
+                    elementary_action=antecedent
+                ).exists():
+                    raise serializers.ValidationError(
+                        f"Antecedent '{antecedent}' has not been used in the operating mode yet"
+                    )
+
+                antecedent_kill_chain = KillChain.objects.filter(
+                    operating_mode=attrs.get("operating_mode"),
+                    elementary_action=antecedent
+                ).first()
+
+                if antecedent_kill_chain and KillChain.AttackStage.compare_stages(
+                    antecedent_kill_chain.attack_stage, attack_stage) < 1:
+                    raise serializers.ValidationError(
+                        {'attack_stage': f"The attack stage needs to be after the attack stage '{antecedent_kill_chain.attack_stage}' of the antecedent '{antecedent}'"}
+                    )
+        
+
+        
+        return super().validate(attrs)
 
 
 class KillChainReadSerializer(BaseModelSerializer):
