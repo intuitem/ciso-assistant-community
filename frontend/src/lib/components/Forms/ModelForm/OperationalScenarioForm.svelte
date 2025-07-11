@@ -30,8 +30,6 @@
 
 	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
 
-	console.log(object);
-
 	let activeActivity: string | null = $state(null);
 	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {

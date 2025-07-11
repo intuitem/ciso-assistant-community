@@ -32,7 +32,6 @@
 			const response = await fetch(
 				`/operating-modes/default-ref-id/?operational_scenario=${operationalScenarioId}`
 			);
-			console.log(response);
 			const result = await response.json();
 			if (response.ok && result.results) {
 				form.form.update((currentData) => {

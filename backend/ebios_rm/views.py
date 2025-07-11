@@ -21,7 +21,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
-from icecream import ic
 
 import structlog
 
@@ -297,7 +296,7 @@ class OperatingModeViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get likelihood choices")
     def likelihood(self, request, pk):
-        instance: AttackPath = self.get_object()
+        instance: OperatingMode = self.get_object()
         undefined = dict([(-1, "--")])
         _choices = dict(
             zip(

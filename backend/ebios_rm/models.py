@@ -179,7 +179,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         default=QuotationMethod.MANUAL,
         verbose_name=_("Quotation method"),
         help_text=_(
-            "Method used to quote the study (e.g., 'fixed price', 'time and material')"
+            "Method used to quote the study: 'manual' for manual likelihood assessment, 'express' for automatic propagation from operating modes"
         ),
     )
 
@@ -767,12 +767,12 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
     @classmethod
     def get_default_ref_id(cls, operational_scenario):
         """return associated risk assessment id"""
-        opertaing_modes_ref_ids = [
+        operating_modes_ref_ids = [
             x.ref_id for x in operational_scenario.operating_modes.all()
         ]
-        nb_opertaing_modes = len(opertaing_modes_ref_ids) + 1
-        candidates = [f"MO.{i:02d}" for i in range(1, nb_opertaing_modes + 1)]
-        return next(x for x in candidates if x not in opertaing_modes_ref_ids)
+        nb_operating_modes = len(operating_modes_ref_ids) + 1
+        candidates = [f"MO.{i:02d}" for i in range(1, nb_operating_modes + 1)]
+        return next(x for x in candidates if x not in operating_modes_ref_ids)
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):

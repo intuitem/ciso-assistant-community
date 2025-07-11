@@ -198,18 +198,17 @@
 	const onRenderComplete = (g, nodes, links, config) => {
 		g.selectAll('.custom-multiline-label').remove();
 
+		const nodeMap = new Map();
+		g.selectAll('g').each(function () {
+			const data = this.__data__;
+			if (data?.id) {
+				nodeMap.set(data.id, this);
+			}
+		});
 		nodes.forEach((node) => {
 			if (node.label) {
-				const allNodeGroups = g.selectAll('g').nodes();
-				let targetGroup = null;
-
-				for (let groupElement of allNodeGroups) {
-					const groupData = groupElement.__data__;
-					if (groupData && groupData.id === node.id) {
-						targetGroup = g.select(() => groupElement);
-						break;
-					}
-				}
+				const groupElement = nodeMap.get(node.id);
+				const targetGroup = groupElement ? g.select(() => groupElement) : null;
 
 				if (targetGroup) {
 					const lines = node.label.split('\n').filter((line) => line.trim() !== '');
@@ -221,7 +220,7 @@
 					const lineHeight = 12;
 					const totalHeight = lines.length * lineHeight;
 					const currentNodeSize = node.size ?? DEFAULT_NODE_SIZE;
-					const startY = currentNodeSize / 2 + 15;
+					const startY = 0;
 
 					lines.forEach((line, i) => {
 						targetGroup
@@ -230,7 +229,7 @@
 							.attr('text-anchor', 'middle')
 							.attr('x', 0)
 							.attr('y', startY + i * lineHeight)
-							.attr('font-size', '10px')
+							.attr('font-size', '12px')
 							.attr('fill', '#0F1E57')
 							.style('font-family', 'var(--vis-font-family)')
 							.text(line.trim());

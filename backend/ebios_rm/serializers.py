@@ -441,7 +441,7 @@ class KillChainWriteSerializer(BaseModelSerializer):
                     elementary_action=antecedent,
                 ).exists():
                     raise serializers.ValidationError(
-                        f"Antecedent '{antecedent}' has not been used in the operating mde yet"
+                        f"Antecedent '{antecedent}' has not been used in the operating mode yet"
                     )
 
                 antecedent_kill_chain = KillChain.objects.filter(
