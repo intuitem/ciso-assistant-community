@@ -137,13 +137,10 @@
 	);
 
 	const getBadgeStyles = (answers: any, questions: any) => {
-		const answeredCount = Object.values(answers || {}).filter(answer => answer !== null).length;
+		const answeredCount = Object.values(answers || {}).filter((answer) => answer !== null).length;
 		const totalCount = Object.keys(questions || {}).length;
-		const backgroundColor = answeredCount === 0
-			? '#fca5a5'
-			: answeredCount === totalCount
-				? '#bbf7d0'
-				: '#fef08a';
+		const backgroundColor =
+			answeredCount === 0 ? '#fca5a5' : answeredCount === totalCount ? '#bbf7d0' : '#fef08a';
 		return {
 			backgroundColor,
 			color: darkenColor(backgroundColor, 0.6),
