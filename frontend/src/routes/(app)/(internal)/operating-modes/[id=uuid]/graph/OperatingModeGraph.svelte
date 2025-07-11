@@ -47,6 +47,7 @@
 		height = '80vh',
 		maxLineLength = 30,
 		disableZoom = false,
+		linkFlow = false,
 		layoutType = GraphLayoutType.Parallel,
 		layoutParallelGroupSpacing = 200
 	}: {
@@ -60,6 +61,7 @@
 		height?: string;
 		maxLineLength?: number;
 		disableZoom?: boolean;
+		linkFlow?: boolean;
 		layoutType?: GraphLayoutType;
 		layoutParallelGroupSpacing?: number;
 	} = $props();
@@ -171,7 +173,6 @@
 	const nodeFill = '#FFFFFF';
 	const linkStroke = '#8FA1B9';
 	const linkArrow = GraphLinkArrowStyle.Single;
-	const linkFlow = false;
 	const linkArrowColor = '#4D179A';
 	const linkArrowSize = 8;
 

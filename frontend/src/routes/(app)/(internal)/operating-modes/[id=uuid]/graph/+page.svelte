@@ -13,6 +13,7 @@
 		links: data.data.links
 	};
 	const panelNodes = data.data.panelNodes;
+	const linkFlow = data.animated; //?animated=true
 </script>
 
 <!-- {JSON.stringify(data.data, null, 2)} -->
@@ -22,4 +23,4 @@
 >
 	<i class="fa-solid fa-arrow-left mr-2"></i>{m.returnToMo()}</a
 >
-<GraphComponent data={data2} {panelNodes} />
+<GraphComponent data={data2} {panelNodes} {linkFlow} />
