@@ -74,7 +74,6 @@
 				URLModel: URLModel
 			}
 		};
-		console.log('row', row)
 		const name =
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
