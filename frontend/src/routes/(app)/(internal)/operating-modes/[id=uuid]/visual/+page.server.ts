@@ -1,4 +1,3 @@
-
 import { BASE_API_URL } from '$lib/utils/constants';
 
 import type { PageServerLoad } from './$types';

@@ -991,7 +991,7 @@ class KillChain(AbstractBaseModel, FolderMixin):
             )
 
     def __str__(self):
-        return f"KillChain: {self.attack_stage} - {self.elementary_action.ref_id}"
+        return f"{self.operating_mode} - {self.elementary_action.name}"
 
 
 common_exclude = ["created_at", "updated_at"]

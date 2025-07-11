@@ -385,6 +385,8 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
 
 class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
+    icon_fa_class = serializers.CharField()
+    icon_fa_hex = serializers.CharField()
     threat = FieldsRelatedField()
     folder = FieldsRelatedField()
     attack_stage = serializers.CharField(source="get_attack_stage_display")
@@ -462,6 +464,7 @@ class KillChainReadSerializer(BaseModelSerializer):
     elementary_action = FieldsRelatedField()
     antecedents = FieldsRelatedField(many=True)
     attack_stage = serializers.CharField()
+    str = serializers.CharField(source="__str__")
 
     class Meta:
         model = KillChain

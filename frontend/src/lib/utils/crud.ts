@@ -1056,7 +1056,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threat', urlModel: 'threats' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'attack_stage', valueType: 'number' }, { field: 'icon' }]
+		selectFields: [{ field: 'attack_stage', valueType: 'number' }, { field: 'icon' }],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'threat' },
+			{ field: 'icon' },
+			{ field: 'attack_stage' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
 	},
 	'operating-modes': {
 		endpointUrl: 'ebios-rm/operating-modes',
@@ -1085,8 +1096,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		detailViewFields: [
-			{ field: 'id' },
-			{ field: 'folder' },
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },

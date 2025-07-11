@@ -556,6 +556,8 @@
 																{m.accept()}
 															</span>
 														</div>
+													{:else if key === 'icon_fa_class'}
+														<i class="text-lg fa {value}"></i>
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 														{#if value?.length > 300}
