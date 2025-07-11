@@ -12,9 +12,9 @@ Features:
 - Outputs the result to a .txt file.
 
 Usage (from command line):
-    python extract_pdf_text.py input.pdf
-    python extract_pdf_text.py input.pdf -o output.txt
-    python extract_pdf_text.py input.pdf --start 3 --end 10 --no-page-break
+    python simple_pdf_extractor.py input.pdf
+    python simple_pdf_extractor.py input.pdf -o output.txt
+    python simple_pdf_extractor.py input.pdf --start 3 --end 10 --no-page-break
 
 Requirements:
     pip install PyMuPDF
