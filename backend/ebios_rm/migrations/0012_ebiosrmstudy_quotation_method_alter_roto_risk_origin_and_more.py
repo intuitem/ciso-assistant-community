@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0082_riskscenario_inherent_impact_and_more"),
         ("ebios_rm", "0011_alter_roto_risk_origin"),
