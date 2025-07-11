@@ -202,7 +202,7 @@
 					const lineHeight = 12;
 					const totalHeight = lines.length * lineHeight;
 					const currentNodeSize = node.size ?? DEFAULT_NODE_SIZE;
-					const startY = currentNodeSize / 2 + 25 - totalHeight / 2 + lineHeight;
+					const startY = currentNodeSize / 2 + 15;
 
 					lines.forEach((line, i) => {
 						targetGroup

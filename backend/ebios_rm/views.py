@@ -365,10 +365,12 @@ class OperatingModeViewSet(BaseModelViewSet):
             if panel_name:
                 panel_nodes[panel_name].append(ea.id)
 
-        for step in mo.kill_chain_steps.all():
+        for step in mo.kill_chain_steps.all().order_by(
+            "elementary_action__attack_stage"
+        ):
             ea = step.elementary_action
 
-            for ant in step.antecedents.all():
+            for ant in step.antecedents.all().order_by("attack_stage"):
                 if step.logic_operator:
                     pass
                 else:
