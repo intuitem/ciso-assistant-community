@@ -56,13 +56,13 @@
 	label={m.elementaryAction()}
 	hidden={initialData.elementary_action}
 />
-<Checkbox
-	{form}
-	field="is_highlighted"
-	label={m.isHighlighted()}
-	cacheLock={cacheLocks['is_highlighted']}
-	bind:cachedValue={formDataCache['is_highlighted']}
-/>
+<!-- <Checkbox -->
+<!-- 	{form} -->
+<!-- 	field="is_highlighted" -->
+<!-- 	label={m.isHighlighted()} -->
+<!-- 	cacheLock={cacheLocks['is_highlighted']} -->
+<!-- 	bind:cachedValue={formDataCache['is_highlighted']} -->
+<!-- /> -->
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="elementary-actions"

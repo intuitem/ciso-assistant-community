@@ -860,7 +860,7 @@ export const OperatingModeSchema = z.object({
 export const KillChainSchema = z.object({
 	operating_mode: z.string().uuid(),
 	elementary_action: z.string().uuid(),
-	is_highlighted: z.boolean().default(false),
+	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
 	logic_operator: z.string().optional().nullable()
 });
