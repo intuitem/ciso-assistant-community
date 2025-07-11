@@ -1009,7 +1009,7 @@ export const listViewFields = {
 		}
 	},
 	'elementary-actions': {
-		head: ['ref_id', 'domain', 'icon', 'name', 'attack_stage', 'threat'],
+		head: ['ref_id', 'domain', '', 'name', 'attack_stage', 'threat'],
 		body: ['ref_id', 'domain', 'icon_fa_class', 'name', 'attack_stage', 'threat']
 	},
 	'operating-modes': {
