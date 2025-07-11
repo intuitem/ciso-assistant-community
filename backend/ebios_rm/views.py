@@ -353,7 +353,7 @@ class OperatingModeViewSet(BaseModelViewSet):
         }
         panel_nodes = {panel: [] for panel in panels.values()}
 
-        for ea in mo.elementary_actions.all():
+        for ea in mo.elementary_actions.all().order_by("attack_stage"):
             stage = ea.attack_stage
 
             entry = {"id": ea.id, "label": ea.name, "group": groups.get(stage)}

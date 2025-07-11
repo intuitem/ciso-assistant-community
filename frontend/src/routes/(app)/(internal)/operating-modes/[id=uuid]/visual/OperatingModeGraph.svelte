@@ -166,7 +166,7 @@
 	// Graph configuration
 	const nodeShape = (node: NodeDatum) => node.shape ?? DEFAULT_NODE_SHAPE;
 	const nodeSize = (node: NodeDatum) => node.size ?? DEFAULT_NODE_SIZE;
-	const nodeStrokeWidth = 2;
+	const nodeStrokeWidth = 1.5;
 	const nodeStroke = '#4D179A';
 	const nodeFill = '#FFFFFF';
 	const linkStroke = '#8FA1B9';
