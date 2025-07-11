@@ -3,6 +3,7 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import { getModelInfo, URL_MODEL_MAP } from './crud';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -354,6 +355,14 @@ const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'inherent_level'
+	}
+};
+
 // TODO: TEST THIS
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -578,6 +587,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
@@ -589,6 +599,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
@@ -725,8 +736,8 @@ export const listViewFields = {
 		body: ['name', 'description']
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
+		head: ['email', 'firstName', 'lastName', 'userGroups', 'keep_local_login', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'user_groups', 'keep_local_login', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -758,22 +769,12 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'framework',
-			'assets',
-			'evidences',
 			'description',
 			'perimeter',
-			'reviewProgress'
+			'reviewProgress',
+			'updated_at'
 		],
-		body: [
-			'ref_id',
-			'name',
-			'framework',
-			'assets',
-			'evidences',
-			'description',
-			'perimeter',
-			'progress'
-		],
+		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1016,7 +1017,16 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'findings_assessment',
+			'severity',
+			'owner',
+			'status',
+			'applied_controls',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1024,6 +1034,7 @@ export const listViewFields = {
 			'severity',
 			'owner',
 			'status',
+			'applied_controls',
 			'filtering_labels'
 		],
 		filters: { filtering_labels: LABELS_FILTER }
@@ -1060,6 +1071,10 @@ export const listViewFields = {
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
+	campaigns: {
+		head: ['name', 'description', 'framework', 'status'],
+		body: ['name', 'description', 'framework', 'status']
 	},
 	'task-templates': {
 		head: [

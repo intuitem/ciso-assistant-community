@@ -2,9 +2,13 @@ import csv
 import json
 import mimetypes
 import re
+from django_filters.filterset import filterset_factory
+from django_filters.utils import try_dbfield
+import regex
 import os
 import uuid
 import zipfile
+import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
@@ -97,8 +101,6 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
-    RoleCodename,
-    UserGroupCodename,
     compare_schema_versions,
     _generate_occurrences,
     _create_task_dict,
@@ -130,6 +132,7 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
+from global_settings.utils import ff_is_enabled
 
 import structlog
 
@@ -146,16 +149,68 @@ MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
 class GenericFilterSet(df.FilterSet):
+    @classmethod
+    def filter_for_lookup(cls, field, lookup_type):
+        DEFAULTS = dict(cls.FILTER_DEFAULTS)
+        if hasattr(cls, "_meta"):
+            DEFAULTS.update(cls._meta.filter_overrides)
+
+        data = try_dbfield(DEFAULTS.get, field.__class__) or {}
+        filter_class = data.get("filter_class")
+        params = data.get("extra", lambda field: {})(field)
+
+        # if there is no filter class, exit early
+        if not filter_class:
+            return None, {}
+
+        # perform lookup specific checks
+        if lookup_type == "exact" and getattr(field, "choices", None):
+            return df.MultipleChoiceFilter, {"choices": field.choices, **params}
+
+        if lookup_type == "isnull":
+            data = try_dbfield(DEFAULTS.get, models.BooleanField)
+
+            filter_class = data.get("filter_class")
+            params = data.get("extra", lambda field: {})(field)
+            return filter_class, params
+
+        if lookup_type == "in":
+
+            class ConcreteInFilter(df.BaseInFilter, filter_class):
+                pass
+
+            ConcreteInFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteInFilter, params
+
+        if lookup_type == "range":
+
+            class ConcreteRangeFilter(df.BaseRangeFilter, filter_class):
+                pass
+
+            ConcreteRangeFilter.__name__ = cls._csv_filter_class_name(
+                filter_class, lookup_type
+            )
+
+            return ConcreteRangeFilter, params
+
+        return filter_class, params
+
     class Meta:
         model = None  # This will be set dynamically via filterset_factory.
-        fields = "__all__"
         filter_overrides = {
-            models.CharField: {
-                "filter_class": df.MultipleChoiceFilter,
+            models.ForeignKey: {
+                "filter_class": df.ModelMultipleChoiceFilter,
                 "extra": lambda f: {
-                    "lookup_expr": "icontains",
-                    # If your model field defines choices, they will be used:
-                    "choices": f.choices if hasattr(f, "choices") else None,
+                    "queryset": f.remote_field.model.objects.all(),
+                },
+            },
+            models.ManyToManyField: {
+                "filter_class": df.ModelMultipleChoiceFilter,
+                "extra": lambda f: {
+                    "queryset": f.remote_field.model.objects.all(),
                 },
             },
         }
@@ -175,16 +230,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     serializers_module = "core.serializers"
 
-    # @property
-    # def filterset_class(self):
-    #     # If you have defined filterset_fields, build the FilterSet on the fly.
-    #     if self.filterset_fields:
-    #         return filterset_factory(
-    #             model=self.model,
-    #             filterset=GenericFilterSet,
-    #             fields=self.filterset_fields,
-    #         )
-    #     return None
+    @property
+    def filterset_class(self):
+        # If you have defined filterset_fields, build the FilterSet on the fly.
+        if self.filterset_fields:
+            return filterset_factory(
+                model=self.model,
+                filterset=GenericFilterSet,
+                fields=self.filterset_fields,
+            )
+        return None
 
     def get_queryset(self) -> models.query.QuerySet:
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
@@ -315,7 +370,7 @@ class PerimeterFilter(df.FilterSet):
 
     class Meta:
         model = Perimeter
-        fields = ["folder", "lc_status"]
+        fields = ["folder", "lc_status", "campaigns"]
 
 
 class PerimeterViewSet(BaseModelViewSet):
@@ -326,6 +381,7 @@ class PerimeterViewSet(BaseModelViewSet):
     model = Perimeter
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
+    filterset_fields = ["folder", "campaigns"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -579,6 +635,8 @@ class AssetViewSet(BaseModelViewSet):
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
+            # Use domain.name/asset.name as unique key to handle duplicate asset names across domains
+            asset_key = f"{asset.folder.name}/{asset.name}"
             nodes.append(
                 {
                     "name": asset.name,
@@ -588,19 +646,33 @@ class AssetViewSet(BaseModelViewSet):
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
-            nodes_idx[asset.name] = N
+            nodes_idx[asset_key] = N
             N += 1
+
+        # Add links between assets and their domains
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            asset_key = f"{asset.folder.name}/{asset.name}"
+            links.append(
+                {
+                    "source": nodes_idx[asset.folder.name],
+                    "target": nodes_idx[asset_key],
+                    "value": "contains",
+                }
+            )
+
+        # Add links between assets (existing relationships)
+        for asset in Asset.objects.filter(id__in=viewable_assets):
+            asset_key = f"{asset.folder.name}/{asset.name}"
             for relationship in asset.parent_assets.all():
+                relationship_key = f"{relationship.folder.name}/{relationship.name}"
                 links.append(
                     {
-                        "source": nodes_idx[relationship.name],
-                        "target": nodes_idx[asset.name],
+                        "source": nodes_idx[relationship_key],
+                        "target": nodes_idx[asset_key],
                         "value": "supported by",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
-
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
@@ -848,6 +920,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
     model = Vulnerability
     filterset_fields = [
         "folder",
+        "assets",
         "status",
         "severity",
         "risk_scenarios",
@@ -905,7 +978,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
                 if operational_scenario.is_selected
             ]:
-                risk_scenario = RiskScenario.objects.create(
+                risk_scenario = RiskScenario(
                     risk_assessment=instance,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
@@ -921,15 +994,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                             ],
                         )
                     ),
-                    current_proba=operational_scenario.likelihood,
-                    current_impact=operational_scenario.gravity,
                 )
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                risk_scenario.save()
+
                 risk_scenario.assets.set(operational_scenario.get_assets())
                 risk_scenario.threats.set(operational_scenario.threats.all())
                 risk_scenario.existing_applied_controls.set(
                     operational_scenario.get_applied_controls()
                 )
-                risk_scenario.save()
         instance.save()
         return super().perform_create(serializer)
 
@@ -1065,6 +1143,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "residual_risk",
                 "treatment",
             ]
+            if ff_is_enabled("inherent_risk"):
+                # insert inherent_risk just before existing_controls
+                columns.insert(columns.index("existing_controls"), "inherent_impact")
+                columns.insert(columns.index("existing_controls"), "inherent_proba")
+                columns.insert(columns.index("existing_controls"), "inherent_level")
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
@@ -1094,6 +1177,19 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
+                if ff_is_enabled("inherent_risk"):
+                    row.insert(
+                        columns.index("inherent_impact"),
+                        scenario.get_inherent_impact()["name"],
+                    )
+                    row.insert(
+                        columns.index("inherent_proba"),
+                        scenario.get_inherent_proba()["name"],
+                    )
+                    row.insert(
+                        columns.index("inherent_level"),
+                        scenario.get_inherent_risk()["name"],
+                    )
                 writer.writerow(row)
 
             return response
@@ -1121,12 +1217,23 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "swap_axes": "_swapaxes" if swap_axes else "",
                 "flip_vertical": "_vflip" if flip_vertical else "",
             }
+            ff_settings = GlobalSettings.objects.filter(
+                name=GlobalSettings.Names.FEATURE_FLAGS
+            ).first()
+            if ff_settings is None:
+                feature_flags = {}
+            else:
+                feature_flags = ff_settings.value
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
-                "ri_clusters": build_scenario_clusters(risk_assessment),
+                "ri_clusters": build_scenario_clusters(
+                    risk_assessment,
+                    include_inherent=feature_flags.get("inherent_risk", False),
+                ),
                 "risk_matrix": risk_assessment.risk_matrix,
                 "settings": matrix_settings,
+                "feature_flags": feature_flags,
             }
             html = render_to_string("core/ra_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
@@ -1168,9 +1275,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control
-                ) if applied_control.status else context["no status"].append(
-                    applied_control
-                )
+                ) if applied_control.status else context["--"].append(applied_control)
             data = {
                 "status_text": status,
                 "color_map": color_map,
@@ -1231,7 +1336,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ref_id=scenario.ref_id,
                 )
 
-                for field in ["applied_controls", "threats", "assets"]:
+                for field in [
+                    "applied_controls",
+                    "threats",
+                    "assets",
+                    "existing_applied_controls",
+                ]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
@@ -2088,7 +2198,14 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def count_per_level(self, request):
         folder_id = request.query_params.get("folder", None)
         return Response(
-            {"results": risks_count_per_level(request.user, None, folder_id)}
+            {
+                "results": risks_count_per_level(
+                    request.user,
+                    None,
+                    folder_id,
+                    include_inherent=ff_is_enabled("inherent_risk"),
+                )
+            }
         )
 
     @action(detail=False, name="Get risk scenarios count per status")
@@ -2471,7 +2588,6 @@ class FolderViewSet(BaseModelViewSet):
         ):
             entry = {
                 "name": folder.name,
-                "symbol": "roundRect",
                 "uuid": folder.id,
             }
             folder_content = get_folder_content(
@@ -4074,6 +4190,55 @@ class QualificationViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
+class CampaignViewSet(BaseModelViewSet):
+    model = Campaign
+
+    filterset_fields = ["folder", "frameworks", "perimeters"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Campaign.Status.choices))
+
+    @action(detail=True, name="Get campaign metrics")
+    def metrics(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Campaign
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        campaign = self.get_object()
+        return Response(campaign.metrics())
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        campaign = serializer.instance
+        frameworks = serializer.instance.frameworks.all()
+        for perimeter in campaign.perimeters.all():
+            for framework in frameworks:
+                framework_implementation_groups = None
+                if campaign.selected_implementation_groups:
+                    framework_implementation_groups = [
+                        group["value"]
+                        for group in campaign.selected_implementation_groups
+                        if group["framework"] == str(framework.id)
+                    ]
+                compliance_assessment = ComplianceAssessment.objects.create(
+                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
+                    campaign=campaign,
+                    perimeter=perimeter,
+                    framework=framework,
+                    folder=perimeter.folder,
+                    selected_implementation_groups=framework_implementation_groups
+                    if framework_implementation_groups
+                    else None,
+                )
+                compliance_assessment.create_requirement_assessments()
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
@@ -4084,6 +4249,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "folder",
         "framework",
         "perimeter",
+        "campaign",
         "status",
         "ebios_rm_studies",
         "assets",
@@ -4190,6 +4356,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
+        show_documentation_score = audit.show_documentation_score
         for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
             entry = {
@@ -4200,9 +4367,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "description": req_node.description,
                 "compliance_result": req.result,
                 "requirement_progress": req.status,
-                "score": req.score,
                 "observations": req.observation,
             }
+            if show_documentation_score:
+                entry["implementation_score"] = req.score
+                entry["documentation_score"] = req.documentation_score
+            else:
+                entry["score"] = req.score
             entries.append(entry)
 
         df = pd.DataFrame(entries)
@@ -4402,9 +4573,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control
-                ) if applied_control.status else context["no status"].append(
-                    applied_control
-                )
+                ) if applied_control.status else context["--"].append(applied_control)
             data = {
                 "status_text": status,
                 "color_map": color_map,
@@ -4713,30 +4882,52 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True)
     def export(self, request, pk):
+        def sanitize_filename(name):
+            return regex.sub(r"[^\p{L}\p{N}\p{M}\-_.]+", "_", name)
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
             (index_content, evidences) = generate_html(compliance_assessment)
-            zip_name = f"{compliance_assessment.name.replace('/', '-')}-{compliance_assessment.framework.name.replace('/', '-')}-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.zip"
-            with zipfile.ZipFile(zip_name, "w") as zipf:
-                for evidence in evidences:
-                    if evidence.attachment:
-                        if default_storage.exists(evidence.attachment.name):
-                            zipf.writestr(
-                                os.path.join(
-                                    "evidences",
-                                    os.path.basename(evidence.attachment.name),
-                                ),
-                                default_storage.open(evidence.attachment.name).read(),
-                            )
-                zipf.writestr("index.html", index_content)
+            zip_name = f"{sanitize_filename(compliance_assessment.name)}-{sanitize_filename(compliance_assessment.framework.name)}-{datetime.now():%Y-%m-%d-%H-%M}.zip"
 
-            response = FileResponse(open(zip_name, "rb"), as_attachment=True)
-            response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
-            os.remove(zip_name)
-            return response
+            # Create temporary file that will be automatically deleted
+            temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=".zip")
+
+            try:
+                with zipfile.ZipFile(temp_file, "w") as zipf:
+                    for evidence in evidences:
+                        if evidence.attachment and default_storage.exists(
+                            evidence.attachment.name
+                        ):
+                            with default_storage.open(
+                                evidence.attachment.name
+                            ) as attachment_file:
+                                zipf.writestr(
+                                    os.path.join(
+                                        "evidences",
+                                        os.path.basename(evidence.attachment.name),
+                                    ),
+                                    attachment_file.read(),
+                                )
+                    zipf.writestr("index.html", index_content)
+
+                # Seek to beginning for reading
+                temp_file.seek(0)
+
+                # Create response - FileResponse will handle closing the temp_file
+                response = FileResponse(
+                    temp_file, as_attachment=True, filename=zip_name
+                )
+                return response
+
+            except Exception:
+                # Clean up on error
+                temp_file.close()
+                raise
+
         else:
             return Response({"error": "Permission denied"})
 

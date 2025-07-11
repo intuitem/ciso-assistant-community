@@ -80,7 +80,7 @@
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
-		risk: 'current' | 'residual'
+		risk: 'current' | 'residual' | 'inherent'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
@@ -224,7 +224,7 @@
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
 					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
+					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
@@ -258,6 +258,7 @@
 					'ref_id',
 					'name',
 					'threats',
+					'inherent_level',
 					'existing_applied_controls',
 					'current_level',
 					'applied_controls',
@@ -278,8 +279,25 @@
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
-			<div class="flex-1">
+		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
+			{#if page.data?.featureflags?.inherent_risk}
+				<div>
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+
+					<RiskMatrix
+						riskMatrix={risk_assessment.risk_matrix}
+						matrixName={'inherent'}
+						data={buildRiskCluster(
+							risk_assessment.risk_scenarios,
+							risk_assessment.risk_matrix,
+							'inherent'
+						)}
+						dataItemComponent={RiskScenarioItem}
+						{useBubbles}
+					/>
+				</div>
+			{/if}
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
 				<RiskMatrix
@@ -287,11 +305,10 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
 					{useBubbles}
 				/>
 			</div>
-			<div class="flex-1">
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 
 				<RiskMatrix
@@ -299,7 +316,7 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>

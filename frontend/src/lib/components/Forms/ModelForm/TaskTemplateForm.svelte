@@ -215,13 +215,6 @@
 		bind:cachedValue={formDataCache['status']}
 		disableDoubleDash={true}
 	/>
-	<TextArea
-		{form}
-		field="observation"
-		label={m.observation()}
-		cacheLock={cacheLocks['observation']}
-		bind:cachedValue={formDataCache['observation']}
-	/>
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -255,6 +248,14 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		label={m.assets()}
@@ -296,6 +297,13 @@
 		cacheLock={cacheLocks['findings_assessment']}
 		bind:cachedValue={formDataCache['findings_assessment']}
 		label={m.findingsAssessment()}
+	/>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
 	/>
 </Dropdown>
 <Checkbox {form} field="enabled" label={m.enabled()} />

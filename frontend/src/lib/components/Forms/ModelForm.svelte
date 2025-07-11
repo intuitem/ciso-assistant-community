@@ -51,6 +51,7 @@
 	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
 	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
+	import CampaignForm from './ModelForm/CampaignForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -236,10 +237,11 @@
 				cacheLock={cacheLocks['reference_control']}
 				bind:cachedValue={formDataCache['reference_control']}
 				label={m.referenceControl()}
+				helpText={m.referenceControlHelpText()}
 				nullable={true}
-				on:change={async (e) => {
-					if (e.detail) {
-						await fetch(`/reference-controls/${e.detail}`)
+				onChange={async (e) => {
+					if (e) {
+						await fetch(`/reference-controls/${e}`)
 							.then((r) => r.json())
 							.then((r) => {
 								form.form.update((currentData) => {
@@ -342,6 +344,8 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'campaigns'}
+			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'assets'}
 			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}

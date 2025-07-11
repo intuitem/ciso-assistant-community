@@ -575,6 +575,7 @@ Set DJANGO_DEBUG=False for security reason.
 - ID: Indonesian
 - DA: Danish
 - HU: Hungarian
+- UK: Ukrainian
 
 ## Contributors 🤝
 

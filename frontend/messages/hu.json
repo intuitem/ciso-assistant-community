@@ -956,5 +956,6 @@
 			}
 		}
 	],
-	"matchingScenarios": "Egyező forgatókönyvek"
+	"matchingScenarios": "Egyező forgatókönyvek",
+	"fearedEventAssetHelpText": "A félelemkeltő események általában üzleti értékekkel (elsődleges eszközökkel) vannak összekapcsolva. A támogatási eszközök itt is engedélyezettek a rugalmasság érdekében."
 }

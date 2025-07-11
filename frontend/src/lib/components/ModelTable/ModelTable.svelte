@@ -37,7 +37,7 @@
 	import Th from './Th.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers } from '$lib/utils/stores';
+	import { tableHandlers, tableStates } from '$lib/utils/stores';
 
 	interface Props {
 		// Props
@@ -61,6 +61,10 @@
 		regionFoot?: string;
 		regionFootCell?: string;
 		displayActions?: boolean;
+		disableCreate?: boolean;
+		disableEdit?: boolean;
+		disableDelete?: boolean;
+		disableView?: boolean;
 		identifierField?: string;
 		deleteForm?: SuperValidated<AnyZodObject> | undefined;
 		URLModel?: urlModel | undefined;
@@ -89,7 +93,7 @@
 		rowsPerPage = true,
 		rowCount = true,
 		pagination = true,
-		numberRowsPerPage = 10,
+		numberRowsPerPage = $tableStates[page.url.pathname]?.rowsPerPage ?? 10,
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
@@ -102,6 +106,10 @@
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
+		disableCreate = false,
+		disableEdit = false,
+		disableDelete = false,
+		disableView = false,
 		identifierField = 'id',
 		deleteForm = undefined,
 		URLModel = undefined,
@@ -122,6 +130,27 @@
 		actionsHead,
 		tail
 	}: Props = $props();
+
+	let model = $derived(URL_MODEL_MAP[URLModel]);
+	const tableSource: TableSource = $derived(
+		Object.keys(source.head)
+			.filter(
+				(key) =>
+					!(
+						model?.flaggedFields &&
+						Object.hasOwn(model.flaggedFields, key) &&
+						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
+						page.data?.featureflags[model.flaggedFields[key]] === false
+					)
+			)
+			.reduce(
+				(acc, key) => {
+					acc.head[key] = source.head[key];
+					return acc;
+				},
+				{ head: {}, body: source.body, meta: source.meta }
+			)
+	);
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -161,18 +190,20 @@
 	let classesTable = $derived(`${element} ${text} ${color}`);
 
 	const handler = new DataHandler(
-		source.body.map((item: Record<string, any>, index: number) => {
+		tableSource.body.map((item: Record<string, any>, index: number) => {
 			return {
 				...item,
-				meta: source.meta
-					? source.meta.results
-						? { ...source.meta.results[index] }
-						: { ...source.meta[index] }
+				meta: tableSource.meta
+					? tableSource.meta.results
+						? { ...tableSource.meta.results[index] }
+						: { ...tableSource.meta[index] }
 					: undefined
 			};
 		}),
 		{
-			rowsPerPage: pagination ? numberRowsPerPage : undefined,
+			rowsPerPage: pagination
+				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
+				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
 			totalRows: source?.meta?.count
 		}
 	);
@@ -182,7 +213,12 @@
 	$tableHandlers[baseEndpoint] = handler;
 
 	handler.onChange((state: State) =>
-		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
+		loadTableData({
+			state,
+			URLModel,
+			endpoint: baseEndpoint,
+			fields: Object.keys(tableSource.head)
+		})
 	);
 
 	onMount(() => {
@@ -197,6 +233,7 @@
 	const preventDelete = (row: TableSource) =>
 		(row?.meta?.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
+		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
@@ -265,12 +302,14 @@
 
 	$effect(() => {
 		if (page.form?.form?.posted && page.form?.form?.valid) {
+			console.debug('Form posted, invalidating table');
 			handler.invalidate();
 		}
 	});
 
 	$effect(() => {
 		if (invalidateTable) {
+			console.debug('Invalidating table due to filter change');
 			handler.invalidate();
 			_goto(page.url);
 			invalidateTable = false;
@@ -278,7 +317,6 @@
 	});
 
 	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
-	let model = $derived(URL_MODEL_MAP[URLModel]);
 	let canCreateObject = $derived(
 		model
 			? page.params.id
@@ -388,7 +426,7 @@
 			{#if canSelectObject}
 				{@render selectButton?.()}
 			{/if}
-			{#if canCreateObject}
+			{#if canCreateObject && !disableCreate}
 				{@render addButton?.()}
 			{/if}
 		</div>
@@ -402,8 +440,10 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+				{#each Object.entries(tableSource.head) as [key, heading]}
+					{#if fields.length === 0 || fields.includes(key)}
+						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+					{/if}
 				{/each}
 				{#if displayActions}
 					<th class="{regionHeadCell} select-none text-end"></th>
@@ -525,7 +565,7 @@
 											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
 											{@const actionsURLModel = URLModel}
 											<TableRowActions
-												{deleteForm}
+												deleteForm={disableDelete ? null : deleteForm}
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
@@ -535,6 +575,8 @@
 												{row}
 												hasBody={actionsBody}
 												{identifierField}
+												{disableEdit}
+												{disableView}
 												preventDelete={preventDelete(row)}
 												preventEdit={preventEdit(row)}
 											>
@@ -594,10 +636,10 @@
 				</ContextMenu.Content>
 			{/if}
 		</ContextMenu.Root>
-		{#if source.foot}
+		{#if tableSource.foot}
 			<tfoot class="table-foot {regionFoot}">
 				<tr>
-					{#each source.foot as cell}
+					{#each tableSource.foot as cell}
 						<td class={regionFootCell}>{cell}</td>
 					{/each}
 				</tr>

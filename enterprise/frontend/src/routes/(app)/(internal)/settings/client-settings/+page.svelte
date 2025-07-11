@@ -46,6 +46,7 @@
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
+    localStorage.removeItem('favicon')
 	}
 </script>
 
@@ -82,7 +83,7 @@
 							modalConfirm(
 								data.settings.id,
 								data.settings.logo,
-								'settings/client-settings?/deleteLogo'
+								'/settings/client-settings?/deleteLogo'
 							)}
 					>
 						<i class="fa-solid fa-trash"></i>
@@ -101,21 +102,21 @@
 						allowedExtensions={['png', 'jpeg', 'jpg', 'svg', 'ico']}
 					/>
 				</div>
+        {#if data.settings.favicon != null}
+          <button
+            class="btn preset-filled-tertiary-500 h-full"
+            type="button"
+            onclick={(_) =>
+              modalConfirm(
+                data.settings.id,
+                data.settings.favicon,
+                '/settings/client-settings?/deleteFavicon'
+              )}
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        {/if}
 			</div>
-			{#if data.settings.favicon != null}
-				<button
-					class="btn preset-filled-tertiary-500 h-full"
-					type="button"
-					onclick={(_) =>
-						modalConfirm(
-							data.settings.id,
-							data.settings.favicon,
-							'settings/client-settings?/deleteFavicon'
-						)}
-				>
-					<i class="fa-solid fa-trash"></i>
-				</button>
-			{/if}
 			<Checkbox
 				{form}
 				field="show_images_unauthenticated"
