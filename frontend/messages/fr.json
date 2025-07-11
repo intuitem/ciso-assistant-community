@@ -1251,8 +1251,8 @@
 	"ebiosWs2_3_tooltip": "Vous avez besoin d'au moins un couple SR/OV pour le sélectionner",
 	"ebiosWs3_2_tooltip": "Vous avez besoin d'au moins un couple SR/OV sélectionné pour élaborer un scénario stratégique",
 	"ebiosWs3_3_tooltip": "Vous avez besoin d'au moins une Partie Prenante pour définir les mesures de sécurité associées",
-	"ebiosWs4_1_tooltip": "Vous avez besoin d'au moins un Chemin d'Attaque sélectionné à partir d'un Scénario Stratégique pour élaborer un scénario opérationnel",
-	"ebiosWs4_2_tooltip": "Vous avez besoin d'au moins un Scénario Opérationnel pour évaluer sa vraisemblance",
+	"ebiosWs4_2_tooltip": "Vous avez besoin d'au moins un Chemin d'Attaque sélectionné à partir d'un Scénario Stratégique pour élaborer un scénario opérationnel",
+	"ebiosWs4_3_tooltip": "Vous avez besoin d'au moins un Scénario Opérationnel pour évaluer sa vraisemblance",
 	"ebiosWs5_tooltip": "Aucune analyse de risque n'a encore été réalisée",
 	"govern": "Gouverner",
 	"identify": "Identifier",
@@ -1689,8 +1689,8 @@
 	"antecedentsHelpText": "Les antécédents ne sont pas applicables pour la phase de reconnaissance.",
 	"logicOperator": "Opérateur logique",
 	"logicOperatorHelpText": "Permet de combiner plusieurs antécédents",
-	"isHighlighted": "Mis en évidence",
-	"killChains": "Chaine de frappe",
+	"isHighlighted": "Mise en évidence",
+	"killChains": "Chaine",
 	"killChain": "Etape de la chaine",
 	"associatedKillChains": "Etapes de la chaine",
 	"addKillChain": "Ajouter une étape à la chaine",
@@ -1698,7 +1698,7 @@
 	"ebiosInitialAccess": "Rentrer",
 	"ebiosDiscovery": "Trouver",
 	"ebiosExploitation": "Exploiter",
-  "ebiosOperationalScenarioHelp": "Les chemins d'attaque fournissent une description de haut niveau de la façon dont un scénario stratégique (de l'atelier 3) pourrait se dérouler. Bien qu'un scénario stratégique puisse avoir plusieurs chemins d'attaque, chaque chemin se traduit par un scénario opérationnel dans l'atelier 4. Vous pouvez ensuite décomposer chaque scénario opérationnel en plusieurs modes opératoires qui combinent des actions élémentaires pour décrire une chaîne de cyberattaque complète.",
+  "ebiosOperationalScenarioHelp": "Les chemins d'attaque fournissent une description de haut niveau de la façon dont un scénario stratégique (de l'atelier 3) pourrait se dérouler. Bien qu'un scénario stratégique puisse avoir plusieurs chemins d'attaque, chaque chemin se traduit par un scénario opérationnel dans l'atelier 4. Vous pouvez ensuite décomposer chaque scénario opérationnel en plusieurs modes opératoires qui combinent des actions élémentaires pour décrire une chaîne complète.",
   "moVisual": "visuel"
 
 }
