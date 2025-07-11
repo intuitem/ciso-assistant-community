@@ -353,14 +353,20 @@ class OperatingModeViewSet(BaseModelViewSet):
         }
         panel_nodes = {panel: [] for panel in panels.values()}
 
-        for step in mo.kill_chain_steps.all():
-            ea = step.elementary_action
+        for ea in mo.elementary_actions.all():
             stage = ea.attack_stage
 
             entry = {"id": ea.id, "label": ea.name, "group": groups.get(stage)}
             if ea.icon:
                 entry["icon"] = ea.icon_fa_hex
             nodes.append(entry)
+
+            panel_name = panels.get(stage)
+            if panel_name:
+                panel_nodes[panel_name].append(ea.id)
+
+        for step in mo.kill_chain_steps.all():
+            ea = step.elementary_action
 
             for ant in step.antecedents.all():
                 if step.logic_operator:
@@ -369,9 +375,6 @@ class OperatingModeViewSet(BaseModelViewSet):
                     links.append({"source": ant.id, "target": ea.id})
 
             # Add to panel nodes
-            panel_name = panels.get(stage)
-            if panel_name:
-                panel_nodes[panel_name].append(ea.id)
 
         return Response(
             {"nodes": nodes, "links": links, "panelNodes": panel_nodes, "mo_id": mo.id}
