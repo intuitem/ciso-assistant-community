@@ -135,6 +135,22 @@
 	let classesPercentText = $derived((resultColor: string) =>
 		resultColor === '#000000' ? 'text-white' : ''
 	);
+
+	const getBadgeStyles = (answers: any, questions: any) => {
+		const answeredCount = Object.values(answers || {}).filter(answer => answer !== null).length;
+		const totalCount = Object.keys(questions || {}).length;
+		const backgroundColor = answeredCount === 0
+			? '#fca5a5'
+			: answeredCount === totalCount
+				? '#bbf7d0'
+				: '#fef08a';
+		return {
+			backgroundColor,
+			color: darkenColor(backgroundColor, 0.6),
+			answeredCount,
+			totalCount
+		};
+	};
 </script>
 
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
@@ -201,53 +217,14 @@
 						{/each}
 					{/if}
 					{#if node.questions}
-						{#if Object.keys(node.questions).length > 1}
-							<span
-								class="badge"
-								style="background-color: {Object.values(node.answers).filter(
-									(answer) => answer !== null
-								).length === 0
-									? '#fca5a5'
-									: Object.values(node.answers).filter((answer) => answer !== null).length ===
-										  Object.keys(node.questions).length
-										? '#bbf7d0'
-										: '#fef08a'}; color: {darkenColor(
-									Object.values(node.answers).filter((answer) => answer !== null).length === 0
-										? '#fca5a5'
-										: Object.values(node.answers).filter((answer) => answer !== null).length ===
-											  Object.keys(node.questions).length
-											? '#bbf7d0'
-											: '#fef08a',
-									0.6
-								)}"
-								>{Object.values(node.answers).filter((answer) => answer !== null)
-									.length}/{Object.keys(node.questions).length}
-								{m.questionPlural()}</span
-							>
-						{:else}
-							<span
-								class="badge"
-								style="background-color: {Object.values(node.answers).filter(
-									(answer) => answer !== null
-								).length === 0
-									? '#fca5a5'
-									: Object.values(node.answers).filter((answer) => answer !== null).length ===
-										  Object.keys(node.questions).length
-										? '#bbf7d0'
-										: '#fef08a'}; color: {darkenColor(
-									Object.values(node.answers).filter((answer) => answer !== null).length === 0
-										? '#fca5a5'
-										: Object.values(node.answers).filter((answer) => answer !== null).length ===
-											  Object.keys(node.questions).length
-											? '#bbf7d0'
-											: '#fef08a',
-									0.6
-								)}"
-								>{Object.values(node.answers).filter((answer) => answer !== null)
-									.length}/{Object.keys(node.questions).length}
-								{m.questionSingular()}</span
-							>
-						{/if}
+						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}
+						<span
+							class="badge"
+							style="background-color: {badgeStyles.backgroundColor}; color: {badgeStyles.color}"
+						>
+							{badgeStyles.answeredCount}/{badgeStyles.totalCount}
+							{Object.keys(node.questions).length > 1 ? m.questionPlural() : m.questionSingular()}
+						</span>
 					{/if}
 				</div>
 			</div>
