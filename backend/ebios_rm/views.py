@@ -362,12 +362,20 @@ class OperatingModeViewSet(BaseModelViewSet):
                 entry["icon"] = ea.icon_fa_hex
             nodes.append(entry)
 
+            for ant in step.antecedents.all():
+                if step.logic_operator:
+                    pass
+                else:
+                    links.append({"source": ant.id, "target": ea.id})
+
             # Add to panel nodes
             panel_name = panels.get(stage)
             if panel_name:
                 panel_nodes[panel_name].append(ea.id)
 
-        return Response({"nodes": nodes, "links": links, "panelNodes": panel_nodes})
+        return Response(
+            {"nodes": nodes, "links": links, "panelNodes": panel_nodes, "mo_id": mo.id}
+        )
 
 
 class KillChainViewSet(BaseModelViewSet):
