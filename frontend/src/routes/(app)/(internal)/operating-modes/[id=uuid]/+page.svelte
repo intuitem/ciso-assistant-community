@@ -90,10 +90,10 @@
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
 			<Anchor
-				href={`${page.url.pathname}/visual`}
+				href={`${page.url.pathname}/graph`}
 				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"
-				><i class="fa-solid fa-diagram-project mr-2"></i>{m.moVisual()}</Anchor
+				><i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}</Anchor
 			>
 		</div>
 	{/snippet}
