@@ -340,10 +340,10 @@ class OperatingModeViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
-        nodes = []
-        links = []
         mo = get_object_or_404(OperatingMode, id=pk)
 
+        nodes = []
+        links = []
         groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
         panels = {
             0: "reconnaissance",
@@ -351,6 +351,7 @@ class OperatingModeViewSet(BaseModelViewSet):
             2: "discovery",
             3: "exploitation",
         }
+
         panel_nodes = {panel: [] for panel in panels.values()}
 
         for ea in mo.elementary_actions.all().order_by("attack_stage"):
@@ -369,12 +370,16 @@ class OperatingModeViewSet(BaseModelViewSet):
             "elementary_action__attack_stage"
         ):
             ea = step.elementary_action
-
-            for ant in step.antecedents.all().order_by("attack_stage"):
+            if step.antecedents:
+                target = ea.id
                 if step.logic_operator:
-                    pass
-                else:
-                    links.append({"source": ant.id, "target": ea.id})
+                    nodes.append(
+                        {"id": step.id, "icon": step.logic_operator, "shape": "circle"}
+                    )
+                    target = step.id
+                    links.append({"source": step.id, "target": ea.id})
+                for ant in step.antecedents.all().order_by("attack_stage"):
+                    links.append({"source": ant.id, "target": target})
 
             # Add to panel nodes
 
