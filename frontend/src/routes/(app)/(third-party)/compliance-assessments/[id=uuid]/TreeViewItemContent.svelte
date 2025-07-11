@@ -204,14 +204,48 @@
 						{#if Object.keys(node.questions).length > 1}
 							<span
 								class="badge"
-								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{Object.keys(node.questions).length} {m.questionPlural()}</span
+								style="background-color: {Object.values(node.answers).filter(
+									(answer) => answer !== null
+								).length === 0
+									? '#fca5a5'
+									: Object.values(node.answers).filter((answer) => answer !== null).length ===
+										  Object.keys(node.questions).length
+										? '#bbf7d0'
+										: '#fef08a'}; color: {darkenColor(
+									Object.values(node.answers).filter((answer) => answer !== null).length === 0
+										? '#fca5a5'
+										: Object.values(node.answers).filter((answer) => answer !== null).length ===
+											  Object.keys(node.questions).length
+											? '#bbf7d0'
+											: '#fef08a',
+									0.6
+								)}"
+								>{Object.values(node.answers).filter((answer) => answer !== null)
+									.length}/{Object.keys(node.questions).length}
+								{m.questionPlural()}</span
 							>
 						{:else}
 							<span
 								class="badge"
-								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{Object.keys(node.questions).length} {m.questionSingular()}</span
+								style="background-color: {Object.values(node.answers).filter(
+									(answer) => answer !== null
+								).length === 0
+									? '#fca5a5'
+									: Object.values(node.answers).filter((answer) => answer !== null).length ===
+										  Object.keys(node.questions).length
+										? '#bbf7d0'
+										: '#fef08a'}; color: {darkenColor(
+									Object.values(node.answers).filter((answer) => answer !== null).length === 0
+										? '#fca5a5'
+										: Object.values(node.answers).filter((answer) => answer !== null).length ===
+											  Object.keys(node.questions).length
+											? '#bbf7d0'
+											: '#fef08a',
+									0.6
+								)}"
+								>{Object.values(node.answers).filter((answer) => answer !== null)
+									.length}/{Object.keys(node.questions).length}
+								{m.questionSingular()}</span
 							>
 						{/if}
 					{/if}
