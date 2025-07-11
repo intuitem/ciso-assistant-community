@@ -7,6 +7,6 @@ export const load = (async ({ fetch, params, url }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-  const animated = url.searchParams.get("animated") === "true";
+	const animated = url.searchParams.get('animated') === 'true';
 	return { data, animated };
 }) satisfies PageServerLoad;
