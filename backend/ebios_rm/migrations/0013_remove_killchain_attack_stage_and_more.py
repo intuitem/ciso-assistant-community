@@ -2,20 +2,28 @@
 
 from django.db import migrations, models
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('ebios_rm', '0012_ebiosrmstudy_quotation_method_alter_roto_risk_origin_and_more'),
+        (
+            "ebios_rm",
+            "0012_ebiosrmstudy_quotation_method_alter_roto_risk_origin_and_more",
+        ),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='killchain',
-            name='attack_stage',
+            model_name="killchain",
+            name="attack_stage",
         ),
         migrations.AddField(
-            model_name='elementaryaction',
-            name='attack_stage',
-            field=models.SmallIntegerField(choices=[(0, 'know'), (1, 'enter'), (2, 'discover'), (3, 'exploit')], default=0, help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')", verbose_name='Attack Stage'),
-        )
+            model_name="elementaryaction",
+            name="attack_stage",
+            field=models.SmallIntegerField(
+                choices=[(0, "know"), (1, "enter"), (2, "discover"), (3, "exploit")],
+                default=0,
+                help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')",
+                verbose_name="Attack Stage",
+            ),
+        ),
     ]

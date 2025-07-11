@@ -416,23 +416,27 @@ class KillChainWriteSerializer(BaseModelSerializer):
     class Meta:
         model = KillChain
         exclude = ["created_at", "updated_at", "folder"]
-    
+
     def validate(self, attrs):
         elementary_action = attrs.get("elementary_action")
         antecedents = attrs.get("antecedents", [])
         attack_stage = elementary_action.attack_stage
-        
+
         if attack_stage == ElementaryAction.AttackStage.KNOW and antecedents:
-            raise serializers.ValidationError("Antecedents cannot be selected in attack stage 'Know'.")
-        
+            raise serializers.ValidationError(
+                "Antecedents cannot be selected in attack stage 'Know'."
+            )
+
         if elementary_action in antecedents:
-            raise serializers.ValidationError("An elementary action cannot be its own antecedent.")
-        
+            raise serializers.ValidationError(
+                "An elementary action cannot be its own antecedent."
+            )
+
         if antecedents:
             for antecedent in antecedents:
                 if not KillChain.objects.filter(
                     operating_mode=attrs.get("operating_mode"),
-                    elementary_action=antecedent
+                    elementary_action=antecedent,
                 ).exists():
                     raise serializers.ValidationError(
                         f"Antecedent '{antecedent}' has not been used in the operating mde yet"
@@ -440,16 +444,16 @@ class KillChainWriteSerializer(BaseModelSerializer):
 
                 antecedent_kill_chain = KillChain.objects.filter(
                     operating_mode=attrs.get("operating_mode"),
-                    elementary_action=antecedent
+                    elementary_action=antecedent,
                 ).first()
 
                 if antecedent_kill_chain and antecedent.attack_stage > attack_stage:
                     raise serializers.ValidationError(
-                        {"antecedents": f"The attack stage of the antecedent '{antecedent}' needs to be the same or before the attack stage of the elementary action"}
+                        {
+                            "antecedents": f"The attack stage of the antecedent '{antecedent}' needs to be the same or before the attack stage of the elementary action"
+                        }
                     )
-        
 
-        
         return super().validate(attrs)
 
 

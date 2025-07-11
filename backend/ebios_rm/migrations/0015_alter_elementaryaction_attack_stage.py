@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0014_auto_20250710_1406'),
+        ("ebios_rm", "0014_auto_20250710_1406"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='elementaryaction',
-            name='attack_stage',
-            field=models.SmallIntegerField(choices=[(0, 'ebiosReconnaissance'), (1, 'ebiosInitialAccess'), (2, 'ebiosDiscovery'), (3, 'ebiosExploitation')], default=0, help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')", verbose_name='Attack Stage'),
+            model_name="elementaryaction",
+            name="attack_stage",
+            field=models.SmallIntegerField(
+                choices=[
+                    (0, "ebiosReconnaissance"),
+                    (1, "ebiosInitialAccess"),
+                    (2, "ebiosDiscovery"),
+                    (3, "ebiosExploitation"),
+                ],
+                default=0,
+                help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')",
+                verbose_name="Attack Stage",
+            ),
         ),
     ]

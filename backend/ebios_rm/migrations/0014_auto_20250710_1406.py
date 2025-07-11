@@ -2,18 +2,17 @@
 
 from django.db import migrations, models
 
+
 def modify_all_ebiosrmstudy(apps, schema_editor):
-    EbiosRmStudy = apps.get_model('ebios_rm', 'EbiosRmStudy')
+    EbiosRmStudy = apps.get_model("ebios_rm", "EbiosRmStudy")
     for study in EbiosRmStudy.objects.all():
-        study.meta["workshops"][3]["steps"].insert(0, {'status': 'to_do'})
+        study.meta["workshops"][3]["steps"].insert(0, {"status": "to_do"})
         study.save()
 
+
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0013_remove_killchain_attack_stage_and_more'),
+        ("ebios_rm", "0013_remove_killchain_attack_stage_and_more"),
     ]
 
-    operations = [
-        migrations.RunPython(modify_all_ebiosrmstudy)
-    ]
+    operations = [migrations.RunPython(modify_all_ebiosrmstudy)]

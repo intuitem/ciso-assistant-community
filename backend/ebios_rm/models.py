@@ -638,6 +638,21 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
 
 
 class ElementaryAction(NameDescriptionMixin, FolderMixin):
+    ICON_MAP = {
+        "server": {"hex": "f233", "fa": "fas fa-server"},
+        "computer": {"hex": "f108", "fa": "fas fa-desktop"},
+        "cloud": {"hex": "f0c2", "fa": "fas fa-cloud"},
+        "file": {"hex": "f15b", "fa": "fas fa-file"},
+        "diamond": {"hex": "f3a5", "fa": "far fa-gem"},
+        "phone": {"hex": "f095", "fa": "fas fa-phone"},
+        "cube": {"hex": "f1b2", "fa": "fas fa-cube"},
+        "blocks": {"hex": "f1b3", "fa": "fas fa-cubes"},
+        "shapes": {"hex": "f61f", "fa": "fas fa-shapes"},
+        "network": {"hex": "f6ff", "fa": "fas fa-network-wired"},
+        "database": {"hex": "f1c0", "fa": "fas fa-database"},
+        "key": {"hex": "f084", "fa": "fas fa-key"},
+    }
+
     class Icon(models.TextChoices):
         SERVER = "server", "Server"
         COMPUTER = "computer", "Computer"
@@ -651,7 +666,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         NETWORK = "network", "Network"
         DATABASE = "database", "Database"
         KEY = "key", "Key"
-    
+
     class AttackStage(models.IntegerChoices):
         KNOW = 0, "ebiosReconnaissance"
         ENTER = 1, "ebiosInitialAccess"
@@ -683,7 +698,23 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         help_text="Icon representing the elementary action",
     )
 
+    @property
+    def icon_fa_hex(self):
+        return f"&#x{self.ICON_MAP.get(self.icon)['hex']};" if self.icon else None
+
+    @property
+    def icon_fa_class(self):
+        return self.ICON_MAP.get(self.icon)["fa"] if self.icon else None
+
     fields_to_check = ["name"]
+
+    def __str__(self):
+        return self.name if hasattr(self, "name") else f"ElementaryAction {self.id}"
+
+    class Meta:
+        verbose_name = "Elementary Action"
+        verbose_name_plural = "Elementary Actions"
+        ordering = ["name"]
 
 
 class OperatingMode(NameDescriptionMixin, FolderMixin):
@@ -732,11 +763,13 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         return OperationalScenario.format_likelihood(
             self.likelihood, self.parsed_matrix
         )
-    
+
     @classmethod
     def get_default_ref_id(cls, operational_scenario):
         """return associated risk assessment id"""
-        opertaing_modes_ref_ids = [x.ref_id for x in operational_scenario.operating_modes.all()]
+        opertaing_modes_ref_ids = [
+            x.ref_id for x in operational_scenario.operating_modes.all()
+        ]
         nb_opertaing_modes = len(opertaing_modes_ref_ids) + 1
         candidates = [f"MO.{i:02d}" for i in range(1, nb_opertaing_modes + 1)]
         return next(x for x in candidates if x not in opertaing_modes_ref_ids)
@@ -928,7 +961,7 @@ class KillChain(AbstractBaseModel, FolderMixin):
         blank=True,
         help_text="Elementary actions that are antecedents to this action in the kill chain",
     )
-    
+
     @property
     def attack_stage(self):
         return self.elementary_action.get_attack_stage_display()
@@ -952,9 +985,11 @@ class KillChain(AbstractBaseModel, FolderMixin):
 
         if existing.exists():
             raise ValidationError(
-                {'elementary_action':f"The elementary action '{self.elementary_action}' is already used in this operating mode's kill chain."}
+                {
+                    "elementary_action": f"The elementary action '{self.elementary_action}' is already used in this operating mode's kill chain."
+                }
             )
-    
+
     def __str__(self):
         return f"KillChain: {self.attack_stage} - {self.elementary_action.ref_id}"
 

@@ -21,8 +21,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
+from icecream import ic
 
 import structlog
+
 logger = structlog.get_logger(__name__)
 
 LONG_CACHE_TTL = 60  # mn
@@ -258,18 +260,18 @@ class ElementaryActionFilter(df.FilterSet):
         method="filter_operating_mode_available_actions",
         label="Operating mode available actions",
     )
-    
-    def filter_operating_mode_available_actions(self, queryset, name, value):  
+
+    def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
         used_elementary_actions = KillChain.objects.filter(
             operating_mode=operating_mode
-        ).values_list('elementary_action', flat=True)
+        ).values_list("elementary_action", flat=True)
         return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
-        
 
     class Meta:
         model = ElementaryAction
         fields = ["operating_modes", "operating_mode_available_actions"]
+
 
 class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
@@ -305,7 +307,7 @@ class OperatingModeViewSet(BaseModelViewSet):
         )
         choices = undefined | _choices
         return Response(choices)
-    
+
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
             "ref_id"
@@ -314,10 +316,8 @@ class OperatingModeViewSet(BaseModelViewSet):
             ref_id = OperatingMode.get_default_ref_id(operational_scenario)
             serializer.validated_data["ref_id"] = ref_id
         serializer.save()
-    
-    @action(
-        detail=False, methods=["get"]
-    )
+
+    @action(detail=False, methods=["get"])
     def default_ref_id(self, request):
         operational_scenario_id = request.query_params.get("operational_scenario")
         if not operational_scenario_id:
@@ -325,7 +325,9 @@ class OperatingModeViewSet(BaseModelViewSet):
                 {"error": "Missing 'operational_scenario' parameter."}, status=400
             )
         try:
-            operational_scenario = OperationalScenario.objects.get(pk=operational_scenario_id)
+            operational_scenario = OperationalScenario.objects.get(
+                pk=operational_scenario_id
+            )
 
             # Use the class method to compute the default ref_id
             default_ref_id = OperatingMode.get_default_ref_id(operational_scenario)
@@ -335,6 +337,37 @@ class OperatingModeViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
+
+    @action(detail=True, name="Build graph for Operating Mode")
+    def build_graph(self, request, pk):
+        nodes = []
+        links = []
+        mo = get_object_or_404(OperatingMode, id=pk)
+
+        groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
+        panels = {
+            0: "reconnaissance",
+            1: "initialAccess",
+            2: "discovery",
+            3: "exploitation",
+        }
+        panel_nodes = {panel: [] for panel in panels.values()}
+
+        for step in mo.kill_chain_steps.all():
+            ea = step.elementary_action
+            stage = ea.attack_stage
+
+            entry = {"id": ea.id, "label": ea.name, "group": groups.get(stage)}
+            if ea.icon:
+                entry["icon"] = ea.icon_fa_hex
+            nodes.append(entry)
+
+            # Add to panel nodes
+            panel_name = panels.get(stage)
+            if panel_name:
+                panel_nodes[panel_name].append(ea.id)
+
+        return Response({"nodes": nodes, "links": links, "panelNodes": panel_nodes})
 
 
 class KillChainViewSet(BaseModelViewSet):
