@@ -341,7 +341,6 @@ class OperatingModeViewSet(BaseModelViewSet):
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
         mo = get_object_or_404(OperatingMode, id=pk)
-
         nodes = []
         links = []
         groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
@@ -351,37 +350,48 @@ class OperatingModeViewSet(BaseModelViewSet):
             2: "discovery",
             3: "exploitation",
         }
-
         panel_nodes = {panel: [] for panel in panels.values()}
 
         for ea in mo.elementary_actions.all().order_by("attack_stage"):
             stage = ea.attack_stage
-
             entry = {"id": ea.id, "label": ea.name, "group": groups.get(stage)}
             if ea.icon:
                 entry["icon"] = ea.icon_fa_hex
             nodes.append(entry)
-
             panel_name = panels.get(stage)
             if panel_name:
                 panel_nodes[panel_name].append(ea.id)
-
         for step in mo.kill_chain_steps.all().order_by(
             "elementary_action__attack_stage"
         ):
             ea = step.elementary_action
-            if step.antecedents:
+
+            if step.antecedents.exists():
                 target = ea.id
+
                 if step.logic_operator:
+                    # Get the stage from the first antecedent for panel placement
+                    antecedent_stage = step.antecedents.first().attack_stage
+
                     nodes.append(
-                        {"id": step.id, "icon": step.logic_operator, "shape": "circle"}
+                        {
+                            "id": step.id,
+                            "icon": step.logic_operator,
+                            "shape": "circle",
+                            "group": groups.get(antecedent_stage),
+                        }
                     )
+
+                    # Add logic operator to the same panel as its antecedents
+                    panel_name = panels.get(antecedent_stage)
+                    if panel_name:
+                        panel_nodes[panel_name].append(step.id)
+
                     target = step.id
                     links.append({"source": step.id, "target": ea.id})
+
                 for ant in step.antecedents.all().order_by("attack_stage"):
                     links.append({"source": ant.id, "target": target})
-
-            # Add to panel nodes
 
         return Response(
             {"nodes": nodes, "links": links, "panelNodes": panel_nodes, "mo_id": mo.id}
