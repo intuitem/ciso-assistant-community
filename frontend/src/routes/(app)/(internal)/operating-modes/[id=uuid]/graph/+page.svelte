@@ -16,7 +16,6 @@
 	const linkFlow = data.animated; //?animated=true
 </script>
 
-<!-- {JSON.stringify(data.data, null, 2)} -->
 <a
 	class="text-primary-800 hover:text-primary-500 cursor-pointer"
 	href="/operating-modes/{data.data.mo_id}/"

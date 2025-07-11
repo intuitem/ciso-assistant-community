@@ -49,7 +49,9 @@
 		disableZoom = false,
 		linkFlow = false,
 		layoutType = GraphLayoutType.Parallel,
-		layoutParallelGroupSpacing = 200
+		layoutParallelGroupSpacing = 250, // Increased default spacing
+		layoutParallelNodesPerColumn = 4, // Reduced nodes per column for discovery
+		layoutParallelSubGroupsPerRow = 3 // Control sub-groups per row
 	}: {
 		data: GraphData;
 		panelNodes?: {
@@ -64,9 +66,11 @@
 		linkFlow?: boolean;
 		layoutType?: GraphLayoutType;
 		layoutParallelGroupSpacing?: number;
+		layoutParallelNodesPerColumn?: number;
+		layoutParallelSubGroupsPerRow?: number;
 	} = $props();
 
-	// Build panels with configurable node assignments
+	// Build panels with optimized padding for discovery panel
 	const panels = $derived([
 		{
 			label: m.ebiosReconnaissance(),
@@ -82,7 +86,7 @@
 		{
 			label: m.ebiosInitialAccess(),
 			nodes: panelNodes.initialAccess,
-			padding: { top: 20, right: 60, bottom: 20, left: 60 },
+			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf504;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'violet',
@@ -93,7 +97,7 @@
 		{
 			label: m.ebiosDiscovery(),
 			nodes: panelNodes.discovery,
-			padding: { top: 20, right: 50, bottom: 20, left: 50 },
+			padding: { top: 50, right: 60, bottom: 50, left: 60 },
 			sideIconSymbol: '&#xf140;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'orange',
@@ -164,6 +168,20 @@
 		...data,
 		nodes: processNodesWithWrapping(data.nodes)
 	});
+
+	// Layout node group function to organize nodes by panel assignment
+	const layoutNodeGroup = (node: NodeDatum) => {
+		if (panelNodes.reconnaissance.includes(node.id)) return 'reconnaissance';
+		if (panelNodes.initialAccess.includes(node.id)) return 'initialAccess';
+		if (panelNodes.discovery.includes(node.id)) return 'discovery';
+		if (panelNodes.exploitation.includes(node.id)) return 'exploitation';
+		return 'other'; // fallback for nodes not in any panel
+	};
+
+	// Sub-group function to organize nodes by their group property within each panel
+	const layoutParallelNodeSubGroup = (node: NodeDatum) => {
+		return node.group || 'default';
+	};
 
 	// Graph configuration
 	const nodeShape = (node: NodeDatum) => node.shape ?? DEFAULT_NODE_SHAPE;
@@ -238,9 +256,13 @@
 			{nodeIcon}
 			{onRenderComplete}
 			{layoutType}
+			{layoutNodeGroup}
+			{layoutParallelNodeSubGroup}
 			{panels}
 			{disableZoom}
 			{layoutParallelGroupSpacing}
+			{layoutParallelNodesPerColumn}
+			{layoutParallelSubGroupsPerRow}
 			{linkStroke}
 			{linkArrow}
 			{linkFlow}

@@ -378,7 +378,6 @@ class OperatingModeViewSet(BaseModelViewSet):
                             "id": step.id,
                             "icon": step.logic_operator,
                             "shape": "circle",
-                            "group": groups.get(antecedent_stage),
                         }
                     )
 
