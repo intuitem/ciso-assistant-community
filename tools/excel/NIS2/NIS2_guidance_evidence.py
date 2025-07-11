@@ -1,3 +1,7 @@
+"""
+Extract "GUIDANCE" (annotation) and "EXAMPLES OF EVIDENCE" (typical_evidence) from the NIS2 PDF file.
+"""
+
 import re
 import sys
 import pandas as pd

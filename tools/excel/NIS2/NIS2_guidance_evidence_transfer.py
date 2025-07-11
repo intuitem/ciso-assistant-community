@@ -1,3 +1,8 @@
+"""
+This script copies the columns "annotation" and "typical_evidence" from a source Excel file to a destination Excel file
+by matching rows based on the "ref_id" column, inserting the new columns after "description" in the "req_content" sheet.
+"""
+
 import argparse
 import shutil
 from pathlib import Path

@@ -1,3 +1,33 @@
+"""
+Simple PDF Text Extractor Script
+-------------------------
+
+This script extracts structured text from a PDF file using PyMuPDF (fitz),
+preserving the relative layout of blocks as they appear on each page.
+
+Features:
+- Extracts text in reading order (top-to-bottom, left-to-right).
+- Allows specifying a page range via --start and --end.
+- Can optionally suppress page separators with --no-page-break.
+- Outputs the result to a .txt file.
+
+Usage (from command line):
+    python extract_pdf_text.py input.pdf
+    python extract_pdf_text.py input.pdf -o output.txt
+    python extract_pdf_text.py input.pdf --start 3 --end 10 --no-page-break
+
+Requirements:
+    pip install PyMuPDF
+
+WARNING:
+    Text extraction from PDFs is inherently imperfect. The structure may not exactly
+    match the visual layout, and line breaks or text order can be inconsistent,
+    depending on how the PDF was generated. If you plan to apply post-processing scripts,
+    you may need to manually adjust or clean some parts of the extracted text.
+"""
+
+
+
 import fitz  # PyMuPDF
 import argparse
 import os
