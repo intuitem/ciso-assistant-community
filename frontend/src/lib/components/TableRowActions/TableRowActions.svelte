@@ -182,6 +182,16 @@
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor
 			>
 		{/if}
+		{#if URLModel === 'operating-modes'}
+			<Anchor
+				breadcrumbAction="push"
+				label={m.graph()}
+				href={`/operating-modes/${row.meta.id}/graph/`}
+				stopPropagation
+				class="unstyled cursor-pointer hover:text-primary-500"
+				data-testid="tablerow-edit-button"><i class="fa-solid fa-project-diagram"></i></Anchor
+			>
+		{/if}
 		{#if displayEdit}
 			<Anchor
 				breadcrumbAction="push"

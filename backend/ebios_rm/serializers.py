@@ -464,6 +464,7 @@ class KillChainReadSerializer(BaseModelSerializer):
     elementary_action = FieldsRelatedField()
     antecedents = FieldsRelatedField(many=True)
     attack_stage = serializers.CharField()
+    folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
 
     class Meta:
