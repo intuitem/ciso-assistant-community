@@ -1084,17 +1084,17 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/kill-chains'
 			}
 		],
-		// detailViewFields: [
-		//  	{ field: 'id' },
-		//  	{ field: 'ref_id' },
-		//  	{ field: 'name' },
-		//  	{ field: 'description' },
-		//  	{ field: 'operational_scenario' },
-		//      { field: 'likelihood'},
-		//  	{ field: 'created_at' },
-		//  	{ field: 'updated_at' },
-		//  ],
-
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'operational_scenario' },
+			{ field: 'likelihood' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
 	},
 	'kill-chains': {
 		endpointUrl: 'ebios-rm/kill-chains',

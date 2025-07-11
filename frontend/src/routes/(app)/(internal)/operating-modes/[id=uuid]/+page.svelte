@@ -108,7 +108,7 @@
 			listJustify="justify-center"
 		>
 			{#snippet list()}
-				{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+				{#each Object.entries(data.relatedModels).sort( ([a], [b]) => a.localeCompare(b) ) as [urlmodel, model]}
 					<Tabs.Control value={urlmodel}>
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.table.body.length > 0}

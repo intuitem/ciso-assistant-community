@@ -334,6 +334,19 @@
 				: Object.hasOwn(user.permissions, `add_${model.name}`)
 			: false
 	);
+	console.log(
+		canPerformAction({
+			user,
+			action: 'add',
+			model: model.name,
+			domain:
+				folderId ||
+				page.data?.data?.folder?.id ||
+				page.data?.data?.folder ||
+				page.params.id ||
+				user.root_folder_id
+		})
+	);
 	let contextMenuCanEditObject = $derived(
 		(model
 			? page.params.id

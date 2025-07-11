@@ -81,6 +81,15 @@
 		{form}
 		multiple
 		optionsEndpoint="elementary-actions"
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'attack_stage',
+					translate: true
+				}
+			],
+			classes: 'text-yellow-700'
+		}}
 		field="elementary_actions"
 		cacheLock={cacheLocks['elementary_actions']}
 		bind:cachedValue={formDataCache['elementary_actions']}
