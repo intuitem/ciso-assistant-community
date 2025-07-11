@@ -74,10 +74,11 @@
 				URLModel: URLModel
 			}
 		};
+		console.log('row', row)
 		const name =
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
-				: (row.name ?? Object.values(row)[0]);
+				: (row.name ?? row.meta.str ?? Object.values(row)[0]);
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name })
