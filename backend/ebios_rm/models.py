@@ -1,6 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 from auditlog.registry import auditlog
 
@@ -21,6 +23,8 @@ from core.validators import (
 from iam.models import FolderMixin, User
 from tprm.models import Entity
 
+from django.core.exceptions import ValidationError
+
 INITIAL_META = {
     "workshops": [
         {
@@ -33,7 +37,7 @@ INITIAL_META = {
         },
         {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
         {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
-        {"steps": [{"status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
         {
             "steps": [
                 {"status": "to_do"},
@@ -58,6 +62,10 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
+
+    class QuotationMethod(models.TextChoices):
+        MANUAL = "manual", "Manual"
+        EXPRESS = "express", "Express"
 
     META_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -165,6 +173,16 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         validators=[JSONSchemaInstanceValidator(META_JSONSCHEMA)],
     )
 
+    quotation_method = models.CharField(
+        max_length=100,
+        choices=QuotationMethod.choices,
+        default=QuotationMethod.MANUAL,
+        verbose_name=_("Quotation method"),
+        help_text=_(
+            "Method used to quote the study: 'manual' for manual likelihood assessment, 'express' for automatic propagation from operating modes"
+        ),
+    )
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -212,12 +230,20 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     def update_workshop_step_status(self, workshop: int, step: int, new_status: str):
         if workshop < 1 or workshop > 5:
             raise ValueError("Workshop must be between 1 and 5")
-        if step < 1 or step > len(self.meta["workshops"][workshop - 1]["steps"]):
+
+        # Workshop 4 uses 0-based indexing (steps 0, 1, 2)
+        min_step = 0 if workshop == 4 else 1
+
+        if step < min_step or step > len(
+            self.meta["workshops"][workshop - 1]["steps"]
+        ) - (1 - min_step):
             raise ValueError(
-                f"Worshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
+                f"Workshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
             )
-        status = new_status
-        self.meta["workshops"][workshop - 1]["steps"][step - 1]["status"] = status
+
+        # Workshop 4 uses step directly, others use step - 1
+        index = step if workshop == 4 else step - 1
+        self.meta["workshops"][workshop - 1]["steps"][index]["status"] = new_status
         return self.save()
 
 
@@ -299,6 +325,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         AMATEUR = "amateur", _("Amateur")
         AVENGER = "avenger", _("Avenger")
         PATHOLOGICAL = "pathological", _("Pathological")
+        OTHER = "other", _("Other")
 
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
@@ -618,6 +645,156 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         return self.ro_to_couple.get_gravity()
 
 
+class ElementaryAction(NameDescriptionMixin, FolderMixin):
+    ICON_MAP = {
+        "server": {"hex": "f233", "fa": "fas fa-server"},
+        "computer": {"hex": "f108", "fa": "fas fa-desktop"},
+        "cloud": {"hex": "f0c2", "fa": "fas fa-cloud"},
+        "file": {"hex": "f15b", "fa": "fas fa-file"},
+        "diamond": {"hex": "f3a5", "fa": "far fa-gem"},
+        "phone": {"hex": "f095", "fa": "fas fa-phone"},
+        "cube": {"hex": "f1b2", "fa": "fas fa-cube"},
+        "blocks": {"hex": "f1b3", "fa": "fas fa-cubes"},
+        "shapes": {"hex": "f61f", "fa": "fas fa-shapes"},
+        "network": {"hex": "f6ff", "fa": "fas fa-network-wired"},
+        "database": {"hex": "f1c0", "fa": "fas fa-database"},
+        "key": {"hex": "f084", "fa": "fas fa-key"},
+        "search": {"hex": "f002", "fa": "fa-solid fa-magnifying-glass"},
+        "carrot": {"hex": "f084", "fa": "fa-solid fa-carrot"},
+        "money": {"hex": "f81d", "fa": "fa-solid fa-sack-dollar"},
+        "skull": {"hex": "f714", "fa": "fa-solid fa-skull-crossbones"},
+        "globe": {"hex": "f0ac", "fa": "fa-solid fa-globe"},
+        "usb": {"hex": "f287", "fa": "fa-brands fa-usb"},
+    }
+
+    class Icon(models.TextChoices):
+        SERVER = "server", "Server"
+        COMPUTER = "computer", "Computer"
+        CLOUD = "cloud", "Cloud"
+        FILE = "file", "File"
+        DIAMOND = "diamond", "Diamond"
+        PHONE = "phone", "Phone"
+        CUBE = "cube", "Cube"
+        BLOCKS = "blocks", "Blocks"
+        SHAPES = "shapes", "Shapes"
+        NETWORK = "network", "Network"
+        DATABASE = "database", "Database"
+        KEY = "key", "Key"
+        SEARCH = "search", "Search"
+        CARROT = "carrot", "Carrot"
+        MONEY = "money", "Money"
+        SKULL = "skull", "Skull"
+        GLOBE = "globe", "Globe"
+        USB = "usb", "USB"
+
+    class AttackStage(models.IntegerChoices):
+        KNOW = 0, "ebiosReconnaissance"
+        ENTER = 1, "ebiosInitialAccess"
+        DISCOVER = 2, "ebiosDiscovery"
+        EXPLOIT = 3, "ebiosExploitation"
+
+    ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
+    threat = models.ForeignKey(
+        Threat,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Threat"),
+        related_name="elementary_actions",
+        help_text=_("Threat that the elementary action is derived from"),
+        null=True,
+        blank=True,
+    )
+    attack_stage = models.SmallIntegerField(
+        choices=AttackStage.choices,
+        default=AttackStage.KNOW,
+        verbose_name="Attack Stage",
+        help_text="Stage of the attack in the kill chain (e.g., 'Know', 'Enter', 'Discover', 'Exploit')",
+    )
+    icon = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        choices=Icon.choices,
+        verbose_name="Icon",
+        help_text="Icon representing the elementary action",
+    )
+
+    @property
+    def icon_fa_hex(self):
+        return f"&#x{self.ICON_MAP.get(self.icon)['hex']};" if self.icon else None
+
+    @property
+    def icon_fa_class(self):
+        return self.ICON_MAP.get(self.icon)["fa"] if self.icon else None
+
+    fields_to_check = ["name"]
+
+    def __str__(self):
+        return self.name if hasattr(self, "name") else f"ElementaryAction {self.id}"
+
+    class Meta:
+        verbose_name = "Elementary Action"
+        verbose_name_plural = "Elementary Actions"
+        ordering = ["name"]
+
+
+class OperatingMode(NameDescriptionMixin, FolderMixin):
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="Reference ID"
+    )
+    operational_scenario = models.ForeignKey(
+        "OperationalScenario",
+        verbose_name=_("Operational scenario"),
+        on_delete=models.CASCADE,
+        related_name="operating_modes",
+    )
+    elementary_actions = models.ManyToManyField(
+        ElementaryAction,
+        verbose_name=_("Elementary actions"),
+        related_name="operating_modes",
+        help_text=_("Elementary actions that are part of the operating mode"),
+        blank=True,
+    )
+    likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
+
+    fields_to_check = ["name", "operational_scenario", "ref_id"]
+
+    class Meta:
+        verbose_name = "Operating Mode"
+        verbose_name_plural = "Operating Modes"
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.operational_scenario.folder
+        super().save(*args, **kwargs)
+
+    @property
+    def ebios_rm_study(self):
+        return self.operational_scenario.ebios_rm_study
+
+    @property
+    def risk_matrix(self):
+        return self.operational_scenario.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
+    def get_likelihood_display(self):
+        return OperationalScenario.format_likelihood(
+            self.likelihood, self.parsed_matrix
+        )
+
+    @classmethod
+    def get_default_ref_id(cls, operational_scenario):
+        """return associated risk assessment id"""
+        operating_modes_ref_ids = [
+            x.ref_id for x in operational_scenario.operating_modes.all()
+        ]
+        nb_operating_modes = len(operating_modes_ref_ids) + 1
+        candidates = [f"MO.{i:02d}" for i in range(1, nb_operating_modes + 1)]
+        return next(x for x in candidates if x not in operating_modes_ref_ids)
+
+
 class OperationalScenario(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
@@ -647,6 +824,10 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+
+    @property
+    def quotation_method(self):
+        return self.ebios_rm_study.quotation_method
 
     class Meta:
         verbose_name = _("Operational scenario")
@@ -744,6 +925,93 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             **risk_matrix["risk"][risk_index],
             "value": risk_index,
         }
+
+    @receiver([post_save, post_delete], sender=OperatingMode)
+    def update_likelihood_from_operating_modes(sender, instance, **kwargs):
+        if instance.operational_scenario.ebios_rm_study.quotation_method != "express":
+            return
+
+        max_likelihood = (
+            instance.operational_scenario.operating_modes.aggregate(
+                max_l=models.Max("likelihood")
+            )["max_l"]
+            if instance.operational_scenario.operating_modes.exists()
+            else -1
+        )
+
+        instance.operational_scenario.likelihood = max_likelihood
+        instance.operational_scenario.save(update_fields=["likelihood"])
+
+    @receiver(post_save, sender=EbiosRMStudy)
+    def update_scenarios_likelihood_on_quotation_method_change(
+        sender, instance, **kwargs
+    ):
+        if instance.quotation_method != "express":
+            return
+
+        for scenario in instance.operational_scenarios.all():
+            scenario.update_likelihood_from_operating_modes(
+                instance=scenario.operating_modes.first()
+            )
+
+
+class KillChain(AbstractBaseModel, FolderMixin):
+    class LogicOperator(models.TextChoices):
+        AND = "AND", "AND"
+        OR = "OR", "OR"
+
+    operating_mode = models.ForeignKey(
+        OperatingMode, on_delete=models.CASCADE, related_name="kill_chain_steps"
+    )
+    elementary_action = models.ForeignKey(
+        ElementaryAction, on_delete=models.PROTECT, related_name="as_kill_chain"
+    )
+    is_highlighted = models.BooleanField(default=False)
+    logic_operator = models.CharField(
+        max_length=10,
+        choices=LogicOperator.choices,
+        blank=True,
+        null=True,
+        help_text="Logic operator to apply between antecedents",
+    )
+
+    antecedents = models.ManyToManyField(
+        ElementaryAction,
+        related_name="kill_chain_antecedents",
+        blank=True,
+        help_text="Elementary actions that are antecedents to this action in the kill chain",
+    )
+
+    @property
+    def attack_stage(self):
+        return self.elementary_action.get_attack_stage_display()
+
+    class Meta:
+        verbose_name = "Kill Chain"
+        verbose_name_plural = "Kill Chains"
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.operating_mode.folder
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        existing = KillChain.objects.filter(
+            operating_mode=self.operating_mode,
+            elementary_action=self.elementary_action,
+        )
+        if self.pk:
+            existing = existing.exclude(pk=self.pk)
+
+        if existing.exists():
+            raise ValidationError(
+                {
+                    "elementary_action": f"The elementary action '{self.elementary_action}' is already used in this operating mode's kill chain."
+                }
+            )
+
+    def __str__(self):
+        return f"{self.operating_mode} - {self.elementary_action.name}"
 
 
 common_exclude = ["created_at", "updated_at"]
