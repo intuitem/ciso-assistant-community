@@ -651,6 +651,11 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         "network": {"hex": "f6ff", "fa": "fas fa-network-wired"},
         "database": {"hex": "f1c0", "fa": "fas fa-database"},
         "key": {"hex": "f084", "fa": "fas fa-key"},
+        "search": {"hex": "f002", "fa": "fa-solid fa-magnifying-glass"},
+        "carrot": {"hex": "f084", "fa": "fa-solid fa-carrot"},
+        "money": {"hex": "f0d6", "fa": "fa-solid fa-money-bill"},
+        "skull": {"hex": "f714", "fa": "fa-solid fa-skull-crossbones"},
+        "globe": {"hex": "f0ac", "fa": "fa-solid fa-globe"},
     }
 
     class Icon(models.TextChoices):
@@ -666,6 +671,11 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         NETWORK = "network", "Network"
         DATABASE = "database", "Database"
         KEY = "key", "Key"
+        SEARCH = "search", "Search"
+        CARROT = "carrot", "Carrot"
+        MONEY = "money", "Money"
+        SKULL = "skull", "Skull"
+        GLOBE = "globe", "Globe"
 
     class AttackStage(models.IntegerChoices):
         KNOW = 0, "ebiosReconnaissance"
