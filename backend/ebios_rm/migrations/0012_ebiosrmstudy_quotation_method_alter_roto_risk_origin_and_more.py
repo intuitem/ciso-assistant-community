@@ -6,6 +6,23 @@ import uuid
 from django.db import migrations, models
 
 
+def modify_all_ebiosrmstudy(apps, schema_editor):
+    EbiosRmStudy = apps.get_model("ebios_rm", "EbiosRmStudy")
+    for study in EbiosRmStudy.objects.all():
+        try:
+            if (
+                study.meta
+                and "workshops" in study.meta
+                and len(study.meta["workshops"]) > 3
+                and "steps" in study.meta["workshops"][3]
+                and len(study.meta["workshops"][3]["steps"]) != 3
+            ):
+                study.meta["workshops"][3]["steps"] = [{"status": "to_do"}] * 3
+                study.save()
+        except (KeyError, TypeError, IndexError):
+            pass
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0082_riskscenario_inherent_impact_and_more"),
@@ -304,4 +321,5 @@ class Migration(migrations.Migration):
                 "ordering": ["created_at"],
             },
         ),
+        migrations.RunPython(modify_all_ebiosrmstudy, migrations.RunPython.noop),
     ]
