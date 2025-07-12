@@ -27,11 +27,11 @@ importers:
         specifier: ^8.35.0
         version: 8.35.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
       '@unovis/svelte':
-        specifier: 1.4.3-beta.0
-        version: 1.4.3-beta.0(@unovis/ts@1.4.3-beta.0)(svelte@5.34.8)
+        specifier: 1.5.2
+        version: 1.5.2(@unovis/ts@1.5.2)(svelte@5.34.8)
       '@unovis/ts':
-        specifier: 1.4.3-beta.0
-        version: 1.4.3-beta.0
+        specifier: 1.5.2
+        version: 1.5.2
       bits-ui:
         specifier: ^0.22.0
         version: 0.22.0(svelte@5.34.8)
@@ -1506,14 +1506,14 @@ packages:
   '@unovis/graphlibrary@2.2.0-2':
     resolution: {integrity: sha512-HeEzpd/vDyWiIJt0rnh+2ICXUIuF2N0+Z9OJJiKg0DB+eFUcD+bk+9QPhYHwkFwfxdjDA9fHi1DZ/O/bbV58Nw==}
 
-  '@unovis/svelte@1.4.3-beta.0':
-    resolution: {integrity: sha512-6rpY7aFhqmWgz4VixX0UgCaMrw8wlRzhjPox31qdO9DDTsE6Em4+mpMXCzKj1WpRx1GZ8CDdcCfYRiot0CEdTw==}
+  '@unovis/svelte@1.5.2':
+    resolution: {integrity: sha512-TSqJFvbBnkHAZ4Wjt6qBcsza+bGGAjlXORCQJ1nN1PuVNAxlnnwJsx80fd9jpK6lHsp/IovqPt6fcUHBQwpLkw==}
     peerDependencies:
-      '@unovis/ts': 1.4.3-beta.0
-      svelte: ^3.48.0 || ^4.0.0
+      '@unovis/ts': 1.5.2
+      svelte: '^3.48.0 || ^4.0.0 '
 
-  '@unovis/ts@1.4.3-beta.0':
-    resolution: {integrity: sha512-8Uyf6yHkOP1a1NoIONrUp+PxsRmgTkxA4KvqXyylqrwFXFNY5spmZndc8oMv14257iJUr7W0TJlAtEADOwiajw==}
+  '@unovis/ts@1.5.2':
+    resolution: {integrity: sha512-gpg81cr1z/Q9N45wFUkYCGN8o3GbW9U1qx2iQr+xTgyPFoKR9y9+b/savitxzaMGulHAF7cKlm0Nz/pBbQsFoA==}
 
   '@vincjo/datatables@1.14.10':
     resolution: {integrity: sha512-gtojSC/LKDHbh2ZGZeaAQ+lLltcmcSDDLkecgb9WpG7lHmd4b/1HUTtFWAJt43TnaK8SrciGugh9VRRZN53bpw==}
@@ -2232,8 +2232,8 @@ packages:
   effect@3.16.10:
     resolution: {integrity: sha512-F0hDCOLax7i3SOy5wQnJZTzKP9aGg8OQNUJ2s8YoL5fVcCgRCgE+Ky+Hfz5qC7LgVVOWDDbRpCh5MPB20wRI8Q==}
 
-  elkjs@0.8.2:
-    resolution: {integrity: sha512-L6uRgvZTH+4OF5NE/MBbzQx/WYpru1xCBE9respNj6qznEewGUIfhzmm7horWWxbNO2M0WckQypGctR8lH79xQ==}
+  elkjs@0.10.0:
+    resolution: {integrity: sha512-v/3r+3Bl2NMrWmVoRTMBtHtWvRISTix/s9EfnsfEWApNrsmNjqgqJOispCGg46BPwIFdkag3N/HYSxJczvCm6w==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -5514,12 +5514,12 @@ snapshots:
     dependencies:
       lodash-es: 4.17.21
 
-  '@unovis/svelte@1.4.3-beta.0(@unovis/ts@1.4.3-beta.0)(svelte@5.34.8)':
+  '@unovis/svelte@1.5.2(@unovis/ts@1.5.2)(svelte@5.34.8)':
     dependencies:
-      '@unovis/ts': 1.4.3-beta.0
+      '@unovis/ts': 1.5.2
       svelte: 5.34.8
 
-  '@unovis/ts@1.4.3-beta.0':
+  '@unovis/ts@1.5.2':
     dependencies:
       '@emotion/css': 11.13.5
       '@juggle/resize-observer': 3.4.0
@@ -5542,7 +5542,7 @@ snapshots:
       d3-geo-projection: 4.0.0
       d3-interpolate-path: 2.3.0
       d3-sankey: 0.12.3
-      elkjs: 0.8.2
+      elkjs: 0.10.0
       geojson: 0.5.0
       leaflet: 1.7.1
       maplibre-gl: 2.4.0
@@ -6439,7 +6439,7 @@ snapshots:
       fast-check: 3.23.2
     optional: true
 
-  elkjs@0.8.2: {}
+  elkjs@0.10.0: {}
 
   emoji-regex@8.0.0: {}
 

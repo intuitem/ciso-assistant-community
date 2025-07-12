@@ -897,7 +897,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' }
 		],
-		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }]
+		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }],
+		selectFields: [{ field: 'quotation_method' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',
@@ -1033,7 +1034,90 @@ export const URL_MODEL_MAP: ModelMap = {
 				detail: true
 			}
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+		reverseForeignKeyFields: [
+			{
+				field: 'operational_scenario',
+				urlModel: 'operating-modes',
+				endpointUrl: 'ebios-rm/operating-modes'
+			}
+		],
+		selectFields: [
+			{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }
+		]
+	},
+	'elementary-actions': {
+		endpointUrl: 'ebios-rm/elementary-actions',
+		name: 'elementaryaction',
+		localName: 'elementaryAction',
+		localNamePlural: 'elementaryActions',
+		verboseName: 'Elementary action',
+		verboseNamePlural: 'Elementary actions',
+		foreignKeyFields: [
+			{ field: 'threat', urlModel: 'threats' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'attack_stage', valueType: 'number' }, { field: 'icon' }],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'threat' },
+			{ field: 'icon' },
+			{ field: 'attack_stage' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
+	},
+	'operating-modes': {
+		endpointUrl: 'ebios-rm/operating-modes',
+		name: 'operatingmode',
+		localName: 'operatingMode',
+		localNamePlural: 'operatingModes',
+		verboseName: 'Operating mode',
+		verboseNamePlural: 'Operating modes',
+		foreignKeyFields: [
+			{ field: 'operational_scenario', urlModel: 'operational-scenarios' },
+			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }],
+		reverseForeignKeyFields: [
+			{
+				field: 'operating_modes',
+				urlModel: 'elementary-actions',
+				endpointUrl: 'ebios-rm/elementary-actions',
+				disableDelete: true
+			},
+			{
+				field: 'operating_mode',
+				urlModel: 'kill-chains',
+				endpointUrl: 'ebios-rm/kill-chains'
+			}
+		],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'operational_scenario' },
+			{ field: 'likelihood' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
+	},
+	'kill-chains': {
+		endpointUrl: 'ebios-rm/kill-chains',
+		name: 'killchain',
+		localName: 'killChain',
+		localNamePlural: 'killChains',
+		verboseName: 'Kill chain',
+		verboseNamePlural: 'Kill chains',
+		foreignKeyFields: [
+			{ field: 'operating_mode', urlModel: 'operating-modes' },
+			{ field: 'elementary_action', urlModel: 'elementary-actions' },
+			{ field: 'antecedents', urlModel: 'elementary-actions' }
+		],
+		selectFields: [{ field: 'logic_operator' }]
 	},
 	'security-exceptions': {
 		name: 'securityexception',

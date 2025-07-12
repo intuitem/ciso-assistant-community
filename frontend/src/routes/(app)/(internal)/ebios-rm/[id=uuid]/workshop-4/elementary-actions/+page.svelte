@@ -29,8 +29,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model,
-				customNameDescription: true
+				model: data.model
 			}
 		};
 		let modal: ModalSettings = {
@@ -41,17 +40,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-
-	let activeActivity: string | null = $state(null);
-	page.url.searchParams.forEach((value, key) => {
-		if (key === 'activity' && value === 'one') {
-			activeActivity = 'one';
-		} else if (key === 'activity' && value === 'two') {
-			activeActivity = 'two';
-		} else if (key === 'activity' && value === 'three') {
-			activeActivity = 'three';
-		}
-	});
 </script>
 
 <div class="flex items-center justify-between mb-4">
@@ -64,18 +52,12 @@
 		<p>{m.goBackToEbiosRmStudy()}</p>
 	</Anchor>
 </div>
-<div
-	class="rounded-xl bg-linear-to-r from-slate-50 to-white shadow mb-4 p-2 text-xs text-slate-600 whitespace-pre-line ml-auto"
->
-	<i class="fa-solid fa-circle-info"></i>
-	{m.ebiosOperationalScenarioHelp()}
-</div>
+
 <ModelTable
 	source={data.table}
 	deleteForm={data.deleteForm}
 	{URLModel}
-	detailQueryParameter={`activity=${activeActivity}`}
-	baseEndpoint="/operational-scenarios?ebios_rm_study={page.params.id}"
+	baseEndpoint="/elementary-actions"
 >
 	{#snippet addButton()}
 		<div>
