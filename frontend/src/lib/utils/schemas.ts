@@ -621,6 +621,7 @@ export const personalDataSchema = z.object({
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
+	quotation_method: z.string().optional().default('manual'),
 	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),
@@ -838,6 +839,32 @@ export const AuthTokenCreateSchema = z.object({
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
+export const ElementaryActionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	threat: z.string().uuid().optional(),
+	icon: z.string().optional().nullable(),
+	attack_stage: z.number().default(0),
+	operating_modes: z.string().uuid().optional().array().optional()
+});
+
+export const OperatingModeSchema = z.object({
+	...NameDescriptionMixin,
+	operational_scenario: z.string().uuid(),
+	ref_id: z.string().optional(),
+	elementary_actions: z.string().uuid().optional().array().optional(),
+	likelihood: z.number().optional().default(-1)
+});
+
+export const KillChainSchema = z.object({
+	operating_mode: z.string().uuid(),
+	elementary_action: z.string().uuid(),
+	// is_highlighted: z.boolean().default(false),
+	antecedents: z.string().uuid().optional().array().optional(),
+	logic_operator: z.string().optional().nullable()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -889,7 +916,10 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'task-templates': TaskTemplateSchema,
-	'task-nodes': TaskNodeSchema
+	'task-nodes': TaskNodeSchema,
+	'elementary-actions': ElementaryActionSchema,
+	'operating-modes': OperatingModeSchema,
+	'kill-chains': KillChainSchema
 };
 
 export const modelSchema = (model: string) => {

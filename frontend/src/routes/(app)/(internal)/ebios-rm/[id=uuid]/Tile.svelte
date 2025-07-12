@@ -13,6 +13,7 @@
 		borderColor?: string;
 		createRiskAnalysis?: boolean;
 		workshop?: number;
+		startAtZero?: boolean;
 		action?: import('svelte').Snippet;
 		content?: import('svelte').Snippet;
 		addRiskAnalysis?: import('svelte').Snippet;
@@ -25,6 +26,7 @@
 		borderColor = '',
 		createRiskAnalysis = false,
 		workshop = 0,
+		startAtZero = false,
 		action,
 		content,
 		addRiskAnalysis
@@ -41,6 +43,10 @@
 				? 'in_progress'
 				: 'to_do'
 	);
+
+	function getStepNumber(index: number): number {
+		return startAtZero ? index : index + 1;
+	}
 
 	function updateStepStatus(i: number) {
 		return async () => {
@@ -76,21 +82,21 @@
 				<div>
 					<ol class="relative text-gray-500 border-s border-gray-200">
 						{#each steps as step, i}
-							<li class="flex flex-row justify-between mb-10 ms-6">
+							<li class="flex flex-row justify-between items-start gap-8 mb-10 ms-6">
 								{#if createRiskAnalysis && i === 0}
 									{@render addRiskAnalysis?.()}
 								{:else if !step.disabled}
 									<Anchor
 										href={step.href}
 										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
-										label={safeTranslate(`ebiosWs${workshop}_${i + 1}`)}
+										label={safeTranslate(`ebiosWs${workshop}_${getStepNumber(i)}`)}
 										class="hover:text-purple-800"
 									>
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 {step.status ===
 											'done'
 												? 'bg-success-200'
-												: 'bg-surface-200'} rounded-full -start-6 ring-4 ring-white"
+												: 'bg-surface-200'} rounded-full -start-4 ring-4 ring-white"
 										>
 											<i
 												class="fa-solid {step.status === 'done'
@@ -99,8 +105,13 @@
 												aria-hidden="true"
 											></i>
 										</span>
-										<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-										<p class="text-sm">{step.title}</p>
+										{#if step.preliminary}
+											<h3 class="font-medium leading-tight">Preliminary step</h3>
+											<p class="text-sm">{step.title}</p>
+										{:else}
+											<h3 class="font-medium leading-tight">{m.activity()} {getStepNumber(i)}</h3>
+											<p class="text-sm">{step.title}</p>
+										{/if}
 									</Anchor>
 								{:else}
 									<Tooltip
@@ -112,12 +123,20 @@
 										{#snippet trigger()}
 											<div class="text-gray-300 *:pointer-events-none">
 												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-6 ring-4 ring-white"
+													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
 												>
 													<i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
 												</span>
-												<h3 class="font-medium leading-tight text-start">{m.activity()} {i + 1}</h3>
-												<p class="text-sm text-start">{step.title}</p>
+												{#if step.preliminary}
+													<h3 class="font-medium leading-tight text-start">Preliminary step</h3>
+													<p class="text-sm text-start">{step.title}</p>
+												{:else}
+													<h3 class="font-medium leading-tight text-start">
+														{m.activity()}
+														{getStepNumber(i)}
+													</h3>
+													<p class="text-sm text-start">{step.title}</p>
+												{/if}
 											</div>
 										{/snippet}
 										{#snippet content()}
@@ -158,7 +177,7 @@
 													use:enhance={updateStepStatus(i)}
 												>
 													<input type="hidden" name="workshop" value={workshop} />
-													<input type="hidden" name="step" value={i + 1} />
+													<input type="hidden" name="step" value={getStepNumber(i)} />
 													<input
 														type="hidden"
 														name="status"

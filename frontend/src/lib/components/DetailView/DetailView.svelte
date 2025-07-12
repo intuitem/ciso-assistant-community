@@ -75,8 +75,10 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
+	let filteredData = $state(data.data);
+
 	if (data.model?.detailViewFields) {
-		data.data = Object.fromEntries(
+		filteredData = Object.fromEntries(
 			Object.entries(data.data).filter(
 				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
 			)
@@ -285,7 +287,7 @@
 			<!-- Left side - Details (now takes half width) -->
 			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4"
 						>
@@ -399,6 +401,9 @@
 											{:else if value === 'P4'}
 												<li class="fa-solid fa-flag text-gray-500"></li>
 												{m.p4()}
+											{:else if key === 'icon'}
+												<i class="text-lg fa {data.data.icon_fa_class}"></i>
+												{safeTranslate((value.str || value.name) ?? value)}
 											{:else if isURL(value) && !value.startsWith('urn')}
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor

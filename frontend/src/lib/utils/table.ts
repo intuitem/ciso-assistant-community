@@ -1000,13 +1000,25 @@ export const listViewFields = {
 		}
 	},
 	'operational-scenarios': {
-		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
-		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		head: ['is_selected', 'attackPath', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'attack_path', 'operating_modes_description', 'threats', 'likelihood'],
 		filters: {
 			threats: THREAT_FILTER,
 			likelihood: RISK_PROBABILITY_FILTER,
 			is_selected: IS_SELECTED_FILTER
 		}
+	},
+	'elementary-actions': {
+		head: ['ref_id', 'domain', '', 'name', 'attack_stage', 'threat'],
+		body: ['ref_id', 'domain', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+	},
+	'operating-modes': {
+		head: ['ref_id', 'name', 'likelihood'],
+		body: ['ref_id', 'name', 'likelihood']
+	},
+	'kill-chains': {
+		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
