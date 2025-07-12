@@ -35,8 +35,13 @@
 			const result = await response.json();
 			if (response.ok && result.results) {
 				form.form.update((currentData) => {
-					updated_fields.add('ref_id');
-					return { ...currentData, ref_id: result.results };
+					// Only update ref_id if it's empty/null/undefined
+					if (!currentData.ref_id || currentData.ref_id === '') {
+						updated_fields.add('ref_id');
+						return { ...currentData, ref_id: result.results };
+					}
+					// Return unchanged data if ref_id already has a value
+					return currentData;
 				});
 			} else {
 				console.error(result.error || 'Failed to fetch default ref_id');
