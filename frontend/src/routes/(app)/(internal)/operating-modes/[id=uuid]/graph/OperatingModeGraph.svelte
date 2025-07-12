@@ -18,18 +18,6 @@
 		target: string;
 	};
 
-	type PanelConfig = {
-		label: string;
-		nodes: string[];
-		padding?: { top: number; right: number; bottom: number; left: number };
-		sideIconSymbol?: string;
-		sideIconShape?: string;
-		sideIconSymbolColor?: string;
-		sideIconFontSize?: number;
-		dashedOutline?: boolean;
-		borderColor?: string;
-	};
-
 	type GraphData = {
 		nodes: NodeDatum[];
 		links: LinkDatum[];
@@ -49,8 +37,8 @@
 		disableZoom = false,
 		linkFlow = false,
 		layoutType = GraphLayoutType.Parallel,
-		layoutParallelGroupSpacing = 250, // Increased default spacing
-		layoutParallelNodesPerColumn = 4, // Reduced nodes per column for discovery
+		layoutParallelGroupSpacing = 250, // Increased from 200 for more space between columns
+		layoutParallelNodesPerColumn = 3, // Reduced from 4 to spread nodes more
 		layoutParallelSubGroupsPerRow = 3 // Control sub-groups per row
 	}: {
 		data: GraphData;
@@ -70,12 +58,12 @@
 		layoutParallelSubGroupsPerRow?: number;
 	} = $props();
 
-	// Build panels with optimized padding for discovery panel
+	// Build panels with increased padding for more space
 	const panels = $derived([
 		{
 			label: m.ebiosReconnaissance(),
 			nodes: panelNodes.reconnaissance,
-			padding: { top: 50, right: 60, bottom: 50, left: 60 },
+			padding: { top: 50, right: 80, bottom: 50, left: 80 }, // Increased horizontal padding
 			sideIconSymbol: '&#xf002;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'pink',
@@ -86,7 +74,7 @@
 		{
 			label: m.ebiosInitialAccess(),
 			nodes: panelNodes.initialAccess,
-			padding: { top: 50, right: 60, bottom: 50, left: 60 },
+			padding: { top: 50, right: 80, bottom: 50, left: 80 }, // Increased horizontal padding
 			sideIconSymbol: '&#xf504;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'violet',
@@ -97,7 +85,7 @@
 		{
 			label: m.ebiosDiscovery(),
 			nodes: panelNodes.discovery,
-			padding: { top: 50, right: 60, bottom: 50, left: 60 },
+			padding: { top: 50, right: 80, bottom: 50, left: 80 }, // Increased horizontal padding
 			sideIconSymbol: '&#xf140;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'orange',
@@ -108,7 +96,7 @@
 		{
 			label: m.ebiosExploitation(),
 			nodes: panelNodes.exploitation,
-			padding: { top: 50, right: 60, bottom: 50, left: 60 },
+			padding: { top: 50, right: 80, bottom: 50, left: 80 }, // Increased horizontal padding
 			sideIconSymbol: '&#xe4e9;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'red',
@@ -120,7 +108,7 @@
 
 	// Configuration constants
 	const DEFAULT_NODE_SHAPE = GraphNodeShape.Square;
-	const DEFAULT_NODE_SIZE = 60;
+	const DEFAULT_NODE_SIZE = 70;
 
 	function wrapText(text: string, maxLength: number = maxLineLength): string[] {
 		if (!text) return [];
@@ -159,7 +147,7 @@
 	function processNodesWithWrapping(nodes: NodeDatum[]): NodeDatum[] {
 		return nodes.map((node) => ({
 			...node,
-			label: node.label ? wrapText(node.label).join('\n') : node.label
+			label: node.label ? wrapText(node.label, 22).join('\n') : node.label
 		}));
 	}
 
@@ -230,6 +218,7 @@
 							.attr('x', 0)
 							.attr('y', startY + i * lineHeight)
 							.attr('font-size', '12px')
+							.attr('font-weight', '400')
 							.attr('fill', '#0F1E57')
 							.style('font-family', 'var(--vis-font-family)')
 							.text(line.trim());

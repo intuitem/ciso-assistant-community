@@ -653,9 +653,10 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         "key": {"hex": "f084", "fa": "fas fa-key"},
         "search": {"hex": "f002", "fa": "fa-solid fa-magnifying-glass"},
         "carrot": {"hex": "f084", "fa": "fa-solid fa-carrot"},
-        "money": {"hex": "f0d6", "fa": "fa-solid fa-money-bill"},
+        "money": {"hex": "f81d", "fa": "fa-solid fa-sack-dollar"},
         "skull": {"hex": "f714", "fa": "fa-solid fa-skull-crossbones"},
         "globe": {"hex": "f0ac", "fa": "fa-solid fa-globe"},
+        "usb": {"hex": "f287", "fa": "fa-brands fa-usb"},
     }
 
     class Icon(models.TextChoices):
@@ -676,6 +677,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         MONEY = "money", "Money"
         SKULL = "skull", "Skull"
         GLOBE = "globe", "Globe"
+        USB = "usb", "USB"
 
     class AttackStage(models.IntegerChoices):
         KNOW = 0, "ebiosReconnaissance"
