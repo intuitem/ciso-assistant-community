@@ -1281,8 +1281,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeters', urlModel: 'perimeters' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'campaign', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'campaigns', urlModel: 'perimeters', disableAddDeleteButtons: true }
+			{
+				field: 'campaign',
+				urlModel: 'compliance-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{ field: 'campaigns', urlModel: 'perimeters', disableCreate: true, disableDelete: true }
 		],
 		detailViewFields: [
 			{ field: 'id' },
