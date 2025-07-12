@@ -196,6 +196,9 @@
                         }
                     },
                     "type": "object"
+                },
+                "initContainers": {
+                    "type": "array"
                 }
             },
             "type": "object"
@@ -312,6 +315,9 @@
                         }
                     },
                     "type": "object"
+                },
+                "initContainers": {
+                    "type": "array"
                 }
             },
             "type": "object"
