@@ -9,18 +9,8 @@ from django.db import migrations, models
 def modify_all_ebiosrmstudy(apps, schema_editor):
     EbiosRmStudy = apps.get_model("ebios_rm", "EbiosRmStudy")
     for study in EbiosRmStudy.objects.all():
-        try:
-            if (
-                study.meta
-                and "workshops" in study.meta
-                and len(study.meta["workshops"]) > 3
-                and "steps" in study.meta["workshops"][3]
-                and len(study.meta["workshops"][3]["steps"]) != 3
-            ):
-                study.meta["workshops"][3]["steps"] = [{"status": "to_do"}] * 3
-                study.save()
-        except (KeyError, TypeError, IndexError):
-            pass
+        study.meta["workshops"][3]["steps"].insert(0, {"status": "to_do"})
+        study.save()
 
 
 class Migration(migrations.Migration):

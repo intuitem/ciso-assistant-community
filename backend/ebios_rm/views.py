@@ -86,7 +86,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         detail=True,
         methods=["patch"],
         name="Update workshop step status",
-        url_path="workshop/(?P<workshop>[1-5])/step/(?P<step>[1-5])",
+        url_path="workshop/(?P<workshop>[1-5])/step/(?P<step>[0-5])",
     )
     def update_workshop_step_status(self, request, pk, workshop, step):
         ebios_rm_study: EbiosRMStudy = self.get_object()
