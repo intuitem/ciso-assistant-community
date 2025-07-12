@@ -1690,10 +1690,10 @@
 	"logicOperator": "Opérateur logique",
 	"logicOperatorHelpText": "Permet de combiner plusieurs antécédents",
 	"isHighlighted": "Mise en évidence",
-	"killChains": "Chaine",
-	"killChain": "Etape de la chaine",
-	"associatedKillChains": "Etapes de la chaine",
-	"addKillChain": "Ajouter une étape à la chaine",
+	"killChains": "Enchaînement",
+	"killChain": "Etape de l'enchaînement",
+	"associatedKillChains": "Etapes",
+	"addKillChain": "Ajouter une étape",
 	"ebiosReconnaissance": "Connaître",
 	"ebiosInitialAccess": "Rentrer",
 	"ebiosDiscovery": "Trouver",
@@ -1701,6 +1701,7 @@
 	"ebiosOperationalScenarioHelp": "Les chemins d'attaque fournissent une description de haut niveau de la façon dont un scénario stratégique (de l'atelier 3) pourrait se dérouler. Bien qu'un scénario stratégique puisse avoir plusieurs chemins d'attaque, chaque chemin se traduit par un scénario opérationnel dans l'atelier 4. Vous pouvez ensuite décomposer chaque scénario opérationnel en plusieurs modes opératoires qui combinent des actions élémentaires pour décrire une chaîne complète.",
 	"moGraph": "Graphe",
 	"returnToMo": "Revenir au mode opératoire",
-	"graphAnimate": "Animate",
-	"graphStop": "Stop"
+	"graphAnimate": "Animer",
+	"graphStop": "Stop",
+  "graphMoHelp": "Vous pouvez repositionner les noeuds du graphe pour améliorer son rendu et réduire le croisement des lignes. Il est également conseillé d'avoir un enchaînement par mode opératoire pour une meilleure lisibilité et cotation."
 }
