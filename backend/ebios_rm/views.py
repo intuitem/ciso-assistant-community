@@ -351,7 +351,20 @@ class OperatingModeViewSet(BaseModelViewSet):
         }
         panel_nodes = {panel: [] for panel in panels.values()}
 
-        for ea in mo.elementary_actions.all().order_by("attack_stage"):
+        # Collect all elementary actions that are part of kill chain steps
+        kill_chain_ea_ids = set()
+        for step in mo.kill_chain_steps.all():
+            kill_chain_ea_ids.add(step.elementary_action.id)
+            # Also add antecedents
+            for ant in step.antecedents.all():
+                kill_chain_ea_ids.add(ant.id)
+
+        # Create nodes only for elementary actions in the kill chain
+        kill_chain_eas = mo.elementary_actions.filter(
+            id__in=kill_chain_ea_ids
+        ).order_by("attack_stage")
+
+        for ea in kill_chain_eas:
             stage = ea.attack_stage
             entry = {"id": ea.id, "label": ea.name, "group": groups.get(stage)}
             if ea.icon:
@@ -360,18 +373,17 @@ class OperatingModeViewSet(BaseModelViewSet):
             panel_name = panels.get(stage)
             if panel_name:
                 panel_nodes[panel_name].append(ea.id)
+
+        # Build links based on kill chain steps
         for step in mo.kill_chain_steps.all().order_by(
             "elementary_action__attack_stage"
         ):
             ea = step.elementary_action
-
             if step.antecedents.exists():
                 target = ea.id
-
                 if step.logic_operator:
                     # Get the stage from the first antecedent for panel placement
                     antecedent_stage = step.antecedents.first().attack_stage
-
                     nodes.append(
                         {
                             "id": step.id,
@@ -380,15 +392,12 @@ class OperatingModeViewSet(BaseModelViewSet):
                             "size": 45,
                         }
                     )
-
                     # Add logic operator to the same panel as its antecedents
                     panel_name = panels.get(antecedent_stage)
                     if panel_name:
                         panel_nodes[panel_name].append(step.id)
-
                     target = step.id
                     links.append({"source": step.id, "target": ea.id})
-
                 for ant in step.antecedents.all().order_by("attack_stage"):
                     links.append({"source": ant.id, "target": target})
 
