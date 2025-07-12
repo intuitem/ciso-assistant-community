@@ -44,6 +44,7 @@
 			fields: {
 				field: string; // Field name in the object
 				path?: string; // Optional, used for nested fields};
+				translate?: boolean; // Optional, used for translating the field
 				display?: (value: any) => string;
 			}[];
 			position?: 'suffix' | 'prefix'; // Default: 'suffix'
@@ -220,7 +221,7 @@
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
 						const value = getNestedValue(object, f.field, f.path);
-						return f.display ? f.display(value) : value;
+						return f.display ? f.display(value) : f.translate ? safeTranslate(value) : value;
 					})
 					.filter(Boolean);
 
