@@ -254,7 +254,6 @@
 			{linkStroke}
 			{linkArrow}
 			{linkFlow}
-			{linkArrowColor}
 			{linkArrowSize}
 		/>
 	</VisSingleContainer>
@@ -267,5 +266,6 @@
 	}
 	:global(:root) {
 		--vis-graph-panel-label-font-weight: 800;
+		--vis-graph-link-stroke-color: #8fa1b9;
 	}
 </style>
