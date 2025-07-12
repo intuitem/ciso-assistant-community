@@ -38,7 +38,7 @@
 		linkFlow = false,
 		layoutType = GraphLayoutType.Parallel,
 		layoutParallelGroupSpacing = 250, // Increased from 200 for more space between columns
-		layoutParallelNodesPerColumn = 3, // Reduced from 4 to spread nodes more
+		layoutParallelNodesPerColumn = 5, // Reduced from 4 to spread nodes more
 		layoutParallelSubGroupsPerRow = 3 // Control sub-groups per row
 	}: {
 		data: GraphData;
@@ -264,5 +264,8 @@
 	:global(.custom-multiline-label) {
 		font-family: var(--vis-font-family);
 		pointer-events: none;
+	}
+	:global(:root) {
+		--vis-graph-panel-label-font-weight: 800;
 	}
 </style>
