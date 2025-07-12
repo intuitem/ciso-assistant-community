@@ -230,12 +230,20 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     def update_workshop_step_status(self, workshop: int, step: int, new_status: str):
         if workshop < 1 or workshop > 5:
             raise ValueError("Workshop must be between 1 and 5")
-        if step < 1 or step > len(self.meta["workshops"][workshop - 1]["steps"]):
+
+        # Workshop 4 uses 0-based indexing (steps 0, 1, 2)
+        min_step = 0 if workshop == 4 else 1
+
+        if step < min_step or step > len(
+            self.meta["workshops"][workshop - 1]["steps"]
+        ) - (1 - min_step):
             raise ValueError(
-                f"Worshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
+                f"Workshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
             )
-        status = new_status
-        self.meta["workshops"][workshop - 1]["steps"][step - 1]["status"] = status
+
+        # Workshop 4 uses step directly, others use step - 1
+        index = step if workshop == 4 else step - 1
+        self.meta["workshops"][workshop - 1]["steps"][index]["status"] = new_status
         return self.save()
 
 
