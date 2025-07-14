@@ -48,3 +48,13 @@
 	cacheLock={cacheLocks['lc_status']}
 	bind:cachedValue={formDataCache['lc_status']}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="default_assignee"
+	cacheLock={cacheLocks['default_assignee']}
+	bind:cachedValue={formDataCache['default_assignee']}
+	label={m.defaultAssignee()}
+/>

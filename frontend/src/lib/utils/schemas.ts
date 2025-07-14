@@ -90,7 +90,8 @@ export const PerimeterSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	lc_status: z.string().optional().default('in_design')
+	lc_status: z.string().optional().default('in_design'),
+	default_assignee: z.array(z.string().optional()).optional()
 });
 
 export const RiskMatrixSchema = z.object({
