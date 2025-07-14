@@ -162,7 +162,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'perimeters',
 		verboseName: 'Perimeter',
 		verboseNamePlural: 'Perimeters',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'default_assignee', urlModel: 'users' }
+		],
 		selectFields: [{ field: 'lc_status' }],
 		reverseForeignKeyFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
