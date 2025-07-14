@@ -2953,6 +2953,9 @@ class RiskAssessment(Assessment):
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
     )
+    risk_appetite = models.SmallIntegerField(
+        default=-1, verbose_name=_("Risk appetite")
+    )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
