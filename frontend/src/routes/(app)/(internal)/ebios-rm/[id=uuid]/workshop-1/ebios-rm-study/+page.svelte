@@ -251,6 +251,7 @@
 											URLModel={urlmodel}
 											canSelectObject={canEditObject}
 											baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
+											disableDelete={true}
 										>
 											{#snippet selectButton()}
 												<div>
