@@ -1743,6 +1743,8 @@
 	"graphAnimate": "Animate",
 	"graphStop": "Stop",
 	"graphMoHelp": "You can move the graph nodes to improve the rendering and reduce links crossover. It's better to have one killchain per operating mode for readibility and independent quotation.",
+	"defaultAssignee": "Default assignee",
+	"defaultAssigneeHelpText": "This user will be preset automatically as author for all assessments of this perimeter",
 	"riskAppetite": "Risk appetite",
   "riskAppetiteHelpText": "Threshold of tolerable risk level"
 }
