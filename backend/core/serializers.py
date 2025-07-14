@@ -247,6 +247,7 @@ class PerimeterReadSerializer(BaseModelSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     folder = FieldsRelatedField()
     lc_status = serializers.CharField(source="get_lc_status_display")
+    default_assignee = FieldsRelatedField(many=True)
 
     class Meta:
         model = Perimeter

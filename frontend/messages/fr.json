@@ -1703,5 +1703,7 @@
 	"returnToMo": "Revenir au mode opératoire",
 	"graphAnimate": "Animer",
 	"graphStop": "Stop",
-	"graphMoHelp": "Vous pouvez repositionner les noeuds du graphe pour améliorer son rendu et réduire le croisement des lignes. Il est également conseillé d'avoir un enchaînement par mode opératoire pour une meilleure lisibilité et cotation."
+	"graphMoHelp": "Vous pouvez repositionner les noeuds du graphe pour améliorer son rendu et réduire le croisement des lignes. Il est également conseillé d'avoir un enchaînement par mode opératoire pour une meilleure lisibilité et cotation.",
+	"defaultAssignee": "Assignation par défaut",
+	"defaultAssigneeHelpText": "Cet utilisateur sera utilisé par défaut pour toutes les analyses de ce périmètre"
 }
