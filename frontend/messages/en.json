@@ -1746,5 +1746,5 @@
 	"defaultAssignee": "Default assignee",
 	"defaultAssigneeHelpText": "This user will be preset automatically as author for all assessments of this perimeter",
 	"riskAppetite": "Risk appetite",
-  "riskAppetiteHelpText": "Threshold of tolerable risk level"
+	"riskAppetiteHelpText": "Threshold of tolerable risk level"
 }

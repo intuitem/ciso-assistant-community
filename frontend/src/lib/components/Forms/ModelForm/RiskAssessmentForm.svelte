@@ -28,34 +28,27 @@
 		object = {}
 	}: Props = $props();
 
-	// State for risk appetite choices
 	let riskAppetiteChoices = $state<{ label: string; value: string }[]>([]);
 
 	async function handleRiskMatrixChange(id: string) {
-		console.log('handleRiskMatrixChange called with id:', id); // Debug log
-		// Reset choices first
 		riskAppetiteChoices = [];
 
 		if (id) {
 			try {
 				const response = await fetch(`/risk-matrices/${id}`);
-				console.log('Response status:', response.status); // Debug log
 				if (response.ok) {
 					const data = await response.json();
-					console.log('Risk matrix data:', data); // Debug log
 
 					// Access the first item in the results array
 					const riskMatrix = data.results && data.results.length > 0 ? data.results[0] : null;
 
 					if (riskMatrix && riskMatrix.json_definition) {
 						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
-						console.log('Parsed JSON definition:', jsonDefinition); // Debug log
 						const riskLevels = jsonDefinition.risk || [];
 						riskAppetiteChoices = riskLevels.map((level) => ({
 							label: level.name,
-							value: level.id.toString()
+							value: level.id
 						}));
-						console.log('Risk appetite choices:', riskAppetiteChoices); // Debug log
 					}
 				}
 			} catch (error) {
@@ -113,17 +106,17 @@
 		onChange={async (e) => await handleRiskMatrixChange(e)}
 		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
-	<!-- Debug: Always show risk appetite field -->
-	<AutocompleteSelect
-		translateOptions={false}
-		{form}
-		options={riskAppetiteChoices}
-		field="risk_appetite"
-		cacheLock={cacheLocks['risk_appetite']}
-		bind:cachedValue={formDataCache['risk_appetite']}
-		label={m.riskAppetite()}
-		helpText="Debug: Choices length: {riskAppetiteChoices.length}"
-	/>
+	{#if riskAppetiteChoices.length > 0}
+		<Select
+			{form}
+			options={riskAppetiteChoices}
+			field="risk_appetite"
+			cacheLock={cacheLocks['risk_appetite']}
+			bind:cachedValue={formDataCache['risk_appetite']}
+			label={m.riskAppetite()}
+			helpText={m.riskAppetiteHelpText()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
