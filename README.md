@@ -558,24 +558,25 @@ Set DJANGO_DEBUG=False for security reason.
 
 ## Supported languages 🌐
 
-- FR: French
-- EN: English
-- AR: Arabic
-- PT: Portuguese
-- ES: Spanish
-- DE: German
-- NL: Dutch
-- IT: Italian
-- PL: Polish
-- RO: Romanian
-- HI: Hindi
-- UR: Urdu
-- CS: Czech
-- SV: Swedish
-- ID: Indonesian
-- DA: Danish
-- HU: Hungarian
-- UK: Ukrainian
+1. FR: French
+2. EN: English
+3. AR: Arabic
+4. PT: Portuguese
+5. ES: Spanish
+6. DE: German
+7. NL: Dutch
+8. IT: Italian
+9. PL: Polish
+10. RO: Romanian
+11. HI: Hindi
+12. UR: Urdu
+13. CS: Czech
+14. SV: Swedish
+15. ID: Indonesian
+16. DA: Danish
+17. HU: Hungarian
+18. UK: Ukrainian
+19. EL: Greek
 
 ## Contributors 🤝
 
