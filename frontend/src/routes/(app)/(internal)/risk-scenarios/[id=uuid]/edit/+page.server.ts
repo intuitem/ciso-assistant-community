@@ -41,6 +41,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 					body: [],
 					meta: []
 				};
+				table.head = Object.fromEntries(table.head.map((key) => [key, key])); // HORRIBLE CODE (Will create a regression if the header name and the value key are not the same)
 				tables[key] = table;
 			} else {
 				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
