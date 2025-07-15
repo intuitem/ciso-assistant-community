@@ -3498,6 +3498,16 @@ class RiskScenario(NameDescriptionMixin):
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
+    @property
+    def beyond_appetite(self):
+        appetite = self.risk_assessment.risk_appetite
+        if appetite:
+            if self.current_level > appetite:
+                return "yes"
+            else:
+                return "no"
+        return "undefined"
+
     def _get_risk_data(self, value: int, data_key: str):
         """
         A generic helper method to retrieve and format risk-related data.
