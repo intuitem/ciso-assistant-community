@@ -7,7 +7,7 @@ export interface LoadTableDataParams {
 	state: State;
 	URLModel: urlModel;
 	endpoint: string;
-	fields?: string[];
+	fields?: { head: string[]; body: string[] };
 }
 
 export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadTableDataParams) => {
@@ -22,8 +22,9 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 	state.setTotalRows(response.count);
 
 	const fieldsToUse =
-		fields.length > 0
-			? { ...listViewFields[URLModel as urlModel], head: fields, body: fields }
+		fields.head && fields.head.length > 0 &&
+		fields.head.toString() !== listViewFields[URLModel as urlModel].head.toString()
+			? { ...listViewFields[URLModel as urlModel],  head: fields.head, body: fields.body.length > 0 ? fields.body : fields.head }
 			: listViewFields[URLModel as urlModel];
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 
