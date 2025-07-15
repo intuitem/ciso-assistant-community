@@ -36,12 +36,19 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
 			const response = await fetch(keyEndpoint);
 			if (response.ok) {
+				const headData: Record<string, string> = listViewFields[key as urlModel].body.reduce(
+					(obj, field, index) => {
+						obj[field] = listViewFields[key as urlModel].head[index];
+						return obj;
+					},
+					{}
+				);
+
 				const table: TableSource = {
-					head: listViewFields[key].head,
+					head: headData,
 					body: [],
 					meta: []
 				};
-				table.head = Object.fromEntries(table.head.map((key) => [key, key])); // HORRIBLE CODE (Will create a regression if the header name and the value key are not the same)
 				tables[key] = table;
 			} else {
 				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);

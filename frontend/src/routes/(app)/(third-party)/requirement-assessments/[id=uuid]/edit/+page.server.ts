@@ -100,12 +100,19 @@ export const load = (async ({ fetch, params }) => {
 
 	await Promise.all(
 		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
+			const headData: Record<string, string> = listViewFields[key as urlModel].body.reduce(
+				(obj, field, index) => {
+					obj[field] = listViewFields[key as urlModel].head[index];
+					return obj;
+				},
+				{}
+			);
+
 			const table: TableSource = {
-				head: listViewFields[key].head,
+				head: headData,
 				body: [],
 				meta: []
 			};
-			table.head = Object.fromEntries(table.head.map((key) => [key, key])); // HORRIBLE CODE (Will create a regression if the header name and the value key are not the same)
 			tables[key] = table;
 		})
 	);
