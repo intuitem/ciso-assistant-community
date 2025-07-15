@@ -22,9 +22,14 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 	state.setTotalRows(response.count);
 
 	const fieldsToUse =
-		fields.head && fields.head.length > 0 &&
+		fields.head &&
+		fields.head.length > 0 &&
 		fields.head.toString() !== listViewFields[URLModel as urlModel].head.toString()
-			? { ...listViewFields[URLModel as urlModel],  head: fields.head, body: fields.body.length > 0 ? fields.body : fields.head }
+			? {
+					...listViewFields[URLModel as urlModel],
+					head: fields.head,
+					body: fields.body.length > 0 ? fields.body : fields.head
+				}
 			: listViewFields[URLModel as urlModel];
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 
