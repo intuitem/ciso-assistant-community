@@ -179,13 +179,11 @@
 			multiple
 			{form}
 			optionsEndpoint="assets"
-			optionsExtraFields={[
-				['folder', 'str']
-			]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsInfoFields={{
 				fields: [
 					{
-						field: 'type',
+						field: 'type'
 					}
 				],
 				color: 'blue'
@@ -202,7 +200,7 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	{:else if context === "selectAudit"}
+{:else if context === 'selectAudit'}
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -214,18 +212,16 @@
 		bind:cachedValue={formDataCache['compliance_assessments']}
 		label={m.complianceAssessment()}
 	/>
-{:else if context === "selectAsset"}
+{:else if context === 'selectAsset'}
 	<AutocompleteSelect
 		multiple
 		{form}
 		optionsEndpoint="assets"
-		optionsExtraFields={[
-			['folder', 'str']
-		]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsInfoFields={{
 			fields: [
 				{
-					field: 'type',
+					field: 'type'
 				}
 			],
 			color: 'blue'
