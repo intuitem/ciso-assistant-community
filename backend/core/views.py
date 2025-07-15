@@ -4079,6 +4079,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "owner",
     ]
 
     @action(methods=["get"], detail=True)

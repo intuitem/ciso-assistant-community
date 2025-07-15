@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl
+from core.models import AppliedControl, Evidence
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
@@ -61,6 +61,24 @@ def check_deprecated_controls():
         send_notification_email_deprecated_control(owner_email, controls)
 
 
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="22", minute="0"))
+def check_evidence_with_expired_evidence():
+    expired_evidences = Evidence.objects.filter(
+        expiry_date__lt=date.today(), expiry_date__isnull=False
+    ).prefetch_related("owner")
+    # Group by individual owner
+    owner_controls = {}
+    for evidence in expired_evidences:
+        for owner in evidence.owner.all():
+            if owner.email not in owner_controls:
+                owner_controls[owner.email] = []
+            owner_controls[owner.email].append(evidence)
+    # Send personalized email to each owner
+    for owner_email, evidences in owner_controls.items():
+        send_notification_email_expired_evidence(owner_email, evidences)
+
+
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
@@ -72,6 +90,22 @@ def send_notification_email_expired_eta(owner_email, controls):
         message += f"- {control.name} (ETA: {control.eta})\n"
     message += "\nThis reminder will stop once the control is marked as active or you update the ETA.\n"
     message += "Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
+    message += "Thank you."
+
+    send_notification_email(subject, message, owner_email)
+
+
+@task()
+def send_notification_email_expired_evidence(owner_email, evidences):
+    if not check_email_configuration(owner_email, evidences):
+        return
+
+    subject = f"CISO Assistant: You have {len(evidences)} expired evidence(s)"
+    message = "Hello,\n\nThe following evidences have expired:\n\n"
+    for evidence in evidences:
+        message += f"- {evidence.name} (expiry date: {evidence.expiry_date})\n"
+    message += "\nThis reminder will stop once the evidence is not expired.\n"
+    message += "Log in to your CISO Assistant portal and check 'evidences' section.\n\n"
     message += "Thank you."
 
     send_notification_email(subject, message, owner_email)
