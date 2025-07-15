@@ -15,7 +15,7 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		'requirement_assessments': 'matchingRequirements'
+		requirement_assessments: 'matchingRequirements'
 	};
 
 	const appliedControls: TableSource = {
