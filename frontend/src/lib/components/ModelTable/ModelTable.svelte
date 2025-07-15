@@ -217,7 +217,10 @@
 			state,
 			URLModel,
 			endpoint: baseEndpoint,
-			fields: Object.keys(tableSource.head)
+			fields:
+				fields.length > 0
+					? { head: fields, body: fields }
+					: { head: Object.values(tableSource.head), body: Object.values(tableSource.body) }
 		})
 	);
 
