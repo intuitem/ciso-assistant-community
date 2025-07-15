@@ -3,6 +3,7 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import { getModelInfo, URL_MODEL_MAP } from './crud';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -354,6 +355,14 @@ const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'inherent_level'
+	}
+};
+
 // TODO: TEST THIS
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -512,8 +521,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'parent_folder']
 	},
 	perimeters: {
-		head: ['ref_id', 'name', 'description', 'domain'],
-		body: ['ref_id', 'name', 'description', 'folder'],
+		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
+		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER
@@ -578,6 +587,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
@@ -589,6 +599,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
@@ -989,13 +1000,25 @@ export const listViewFields = {
 		}
 	},
 	'operational-scenarios': {
-		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
-		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		head: ['is_selected', 'attackPath', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'attack_path', 'operating_modes_description', 'threats', 'likelihood'],
 		filters: {
 			threats: THREAT_FILTER,
 			likelihood: RISK_PROBABILITY_FILTER,
 			is_selected: IS_SELECTED_FILTER
 		}
+	},
+	'elementary-actions': {
+		head: ['ref_id', 'domain', '', 'name', 'attack_stage', 'threat'],
+		body: ['ref_id', 'domain', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+	},
+	'operating-modes': {
+		head: ['ref_id', 'name', 'likelihood'],
+		body: ['ref_id', 'name', 'likelihood']
+	},
+	'kill-chains': {
+		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],

@@ -948,5 +948,6 @@
 			}
 		}
 	],
-	"matchingScenarios": "Matchande scenarier"
+	"matchingScenarios": "Matchande scenarier",
+	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet."
 }

@@ -1,22 +1,20 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
-	import Cell from './Cell.svelte';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
-	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
+	import Cell from './Cell.svelte';
+	import { buildRiskMatrix, reverseRows, transpose } from './utils';
 
 	import { page } from '$app/state';
 	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
-	import type { ComponentType } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ComponentType } from 'svelte';
+	import Legend from './Legend.svelte';
 
 	interface Props {
 		// --- Props ---
 		riskMatrix: any;
 		wrapperClass?: string | undefined;
 		matrixName: string; // used to differentiate bubbles tooltip names
-		showRisks?: boolean;
+		showLegend?: boolean;
 		useBubbles?: boolean;
 		data?: Array<Array<any>> | undefined; // Ensure data is typed correctly
 		dataItemComponent?: ComponentType | undefined;
@@ -30,7 +28,7 @@
 		riskMatrix,
 		wrapperClass = '',
 		matrixName,
-		showRisks = false,
+		showLegend: showRisks = false,
 		useBubbles = false,
 		data = undefined,
 		dataItemComponent = undefined,
@@ -38,10 +36,6 @@
 		flipVertical = page.data.settings.risk_matrix_flip_vertical ?? false,
 		labelStandard = page.data.settings.risk_matrix_labels ?? 'ISO'
 	}: Props = $props();
-
-	run(() => {
-		console.log(page.data.settings);
-	});
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
@@ -228,34 +222,5 @@
 </div>
 
 {#if showRisks}
-	<div class="w-full flex flex-col justify-start mt-4">
-		<h3 class="flex font-semibold p-2 m-2 text-md">{m.riskLevels()}</h3>
-		<div class="flex justify-start mx-2">
-			<table class="w-auto border-separate" style="border-spacing: 0 4px;">
-				<thead>
-					<tr>
-						<th class="text-left pb-2 px-2 font-semibold">{m.level()}</th>
-						<th class="text-left pb-2 px-2 font-semibold">{m.description()}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each parsedRiskMatrix.risk as riskItem}
-						<tr class="col">
-							<td
-								class="w-auto text-center border-4 border-white p-2 font-semibold whitespace-nowrap rounded-l {classesCellText(
-									riskItem.hexcolor
-								)}"
-								style="background-color: {riskItem.hexcolor}"
-							>
-								{riskItem.name}
-							</td>
-							<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-white rounded-r">
-								{riskItem.description}
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	</div>
+	<Legend {parsedRiskMatrix} />
 {/if}

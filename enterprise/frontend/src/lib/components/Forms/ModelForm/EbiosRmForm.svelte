@@ -117,6 +117,15 @@
 			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
+		<Select
+			{form}
+			options={model.selectOptions['quotation_method']}
+			field="quotation_method"
+			disableDoubleDash
+			label={m.quotationMethod()}
+			cacheLock={cacheLocks['quotation_method']}
+			bind:cachedValue={formDataCache['quotation_method']}
+		/>
 		<TextField
 			{form}
 			field="ref_id"
@@ -170,7 +179,17 @@
 			multiple
 			{form}
 			optionsEndpoint="assets"
-			optionsExtraFields={[['folder', 'str']]}
+			optionsExtraFields={[
+				['folder', 'str']
+			]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type',
+					}
+				],
+				color: 'blue'
+			}}
 			optionsLabelField="auto"
 			field="assets"
 			label={m.assets()}
@@ -200,7 +219,17 @@
 		multiple
 		{form}
 		optionsEndpoint="assets"
-		optionsExtraFields={[['folder', 'str']]}
+		optionsExtraFields={[
+			['folder', 'str']
+		]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type',
+				}
+			],
+			color: 'blue'
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		cacheLock={cacheLocks['assets']}
