@@ -75,15 +75,16 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
-	let filteredData = $state(data.data);
-
-	if (data.model?.detailViewFields) {
-		filteredData = Object.fromEntries(
-			Object.entries(data.data).filter(
-				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
-			)
-		);
-	}
+	let filteredData = $derived(
+		data.model?.detailViewFields
+			? Object.fromEntries(
+					Object.entries(data.data).filter(
+						([key, _]) =>
+							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+					)
+				)
+			: data.data
+	);
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
