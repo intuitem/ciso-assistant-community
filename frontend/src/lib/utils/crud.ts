@@ -149,7 +149,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Domain',
 		verboseNamePlural: 'Domains',
 		listViewUrlParams: '?content_type=DO&content_type=GL',
-		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
+		foreignKeyFields: [
+			{ field: 'parent_folder', urlModel: 'folders' },
+			{ field: 'path', urlModel: 'folders' }
+		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
@@ -163,6 +166,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Perimeter',
 		verboseNamePlural: 'Perimeters',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'default_assignee', urlModel: 'users' }
 		],
@@ -220,6 +224,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Threat',
 		verboseNamePlural: 'Threats',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
@@ -350,6 +355,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'reference_control', urlModel: 'reference-controls', urlParams: 'category=policy' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
@@ -381,6 +387,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -395,7 +402,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'label',
 		localNamePlural: 'labels',
 		verboseName: 'Label',
-		verboseNamePlural: 'Labels'
+		verboseNamePlural: 'Labels',
+		foreignKeyFields: [{ field: 'path', urlModel: 'folders' }]
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
@@ -421,6 +429,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -444,6 +453,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'solutions' }
 		],
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
@@ -519,6 +529,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Evidences',
 		fileFields: ['attachment'],
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{
 				field: 'folder',
 				urlModel: 'folders',
@@ -1129,6 +1140,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Security exception',
 		verboseNamePlural: 'Security exceptions',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'owners', urlModel: 'users' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' }
@@ -1174,6 +1186,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Findings assessment',
 		verboseNamePlural: 'Findings assessments',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'users' },
@@ -1194,6 +1207,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Finding',
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' }
@@ -1213,6 +1227,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
@@ -1231,6 +1246,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Timeline entry',
 		verboseNamePlural: 'Timeline entries',
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'incident', urlModel: 'incidents' },
 			{ field: 'author', urlModel: 'users' }
 		],
@@ -1245,6 +1261,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Task templates',
 		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'assigned_to', urlModel: 'users' },
@@ -1266,6 +1283,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Task nodes',
 		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
+			{ field: 'path', urlModel: 'folders' },
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'folder', urlModel: 'folders' }
