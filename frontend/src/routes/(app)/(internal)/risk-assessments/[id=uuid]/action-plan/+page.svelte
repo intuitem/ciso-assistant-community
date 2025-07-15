@@ -16,7 +16,7 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		'risk-scenarios': 'matchingScenarios'
+		risk_scenarios: 'matchingScenarios'
 	};
 
 	const appliedControls: TableSource = {
