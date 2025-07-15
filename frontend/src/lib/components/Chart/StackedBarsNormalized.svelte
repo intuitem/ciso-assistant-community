@@ -18,7 +18,7 @@
 		data,
 		names,
 		uuids,
-		title = 'chart title'
+		title = ''
 	}: Props = $props();
 
 	function truncateString(maxLength: number) {
