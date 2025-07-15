@@ -34,7 +34,6 @@
 		children
 	}: Props = $props();
 
-
 	let sidebarOpen = $state(true);
 
 	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
@@ -61,7 +60,6 @@
 		}
 	});
 
-
 	const licenseExpirationNotifyDays = data.LICENSE_EXPIRATION_NOTIFY_DAYS;
 	const licenseStatus: Record<string, any> = data.licenseStatus;
 
@@ -70,9 +68,7 @@
 	import type { PageData, ActionData } from './$types';
 	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
 
-
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
-
 
 	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {
@@ -93,15 +89,15 @@
 <!-- App Shell -->
 <div class="overflow-x-hidden">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
-  {#if data.licenseStatus.status === 'expired'}
-    <aside class="preset-tonal-warning text-center w-full items-center py-2">
-      {m.licenseExpiredMessage()}
-    </aside>
-  {:else if licenseAboutToExpire}
-    <aside class="preset-tonal-warning text-center w-full items-center py-2">
-      {m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
-    </aside>
-  {/if}
+	{#if data.licenseStatus.status === 'expired'}
+		<aside class="preset-tonal-warning text-center w-full items-center py-2">
+			{m.licenseExpiredMessage()}
+		</aside>
+	{:else if licenseAboutToExpire}
+		<aside class="preset-tonal-warning text-center w-full items-center py-2">
+			{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
+		</aside>
+	{/if}
 	<AppBar
 		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
 		background="bg-white"

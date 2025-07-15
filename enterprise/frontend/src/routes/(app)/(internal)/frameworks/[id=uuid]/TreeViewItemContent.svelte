@@ -11,7 +11,7 @@
 		reference_controls?: Record<string, unknown>[];
 		children: Record<string, unknown>[];
 		assessable: boolean;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -65,7 +65,7 @@
 	<span class="whitespace-pre-line" style="font-weight: 300;">
 		{#if node.assessable}
 			<Anchor
-				href={`inspect-requirement/${node.id}`}
+				href={`/frameworks/inspect-requirement/${node.id}`}
 				label={title}
 				class="text-primary-500 hover:text-primary-700"
 			>

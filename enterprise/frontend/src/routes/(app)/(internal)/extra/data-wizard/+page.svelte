@@ -71,7 +71,9 @@
 	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
-				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}</h4>
+				<h4 class="h4 font-bold">
+					<i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}
+				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
@@ -120,7 +122,8 @@
 								</p>
 							{:else}
 								<p class="font-medium text-gray-900">
-									<span class="text-blue-600">{m.clickToUpload()}</span> {m.orDragAndDrop()}
+									<span class="text-blue-600">{m.clickToUpload()}</span>
+									{m.orDragAndDrop()}
 								</p>
 								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
 							{/if}
@@ -309,7 +312,7 @@
 		</form>
 	</div>
 	<div class="col-span-2 p-4">
-    {m.dataWizardParsingResults()}
+		{m.dataWizardParsingResults()}
 		{#if formSubmitted}
 			<div class="col-span-full mb-4">
 				{#if form?.success}

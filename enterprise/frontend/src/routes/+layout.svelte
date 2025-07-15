@@ -126,7 +126,11 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" type={clientSettings?.settings?.favicon_mime_type ?? 'image/x-icon'} href='/favicon' />
+	<link
+		rel="icon"
+		type={clientSettings?.settings?.favicon_mime_type ?? 'image/x-icon'}
+		href="/favicon"
+	/>
 </svelte:head>
 
 <Modal components={modalRegistry} />
@@ -135,6 +139,6 @@
 {@render children?.()}
 
 {#if $flash}
-  {@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
-  <div style:background-color={bg} class="flash">{$flash.message}</div>
+	{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
+	<div style:background-color={bg} class="flash">{$flash.message}</div>
 {/if}
