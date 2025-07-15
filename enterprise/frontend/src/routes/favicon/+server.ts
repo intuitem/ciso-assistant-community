@@ -11,13 +11,13 @@ export const GET: RequestHandler = async ({ fetch }) => {
 		const res = await fetch(endpoint);
 
 		if (!res.ok) {
-      const fileBuffer = readFileSync(faviconPath);
+			const fileBuffer = readFileSync(faviconPath);
 
-      return new Response(fileBuffer, {
-        headers: {
-          'Content-Type': 'image/x-icon'
-        }
-      });
+			return new Response(fileBuffer, {
+				headers: {
+					'Content-Type': 'image/x-icon'
+				}
+			});
 		}
 
 		const response = await res.json();

@@ -12,10 +12,9 @@
 	}
 
 	let { data }: Props = $props();
-	let totalRisksCount = $derived(data.risks_count_per_level.current.reduce(
-		(sum, level) => sum + level.value,
-		0
-	));
+	let totalRisksCount = $derived(
+		data.risks_count_per_level.current.reduce((sum, level) => sum + level.value, 0)
+	);
 
 	// Reactive boolean that checks if there are any risks (sum > 0)
 	let hasRisks = $derived(totalRisksCount > 0);

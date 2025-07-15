@@ -43,15 +43,14 @@
 		helpText={m.loadMissingLibrariesHelpText()}
 	/>
 {:else}
-  <AutocompleteSelect
-    {form}
-    optionsEndpoint="folders?content_type=DO&content_type=GL"
-	optionsSelf={object}
-    field="parent_folder"
-    cacheLock={cacheLocks['parent_folder']}
-    bind:cachedValue={formDataCache['parent_folder']}
-    label={m.parentDomain()}
-    hide={initialData.parent_folder}
-  />
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		optionsSelf={object}
+		field="parent_folder"
+		cacheLock={cacheLocks['parent_folder']}
+		bind:cachedValue={formDataCache['parent_folder']}
+		label={m.parentDomain()}
+		hide={initialData.parent_folder}
+	/>
 {/if}
-
