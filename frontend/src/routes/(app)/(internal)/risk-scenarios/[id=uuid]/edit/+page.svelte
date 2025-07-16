@@ -288,6 +288,15 @@
 									form={_form}
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
+									optionsInfoFields={{
+										fields: [
+											{
+												field: 'reference_control',
+												path: 'str'
+											}
+										],
+										classes: 'text-green-800'
+									}}
 									optionsDetailedUrlParameters={[
 										['scope_folder_id', page.data.scenario.perimeter.folder.id]
 									]}
@@ -358,6 +367,15 @@
 									form={_form}
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
+									optionsInfoFields={{
+										fields: [
+											{
+												field: 'reference_control',
+												path: 'str'
+											}
+										],
+										classes: 'text-green-800'
+									}}
 									optionsDetailedUrlParameters={[
 										['scope_folder_id', page.data.scenario.perimeter.folder.id]
 									]}

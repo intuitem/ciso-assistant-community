@@ -83,6 +83,15 @@
 	multiple
 	optionsEndpoint="applied-controls"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'reference_control',
+				path: 'str'
+			}
+		],
+		classes: 'text-green-800'
+	}}
 	field="associated_controls"
 	cacheLock={cacheLocks['associated_controls']}
 	bind:cachedValue={formDataCache['associated_controls']}
