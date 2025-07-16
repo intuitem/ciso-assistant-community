@@ -1066,7 +1066,7 @@
 	"likelihoodHelpText": "Estimat for sandsynligheden for at en risiko opstår",
 	"studyAssetHelpText": "Primære (forretningsaktiver) og understøttende aktiver relateret til analysens objekt",
 	"fearedEventHelpText": "De frygtede hændelser skal udtrykke forretningens bekymringer",
-	"fearedEventAssetHelpText": "Primært aktiv (forretningsværdi), som påvirkes af den frygtede hændelse",
+	"fearedEventAssetHelpText": "Frygtede hændelser er typisk knyttet til forretningsværdier (primære aktiver). Understøttende aktiver er tilladt her for fleksibilitet.",
 	"fearedEventQualificationHelpText": "Mulige påvirkningskategorier",
 	"fearedEventIsSelectedHelpText": "Valg af den frygtede hændelse til analysen",
 	"riskOriginHelpText": "Element, person, gruppe eller organisation, som potentielt kan generere en risiko",
@@ -1239,5 +1239,6 @@
 				"countPlural=other": "{count} Dage"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Matchende scenarier"
 }

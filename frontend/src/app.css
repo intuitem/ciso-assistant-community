@@ -43,97 +43,30 @@
 	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
 }
 
-/* Components: Forms > Radio / Checkbox */
-
-@utility checkbox {
-	--tw-ring-color: var(--color-surface-200-800);
-
-	cursor: pointer;
-	background-color: var(--color-surface-50-700);
-	border-radius: var(--radius-sm);
-	height: --spacing(5);
-	width: --spacing(5);
-
-	@variant focus-within {
-		--tw-ring-color: var(--color-primary-500);
-	}
-	@variant hover {
-		filter: brightness(105%);
-	}
-	@variant focus {
-		filter: brightness(105%);
-	}
-
-	&:checked {
-		background-color: var(--color-primary-500);
-
-		@variant hover {
-			background-color: var(--color-primary-500);
-		}
-		@variant focus {
-			background-color: var(--color-primary-500);
-			border: 0;
-		}
-	}
-
-	&:indeterminate {
-		background-color: var(--color-primary-500);
-
-		@variant hover {
-			background-color: var(--color-primary-500);
-		}
-		@variant focus {
-			background-color: var(--color-primary-500);
-			border: 0;
-		}
-	}
-}
-
-@utility radio {
-	--tw-ring-color: var(--color-surface-200-800);
-
-	cursor: pointer;
-	background-color: var(--color-surface-50-700);
-	border-radius: var(--radius-sm);
-	height: --spacing(5);
-	width: --spacing(5);
-
-	/* Base Size --- */
-	border-radius: 100%;
-	height: --spacing(5);
-	width: --spacing(5);
-
-	@variant focus-within {
-		--tw-ring-color: var(--color-primary-500);
-	}
-	@variant hover {
-		filter: brightness(105%);
-	}
-	@variant focus {
-		filter: brightness(105%);
-	}
-
-	&:checked {
-		background-color: var(--color-primary-500);
-
-		@variant hover {
-			background-color: var(--color-primary-500);
-		}
-		@variant focus {
-			background-color: var(--color-primary-500);
-			border: 0;
-		}
-	}
-}
-
 @layer utilities {
 	/* (all other styles here...) */
 	html,
 	body {
-		@apply h-full overflow-auto;
+		@apply h-auto overflow-auto;
 	}
 	.capitalize-first:first-letter {
 		@apply capitalize;
+	}
+	tbody {
+		& > :not(:last-child) {
+			border-color: var(--color-surface-100-900) !important;
+		}
+	}
+	.input,
+	.select,
+	.multiselect,
+	.textarea {
+		background-color: var(--color-surface-100);
+	}
+
+	.checkbox,
+	.radio {
+		background-color: var(--color-surface-100);
 	}
 }
 
@@ -141,4 +74,12 @@
 	[data-popup] {
 		transition: none;
 	}
+}
+
+.hide-scrollbar {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
 }

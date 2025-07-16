@@ -134,18 +134,21 @@
 		return resultCounts;
 	};
 
-	let selectedStatus = $state(['done', 'to_do', 'in_progress', 'in_review']);
-	let selectedResults = $state([
-		'compliant',
-		'non_compliant',
-		'partially_compliant',
-		'not_assessed',
-		'not_applicable'
-	]);
-	let displayOnlyAssessableNodes = $state(false);
-
+	let id = $state(page.params.id);
 	// derive the current filters for this audit ID
-	const currentFilters = derived(auditFiltersStore, ($f) => $f[page.params.id] ?? {});
+	const currentFilters = derived(auditFiltersStore, ($f) => $f[id] ?? {});
+	// reactive values that update whenever auditFiltersStore changes
+	let selectedStatus = $state([]);
+	let selectedResults = $state([]);
+	let displayOnlyAssessableNodes = $state(false);
+	$effect(
+		() =>
+			({
+				selectedStatus = [],
+				selectedResults = [],
+				displayOnlyAssessableNodes = false
+			} = $currentFilters)
+	);
 
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {
@@ -330,6 +333,7 @@
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
 
 	let exportPopupOpen = $state(false);
+	let filterPopupOpen = $state(false);
 
 	run(() => {
 		if (tree) {
@@ -350,12 +354,18 @@
 	run(() => {
 		if (form?.message?.requirementAssessmentsSync) console.log(form);
 	});
+
+	let filterCount = $derived(
+		(selectedStatus.length > 0 ? 1 : 0) +
+			(selectedResults.length > 0 ? 1 : 0) +
+			(displayOnlyAssessableNodes ? 1 : 0)
+	);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
 						class="text-sm font-medium text-gray-800 capitalize-first"
@@ -612,67 +622,97 @@
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<div class=" flex items-center font-semibold">
-			<span class="h4">{m.associatedRequirements()}</span>
-			<span class="badge preset-tonal-primary ml-1">
-				{#if treeViewNodes}
-					{assessableNodesCount(treeViewNodes)}
-				{/if}
-			</span>
-			<span class="text-xs ml-2 text-gray-500">{m.filterBy()}</span>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceStatusColorMap) as [status, color]}
-					<button
-						type="button"
-						onclick={() => toggleStatus(status)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedStatus.includes(status)
-							? color + '44'
-							: 'grey'}; color: {selectedStatus.includes(status)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
-					>
-						{safeTranslate(status)}
-					</button>
-				{/each}
-			</div>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceResultColorMap) as [result, color]}
-					<button
-						type="button"
-						onclick={() => toggleResult(result)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedResults.includes(result)
-							? color + '44'
-							: 'grey'}; color: {selectedResults.includes(result)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
-					>
-						{safeTranslate(result)}
-					</button>
-				{/each}
-			</div>
-			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-				{#if displayOnlyAssessableNodes}
-					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
-				{:else}
-					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
-				{/if}
-				<Switch
-					name="questionnaireToggle"
-					class="flex flex-row items-center justify-center"
-					active="bg-primary-500"
-					background="bg-green-500"
-					onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
-					onclick={() => (displayOnlyAssessableNodes = !displayOnlyAssessableNodes)}
-				>
-					{#if displayOnlyAssessableNodes}
-						<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
-					{:else}
-						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+		<div class="flex flex-row items-center font-semibold justify-between">
+			<div>
+				<span class="h4">{m.associatedRequirements()}</span>
+				<span class="badge bg-violet-400 text-white ml-1 rounded-xl">
+					{#if treeViewNodes}
+						{assessableNodesCount(treeViewNodes)}
 					{/if}
-				</Switch>
+				</span>
 			</div>
+			<Popover
+				open={filterPopupOpen}
+				onOpenChange={(e) => (filterPopupOpen = e.open)}
+				positioning={{ placement: 'bottom-start' }}
+				triggerBase="btn preset-filled-primary-500 w-fit"
+				contentBase="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+				zIndex="1000"
+				autoFocus={false}
+				onPointerDownOutside={() => (filterPopupOpen = false)}
+				closeOnInteractOutside={false}
+			>
+				{#snippet trigger()}
+					<i class="fa-solid fa-filter mr-2"></i>
+					{m.filters()}
+					{#if filterCount}
+						<span class="text-xs">{filterCount}</span>
+					{/if}
+				{/snippet}
+				{#snippet content()}
+					<div>
+						<span class="text-sm font-bold">{m.result()}</span>
+						<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+							{#each Object.entries(complianceResultColorMap) as [result, color]}
+								<button
+									type="button"
+									onclick={() => toggleResult(result)}
+									class="px-2 py-1 rounded-md font-bold"
+									style="background-color: {selectedResults.includes(result)
+										? color
+										: 'grey'}; color: {selectedResults.includes(result)
+										? result === 'not_applicable'
+											? 'white'
+											: 'black'
+										: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+								>
+									{safeTranslate(result)}
+								</button>
+							{/each}
+						</div>
+					</div>
+					<div>
+						<span class="text-sm font-bold">{m.status()}</span>
+						<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+							{#each Object.entries(complianceStatusColorMap) as [status, color]}
+								<button
+									type="button"
+									onclick={() => toggleStatus(status)}
+									class="px-2 py-1 rounded-md font-bold"
+									style="background-color: {selectedStatus.includes(status)
+										? color + '44'
+										: 'grey'}; color: {selectedStatus.includes(status)
+										? darkenColor(color, 0.3)
+										: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+								>
+									{safeTranslate(status)}
+								</button>
+							{/each}
+						</div>
+					</div>
+					<div>
+						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+							<Switch
+								name="questionnaireToggle"
+								class="flex flex-row items-center justify-center"
+								active="bg-primary-500"
+								onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
+								onclick={() => {
+									displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
+									auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
+								}}
+							>
+								{#if displayOnlyAssessableNodes}
+									<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+								{:else}
+									<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+								{/if}
+							</Switch>
+						</div>
+					</div>
+				{/snippet}
+			</Popover>
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">

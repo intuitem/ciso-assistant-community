@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
@@ -30,7 +30,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -80,7 +80,7 @@
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
-		risk: 'current' | 'residual'
+		risk: 'current' | 'residual' | 'inherent'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
@@ -184,10 +184,7 @@
 							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						{/snippet}
 						{#snippet content()}
-							<div
-								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-								data-popup="popupDownload"
-							>
+							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/pdf"
@@ -198,13 +195,13 @@
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 									>... {m.asCSV()}</a
 								>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 								<a
-									href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
 									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 								>
 								<a
-									href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/csv"
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 									>... {m.asCSV()}</a
 								>
@@ -224,10 +221,10 @@
 					{/if}
 				</div>
 				<Anchor
-					label={m.remediationPlan()}
-					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
+					label={m.actionPlan()}
+					href="/risk-assessments/{risk_assessment.id}/action-plan"
 					class="btn preset-filled-primary-500"
-					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.remediationPlan()}</Anchor
+					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
@@ -261,6 +258,7 @@
 					'ref_id',
 					'name',
 					'threats',
+					'inherent_level',
 					'existing_applied_controls',
 					'current_level',
 					'applied_controls',
@@ -281,8 +279,25 @@
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
-			<div class="flex-1">
+		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
+			{#if page.data?.featureflags?.inherent_risk}
+				<div>
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+
+					<RiskMatrix
+						riskMatrix={risk_assessment.risk_matrix}
+						matrixName={'inherent'}
+						data={buildRiskCluster(
+							risk_assessment.risk_scenarios,
+							risk_assessment.risk_matrix,
+							'inherent'
+						)}
+						dataItemComponent={RiskScenarioItem}
+						{useBubbles}
+					/>
+				</div>
+			{/if}
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
 				<RiskMatrix
@@ -290,11 +305,10 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
 					{useBubbles}
 				/>
 			</div>
-			<div class="flex-1">
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 
 				<RiskMatrix
@@ -302,7 +316,7 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>

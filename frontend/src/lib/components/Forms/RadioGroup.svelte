@@ -36,8 +36,8 @@
 		cachedValue = $bindable(),
 		field,
 		valuePath = field,
-		key,
-		labelKey
+		key = 'value',
+		labelKey = 'label'
 	}: Props = $props();
 
 	const { value } = form ? formFieldProxy(form, valuePath) : {};
@@ -81,7 +81,7 @@
 		{#each labeledOptions as option}
 			{@const color = colorMap[option.id] ?? 'preset-filled-primary-500'}
 			<label class="flex-auto rounded-lg {option[key] === internalValue ? color : ''}">
-				<div class="text-base text-center cursor-pointer px-4 py-1 hover:variant-soft h-full">
+				<div class="text-base text-center cursor-pointer px-4 py-1 hover:preset-tonal h-full">
 					<div class="h-0 w-0 overflow-hidden">
 						<input
 							type="radio"

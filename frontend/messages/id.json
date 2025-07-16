@@ -1049,7 +1049,7 @@
 	"likelihoodHelpText": "Perkiraan kemungkinan atau probabilitas terjadinya suatu risiko",
 	"studyAssetHelpText": "Aset utama (aset bisnis) dan aset pendukung yang terkait dengan objek yang dipelajari",
 	"fearedEventHelpText": "Kejadian yang ditakuti harus mengungkapkan/menerjemahkan kekhawatiran dari bisnis",
-	"fearedEventAssetHelpText": "Aset utama (nilai bisnis) yang dipengaruhi oleh kejadian yang ditakuti",
+	"fearedEventAssetHelpText": "Kejadian yang ditakuti biasanya terkait dengan nilai bisnis (aset utama). Aset pendukung juga diperbolehkan di sini untuk fleksibilitas.",
 	"fearedEventQualificationHelpText": "Kategori dampak yang mungkin terjadi",
 	"fearedEventIsSelectedHelpText": "Pemilihan kejadian yang ditakuti untuk studi",
 	"riskOriginHelpText": "Elemen, individu, kelompok individu, atau organisasi yang mungkin menghasilkan risiko",
@@ -1144,5 +1144,6 @@
 				"countPlural=other": "{count} Hari"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Skenario yang cocok"
 }

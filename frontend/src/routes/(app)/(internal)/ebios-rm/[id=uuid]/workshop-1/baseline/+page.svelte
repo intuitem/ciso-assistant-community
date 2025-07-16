@@ -79,7 +79,7 @@
 		href={`/ebios-rm/${data.data.id}`}
 		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 	>
-		<i class="fa-solid fa-arrow-left" />
+		<i class="fa-solid fa-arrow-left"></i>
 		<p>{m.goBackToEbiosRmStudy()}</p>
 	</Anchor>
 </div>
@@ -96,7 +96,7 @@
 		<div>
 			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 				<button
-					class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+					class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 					data-testid="select-button"
 					title={m.selectAudit()}
 					onclick={modalUpdateForm}
@@ -109,7 +109,7 @@
 		<div>
 			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 				<button
-					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+					class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 					data-testid="add-button"
 					title={safeTranslate('add-' + data.model.localName)}
 					onclick={modalCreateForm}

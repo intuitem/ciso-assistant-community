@@ -87,18 +87,23 @@
 		],
 		ws4: [
 			{
-				title: safeTranslate(m.ebiosWs4_1()),
+				title: safeTranslate(m.ebiosWs4_0()),
 				status: data.data.meta.workshops[3].steps[0].status,
+				href: `${page.url.pathname}/workshop-4/elementary-actions`
+			},
+			{
+				title: safeTranslate(m.ebiosWs4_1()),
+				status: data.data.meta.workshops[3].steps[1].status,
 				href: `${page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${page.url.pathname}`,
 				disabled: data.data.selected_attack_path_count < 1,
-				tooltip: safeTranslate(m.ebiosWs4_1_tooltip())
+				tooltip: safeTranslate(m.ebiosWs4_2_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
-				status: data.data.meta.workshops[3].steps[1].status,
+				status: data.data.meta.workshops[3].steps[2].status,
 				href: `${page.url.pathname}/workshop-4/operational-scenario?activity=two&next=${page.url.pathname}`,
 				disabled: data.data.operational_scenario_count < 1,
-				tooltip: safeTranslate(m.ebiosWs4_2_tooltip())
+				tooltip: safeTranslate(m.ebiosWs4_3_tooltip())
 			}
 		],
 		ws5: [
@@ -131,7 +136,7 @@
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/action-plan?next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			}
@@ -183,6 +188,7 @@
 		/>
 		<Tile
 			workshop={4}
+			startAtZero={true}
 			title={m.ebiosWs4()}
 			accent_color="bg-yellow-600"
 			borderColor="border-yellow-600"

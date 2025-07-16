@@ -12,7 +12,7 @@
 	import { goto } from '$app/navigation';
 
 	// Base Classes
-	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
@@ -48,7 +48,10 @@
 				<h4 class="h4">{m.step({ number: 1 })}</h4>
 				<p class="text-surface-900">{$modalStore[0].body ?? '(body missing)'}</p>
 				<QR
-					data={totp.totp_url}
+					data={totp.totp_url.replace(
+						/issuer=[^&]+/,
+						'issuer=' + encodeURIComponent('CISO Assistant')
+					)}
 					anchorInnerFill="black"
 					anchorOuterFill="black"
 					width="400"

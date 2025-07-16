@@ -51,6 +51,10 @@
 	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
 	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
+	import CampaignForm from './ModelForm/CampaignForm.svelte';
+	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
+	import KillChainForm from './ModelForm/KillChainForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -236,10 +240,11 @@
 				cacheLock={cacheLocks['reference_control']}
 				bind:cachedValue={formDataCache['reference_control']}
 				label={m.referenceControl()}
+				helpText={m.referenceControlHelpText()}
 				nullable={true}
-				on:change={async (e) => {
-					if (e.detail) {
-						await fetch(`/reference-controls/${e.detail}`)
+				onChange={async (e) => {
+					if (e) {
+						await fetch(`/reference-controls/${e}`)
 							.then((r) => r.json())
 							.then((r) => {
 								form.form.update((currentData) => {
@@ -342,6 +347,8 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'campaigns'}
+			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'assets'}
 			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}
@@ -430,6 +437,7 @@
 				{formDataCache}
 				{initialData}
 				{context}
+				{object}
 			/>
 		{:else if URLModel === 'security-exceptions'}
 			<SecurityExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
@@ -452,6 +460,26 @@
 			<TaskTemplateForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'elementary-actions'}
+			<ElementaryActionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+		{:else if URLModel === 'operating-modes'}
+			<OperatingModeForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={model.initialData}
+				{context}
+			/>
+		{:else if URLModel === 'kill-chains'}
+			<KillChainForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={model.initialData}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

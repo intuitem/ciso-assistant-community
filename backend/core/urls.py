@@ -49,6 +49,11 @@ router.register(
     ComplianceAssessmentViewSet,
     basename="compliance-assessments",
 )
+router.register(
+    r"campaigns",
+    CampaignViewSet,
+    basename="campaigns",
+)
 router.register(r"requirement-nodes", RequirementViewSet, basename="requirement-nodes")
 router.register(
     r"requirement-assessments",
@@ -117,6 +122,9 @@ urlpatterns = [
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
     path(
+        "accounts/oidc/", include("iam.sso.oidc.urls")
+    ),  # NOTE: This has to be placed before the allauth urls, otherwise our OIDC login implementation will not be used
+    path(
         "accounts/saml/", include("iam.sso.saml.urls")
     ),  # NOTE: This has to be placed before the allauth urls, otherwise our ACS implementation will not be used
     path("accounts/", include("allauth.urls")),
@@ -132,6 +140,10 @@ urlpatterns = [
     path(
         "compliance-assessments/<uuid:pk>/action-plan/",
         ComplianceAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/",
+        RiskAssessmentActionPlanList.as_view(),
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
 ]
