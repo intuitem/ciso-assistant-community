@@ -826,7 +826,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'nature' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
-			{ field: 'filtering_labels' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	'processing-natures': {
