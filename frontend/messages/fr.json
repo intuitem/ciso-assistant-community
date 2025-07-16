@@ -971,6 +971,7 @@
 	"hasSensitivePersonalData": "Contient des données personnelles sensibles",
 	"associatedControls": "Mesures associées",
 	"processingNature": "Nature",
+	"nature": "Nature",
 	"personalDataCategoriesIdentified": "Catégories des données personnelles identifiées",
 	"documentedProcessings": "Traitements documentés",
 	"privacyConsent": "Consentement",

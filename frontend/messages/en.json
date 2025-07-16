@@ -1001,6 +1001,7 @@
 	"hasSensitivePersonalData": "Has sensitive personal data",
 	"associatedControls": "Associated controls",
 	"processingNature": "Nature",
+	"nature": "Nature",
 	"personalDataCategoriesIdentified": "Personal data categories identified",
 	"documentedProcessings": "Documented processings",
 	"privacyConsent": "Consent",

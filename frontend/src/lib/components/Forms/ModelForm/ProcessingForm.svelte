@@ -84,6 +84,14 @@
 	cacheLock={cacheLocks['dpia_required']}
 	bind:cachedValue={formDataCache['dpia_required']}
 />
+<TextField
+	{form}
+	field="dpia_reference"
+	label={m.dpiaReference()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['dpia_reference']}
+	bind:cachedValue={formDataCache['dpia_reference']}
+/>
 <!-- author = models.ForeignKey( -->
 <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->
 <!-- ) -->
