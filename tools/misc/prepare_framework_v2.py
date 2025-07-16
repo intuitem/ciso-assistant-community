@@ -30,15 +30,18 @@ import os
 import yaml
 import argparse
 from openpyxl import Workbook
-# from datetime import date
 
 
 # Validates that urn_root only contains allowed characters
 def validate_urn_root(urn_root):
     if not re.fullmatch(r"[a-z0-9._-]+", urn_root):
-        raise ValueError(
-            "(validate_urn_root) Invalid URN root : only lowercase alphanumeric characters, '-', '_', and '.' are allowed."
-        )
+        raise ValueError(f"(validate_urn_root) Invalid URN root \"{urn_root}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed.")
+
+
+# Validates that ref_id only contains allowed characters
+def validate_ref_id(ref_id):
+    if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
+        raise ValueError(f"Invalid Ref. ID \"{ref_id}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed.")
 
 
 # Checks for required non-empty field
@@ -54,6 +57,12 @@ def validate_implementation_groups(impl_groups, context="implementation_groups")
         for i, group in enumerate(impl_groups, start=1):
             if "ref_id" not in group or not str(group["ref_id"]).strip():
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
+            
+            try:
+                validate_ref_id(group["ref_id"])
+            except ValueError as e:
+                raise ValueError(f'(validate_implementation_groups) {e} in {context} #{i}')
+
             if "name" not in group or not str(group["name"]).strip():
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in {context} #{i}')
             if "description" not in group or not str(group["description"]).strip():
@@ -70,6 +79,7 @@ def validate_extra_locales(data):
         raise ValueError("(validate_extra_locales) Field \"extra_locales\" must be a non-empty list if defined.")
 
     impl_groups_main = data.get("implementation_groups") or []
+    impl_groups_main_sheet = data.get("implementation_groups_sheet_base_name") or ""
 
     for i, locale_entry in enumerate(extra_locales, start=1):
         if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
@@ -91,7 +101,12 @@ def validate_extra_locales(data):
             loc_impl_groups = loc_data.get("implementation_groups")
             if loc_impl_groups is not None:
                 if not impl_groups_main:
-                    print(f"⚠️  [WARNING] (validate_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework. Skipping locale's \"implementation_groups\"")
+                    print(f"⚠️  [WARNING] (validate_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework."
+                          "\n\t     Skipping locale's \"implementation_groups\"...")
+                    continue
+                if not impl_groups_main_sheet:
+                    print(f"⚠️  [WARNING] (validate_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing \"implementation_groups_sheet_base_name\" field in framework."
+                          "\n\t     Skipping locale's \"implementation_groups\"...")
                     continue
 
                 validate_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
@@ -109,6 +124,12 @@ def validate_yaml_data(data):
     ]
     for field in required_fields:
         validate_required_field(field, data.get(field))
+    
+    try:
+        validate_ref_id(data.get("ref_id"))
+    except ValueError as e:
+        raise ValueError(f'(validate_yaml_data) {e}')
+        
         
     if not re.fullmatch(r"[a-z0-9-]{2}", data.get("locale")):
         raise ValueError(f"(validate_yaml_data) Invalid locale code \"{data.get("locale")}\" in \"locale\" entry")
@@ -122,6 +143,11 @@ def validate_yaml_data(data):
     if impl_base:
         validate_implementation_groups(impl_groups, "implementation_groups")
         print(f"ℹ️  [INFO] Implementation groups will be added using base name: \"{impl_base}\"")
+    # If there's "implementation_groups" but no "implementation_groups_sheet_base_name", raise a warning 
+    elif impl_groups:
+        print(f"⚠️  [WARNING] (validate_yaml_data) \"implementation_groups\" defined but missing \"implementation_groups_sheet_base_name\" field in framework."
+              "\n\t     Skipping \"implementation_groups\"...")
+        
 
     # Validate extra_locales if present
     validate_extra_locales(data)

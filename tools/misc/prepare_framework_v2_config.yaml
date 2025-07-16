@@ -9,7 +9,8 @@
 #   digits, dashes (-), underscores (_) or dots (.) — no uppercase or special chars.
 # - locale: (str) Locale setting complying with ISO 639 Set 1 (e.g., "en", "fr").
 #   See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes.
-# - ref_id: (str) Reference ID for the framework.
+# - ref_id: (str) Reference ID for the framework. Must contain only letters,
+#   digits, dashes (-), underscores (_) or dots (.) — no special chars.
 # - framework_name: (str) Name of the framework.
 # - description: (str, multiline supported) Description of the framework.
 # - copyright: (str) Copyright information.
@@ -27,7 +28,8 @@
 #
 # - implementation_groups: (list of objects) Only required if you use 
 #   "implementation_groups_sheet_base_name". Each object must contain:
-#     - ref_id (str, required)
+#     - ref_id (str, required) Must contain only letters,
+#       digits, dashes (-), underscores (_) or dots (.) — no special chars.
 #     - name (str, required)
 #     - description (str, optional) — warning shown if missing
 #
