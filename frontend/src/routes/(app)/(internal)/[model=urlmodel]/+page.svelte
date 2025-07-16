@@ -7,6 +7,7 @@
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import { onMount } from 'svelte';
 	import {
@@ -135,20 +136,22 @@
 								{#if ['threats', 'reference-controls'].includes(URLModel)}
 									{@const title =
 										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
-									<a
+									<Anchor
 										href={`/libraries?object_type=${URLModel}`}
+										label={m.libraries()}
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										data-testid="add-button"
-										id="add-button"
-										{title}><i class="fa-solid fa-file-import mr-2"></i></a
+										data-testid="import-button"
+										id="import-button"
+										{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 									>
 								{/if}
 								{#if URLModel === 'assets'}
-									<a
+									<Anchor
 										href="assets/graph/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exploreButton()}
-										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
 								{#if URLModel === 'folders'}
@@ -159,38 +162,42 @@
 										onclick={modalFolderImportForm}
 										><i class="fa-solid fa-file-import"></i>
 									</button>
-									<a
+									<Anchor
 										href="x-rays/inspect"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exploreButton()}
-										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
 							{:else if URLModel === 'risk-matrices'}
-								<a
+								<Anchor
 									href="/libraries?object_type=risk_matrix"
 									onclick={handleClickForGT}
+									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
+									data-testid="import-button"
+									id="import-button"
+									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{:else if URLModel === 'frameworks'}
-								<a
+								<Anchor
 									href="/libraries?object_type=framework"
 									onclick={handleClickForGT}
+									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
+									data-testid="import-button"
+									id="import-button"
+									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{:else if URLModel === 'requirement-mapping-sets'}
-								<a
+								<Anchor
 									href="/libraries?object_type=requirement_mapping_set"
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
+									label={m.libraries()}
+									data-testid="import-button"
+									id="import-button"
+									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{/if}
 						</span>
