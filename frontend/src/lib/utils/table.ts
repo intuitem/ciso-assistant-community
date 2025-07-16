@@ -254,6 +254,15 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const PROCESSING_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'processings',
+		label: 'processing',
+		multiple: true
+	}
+};
+
 const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -263,6 +272,17 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const PERSONAL_DATA_CATEGORY_FITLER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'personal-data/category',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -900,8 +920,28 @@ export const listViewFields = {
 		body: ['name', 'description', 'processing']
 	},
 	'personal-data': {
-		head: ['name', 'description', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['name', 'description', 'category', 'is_sensitive', 'retention', 'deletion_policy']
+		head: [
+			'processing',
+			'name',
+			'description',
+			'category',
+			'isSensitive',
+			'retention',
+			'deletionPolicy'
+		],
+		body: [
+			'processing',
+			'name',
+			'description',
+			'category',
+			'is_sensitive',
+			'retention',
+			'deletion_policy'
+		],
+		filters: {
+			processing: PROCESSING_FILTER,
+			category: PERSONAL_DATA_CATEGORY_FITLER
+		}
 	},
 	'data-subjects': {
 		head: ['name', 'description', 'category'],
