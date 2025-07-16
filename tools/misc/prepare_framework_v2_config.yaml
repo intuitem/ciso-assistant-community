@@ -40,12 +40,12 @@
 
 
 # --- Output Excel file name (optional) ---
-# excel_file_name: "output.xlsx"
+# excel_file_name: "my_framework.xlsx"
 
 # --- Metadata sheets ---
 urn_root: "risk-framework_2025.example"
 locale: "en"
-ref_id: "rfw001"
+ref_id: "risk-framework_2025.example"
 framework_name: "Example Risk Framework"
 description: |
   This is a demonstration framework.
@@ -55,10 +55,10 @@ copyright: "© 2025 Example Organization"
 provider: "intuitem"
 
 # --- Specific to Framework sheets ---
-framework_sheet_base_name: "examplefw"
+framework_sheet_base_name: "framework"
 
 # --- To enable implementation groups, uncomment the lines below ---
-# implementation_groups_sheet_base_name: "examplegroups"
+# implementation_groups_sheet_base_name: "imp_grp"
 
 # implementation_groups:
 #   - ref_id: "grp001"
