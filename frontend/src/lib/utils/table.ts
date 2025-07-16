@@ -272,7 +272,7 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PERSONAL_DATA_CATEGORY_FITLER: ListViewFilterConfig = {
+const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'personal-data/category',
@@ -940,7 +940,7 @@ export const listViewFields = {
 		],
 		filters: {
 			processing: PROCESSING_FILTER,
-			category: PERSONAL_DATA_CATEGORY_FITLER
+			category: PERSONAL_DATA_CATEGORY_FILTER
 		}
 	},
 	'data-subjects': {
