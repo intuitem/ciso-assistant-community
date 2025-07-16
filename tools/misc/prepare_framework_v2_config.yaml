@@ -7,7 +7,8 @@
 # REQUIRED FIELDS:
 # - urn_root: (str) Unique identifier base. Must contain only lowercase letters,
 #   digits, dashes (-), underscores (_) or dots (.) — no uppercase or special chars.
-# - locale: (str) Locale setting complying with ISO 639 Set 1 (e.g., "en", "fr"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes.
+# - locale: (str) Locale setting complying with ISO 639 Set 1 (e.g., "en", "fr").
+#   See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes.
 # - ref_id: (str) Reference ID for the framework.
 # - framework_name: (str) Name of the framework.
 # - description: (str, multiline supported) Description of the framework.
