@@ -9,7 +9,6 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import * as m from '$paraglide/messages.js';
 
-
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 
 	import {
@@ -46,6 +45,7 @@
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
+		localStorage.removeItem('favicon');
 	}
 </script>
 
@@ -54,13 +54,12 @@
 		dataType="form"
 		enctype="multipart/form-data"
 		data={data.form}
-		
 		validators={zod(ClientSettingsSchema)}
 		action="/settings/client-settings?/editClientSettings"
 		class="flex flex-col space-y-3"
 	>
 		{#snippet children({ form })}
-				<HiddenInput {form} field="id" />
+			<HiddenInput {form} field="id" />
 			<TextField {form} field="name" label={m.name()} />
 			<div class="flex items-center space-x-1">
 				<div class="w-full">
@@ -101,20 +100,20 @@
 						allowedExtensions={['png', 'jpeg', 'jpg', 'svg', 'ico']}
 					/>
 				</div>
-        {#if data.settings.favicon != null}
-          <button
-            class="btn preset-filled-tertiary-500 h-full"
-            type="button"
-            onclick={(_) =>
-              modalConfirm(
-                data.settings.id,
-                data.settings.favicon,
-                '/settings/client-settings?/deleteFavicon'
-              )}
-          >
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        {/if}
+				{#if data.settings.favicon != null}
+					<button
+						class="btn preset-filled-tertiary-500 h-full"
+						type="button"
+						onclick={(_) =>
+							modalConfirm(
+								data.settings.id,
+								data.settings.favicon,
+								'/settings/client-settings?/deleteFavicon'
+							)}
+					>
+						<i class="fa-solid fa-trash"></i>
+					</button>
+				{/if}
 			</div>
 			<Checkbox
 				{form}
@@ -127,6 +126,6 @@
 				data-testid="save-button"
 				type="submit">{m.save()}</button
 			>
-					{/snippet}
-		</SuperForm>
+		{/snippet}
+	</SuperForm>
 {/if}

@@ -131,6 +131,27 @@
 		tail
 	}: Props = $props();
 
+	let model = $derived(URL_MODEL_MAP[URLModel]);
+	const tableSource: TableSource = $derived(
+		Object.keys(source.head)
+			.filter(
+				(key) =>
+					!(
+						model?.flaggedFields &&
+						Object.hasOwn(model.flaggedFields, key) &&
+						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
+						page.data?.featureflags[model.flaggedFields[key]] === false
+					)
+			)
+			.reduce(
+				(acc, key) => {
+					acc.head[key] = source.head[key];
+					return acc;
+				},
+				{ head: {}, body: source.body, meta: source.meta }
+			)
+	);
+
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
 		rowIndex: number
@@ -169,13 +190,13 @@
 	let classesTable = $derived(`${element} ${text} ${color}`);
 
 	const handler = new DataHandler(
-		source.body.map((item: Record<string, any>, index: number) => {
+		tableSource.body.map((item: Record<string, any>, index: number) => {
 			return {
 				...item,
-				meta: source.meta
-					? source.meta.results
-						? { ...source.meta.results[index] }
-						: { ...source.meta[index] }
+				meta: tableSource.meta
+					? tableSource.meta.results
+						? { ...tableSource.meta.results[index] }
+						: { ...tableSource.meta[index] }
 					: undefined
 			};
 		}),
@@ -192,7 +213,15 @@
 	$tableHandlers[baseEndpoint] = handler;
 
 	handler.onChange((state: State) =>
-		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
+		loadTableData({
+			state,
+			URLModel,
+			endpoint: baseEndpoint,
+			fields:
+				fields.length > 0
+					? { head: fields, body: fields }
+					: { head: Object.values(tableSource.head), body: Object.values(tableSource.body) }
+		})
 	);
 
 	onMount(() => {
@@ -291,7 +320,6 @@
 	});
 
 	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
-	let model = $derived(URL_MODEL_MAP[URLModel]);
 	let canCreateObject = $derived(
 		model
 			? page.params.id
@@ -415,7 +443,7 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#each Object.entries(source.head) as [key, heading]}
+				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
 						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
 					{/if}
@@ -518,6 +546,8 @@
 																{m.accept()}
 															</span>
 														</div>
+													{:else if key === 'icon_fa_class'}
+														<i class="text-lg fa {value}"></i>
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 														{#if value?.length > 300}
@@ -611,10 +641,10 @@
 				</ContextMenu.Content>
 			{/if}
 		</ContextMenu.Root>
-		{#if source.foot}
+		{#if tableSource.foot}
 			<tfoot class="table-foot {regionFoot}">
 				<tr>
-					{#each source.foot as cell}
+					{#each tableSource.foot as cell}
 						<td class={regionFootCell}>{cell}</td>
 					{/each}
 				</tr>
