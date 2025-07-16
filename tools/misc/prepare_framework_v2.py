@@ -71,6 +71,8 @@ def validate_implementation_groups(impl_groups, context="implementation_groups")
 
 # Added validation for extra_locales
 def validate_extra_locales(data):
+    
+    framework_locale = data.get("locale")
     extra_locales = data.get("extra_locales")
     if extra_locales is None:
         return
@@ -84,6 +86,11 @@ def validate_extra_locales(data):
     for i, locale_entry in enumerate(extra_locales, start=1):
         if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
             raise ValueError(f"(validate_extra_locales) Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
+
+        if framework_locale in locale_entry.keys():
+            print(f"⚠️  [WARNING] (validate_extra_locales) Locale \"{framework_locale}\" is already the framework's main locale."
+                          f"\n\t     Skipping locale \"{framework_locale}\"...")
+            continue
 
         for loc_code, loc_data in locale_entry.items():
             if not re.fullmatch(r"[a-z0-9-]{2}", loc_code):
