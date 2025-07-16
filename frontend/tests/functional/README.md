@@ -1,11 +1,13 @@
 # E2E Tests Usage Guide
 
 ## Overview
+
 This project uses **Playwright** for end-to-end (E2E) tests that allow comprehensive testing of the CISO Assistant application by simulating real user interactions.
 
 Playwright Documentation: https://playwright.dev/docs/intro
 
 ## Test Structure
+
 ```
 frontend/tests/
 .
@@ -72,12 +74,14 @@ frontend/tests/
 ```
 
 ## Prerequisites
+
 - **Node.js** and **pnpm** installed
 - **Python 3** with **Poetry** for the backend
 - **Docker** for the mail service (optional with `-m`)
 - **Git** for version information
 
 ## Installation
+
 ```bash
 # Install frontend dependencies
 cd frontend
@@ -95,6 +99,7 @@ poetry install
 ## Running Tests
 
 ### Basic Command
+
 ```bash
 # From the frontend/tests directory
 ./e2e-tests.sh
@@ -103,17 +108,20 @@ poetry install
 ### Main Options
 
 #### Configuration Options
+
 - `--port=8080` : Backend server port (default: 8173)
 - `--mailer=1025/8025` : SMTP/Web ports for mail service
 - `--no-sudo` : Run Docker without sudo
 
 #### Execution Options
+
 - `-q` : Quick mode (single project, no retry)
 - `-v` : Show backend server logs
 - `-k` : Keep initial database snapshot
 - `-m` : Use existing mail service
 
 #### Playwright Options
+
 - `--browser=chromium` : Specific browser (chromium/firefox/webkit)
 - `--headed` : Run with graphical interface
 - `--grep="pattern"` : Filter tests by name
@@ -122,6 +130,7 @@ poetry install
 - `--retries=2` : Number of retry attempts on failure
 
 ### Usage Examples
+
 ```bash
 # Quick tests in headless mode
 ./e2e-tests.sh -q

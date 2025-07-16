@@ -57,11 +57,11 @@ test('more panel components work properly', async ({ logedPage, sideBar, page })
 		await page.getByTestId('form-input-first-name').fill(testFirstName);
 		await page.getByTestId('form-input-last-name').fill(testLastName);
 		await page.getByTestId('save-button').click();
-		
+
 		await page.waitForURL('/my-profile');
 
 		await page.goto('/analytics');
-		
+
 		// Check that user name display now shows first name and last name instead of email
 		await expect(sideBar.userNameDisplay).toHaveText(`${testFirstName} ${testLastName}`);
 		//await expect(sideBar.userEmailDisplay).not.toBeVisible();
