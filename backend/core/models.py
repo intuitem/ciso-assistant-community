@@ -17,7 +17,12 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    RegexValidator,
+    MinValueValidator,
+    URLValidator,
+)
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery
 from django.forms.models import model_to_dict
@@ -1765,6 +1770,7 @@ class Asset(
         null=True,
         blank=True,
         max_length=2048,
+        validators=[URLValidator(schemes={"http", "https"})],
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
@@ -2362,6 +2368,7 @@ class Evidence(
         blank=True,
         null=True,
         max_length=2048,
+        validators=[URLValidator(schemes={"http", "https"})],
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
@@ -2479,10 +2486,11 @@ class Incident(NameDescriptionMixin, FolderMixin):
         default=Detection.INTERNAL,
     )
 
-    link = models.CharField(
+    link = models.URLField(
         null=True,
         blank=True,
         max_length=2048,
+        validators=[URLValidator(schemes={"http", "https"})],
         verbose_name=_("Link"),
     )
 
@@ -2666,10 +2674,11 @@ class AppliedControl(
         help_text=_("Date after which the applied control is no longer valid"),
         verbose_name=_("Expiry date"),
     )
-    link = models.CharField(
+    link = models.URLField(
         null=True,
         blank=True,
         max_length=2048,
+        validators=[URLValidator(schemes={"http", "https"})],
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
