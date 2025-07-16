@@ -3499,14 +3499,14 @@ class RiskScenario(NameDescriptionMixin):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
     @property
-    def beyond_appetite(self):
+    def within_appetite(self):
         appetite = self.risk_assessment.risk_appetite
-        if appetite:
-            if self.current_level > appetite:
-                return "yes"
+        if appetite >= 0:
+            if self.current_level <= appetite:
+                return "YES"
             else:
-                return "no"
-        return "undefined"
+                return "NO"
+        return "--"
 
     def _get_risk_data(self, value: int, data_key: str):
         """

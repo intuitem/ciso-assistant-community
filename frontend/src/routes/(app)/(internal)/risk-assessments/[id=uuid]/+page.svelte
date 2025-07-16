@@ -261,6 +261,7 @@
 					'inherent_level',
 					'existing_applied_controls',
 					'current_level',
+					'within_appetite',
 					'applied_controls',
 					'residual_level'
 				]}

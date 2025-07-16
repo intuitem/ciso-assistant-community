@@ -593,7 +593,8 @@ export const listViewFields = {
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
-			'riskAssessment'
+			'riskAssessment',
+			'withinAppetite'
 		],
 		body: [
 			'ref_id',
@@ -605,7 +606,8 @@ export const listViewFields = {
 			'applied_controls',
 			'residual_level',
 			'treatment',
-			'risk_assessment'
+			'risk_assessment',
+			'within_appetite'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
