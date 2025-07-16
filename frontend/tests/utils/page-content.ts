@@ -158,4 +158,8 @@ export class PageContent extends BasePage {
 			? this.getRow(value, language).getByTestId('tablerow-import-button')
 			: this.getRow(value).getByTestId('tablerow-import-button');
 	}
+
+	async waitUntilTableLoaded() {
+        await this.page.getByRole('row').nth(1).waitFor({ state: 'visible', timeout: 1500 });
+    }
 }
