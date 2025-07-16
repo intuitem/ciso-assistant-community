@@ -76,7 +76,7 @@ def validate_extra_locales(data):
             raise ValueError(f"(validate_extra_locales) Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
 
         for loc_code, loc_data in locale_entry.items():
-            if not re.fullmatch(r"[a-z0-9-]{2,5}", loc_code):
+            if not re.fullmatch(r"[a-z0-9-]{2}", loc_code):
                 raise ValueError(f"(validate_extra_locales) Invalid locale code \"{loc_code}\" in extra_locales entry #{i}")
 
             if not isinstance(loc_data, dict) or not loc_data:
@@ -109,6 +109,9 @@ def validate_yaml_data(data):
     ]
     for field in required_fields:
         validate_required_field(field, data.get(field))
+        
+    if not re.fullmatch(r"[a-z0-9-]{2}", data.get("locale")):
+        raise ValueError(f"(validate_yaml_data) Invalid locale code \"{data.get("locale")}\" in \"locale\" entry")
 
     validate_urn_root(data["urn_root"])
 
