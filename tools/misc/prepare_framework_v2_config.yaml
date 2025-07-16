@@ -13,6 +13,7 @@
 # - description: (str, multiline supported) Description of the framework.
 # - copyright: (str) Copyright information.
 # - provider: (str) Name of the providing organization.
+# - packager: (str) Name of the organisation / person creating the package.
 # - framework_sheet_base_name: (str) Base name used for the framework-related sheets.
 #
 # OPTIONAL / CONDITIONAL FIELDS:
@@ -53,6 +54,7 @@ description: |
   Designed for illustration and testing of the Excel generator.
 copyright: "© 2025 Example Organization"
 provider: "intuitem"
+packager: "intuitem"
 
 # --- Specific to Framework sheets ---
 framework_sheet_base_name: "framework"

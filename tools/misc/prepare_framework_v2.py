@@ -105,7 +105,7 @@ def validate_extra_locales(data):
 def validate_yaml_data(data):
     required_fields = [
         "urn_root", "locale", "ref_id", "framework_name", "description",
-        "copyright", "provider", "framework_sheet_base_name"
+        "copyright", "provider", "packager", "framework_sheet_base_name"
     ]
     for field in required_fields:
         validate_required_field(field, data.get(field))
@@ -158,6 +158,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     description = data["description"]
     copyright_ = data["copyright"]
     provider = data["provider"]
+    packager = data["packager"]
     framework_sheet_base = data["framework_sheet_base_name"]
     impl_group_base = data.get("implementation_groups_sheet_base_name")
     impl_groups = data.get("implementation_groups", [])
@@ -176,7 +177,7 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
     ws1.append(["description", description])
     ws1.append(["copyright", copyright_])
     ws1.append(["provider", provider])
-    ws1.append(["packager", "intuitem"])
+    ws1.append(["packager", packager])
 
     # Add extra_locales to library_meta sheet
     extra_locales = data.get("extra_locales")
