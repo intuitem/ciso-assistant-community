@@ -330,30 +330,37 @@
 								strokeWidth="20px"
 								value={formatScoreValue(nodeScore(), node.max_score)}
 								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
-								size="size-12"><p class="font-semibold text-xs">{nodeScore()}</p></ProgressRing
+								size="size-12">{nodeScore()}</ProgressRing
 							>
 							{#if showDocumentationScore}
 								<ProgressRing
 									strokeWidth="20px"
 									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
 									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
-									size="size-12"
-									><p class="font-semibold text-xs">{nodeDocumentationScore()}</p></ProgressRing
+									size="size-12">{nodeDocumentationScore()}</ProgressRing
 								>
 							{/if}
 						{/if}
 					{:else}
-						{@const displayedScore = showDocumentationScore
+						<!-- {@const displayedScore = showDocumentationScore
 							? (nodeScore() + nodeDocumentationScore()) / 2
-							: nodeScore()}
-						{nodeScore()}
-						{nodeDocumentationScore()}
-						<ProgressRing
-							strokeWidth="20px"
-							value={formatScoreValue(displayedScore, node.max_score)}
-							meterStroke={displayScoreColor(displayedScore, node.max_score)}
-							size="size-12"><p class="font-semibold text-xs">{displayedScore}</p></ProgressRing
-						>
+							: nodeScore()} -->
+						{#if nodeScore() !== null}
+							<ProgressRing
+								strokeWidth="20px"
+								value={formatScoreValue(nodeScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+								size="size-12">{nodeScore()}</ProgressRing
+							>
+							{#if showDocumentationScore}
+								<ProgressRing
+									strokeWidth="20px"
+									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+									size="size-12">{nodeDocumentationScore()}</ProgressRing
+								>
+							{/if}
+						{/if}
 					{/if}
 				</div>
 			</div>
