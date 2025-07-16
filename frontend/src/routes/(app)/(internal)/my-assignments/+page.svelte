@@ -84,6 +84,47 @@
 		{/each}
 	</div>
 
+	<div
+		class="col-span-full text-lg font-black underline underline-offset-4 decoration-4 decoration-blue-500"
+	>
+		{m.evidences()}
+	</div>
+	<div class="text-left col-span-full">
+		<div class="relative overflow-x-auto shadow-lg rounded-lg">
+			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				<thead
+					class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+				>
+					<tr>
+						<th scope="col" class="px-6 py-3"> {m.name()} </th>
+						<th scope="col" class="px-6 py-3"> {m.attachment()} </th>
+						<th scope="col" class="px-6 py-3"> {m.expirationDate()} </th>
+						<th scope="col" class="px-6 py-3"> {m.folder()} </th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each data.data.evidences as ev}
+						<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+							>
+								<Anchor href="/evidences/{ev.id}" class="hover:text-violet-400">{ev.name}</Anchor>
+							</th>
+							<td class="px-6 py-4"> {ev.attachment ?? '-'} </td>
+							<td class="px-6 py-4">
+								<span class=" p-1 rounded-sm {eta_span_class[ev.expiry_date]}">
+									{formatDateOrDateTime(ev.expiry_date, getLocale()) ?? '-'}
+								</span>
+							</td>
+							<td class="px-6 py-4">{ev.folder.str} </td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
 	<div class="text-left col-span-full lg:col-span-6">
 		<div class="text-lg font-black underline underline-offset-4 decoration-4 decoration-orange-300">
 			{m.riskAssessments()}
