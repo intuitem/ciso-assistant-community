@@ -8,11 +8,21 @@
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 </script>
 
 <p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
@@ -58,9 +68,17 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="assets?type=PR"
+	optionsEndpoint="assets"
 	optionsDetailedUrlParameters={[['ebios_rm_studies', initialData.ebios_rm_study]]}
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
 	optionsLabelField="auto"
 	field="assets"
 	label={m.assets()}

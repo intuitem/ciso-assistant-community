@@ -953,5 +953,7 @@
 				"countPlural=other": "{count} Dias"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Cenários correspondentes",
+	"fearedEventAssetHelpText": "Os eventos temidos são geralmente vinculados a valores empresariais (ativos primários). Ativos de suporte são permitidos aqui para flexibilidade."
 }

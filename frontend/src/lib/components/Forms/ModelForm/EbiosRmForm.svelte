@@ -5,18 +5,30 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
-	import { page } from '$app/stores';
+	import Select from '../Select.svelte';
+	import { page } from '$app/state';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+	}
 
-	let activeActivity: string | null = null;
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context
+	}: Props = $props();
 
-	$page.url.searchParams.forEach((value, key) => {
+	let activeActivity: string | null = $state(null);
+
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -96,6 +108,15 @@
 			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
+		<Select
+			{form}
+			options={model.selectOptions['quotation_method']}
+			field="quotation_method"
+			disableDoubleDash
+			label={m.quotationMethod()}
+			cacheLock={cacheLocks['quotation_method']}
+			bind:cachedValue={formDataCache['quotation_method']}
+		/>
 		<TextField
 			{form}
 			field="ref_id"
@@ -142,6 +163,14 @@
 			optionsEndpoint="assets"
 			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type'
+					}
+				],
+				classes: 'text-blue-500'
+			}}
 			field="assets"
 			label={m.assets()}
 			helpText={m.studyAssetHelpText()}
@@ -172,6 +201,14 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		cacheLock={cacheLocks['assets']}

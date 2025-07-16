@@ -3,13 +3,27 @@
 	import { getOptions } from '$lib/utils/crud';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let ref_id: string;
-	export let name: string;
-	export let description: string;
-	export let threats: Record<string, unknown>[] = [];
-	export let reference_controls: Record<string, unknown>[] = [];
-	export let children: Record<string, unknown>[];
-	export let assessable: boolean;
+	interface Props {
+		ref_id: string;
+		name: string;
+		description: string;
+		threats?: Record<string, unknown>[];
+		reference_controls?: Record<string, unknown>[];
+		children: Record<string, unknown>[];
+		assessable: boolean;
+		[key: string]: any;
+	}
+
+	let {
+		ref_id,
+		name,
+		description,
+		threats = [],
+		reference_controls = [],
+		children,
+		assessable,
+		...rest
+	}: Props = $props();
 
 	const node = {
 		ref_id,
@@ -19,7 +33,7 @@
 		reference_controls,
 		children,
 		assessable,
-		...$$restProps
+		...rest
 	} as const;
 
 	type TreeViewItemNode = typeof node;
@@ -41,17 +55,17 @@
 
 	const title: string = getRequirementTitle(ref_id, name);
 
-	let showInfo = false;
+	let showInfo = $state(false);
 
-	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
-	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
+	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
+	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
 </script>
 
 <div>
 	<span class="whitespace-pre-line" style="font-weight: 300;">
 		{#if node.assessable}
 			<Anchor
-				href={`inspect-requirement/${node.id}`}
+				href={`/frameworks/inspect-requirement/${node.id}`}
 				label={title}
 				class="text-primary-500 hover:text-primary-700"
 			>
@@ -90,18 +104,18 @@
 			role="button"
 			tabindex="0"
 			class="underline text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-			on:click={(e) => {
+			onclick={(e) => {
 				e.preventDefault();
 				showInfo = !showInfo;
 			}}
-			on:keydown={(e) => {
+			onkeydown={(e) => {
 				if (e.key === 'Enter') {
 					e.preventDefault();
 					showInfo = !showInfo;
 				}
 			}}
 		>
-			<i class="text-xs fa-solid fa-info-circle" /> Learn more
+			<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 		</div>
 		<div
 			class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
@@ -110,7 +124,7 @@
 		>
 			<div class="flex-1">
 				<p class="font-medium">
-					<i class="fa-solid fa-gears" />
+					<i class="fa-solid fa-gears"></i>
 					Suggested reference controls
 				</p>
 				{#if reference_controls.length === 0}
@@ -128,7 +142,7 @@
 			</div>
 			<div class="flex-1">
 				<p class="font-medium">
-					<i class="fa-solid fa-gears" />
+					<i class="fa-solid fa-gears"></i>
 					Threats covered
 				</p>
 				{#if threats.length === 0}

@@ -122,6 +122,16 @@ class Folder(NameDescriptionMixin):
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
 
+    def get_folder_full_path(self, include_root: bool = False) -> list[Self]:
+        """
+        Get the full path of the folder including its parents.
+        If include_root is True, the root folder is included in the path.
+        """
+        folders = ([self] + [f for f in self.get_parent_folders()])[::-1]
+        if include_root:
+            return folders
+        return folders[1:] if len(folders) > 1 else folders
+
     @staticmethod
     def _navigate_structure(start, path):
         """
@@ -240,6 +250,12 @@ class FolderMixin(models.Model):
         related_name="%(class)s_folder",
         default=Folder.get_root_folder_id,
     )
+
+    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+        folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
+        if include_root:
+            return folders
+        return folders[1:] if len(folders) > 1 else folders
 
     class Meta:
         abstract = True

@@ -960,5 +960,7 @@
 				"countPlural=other": "{count} Tage"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Übereinstimmende Szenarien",
+	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt."
 }

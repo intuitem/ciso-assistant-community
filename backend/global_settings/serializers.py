@@ -103,6 +103,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     experimental = serializers.BooleanField(
         source="value.experimental", required=False, default=True
     )
+    inherent_risk = serializers.BooleanField(
+        source="value.inherent_risk", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -120,6 +123,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "tprm",
             "privacy",
             "experimental",
+            "inherent_risk",
         ]
         read_only_fields = ["name"]
 

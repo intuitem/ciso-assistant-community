@@ -3,6 +3,15 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import { getModelInfo, URL_MODEL_MAP } from './crud';
+
+export function tableSourceMapper(source: any[], keys: string[]): any[] {
+	return source.map((row) => {
+		const mappedRow: any = {};
+		keys.forEach((key) => (mappedRow[key] = row[key]));
+		return mappedRow;
+	});
+}
 
 interface ListViewFilterConfig {
 	component: ComponentType;
@@ -26,8 +35,6 @@ const YES_NO_OPTIONS = [
 	{ label: 'yes', value: 'true' },
 	{ label: 'no', value: 'false' }
 ];
-
-const YES_OPTION = [{ label: 'yes', value: 'true' }];
 
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -348,6 +355,14 @@ const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'inherent_level'
+	}
+};
+
 // TODO: TEST THIS
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -474,7 +489,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
-		options: YES_OPTION,
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -483,7 +498,7 @@ const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'mappingSuggested',
-		options: YES_OPTION,
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -506,8 +521,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'parent_folder']
 	},
 	perimeters: {
-		head: ['ref_id', 'name', 'description', 'domain'],
-		body: ['ref_id', 'name', 'description', 'folder'],
+		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
+		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER
@@ -572,6 +587,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
@@ -583,6 +599,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
@@ -719,8 +736,8 @@ export const listViewFields = {
 		body: ['name', 'description']
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
+		head: ['email', 'firstName', 'lastName', 'userGroups', 'keep_local_login', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'user_groups', 'keep_local_login', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -752,22 +769,12 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'framework',
-			'assets',
-			'evidences',
 			'description',
 			'perimeter',
-			'reviewProgress'
+			'reviewProgress',
+			'updated_at'
 		],
-		body: [
-			'ref_id',
-			'name',
-			'framework',
-			'assets',
-			'evidences',
-			'description',
-			'perimeter',
-			'progress'
-		],
+		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -993,13 +1000,25 @@ export const listViewFields = {
 		}
 	},
 	'operational-scenarios': {
-		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
-		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		head: ['is_selected', 'attackPath', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'attack_path', 'operating_modes_description', 'threats', 'likelihood'],
 		filters: {
 			threats: THREAT_FILTER,
 			likelihood: RISK_PROBABILITY_FILTER,
 			is_selected: IS_SELECTED_FILTER
 		}
+	},
+	'elementary-actions': {
+		head: ['ref_id', 'domain', '', 'name', 'attack_stage', 'threat'],
+		body: ['ref_id', 'domain', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+	},
+	'operating-modes': {
+		head: ['ref_id', 'name', 'likelihood'],
+		body: ['ref_id', 'name', 'likelihood']
+	},
+	'kill-chains': {
+		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
@@ -1010,7 +1029,16 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'findings_assessment',
+			'severity',
+			'owner',
+			'status',
+			'applied_controls',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1018,6 +1046,7 @@ export const listViewFields = {
 			'severity',
 			'owner',
 			'status',
+			'applied_controls',
 			'filtering_labels'
 		],
 		filters: { filtering_labels: LABELS_FILTER }
@@ -1054,6 +1083,10 @@ export const listViewFields = {
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
+	campaigns: {
+		head: ['name', 'description', 'framework', 'status'],
+		body: ['name', 'description', 'framework', 'status']
 	},
 	'task-templates': {
 		head: [

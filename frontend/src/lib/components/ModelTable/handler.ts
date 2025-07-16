@@ -1,6 +1,5 @@
-import { listViewFields } from '$lib/utils/table';
+import { listViewFields, tableSourceMapper } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
-import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 
@@ -8,7 +7,7 @@ export interface LoadTableDataParams {
 	state: State;
 	URLModel: urlModel;
 	endpoint: string;
-	fields?: string[];
+	fields?: { head: string[]; body: string[] };
 }
 
 export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadTableDataParams) => {
@@ -23,8 +22,14 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 	state.setTotalRows(response.count);
 
 	const fieldsToUse =
-		fields.length > 0
-			? { ...listViewFields[URLModel as urlModel], head: fields, body: fields }
+		fields.head &&
+		fields.head.length > 0 &&
+		fields.head.toString() !== listViewFields[URLModel as urlModel].head.toString()
+			? {
+					...listViewFields[URLModel as urlModel],
+					head: fields.head,
+					body: fields.body.length > 0 ? fields.body : fields.head
+				}
 			: listViewFields[URLModel as urlModel];
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 

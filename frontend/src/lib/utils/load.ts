@@ -1,6 +1,6 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { getModelInfo, type ModelMapEntry } from '$lib/utils/crud';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
@@ -81,13 +81,13 @@ export const loadDetail = async ({ event, model, id }) => {
 					initialData['ebios_rm_study'] = data.ebios_rm_study.id;
 				}
 				if (data.folder) {
-					if (!new RegExp(UUID_REGEX).test(data.folder)) {
+					if (!new RegExp(UUID_REGEX).test(data.folder) && !data?.folder?.id) {
 						const objectEndpoint = `${endpoint}object/`;
 						const objectResponse = await event.fetch(objectEndpoint);
 						const objectData = await objectResponse.json();
 						initialData['folder'] = objectData.folder;
 					} else {
-						initialData['folder'] = data.folder.id ?? data.folder;
+						initialData['folder'] = data?.folder?.id ?? data.folder;
 					}
 				}
 				const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
@@ -125,7 +125,8 @@ export const loadDetail = async ({ event, model, id }) => {
 					createForm,
 					selectOptions,
 					initialData,
-					disableAddDeleteButtons: e.disableAddDeleteButtons
+					disableCreate: e.disableCreate,
+					disableDelete: e.disableDelete
 				};
 			})
 		);

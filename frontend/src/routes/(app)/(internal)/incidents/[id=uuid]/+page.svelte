@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -17,7 +19,7 @@
 	import { listViewFields } from '$lib/utils/table';
 	import { browser } from '$app/environment';
 	import { goto as _goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime.js';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
@@ -25,19 +27,24 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import {
-		type TableSource,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+		[key: string]: any;
+	}
+
+	let { data, form }: Props = $props();
 
 	const invalidateAll = true;
 	const formAction = '?/create';
@@ -49,7 +56,7 @@
 		dataType: 'json',
 		enctype: 'application/x-www-form-urlencoded',
 		invalidateAll,
-		applyAction: $$props.applyAction ?? true,
+		applyAction: true,
 		resetForm: true,
 		validators: zod(schema),
 		taintedMessage: false,
@@ -98,12 +105,21 @@
 		})
 	);
 
-	let invalidateTable = false;
-	$: if (browser || invalidateTable) {
-		handler.invalidate();
-		_goto($page.url);
-		invalidateTable = false;
-	}
+	let invalidateTable = $state(true);
+
+	$effect(() => {
+		if (page.form?.form?.posted && page.form?.form?.valid) {
+			handler.invalidate();
+		}
+	});
+
+	$effect(() => {
+		if (invalidateTable) {
+			handler.invalidate();
+			_goto(page.url);
+			invalidateTable = false;
+		}
+	});
 
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
@@ -129,31 +145,31 @@
 		modalStore.trigger(modal);
 	}
 
-	let refreshKey = false;
-	function forceRefresh() {
-		refreshKey = !refreshKey;
-	}
+	let refreshKey = $state(false);
 
-	let resetForm = true;
+	let resetForm = $state(true);
 
-	$: formStore = _form.form;
+	let formStore = $derived(_form.form);
 
-	$: if (form?.newEvidence) {
-		refreshKey = !refreshKey;
-		resetForm = false;
-		_form.form.update(
-			(current: Record<string, any>) => ({
-				...current,
-				evidences: current.evidences
-					? [...current.evidences, form?.newEvidence]
-					: [form?.newEvidence]
-			}),
-			{ taint: false }
-		);
-		console.debug('formStore', $formStore);
-	}
+	run(() => {
+		if (form?.newEvidence) {
+			refreshKey = !refreshKey;
+			resetForm = false;
+			_form.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					evidences: current.evidences
+						? [...current.evidences, form?.newEvidence]
+						: [form?.newEvidence]
+				}),
+				{ taint: false }
+			);
+			form.newEvidence = undefined;
+			console.debug('formStore', $formStore);
+		}
+	});
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
@@ -167,105 +183,104 @@
 
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
-		<div
-			slot="widgets"
-			class="shadow-xl border-l border-t p-4 rounded bg-gradient-to-tl from-slate-50 to-white"
-			hidden={!canEditObject}
-		>
-			{#if canEditObject}
-				<!-- new record form -->
-				<h1 class="text-xl font-bold font-serif mb-2">{m.addTimelineEntry()}</h1>
-				<SuperForm
-					class="flex flex-col space-y-3"
-					action={formAction}
-					dataType={'json'}
-					enctype={'application/x-www-form-urlencoded'}
-					data={timelineForm}
-					{_form}
-					{invalidateAll}
-					let:form
-					let:data
-					let:initialData
-					validators={zod(schema)}
-					{...$$restProps}
-				>
-					<AutocompleteSelect
-						{form}
-						optionsEndpoint="incidents"
-						field="incident"
-						label={m.incident()}
-						hidden={initialData.incident}
-					/>
-					<Select
-						{form}
-						disableDoubleDash={true}
-						options={model.selectOptions['entry_type']}
-						field="entry_type"
-						label={m.entryType()}
-					/>
-					{#key refreshKey}
-						<TextField
-							type="datetime-local"
-							step="1"
-							{form}
-							field="timestamp"
-							label={m.timestamp()}
-						/>
-					{/key}
-					<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
-					<TextArea {form} field="observation" label={m.observation()} />
-					{#key refreshKey}
-						<div class="flex items-end justify-center">
-							<div class="w-full mr-2">
-								<AutocompleteSelect
+		{#snippet widgets()}
+			<div
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
+				hidden={!canEditObject}
+			>
+				{#if canEditObject}
+					<!-- new record form -->
+					<h1 class="text-xl font-bold mb-2">{m.addTimelineEntry()}</h1>
+					<SuperForm
+						class="flex flex-col space-y-3"
+						action={formAction}
+						dataType={'json'}
+						enctype={'application/x-www-form-urlencoded'}
+						data={timelineForm}
+						{_form}
+						{invalidateAll}
+						validators={zod(schema)}
+					>
+						{#snippet children({ form, data, initialData })}
+							<AutocompleteSelect
+								{form}
+								optionsEndpoint="incidents"
+								field="incident"
+								label={m.incident()}
+								hidden={initialData.incident}
+							/>
+							<Select
+								{form}
+								disableDoubleDash={true}
+								options={model.selectOptions['entry_type']}
+								field="entry_type"
+								label={m.entryType()}
+							/>
+							{#key refreshKey}
+								<TextField
+									type="datetime-local"
+									step="1"
 									{form}
-									multiple
-									optionsEndpoint="evidences"
-									field="evidences"
-									{resetForm}
-									label={m.evidences()}
+									field="timestamp"
+									label={m.timestamp()}
 								/>
+							{/key}
+							<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
+							<TextArea {form} field="observation" label={m.observation()} />
+							{#key refreshKey}
+								<div class="flex items-end justify-center">
+									<div class="w-full mr-2">
+										<AutocompleteSelect
+											{form}
+											multiple
+											optionsEndpoint="evidences"
+											field="evidences"
+											{resetForm}
+											label={m.evidences()}
+										/>
+									</div>
+									<button
+										class="btn bg-gray-300 h-11 w-10"
+										onclick={(_) => modalEvidenceCreateForm()}
+										type="button"><i class="fa-solid fa-plus text-sm"></i></button
+									>
+								</div>
+							{/key}
+							<div class="flex flex-row justify-between space-x-4">
+								<button
+									class="btn preset-filled-tertiary-500 font-semibold w-full"
+									data-testid="reset-button"
+									type="button"
+									onclick={() => {
+										_form.reset();
+										_form.form.update((current) => ({
+											...current,
+											evidences: undefined,
+											timestamp: new Date().toISOString()
+										}));
+										refreshKey = !refreshKey;
+										resetForm = true;
+									}}>{m.cancel()}</button
+								>
+								<button
+									class="btn preset-filled-primary-500 font-semibold w-full"
+									data-testid="save-button"
+									type="submit"
+									onclick={() => {
+										resetForm = true;
+									}}>{m.save()}</button
+								>
 							</div>
-							<button
-								class="btn bg-gray-300 h-11 w-10"
-								on:click={(_) => modalEvidenceCreateForm()}
-								type="button"><i class="fa-solid fa-plus text-sm" /></button
-							>
-						</div>
-					{/key}
-					<div class="flex flex-row justify-between space-x-4">
-						<button
-							class="btn variant-filled-tertiary font-semibold w-full"
-							data-testid="reset-button"
-							type="button"
-							on:click={() => {
-								_form.reset();
-								_form.form.update((current) => ({
-									...current,
-									evidences: undefined,
-									timestamp: new Date().toISOString()
-								}));
-								refreshKey = !refreshKey;
-								resetForm = true;
-							}}>{m.cancel()}</button
-						>
-						<button
-							class="btn variant-filled-primary font-semibold w-full"
-							data-testid="save-button"
-							type="submit"
-							on:click={() => {
-								resetForm = true;
-							}}>{m.save()}</button
-						>
-					</div>
-				</SuperForm>
-			{/if}
-		</div>
+						{/snippet}
+					</SuperForm>
+				{/if}
+			</div>
+		{/snippet}
 	</DetailView>
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
 		<div class="flex flex-row justify-between items-center">
-			<h1 class="text-xl font-bold font-serif">{m.timeline()}</h1>
+			<h1 class="text-xl font-bold">{m.timeline()}</h1>
 			<Search {handler} />
 			<RowsPerPage {handler} />
 		</div>
@@ -289,9 +304,8 @@
 								model={model.info}
 								URLModel={actionsURLModel}
 								detailURL={`/${actionsURLModel}/${meta.id}`}
-								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
+								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								{row}
-								hasBody={$$slots.actionsBody}
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
@@ -302,7 +316,7 @@
 							{/if}
 						</div>
 						<div class="mb-1">
-							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded"
+							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded-sm"
 								>{safeTranslate(meta.entry_type)}</span
 							>
 						</div>

@@ -7,14 +7,28 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let duplicate: boolean = false;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let object: Record<string, any> = {};
-	// export let context: string = 'default';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		duplicate?: boolean;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: Record<string, any>; // export let context: string = 'default';
+	}
+
+	let {
+		form,
+		model,
+		duplicate = false,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {}
+	}: Props = $props();
+
 	// export let updated_fields: Set<string> = new Set();
 </script>
 
@@ -74,41 +88,43 @@
 		bind:cachedValue={formDataCache['authors']}
 		label={m.authors()}
 	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
-		field="reviewers"
-		cacheLock={cacheLocks['reviewers']}
-		bind:cachedValue={formDataCache['reviewers']}
-		label={m.reviewers()}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="eta"
-		label={m.eta()}
-		helpText={m.etaHelpText()}
-		cacheLock={cacheLocks['eta']}
-		bind:cachedValue={formDataCache['eta']}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="due_date"
-		label={m.dueDate()}
-		helpText={m.dueDateHelpText()}
-		cacheLock={cacheLocks['due_date']}
-		bind:cachedValue={formDataCache['due_date']}
-	/>
-	<TextArea
-		{form}
-		field="observation"
-		label={m.observation()}
-		cacheLock={cacheLocks['observation']}
-		bind:cachedValue={formDataCache['observation']}
-	/>
+	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="users?is_third_party=false"
+			optionsLabelField="email"
+			field="reviewers"
+			cacheLock={cacheLocks['reviewers']}
+			bind:cachedValue={formDataCache['reviewers']}
+			label={m.reviewers()}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
+		/>
+		<TextArea
+			{form}
+			field="observation"
+			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
+		/>
+	</Dropdown>
 	{#if initialData.ebios_rm_study}
 		<AutocompleteSelect
 			{form}

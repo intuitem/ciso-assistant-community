@@ -14,7 +14,8 @@
                     "additionalProperties": false,
                     "properties": {
                         "databaseType": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": ["sqlite", "pgsql", "externalPgsql"]
                         },
                         "djangoDebug": {
                             "type": "boolean"
@@ -26,7 +27,8 @@
                             "type": "string"
                         },
                         "emailAdmin": {
-                            "type": "string"
+                            "type": "string",
+                            "format": "email"
                         },
                         "smtp": {
                             "additionalProperties": false,
@@ -44,7 +46,9 @@
                                     "type": "string"
                                 },
                                 "port": {
-                                    "type": "integer"
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 65535
                                 },
                                 "useTls": {
                                     "type": "boolean"
@@ -161,7 +165,8 @@
                     "type": "object"
                 },
                 "replicas": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "resources": {
                     "additionalProperties": true,
@@ -182,7 +187,9 @@
                             "type": "object"
                         },
                         "port": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 65535
                         },
                         "portName": {
                             "type": "string"
@@ -209,7 +216,9 @@
                     "type": "string"
                 },
                 "port": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
                 },
                 "user": {
                     "type": "string"
@@ -272,7 +281,8 @@
                     "type": "object"
                 },
                 "replicas": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "resources": {
                     "additionalProperties": true,
@@ -293,7 +303,9 @@
                             "type": "object"
                         },
                         "port": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 65535
                         },
                         "portName": {
                             "type": "string"
@@ -384,14 +396,22 @@
                     "type": "string"
                 },
                 "pathType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": ["Exact", "Prefix", "ImplementationSpecific"]
                 },
                 "tls": {
                     "additionalProperties": false,
                     "properties": {
                         "certificateSecret": {
                             "additionalProperties": true,
-                            "properties": {},
+                            "properties": {
+                                "key": {
+                                    "type": "string"
+                                },
+                                "certificate": {
+                                    "type": "string"
+                                }
+                            },
                             "type": "object"
                         },
                         "enabled": {

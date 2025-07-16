@@ -18,6 +18,9 @@ export interface User {
 	accessible_domains: string[];
 	domain_permissions: Record<string, string[]>;
 	root_folder_id: string;
+	preferences: {
+		lang?: string;
+	};
 }
 
 export interface GlobalSettings {
@@ -64,16 +67,20 @@ export const URL_MODEL = [
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
+	// 'ebios-rm',
 	'feared-events',
 	'ro-to',
 	'stakeholders',
 	'strategic-scenarios',
 	'attack-paths',
 	'operational-scenarios',
+	'elementary-actions',
+	'operating-modes',
+	'kill-chains',
+	// qualifications
 	'qualifications',
 	'processings',
 	'processing-natures',
-	// 'ebios-rm',
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
@@ -95,7 +102,9 @@ export const URL_MODEL = [
 	'business-impact-analysis',
 	'escalation-thresholds',
 	'asset-assessments',
-	'asset-class'
+	'asset-class',
+	// campaigns,
+	'campaigns'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

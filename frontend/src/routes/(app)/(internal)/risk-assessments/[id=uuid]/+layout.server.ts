@@ -1,8 +1,9 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { tableSourceMapper } from '$lib/utils/table';
 import { getModelInfo } from '$lib/utils/crud';
 
 import { modelSchema } from '$lib/utils/schemas';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
@@ -28,6 +29,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'ref_id',
 		'name',
 		'threats',
+		'inherentLevel',
 		'existingControls',
 		'currentLevel',
 		'extraAppliedControls',
@@ -38,6 +40,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'ref_id',
 		'name',
 		'threats',
+		'inherent_level',
 		'existing_applied_controls',
 		'current_level',
 		'applied_controls',
