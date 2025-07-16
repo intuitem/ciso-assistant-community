@@ -570,7 +570,9 @@ export class TestContent {
 					assets: [vars.folderName + '/' + vars.assetName + ' Support'],
 					current_proba: 'High',
 					current_impact: 'Medium',
-					applied_controls: [vars.folderName + '/' + vars.appliedControlName + ' ' + vars.referenceControl2.name],
+					applied_controls: [
+						vars.folderName + '/' + vars.appliedControlName + ' ' + vars.referenceControl2.name
+					],
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
 					justification: 'Test comments'
