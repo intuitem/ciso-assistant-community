@@ -806,7 +806,27 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'purposes' },
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
-			{ field: 'processing', urlModel: 'data-transfers' }
+			{ field: 'processing', urlModel: 'data-transfers' },
+			{
+				field: 'processings',
+				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'status' },
+			{ field: 'legal_basis' },
+			{ field: 'dpia_required' },
+			{ field: 'dpia_reference' },
+			{ field: 'folder' },
+			{ field: 'nature' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	'processing-natures': {
