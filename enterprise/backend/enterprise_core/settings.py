@@ -127,7 +127,7 @@ CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
-ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
+ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
 USE_S3 = os.getenv("USE_S3", "False") == "True"
 
@@ -198,6 +198,7 @@ INSTALLED_APPS = [
     "allauth.headless",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
+    "allauth.socialaccount.providers.openid_connect",
     "allauth.mfa",
     "huey.contrib.djhuey",
 ]
@@ -371,6 +372,8 @@ LANGUAGES = [
     ("id", "Indonesian"),
     ("da", "Danish"),
     ("hu", "Hungarian"),
+    ("uk", "Ukrainian"),
+    ("el", "Greek"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

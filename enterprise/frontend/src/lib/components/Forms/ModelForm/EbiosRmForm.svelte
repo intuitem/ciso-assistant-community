@@ -117,6 +117,15 @@
 			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
+		<Select
+			{form}
+			options={model.selectOptions['quotation_method']}
+			field="quotation_method"
+			disableDoubleDash
+			label={m.quotationMethod()}
+			cacheLock={cacheLocks['quotation_method']}
+			bind:cachedValue={formDataCache['quotation_method']}
+		/>
 		<TextField
 			{form}
 			field="ref_id"
@@ -171,6 +180,14 @@
 			{form}
 			optionsEndpoint="assets"
 			optionsExtraFields={[['folder', 'str']]}
+			optionsInfoFields={{
+				fields: [
+					{
+						field: 'type'
+					}
+				],
+				color: 'blue'
+			}}
 			optionsLabelField="auto"
 			field="assets"
 			label={m.assets()}
@@ -183,7 +200,7 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	{:else if context === "selectAudit"}
+{:else if context === 'selectAudit'}
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -195,12 +212,20 @@
 		bind:cachedValue={formDataCache['compliance_assessments']}
 		label={m.complianceAssessment()}
 	/>
-{:else if context === "selectAsset"}
+{:else if context === 'selectAsset'}
 	<AutocompleteSelect
 		multiple
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			color: 'blue'
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		cacheLock={cacheLocks['assets']}

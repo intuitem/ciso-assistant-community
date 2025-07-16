@@ -1,0 +1,2149 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-and-bsi-c5-2020
+locale: en
+ref_id: mapping-adobe-ccf-v5-and-bsi-c5-2020
+name: adobe-ccf-v5 <-> BSI-C5-2020
+description: Mapping between Adobe CCF v5 and BSI C5 Library
+copyright: Adobe
+version: 1
+publication_date: 2025-07-01
+provider: Adobe
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:adobe-ccf-v5
+- urn:intuitem:risk:library:bsi-c5-2020
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-bsi-c5-2020
+    ref_id: mapping-adobe-ccf-v5-and-bsi-c5-2020
+    name: adobe-ccf-v5 <-> BSI-C5-2020
+    description: Mapping between Adobe CCF v5 and BSI C5 Library
+    source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    target_framework_urn: urn:intuitem:risk:framework:bsi-c5-2020
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-15
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-17
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-10
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-07
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-03
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-19
+      target_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-bsi-c5-2020-revert
+    ref_id: mapping-adobe-ccf-v5-and-bsi-c5-2020-revert
+    name: adobe-ccf-v5 <-> BSI-C5-2020
+    description: Mapping between Adobe CCF v5 and BSI C5 Library
+    target_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    source_framework_urn: urn:intuitem:risk:framework:bsi-c5-2020
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-23
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-23
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cms-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-21
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-21
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-08
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-15
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-17
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-13
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-13
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-17
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-01
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-09
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-19
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-19
+      relationship: intersect

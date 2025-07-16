@@ -101,7 +101,10 @@ class ClientSettingsViewSet(BaseModelViewSet):
     @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def logo(self, request):
         instance = ClientSettings.objects.get()
-        if not instance.logo:
+        show_data = (
+            instance.show_images_unauthenticated or request.user.is_authenticated
+        )
+        if not (instance.logo and show_data):
             return Response(
                 {"error": "No logo uploaded"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -109,11 +112,13 @@ class ClientSettingsViewSet(BaseModelViewSet):
             {"data": instance.logo_base64, "mime_type": instance.logo_mime_type}
         )
 
-    @permission_classes((AllowAny,))
-    @action(methods=["get"], detail=False)
+    @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def favicon(self, request):
         instance = ClientSettings.objects.get()
-        if not instance.favicon:
+        show_data = (
+            instance.show_images_unauthenticated or request.user.is_authenticated
+        )
+        if not (instance.favicon and show_data):
             return Response(
                 {"error": "No favicon uploaded"}, status=status.HTTP_404_NOT_FOUND
             )

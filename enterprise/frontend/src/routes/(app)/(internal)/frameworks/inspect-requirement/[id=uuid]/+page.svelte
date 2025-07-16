@@ -7,7 +7,7 @@
 	import * as m from '$paraglide/messages';
 	import { darkenColor } from '$lib/utils/helpers';
 	import { page } from '$app/state';
-	import { } from '@skeletonlabs/skeleton-svelte';
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
 	interface Props {
@@ -17,9 +17,9 @@
 	let { data }: Props = $props();
 
 	// Create a map for faster lookups
-	let memoizedRequirementAssessments = $derived(new Map(
-		data.requirementAssessments.map((ra) => [ra.compliance_assessment.id, ra])
-	));
+	let memoizedRequirementAssessments = $derived(
+		new Map(data.requirementAssessments.map((ra) => [ra.compliance_assessment.id, ra]))
+	);
 
 	function findRequirementAssessment(audit: string): any {
 		return memoizedRequirementAssessments.get(audit);
@@ -49,6 +49,8 @@
 	function getBadgeStyle(color: string) {
 		return `background-color: ${color + '44'}; color: ${darkenColor(color, 0.3)};`;
 	}
+
+	let openAccordionItems = $state(['requirement']);
 </script>
 
 <div
@@ -66,195 +68,193 @@
 		</div>
 
 		{#each data.metrics as domain, domainIndex}
-			<Accordion class="my-4">
-				<Accordion.Item open>
+			<Accordion
+				class="my-4"
+				value={openAccordionItems}
+				onValueChange={(e) => (openAccordionItems = e.value)}
+				multiple
+			>
+				<Accordion.Item value="requirement">
 					{#snippet lead()}
-									
-							<i class="fa-solid fa-sitemap text-primary-500"></i>
-						
-									{/snippet}
+						<i class="fa-solid fa-sitemap text-primary-500"></i>
+					{/snippet}
+					{#snippet control()}
+						<div class="flex flex-row space-x-4 items-center">
+							<span class="font-bold text-lg text-gray-800">{domain.name}</span>
 
-					{#snippet summary()}
-									
-							<div class="flex flex-row space-x-4 items-center">
-								<span class="font-bold text-lg text-gray-800">{domain.name}</span>
-
-								<!-- Compliance section -->
-								<div>
-									<div class="flex items-center space-x-2 text-sm">
-										<p class="text-gray-600">{m.compliantRequirementsSemiColon()}</p>
-										<span class="font-bold text-green-500">
-											{domain.compliance_result.compliance_percentage}%
-										</span>
-										<span class="text-sm ml-2 text-gray-600">
-											({domain.compliance_result.compliant_count} / {domain.compliance_result
-												.total_count})
-										</span>
-									</div>
-									<div class="h-2 bg-gray-200 rounded-full mt-2">
-										<div
-											class="h-full bg-green-500 rounded-full"
-											style="width: {domain.compliance_result.compliance_percentage}%;"
-										></div>
-									</div>
+							<!-- Compliance section -->
+							<div>
+								<div class="flex items-center space-x-2 text-sm">
+									<p class="text-gray-600">{m.compliantRequirementsSemiColon()}</p>
+									<span class="font-bold text-green-500">
+										{domain.compliance_result.compliance_percentage}%
+									</span>
+									<span class="text-sm ml-2 text-gray-600">
+										({domain.compliance_result.compliant_count} / {domain.compliance_result
+											.total_count})
+									</span>
 								</div>
-
-								<!-- Progress section -->
-								<div>
-									<div class="flex items-center space-x-2 text-sm">
-										<p class="text-gray-600">{m.requirementsProgressionSemiColon()}</p>
-										<span class="font-bold text-blue-500">
-											{domain.assessment_progress.assessment_completion_rate}%
-										</span>
-										<span class="text-sm ml-2 text-gray-600">
-											({domain.assessment_progress.assessed_count} / {domain.assessment_progress
-												.total_count})
-										</span>
-									</div>
-									<div class="h-2 bg-gray-200 rounded-full mt-2">
-										<div
-											class="h-full bg-blue-500 rounded-full"
-											style="width: {domain.assessment_progress.assessment_completion_rate}%;"
-										></div>
-									</div>
+								<div class="h-2 bg-gray-200 rounded-full mt-2">
+									<div
+										class="h-full bg-green-500 rounded-full"
+										style="width: {domain.compliance_result.compliance_percentage}%;"
+									></div>
 								</div>
 							</div>
-						
-									{/snippet}
 
-					{#snippet content()}
-									
-							<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-								{#each domain.perimeters as perimeter, perimeterIndex}
-									{@const assessment =
-										perimeter.compliance_assessments[currentIndices[domainIndex][perimeterIndex]]}
-									{@const requirementAssessment = findRequirementAssessment(assessment.id)}
+							<!-- Progress section -->
+							<div>
+								<div class="flex items-center space-x-2 text-sm">
+									<p class="text-gray-600">{m.requirementsProgressionSemiColon()}</p>
+									<span class="font-bold text-blue-500">
+										{domain.assessment_progress.assessment_completion_rate}%
+									</span>
+									<span class="text-sm ml-2 text-gray-600">
+										({domain.assessment_progress.assessed_count} / {domain.assessment_progress
+											.total_count})
+									</span>
+								</div>
+								<div class="h-2 bg-gray-200 rounded-full mt-2">
+									<div
+										class="h-full bg-blue-500 rounded-full"
+										style="width: {domain.assessment_progress.assessment_completion_rate}%;"
+									></div>
+								</div>
+							</div>
+						</div>
+					{/snippet}
 
-									{#if requirementAssessment}
-										<div class="flex flex-col p-4 bg-gray-100 shadow-md rounded-lg space-y-2">
-											<span class="font-bold text-lg text-gray-800">
-												<i class="fa-solid fa-cubes mr-2 text-primary-500"></i>
-												{perimeter.name}
-											</span>
+					{#snippet panel()}
+						<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+							{#each domain.perimeters as perimeter, perimeterIndex}
+								{@const assessment =
+									perimeter.compliance_assessments[currentIndices[domainIndex][perimeterIndex]]}
+								{@const requirementAssessment = findRequirementAssessment(assessment.id)}
 
-											<div class="flex flex-col items-center space-y-2 h-full">
-												{#if hasMultipleAssessments(perimeter)}
-													<div class="flex w-full items-center justify-between space-x-4">
-														<button
-															aria-label="Previous assessment"
-															class="px-4 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
-															onclick={() => updateCurrentIndex(domainIndex, perimeterIndex, -1)}
-														>
-															<i class="fa-solid fa-arrow-left"></i>
-														</button>
+								{#if requirementAssessment}
+									<div class="flex flex-col p-4 bg-gray-100 shadow-md rounded-lg space-y-2">
+										<span class="font-bold text-lg text-gray-800">
+											<i class="fa-solid fa-cubes mr-2 text-primary-500"></i>
+											{perimeter.name}
+										</span>
 
-														<Anchor
-															breadcrumbAction="push"
-															href={`/compliance-assessments/${assessment.id}?next=${page.url.pathname}`}
-															label={assessment.name}
-															class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
-														>
-															<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
-															{assessment.name} - {assessment.version}
-														</Anchor>
+										<div class="flex flex-col items-center space-y-2 h-full">
+											{#if hasMultipleAssessments(perimeter)}
+												<div class="flex w-full items-center justify-between space-x-4">
+													<button
+														aria-label="Previous assessment"
+														class="px-4 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+														onclick={() => updateCurrentIndex(domainIndex, perimeterIndex, -1)}
+													>
+														<i class="fa-solid fa-arrow-left"></i>
+													</button>
 
-														<button
-															aria-label="Next assessment"
-															class="px-4 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
-															onclick={() => updateCurrentIndex(domainIndex, perimeterIndex, 1)}
-														>
-															<i class="fa-solid fa-arrow-right"></i>
-														</button>
-													</div>
-												{:else}
-													<div class="flex w-full items-center justify-center">
-														<Anchor
-															breadcrumbAction="push"
-															href={`/compliance-assessments/${assessment.id}?next=${page.url.pathname}`}
-															label={assessment.name}
-															class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
-														>
-															<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
-															{assessment.name} - {assessment.version}
-														</Anchor>
-													</div>
-												{/if}
+													<Anchor
+														breadcrumbAction="push"
+														href={`/compliance-assessments/${assessment.id}?next=${page.url.pathname}`}
+														label={assessment.name}
+														class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
+													>
+														<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
+														{assessment.name} - {assessment.version}
+													</Anchor>
 
-												<!-- Requirement Assessment Card -->
-												<Anchor
-													breadcrumbAction="push"
-													href={`/requirement-assessments/${requirementAssessment.id}?next=${page.url.pathname}`}
-													label={requirementAssessment.name}
-													class="flex flex-col items-center justify-center space-y-2 border w-full h-full p-2 rounded-lg bg-gray-200 shadow-md hover:border-2"
-													style="border-color: {complianceResultColorMap[
-														requirementAssessment.result
-													]};
+													<button
+														aria-label="Next assessment"
+														class="px-4 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+														onclick={() => updateCurrentIndex(domainIndex, perimeterIndex, 1)}
+													>
+														<i class="fa-solid fa-arrow-right"></i>
+													</button>
+												</div>
+											{:else}
+												<div class="flex w-full items-center justify-center">
+													<Anchor
+														breadcrumbAction="push"
+														href={`/compliance-assessments/${assessment.id}?next=${page.url.pathname}`}
+														label={assessment.name}
+														class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
+													>
+														<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
+														{assessment.name} - {assessment.version}
+													</Anchor>
+												</div>
+											{/if}
+
+											<!-- Requirement Assessment Card -->
+											<Anchor
+												breadcrumbAction="push"
+												href={`/requirement-assessments/${requirementAssessment.id}?next=${page.url.pathname}`}
+												label={requirementAssessment.name}
+												class="flex flex-col items-center justify-center space-y-2 border w-full h-full p-2 rounded-lg bg-gray-200 shadow-md hover:border-2"
+												style="border-color: {complianceResultColorMap[
+													requirementAssessment.result
+												]};
 													background-color: {complianceResultColorMap[requirementAssessment.result] + '10'};"
-												>
-													<div class="flex flex-row space-x-2">
-														<span
-															class="badge h-fit whitespace-nowrap w-fit"
-															style={getBadgeStyle(
-																complianceStatusColorMap[requirementAssessment.status]
-															)}
-														>
-															{safeTranslate(requirementAssessment.status)}
-														</span>
-														<span
-															class="badge h-fit whitespace-nowrap w-fit"
-															style={getBadgeStyle(
-																complianceResultColorMap[requirementAssessment.result]
-															)}
-														>
-															{safeTranslate(requirementAssessment.result)}
-														</span>
-													</div>
+											>
+												<div class="flex flex-row space-x-2">
+													<span
+														class="badge h-fit whitespace-nowrap w-fit"
+														style={getBadgeStyle(
+															complianceStatusColorMap[requirementAssessment.status]
+														)}
+													>
+														{safeTranslate(requirementAssessment.status)}
+													</span>
+													<span
+														class="badge h-fit whitespace-nowrap w-fit"
+														style={getBadgeStyle(
+															complianceResultColorMap[requirementAssessment.result]
+														)}
+													>
+														{safeTranslate(requirementAssessment.result)}
+													</span>
+												</div>
 
-													{#if requirementAssessment.is_scored}
-														<div class="flex flex-row space-x-2">
+												{#if requirementAssessment.is_scored}
+													<div class="flex flex-row space-x-2">
+														<ProgressRing
+															strokeWidth="20px"
+															meterStroke={displayScoreColor(
+																requirementAssessment.score,
+																assessment.max_score
+															)}
+															value={formatScoreValue(
+																requirementAssessment.score,
+																assessment.max_score
+															)}
+															classes="shrink-0"
+															size="size-10"
+														>
+															{requirementAssessment.score}
+														</ProgressRing>
+
+														{#if assessment.show_documentation_score}
 															<ProgressRing
 																strokeWidth="20px"
 																meterStroke={displayScoreColor(
-																	requirementAssessment.score,
+																	requirementAssessment.documentation_score,
 																	assessment.max_score
 																)}
 																value={formatScoreValue(
-																	requirementAssessment.score,
+																	requirementAssessment.documentation_score,
 																	assessment.max_score
 																)}
 																classes="shrink-0"
 																size="size-10"
 															>
-																{requirementAssessment.score}
+																{requirementAssessment.documentation_score}
 															</ProgressRing>
-
-															{#if assessment.show_documentation_score}
-																<ProgressRing
-																	strokeWidth="20px"
-																	meterStroke={displayScoreColor(
-																		requirementAssessment.documentation_score,
-																		assessment.max_score
-																	)}
-																	value={formatScoreValue(
-																		requirementAssessment.documentation_score,
-																		assessment.max_score
-																	)}
-																	classes="shrink-0"
-																	size="size-10"
-																>
-																	{requirementAssessment.documentation_score}
-																</ProgressRing>
-															{/if}
-														</div>
-													{/if}
-												</Anchor>
-											</div>
+														{/if}
+													</div>
+												{/if}
+											</Anchor>
 										</div>
-									{/if}
-								{/each}
-							</div>
-						
-									{/snippet}
+									</div>
+								{/if}
+							{/each}
+						</div>
+					{/snippet}
 				</Accordion.Item>
 			</Accordion>
 		{/each}

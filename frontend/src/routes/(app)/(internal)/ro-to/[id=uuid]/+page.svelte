@@ -176,6 +176,10 @@
 					source={data.table}
 					URLModel="feared-events"
 					baseEndpoint={'feared-events/?ro_to_couples=' + roto.id}
+					pagination={false}
+					search={false}
+					hideFilters={true}
+					fields={['name', 'assets', 'description', 'qualifications', 'gravity']}
 				></ModelTable>
 			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">

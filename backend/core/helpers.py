@@ -633,6 +633,7 @@ def aggregate_risks_per_field(
     user: User,
     field: str,
     residual: bool = False,
+    inherent: bool = False,
     risk_assessments: list | None = None,
     folder_id=None,
 ):
@@ -658,16 +659,20 @@ def aggregate_risks_per_field(
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(residual_level=i)
-                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this useful ?
+                )
+            elif inherent:
+                count = (
+                    RiskScenario.objects.filter(id__in=object_ids_view)
+                    .filter(inherent_level=i)
+                    .count()
+                )
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
-                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this useful ?
+                )
 
             if "count" not in values[k]:
                 values[k]["count"] = count
@@ -678,10 +683,14 @@ def aggregate_risks_per_field(
 
 
 def risks_count_per_level(
-    user: User, risk_assessments: list | None = None, folder_id=None
+    user: User,
+    risk_assessments: list | None = None,
+    folder_id=None,
+    include_inherent=False,
 ):
     current_level = list()
     residual_level = list()
+    inherent_level = list()
 
     for r in aggregate_risks_per_field(
         user, "name", risk_assessments=risk_assessments, folder_id=folder_id
@@ -707,7 +716,32 @@ def risks_count_per_level(
                 "color": r[1]["color"],
             }
         )
-    return {"current": current_level, "residual": residual_level}
+
+    if not include_inherent:
+        return {
+            "current": current_level,
+            "residual": residual_level,
+        }
+
+    for r in aggregate_risks_per_field(
+        user,
+        "name",
+        inherent=True,
+        risk_assessments=risk_assessments,
+        folder_id=folder_id,
+    ).items():
+        inherent_level.append(
+            {
+                "name": r[0],
+                "value": r[1]["count"],
+                "color": r[1]["color"],
+            }
+        )
+    return {
+        "current": current_level,
+        "residual": residual_level,
+        "inherent": inherent_level,
+    }
 
 
 def p_risks(user: User):
@@ -875,7 +909,9 @@ def build_audits_stats(user, folder_id=None):
     data = list()
     names = list()
     uuids = list()
-    for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
+    for audit in ComplianceAssessment.objects.filter(id__in=object_ids).order_by(
+        "-updated_at"
+    )[:10]:
         data.append([rs[0] for rs in audit.get_requirements_result_count()])
         names.append(audit.name)
         uuids.append(audit.id)
@@ -1074,13 +1110,16 @@ def acceptances_to_review(user: User):
     return acceptances
 
 
-def build_scenario_clusters(risk_assessment: RiskAssessment):
+def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=False):
     risk_matrix = risk_assessment.risk_matrix.parse_json()
     grid = risk_matrix["grid"]
     risk_matrix_current = [
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
     risk_matrix_residual = [
+        [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
+    ]
+    risk_matrix_inherent = [
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
 
@@ -1091,8 +1130,18 @@ def build_scenario_clusters(risk_assessment: RiskAssessment):
             risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:
             risk_matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.ref_id)
+        if include_inherent:
+            if ri.inherent_level >= 0:
+                risk_matrix_inherent[ri.inherent_proba][ri.inherent_impact].add(
+                    ri.ref_id
+                )
 
-    return {"current": risk_matrix_current, "residual": risk_matrix_residual}
+    clusters = {"current": risk_matrix_current, "residual": risk_matrix_residual}
+
+    if include_inherent:
+        clusters["inherent"] = risk_matrix_inherent
+
+    return clusters
 
 
 def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
@@ -1215,7 +1264,6 @@ def get_folder_content(folder: Folder, include_perimeters=True):
         entry = {
             "name": f.name,
             "uuid": f.id,
-            "itemStyle": {"color": "#8338ec"},
         }
         children = get_folder_content(f, include_perimeters=include_perimeters)
         if len(children) > 0:
@@ -1226,19 +1274,15 @@ def get_folder_content(folder: Folder, include_perimeters=True):
             content.append(
                 {
                     "name": p.name,
-                    "symbol": "circle",
-                    "itemStyle": {"color": "#3a86ff"},
                     "children": [
                         {
                             "name": "Audits",
-                            "symbol": "diamond",
                             "value": ComplianceAssessment.objects.filter(
                                 perimeter=p
                             ).count(),
                         },
                         {
                             "name": "Risk assessments",
-                            "symbol": "diamond",
                             "value": RiskAssessment.objects.filter(perimeter=p).count(),
                         },
                     ],
@@ -1326,9 +1370,20 @@ def duplicate_related_objects(
         """
         Duplicate an object and link it to the duplicate object.
         """
-        new_obj.pk = None
-        new_obj.folder = target_folder
-        new_obj.save()
+        # Get the model of the object
+        model_class = new_obj.__class__
+
+        # Extract all fields except the primary key
+        field_values = {}
+        for field in new_obj._meta.fields:
+            if not field.primary_key and not field.auto_created:
+                field_values[field.name] = getattr(new_obj, field.name)
+
+        # Apply changes
+        field_values["folder"] = target_folder
+
+        # Create the new object
+        new_obj = model_class.objects.create(**field_values)
         link_existing_object(duplicate_object, new_obj, field_name)
 
     model_class = getattr(type(source_object), field_name).field.related_model
