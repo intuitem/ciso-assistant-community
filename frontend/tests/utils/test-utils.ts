@@ -514,7 +514,7 @@ export class TestContent {
 				}
 			},
 			evidencesPage: {
-				displayName: 'Evidence',
+				displayName: 'Evidences',
 				dependency: vars.framework,
 				build: {
 					name: vars.evidenceName,
