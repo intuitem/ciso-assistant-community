@@ -1214,6 +1214,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Incidents',
 		foreignKeyFields: [
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
