@@ -24,13 +24,13 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 	const fieldsToUse =
 		fields.head &&
 		fields.head.length > 0 &&
-		fields.head.toString() !== listViewFields[URLModel as urlModel].head.toString()
+		fields.head.toString() !== listViewFields[URLModel as urlModel]?.head?.toString()
 			? {
 					...listViewFields[URLModel as urlModel],
 					head: fields.head,
 					body: fields.body.length > 0 ? fields.body : fields.head
 				}
-			: listViewFields[URLModel as urlModel];
+			: (listViewFields[URLModel as urlModel] ?? fields);
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 
 	const headData: Record<string, string> = fieldsToUse.body.reduce((obj, key, index) => {
