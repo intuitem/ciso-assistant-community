@@ -149,7 +149,7 @@ def validate_yaml_data(data):
     # Validate implementation_groups if base name is defined
     if impl_base:
         validate_implementation_groups(impl_groups, "implementation_groups")
-        print(f"ℹ️  [INFO] Implementation groups will be added using base name: \"{impl_base}\"")
+        print(f"ℹ️  [INFO] Implementation groups sheets will be added using base name: \"{impl_base}\"")
     # If there's "implementation_groups" but no "implementation_groups_sheet_base_name", raise a warning 
     elif impl_groups:
         print(f"⚠️  [WARNING] (validate_yaml_data) \"implementation_groups\" defined but missing \"implementation_groups_sheet_base_name\" field in framework."
