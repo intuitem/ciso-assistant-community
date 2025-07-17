@@ -45,32 +45,32 @@ def validate_ref_id(ref_id):
 
 
 # Checks for required non-empty field
-def validate_required_field(field_name, value):
+def validate_yaml_required_field(field_name, value):
     if value is None or str(value).strip() == "":
         raise ValueError(f"Missing or empty required field: \"{field_name}\"")
 
 
-def validate_implementation_groups(impl_groups, context="implementation_groups"):
+def validate_yaml_implementation_groups(impl_groups, context="implementation_groups"):
     if impl_groups is not None:
         if not isinstance(impl_groups, list) or not impl_groups:
-            raise ValueError(f'(validate_implementation_groups) Field "{context}" must be a non-empty list if defined.')
+            raise ValueError(f'(validate_yaml_implementation_groups) Field "{context}" must be a non-empty list if defined.')
         for i, group in enumerate(impl_groups, start=1):
             if "ref_id" not in group or not str(group["ref_id"]).strip():
-                raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
+                raise ValueError(f'(validate_yaml_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
             
             try:
                 validate_ref_id(group["ref_id"])
             except ValueError as e:
-                raise ValueError(f'(validate_implementation_groups) {e} in {context} #{i}')
+                raise ValueError(f'(validate_yaml_implementation_groups) {e} in {context} #{i}')
 
             if "name" not in group or not str(group["name"]).strip():
-                raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in {context} #{i}')
+                raise ValueError(f'(validate_yaml_implementation_groups) Missing or empty \"name\" in {context} #{i}')
             if "description" not in group or not str(group["description"]).strip():
-                print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in {context} #{i}')
+                print(f'⚠️  [WARNING] (validate_yaml_implementation_groups) Missing or empty \"description\" in {context} #{i}')
 
 
 # Added validation for extra_locales
-def validate_extra_locales(data):
+def validate_yaml_extra_locales(data):
     
     framework_locale = data.get("locale")
     extra_locales = data.get("extra_locales")
@@ -78,45 +78,45 @@ def validate_extra_locales(data):
         return
 
     if not isinstance(extra_locales, list) or not extra_locales:
-        raise ValueError("(validate_extra_locales) Field \"extra_locales\" must be a non-empty list if defined.")
+        raise ValueError("(validate_yaml_extra_locales) Field \"extra_locales\" must be a non-empty list if defined.")
 
     impl_groups_main = data.get("implementation_groups") or []
     impl_groups_main_sheet = data.get("implementation_groups_sheet_base_name") or ""
 
     for i, locale_entry in enumerate(extra_locales, start=1):
         if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
-            raise ValueError(f"(validate_extra_locales) Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
+            raise ValueError(f"(validate_yaml_extra_locales) Each entry in \"extra_locales\" must be a dict with exactly one locale code key (entry #{i})")
 
         if framework_locale in locale_entry.keys():
-            print(f"⚠️  [WARNING] (validate_extra_locales) Locale \"{framework_locale}\" is already the framework's main locale."
+            print(f"⚠️  [WARNING] (validate_yaml_extra_locales) Locale \"{framework_locale}\" is already the framework's main locale."
                           f"\n\t     Skipping locale \"{framework_locale}\"...")
             continue
 
         for loc_code, loc_data in locale_entry.items():
             if not re.fullmatch(r"[a-z0-9-]{2}", loc_code):
-                raise ValueError(f"(validate_extra_locales) Invalid locale code \"{loc_code}\" in extra_locales entry #{i}")
+                raise ValueError(f"(validate_yaml_extra_locales) Invalid locale code \"{loc_code}\" in extra_locales entry #{i}")
 
             if not isinstance(loc_data, dict) or not loc_data:
-                raise ValueError(f"(validate_extra_locales) Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
+                raise ValueError(f"(validate_yaml_extra_locales) Locale data for \"{loc_code}\" must be a non-empty dict (entry #{i})")
 
             # Optional fields: warn if missing or empty
             for req_field in ["framework_name", "description", "copyright"]:
                 if req_field not in loc_data or str(loc_data[req_field]).strip() == "":
-                    print(f"⚠️  [WARNING] (validate_extra_locales) Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
+                    print(f"⚠️  [WARNING] (validate_yaml_extra_locales) Missing or empty field \"{req_field}\" in extra_locales for locale \"{loc_code}\" (entry #{i})")
 
             # Validate implementation_groups in locale if present
             loc_impl_groups = loc_data.get("implementation_groups")
             if loc_impl_groups is not None:
                 if not impl_groups_main:
-                    print(f"⚠️  [WARNING] (validate_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework."
+                    print(f"⚠️  [WARNING] (validate_yaml_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing in framework."
                           "\n\t     Skipping locale's \"implementation_groups\"...")
                     continue
                 if not impl_groups_main_sheet:
-                    print(f"⚠️  [WARNING] (validate_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing \"implementation_groups_sheet_base_name\" field in framework."
+                    print(f"⚠️  [WARNING] (validate_yaml_extra_locales) \"implementation_groups\" defined in locale \"{loc_code}\" but missing \"implementation_groups_sheet_base_name\" field in framework."
                           "\n\t     Skipping locale's \"implementation_groups\"...")
                     continue
 
-                validate_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
+                validate_yaml_implementation_groups(loc_impl_groups, f'implementation_groups in locale "{loc_code}"')
 
                 # Check that each local ref_id exists in the main implementation_groups
                 for group in loc_impl_groups:
@@ -130,7 +130,7 @@ def validate_yaml_data(data):
         "copyright", "provider", "packager", "framework_sheet_base_name"
     ]
     for field in required_fields:
-        validate_required_field(field, data.get(field))
+        validate_yaml_required_field(field, data.get(field))
     
     try:
         validate_ref_id(data.get("ref_id"))
@@ -148,7 +148,7 @@ def validate_yaml_data(data):
 
     # Validate implementation_groups if base name is defined
     if impl_base:
-        validate_implementation_groups(impl_groups, "implementation_groups")
+        validate_yaml_implementation_groups(impl_groups, "implementation_groups")
         print(f"ℹ️  [INFO] Implementation groups sheets will be added using base name: \"{impl_base}\"")
     # If there's "implementation_groups" but no "implementation_groups_sheet_base_name", raise a warning 
     elif impl_groups:
@@ -157,10 +157,8 @@ def validate_yaml_data(data):
         
 
     # Validate extra_locales if present
-    validate_extra_locales(data)
+    validate_yaml_extra_locales(data)
 
-
-# Modification in create_excel_from_yaml:
 
 def create_excel_from_yaml(yaml_path, output_excel=None):
     if not os.path.isfile(yaml_path):
