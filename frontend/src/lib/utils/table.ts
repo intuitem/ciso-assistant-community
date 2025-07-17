@@ -1195,23 +1195,25 @@ export const getListViewFields = ({
 	let body = [...baseEntry.body];
 
 	if (key === 'risk-scenarios' && featureFlags.includes('inherent_risk')) {
-		head = insertField(head, 'inherentLevel', 'name');
-		body = insertField(body, 'inherent_level', 'name');
+		if (!head.includes('inherentLevel')) {
+			head = insertField(head, 'inherentLevel', 'name');
+		}
+		if (!body.includes('inherent_level')) {
+			body = insertField(body, 'inherent_level', 'name');
+		}
 	}
 
-	const indicesToPop = body
-		.map((field: string, index: number) =>
-			model?.flaggedFields &&
-			Object.hasOwn(model.flaggedFields, field) &&
-			featureFlags.includes(model.flaggedFields[field])
-				? index
-				: -1
-		)
-		.filter((i) => i !== -1);
+	if (model?.flaggedFields) {
+		const indicesToPop = body
+			.map((field: string, index: number) => {
+				const flag = model.flaggedFields?.[field];
+				return flag && !featureFlags.includes(flag) ? index : -1;
+			})
+			.filter((i) => i !== -1);
 
-	head = head.filter((_, index) => !indicesToPop.includes(index));
-	body = body.filter((_, index) => !indicesToPop.includes(index));
-
+		head = head.filter((_, index) => !indicesToPop.includes(index));
+		body = body.filter((_, index) => !indicesToPop.includes(index));
+	}
 	return {
 		...baseEntry,
 		head,

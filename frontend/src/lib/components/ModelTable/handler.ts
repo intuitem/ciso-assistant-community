@@ -8,10 +8,15 @@ export interface LoadTableDataParams {
 	URLModel: urlModel;
 	endpoint: string;
 	fields?: { head: string[]; body: string[] };
-	featureFlags?: string[];  
+	featureFlags?: string[];
 }
 
-export const loadTableData = async ({ state, URLModel, endpoint, fields, featureFlags = []
+export const loadTableData = async ({
+	state,
+	URLModel,
+	endpoint,
+	fields,
+	featureFlags = []
 }: LoadTableDataParams) => {
 	const url = new URL(endpoint, window.location.origin);
 	const params = new URLSearchParams(url.search);
@@ -26,16 +31,14 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields, feature
 	const baseFields = getListViewFields({ key: URLModel, featureFlags });
 
 	const fieldsToUse =
-		fields?.head &&
-		fields.head.length > 0 &&
-		fields.head.toString() !== baseFields.head.toString()
+		fields?.head && fields.head.length > 0 && fields.head.toString() !== baseFields.head.toString()
 			? {
 					...baseFields,
 					head: fields.head,
 					body: fields.body.length > 0 ? fields.body : fields.head
 				}
 			: baseFields;
-			
+
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 
 	const headData: Record<string, string> = fieldsToUse.body.reduce((obj, key, index) => {
