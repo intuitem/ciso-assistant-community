@@ -3,8 +3,9 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import * as m from '$paraglide/messages.js';
-	import TextArea from '../TextArea.svelte';
+	import { m } from '$paraglide/messages';
+	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 
 	interface Props {
