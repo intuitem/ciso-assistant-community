@@ -897,14 +897,8 @@
 	"associatedFindingsAssessments": "संबद्ध फॉलो-अप",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} घंटा",
 				"countPlural=other": "{count} घंटे"
@@ -913,13 +907,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} मिनट",
 				"countPlural=other": "{count} मिनट"
@@ -928,13 +917,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} दिन",
 				"countPlural=other": "{count} दिन"

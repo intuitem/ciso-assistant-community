@@ -929,14 +929,8 @@
 	"mappingSuggestionTeasing": "Suggesties voor in kaart brengen zijn nu beschikbaar! U kunt de filters gebruiken om suggesties te verkennen op basis van geladen kaders.",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} Uur",
 				"countPlural=other": "{count} Uren"
@@ -945,13 +939,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Minuut",
 				"countPlural=other": "{count} Minuten"
@@ -960,13 +949,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Dag",
 				"countPlural=other": "{count} Dagen"

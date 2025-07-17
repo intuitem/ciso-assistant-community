@@ -928,14 +928,8 @@
 	"associatedFindingsAssessments": "Kapcsolódó követő értékelések",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} Óra",
 				"countPlural=other": "{count} Óra"
@@ -944,13 +938,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Perc",
 				"countPlural=other": "{count} Perc"
@@ -959,13 +948,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Nap",
 				"countPlural=other": "{count} Nap"

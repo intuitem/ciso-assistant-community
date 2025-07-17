@@ -1640,38 +1640,23 @@
 	"associatedFindingsAssessments": "Συνδεδεμένες παρακολουθήσεις",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": [],
-			"match": [
-				"Εμφανίζονται δυναμικά (δείτε plural rules)"
-			]
+			"match": ["Εμφανίζονται δυναμικά (δείτε plural rules)"]
 		}
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": [],
-			"match": [
-				"Εμφανίζονται δυναμικά"
-			]
+			"match": ["Εμφανίζονται δυναμικά"]
 		}
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": [],
-			"match": [
-				"Εμφανίζονται δυναμικά"
-			]
+			"match": ["Εμφανίζονται δυναμικά"]
 		}
 	],
 	"suggestedParentheses": "(προτεινόμενο)",
