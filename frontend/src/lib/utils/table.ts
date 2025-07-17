@@ -919,7 +919,7 @@ export const listViewFields = {
 		head: ['name', 'description', 'processing'],
 		body: ['name', 'description', 'processing'],
 		filters: {
-			processing: PROCESSING_FILTER,
+			processing: PROCESSING_FILTER
 		}
 	},
 	'personal-data': {
