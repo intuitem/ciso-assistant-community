@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { applyAction, deserialize, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
-	import type { ActionResult } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import type { DataHandler } from '@vincjo/datatables/remote';
@@ -16,22 +14,6 @@
 	let { meta, actionsURLModel }: Props = $props();
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
-
-	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
-		const data = new FormData(event.currentTarget);
-
-		const response = await fetch(event.currentTarget.action, {
-			method: 'POST',
-			body: data
-		});
-
-		const result: ActionResult = deserialize(await response.text());
-
-		if (result.type === 'success') {
-			await invalidateAll();
-		}
-		applyAction(result);
-	}
 </script>
 
 {#if actionsURLModel === 'stored-libraries' && Object.hasOwn(library, 'is_loaded') && !library.is_loaded}
@@ -117,10 +99,12 @@
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
-						update();
+						await update();
+						Object.values($tableHandlers).forEach((handler) => {
+							handler.invalidate();
+						});
 					};
 				}}
-				onsubmit={handleSubmit}
 			>
 				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
 					<i class="fa-solid fa-circle-up"></i>
