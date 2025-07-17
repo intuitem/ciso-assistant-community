@@ -22,7 +22,6 @@ class PurposeWriteSerializer(BaseModelSerializer):
 class PurposeReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
-    associated_controls = FieldsRelatedField(["name"], many=True)
 
     class Meta:
         model = Purpose
@@ -122,6 +121,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
     nature = FieldsRelatedField(["name"], many=True)
+    associated_controls = FieldsRelatedField(["name"], many=True)
 
     class Meta:
         model = Processing
