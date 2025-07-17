@@ -1178,3 +1178,48 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
+
+export const getListViewFields = ({
+	key,
+	featureFlags = {}
+}: {
+	key: string;
+	featureFlags: Record<string, boolean>;
+}) => {
+	if (!Object.keys(listViewFields).includes(key)) {
+		return { head: [], body: [] };
+	}
+
+	const baseEntry = listViewFields[key];
+	const model = getModelInfo(key);
+
+	let head = [...baseEntry.head];
+	let body = [...baseEntry.body];
+
+	if (model?.flaggedFields) {
+		const indicesToPop = body
+			.map((field: string, index: number) => {
+				const flag = model.flaggedFields?.[field];
+				// instead of includes, check if featureFlags[flag] is truthy
+				return flag && !featureFlags[flag] ? index : -1;
+			})
+			.filter((i) => i !== -1);
+
+		head = head.filter((_, index) => !indicesToPop.includes(index));
+		body = body.filter((_, index) => !indicesToPop.includes(index));
+	}
+
+	return {
+		...baseEntry,
+		head,
+		body
+	};
+};
+
+function insertField(fields: string[], fieldToInsert: string, afterField: string): string[] {
+	const index = fields.indexOf(afterField);
+	if (index === -1) return fields;
+	const clone = [...fields];
+	clone.splice(index + 1, 0, fieldToInsert);
+	return clone;
+}
