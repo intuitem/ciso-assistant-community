@@ -8,7 +8,7 @@ It ensures the integrity of required fields, supports optional implementation gr
 validation with user-friendly error messages.
 
 Usage:
-    python generate_excel_from_yaml.py -i input.yaml [-o output.xlsx]
+    python prepare_framework_v2.py [-i|--input input.yaml] [-o|--output output.xlsx]
 
 Dependencies:
     - PyYAML
