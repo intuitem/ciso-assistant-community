@@ -220,7 +220,7 @@
 			fields:
 				fields.length > 0
 					? { head: fields, body: fields }
-					: { head: Object.values(tableSource.head), body: Object.values(tableSource.body) },
+					: { head: Object.keys(tableSource.head), body: Object.keys(tableSource.body) },
 			featureFlags: page.data?.featureflags
 		})
 	);

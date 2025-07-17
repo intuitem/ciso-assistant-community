@@ -607,6 +607,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
@@ -618,6 +619,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
@@ -1193,15 +1195,6 @@ export const getListViewFields = ({
 
 	let head = [...baseEntry.head];
 	let body = [...baseEntry.body];
-
-	if (key === 'risk-scenarios' && featureFlags.inherent_risk) {
-		if (!head.includes('inherentLevel')) {
-			head = insertField(head, 'inherentLevel', 'name');
-		}
-		if (!body.includes('inherent_level')) {
-			body = insertField(body, 'inherent_level', 'name');
-		}
-	}
 
 	if (model?.flaggedFields) {
 		const indicesToPop = body
