@@ -557,7 +557,7 @@
 							)}
 							{@const fieldsToUse = getListViewFields({
 								key: urlmodel,
-								featureFlags: data.featureflags
+								featureFlags: page.data?.featureflags
 							}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
