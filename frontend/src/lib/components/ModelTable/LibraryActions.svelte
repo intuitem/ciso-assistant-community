@@ -16,22 +16,6 @@
 	let { meta, actionsURLModel }: Props = $props();
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
-
-	// async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
-	// 	const data = new FormData(event.currentTarget);
-	//
-	// 	const response = await fetch(event.currentTarget.action, {
-	// 		method: 'POST',
-	// 		body: data
-	// 	});
-	//
-	// 	const result: ActionResult = deserialize(await response.text());
-	//
-	// 	if (result.type === 'success') {
-	// 		await invalidateAll();
-	// 	}
-	// 	applyAction(result);
-	// }
 </script>
 
 {#if actionsURLModel === 'stored-libraries' && Object.hasOwn(library, 'is_loaded') && !library.is_loaded}
