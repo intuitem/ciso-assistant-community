@@ -1638,27 +1638,18 @@
 	"errorCreatingPersonalAccessToken": "Σφάλμα δημιουργίας διακριτικού πρόσβασης.",
 	"errorMaxPatAmountExceeded": "Υπέρβαση μέγιστου πλήθους διακριτικών για τον χρήστη.",
 	"associatedFindingsAssessments": "Συνδεδεμένες παρακολουθήσεις",
-	"hourCount": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": [],
-			"match": ["Εμφανίζονται δυναμικά (δείτε plural rules)"]
-		}
-	],
-	"minuteCount": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": [],
-			"match": ["Εμφανίζονται δυναμικά"]
-		}
-	],
-	"dayCount": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": [],
-			"match": ["Εμφανίζονται δυναμικά"]
-		}
-	],
+  "hourCount": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+-     "selectors": [],
+-     "match": ["Εμφανίζονται δυναμικά (δείτε plural rules)"]
++     "selectors": ["countPlural"],
++     "match": {
++       "countPlural=one": "{count} Ώρα",
++       "countPlural=other": "{count} Ώρες"
++     }
+    }
+  ],
 	"suggestedParentheses": "(προτεινόμενο)",
 	"matchingScenarios": "Αντιστοιχούμενα σενάρια",
 	"clickToUpload": "Κλικ για μεταφόρτωση",
