@@ -607,7 +607,6 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
-			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
@@ -619,7 +618,6 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
-			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
@@ -1178,3 +1176,53 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
+
+export const getListViewFields = ({
+	key,
+	featureFlags = []
+}: {
+	key: string;
+	featureFlags: string[];
+}) => {
+	if (!Object.keys(listViewFields).includes(key)) {
+		throw new Error(`Model ${key} is not supported`);
+	}
+
+	const baseEntry = listViewFields[key];
+	const model = getModelInfo(key);
+
+	let head = [...baseEntry.head];
+	let body = [...baseEntry.body];
+
+	if (key === 'risk-scenarios' && featureFlags.includes('inherent_risk')) {
+		head = insertField(head, 'inherentLevel', 'name');
+		body = insertField(body, 'inherent_level', 'name');
+	}
+
+	const indicesToPop = body
+		.map((field: string, index: number) =>
+			model?.flaggedFields &&
+			Object.hasOwn(model.flaggedFields, field) &&
+			featureFlags.includes(model.flaggedFields[field])
+				? index
+				: -1
+		)
+		.filter((i) => i !== -1);
+
+	head = head.filter((_, index) => !indicesToPop.includes(index));
+	body = body.filter((_, index) => !indicesToPop.includes(index));
+
+	return {
+		...baseEntry,
+		head,
+		body
+	};
+};
+
+function insertField(fields: string[], fieldToInsert: string, afterField: string): string[] {
+	const index = fields.indexOf(afterField);
+	if (index === -1) return fields;
+	const clone = [...fields];
+	clone.splice(index + 1, 0, fieldToInsert);
+	return clone;
+}
