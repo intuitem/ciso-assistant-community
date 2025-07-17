@@ -1665,7 +1665,6 @@
 	"tokenAuthMethod": "Méthode d’authentification par token",
 	"oauthPKCEEnabled": "OAuth PKCE activé",
 	"suggestedParentheses": "(suggéré)",
-	"matchingScenarios": "Scénarios correspondants",
 	"clientSecretAlreadySetHelpText": "Le secret client est déjà défini.",
 	"resetClientSecret": "Effacer le secret client",
 	"oidcTokenAuthMethodHelpText": "Méthode facultative d'authentification au point de terminaison du token. Si elle est omise, une méthode de la liste des méthodes d’authentification du serveur sera utilisée",
@@ -1706,5 +1705,12 @@
 	"graphStop": "Stop",
 	"graphMoHelp": "Vous pouvez repositionner les noeuds du graphe pour améliorer son rendu et réduire le croisement des lignes. Il est également conseillé d'avoir un enchaînement par mode opératoire pour une meilleure lisibilité et cotation.",
 	"defaultAssignee": "Assignation par défaut",
-	"defaultAssigneeHelpText": "Cet utilisateur sera utilisé par défaut pour toutes les analyses de ce périmètre"
+	"defaultAssigneeHelpText": "Cet utilisateur sera utilisé par défaut pour toutes les analyses de ce périmètre",
+	"inherentRisk": "Risque inhérent",
+	"inherentProba": "Probabilité inhérente",
+	"inherentImpact": "Impact inhérent",
+	"inherentLevel": "Niveau inhérent",
+	"inherentRiskLevelPerScenario": "Niveau de risque inhérent par scénario",
+	"inherentRiskLevel": "Niveau de risque inhérent",
+	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure"
 }

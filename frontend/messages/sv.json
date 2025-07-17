@@ -915,13 +915,18 @@
 	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent",
 	"mappingSuggested": "Förslag på kartläggning",
 	"mappingSuggestedHelpText": "Förslag på kartläggning baserade på inlästa ramverk",
-	"mappingSuggestionTeasing": "Mapping suggestions are now available! You can use the filters to explore suggestions based on loaded frameworks.",
-	"associatedFindingsAssessments": "Associated follow-ups",
 	"mappingSuggestionTeasing": "Kartläggningsförslag finns nu tillgängliga! Du kan använda filtren för att utforska förslag baserade på inlästa ramverk.",
+	"associatedFindingsAssessments": "Associated follow-ups",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Timme",
 				"countPlural=other": "{count} Timmar"
@@ -930,8 +935,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minut",
 				"countPlural=other": "{count} Minuter"
@@ -940,8 +950,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dag",
 				"countPlural=other": "{count} Dagar"
