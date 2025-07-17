@@ -220,7 +220,16 @@
 			fields:
 				fields.length > 0
 					? { head: fields, body: fields }
-					: { head: Object.keys(tableSource.head), body: Object.keys(tableSource.body) },
+					: {
+							head:
+								typeof tableSource.head[0] === 'string'
+									? Object.values(tableSource.head)
+									: Object.keys(tableSource.head),
+							body:
+								typeof tableSource.body[0] === 'string'
+									? Object.values(tableSource.body)
+									: Object.keys(tableSource.body)
+						},
 			featureFlags: page.data?.featureflags
 		})
 	);
