@@ -1179,10 +1179,10 @@ export const contextMenuActions = { 'applied-controls': [{ component: ChangeStat
 
 export const getListViewFields = ({
 	key,
-	featureFlags = []
+	featureFlags = {}
 }: {
 	key: string;
-	featureFlags: string[];
+	featureFlags: Record<string, boolean>; // <-- FIXED typing
 }) => {
 	if (!Object.keys(listViewFields).includes(key)) {
 		throw new Error(`Model ${key} is not supported`);
@@ -1194,7 +1194,7 @@ export const getListViewFields = ({
 	let head = [...baseEntry.head];
 	let body = [...baseEntry.body];
 
-	if (key === 'risk-scenarios' && featureFlags.includes('inherent_risk')) {
+	if (key === 'risk-scenarios' && featureFlags.inherent_risk) {
 		if (!head.includes('inherentLevel')) {
 			head = insertField(head, 'inherentLevel', 'name');
 		}
@@ -1207,13 +1207,15 @@ export const getListViewFields = ({
 		const indicesToPop = body
 			.map((field: string, index: number) => {
 				const flag = model.flaggedFields?.[field];
-				return flag && !featureFlags.includes(flag) ? index : -1;
+				// instead of includes, check if featureFlags[flag] is truthy
+				return flag && !featureFlags[flag] ? index : -1;
 			})
 			.filter((i) => i !== -1);
 
 		head = head.filter((_, index) => !indicesToPop.includes(index));
 		body = body.filter((_, index) => !indicesToPop.includes(index));
 	}
+
 	return {
 		...baseEntry,
 		head,
