@@ -8,7 +8,7 @@ export interface LoadTableDataParams {
 	URLModel: urlModel;
 	endpoint: string;
 	fields?: { head: string[]; body: string[] };
-	featureFlags?: string[];
+	featureFlags?: Record<string, boolean>;
 }
 
 export const loadTableData = async ({
@@ -16,7 +16,7 @@ export const loadTableData = async ({
 	URLModel,
 	endpoint,
 	fields,
-	featureFlags = []
+	featureFlags = {}
 }: LoadTableDataParams) => {
 	const url = new URL(endpoint, window.location.origin);
 	const params = new URLSearchParams(url.search);

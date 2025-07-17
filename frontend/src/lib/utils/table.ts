@@ -1184,7 +1184,7 @@ export const getListViewFields = ({
 	featureFlags = {}
 }: {
 	key: string;
-	featureFlags: Record<string, boolean>; // <-- FIXED typing
+	featureFlags: Record<string, boolean>;
 }) => {
 	if (!Object.keys(listViewFields).includes(key)) {
 		throw new Error(`Model ${key} is not supported`);
