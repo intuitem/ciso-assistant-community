@@ -32,6 +32,9 @@ import argparse
 from openpyxl import Workbook
 
 
+
+# ------------------------ SHARED VALIDATION ------------------------
+
 # Validates that urn_root only contains allowed characters
 def validate_urn_root(urn_root):
     if not re.fullmatch(r"[a-z0-9._-]+", urn_root):
@@ -45,11 +48,15 @@ def validate_ref_id(ref_id):
 
 
 # Checks for required non-empty field
-def validate_yaml_required_field(field_name, value):
+def validate_required_field(field_name, value):
     if value is None or str(value).strip() == "":
         raise ValueError(f"Missing or empty required field: \"{field_name}\"")
 
 
+
+# ------------------------ YAML VALIDATION ------------------------
+
+# Validate that the implementation_groups list is correct and complete
 def validate_yaml_implementation_groups(impl_groups, context="implementation_groups"):
     if impl_groups is not None:
         if not isinstance(impl_groups, list) or not impl_groups:
@@ -123,14 +130,14 @@ def validate_yaml_extra_locales(data):
                     if all(group["ref_id"] != fg["ref_id"] for fg in impl_groups_main):
                         raise ValueError(f'ref_id "{group["ref_id"]}" in locale "{loc_code}" implementation_groups does not exist in framework implementation_groups.')
 
-
+# Validate all required YAML fields and structure
 def validate_yaml_data(data):
     required_fields = [
         "urn_root", "locale", "ref_id", "framework_name", "description",
         "copyright", "provider", "packager", "framework_sheet_base_name"
     ]
     for field in required_fields:
-        validate_yaml_required_field(field, data.get(field))
+        validate_required_field(field, data.get(field))
     
     try:
         validate_ref_id(data.get("ref_id"))
@@ -160,6 +167,10 @@ def validate_yaml_data(data):
     validate_yaml_extra_locales(data)
 
 
+
+# ------------------------ YAML MODE ------------------------
+
+# Process a YAML configuration file
 def create_excel_from_yaml(yaml_path, output_excel=None):
     if not os.path.isfile(yaml_path):
         raise FileNotFoundError(f"YAML file not found: \"{yaml_path}\"")
@@ -336,6 +347,9 @@ def create_excel_from_yaml(yaml_path, output_excel=None):
         print("💡 Tip: Make sure the Excel file is not open in another program and that you have write permission.")
         sys.exit(1)
 
+
+
+# ------------------------ MAIN ------------------------
 
 # CLI entry point
 if __name__ == "__main__":
