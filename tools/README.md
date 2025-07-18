@@ -1,5 +1,7 @@
 # Library workbench
 
+The `prepare_framework_v2.py` script can be used to create an Excel file with the base structure of a CISO Assistant framework in v2 format.
+
 The `convert_library_v2.py` script can be used to transform an Excel file to a CISO Assistant library.
 
 The `convert_library_v1.py` script is the previous version working on the previous Excel file format.
@@ -9,6 +11,43 @@ The `convert_v1_to_v2.py` script converts any old Excel file to the new v2 forma
 Have a look at the provided examples.
 
 ## Usage
+
+### > `prepare_framework_v2.py`
+
+> [!NOTE]
+> The purpose of this script is to help create the base structure of the Excel file. This avoids common mistakes that can be made when creating a framework.  
+
+Usage (simplified):
+```bash
+python prepare_framework_v2.py
+```
+
+Usage (advanced):
+```bash
+python prepare_framework_v2.py [-i|--input input.yaml|input.xlsx] [-o|--output output.xlsx]
+```
+
+Arguments:
+- **`-i, --input`**: Path to the input configuration file. Can be either a YAML (`.yaml`/`.yml`) or Excel (`.xlsx`) file. Default is `prepare_framework_v2_config.xlsx`.
+- **`-o, --output`**: Optional output Excel file name. If not specified, the output file name will be derived automatically.
+
+
+If we simply launch the script like this in a command line shell:
+
+```bash
+python prepare_framework_v2.py
+```
+the script will use an Excel configuration file called `prepare_framework_v2_config.xlsx` by default. This file contains its own documentation. Changes can be made directly in this file, avoiding you from adding arguments when you launch the script.
+
+For advanced users, you can use the YAML configuration file instead, called `prepare_framework_v2_config.yaml`. This file contains its own documentation. Changes can be made directly in this file. To launch the script with a YAML configuration file, open a shell in a command line, and type:
+```bash
+python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
+```
+
+
+> [!TIP]
+> See ["Format of Excel files"](#format-of-excel-files) for a better understanding of Excel and YAML configuration file values.
+
 
 ### > `convert_library_v2.py`
 
