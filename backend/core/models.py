@@ -2365,6 +2365,18 @@ class Evidence(
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
+
+    owner = models.ManyToManyField(
+        User, blank=True, verbose_name=_("Owner"), related_name="evidences"
+    )
+
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text=_("Date after which the applied control is no longer valid"),
+        verbose_name=_("Expiry date"),
+    )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]

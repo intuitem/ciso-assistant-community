@@ -351,7 +351,8 @@ export const EvidenceSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	timeline_entries: z.string().optional().array().optional(),
-
+	owner: z.string().uuid().optional().array().optional(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
