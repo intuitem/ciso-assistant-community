@@ -477,6 +477,15 @@
 												['scope_folder_id', page.data.requirementAssessment.folder.id]
 											]}
 											optionsExtraFields={[['folder', 'str']]}
+											optionsInfoFields={{
+												fields: [
+													{
+														field: 'reference_control',
+														path: 'str'
+													}
+												],
+												classes: 'text-green-800'
+											}}
 											field="applied_controls"
 										/>
 									{/key}
