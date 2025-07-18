@@ -123,7 +123,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	evidencesPage: async ({ page }, use) => {
-		const ePage = new PageContent(page, '/evidences', 'Evidences', [
+		const ePage = new PageContent(page, '/evidences', 'Evidence', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'attachment', type: type.FILE },
