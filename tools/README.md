@@ -10,10 +10,29 @@ Have a look at the provided examples.
 
 ## Usage
 
-Usage: 
+### > `convert_library_v2.py`
+
+Usage (simplified): 
 ```bash
-python convert_library_v2.py [--compat] your_library_file.xlsx
+python convert_library_v2.py your_library_file.xlsx [--verbose]
 ```
+
+Usage (advanced):
+```bash
+python convert_library_v2.py your_library_file.xlsx [--compat MODE] [--output out.yaml] [--verbose]
+python convert_library_v2.py path/to/folder --bulk [--compat MODE] [--output-dir out_folder] [--verbose]
+```
+
+Arguments:
+- **`--compat`**: Specify compatibility mode number.
+  - **`0`**: **[DEFAULT]** Don't use any Compatibility Mode.
+  - **`1`**: Use legacy URN fallback logic (for requirements without `ref_id`). Recommended only to maintain libraries that have been generated prior or up to release `v1.9.20`.
+  - **`2`**: Don't clean the URNs before saving it into the YAML file (Only spaces "` `" are replaced with hyphen "`-`" and the URN is lower-cased).
+- **`--verbose`**: Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.
+- **`--output`**: Custom output file name (only for single file mode). Adds yaml' if missing.
+- **`--bulk`**: Enable bulk mode to process all `.xlsx` files in a directory.
+- **`--output-dir`**: Destination directory for YAML files (only valid with `--bulk`).
+
 
 To launch it, open a shell in a command line, and type:
 
@@ -21,13 +40,48 @@ To launch it, open a shell in a command line, and type:
 python convert_library_v2.py your_library_file.xlsx
 ```
 
-`your_library_file.yaml` will be generated in the same directory.
+`your_library_file.yaml` will be generated in the same directory. In most cases, this command line will suffice.
 
 The resulting YAML file adheres to the CISO Assistant schema and can be directly imported into the platform.
 
-The `--compat` flag is recommended only to maintain libraries that have been generated prior or up to release 1.9.20. 
+When the `--compat` flag is omitted or when the compatibility mode is different from `1`, URNs for nodes without a `ref_id` are constructed using the `parent_urn`. This format is simpler to understand and maintain compared to the legacy `nodeXXX` suffix system.
 
-When the `--compat` flag is omitted, URNs for nodes without a `ref_id` are constructed using the parent_urn. This format is simpler to understand and maintain compared to the legacy `nodeXXX` suffix system.
+
+### > `convert_library_v1.py`
+
+> [!WARNING]
+> The `v1` format is deprecated an no longer maintained. We strongly recommend updating your Excel file in `v2` format with [`convert_v1_to_v2.py`](#-convert_v1_to_v2py).
+
+Usage:
+```bash
+python convert_library.py [--compat] your_library_file.xlsx
+```
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python convert_library.py your_library_file.xlsx
+```
+
+This will produce a file named `your_library_file.yaml`.
+
+The `--compat` flag is recommended only to maintain libraries that have been generated prior or up to release `1.9.20`. Without the compat flag, URNs generated for nodes without `ref_id` are constructed using the `parent_urn`. These generated URNs are much simpler to understand and maintain if required, compared to the previous system using `nodeXXX` suffix.
+
+
+### > `convert_v1_to_v2.py`
+
+Usage:
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+This will produce a file named `your_v1_library_file_new.yaml`.
 
 
 ## Format of Excel files
