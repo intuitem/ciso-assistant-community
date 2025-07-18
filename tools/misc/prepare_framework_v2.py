@@ -99,13 +99,23 @@ def validate_implementation_groups(impl_groups, context="implementation_groups",
                              "💡 Tip: Fill this sheet or, if you don't use it, disable it by adding \"#\" in front of the sheet name.")
         else:
             raise ValueError(f'(validate_implementation_groups) Field "{context}" must be a non-empty list if defined.')
-        
+    
+    impl_groups_ref_ids = []
+    
     for i, group in enumerate(impl_groups, start=1):
         if "ref_id" not in group or not str(group["ref_id"]).strip():
             if is_in_excel_config:
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in table of sheet "{context}" (Row #{i+2})')
             else:
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
+            
+        if group["ref_id"] in impl_groups_ref_ids:
+            if is_in_excel_config:
+                raise ValueError(f'(validate_implementation_groups) ref_id "{group["ref_id"]}" is duplicated in table of sheet "{context}" (Row #{i+2})')
+            else:
+                raise ValueError(f'(validate_implementation_groups) ref_id "{group["ref_id"]}" is duplicated in {context} (#{i})')
+        
+        impl_groups_ref_ids.append(group["ref_id"])
         
         try:
             validate_ref_id(group["ref_id"])
@@ -370,8 +380,7 @@ def validate_excel_data(wb):
             # Check that each localized implementation group ref_id exists in the main implementation_groups
             for group in impl_groups_loc:
                 if all(group["ref_id"] != fg["ref_id"] for fg in impl_groups_main):
-                    raise ValueError(
-                        f'ref_id "{group["ref_id"]}" in locale "{loc}" does not exist in main implementation_groups sheet "{impl_base}"')
+                    raise ValueError(f'ref_id "{group["ref_id"]}" in locale "{loc}" does not exist in main implementation_groups sheet "{impl_base}"')
         else:
             print(f"⏩❓ [SKIP] (validate_excel_data) Skipped unknown sheet \"{sheet}\"")
             continue
