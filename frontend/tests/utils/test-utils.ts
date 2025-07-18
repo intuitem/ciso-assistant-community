@@ -375,6 +375,7 @@ export class TestContent {
 		return {
 			foldersPage: {
 				displayName: 'Domains',
+				permName: 'folder',
 				build: {
 					name: vars.folderName,
 					description: vars.description
@@ -386,6 +387,7 @@ export class TestContent {
 			},
 			usersPage: {
 				displayName: 'Users',
+				permName: 'user',
 				build: {
 					email: vars.user.email
 				},
@@ -404,6 +406,7 @@ export class TestContent {
 			},
 			perimetersPage: {
 				displayName: 'Perimeters',
+				permName: 'perimeter',
 				build: {
 					name: vars.perimeterName,
 					description: vars.description,
@@ -420,6 +423,7 @@ export class TestContent {
 			},
 			assetsPage: {
 				displayName: 'Assets',
+				permName: 'asset',
 				build: {
 					name: vars.assetName,
 					description: vars.description,
@@ -435,6 +439,7 @@ export class TestContent {
 			},
 			threatsPage: {
 				displayName: 'Threats',
+				permName: 'threat',
 				build: {
 					name: vars.threatName,
 					description: vars.description,
@@ -449,6 +454,7 @@ export class TestContent {
 			},
 			referenceControlsPage: {
 				displayName: 'Reference controls',
+				permName: 'referencecontrol',
 				build: {
 					name: vars.referenceControlName,
 					description: vars.description,
@@ -467,6 +473,7 @@ export class TestContent {
 			},
 			appliedControlsPage: {
 				displayName: 'Applied controls',
+				permName: 'appliedcontrol',
 				dependency: vars.referenceControl.library,
 				build: {
 					reference_control: {
@@ -533,6 +540,7 @@ export class TestContent {
 			},
 			evidencesPage: {
 				displayName: 'Evidences',
+				permName: 'evidence',
 				dependency: vars.framework,
 				build: {
 					name: vars.evidenceName,
@@ -550,6 +558,7 @@ export class TestContent {
 			},
 			riskAssessmentsPage: {
 				displayName: 'Risk assessments',
+				permName: 'riskassessment',
 				dependency: vars.matrix,
 				build: {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
@@ -573,6 +582,7 @@ export class TestContent {
 			},
 			riskScenariosPage: {
 				displayName: 'Risk scenarios',
+				permName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
 					name: vars.riskScenarioName,
@@ -596,6 +606,7 @@ export class TestContent {
 			},
 			riskAcceptancesPage: {
 				displayName: 'Risk acceptances',
+				permName: 'riskacceptance',
 				build: {
 					name: vars.riskAcceptanceName,
 					description: vars.description,
@@ -615,6 +626,7 @@ export class TestContent {
 			},
 			securityExceptionsPage: {
 				displayName: 'Exceptions',
+				permName: 'securityexception',
 				build: {
 					name: vars.securityExceptionName,
 					description: vars.description,
@@ -668,20 +680,6 @@ export function setHttpResponsesListener(page: Page) {
 	});
 }
 
-export function getSingularName(pluralName: string) {
-	const exceptions: any = {
-		Domains: 'Folder',
-		Libraries: 'Library',
-		'Risk matrices': 'Risk matrix',
-		Policies: 'Policy',
-		Exceptions: 'Security exception'
-	};
-	return (
-		exceptions[pluralName] ??
-		(pluralName.endsWith('s') ? pluralName.substring(0, pluralName.length - 1) : pluralName)
-	);
-}
-
 export function getUniqueValue(value: string): string {
 	if (value.match(/.+@.+/)) {
 		const email = value.split('@');
@@ -706,7 +704,7 @@ export function userFromUserGroupHasPermission(
 	permission: string,
 	object: string
 ) {
-	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;
+	const perm = `${permission}_${object.toLowerCase().replace(' ', '')}`;
 	return userGroup in testData.usergroups && testData.usergroups[userGroup].perms.includes(perm);
 }
 
