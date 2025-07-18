@@ -313,7 +313,23 @@ The `_content` tab for a `urn_prefix` object contains the following columns:
 
 ## Mappings
 
-The `prepare_mapping_v2.py` script can be used to create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library_v2.py` tool to get the resulting mapping library.
+The `prepare_mapping_v2.py` script can be used to create an Excel file based on two framework libraries in YAML.
+
+Usage :
+```bash
+python prepare_mapping_v2.py source.yaml target.yaml
+```
+
+To launch it, open a shell in a command line, and type:
+```bash
+python prepare_mapping_v2.py source.yaml target.yaml
+```
+
+
+Once the Excel file is properly filled in, it can be processed by the `convert_library_v2.py` tool to get the resulting mapping library. This tool also automatically creates the reverse of a mapping inside the resulting YAML file.
+
+> [!CAUTION]
+> The `convert_library_v1.py` tool does not create the reverse of a mapping. 
 
 ## Considerations for URN selection
 
