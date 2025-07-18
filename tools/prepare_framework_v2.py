@@ -168,7 +168,7 @@ def validate_yaml_extra_locales(data):
         
         for loc in extra_locales_list:
             if loc in locale_entry.keys():
-                raise ValueError(f"(validate_yaml_extra_locales) Locale \"{loc_code}\" is duplicated (#{i})")
+                raise ValueError(f"(validate_yaml_extra_locales) Locale \"{loc}\" is duplicated (#{i})")
         
         extra_locales_list.extend(locale_entry.keys())
 
