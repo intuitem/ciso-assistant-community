@@ -6,7 +6,6 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	interface Props {
@@ -29,7 +28,35 @@
 		object = {}
 	}: Props = $props();
 
-	// export let updated_fields: Set<string> = new Set();
+	let riskAppetiteChoices = $state<{ label: string; value: string }[]>([]);
+
+	async function handleRiskMatrixChange(id: string) {
+		riskAppetiteChoices = [];
+
+		if (id) {
+			try {
+				const response = await fetch(`/risk-matrices/${id}`);
+				if (response.ok) {
+					const data = await response.json();
+
+					// Access the first item in the results array
+					const riskMatrix = data.results && data.results.length > 0 ? data.results[0] : null;
+
+					if (riskMatrix && riskMatrix.json_definition) {
+						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
+						const riskLevels = jsonDefinition.risk || [];
+						riskAppetiteChoices = riskLevels.map((level) => ({
+							label: level.name,
+							value: level.id
+						}));
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching risk matrix data:', error);
+				riskAppetiteChoices = [];
+			}
+		}
+	}
 </script>
 
 <TextField
@@ -39,7 +66,6 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
@@ -77,7 +103,20 @@
 		label={m.riskMatrix()}
 		helpText={m.riskAssessmentMatrixHelpText()}
 		hidden={initialData.risk_matrix}
+		onChange={async (e) => await handleRiskMatrixChange(e)}
+		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
+	{#if riskAppetiteChoices.length > 0}
+		<Select
+			{form}
+			options={riskAppetiteChoices}
+			field="risk_appetite"
+			cacheLock={cacheLocks['risk_appetite']}
+			bind:cachedValue={formDataCache['risk_appetite']}
+			label={m.riskAppetite()}
+			helpText={m.riskAppetiteHelpText()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
