@@ -154,6 +154,8 @@ def validate_yaml_extra_locales(data):
 
     impl_groups_main = data.get("implementation_groups") or []
     impl_groups_main_sheet = data.get("implementation_groups_sheet_base_name") or ""
+    
+    extra_locales_list = []
 
     for i, locale_entry in enumerate(extra_locales, start=1):
         if not isinstance(locale_entry, dict) or len(locale_entry) != 1:
@@ -163,6 +165,13 @@ def validate_yaml_extra_locales(data):
             print(f"⚠️  [WARNING] (validate_yaml_extra_locales) Locale \"{framework_locale}\" is already the framework's main locale."
                           f"\n\t     ⏩ Skipping locale \"{framework_locale}\"...")
             continue
+        
+        for loc in extra_locales_list:
+            if loc in locale_entry.keys():
+                raise ValueError(f"(validate_yaml_extra_locales) Locale \"{loc_code}\" is duplicated (#{i})")
+        
+        extra_locales_list.extend(locale_entry.keys())
+
 
         for loc_code, loc_data in locale_entry.items():
             if not is_valid_locale(loc_code):
@@ -322,7 +331,8 @@ def validate_excel_data(wb):
               "\n\t     ⏩ Skipping sheet \"imp_grp\"...")
         print("💡 Tip: Remember to remove the \"#\" in front of \"implementation_groups_sheet_base_name\" in the \"base\" sheet if you want to use the implementation groups sheet.")
 
-        
+    base_extra_locales_list = []
+    imp_grp_extra_locales_list = []
 
     for sheet in wb.sheetnames:
         if not is_sheet_enabled(sheet):
@@ -338,7 +348,14 @@ def validate_excel_data(wb):
             # Check locale
             if not extract_locale_suffix(sheet):
                 raise ValueError(f"(validate_excel_data) Invalid locale code in sheet name '{sheet}' (parsed as '{loc}')")
+
+            # Check duplicate locale
+            if loc in base_extra_locales_list:
+                raise ValueError(f"(validate_excel_data) Locale \"{loc}\" is duplicated (Sheet: \"{sheet})\"")
             
+            base_extra_locales_list.append(loc)
+
+
             if locale_main == loc:
                 print(f"⚠️  [WARNING] (validate_excel_data) Locale \"{loc}\" is already the framework's main locale."
                             f"\n\t     ⏩ Skipping \"{sheet}\"...")
@@ -363,6 +380,13 @@ def validate_excel_data(wb):
             if not extract_locale_suffix(sheet):
                 raise ValueError(f"(validate_excel_data) Invalid locale code in sheet name '{sheet}' (parsed as '{loc}')")
             
+            # Check duplicate locale
+            if loc in imp_grp_extra_locales_list:
+                raise ValueError(f"(validate_excel_data) Locale \"{loc}\" is duplicated (Sheet: \"{sheet})\"")
+            
+            imp_grp_extra_locales_list.append(loc)
+
+
             if locale_main == loc:
                 print(f"⚠️  [WARNING] (validate_excel_data) Locale \"{loc}\" is already the framework's main locale."
                             f"\n\t     ⏩ Skipping \"{sheet}\"...")
