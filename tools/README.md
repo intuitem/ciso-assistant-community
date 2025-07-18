@@ -152,7 +152,7 @@ The _content tab for a "reference_controls" object contains the following column
 - ref_id (*)
 - name
 - description
-- category: one among policy/process/technical/physical
+- category: one among policy/process/technical/physical/procedure
 - csf_function: one among govern/identify/protect/detect/respond/recover
 - annotation
 

@@ -80,7 +80,7 @@
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
-		risk: 'current' | 'residual'
+		risk: 'current' | 'residual' | 'inherent'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
@@ -104,6 +104,17 @@
 		risk_assessment.risk_matrix,
 		'residual'
 	);
+
+	let fields = [
+		'ref_id',
+		'name',
+		'threats',
+		...(page.data?.featureflags?.inherent_risk ? ['inherent_level'] : []),
+		'existing_applied_controls',
+		'current_level',
+		'applied_controls',
+		'residual_level'
+	];
 </script>
 
 <main class="grow main">
@@ -254,21 +265,14 @@
 				search={false}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
-				fields={[
-					'ref_id',
-					'name',
-					'threats',
-					'existing_applied_controls',
-					'current_level',
-					'applied_controls',
-					'residual_level'
-				]}
+				{fields}
 			>
 				{#snippet addButton()}
 					<button
 						class="btn preset-filled-primary-500 self-end my-auto"
 						onclick={(_) => modalCreateForm()}
-						><i class="fa-solid fa-plus mr-2 lowercase"></i>
+					>
+						<i class="fa-solid fa-plus mr-2 lowercase"></i>
 						{m.addRiskScenario()}
 					</button>
 				{/snippet}
@@ -278,8 +282,25 @@
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
-			<div class="flex-1">
+		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
+			{#if page.data?.featureflags?.inherent_risk}
+				<div>
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+
+					<RiskMatrix
+						riskMatrix={risk_assessment.risk_matrix}
+						matrixName={'inherent'}
+						data={buildRiskCluster(
+							risk_assessment.risk_scenarios,
+							risk_assessment.risk_matrix,
+							'inherent'
+						)}
+						dataItemComponent={RiskScenarioItem}
+						{useBubbles}
+					/>
+				</div>
+			{/if}
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
 				<RiskMatrix
@@ -287,11 +308,10 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
 					{useBubbles}
 				/>
 			</div>
-			<div class="flex-1">
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 
 				<RiskMatrix
@@ -299,7 +319,7 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>

@@ -52,6 +52,9 @@
 	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
+	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
+	import KillChainForm from './ModelForm/KillChainForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -237,6 +240,7 @@
 				cacheLock={cacheLocks['reference_control']}
 				bind:cachedValue={formDataCache['reference_control']}
 				label={m.referenceControl()}
+				helpText={m.referenceControlHelpText()}
 				nullable={true}
 				onChange={async (e) => {
 					if (e) {
@@ -433,6 +437,7 @@
 				{formDataCache}
 				{initialData}
 				{context}
+				{object}
 			/>
 		{:else if URLModel === 'security-exceptions'}
 			<SecurityExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
@@ -455,6 +460,26 @@
 			<TaskTemplateForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'elementary-actions'}
+			<ElementaryActionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+		{:else if URLModel === 'operating-modes'}
+			<OperatingModeForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={model.initialData}
+				{context}
+			/>
+		{:else if URLModel === 'kill-chains'}
+			<KillChainForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={model.initialData}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

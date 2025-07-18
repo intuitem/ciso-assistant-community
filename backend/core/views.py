@@ -132,6 +132,7 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
+from global_settings.utils import ff_is_enabled
 
 import structlog
 
@@ -621,6 +622,8 @@ class AssetViewSet(BaseModelViewSet):
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
+            # Use domain.name/asset.name as unique key to handle duplicate asset names across domains
+            asset_key = f"{asset.folder.name}/{asset.name}"
             nodes.append(
                 {
                     "name": asset.name,
@@ -630,19 +633,33 @@ class AssetViewSet(BaseModelViewSet):
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
-            nodes_idx[asset.name] = N
+            nodes_idx[asset_key] = N
             N += 1
+
+        # Add links between assets and their domains
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            asset_key = f"{asset.folder.name}/{asset.name}"
+            links.append(
+                {
+                    "source": nodes_idx[asset.folder.name],
+                    "target": nodes_idx[asset_key],
+                    "value": "contains",
+                }
+            )
+
+        # Add links between assets (existing relationships)
+        for asset in Asset.objects.filter(id__in=viewable_assets):
+            asset_key = f"{asset.folder.name}/{asset.name}"
             for relationship in asset.parent_assets.all():
+                relationship_key = f"{relationship.folder.name}/{relationship.name}"
                 links.append(
                     {
-                        "source": nodes_idx[relationship.name],
-                        "target": nodes_idx[asset.name],
+                        "source": nodes_idx[relationship_key],
+                        "target": nodes_idx[asset_key],
                         "value": "supported by",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
-
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
@@ -948,7 +965,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
                 if operational_scenario.is_selected
             ]:
-                risk_scenario = RiskScenario.objects.create(
+                risk_scenario = RiskScenario(
                     risk_assessment=instance,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
@@ -964,15 +981,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                             ],
                         )
                     ),
-                    current_proba=operational_scenario.likelihood,
-                    current_impact=operational_scenario.gravity,
                 )
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                risk_scenario.save()
+
                 risk_scenario.assets.set(operational_scenario.get_assets())
                 risk_scenario.threats.set(operational_scenario.threats.all())
                 risk_scenario.existing_applied_controls.set(
                     operational_scenario.get_applied_controls()
                 )
-                risk_scenario.save()
         instance.save()
         return super().perform_create(serializer)
 
@@ -1108,6 +1130,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "residual_risk",
                 "treatment",
             ]
+            if ff_is_enabled("inherent_risk"):
+                # insert inherent_risk just before existing_controls
+                columns.insert(columns.index("existing_controls"), "inherent_impact")
+                columns.insert(columns.index("existing_controls"), "inherent_proba")
+                columns.insert(columns.index("existing_controls"), "inherent_level")
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
@@ -1137,6 +1164,19 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
+                if ff_is_enabled("inherent_risk"):
+                    row.insert(
+                        columns.index("inherent_impact"),
+                        scenario.get_inherent_impact()["name"],
+                    )
+                    row.insert(
+                        columns.index("inherent_proba"),
+                        scenario.get_inherent_proba()["name"],
+                    )
+                    row.insert(
+                        columns.index("inherent_level"),
+                        scenario.get_inherent_risk()["name"],
+                    )
                 writer.writerow(row)
 
             return response
@@ -1164,12 +1204,23 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "swap_axes": "_swapaxes" if swap_axes else "",
                 "flip_vertical": "_vflip" if flip_vertical else "",
             }
+            ff_settings = GlobalSettings.objects.filter(
+                name=GlobalSettings.Names.FEATURE_FLAGS
+            ).first()
+            if ff_settings is None:
+                feature_flags = {}
+            else:
+                feature_flags = ff_settings.value
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
-                "ri_clusters": build_scenario_clusters(risk_assessment),
+                "ri_clusters": build_scenario_clusters(
+                    risk_assessment,
+                    include_inherent=feature_flags.get("inherent_risk", False),
+                ),
                 "risk_matrix": risk_assessment.risk_matrix,
                 "settings": matrix_settings,
+                "feature_flags": feature_flags,
             }
             html = render_to_string("core/ra_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
@@ -1409,6 +1460,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "findings": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
+            "processings": ["exact"],
         }
 
 
@@ -2134,7 +2186,14 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def count_per_level(self, request):
         folder_id = request.query_params.get("folder", None)
         return Response(
-            {"results": risks_count_per_level(request.user, None, folder_id)}
+            {
+                "results": risks_count_per_level(
+                    request.user,
+                    None,
+                    folder_id,
+                    include_inherent=ff_is_enabled("inherent_risk"),
+                )
+            }
         )
 
     @action(detail=False, name="Get risk scenarios count per status")
@@ -2517,7 +2576,6 @@ class FolderViewSet(BaseModelViewSet):
         ):
             entry = {
                 "name": folder.name,
-                "symbol": "roundRect",
                 "uuid": folder.id,
             }
             folder_content = get_folder_content(

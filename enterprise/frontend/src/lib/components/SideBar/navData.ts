@@ -110,7 +110,7 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
-				},
+				}
 			]
 		},
 		{
@@ -154,7 +154,7 @@ export const navData = {
 				{
 					name: 'businessImpactAnalysis',
 					fa_icon: 'fa-solid fa-arrows-to-eye',
-					href: '/business-impact-analysis',
+					href: '/business-impact-analysis'
 				}
 			]
 		},
@@ -271,7 +271,7 @@ export const navData = {
 				{
 					name: 'campaigns',
 					fa_icon: 'fa-solid fa-scale-balanced',
-					href: '/campaigns',
+					href: '/campaigns'
 				},
 				{
 					name: 'recap',
@@ -290,7 +290,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
 					permissions: [
-            'view_appliedcontrol',
+						'view_appliedcontrol',
 						'view_entity',
 						'view_solution',
 						'view_entityassessment'

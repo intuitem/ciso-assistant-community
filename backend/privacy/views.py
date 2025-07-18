@@ -70,7 +70,7 @@ class PersonalDataViewSet(BaseModelViewSet):
     """
 
     model = PersonalData
-    filterset_fields = ["processing"]
+    filterset_fields = ["processing", "category"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
