@@ -635,10 +635,12 @@ export class TestContent {
 			},
 			businessImpactAnalysisPage: {
 				displayName: 'Business Impact Analysis',
+				permName: 'businessimpactanalysis',
 				build: {
 					name: vars.biaName,
 					description: vars.description,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
+					risk_matrix: vars.matrix.displayName,
 					due_date: '2025-05-01'
 				}
 			}
