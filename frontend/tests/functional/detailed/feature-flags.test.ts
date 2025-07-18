@@ -16,23 +16,38 @@ test('Feature Flags - X-Rays and Inherent Risk visibility toggling', async ({ pa
 	const xraysToggle = page.getByTestId('form-input-xrays');
 	const inherentRiskToggle = page.getByTestId('form-input-inherent-risk');
 
-	if (await xraysToggle.isChecked()) {
-		await xraysToggle.click();
+	try {
+		if (await xraysToggle.isChecked()) {
+			await xraysToggle.click();
+		}
+		if (await inherentRiskToggle.isChecked()) {
+			await inherentRiskToggle.click();
+		}
+
+		await page.getByRole('button', { name: 'Save' }).click();
+		await page.waitForTimeout(500);
+
+		await page.reload();
+		await page.waitForTimeout(500);
+
+		await page.getByText('Operations').click();
+		await expect(page.getByText('X-Rays', { exact: false })).not.toBeVisible();
+
+		const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
+		await risksPage.goto();
+		await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
+	} finally {
+		await page.goto('/settings');
+		await page.getByText(/^ Feature flags$/).click();
+
+		if (!(await xraysToggle.isChecked())) {
+			await xraysToggle.click();
+		}
+		if (!(await inherentRiskToggle.isChecked())) {
+			await inherentRiskToggle.click();
+		}
+
+		await page.getByRole('button', { name: 'Save' }).click();
+		await page.waitForTimeout(500);
 	}
-	if (await inherentRiskToggle.isChecked()) {
-		await inherentRiskToggle.click();
-	}
-
-	await page.getByRole('button', { name: 'Save' }).click();
-	await page.waitForTimeout(500);
-
-	await page.reload();
-	await page.waitForTimeout(500);
-
-	await page.getByText('Operations').click();
-	await expect(page.getByText('X-Rays', { exact: false })).not.toBeVisible();
-
-	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
-	await risksPage.goto();
-	await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
 });
