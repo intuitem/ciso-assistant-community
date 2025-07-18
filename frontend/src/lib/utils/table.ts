@@ -254,6 +254,15 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const PROCESSING_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'processings',
+		label: 'processing',
+		multiple: true
+	}
+};
+
 const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -263,6 +272,17 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'personal-data/category',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -590,11 +610,11 @@ export const listViewFields = {
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
+			'withinAppetite',
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
 			'riskAssessment',
-			'withinAppetite'
 		],
 		body: [
 			'ref_id',
@@ -603,11 +623,11 @@ export const listViewFields = {
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
+			'within_appetite',
 			'applied_controls',
 			'residual_level',
 			'treatment',
 			'risk_assessment',
-			'within_appetite'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -899,11 +919,34 @@ export const listViewFields = {
 	},
 	purposes: {
 		head: ['name', 'description', 'processing'],
-		body: ['name', 'description', 'processing']
+		body: ['name', 'description', 'processing'],
+		filters: {
+			processing: PROCESSING_FILTER
+		}
 	},
 	'personal-data': {
-		head: ['name', 'description', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['name', 'description', 'category', 'is_sensitive', 'retention', 'deletion_policy']
+		head: [
+			'processing',
+			'name',
+			'description',
+			'category',
+			'isSensitive',
+			'retention',
+			'deletionPolicy'
+		],
+		body: [
+			'processing',
+			'name',
+			'description',
+			'category',
+			'is_sensitive',
+			'retention',
+			'deletion_policy'
+		],
+		filters: {
+			processing: PROCESSING_FILTER,
+			category: PERSONAL_DATA_CATEGORY_FILTER
+		}
 	},
 	'data-subjects': {
 		head: ['name', 'description', 'category'],
@@ -1137,3 +1180,48 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
+
+export const getListViewFields = ({
+	key,
+	featureFlags = {}
+}: {
+	key: string;
+	featureFlags: Record<string, boolean>;
+}) => {
+	if (!Object.keys(listViewFields).includes(key)) {
+		return { head: [], body: [] };
+	}
+
+	const baseEntry = listViewFields[key];
+	const model = getModelInfo(key);
+
+	let head = [...baseEntry.head];
+	let body = [...baseEntry.body];
+
+	if (model?.flaggedFields) {
+		const indicesToPop = body
+			.map((field: string, index: number) => {
+				const flag = model.flaggedFields?.[field];
+				// instead of includes, check if featureFlags[flag] is truthy
+				return flag && !featureFlags[flag] ? index : -1;
+			})
+			.filter((i) => i !== -1);
+
+		head = head.filter((_, index) => !indicesToPop.includes(index));
+		body = body.filter((_, index) => !indicesToPop.includes(index));
+	}
+
+	return {
+		...baseEntry,
+		head,
+		body
+	};
+};
+
+function insertField(fields: string[], fieldToInsert: string, afterField: string): string[] {
+	const index = fields.indexOf(afterField);
+	if (index === -1) return fields;
+	const clone = [...fields];
+	clone.splice(index + 1, 0, fieldToInsert);
+	return clone;
+}

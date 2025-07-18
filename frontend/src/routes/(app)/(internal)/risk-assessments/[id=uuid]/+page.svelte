@@ -104,6 +104,17 @@
 		risk_assessment.risk_matrix,
 		'residual'
 	);
+
+	let fields = [
+		'ref_id',
+		'name',
+		'threats',
+		...(page.data?.featureflags?.inherent_risk ? ['inherent_level'] : []),
+		'existing_applied_controls',
+		'current_level',
+		'applied_controls',
+		'residual_level'
+	];
 </script>
 
 <main class="grow main">
@@ -254,23 +265,14 @@
 				search={false}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
-				fields={[
-					'ref_id',
-					'name',
-					'threats',
-					'inherent_level',
-					'existing_applied_controls',
-					'current_level',
-					'within_appetite',
-					'applied_controls',
-					'residual_level'
-				]}
+				{fields}
 			>
 				{#snippet addButton()}
 					<button
 						class="btn preset-filled-primary-500 self-end my-auto"
 						onclick={(_) => modalCreateForm()}
-						><i class="fa-solid fa-plus mr-2 lowercase"></i>
+					>
+						<i class="fa-solid fa-plus mr-2 lowercase"></i>
 						{m.addRiskScenario()}
 					</button>
 				{/snippet}

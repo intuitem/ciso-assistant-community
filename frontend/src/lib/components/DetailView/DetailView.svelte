@@ -20,7 +20,7 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
-	import { listViewFields } from '$lib/utils/table';
+	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
 		getModalStore,
@@ -75,15 +75,16 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
-	let filteredData = $state(data.data);
-
-	if (data.model?.detailViewFields) {
-		filteredData = Object.fromEntries(
-			Object.entries(data.data).filter(
-				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
-			)
-		);
-	}
+	let filteredData = $derived(
+		data.model?.detailViewFields
+			? Object.fromEntries(
+					Object.entries(data.data).filter(
+						([key, _]) =>
+							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+					)
+				)
+			: data.data
+	);
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -554,7 +555,10 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+							{@const fieldsToUse = getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
