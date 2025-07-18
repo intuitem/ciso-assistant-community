@@ -14,7 +14,7 @@ Command-line arguments:
 
     -i, --input   : Path to the input configuration file.
                     Can be either a YAML (.yaml/.yml) or Excel (.xlsx) file.
-                    Default is 'prepare_framework_v2_config.yaml'.
+                    Default is 'prepare_framework_v2_config.xlsx'.
 
     -o, --output  : Optional output Excel file name.
                     If not specified, the output file name will be derived automatically.
