@@ -62,7 +62,7 @@
 	onChange={async (e) => handleFrameworkChange(e)}
 	mount={async (e) => handleFrameworkChange(e)}
 />
-{#if implementationGroupsChoices.length > 0 && !initialData.frameworks}
+{#if implementationGroupsChoices.length > 0}
 	<AutocompleteSelect
 		multiple
 		translateOptions={false}
@@ -72,6 +72,7 @@
 		cacheLock={cacheLocks['selected_implementation_groups']}
 		bind:cachedValue={formDataCache['selected_implementation_groups']}
 		label={m.selectedImplementationGroups()}
+		hidden={initialData.frameworks}
 	/>
 {/if}
 <AutocompleteSelect
