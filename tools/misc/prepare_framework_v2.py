@@ -75,7 +75,7 @@ def validate_urn_root(urn_root):
 # Validates that ref_id only contains allowed characters
 def validate_ref_id(ref_id):
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
-        raise ValueError(f"Invalid Ref. ID \"{ref_id}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed.")
+        raise ValueError(f"Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed.")
 
 
 # Checks for required non-empty field
