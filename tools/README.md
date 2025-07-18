@@ -95,13 +95,13 @@ When the `--compat` flag is omitted or when the compatibility mode is different 
 
 Usage:
 ```bash
-python convert_library.py [--compat] your_library_file.xlsx
+python convert_library_v1.py [--compat] your_library_file.xlsx
 ```
 
 To launch it, open a shell in a command line, and type:
 
 ```bash
-python convert_library.py your_library_file.xlsx
+python convert_library_v1.py your_library_file.xlsx
 ```
 
 This will produce a file named `your_library_file.yaml`.
