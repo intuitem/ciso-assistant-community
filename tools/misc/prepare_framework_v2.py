@@ -103,7 +103,7 @@ def validate_implementation_groups(impl_groups, context="implementation_groups",
     for i, group in enumerate(impl_groups, start=1):
         if "ref_id" not in group or not str(group["ref_id"]).strip():
             if is_in_excel_config:
-                raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in table of sheet "{context}" (Line #{i+2})')
+                raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in table of sheet "{context}" (Row #{i+2})')
             else:
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"ref_id\" in {context} #{i}')
         
@@ -111,19 +111,19 @@ def validate_implementation_groups(impl_groups, context="implementation_groups",
             validate_ref_id(group["ref_id"])
         except ValueError as e:
             if is_in_excel_config:
-                raise ValueError(f'(validate_implementation_groups) {e} in table of sheet "{context}" (Line #{i+2})')
+                raise ValueError(f'(validate_implementation_groups) {e} in table of sheet "{context}" (Row #{i+2})')
             else:
                 raise ValueError(f'(validate_implementation_groups) {e} in {context} #{i}')
 
         if "name" not in group or not str(group["name"]).strip():
             if is_in_excel_config:
-                raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in table of sheet "{context}" (Line #{i+2})')
+                raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in table of sheet "{context}" (Row #{i+2})')
             else:
                 raise ValueError(f'(validate_implementation_groups) Missing or empty \"name\" in {context} #{i}')
             
         if "description" not in group or not str(group["description"]).strip():
             if is_in_excel_config:
-                print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in table of sheet "{context}" (Line #{i+2})')
+                print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in table of sheet "{context}" (Row #{i+2})')
             else:
                 print(f'⚠️  [WARNING] (validate_implementation_groups) Missing or empty \"description\" in {context} #{i}')
 
