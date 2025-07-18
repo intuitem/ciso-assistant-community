@@ -32,6 +32,7 @@ type Fixtures = {
 	usersPage: PageContent;
 	securityExceptionsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
+	assetAssessmentsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -70,6 +71,7 @@ export const test = base.extend<Fixtures>({
 			appliedControlsPage,
 			securityExceptionsPage,
 			businessImpactAnalysisPage,
+			assetAssessmentsPage,
 			threatsPage,
 			usersPage
 		},
@@ -91,6 +93,7 @@ export const test = base.extend<Fixtures>({
 			appliedControlsPage,
 			securityExceptionsPage,
 			businessImpactAnalysisPage,
+			assetAssessmentsPage,
 			threatsPage,
 			usersPage
 		});
@@ -277,6 +280,14 @@ export const test = base.extend<Fixtures>({
 			{ name: 'due_date', type: type.DATE }
 		]);
 		await use(bPage);
+	},
+
+	assetAssessmentsPage: async ({ page }, use) => {
+		const aPage = new PageContent(page, '/asset-assessments', 'BIA Assessments', [
+			{ name: 'asset', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT }
+		]);
+		await use(aPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -654,6 +665,14 @@ export class TestContent {
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					risk_matrix: vars.matrix.displayName,
 					due_date: '2025-05-01'
+				}
+			},
+			assetAssessmentsPage: {
+				displayName: 'BIA Assessments',
+				modelName: 'assetassessment',
+				build: {
+					asset: vars.assetName,
+					name: vars.assetAssessmentName
 				}
 			}
 		};
