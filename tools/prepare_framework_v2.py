@@ -596,7 +596,7 @@ def create_excel(data, output_excel=None):
     if extra_locales:
         for locale_entry in extra_locales:
             if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
-                    continue
+                continue
             for loc_code, loc_data in locale_entry.items():
                 # Only add fields that are present and non-empty
                 if "framework_name" in loc_data and str(loc_data["framework_name"]).strip():
@@ -621,7 +621,7 @@ def create_excel(data, output_excel=None):
     if extra_locales:
         for locale_entry in extra_locales:
             if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
-                    continue
+                continue
             for loc_code, loc_data in locale_entry.items():
                 if "framework_name" in loc_data and str(loc_data["framework_name"]).strip():
                     framework_meta_sheet.append([f"name[{loc_code}]", loc_data["framework_name"]])
@@ -640,7 +640,7 @@ def create_excel(data, output_excel=None):
     if extra_locales:
         for locale_entry in extra_locales:
             if locale in locale_entry.keys():  # Ignore if the extra locale is the same as the framework's locale
-                    continue
+                continue
             for loc_code in locale_entry.keys():
                 localized_columns.extend([
                     f"name[{loc_code}]",
