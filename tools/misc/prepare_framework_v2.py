@@ -286,8 +286,11 @@ def validate_excel_data(wb):
 
     validate_ref_id(data.get("ref_id"))
     validate_urn_root(data["urn_root"])
-    if not is_valid_locale(data.get("locale")):
-        raise ValueError(f"(validate_excel_data) Invalid locale code \"{data.get('locale')}\"")
+    
+    locale_main = data.get('locale')
+    
+    if not is_valid_locale(locale_main):
+        raise ValueError(f"(validate_excel_data) Invalid locale code \"{locale_main}\"")
 
     impl_base = data.get("implementation_groups_sheet_base_name")
     impl_groups_main = None
@@ -326,6 +329,11 @@ def validate_excel_data(wb):
             if not extract_locale_suffix(sheet):
                 raise ValueError(f"(validate_excel_data) Invalid locale code in sheet name '{sheet}' (parsed as '{loc}')")
             
+            if locale_main == loc:
+                print(f"⚠️  [WARNING] (validate_excel_data) Locale \"{loc}\" is already the framework's main locale."
+                            f"\n\t     ⏩ Skipping \"{sheet}\"...")
+                continue
+            
             ws = wb[sheet]
             loc_data = extract_kv_from_base_sheet(ws)
             for field in ["framework_name", "description", "copyright"]:
@@ -345,9 +353,14 @@ def validate_excel_data(wb):
             if not extract_locale_suffix(sheet):
                 raise ValueError(f"(validate_excel_data) Invalid locale code in sheet name '{sheet}' (parsed as '{loc}')")
             
+            if locale_main == loc:
+                print(f"⚠️  [WARNING] (validate_excel_data) Locale \"{loc}\" is already the framework's main locale."
+                            f"\n\t     ⏩ Skipping \"{sheet}\"...")
+                continue
+            
             if not impl_groups_main:
                 print(f"⚠️  [WARNING] (validate_excel_data) \"{sheet}\" defined but \"imp_grp\" sheet is missing.\n"
-                    f"\t     ⏩ Skipping locale's \"implementation_groups\"...")
+                    f"\t     ⏩ Skipping \"{sheet}\"...")
                 continue
             
             ws = wb[sheet]
