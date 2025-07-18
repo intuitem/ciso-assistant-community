@@ -44,6 +44,8 @@ For advanced users, you can use the YAML configuration file instead, called `pre
 python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
 ```
 
+> [!NOTE]
+> After using this script, the `library_meta` sheet and the `_meta` sheet of type `framework` in the output Excel file will most likely not need to be modified (unless you want to add an additional language for a specific field).
 
 > [!TIP]
 > See ["Format of Excel files"](#format-of-excel-files) for a better understanding of Excel and YAML configuration file values.
