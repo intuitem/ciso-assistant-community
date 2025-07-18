@@ -375,7 +375,7 @@ export class TestContent {
 		return {
 			foldersPage: {
 				displayName: 'Domains',
-				permName: 'folder',
+				modelName: 'folder',
 				build: {
 					name: vars.folderName,
 					description: vars.description
@@ -387,7 +387,7 @@ export class TestContent {
 			},
 			usersPage: {
 				displayName: 'Users',
-				permName: 'user',
+				modelName: 'user',
 				build: {
 					email: vars.user.email
 				},
@@ -406,7 +406,7 @@ export class TestContent {
 			},
 			perimetersPage: {
 				displayName: 'Perimeters',
-				permName: 'perimeter',
+				modelName: 'perimeter',
 				build: {
 					name: vars.perimeterName,
 					description: vars.description,
@@ -423,7 +423,7 @@ export class TestContent {
 			},
 			assetsPage: {
 				displayName: 'Assets',
-				permName: 'asset',
+				modelName: 'asset',
 				build: {
 					name: vars.assetName,
 					description: vars.description,
@@ -439,7 +439,7 @@ export class TestContent {
 			},
 			threatsPage: {
 				displayName: 'Threats',
-				permName: 'threat',
+				modelName: 'threat',
 				build: {
 					name: vars.threatName,
 					description: vars.description,
@@ -454,7 +454,7 @@ export class TestContent {
 			},
 			referenceControlsPage: {
 				displayName: 'Reference controls',
-				permName: 'referencecontrol',
+				modelName: 'referencecontrol',
 				build: {
 					name: vars.referenceControlName,
 					description: vars.description,
@@ -473,7 +473,7 @@ export class TestContent {
 			},
 			appliedControlsPage: {
 				displayName: 'Applied controls',
-				permName: 'appliedcontrol',
+				modelName: 'appliedcontrol',
 				dependency: vars.referenceControl.library,
 				build: {
 					reference_control: {
@@ -517,7 +517,7 @@ export class TestContent {
 			},
 			complianceAssessmentsPage: {
 				displayName: 'Audits',
-				permName: 'complianceassessment',
+				modelName: 'complianceassessment',
 				dependency: vars.framework,
 				build: {
 					name: vars.assessmentName,
@@ -540,7 +540,7 @@ export class TestContent {
 			},
 			evidencesPage: {
 				displayName: 'Evidences',
-				permName: 'evidence',
+				modelName: 'evidence',
 				dependency: vars.framework,
 				build: {
 					name: vars.evidenceName,
@@ -558,7 +558,7 @@ export class TestContent {
 			},
 			riskAssessmentsPage: {
 				displayName: 'Risk assessments',
-				permName: 'riskassessment',
+				modelName: 'riskassessment',
 				dependency: vars.matrix,
 				build: {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
@@ -582,7 +582,7 @@ export class TestContent {
 			},
 			riskScenariosPage: {
 				displayName: 'Risk scenarios',
-				permName: 'riskscenario',
+				modelName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
 					name: vars.riskScenarioName,
@@ -606,7 +606,7 @@ export class TestContent {
 			},
 			riskAcceptancesPage: {
 				displayName: 'Risk acceptances',
-				permName: 'riskacceptance',
+				modelName: 'riskacceptance',
 				build: {
 					name: vars.riskAcceptanceName,
 					description: vars.description,
@@ -626,7 +626,7 @@ export class TestContent {
 			},
 			securityExceptionsPage: {
 				displayName: 'Exceptions',
-				permName: 'securityexception',
+				modelName: 'securityexception',
 				build: {
 					name: vars.securityExceptionName,
 					description: vars.description,
@@ -647,7 +647,7 @@ export class TestContent {
 			},
 			businessImpactAnalysisPage: {
 				displayName: 'Business Impact Analysis',
-				permName: 'businessimpactanalysis',
+				modelName: 'businessimpactanalysis',
 				build: {
 					name: vars.biaName,
 					description: vars.description,

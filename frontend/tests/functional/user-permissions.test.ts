@@ -112,22 +112,22 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 					const userCanView = userFromUserGroupHasPermission(
 						userGroup,
 						'view',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 					const userCanCreate = userFromUserGroupHasPermission(
 						userGroup,
 						'add',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 					const userCanUpdate = userFromUserGroupHasPermission(
 						userGroup,
 						'change',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 					const userCanDelete = userFromUserGroupHasPermission(
 						userGroup,
 						'delete',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 
 					test.beforeAll(async ({ pages }) => {
