@@ -2080,6 +2080,25 @@ class RiskScenarioFilter(df.FilterSet):
     perimeter = df.UUIDFilter(
         field_name="risk_assessment__perimeter", label="Perimeter ID"
     )
+    within_appetite = df.ChoiceFilter(
+        choices=[("YES", "YES"), ("NO", "NO"), ("--", "--")],
+        method="filter_within_appetite",
+    )
+
+    def filter_within_appetite(self, queryset, name, value):
+        if value == "YES":
+            return queryset.filter(
+                risk_assessment__risk_appetite__gte=0,
+                current_level__lte=models.F("risk_assessment__risk_appetite"),
+            )
+        elif value == "NO":
+            return queryset.filter(
+                risk_assessment__risk_appetite__gte=0,
+                current_level__gt=models.F("risk_assessment__risk_appetite"),
+            )
+        elif value == "--":
+            return queryset.filter(risk_assessment__risk_appetite__lt=0)
+        return queryset
 
     class Meta:
         model = RiskScenario
