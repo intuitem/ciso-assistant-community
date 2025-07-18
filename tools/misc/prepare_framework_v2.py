@@ -46,7 +46,21 @@ import sys
 import os
 import yaml
 import argparse
+import warnings
 from openpyxl import Workbook, load_workbook
+
+
+
+# ------------------------ MISC: openpyxl WARNING MANAGER ------------------------
+
+def custom_warning_filter(message, category, filename, lineno, file=None, line=None):
+    warn_msg = "Data Validation extension is not supported and will be removed"
+
+    if (category == UserWarning and warn_msg in str(message)):
+        return  # Ignore this specific warning
+    return warnings.defaultaction  # Apply default behavior for others
+
+warnings.showwarning = custom_warning_filter
 
 
 
@@ -272,7 +286,7 @@ def validate_excel_data(wb):
 
     validate_ref_id(data.get("ref_id"))
     validate_urn_root(data["urn_root"])
-    if not re.fullmatch(r"[a-z0-9-]{2}", data.get("locale")):
+    if not is_valid_locale(data.get("locale")):
         raise ValueError(f"(validate_excel_data) Invalid locale code \"{data.get('locale')}\"")
 
     impl_base = data.get("implementation_groups_sheet_base_name")
@@ -299,10 +313,10 @@ def validate_excel_data(wb):
 
     for sheet in wb.sheetnames:
         if not is_sheet_enabled(sheet):
-            print(f"⏩ (validate_excel_data) Skipped sheet \"{sheet}\"")
+            print(f"⏩ [SKIP] (validate_excel_data) Skipped sheet \"{sheet}\"")
             continue
         
-        if sheet in ["info", "base", "imp_grp"]:
+        if sheet in ["info", "base", "imp_grp", "_configs"]:
             continue
 
         if sheet.startswith("base_"):
@@ -346,7 +360,7 @@ def validate_excel_data(wb):
                     raise ValueError(
                         f'ref_id "{group["ref_id"]}" in locale "{loc}" does not exist in main implementation_groups sheet "{impl_base}"')
         else:
-            print(f"⏩❓ (validate_excel_data) Skipped unknown sheet \"{sheet}\"")
+            print(f"⏩❓ [SKIP] (validate_excel_data) Skipped unknown sheet \"{sheet}\"")
             continue
             
 
