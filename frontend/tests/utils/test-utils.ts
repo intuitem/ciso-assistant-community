@@ -31,6 +31,7 @@ type Fixtures = {
 	threatsPage: PageContent;
 	usersPage: PageContent;
 	securityExceptionsPage: PageContent;
+	businessImpactAnalysisPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -68,6 +69,7 @@ export const test = base.extend<Fixtures>({
 			referenceControlsPage,
 			appliedControlsPage,
 			securityExceptionsPage,
+			businessImpactAnalysisPage,
 			threatsPage,
 			usersPage
 		},
@@ -88,6 +90,7 @@ export const test = base.extend<Fixtures>({
 			referenceControlsPage,
 			appliedControlsPage,
 			securityExceptionsPage,
+			businessImpactAnalysisPage,
 			threatsPage,
 			usersPage
 		});
@@ -260,6 +263,19 @@ export const test = base.extend<Fixtures>({
 			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(sPage);
+	},
+
+	businessImpactAnalysisPage: async ({ page }, use) => {
+		const bPage = new PageContent(page, '/business-impact-analysis', /Business Impact Analysis?/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'due_date', type: type.DATE }
+		]);
+		await use(bPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -614,6 +630,15 @@ export class TestContent {
 					ref_id: '',
 					status: 'In review',
 					expiration_date: '2100-12-31'
+				}
+			},
+			businessImpactAnalysisPage: {
+				displayName: 'Business Impact Analysis',
+				build: {
+					name: vars.biaName,
+					description: vars.description,
+					perimeter: vars.folderName + '/' + vars.perimeterName,
+					due_date: '2025-05-01'
 				}
 			}
 		};
