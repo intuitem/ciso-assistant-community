@@ -20,7 +20,7 @@ python convert_library_v2.py your_library_file.xlsx [--verbose]
 Usage (advanced):
 ```bash
 python convert_library_v2.py your_library_file.xlsx [--compat MODE] [--output out.yaml] [--verbose]
-python convert_library_v2.py path/to/folder --bulk [--compat MODE] [--output-dir out_folder] [--verbose]
+python convert_library_v2.py path/to/folder_with_libraries --bulk [--compat MODE] [--output-dir out_folder] [--verbose]
 ```
 
 Arguments:
