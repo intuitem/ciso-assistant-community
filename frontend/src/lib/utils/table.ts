@@ -39,7 +39,7 @@ const YES_NO_OPTIONS = [
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' },
-	{ label: '--', value: '--' },
+	{ label: '--', value: '--' }
 ];
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -627,7 +627,7 @@ export const listViewFields = {
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
-			'riskAssessment',
+			'riskAssessment'
 		],
 		body: [
 			'ref_id',
@@ -640,7 +640,7 @@ export const listViewFields = {
 			'applied_controls',
 			'residual_level',
 			'treatment',
-			'risk_assessment',
+			'risk_assessment'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -651,7 +651,7 @@ export const listViewFields = {
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
-      within_appetite: RISK_APPETITE_FILTER,
+			within_appetite: RISK_APPETITE_FILTER
 		}
 	},
 	'risk-acceptances': {
