@@ -78,4 +78,14 @@ export class LoginPage extends BasePage {
 				break;
 		}
 	}
+
+	async skipWelcome() {
+		// if welcome popup is visible, close it
+		await expect(this.page).toHaveURL(/^.*\/analytics$/);
+		const welcomePopup = this.page.getByTestId('modal-component');
+		if (await welcomePopup.isVisible()) {
+			await this.page.keyboard.press('Escape');
+			await expect(welcomePopup).toBeHidden();
+		}
+	}
 }

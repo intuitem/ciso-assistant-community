@@ -217,7 +217,20 @@
 			state,
 			URLModel,
 			endpoint: baseEndpoint,
-			fields: Object.keys(tableSource.head)
+			fields:
+				fields.length > 0
+					? { head: fields, body: fields }
+					: {
+							head:
+								typeof tableSource.head[0] === 'string'
+									? Object.values(tableSource.head)
+									: Object.keys(tableSource.head),
+							body:
+								typeof tableSource.body[0] === 'string'
+									? Object.values(tableSource.body)
+									: Object.keys(tableSource.body)
+						},
+			featureFlags: page.data?.featureflags
 		})
 	);
 
@@ -543,6 +556,8 @@
 																{m.accept()}
 															</span>
 														</div>
+													{:else if key === 'icon_fa_class'}
+														<i class="text-lg fa {value}"></i>
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 														{#if value?.length > 300}
