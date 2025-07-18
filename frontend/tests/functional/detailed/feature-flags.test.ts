@@ -25,11 +25,10 @@ test('Feature Flags - X-Rays and Inherent Risk visibility toggling', async ({ pa
 		}
 
 		await page.getByRole('button', { name: 'Save' }).click();
-		await page.waitForTimeout(500);
-
+		await page.waitForLoadState('networkidle');
 		await page.reload();
-		await page.waitForTimeout(500);
-
+		await page.waitForLoadState('networkidle');
+		
 		await page.getByText('Operations').click();
 		await expect(page.getByText('X-Rays', { exact: false })).not.toBeVisible();
 
@@ -48,6 +47,6 @@ test('Feature Flags - X-Rays and Inherent Risk visibility toggling', async ({ pa
 		}
 
 		await page.getByRole('button', { name: 'Save' }).click();
-		await page.waitForTimeout(500);
+		await page.waitForLoadState('networkidle');
 	}
 });
