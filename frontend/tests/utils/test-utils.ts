@@ -271,6 +271,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'description', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'due_date', type: type.DATE }
