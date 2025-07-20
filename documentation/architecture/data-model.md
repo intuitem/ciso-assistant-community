@@ -1,24 +1,26 @@
 # CISO Assistant Data Model
 
-## Entity-relationship diagram
+## Global fields
 
-### IAM
+All models have the following fields:
+
+- created_at: the date when the object has been created.
+- modified_at: the date when the object has been lastly modified.
+
+## IAM
 
 ```mermaid
 erDiagram
 
-    USER }o--o{ RISK_SCENARIO : owns
-    USER }o--o{ APPLIED_CONTROL : owns
-    USER }o--o{ ASSET : owns
-    USER }o--o{ SECURITY_EXCEPTION : owns
-    USER |o--o{ SECURITY_EXCEPTION : approves
 
-    USER_GROUP      ||--o{ USER      : contains
-    ROLE            }o--|{ PERMISSION: contains
-    ROLE_ASSIGNMENT }o--o| USER_GROUP: contains
-    ROLE_ASSIGNMENT }o--o| USER      : contains
-    ROLE_ASSIGNMENT }o--|| FOLDER    : contains
-    ROLE_ASSIGNMENT }o--|| ROLE      : contains
+    USER_GROUP      }o--o{ USER         : contains
+    ROLE            }o--|{ PERMISSION   : contains
+    ROLE_ASSIGNMENT }o--o| USER         : empowers
+    ROLE_ASSIGNMENT }o--o| USER_GROUP   : empowers
+    ROLE_ASSIGNMENT }o--|| FOLDER       : covers
+    ROLE_ASSIGNMENT }o--|| ROLE         : applies
+
+    USER      |o--o{ RISK_ACCEPTANCE    : approves
 
     USER {
         string  email
@@ -26,23 +28,12 @@ erDiagram
     }
 
     USER_GROUP {
-        string name
-    }
-
-    SSO_SETTINGS {
-        boolean enabled
         string  name
-        string  provider
-        string  provider_id
-        string  client_id
-        string  oidc_secret
-        string  oidc_key
-        json    saml_settings
     }
 
 ```
 
-### Folder organization
+## Folder organization
 
 ```mermaid
 erDiagram
@@ -62,6 +53,19 @@ erDiagram
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
     ROOT_FOLDER           ||--o{ LABEL                       : contains
+
+    DOMAIN {
+        string ref_id
+        string name
+        string description
+        int version
+    }
+
+```
+
+```mermaid
+erDiagram
+
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
@@ -73,17 +77,11 @@ erDiagram
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ INCIDENT                    : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ TIMELINE_ENTRY              : contains
-
-    DOMAIN {
-        string ref_id
-        string name
-        string description
-        int version
-    }
+    ROOT_FOLDER_OR_DOMAIN ||--o{ PROCESSING                  : contains
 
 ```
 
-### Library model
+## Library model
 
 ```mermaid
 erDiagram
@@ -92,32 +90,12 @@ erDiagram
     LOADED_LIBRARY      |o--o{ THREAT                   : contains
     LOADED_LIBRARY      ||--o{ FRAMEWORK                : contains
     LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
-    LOADED_LIBRARY      ||--o{ REQUIREMENT_MAPPING_SET : contains
+    LOADED_LIBRARY      ||--o{ REQUIREMENT_MAPPING_SET  : contains
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
 
 ```
 
-### Project management model
-
-```mermaid
-erDiagram
-
-    PROJECT_OBJECT               |o--o{ COMPLIANCE_ASSESSMENT : contains
-    PROJECT_OBJECT               |o--o{ RISK_ASSESSMENT       : contains
-    PROJECT_OBJECT               |o--o{ PROJECT_OBJECT        : contains
-    USER                         |o--o{ PROJECT_OBJECT        : manages
-
-    PROJECT_OBJECT {
-        string ref_id
-        string name
-        string description
-        string ref_id
-        string status
-        string category
-    }
-```
-
-### General data model
+## General data model
 
 ```mermaid
 erDiagram
@@ -145,10 +123,11 @@ erDiagram
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
     VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
-    USER                         }o--o{ RISK_SCENARIO         : owns
-    USER                         }o--o{ APPLIED_CONTROL       : owns
-    USER                         }o--o{ ASSET                 : owns
-    USER                         }o--o{ INCIDENT              : owns
+    ACTOR.                       }o--o{ PERIMETER             : owns
+    ACTOR                        }o--o{ RISK_SCENARIO         : owns
+    ACTOR                        }o--o{ APPLIED_CONTROL       : owns
+    ACTOR                        }o--o{ ASSET                 : owns
+    ACTOR                        }o--o{ INCIDENT              : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
@@ -161,11 +140,11 @@ erDiagram
     APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
     FINDINGS_ASSESSMENT          ||--o{ FINDING               : contains
     PERIMETER                    |o--o{ FINDINGS_ASSESSMENT   : contains
-    USER                         }o--o{ FINDINGS_ASSESSMENT   : owns
+    ACTOR                        }o--o{ FINDINGS_ASSESSMENT   : owns
     FINDING                      }o--o{ VULNERABILITY         : relates
     FINDING                      }o--o{ REFERENCE_CONTROL     : is_mitigated_by
     FINDING                      }o--o{ APPLIED_CONTROL       : is_mitigated_by
-    USER                         }o--o{ FINDING               : owns
+    ACTOR                        }o--o{ FINDING               : owns
     INCIDENT                     ||--o{ TIMELINE_ENTRY        : contains
     INCIDENT                     }o--o{ ASSET                 : impacts
     INCIDENT                     }o--o{ THREATS               : relates
@@ -198,8 +177,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string[]    selected_implementation_groups
@@ -217,8 +196,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
     }
 
@@ -418,8 +397,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string      category
@@ -451,7 +430,7 @@ erDiagram
 
 ```
 
-### Requirement mappings
+## Requirement mappings
 
 ```mermaid
 erDiagram
@@ -492,14 +471,40 @@ In all views and analytics, a filter on label shall be displayed.
 
 Note: For now, labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
 
-## Global fields
-
-All models have the following fields:
-
-- created_at: the date when the object has been created.
-- modified_at: the date when the object has been lastly modified.
-
 ## Project management, perimeters and domains
+
+### Actors
+
+Actors are representing users, groups, entities, stakeholders, that can play a role in a workflow or model.  Actors can refer to:
+- internal users
+- internal groups
+- entities
+- a team
+- any other stakeholder
+
+The "category" attribute can be: user/group/entity/team/other.
+
+An actor has a ref_id/name/description, and is attached to a domain.
+
+An actor of category "team" has the following attributes:
+- a leader (another actor)
+- a list of deputy leaders (list of actors)
+- a list of members (list of actors)
+
+The ref_id is calculated but must be unique. For a user, it is u:<email>. For a group, it is g:<group_name>. For an entity, it is e:<name>. For a team, it is t:<name>. For other, it is o:<name>.
+
+An actor has the following optional fields for alert management:
+- main email
+- secondary email
+- main phone number
+- secondary phone number
+- alert instructions
+
+An actor is created automatically for each user, group or entity within CISO Assistant.
+
+Teams and other actors must be defined spefically.
+
+Objects can be "owned" bu actors when this is relevant (tasks, risks, applied controls, ...). We can also say that the object is assigned to the actor.
 
 ### Domains
 
@@ -522,6 +527,8 @@ The perimeter has the following fields:
 - status: --/Design/Development/Production/End of life/Dropped
 
 An assessment can only be attached to a perimeter that is in the same domain as the assessment.
+
+A perimeter is owned by an actor (typically a team), which is used for campaigns.
 
 Note: perimeters were previously named "projects", but this was misleading.
 
@@ -556,6 +563,27 @@ PG2 --> IN1[Initiative 1]
 PJ4 --> PJ5[Project 5]
 PJ7[Project 7]
 ```
+
+### Project management model
+
+```mermaid
+erDiagram
+
+    PROJECT_OBJECT               |o--o{ COMPLIANCE_ASSESSMENT : contains
+    PROJECT_OBJECT               |o--o{ RISK_ASSESSMENT       : contains
+    PROJECT_OBJECT               |o--o{ PROJECT_OBJECT        : contains
+    ACTOR                        |o--o{ PROJECT_OBJECT        : manages
+
+    PROJECT_OBJECT {
+        string ref_id
+        string name
+        string description
+        string ref_id
+        string status
+        string category
+    }
+```
+
 
 ## Qualifications
 
@@ -686,8 +714,6 @@ The format of the references field is list of the following objects (* for manda
 
 - string ref_id (*)
 - url reference_link
-- boolean is_cve
-- boolean is_kev
 - ...
 
 The UX shall facilitate the proper edition of references.
@@ -735,7 +761,7 @@ Both types of assessments have common fields:
 - a list of authors
 - a list of reviewers
 
-An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
+An assessment review can be asked to an actor. When at least one reviewer is defined, the _done_ status can only be set if a each actor has reviewed and validated the assessment.
 
 When the assessment status goes from _in progress_ to _in review_, each defined reviewer is notified of the review request.
 A review is deprecated if the assessment is changed. A warning shall be displayed to avoid doing that by error.
@@ -1109,20 +1135,24 @@ To simplify access control, we use a RBAC model.
 
 Note: a DJANGO superuser is given administrator rights automatically on startup.
 
-Principals are either:
-
-- users
-- group of users
-
 Role assignements are described as a table containing the following attributes:
 
-- user: the user that receives the role assignment (can be None)
-- user_group: the group that receives the role assignment (can be None)
-- role: the role assigned to the principal
-- folders: list of folders that form the perimeter of the assignment.
+- user: the user that receives the role assignement
+- group: the group that receives the role assignement
+- role: the role assigned to the principal (user or group)
+- folders: list of folders that form the perimeter of the assignment
 - is_recursive: a boolean indicating if the perimeter includes the subfolders
 
 This table is the golden source of all access management in CISO Assistant, no additional information is necessary to know who has access to what.
+
+
+### Management and visibility of users and groups
+
+It is possible to create new administrative units. There is no hierachy between AU, and there is no link between AU and folders.
+
+Users and groups can be attached to Administrative Units (AU). By default they are not attached (global scope).
+
+There are global roles to manage AUs and to see users and groups within an AU. These roles can be given globally or on a given AU. The DirectoryReader role is especially interesting to determine who can see who.
 
 ### Published global objects
 
@@ -1147,6 +1177,23 @@ When the force_sso global flag is set, all users without keep_local_login:
 - have their password disabled, 
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.
+
+```mermaid
+erDiagram
+
+    SSO_SETTINGS {
+        boolean enabled
+        string  name
+        string  provider
+        string  provider_id
+        string  client_id
+        string  oidc_secret
+        string  oidc_key
+        json    saml_settings
+    }
+```
+
+
 
 ## TPRM evolution
 
@@ -1216,8 +1263,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string      conclusion
@@ -1549,8 +1596,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[].    author
+        actor[]     reviewer
         string      observation
     }
 
@@ -1658,7 +1705,7 @@ erDiagram
 ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
 ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
 TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
-USER                  }o--o{ TASK_TEMPLATE         : owns
+ACTOR.                }o--o{ TASK_TEMPLATE         : owns
 TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
 TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
 TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
@@ -1787,8 +1834,8 @@ CAMPAIGN {
     date        eta
     date        due_date
     string      status
-    principal[] author
-    principal[] reviewer
+    actor[]     author
+    actor[].    reviewer
     string      observation
 }
 
@@ -1807,3 +1854,124 @@ If a non-empty list of frameworks is set for TPRM scope, an entity assessment is
 If a non-empty list of frameworks is set for internal scope, a compliance assessment is generated for each (framework, perimeter) couple. Frameworks can be added or removed at any time. If a framework is removed, the corresponding assessments are either deleted or detached, as decided by the user. A detached assessment cannot be reattached.
 
 If a matrix is set for a campaign, a risk analysis is generated for each perimeter. This can be added or removed at any time. If a matrix is removed, the corresponding risk assessments are either deleted or detached, as decided by the user. A detached risk assessment cannot be reattached.
+
+## PRIVACY
+
+### Data Model Diagram
+
+```mermaid
+erDiagram
+
+ProcessingNature ||--o{ Processing    : is_nature_of
+Actor            ||--o{ Processing    : owns
+Processing       ||--o{ Purpose       : covers
+Processing       ||--o{ PersonalData  : uses
+Processing       ||--o{ DataSubject   : concerns
+Processing       ||--o{ DataRecipient : concerns
+Processing       ||--o{ DataContractor: includes
+Processing       ||--o{ DataTransfer  : includes
+AppliedControl   ||--o{ Processing    : protects
+DataContractor   }o--o| Entity        : corresponds_to
+DataTransfer     }o--o| Entity        : corresponds_to
+
+ProcessingNature {
+  string name
+}
+
+Processing {
+  string  ref_id
+  enum    status
+  enum    legal_basis
+  string  information_channel
+  string  usage_channel
+  boolean dpia_required
+  string  dpia_reference
+  boolean has_sensitive_personal_data
+}
+
+Purpose {
+  string name
+  string description
+}
+
+PersonalData {
+  enum    category
+  string  retention
+  enum    deletion_policy
+  boolean is_sensitive
+}
+
+DataSubject {
+  enum category
+}
+
+DataRecipient {
+  enum category
+}
+
+DataContractor {
+  enum   relationship_type
+  string country
+  string documentation_link
+}
+
+DataTransfer {
+  enum   legal_basis
+  string country
+  string guarantees
+  string documentation_link
+}
+```
+
+### ProcessingNature
+
+ privacy_collection/privacy_recording/privacy_use/...
+
+### Processing
+
+- ref_id/name/description
+- status: Draft/In Review/Approved/Deprecated
+- legal_basis: .../...
+- information_channel: TBD
+- usage_channel: TBD
+- dpia_required: boolean
+- dpia_reference
+- has_sensitive_data(): determines sensitivity based on associated personal data
+
+### Purpose
+
+- ref_id/name/description
+
+### PersonalData
+
+- ref_id/name/description
+- category: identity/financial/sensitive health data/digital behavior/...
+- retention: string
+- deletion_policy: Automatic/Anonymization/Manual Review/...
+- is_sensitive: Boolean
+
+### DataSubject
+
+- ref_id/name/description
+- category: Customer/Employee/Visitor/Minor/Public/...
+
+### DataRecipient
+
+- ref_id/name/description
+- category: Internal Team/Service Provider/Business Partner/Legal Advisor/Authorities/...
+
+### DataContractor
+
+- ref_id/name/description
+- relationship_type: Data Processor/Sub-processor/Joint Controller/...
+- country: Country Code Enum
+- documentation_link: url
+
+### DataTransfer
+
+- ref_id/name/description
+- country: Country Code Enum
+- legal_basis: .../...
+* guarantees: text
+- documentation_link: url
+
