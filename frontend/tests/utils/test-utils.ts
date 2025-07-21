@@ -7,6 +7,7 @@ import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
+import { description } from '$paraglide/messages/ro.js';
 
 type Fixtures = {
 	data: { [key: string]: any };
@@ -666,13 +667,18 @@ export class TestContent {
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					risk_matrix: vars.matrix.displayName,
 					due_date: '2025-05-01'
+				},
+				editParams: {
+					name: '',
+					description: '',
+					due_date: '2025-12-31'
 				}
 			},
 			assetAssessmentsPage: {
 				displayName: 'BIA Assessments',
 				modelName: 'assetassessment',
-				labelField: 'asset',
 				build: {
+					str: vars.assetName,
 					asset: vars.folderName + '/' + vars.assetName,
 					bia: vars.biaName
 				}
