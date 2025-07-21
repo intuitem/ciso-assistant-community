@@ -27,6 +27,10 @@
 		initialData = {}
 	}: Props = $props();
 	const disableDoubleDash = true;
+
+	let currentDateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+		.toISOString()
+		.slice(0, 19);
 </script>
 
 <TextField
@@ -42,6 +46,7 @@
 	{form}
 	field="reported_at"
 	label={m.reportedAt()}
+	value={currentDateTime}
 	cacheLock={cacheLocks['reported_at']}
 	bind:cachedValue={formDataCache['reported_at']}
 />
