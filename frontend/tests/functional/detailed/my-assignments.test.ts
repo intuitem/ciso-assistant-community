@@ -23,7 +23,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('form-input-name').fill('my-assignments-perimeter');
 		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-folder').click();
-				await page.getByRole('option', { name: 'my-assignments-folder' }).click();
+		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
 		await page.getByTestId('save-button').click();
 	});
 
@@ -54,7 +54,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByRole('option', { name: 'admin@tests.com' }).click();
 		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-folder').click();
-				await page.getByRole('option', { name: 'my-assignments-folder' }).click();
+		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
 		await page.getByTestId('save-button').click();
 	});
 
@@ -95,7 +95,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('form-input-name').fill('control-without-owner');
 		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-folder').click();
-				await page.getByRole('option', { name: 'my-assignments-folder' }).click();
+		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
 		await page.getByTestId('save-button').click();
 
 		await page.getByTestId('accordion-item-overview').click();
