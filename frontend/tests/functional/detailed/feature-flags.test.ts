@@ -243,6 +243,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model 
 	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
 	await risksPage.goto();
 	await expect(page.getByText('Inherent Level', { exact: false })).toBeVisible();
+	await page.waitForTimeout(200);
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
 	await risksPage.goto();
@@ -264,6 +265,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('feature-flag-folder');
 	await page.getByTestId('save-button').click();
+	await page.waitForTimeout(200);
 
 	// Create perimeter
 	await page.getByRole('button', { name: 'Organization' }).click();
@@ -274,6 +276,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await page.getByTestId('form-input-folder').click();
 	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
 	await page.getByTestId('save-button').click();
+	await page.waitForTimeout(200);
 
 	// Create risk assessment
 	await page.getByTestId('accordion-item-risk').click();
@@ -369,6 +372,7 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ pag
 	await page.getByTestId('save-button').click();
 	await page.waitForTimeout(200);
 	await page.getByText('test-ebios-rm').click();
+	await page.waitForTimeout(200);
 
 	await page.getByText('Generate the risk assessment').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment-ebios-rm');
@@ -390,7 +394,7 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ pag
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 });
 
-await test('Cleanup - delete the folder', async ({ page }) => {
+test('Cleanup - delete the folder', async ({ page }) => {
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
