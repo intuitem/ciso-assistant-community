@@ -1,11 +1,12 @@
 import { Element } from '../core/element';
 import type { Expect } from '@playwright/test';
 
+/** Represents the `<Toast/>` component. */
 export class Toast extends Element {
 	static DATA_TESTID = 'toast';
 
 	async checkContainText(expect: Expect, text: string) {
-		expect(this._self).toContainText(text);
+		await expect(this._self).toContainText(text);
 	}
 }
 

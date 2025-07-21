@@ -8,7 +8,8 @@ import { test, expect } from './base';
 // These imports are dependencies required to run the _start entry point with eval(finalCode) .
 import { expect as baseExpect } from '@playwright/test';
 import { test as base } from '@playwright/test';
-var __EVAL_DEPENDENCIES__ = [baseExpect, base];
+import { safeTranslate } from '$lib/utils/i18n';
+var __EVAL_DEPENDENCIES__ = [baseExpect, base, safeTranslate];
 // The __EVAL_DEPENDENCIES__ variable is unused, its goal is to "register" the imported variables by storing them in a variable.
 // By being stored in a list these variables get loaded into the global scope (an import doesn't load the imported variable into the global scope if it's unused).
 // Doing so gives the ability to the eval function to access them.

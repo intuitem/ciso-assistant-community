@@ -28,7 +28,7 @@ async function navigateToFolders(page: Page) {
 // Helper to extract the row count from the UI.
 // Assumes the row count element contains at least one number.
 async function getRowCount(page: Page) {
-	const rowCountText = await page.getByTestId('row-count').innerText();
+	const rowCountText = await page.getByTestId('row-count-elem').innerText();
 	const match = rowCountText.match(/\d+$/);
 	return match ? parseInt(match[0], 10) : 0;
 }

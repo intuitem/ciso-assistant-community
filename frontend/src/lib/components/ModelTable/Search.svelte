@@ -22,7 +22,7 @@
 <input
 	class="input bg-surface-50 max-w-2xl"
 	placeholder={m.searchPlaceholder()}
-	data-testid="search-input"
+	data-testid="search-input-elem"
 	id="search-input"
 	type="search"
 	bind:value

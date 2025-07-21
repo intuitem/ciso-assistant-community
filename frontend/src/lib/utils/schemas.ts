@@ -1,7 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {

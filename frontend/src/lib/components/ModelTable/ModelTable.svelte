@@ -373,7 +373,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap {classesBase}">
+<div class="table-wrap {classesBase}" data-testid="model-table">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -469,6 +469,7 @@
 									onRowKeydown(e, rowIndex);
 								}}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
+								data-testid="model-table-row-elem"
 								aria-rowindex={rowIndex + 1}
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
 							>

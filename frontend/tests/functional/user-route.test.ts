@@ -1,296 +1,226 @@
-import { LoginPage } from '../utils/login-page.js';
-import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
-import { m } from '$paraglide/messages';
-const vars = TestContent.generateTestVars();
+import { test as testV2, expect as expectV2 } from '../utilsv2/core/base';
 
-test('user usual routine actions are working correctly', async ({
-	logedPage,
-	pages,
-	analyticsPage,
-	sideBar,
-	page
-}) => {
-	test.slow();
+import type { ListViewPage } from '../utilsv2/base/list-view-page';
+import type { Page } from '../utilsv2/core/page';
 
-	await page.waitForLoadState('networkidle');
-	const modalBackdrop = page.getByTestId('modal-backdrop');
+import { LoginPage } from '../utilsv2/derived/login-page';
+import { LibraryListViewPage } from '../utilsv2/derived/list-view';
+import { safeTranslate } from '$lib/utils/i18n';
+import { ADMIN_EMAIL, ADMIN_PASSWORD } from '../utilsv2/core/test-data';
 
-	await test.step('Dismiss any blocking modals', async () => {
-		if (await modalBackdrop.isVisible()) {
-			await modalBackdrop.press('Escape');
-			await expect(modalBackdrop).not.toBeVisible();
+import {
+	FolderListViewPage,
+	PerimeterListViewPage,
+	AssetListViewPage,
+	AppliedControlListViewPage,
+	ExceptionListViewPage,
+	ComplianceAssessmentListViewPage,
+	EvidenceListViewPage,
+	RiskAssessmentListViewPage,
+	ThreatListViewPage,
+	RiskScenarioListViewPage,
+	RiskAcceptanceListViewPage,
+	UserListViewPage
+} from '../utilsv2/derived/list-view';
+
+interface LocalTestData {
+	pageClass: Page.Class<ListViewPage>;
+	objectName: string;
+	formData: { [key: string]: any };
+}
+const TEST_DATA: LocalTestData[] = [
+	// Make this a const at the end
+	{
+		// Create and use the ListView base class instead for this interface
+		pageClass: FolderListViewPage,
+		objectName: 'Domain',
+		formData: {
+			name: 'User-Routes Domain',
+			description: 'This is the user-routes domain.'
 		}
-
-		if (await page.locator('#driver-dummy-element').isVisible()) {
-			await page.locator('.driver-popover-close-btn').first().click();
+	},
+	{
+		pageClass: PerimeterListViewPage,
+		objectName: 'Perimeter',
+		formData: {
+			name: 'User-Routes Perimeter',
+			description: 'This is the user-routes perimeter.'
 		}
+	},
+	{
+		pageClass: AssetListViewPage,
+		objectName: 'Asset',
+		formData: {
+			name: 'User-Routes Asset',
+			description: 'This is a user-routes asset.',
+			folder: 'User-Routes Domain'
+		}
+	},
+	{
+		pageClass: AppliedControlListViewPage,
+		objectName: 'Applied Control',
+		formData: {
+			name: 'User-Routes Applied Control',
+			description: 'This is the user-routes applied control.',
+			folder: 'User-Routes Domain'
+		}
+	},
+	{
+		pageClass: ExceptionListViewPage,
+		objectName: 'Security Exception',
+		formData: {
+			name: 'User-Routes Exception',
+			description: 'This is the user-routes exception.',
+			folder: 'User-Routes Domain'
+		}
+	},
+	{
+		pageClass: ComplianceAssessmentListViewPage,
+		objectName: 'Audit',
+		formData: {
+			name: 'User-Routes Audit',
+			description: 'This is the user-routes audit.'
+		}
+	},
+	{
+		pageClass: EvidenceListViewPage,
+		objectName: 'Evidence',
+		formData: {
+			name: 'User-Routes Evidence',
+			description: 'This is the user-routes evidence.',
+			folder: 'User-Routes Domain'
+		}
+	},
+	{
+		pageClass: RiskAssessmentListViewPage,
+		objectName: 'Risk Assessment',
+		formData: {
+			name: 'User-Routes Risk Assessment',
+			description: 'This is the user-routes risk assessment.'
+		}
+	},
+	{
+		pageClass: ThreatListViewPage,
+		objectName: 'Threat',
+		formData: {
+			name: 'User-Routes Threat',
+			description: 'This is the user-routes threat.',
+			folder: 'User-Routes Domain'
+		}
+	},
+	{
+		pageClass: RiskScenarioListViewPage,
+		objectName: 'Risk scenario',
+		formData: {
+			name: 'User-Routes Risk scenario',
+			description: 'This is the user-routes risk scenario.',
+			folder: 'User-Routes Domain'
+		}
+	},
+	{
+		pageClass: RiskAcceptanceListViewPage,
+		objectName: 'Risk acceptance',
+		formData: {
+			name: 'User-Routes Risk acceptance',
+			description: 'This is the user-routes risk acceptance.',
+			riskScenarios: 'User-Routes Risk scenario'
+		}
+	},
+	{
+		pageClass: UserListViewPage,
+		objectName: 'User',
+		formData: {
+			email: 'user-routes@tests.com'
+		}
+	}
+];
+
+testV2('user usual routine actions are working correctly', async ({ page }) => {
+	testV2.slow();
+
+	const loginPage = new LoginPage(page);
+	await loginPage.gotoSelf();
+	await loginPage.waitUntilLoaded();
+
+	const analyticsPage = await loginPage.doLoginP(ADMIN_EMAIL, ADMIN_PASSWORD);
+	await analyticsPage.waitUntilLoaded();
+	await analyticsPage.checkSelf(expectV2);
+	await analyticsPage.doCloseModal(); // Closes the FirstLoginModal component.
+
+	const libraryListView = new LibraryListViewPage(page);
+	await libraryListView.gotoSelf();
+	const modelTable = libraryListView.getModelTable();
+
+	await testV2.step('User can load a framework', async () => {
+		await modelTable.checkIfSearchBarVisible(expectV2);
+		await modelTable.doSearch('anssi-architectures-si-sensibles-dr');
+		await modelTable.checkDisplayedRowCount(expectV2, 1);
+
+		let firstRow = modelTable.getFirstRow();
+		await firstRow.checkValue(expectV2, 1, 'anssi-architectures-si-sensibles-dr');
+		await firstRow.doLoadLibrary();
+		const toast = libraryListView.getToast();
+		await toast.checkIfVisible(expectV2);
+		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
+
+		await libraryListView.checkLoadedLibraryCount(expectV2, 1);
 	});
 
-	// Attempt to close any remaining modals
-	await page.locator('body').press('Escape');
+	await testV2.step('User can load a risk matrix', async () => {
+		await modelTable.doSearch('critical_5x5');
+		await modelTable.checkDisplayedRowCount(expectV2, 1);
 
-	await test.step('proper redirection to the analytics page after login', async () => {
-		await analyticsPage.hasUrl();
-		await analyticsPage.hasTitle();
-		setHttpResponsesListener(page);
+		const firstRow = modelTable.getFirstRow();
+		await firstRow.checkValue(expectV2, 1, 'critical_5x5');
+		await firstRow.doLoadLibrary();
+		const toast = libraryListView.getToast();
+		await toast.checkIfVisible(expectV2);
+		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
+
+		await libraryListView.checkLoadedLibraryCount(expectV2, 2);
 	});
 
-	await test.step('user can create a domain', async () => {
-		await sideBar.click('Organization', pages.foldersPage.url);
-		await pages.foldersPage.hasUrl();
-		await pages.foldersPage.hasTitle();
+	for (const testData of TEST_DATA) {
+		await testV2.step(`User can create a ${testData.objectName}`, async () => {
+			const listView = new testData.pageClass(page);
+			await listView.gotoSelf();
 
-		await pages.foldersPage.createItem({
-			name: vars.folderName,
-			description: vars.description
+			const createModal = await listView.getOpenCreateModal();
+			const createForm = createModal.getForm();
+			await createForm.doFillForm(testData.formData);
+			await createForm.doSubmit();
+
+			const toast = listView.getToast();
+			await toast.checkIfVisible(expectV2);
+			await toast.checkContainText(expectV2, 'object has been successfully created');
+
+			const modelTable = listView.getModelTable();
+			await modelTable.doSearch(testData.formData.name ?? testData.formData.email);
+			await modelTable.checkDisplayedRowCount(expectV2, 1);
+
+			const firstRow = modelTable.getFirstRow();
+			await firstRow.checkIfVisible(expectV2);
+
+			await listView.waitUntilLoaded();
 		});
+	}
 
-		//TODO assert that the domain data are displayed in the table
-	});
+	for (const testData of TEST_DATA.slice().reverse()) {
+		await testV2.step(`User can delete a ${testData.objectName}`, async () => {
+			const listView = new testData.pageClass(page);
+			await listView.gotoSelf();
 
-	await test.step('user can create a perimeter', async () => {
-		await sideBar.click('Organization', pages.perimetersPage.url);
-		await pages.perimetersPage.hasUrl();
-		await pages.perimetersPage.hasTitle();
+			const modelTable = listView.getModelTable();
+			await modelTable.doSearch(testData.formData.name ?? testData.formData.email);
+			await modelTable.checkDisplayedRowCount(expectV2, 1);
 
-		await pages.perimetersPage.createItem({
-			name: vars.perimeterName,
-			description: vars.description,
-			folder: vars.folderName,
-			ref_id: 'R.1234',
-			lc_status: 'Production'
+			const firstRow = modelTable.getFirstRow();
+			await firstRow.checkIfVisible(expectV2);
+			await firstRow.doDeleteObject();
+
+			const toast = listView.getToast();
+			await toast.checkContainText(expectV2, 'object has been successfully deleted');
+			await modelTable.checkDisplayedRowCount(expectV2, 0);
 		});
-
-		//TODO assert that the perimeter data are displayed in the table
-	});
-
-	await test.step('user can create an asset', async () => {
-		await sideBar.click('Assetsmanagement', pages.assetsPage.url);
-		await pages.assetsPage.hasUrl();
-		await pages.assetsPage.hasTitle();
-
-		await pages.assetsPage.createItem({
-			name: vars.assetName,
-			description: vars.description,
-			folder: vars.folderName,
-			type: 'Primary'
-		});
-
-		//TODO assert that the asset data are displayed in the table
-	});
-
-	await test.step('user can import a framework', async () => {
-		await sideBar.click('Catalog', pages.frameworksPage.url);
-		await pages.frameworksPage.hasUrl();
-		await pages.frameworksPage.hasTitle();
-
-		await pages.frameworksPage.addButton.click();
-		await pages.librariesPage.hasTitle();
-		await pages.librariesPage.hasTitle();
-
-		await pages.librariesPage.importLibrary(vars.framework.ref, vars.framework.urn);
-
-		await sideBar.click('Catalog', pages.frameworksPage.url);
-		await pages.frameworksPage.hasUrl();
-		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
-	});
-
-	await test.step('user can create a reference control', async () => {
-		await sideBar.click('Catalog', pages.referenceControlsPage.url);
-		await pages.referenceControlsPage.hasUrl();
-		await pages.referenceControlsPage.hasTitle();
-
-		await pages.referenceControlsPage.createItem({
-			name: vars.referenceControlName,
-			description: vars.description,
-			category: 'Physical',
-			csf_function: 'protect',
-			provider: 'Test provider',
-			folder: vars.folderName
-		});
-
-		//TODO assert that the reference control data are displayed in the table
-	});
-
-	await test.step('user can create an applied control', async () => {
-		await sideBar.click('Operations', pages.appliedControlsPage.url);
-		await pages.appliedControlsPage.hasUrl();
-		await pages.appliedControlsPage.hasTitle();
-
-		await pages.appliedControlsPage.createItem({
-			name: vars.appliedControlName,
-			description: vars.description,
-			category: 'Technical',
-			csf_function: 'protect',
-			status: 'To do',
-			eta: '2025-01-01',
-			link: 'https://intuitem.com/',
-			effort: 'Large',
-			cost: 24.42,
-			folder: vars.folderName,
-			reference_control: `${vars.folderName}/${vars.referenceControlName}`
-		});
-
-		//TODO assert that the applied control data are displayed in the table
-	});
-
-	await test.step('user can create a security exception', async () => {
-		await sideBar.click('Governance', pages.securityExceptionsPage.url);
-		await pages.securityExceptionsPage.hasUrl();
-		await pages.securityExceptionsPage.hasTitle();
-
-		await pages.securityExceptionsPage.createItem({
-			name: vars.securityExceptionName,
-			description: vars.description,
-			ref_id: '123456',
-			status: 'Draft',
-			expiration_date: '2100-01-01',
-			folder: vars.folderName,
-			owners: [LoginPage.defaultEmail],
-			approver: LoginPage.defaultEmail
-		});
-	});
-
-	await test.step('user can create a compliance assessment', async () => {
-		await sideBar.click('Compliance', pages.complianceAssessmentsPage.url);
-		await pages.complianceAssessmentsPage.hasUrl();
-		await pages.complianceAssessmentsPage.hasTitle();
-
-		await pages.complianceAssessmentsPage.createItem({
-			name: vars.assessmentName,
-			description: vars.description,
-			perimeter: vars.folderName + '/' + vars.perimeterName,
-			version: '1.4.2',
-			status: 'Done',
-			framework: vars.framework.name,
-			eta: '2025-01-01',
-			due_date: '2025-05-01'
-		});
-
-		//TODO assert that the compliance assessment data are displayed in the table
-	});
-
-	await test.step('user can create an evidence', async () => {
-		await sideBar.click('Compliance', pages.evidencesPage.url);
-		await pages.evidencesPage.hasUrl();
-		await pages.evidencesPage.hasTitle();
-
-		await pages.evidencesPage.createItem({
-			name: vars.evidenceName,
-			description: vars.description,
-			attachment: vars.file,
-			folder: vars.folderName,
-			link: 'https://intuitem.com/'
-		});
-
-		//TODO assert that the evidence data are displayed in the table
-	});
-
-	await test.step('user can import a risk matrix', async () => {
-		await sideBar.click('Catalog', pages.riskMatricesPage.url);
-		await pages.riskMatricesPage.hasUrl();
-		await pages.riskMatricesPage.hasTitle();
-
-		await pages.riskMatricesPage.addButton.click();
-		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrix');
-		await pages.librariesPage.hasTitle();
-
-		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
-
-		await sideBar.click('Catalog', pages.riskMatricesPage.url);
-		await pages.riskMatricesPage.hasUrl();
-		await expect(page.getByRole('row', { name: vars.matrix.displayName })).toBeVisible();
-	});
-
-	await test.step('user can create a risk assessment', async () => {
-		await sideBar.click('Risk', pages.riskAssessmentsPage.url);
-		await pages.riskAssessmentsPage.hasUrl();
-		await pages.riskAssessmentsPage.hasTitle();
-
-		await pages.riskAssessmentsPage.createItem({
-			name: vars.riskAssessmentName,
-			description: vars.description,
-			perimeter: vars.folderName + '/' + vars.perimeterName,
-			version: vars.riskAssessmentVersion,
-			status: 'Done',
-			risk_matrix: vars.matrix.displayName
-		});
-
-		//TODO assert that the risk assessment data are displayed in the table
-	});
-
-	await test.step('user can create a threat', async () => {
-		await sideBar.click('Catalog', pages.threatsPage.url);
-		await pages.threatsPage.hasUrl();
-		await pages.threatsPage.hasTitle();
-
-		await pages.threatsPage.createItem({
-			name: vars.threatName,
-			description: vars.description,
-			folder: vars.folderName,
-			provider: 'Test provider'
-		});
-
-		//TODO assert that the threat data are displayed in the table
-	});
-
-	await test.step('user can create a risk scenario', async () => {
-		await sideBar.click('Risk', pages.riskScenariosPage.url);
-		await pages.riskScenariosPage.hasUrl();
-		await pages.riskScenariosPage.hasTitle();
-
-		await pages.riskScenariosPage.createItem({
-			name: vars.riskScenarioName,
-			description: vars.description,
-			risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
-			threats: [`${vars.folderName}/${vars.threatName}`]
-		});
-
-		//TODO assert that the risk scenario data are displayed in the table
-	});
-
-	await test.step('user can create a risk acceptance', async () => {
-		await sideBar.click('Governance', pages.riskAcceptancesPage.url);
-		await pages.riskAcceptancesPage.hasUrl();
-		await pages.riskAcceptancesPage.hasTitle();
-
-		await pages.riskAcceptancesPage.createItem({
-			name: vars.riskAcceptanceName,
-			description: vars.description,
-			expiry_date: '2025-01-01',
-			folder: vars.folderName,
-			approver: LoginPage.defaultEmail,
-			risk_scenarios: [
-				`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
-			]
-		});
-
-		//TODO assert that the risk acceptance data are displayed in the table
-	});
-
-	await test.step('user can add another user', async () => {
-		await sideBar.click('Organization', pages.usersPage.url);
-		await pages.usersPage.hasUrl();
-		await pages.usersPage.hasTitle();
-
-		await pages.usersPage.createItem({
-			email: vars.user.email
-		});
-
-		//TODO assert that the user data are displayed in the table
-	});
-});
-
-test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
-	await foldersPage.goto();
-	await foldersPage.deleteItemButton(vars.folderName).click();
-	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
-	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
-	await foldersPage.deletePromptConfirmButton().click();
-	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
-
-	await usersPage.goto();
-	await usersPage.deleteItemButton(vars.user.email).click();
-	await usersPage.deleteModalConfirmButton.click();
-	await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
+	}
 });

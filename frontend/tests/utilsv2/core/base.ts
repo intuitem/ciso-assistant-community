@@ -4,6 +4,7 @@ import { fixtures, type Fixtures } from './fixtures';
 import { expect as baseExpect } from '@playwright/test';
 
 export const expect = baseExpect.extend({});
+
 export const test = base.extend<Fixtures>(fixtures);
 
 /**
@@ -13,3 +14,5 @@ export const test = base.extend<Fixtures>(fixtures);
 export function notImplemented(): never {
 	throw new Error('This method can only be called from a derived class !');
 }
+
+// The Fixture interace and the "test" variable will have to be written here.

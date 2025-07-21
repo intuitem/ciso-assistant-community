@@ -84,6 +84,10 @@ export class Element {
 	protected _getContext<K extends keyof Element.Context>(
 		key: keyof Element.Context
 	): Element.Context[K] {
+		// Example of context chain:
+		// Page.CONTEXT Elem.CONTEXT  Elem2.CONTEXT  Elem3.CONTEXT
+		//      X       elem._context elem2._context elem3._context
+
 		let contextValue = this._context[key];
 		if (contextValue !== undefined) {
 			return contextValue;
@@ -129,6 +133,14 @@ export class Element {
 		return this._self;
 	}
 
+	/**
+	 * Returns a `pageClass` Page using the `endpoint` endpoint
+	 * The variadic arguments `...pageArgs` will be added to the `pageClass` constructor internal call.
+	 * */
+	protected _goto<T extends Page.Class<any>>(pageClass: T, endpoint: string): InstanceType<T> {
+		return new pageClass(this._getPage().getSelf(), endpoint);
+	}
+
 	async checkIfVisible(expect: Expect): Promise<void> {
 		await expect(this._self).toBeVisible();
 	}
@@ -165,7 +177,11 @@ export class Element {
 			);
 		}
 		let locator = this._self.getByTestId(dataTestId);
-		if (['has', 'hasNot', 'hasNotText', 'hasText'].some((key) => filters[key])) {
+		if (
+			['has', 'hasNot', 'hasNotText', 'hasText', 'visible'].some((key) =>
+				filters.hasOwnProperty(key)
+			)
+		) {
 			locator = locator.filter(filters); // I guess invalid filters will be ignored.
 		}
 
@@ -181,8 +197,11 @@ export class Element {
 		return new elementClass(locator, superElement, context);
 	}
 
+	// Should i nest doShow(), doShowContextChain() into some kind of Debugger object that i would get with someElem.getDebugger().doShowSelf() ?
+
 	/** Print the super-element chain of the element with all its non-empty context sources. */
 	doShowContextChain() {
+		console.log(`--- ${this.constructor.name} ---`);
 		console.log(
 			`[Super-Element Chain] len=${this._chain.length} ${this._chain.map((obj, index) => {
 				`[${index}] ${obj.constructor.name}`;
@@ -231,15 +250,14 @@ export class Element {
 	}
 }
 export namespace Element {
+	/** This type represents the list of arguments passed to the Element's constructor. */
+	export type Args = ConstructorParameters<typeof Element>; // [Locator, SuperElement, Context?]
+
 	/**
 	 * @template T - The base class of the Element class this type represents.
 	 * This type represents an Element class which is usefull for methods that accept an Element class as a parameter.
 	 */
-	export type Class<T> = (new (
-		locator: Locator,
-		superElement: Element.SuperElement,
-		context?: Element.Context
-	) => T) & { DATA_TESTID: string };
+	export type Class<T> = (new (...args: Element.Args) => T) & { DATA_TESTID: string };
 
 	/**
 	 * This represents the context of an element (see in the spec)
@@ -263,8 +281,6 @@ export namespace Element {
 		hasNot?: Locator;
 		hasNotText?: string | RegExp;
 		hasText?: string | RegExp;
+		visible?: boolean;
 	}
-
-	/** This type represents the list of arguments passed to the Element's constructor. */
-	export type Args = [Locator, SuperElement, Context?];
 }
