@@ -239,6 +239,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model 
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
+	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
 	await risksPage.goto();
@@ -258,6 +259,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
+	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	// Create folder
 	await page.getByRole('button', { name: 'Organization' }).click();
@@ -307,6 +309,7 @@ test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
+	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	const risksPage = new PageContent(page, '/analytics?tab=risk', 'Analytics');
 	await risksPage.goto();
@@ -325,6 +328,7 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
+	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
 	await risksPage.goto();
@@ -361,6 +365,7 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ pag
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
+	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	let risksPage = new PageContent(page, '/ebios-rm', 'Ebios RM');
 	await risksPage.goto();
