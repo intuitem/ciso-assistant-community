@@ -28,6 +28,8 @@
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime.js';
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -417,6 +419,10 @@
 					</ul>
 				</div>
 			{/each}
+			<div>
+				<div class="font-medium">{m.createdAt()}</div>
+				{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
+			</div>
 		</div>
 		{#key compliance_assessment_donut_values}
 			<div class="flex w-1/3 relative">
