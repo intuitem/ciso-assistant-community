@@ -124,6 +124,10 @@ python convert_v1_to_v2.py your_v1_library_file.xlsx
 
 This will produce a file named `your_v1_library_file_new.yaml`.
 
+## About framework Updates
+
+If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
+
 
 ## Format of Excel files
 
