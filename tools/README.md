@@ -186,16 +186,16 @@ A `_meta` of type `framework` contains the following keys:
 The `_content` tab for a `framework` object contains the following columns:
 - assessable (*)
 - depth (*)
-- implementation_groups
+- implementation_groups: comma-separated list of reference to `implementation_groups`
 - ref_id (*)
 - name
 - description
-- threats: blank/comma/LF separated list of references to threats
-- reference_controls: blank/comma/LF separated list of references to reference controls
+- threats: blank/comma/LF separated list of references to `threats`
+- reference_controls: blank/comma/LF separated list of references to `reference` controls
 - typical_evidence
 - annotation
-- questions: 1 or several (n) questions
-- answer: 1 (same for all questions) or n (one answer per question) answers
+- questions: 1 or several (n) questions, separated by line breaks
+- answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
 - urn_id: this is reserved for specific compatibility issues to force the urn calculation
 
 ### Risk matrices
