@@ -285,7 +285,8 @@ export const test = base.extend<Fixtures>({
 	assetAssessmentsPage: async ({ page }, use) => {
 		const aPage = new PageContent(page, '/asset-assessments', 'BIA Assessments', [
 			{ name: 'asset', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'name', type: type.TEXT }
+			{ name: 'name', type: type.TEXT },
+			{ name: 'bia', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(aPage);
 	},
@@ -670,9 +671,10 @@ export class TestContent {
 			assetAssessmentsPage: {
 				displayName: 'BIA Assessments',
 				modelName: 'assetassessment',
+				labelField: 'asset',
 				build: {
-					asset: vars.assetName,
-					name: vars.assetAssessmentName
+					asset: vars.folderName + '/' + vars.assetName,
+					bia: vars.biaName
 				}
 			}
 		};

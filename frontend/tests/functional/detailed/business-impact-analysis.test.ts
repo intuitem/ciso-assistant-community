@@ -76,7 +76,7 @@ test('user can create asset assessments inside BIA', async ({
 		await businessImpactAnalysisPage.viewItemDetail(
 			testObjectsData.businessImpactAnalysisPage.build.name
 		);
-		await businessImpactAnalysisPage.createItem(testObjectsData.assetAssessmentsPage.build);
+		await assetAssessmentsPage.createItem({ asset: vars.assetName }, undefined, page);
 	});
 });
 
