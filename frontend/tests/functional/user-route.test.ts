@@ -29,9 +29,7 @@ interface LocalTestData {
 	formData: { [key: string]: any };
 }
 const TEST_DATA: LocalTestData[] = [
-	// Make this a const at the end
 	{
-		// Create and use the ListView base class instead for this interface
 		pageClass: FolderListViewPage,
 		objectName: 'Domain',
 		formData: {

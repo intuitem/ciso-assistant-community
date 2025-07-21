@@ -3,11 +3,6 @@ import type { Page as _Page, Locator } from '@playwright/test';
 import type { Expect } from '@playwright/test';
 import { safeTranslate } from '$lib/utils/i18n';
 
-// Make this type globally available in the utilsv2 codebase ?
-// Should i put it in utils.ts or create a types.ts file for this ?
-// type JSONObject = {[key: string]: JSONObject} | JSONObject[] | string | number | boolean | null;
-// type JSONDict = {[key: string]: JSONObject};
-
 export class DetailViewPage extends Page {
 	protected _descriptionList: Locator;
 
@@ -35,10 +30,6 @@ export class DetailViewPage extends Page {
 			).toBeTruthy();
 			expect(currentValues[translatedKey]).toBe(value);
 		}
-
-		// await expect(this._self).toBeVisible();
 	}
 }
-/* export namespace DetailViewPage {
-  export type Derived = new(page: _Page) => DetailViewPage;
-} */
+

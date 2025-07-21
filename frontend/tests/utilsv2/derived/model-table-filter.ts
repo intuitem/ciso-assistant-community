@@ -1,7 +1,4 @@
 import { Element } from '../core/element';
-// import { DetailViewPage } from "../base/detail-view-page";
-// import type { Expect } from "../../utilsv2/core/base";
-// import type { Locator } from "@playwright/test";
 
 /** Represents the filter button (and filter box) of the `<ModelTable/>`. */
 export class ModelTableFilter extends Element {
