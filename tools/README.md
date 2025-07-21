@@ -91,7 +91,7 @@ When the `--compat` flag is omitted or when the compatibility mode is different 
 ### > `convert_library_v1.py`
 
 > [!WARNING]
-> The `v1` format is deprecated an no longer maintained. We strongly recommend updating your Excel file in `v2` format with [`convert_v1_to_v2.py`](#-convert_v1_to_v2py).
+> The `v1` format is deprecated. We strongly recommend updating your Excel file in `v2` format with [`convert_v1_to_v2.py`](#-convert_v1_to_v2py).
 
 Usage:
 ```bash

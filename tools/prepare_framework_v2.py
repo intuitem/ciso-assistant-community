@@ -221,7 +221,7 @@ def validate_yaml_data(data):
         
         
     if not is_valid_locale(data.get("locale")):
-        raise ValueError(f"(validate_yaml_data) Invalid locale code \"{data.get("locale")}\" in \"locale\" entry")
+        raise ValueError(f"(validate_yaml_data) Invalid locale code \"{data.get('locale')}\" in \"locale\" entry")
 
     validate_urn_root(data["urn_root"])
 
