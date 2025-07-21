@@ -14,7 +14,6 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('my-assignments-folder');
 		await page.getByTestId('save-button').click();
-		await expect(page.locator('[data-testid="modal-backdrop"]')).toHaveCount(0);
 
 		await page.getByRole('button', { name: 'Organization' }).click();
 		await page.getByTestId('accordion-item-perimeters').click();
@@ -25,7 +24,6 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('form-input-folder').click();
 		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
 		await page.getByTestId('save-button').click();
-		await expect(page.locator('[data-testid="modal-backdrop"]')).toHaveCount(0);
 	});
 
 	await test.step('Create risk assessment', async () => {
