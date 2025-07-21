@@ -233,7 +233,9 @@ test('Feature Flags - Experimental visibility toggling', async ({ page }) => {
 });
 
 // ---------- Inherent Risk ----------
-test('Feature Flags - Inherent Risk visibility toggling', async ({ page }) => {
+test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model table view page', async ({
+	page
+}) => {
 	const loginPage = new LoginPage(page);
 	await loginPage.goto();
 	await loginPage.login();
@@ -243,9 +245,164 @@ test('Feature Flags - Inherent Risk visibility toggling', async ({ page }) => {
 	await expect(page.getByText('Inherent Level', { exact: false })).toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
-
 	await risksPage.goto();
 	await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', true);
+});
+
+test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment details', async ({
+	page
+}) => {
+	const loginPage = new LoginPage(page);
+	await loginPage.goto();
+	await loginPage.login();
+
+	// Create folder
+	await page.getByRole('button', { name: 'Organization' }).click();
+	await page.getByTestId('accordion-item-folders').click();
+	await page.getByTestId('add-button').click();
+	await page.getByTestId('form-input-name').fill('feature-flag-folder');
+	await page.getByTestId('save-button').click();
+
+	// Create perimeter
+	await page.getByRole('button', { name: 'Organization' }).click();
+	await page.getByTestId('accordion-item-perimeters').click();
+	await page.waitForTimeout(200);
+	await page.getByTestId('add-button').click();
+	await page.getByTestId('form-input-name').fill('feature-flag-perimeter');
+	await page.getByTestId('form-input-folder').click();
+	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
+	await page.getByTestId('save-button').click();
+
+	// Create risk assessment
+	await page.getByTestId('accordion-item-risk').click();
+	await page.getByTestId('accordion-item-risk-assessments').click();
+	await page.waitForTimeout(200);
+	await page.getByTestId('add-button').click();
+	await page.getByTestId('form-input-name').fill('test-risk-assessment');
+	await page.getByTestId('form-input-perimeter').click();
+	await page.getByRole('option', { name: 'feature-flag-folder/feature-flag-perimeter' }).click();
+	await page.getByTestId('save-button').click();
+	await page.waitForTimeout(200);
+
+	// Check Inherent Level visibility
+	await page.getByText('test-risk-assessment').click();
+	await expect(page.getByText('Inherent Level', { exact: false })).toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', false);
+	await page.getByTestId('accordion-item-risk').click();
+	await page.getByTestId('accordion-item-risk-assessments').click();
+	await page.waitForTimeout(200);
+	await page.getByText('test-risk-assessment').click();
+	await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', true);
+});
+
+test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({ page }) => {
+	const loginPage = new LoginPage(page);
+	await loginPage.goto();
+	await loginPage.login();
+
+	const risksPage = new PageContent(page, '/analytics?tab=risk', 'Analytics');
+	await risksPage.goto();
+	await expect(page.getByText('Inherent risk level', { exact: false })).toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', false);
+	await risksPage.goto();
+	await expect(page.getByText('Inherent risk level', { exact: false })).not.toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', true);
+});
+
+test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page and in edit page', async ({
+	page
+}) => {
+	const loginPage = new LoginPage(page);
+	await loginPage.goto();
+	await loginPage.login();
+
+	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
+	await risksPage.goto();
+
+	await page.getByTestId('add-button').click();
+	await page.getByTestId('form-input-name').fill('test-risk-scenario');
+	await page.getByTestId('form-input-risk-assessment').click();
+	await page
+		.getByRole('option', {
+			name: 'feature-flag-folder/feature-flag-perimeter/test-risk-assessment - 1.0'
+		})
+		.click();
+	await page.getByTestId('save-button').click();
+	await page.waitForTimeout(200);
+	await page.getByText('test-risk-scenario').click();
+
+	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
+	await page.getByTestId('edit-button').click();
+	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', false);
+
+	await risksPage.goto();
+	await page.getByText('test-risk-scenario').click();
+
+	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
+	await page.getByTestId('edit-button').click();
+	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', true);
+});
+
+test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ page }) => {
+	const loginPage = new LoginPage(page);
+	await loginPage.goto();
+	await loginPage.login();
+
+	let risksPage = new PageContent(page, '/ebios-rm', 'Ebios RM');
+	await risksPage.goto();
+
+	await page.getByTestId('add-button').click();
+	await page.getByTestId('form-input-name').fill('test-ebios-rm');
+	await page.getByTestId('form-input-folder').click();
+	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
+	await page.getByTestId('save-button').click();
+	await page.waitForTimeout(200);
+	await page.getByText('test-ebios-rm').click();
+
+	await page.getByText('Generate the risk assessment').click();
+	await page.getByTestId('form-input-name').fill('test-risk-assessment-ebios-rm');
+	await page.getByTestId('form-input-perimeter').click();
+	await page.getByRole('option', { name: 'feature-flag-folder/feature-flag-perimeter' }).click();
+	await page.getByTestId('save-button').click();
+	await page.waitForTimeout(200);
+
+	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', false);
+
+	risksPage = new PageContent(page, '/risk-assessments', 'Risk Assessments');
+	await risksPage.goto();
+	await page.getByText('test-risk-assessment-ebios-rm').click();
+
+	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
+
+	await toggleFeatureFlag(page, 'inherent-risk', true);
+});
+
+await test('Cleanup - delete the folder', async ({ page }) => {
+	const loginPage = new LoginPage(page);
+	await loginPage.goto();
+	await loginPage.login();
+
+	await page.getByRole('button', { name: 'Organization' }).click();
+	await page.getByTestId('accordion-item-folders').click();
+	await page.waitForTimeout(200);
+
+	const folderRow = page.getByRole('row', { name: /feature-flag-folder/i });
+	await folderRow.getByTestId('tablerow-delete-button').click();
+	await expect(page.getByTestId('delete-prompt-confirm-textfield')).toBeVisible();
+	await page.getByTestId('delete-prompt-confirm-textfield').fill('yes');
+	await page.getByRole('button', { name: 'Submit' }).click();
+	await expect(page.getByRole('row', { name: /feature-flag-folder/i })).toHaveCount(0);
 });
