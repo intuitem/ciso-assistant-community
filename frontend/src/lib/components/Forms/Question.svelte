@@ -36,13 +36,11 @@
 
 	// Initialize buffers for text questions
 	$effect(() => {
-		const newBuffers: Record<string, string> = {};
 		Object.entries(questions).forEach(([urn, question]) => {
-			if (question.type === 'text') {
-				newBuffers[urn] = internalAnswers[urn] || '';
+			if (question.type === 'text' && !(urn in questionBuffers)) {
+				questionBuffers[urn] = internalAnswers[urn] || '';
 			}
 		});
-		questionBuffers = newBuffers;
 	});
 
 	$effect(() => {
