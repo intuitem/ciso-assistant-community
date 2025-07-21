@@ -1577,6 +1577,11 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         choices=PRJ_LC_STATUS,
         verbose_name=_("Status"),
     )
+    default_assignee = models.ManyToManyField(
+        User,
+        verbose_name="Default assignee",
+        blank=True,
+    )
     fields_to_check = ["name"]
 
     class Meta:

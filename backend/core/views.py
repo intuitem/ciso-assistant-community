@@ -1473,6 +1473,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "findings": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
+            "processings": ["exact"],
         }
 
 
