@@ -31,6 +31,7 @@ type Fixtures = {
 	threatsPage: PageContent;
 	usersPage: PageContent;
 	securityExceptionsPage: PageContent;
+	findingsAssessmentsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -68,6 +69,7 @@ export const test = base.extend<Fixtures>({
 			referenceControlsPage,
 			appliedControlsPage,
 			securityExceptionsPage,
+			findingsAssessmentsPage,
 			threatsPage,
 			usersPage
 		},
@@ -88,6 +90,7 @@ export const test = base.extend<Fixtures>({
 			referenceControlsPage,
 			appliedControlsPage,
 			securityExceptionsPage,
+			findingsAssessmentsPage,
 			threatsPage,
 			usersPage
 		});
@@ -260,6 +263,17 @@ export const test = base.extend<Fixtures>({
 			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(sPage);
+	},
+
+	findingsAssessmentsPage: async ({ page }, use) => {
+		const fPage = new PageContent(page, '/findings-assessments', 'Follow-ups', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'status', type: type.SELECT }
+		]);
+		await use(fPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -594,6 +608,23 @@ export class TestContent {
 					description: '',
 					expiry_date: '2025-12-31'
 					//TODO add approver & risk_scenarios
+				}
+			},
+
+			findingsAssessmentsPage: {
+				displayName: 'Follow-ups',
+				build: {
+					name: vars.findingsAssessmentName,
+					description: vars.description,
+					ref_id: 'FA.1234',
+					perimeter: vars.folderName + '/' + vars.perimeterName,
+					status: 'Planned'
+				},
+				editParams: {
+					name: '',
+					description: '',
+					ref_id: '',
+					status: 'In review'
 				}
 			},
 			securityExceptionsPage: {

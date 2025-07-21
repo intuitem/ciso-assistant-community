@@ -12,6 +12,7 @@ export default {
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
 	securityExceptionName: 'Test exception',
+	findingsAssessmentName: 'Test findings assessment',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
