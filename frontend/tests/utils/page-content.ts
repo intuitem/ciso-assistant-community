@@ -40,7 +40,7 @@ export class PageContent extends BasePage {
 		this.deleteModalPromptConfirmText = this.page.getByTestId('delete-prompt-confirm-text');
 	}
 
-	async createItem(values: { [k: string]: any }, dependency?: any) {
+	async createItem(values: { [k: string]: any }, dependency?: any, page?: Page) {
 		if (dependency) {
 			await this.page.goto('/libraries');
 			await this.page.waitForURL('/libraries');
@@ -51,6 +51,9 @@ export class PageContent extends BasePage {
 
 		await this.addButton.click();
 		await this.form.hasTitle();
+		if (page) {
+			await page.waitForLoadState('networkidle');
+		}
 		await this.form.fill(values);
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();

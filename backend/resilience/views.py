@@ -50,7 +50,8 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet):
 
 class AssetAssessmentViewSet(BaseModelViewSet):
     model = AssetAssessment
-    filterset_fields = ["bia"]
+    filterset_fields = ["bia", "asset"]
+    search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
