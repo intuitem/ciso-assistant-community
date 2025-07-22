@@ -17,7 +17,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 
 		await page.getByRole('button', { name: 'Organization' }).click();
 		await page.getByTestId('accordion-item-perimeters').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('my-assignments-perimeter');
@@ -30,7 +30,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create risk assessment', async () => {
 		await page.getByTestId('accordion-item-risk').click();
 		await page.getByTestId('accordion-item-risk-assessments').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-risk-assessment');
@@ -46,7 +46,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create control with owner', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control');
@@ -61,7 +61,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create audit', async () => {
 		await page.getByTestId('accordion-item-compliance').click();
 		await page.getByTestId('accordion-item-compliance-assessments').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-audit');
@@ -79,7 +79,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Verify my assignments contains created entities', async () => {
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await expect(page.getByText('test-control')).toBeVisible();
 		await expect(page.getByText('test-risk-assessment')).toBeVisible();
@@ -89,7 +89,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create control without owner and verify absence in my assignments', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('control-without-owner');
@@ -100,7 +100,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await expect(page.getByText('control-without-owner')).toHaveCount(0);
 	});
@@ -108,7 +108,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Cleanup - delete the folder', async () => {
 		await page.getByRole('button', { name: 'Organization' }).click();
 		await page.getByTestId('accordion-item-folders').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		const folderRow = page.getByRole('row', { name: /my-assignments-folder/i });
 		await folderRow.getByTestId('tablerow-delete-button').click();
