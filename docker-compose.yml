@@ -1,14 +1,14 @@
 services:
   backend:
     container_name: backend
-    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
-    pull_policy: always
+    image: backend
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
       - AUTH_TOKEN_TTL=7200
+      - NOTIFICATION_WEBHOOK_URL=https://mon.webhook.url/ici
 
     volumes:
       - ./db:/code/db
