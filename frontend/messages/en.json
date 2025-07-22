@@ -384,7 +384,7 @@
 	"addBusinessImpactAnalysis": "Start a BIA",
 	"businessImpactAnalysis": "Business Impact Analysis",
 	"escalationThreshold": "Escalation Threshold",
-	"assetAssessment": "Focus",
+	"assetAssessment": "BIA assessment",
 	"assetFolder": "Asset domain",
 	"impactOn": "Impact On",
 	"getHumanPit": "Point in time",
