@@ -6,7 +6,6 @@
 	}
 
 	let { data }: Props = $props();
-	console.log('data', data);
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
