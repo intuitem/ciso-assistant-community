@@ -193,12 +193,18 @@
 						classes: 'text-blue-500'
 					}}
 					field="assets"
+					optionsDetailedUrlParameters={[
+						['scope_folder_id', page.data.scenario.perimeter.folder.id]
+					]}
 					label={m.assets()}
 				/>
 				<AutocompleteSelect
 					form={_form}
 					multiple
 					optionsEndpoint="threats"
+					optionsDetailedUrlParameters={[
+						['scope_folder_id', page.data.scenario.perimeter.folder.id]
+					]}
 					optionsExtraFields={[['folder', 'str']]}
 					optionsLabelField="auto"
 					field="threats"
@@ -208,6 +214,9 @@
 					multiple
 					form={_form}
 					optionsEndpoint="vulnerabilities"
+					optionsDetailedUrlParameters={[
+						['scope_folder_id', page.data.scenario.perimeter.folder.id]
+					]}
 					optionsExtraFields={[['folder', 'str']]}
 					field="vulnerabilities"
 					label={m.vulnerabilities()}
@@ -279,6 +288,9 @@
 									form={_form}
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
+									optionsDetailedUrlParameters={[
+										['scope_folder_id', page.data.scenario.perimeter.folder.id]
+									]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
@@ -346,6 +358,9 @@
 									form={_form}
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
+									optionsDetailedUrlParameters={[
+										['scope_folder_id', page.data.scenario.perimeter.folder.id]
+									]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}
