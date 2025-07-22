@@ -106,6 +106,28 @@ test('user can create asset assessments inside BIA', async ({
 	await test.step('create escalation threshold', async () => {
 		await escalationThresholdsPage.createItem(escalationThresholdsData.build);
 	});
+
+	await test.step('check that escalation threshold is created', async () => {
+		await expect(
+			assetAssessmentsPage.getRow(escalationThresholdsData.build.quali_impact)
+		).toBeVisible();
+	});
+
+	await test.step('check that line heatmap has been updated', async () => {
+		await expect(page.getByTestId('line-heatmap')).toContainText(
+			escalationThresholdsData.build.quali_impact
+		);
+	});
+
+	await test.step('delete escalation threshold', async () => {
+		await assetAssessmentsPage
+			.deleteItemButton(escalationThresholdsData.build.quali_impact)
+			.click();
+		await assetAssessmentsPage.deleteModalConfirmButton.click();
+		await expect(
+			assetAssessmentsPage.getRow(escalationThresholdsData.build.quali_impact)
+		).not.toBeVisible();
+	});
 });
 
 test.afterAll('cleanup', async ({ browser }) => {
