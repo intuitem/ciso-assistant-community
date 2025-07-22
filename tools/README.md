@@ -1,6 +1,6 @@
 # Library workbench
 
-The file `example_framework.xlsx` file will help you understand the structure of a framework. 
+The `example_framework.xlsx` file will help you understand the structure of a framework. 
 
 The `prepare_framework_v2.py` script can be used to create an Excel file with the base structure of a CISO Assistant framework in v2 format.
 
