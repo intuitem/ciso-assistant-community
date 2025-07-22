@@ -44,6 +44,7 @@
 			props: {
 				form: data.scenarioCreateForm,
 				model: data.scenarioModel,
+				scopeFolder: data.risk_assessment.folder,
 				debug: false
 			}
 		};
