@@ -14,6 +14,7 @@ const toggleFeatureFlag = async (page, flagTestId, enable) => {
 		await page.getByRole('button', { name: 'Save' }).click();
 		await page.waitForTimeout(500);
 		await page.reload();
+		await expect(page.getByText(/^ Feature flags$/)).toBeVisible();
 	}
 };
 
