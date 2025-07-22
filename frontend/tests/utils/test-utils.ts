@@ -7,6 +7,7 @@ import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
+import { description } from '$paraglide/messages/ro.js';
 
 type Fixtures = {
 	data: { [key: string]: any };
@@ -31,6 +32,8 @@ type Fixtures = {
 	threatsPage: PageContent;
 	usersPage: PageContent;
 	securityExceptionsPage: PageContent;
+	businessImpactAnalysisPage: PageContent;
+	assetAssessmentsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -68,6 +71,8 @@ export const test = base.extend<Fixtures>({
 			referenceControlsPage,
 			appliedControlsPage,
 			securityExceptionsPage,
+			businessImpactAnalysisPage,
+			assetAssessmentsPage,
 			threatsPage,
 			usersPage
 		},
@@ -88,6 +93,8 @@ export const test = base.extend<Fixtures>({
 			referenceControlsPage,
 			appliedControlsPage,
 			securityExceptionsPage,
+			businessImpactAnalysisPage,
+			assetAssessmentsPage,
 			threatsPage,
 			usersPage
 		});
@@ -262,6 +269,29 @@ export const test = base.extend<Fixtures>({
 		await use(sPage);
 	},
 
+	businessImpactAnalysisPage: async ({ page }, use) => {
+		const bPage = new PageContent(page, '/business-impact-analysis', /Business Impact Analysis?/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'due_date', type: type.DATE }
+		]);
+		await use(bPage);
+	},
+
+	assetAssessmentsPage: async ({ page }, use) => {
+		const aPage = new PageContent(page, '/asset-assessments', 'BIA Assessments', [
+			{ name: 'asset', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'bia', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(aPage);
+	},
+
 	usersPage: async ({ page }, use) => {
 		const uPage = new PageContent(page, '/users', 'Users', [
 			{ name: 'email', type: type.TEXT },
@@ -358,6 +388,7 @@ export class TestContent {
 		return {
 			foldersPage: {
 				displayName: 'Domains',
+				modelName: 'folder',
 				build: {
 					name: vars.folderName,
 					description: vars.description
@@ -369,6 +400,7 @@ export class TestContent {
 			},
 			usersPage: {
 				displayName: 'Users',
+				modelName: 'user',
 				build: {
 					email: vars.user.email
 				},
@@ -387,6 +419,7 @@ export class TestContent {
 			},
 			perimetersPage: {
 				displayName: 'Perimeters',
+				modelName: 'perimeter',
 				build: {
 					name: vars.perimeterName,
 					description: vars.description,
@@ -403,6 +436,7 @@ export class TestContent {
 			},
 			assetsPage: {
 				displayName: 'Assets',
+				modelName: 'asset',
 				build: {
 					name: vars.assetName,
 					description: vars.description,
@@ -418,6 +452,7 @@ export class TestContent {
 			},
 			threatsPage: {
 				displayName: 'Threats',
+				modelName: 'threat',
 				build: {
 					name: vars.threatName,
 					description: vars.description,
@@ -432,6 +467,7 @@ export class TestContent {
 			},
 			referenceControlsPage: {
 				displayName: 'Reference controls',
+				modelName: 'referencecontrol',
 				build: {
 					name: vars.referenceControlName,
 					description: vars.description,
@@ -450,6 +486,7 @@ export class TestContent {
 			},
 			appliedControlsPage: {
 				displayName: 'Applied controls',
+				modelName: 'appliedcontrol',
 				dependency: vars.referenceControl.library,
 				build: {
 					reference_control: {
@@ -493,7 +530,7 @@ export class TestContent {
 			},
 			complianceAssessmentsPage: {
 				displayName: 'Audits',
-				permName: 'complianceassessment',
+				modelName: 'complianceassessment',
 				dependency: vars.framework,
 				build: {
 					name: vars.assessmentName,
@@ -516,6 +553,7 @@ export class TestContent {
 			},
 			evidencesPage: {
 				displayName: 'Evidences',
+				modelName: 'evidence',
 				dependency: vars.framework,
 				build: {
 					name: vars.evidenceName,
@@ -533,6 +571,7 @@ export class TestContent {
 			},
 			riskAssessmentsPage: {
 				displayName: 'Risk assessments',
+				modelName: 'riskassessment',
 				dependency: vars.matrix,
 				build: {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
@@ -556,6 +595,7 @@ export class TestContent {
 			},
 			riskScenariosPage: {
 				displayName: 'Risk scenarios',
+				modelName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
 					name: vars.riskScenarioName,
@@ -579,6 +619,7 @@ export class TestContent {
 			},
 			riskAcceptancesPage: {
 				displayName: 'Risk acceptances',
+				modelName: 'riskacceptance',
 				build: {
 					name: vars.riskAcceptanceName,
 					description: vars.description,
@@ -598,6 +639,7 @@ export class TestContent {
 			},
 			securityExceptionsPage: {
 				displayName: 'Exceptions',
+				modelName: 'securityexception',
 				build: {
 					name: vars.securityExceptionName,
 					description: vars.description,
@@ -614,6 +656,31 @@ export class TestContent {
 					ref_id: '',
 					status: 'In review',
 					expiration_date: '2100-12-31'
+				}
+			},
+			businessImpactAnalysisPage: {
+				displayName: 'Business Impact Analysis',
+				modelName: 'businessimpactanalysis',
+				build: {
+					name: vars.biaName,
+					description: vars.description,
+					perimeter: vars.folderName + '/' + vars.perimeterName,
+					risk_matrix: vars.matrix.displayName,
+					due_date: '2025-05-01'
+				},
+				editParams: {
+					name: '',
+					description: '',
+					due_date: '2025-12-31'
+				}
+			},
+			assetAssessmentsPage: {
+				displayName: 'BIA Assessments',
+				modelName: 'assetassessment',
+				build: {
+					str: vars.assetName,
+					asset: vars.folderName + '/' + vars.assetName,
+					bia: vars.biaName
 				}
 			}
 		};
@@ -640,20 +707,6 @@ export function setHttpResponsesListener(page: Page) {
 	});
 }
 
-export function getSingularName(pluralName: string) {
-	const exceptions: any = {
-		Domains: 'Folder',
-		Libraries: 'Library',
-		'Risk matrices': 'Risk matrix',
-		Policies: 'Policy',
-		Exceptions: 'Security exception'
-	};
-	return (
-		exceptions[pluralName] ??
-		(pluralName.endsWith('s') ? pluralName.substring(0, pluralName.length - 1) : pluralName)
-	);
-}
-
 export function getUniqueValue(value: string): string {
 	if (value.match(/.+@.+/)) {
 		const email = value.split('@');
@@ -678,7 +731,7 @@ export function userFromUserGroupHasPermission(
 	permission: string,
 	object: string
 ) {
-	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;
+	const perm = `${permission}_${object.toLowerCase().replace(' ', '')}`;
 	return userGroup in testData.usergroups && testData.usergroups[userGroup].perms.includes(perm);
 }
 
