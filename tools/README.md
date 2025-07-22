@@ -14,7 +14,7 @@ Have a look at the provided examples.
 
 ## Example framework
 
-The structure of an Excel framework file may not be very easy to understand at first glance. That's why `example_framework.xlsx`, has been created to help you understand the structure of a framework.
+The structure of an Excel framework file may not be very easy to understand at first glance. That's why `example_framework.xlsx` has been created to help you understand the structure of a framework.
 
 The sheets and cells are colored to make it easier to understand the structure of the file, and notes have also been added to some cells. If a cell has a note, you will find a colored triangle at the top right of the cell (red in Excel, brown in LibreOffice). Hover your mouse over the cell with this triangle to see the note.
 
