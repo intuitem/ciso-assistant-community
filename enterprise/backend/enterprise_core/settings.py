@@ -20,7 +20,7 @@ from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 
-load_dotenv(BASE_DIR / ".meta")
+load_dotenv(BASE_DIR / ".env")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
@@ -171,6 +171,7 @@ PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 # Application definition
 
 INSTALLED_APPS = [
+    "django.contrib.admin", 
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",

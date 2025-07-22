@@ -21,7 +21,7 @@ from . import meta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".meta")
+load_dotenv(BASE_DIR / ".env")
 
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -177,8 +177,10 @@ PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
+    "django.contrib.admin",
+    "django.contrib.staticfiles",
+    "django.contrib.auth", 
+    "django.contrib.contenttypes", 
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.forms",

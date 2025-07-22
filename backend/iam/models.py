@@ -435,6 +435,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
+    is_staff = models.BooleanField(default=False) 
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
     is_superuser = models.BooleanField(
         _("superuser status"),
@@ -468,6 +469,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
 
+    def has_module_perms(self, app_label): 
+        return self.is_active and self.is_staff 
+
+    def has_perm(self, perm, obj=None): 
+        return self.is_superuser or self.is_staff 
+    
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         logger.info("user deleted", user=self)
