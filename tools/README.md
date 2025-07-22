@@ -1,5 +1,7 @@
 # Library workbench
 
+The file `example_framework.xlsx` file will help you understand the structure of a framework. 
+
 The `prepare_framework_v2.py` script can be used to create an Excel file with the base structure of a CISO Assistant framework in v2 format.
 
 The `convert_library_v2.py` script can be used to transform an Excel file to a CISO Assistant library.
@@ -10,7 +12,17 @@ The `convert_v1_to_v2.py` script converts any old Excel file to the new v2 forma
 
 Have a look at the provided examples.
 
-## Usage
+## Example framework
+
+The structure of an Excel framework file may not be very easy to understand at first glance. That's why `example_framework.xlsx`, has been created to help you understand the structure of a framework.
+
+The sheets and cells are colored to make it easier to understand the structure of the file, and notes have also been added to some cells. If a cell has a note, you will find a colored triangle at the top right of the cell (red in Excel, brown in LibreOffice). Hover your mouse over the cell with this triangle to see the note.
+
+Before opening a support ticket concerning the creation of a framework, we recommend to take a look at the example framework.
+
+You can also check the ["Format of Excel files"](#format-of-excel-files) section while viewing the example file to better understand the structure.
+
+## Use of scripts
 
 ### > `prepare_framework_v2.py`
 
@@ -232,7 +244,7 @@ A `_meta` of type `threats` contains the following keys:
 
 The `_content` tab for a `threats` object contains the following columns:
 - ref_id (*)
-- name
+- name (*)
 - description
 - annotation
 
@@ -244,7 +256,7 @@ A `_meta` of type `reference_controls` contains the following keys:
 
 The `_content` tab for a `reference_controls` object contains the following columns:
 - ref_id (*)
-- name
+- name (*)
 - description
 - category: one among `policy`/`process`/`technical`/`physical`/`procedure`
 - csf_function: one among `govern`/`identify`/`protect`/`detect`/`respond`/`recover`
