@@ -18,6 +18,8 @@ The structure of an Excel framework file may not be very easy to understand at f
 
 The sheets and cells are colored to make it easier to understand the structure of the file, and notes have also been added to some cells. If a cell has a note, you will find a colored triangle at the top right of the cell (red in Excel, brown in LibreOffice). Hover your mouse over the cell with this triangle to see the note.
 
+This file can be converted with `convert_library_v2.py` and imported into CISO Assistant to see how it looks.
+
 Before opening a support ticket concerning the creation of a framework, we recommend to take a look at the example framework.
 
 You can also check the ["Format of Excel files"](#format-of-excel-files) section while viewing the example file to better understand the structure.
