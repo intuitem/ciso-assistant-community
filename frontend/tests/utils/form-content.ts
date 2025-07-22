@@ -76,32 +76,24 @@ export class FormContent {
 								(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 							);
 							await expect(
-								field.locator.getByRole('option', { name: values[key].value, exact: true }).first()
+								field.locator.getByRole('option', { name: values[key].value }).first()
 							).toBeVisible();
-							await field.locator
-								.getByRole('option', { name: values[key].value, exact: true })
-								.first()
-								.click();
+							await field.locator.getByRole('option', { name: values[key].value }).first().click();
 
 							await responsePromise;
 						} else {
 							await expect(
-								field.locator.getByRole('option', { name: values[key], exact: true }).first()
+								field.locator.getByRole('option', { name: values[key] }).first()
 							).toBeVisible();
-							await field.locator
-								.getByRole('option', { name: values[key], exact: true })
-								.first()
-								.click();
+							await field.locator.getByRole('option', { name: values[key] }).first().click();
 						}
 					}
 					break;
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 					for (const val of values[key]) {
-						await expect(
-							field.locator.getByRole('option', { name: val, exact: true }).first()
-						).toBeVisible();
-						await field.locator.getByRole('option', { name: val, exact: true }).first().click();
+						await expect(field.locator.getByRole('option', { name: val }).first()).toBeVisible();
+						await field.locator.getByRole('option', { name: val }).first().click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&

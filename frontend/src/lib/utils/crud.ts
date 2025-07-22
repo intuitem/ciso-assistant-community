@@ -1482,8 +1482,17 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	}
 };
 
+export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
+	const baseModel = model.split('_')[0];
+	const map = URL_MODEL_MAP[model] || URL_MODEL_MAP[baseModel] || {};
+	// The urlmodel of {model}_duplicate must be {model}
+	map['urlModel'] = baseModel;
+	return map;
+};
+
 export const urlParamModelVerboseName = (model: string): string => {
-	return URL_MODEL_MAP[model]?.verboseName || '';
+	const modelInfo = getModelInfo(model);
+	return modelInfo?.localName || modelInfo?.verboseName || model;
 };
 
 export const urlParamModelForeignKeyFields = (model: string): ForeignKeyField[] => {
@@ -1492,14 +1501,6 @@ export const urlParamModelForeignKeyFields = (model: string): ForeignKeyField[] 
 
 export const urlParamModelSelectFields = (model: string): SelectField[] => {
 	return URL_MODEL_MAP[model]?.selectFields || [];
-};
-
-export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
-	const baseModel = model.split('_')[0];
-	const map = URL_MODEL_MAP[model] || URL_MODEL_MAP[baseModel] || {};
-	// The urlmodel of {model}_duplicate must be {model}
-	map['urlModel'] = baseModel;
-	return map;
 };
 
 export function processObject(
