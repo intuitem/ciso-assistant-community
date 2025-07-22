@@ -38,10 +38,33 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 			}
 		}
 	});
+});
 
+test('more panel components work properly', async ({ logedPage, sideBar, page }) => {
 	await test.step('user email is showing properly', async () => {
 		await expect(sideBar.userEmailDisplay).toHaveText(logedPage.email);
-		//TOD0 test also that user name and first name are displayed instead of the email when sets
+	});
+
+	await test.step('user name and first name are displayed instead of email when set', async () => {
+		await sideBar.moreButton.click();
+		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await sideBar.profileButton.click();
+		await expect(page).toHaveURL('/my-profile');
+
+		await page.getByText('Edit').click();
+		const testFirstName = 'Eric';
+		const testLastName = 'Abder';
+		await page.getByTestId('form-input-first-name').fill(testFirstName);
+		await page.getByTestId('form-input-last-name').fill(testLastName);
+		await page.getByTestId('save-button').click();
+
+		await page.waitForURL('/my-profile');
+
+		await page.goto('/analytics');
+
+		// Check that user name display now shows first name and last name instead of email
+		await expect(sideBar.userNameDisplay).toHaveText(`${testFirstName} ${testLastName}`);
+		//await expect(sideBar.userEmailDisplay).not.toBeVisible();
 	});
 
 	await test.step('user profile panel is working properly', async () => {
@@ -61,25 +84,35 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 		await expect(sideBar.docsButton).toBeVisible();
 	});
+});
 
+test('switching locale works properly', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	await test.step('translation panel is working properly', async () => {
 		await analyticsPage.goto();
-		const locales_ = [...locales];
-		const index = locales_.indexOf('en');
+		const allLocales = [...locales];
+		const index = allLocales.indexOf('en');
 		if (index !== -1) {
-			locales_.splice(index, 1);
-			locales_.push('en');
+			allLocales.splice(index, 1);
+			allLocales.push('en');
 		}
-		for (const getLocale of locales_) {
+		for (const locale of allLocales) {
 			await sideBar.moreButton.click();
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
-			setLocale(getLocale);
-			await sideBar.languageSelect.selectOption(getLocale);
-			await logedPage.hasTitle(m.analytics());
+			setLocale(locale);
+			await sideBar.languageSelect.selectOption(locale);
+			await logedPage.hasTitle(m.analytics({}, { locale }));
 		}
+		await sideBar.moreButton.click();
+		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await expect(sideBar.languageSelect).toBeVisible();
+		setLocale('en');
+		await sideBar.languageSelect.selectOption('en');
+		await logedPage.hasTitle(m.analytics({}, { locale: 'en' }));
 	});
+});
 
+test('about panel works properly', async ({ logedPage, sideBar, page }) => {
 	await test.step('about panel is working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');

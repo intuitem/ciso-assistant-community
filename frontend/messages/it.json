@@ -1113,7 +1113,7 @@
 	"likelihoodHelpText": "Stima della probabilità che un rischio si verifichi",
 	"studyAssetHelpText": "Asset primari (business) e di supporto correlati all'oggetto in studio",
 	"fearedEventHelpText": "Gli eventi temuti devono rappresentare le preoccupazioni del business",
-	"fearedEventAssetHelpText": "Asset primario (valore di business) colpito dall'evento temuto",
+	"fearedEventAssetHelpText": "Gli eventi temuti sono generalmente collegati ai valori aziendali (asset primari). Gli asset di supporto sono consentiti qui per maggiore flessibilità.",
 	"fearedEventQualificationHelpText": "Categorie di impatto possibili",
 	"fearedEventIsSelectedHelpText": "Seleziona l'evento temuto per lo studio",
 	"riskOriginHelpText": "Elemento, persona o organizzazione potenzialmente in grado di generare un rischio",

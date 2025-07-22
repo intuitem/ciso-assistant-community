@@ -4,9 +4,10 @@ simple script to transform the official CIS Excel file to another Excel file for
 
 import openpyxl
 import sys
+import os
 import re
 import argparse
-from openpyxl.styles import numbers
+from openpyxl.utils.exceptions import InvalidFileException
 
 parser = argparse.ArgumentParser(
     prog="convert_cis",
@@ -20,21 +21,37 @@ input_file_name = args.filename
 packager = args.packager
 output_file_name = "cis-controls-v8.xlsx"
 
-print("parsing", input_file_name)
+print(f'⌛ Parsing "{input_file_name}"...')
 
 # Define variable to load the dataframe
-dataframe = openpyxl.load_workbook(input_file_name)
+try:
+    dataframe = openpyxl.load_workbook(input_file_name)
+    print(f'✅ Excel file loaded successfully: "{input_file_name}"')
+
+except FileNotFoundError:
+    print(f'❌ [ERROR] File not found: "{input_file_name}"')
+    sys.exit(1)
+except PermissionError:
+    print(f'❌ [ERROR] Permission denied while accessing "{input_file_name}"')
+    sys.exit(1)
+except InvalidFileException:
+    print(f'❌ [ERROR] The file is not a valid Excel file: "{input_file_name}"')
+    sys.exit(1)
+except Exception as e:
+    print(f'❌ [ERROR] Unexpected error while loading Excel file: {e}')
+    sys.exit(1)
+    
 output_table = []
 
 for tab in dataframe:
-    print("parsing tab", tab.title)
+    print(f'⌛ Parsing tab "{tab.title}"...')
     title = tab.title
     if title == "License for Use":
         library_copyright = tab["B11"].value + "\n" + tab["B13"].value
     # The script previously ignored the controls sheet because the title wasn't an exact match 
     # in the latest version of the CIS Controls .xlsx file (e.g., "Controls V8.1.2" instead of "Controls V8").
     # Using startswith() allows the script to work with all version changes going forward.
-    elif title.startswith("Controls V"):
+    elif title.lower().startswith("controls v"):
         for row in tab:
             (control, safeguard, asset_type, sf, title, description, ig1, ig2, ig3) = (
                 r.value for r in row
@@ -54,10 +71,10 @@ for tab in dataframe:
                         ("x", 2, safeguard, title, description, implementation_groups)
                     )
     else:
-        print(f"Ignored tab: {title}")
+        print(f'⏩ Ignored tab: "{title}"')
 
 
-print("generating", output_file_name)
+print(f'⌛ Generating "{output_file_name}"...')
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
@@ -102,5 +119,18 @@ ws2.append(
 )
 ws2.append(["IG3", "IG3", "To secure sensitive and confidential data."])
 
-print("generate ", output_file_name)
-wb_output.save(output_file_name)
+try:
+    wb_output.save(output_file_name)
+    print(f'✅ Excel file saved successfully: "{output_file_name}"')
+except PermissionError:
+    print(f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"')
+    sys.exit(1)
+except FileNotFoundError:
+    print(f'❌ [ERROR] Invalid path. Cannot save to: "{output_file_name}"')
+    sys.exit(1)
+except OSError as e:
+    print(f'❌ [ERROR] OS error while saving the file: "{e}"')
+    sys.exit(1)
+except Exception as e:
+    print(f'❌ [ERROR] Unexpected error while saving Excel file: "{e}"')
+    sys.exit(1)

@@ -1,4 +1,4 @@
-import { listViewFields, tableSourceMapper } from '$lib/utils/table';
+import { getListViewFields, tableSourceMapper } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
@@ -7,10 +7,17 @@ export interface LoadTableDataParams {
 	state: State;
 	URLModel: urlModel;
 	endpoint: string;
-	fields?: string[];
+	fields?: { head: string[]; body: string[] };
+	featureFlags?: Record<string, boolean>;
 }
 
-export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadTableDataParams) => {
+export const loadTableData = async ({
+	state,
+	URLModel,
+	endpoint,
+	fields,
+	featureFlags = {}
+}: LoadTableDataParams) => {
 	const url = new URL(endpoint, window.location.origin);
 	const params = new URLSearchParams(url.search);
 	const newParams = getParams(state);
@@ -21,10 +28,17 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 	const response = await fetch(url.toString()).then((res) => res.json());
 	state.setTotalRows(response.count);
 
+	const baseFields = getListViewFields({ key: URLModel, featureFlags });
+
 	const fieldsToUse =
-		fields.length > 0
-			? { ...listViewFields[URLModel as urlModel], head: fields, body: fields }
-			: listViewFields[URLModel as urlModel];
+		fields?.head && fields.head.length > 0 && fields.head.toString() !== baseFields.head.toString()
+			? {
+					...baseFields,
+					head: fields.head,
+					body: fields.body.length > 0 ? fields.body : fields.head
+				}
+			: baseFields;
+
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 
 	const headData: Record<string, string> = fieldsToUse.body.reduce((obj, key, index) => {
