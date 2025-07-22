@@ -58,6 +58,13 @@ test('user can create asset assessments inside BIA', async ({
 			folder: vars.folderName,
 			type: 'Primary'
 		});
+		// NOTE: creating one more asset not to trip up the autocomplete test utils
+		await assetsPage.createItem({
+			name: vars.assetName + ' foo',
+			description: vars.description,
+			folder: vars.folderName,
+			type: 'Primary'
+		});
 	});
 
 	await test.step('import risk matrix', async () => {
