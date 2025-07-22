@@ -1,12 +1,11 @@
 import logging
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.conf import settings
 from core.models import ComplianceAssessment, AppliedControl
-from django.db.models.signals import post_save
+import requests
 
 logger = logging.getLogger(__name__)
-logger.info('signals.py loaded')
 
 WEBHOOK_URL = getattr(settings, 'NOTIFICATION_WEBHOOK_URL', None)
 
@@ -16,12 +15,11 @@ def send_webhook_notification(payload):
         logger.warning('Notification webhook URL is not set. Skipping notification.')
         return
     try:
-        logger.info(f'Sending notification to webhook: {WEBHOOK_URL} with payload: {payload}')
-        import requests
+        logger.info('Sending notification to webhook.')
         response = requests.post(WEBHOOK_URL, json=payload, timeout=5)
         response.raise_for_status()
         logger.info(f'Notification sent successfully. Response: {response.status_code}')
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error(f'Error sending notification: {e}')
 
 
@@ -45,11 +43,11 @@ def get_applied_control_payload(instance, old_status):
         'expiry_date': str(instance.expiry_date) if instance.expiry_date else None,
         'link': instance.link,
         'reference_control': str(instance.reference_control) if instance.reference_control else None,
-        'owners': [str(u) for u in instance.owner.all()],
-        'assets': [str(a) for a in instance.assets.all()],
-        'evidences': [str(e) for e in instance.evidences.all()],
-        'security_exceptions': [str(se) for se in instance.security_exceptions.all()],
-        # Ajoute d'autres champs si besoin
+        'owners': [{'id': u.id, 'name': str(u)} for u in instance.owner.all()],
+        'assets': [{'id': a.id, 'name': str(a)} for a in instance.assets.all()],
+        'evidences': [{'id': e.id, 'name': str(e)} for e in instance.evidences.all()],
+        'security_exceptions': [{'id': se.id, 'name': str(se)} for se in instance.security_exceptions.all()],
+        # Add other fields as needed for more context
     }
 
 def get_compliance_assessment_payload(instance, old_status):
@@ -84,7 +82,7 @@ def get_compliance_assessment_payload(instance, old_status):
         'authors': [str(u) for u in instance.authors.all()] if hasattr(instance, 'authors') else [],
         'compliance_percentage': compliance_percentage,
         'progress_percentage': progress_percentage,
-        # Ajoute d'autres champs si besoin
+        # Add other fields as needed
     }
 
 

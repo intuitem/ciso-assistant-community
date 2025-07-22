@@ -11,7 +11,8 @@ class CoreConfig(AppConfig):
     verbose_name = "Core"
 
     def ready(self):
-        # avoid post_migrate handler if we are in the main, as it interferes with restore
+        # Avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
-        import core.signals  # Active les signaux personnalisés
+        # Import signals to register Django signal handlers
+        import core.signals

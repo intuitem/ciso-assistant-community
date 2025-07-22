@@ -8,7 +8,8 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
       - AUTH_TOKEN_TTL=7200
-      - NOTIFICATION_WEBHOOK_URL=https://mon.webhook.url/ici
+      # Set this to your real webhook endpoint before deployment
+      - NOTIFICATION_WEBHOOK_URL=https://your-webhook-endpoint.example.com/notifications
 
     volumes:
       - ./db:/code/db
