@@ -34,6 +34,7 @@ type Fixtures = {
 	securityExceptionsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
 	assetAssessmentsPage: PageContent;
+	escalationThresholdsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -290,6 +291,17 @@ export const test = base.extend<Fixtures>({
 			{ name: 'bia', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(aPage);
+	},
+
+	escalationThresholdsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/escalation-thresholds', 'Escalation thresholds', [
+			{ name: 'point_in_time', type: type.DURATION },
+			{ name: 'asset_assessment', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'qualifications', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'quali_impact', type: type.SELECT },
+			{ name: 'justification', type: type.TEXT }
+		]);
+		await use(ePage);
 	},
 
 	usersPage: async ({ page }, use) => {
