@@ -36,9 +36,9 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -60,10 +60,20 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 4
+      max-parallel: 8
       matrix:
         python-version: ["3.12"]
         playwright-browser: ["chromium"]
+        test-module:
+          [
+            "detailed",
+            "user-route",
+            "user-permissions",
+            "fuzz",
+            "nav",
+            "backup-restore",
+            "domain-import",
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -110,8 +120,9 @@ jobs:
         working-directory: ${{ env.frontend-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+          TEST_MODULE: ${{ matrix.test-module }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_MODULE"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
@@ -123,7 +134,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ matrix.test-module }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/results/
@@ -142,9 +153,9 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -168,10 +179,20 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 4
+      max-parallel: 8
       matrix:
         python-version: ["3.12"]
         playwright-browser: ["chromium"]
+        test-module:
+          [
+            "detailed",
+            "user-route",
+            "user-permissions",
+            "fuzz",
+            "nav",
+            "backup-restore",
+            "domain-import",
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -218,8 +239,9 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+          TEST_MODULE: ${{ matrix.test-module }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_MODULE"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
@@ -231,7 +253,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ matrix.test-module }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/
