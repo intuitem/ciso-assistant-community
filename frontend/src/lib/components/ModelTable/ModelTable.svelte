@@ -48,7 +48,7 @@
 		rowCount?: boolean;
 		pagination?: boolean;
 		numberRowsPerPage?: number;
-		orderBy?: { identifier: string; direction: 'asc' | 'desc' } | undefined;
+		orderBy?: { identifier: string; direction: 'asc' | 'desc' };
 		// Props (styles)
 		element?: string;
 		text?: string;
@@ -66,10 +66,10 @@
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
-		deleteForm?: SuperValidated<AnyZodObject> | undefined;
-		URLModel?: urlModel | undefined;
+		deleteForm?: SuperValidated<AnyZodObject>;
+		URLModel?: urlModel;
 		baseEndpoint?: string;
-		detailQueryParameter?: string | undefined;
+		detailQueryParameter?: string;
 		fields?: string[];
 		canSelectObject?: boolean;
 		hideFilters?: boolean;
@@ -626,7 +626,7 @@
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
-							<action.component row={contextMenuOpenRow} {handler} {action} />
+							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
