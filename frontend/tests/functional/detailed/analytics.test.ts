@@ -1,5 +1,13 @@
 import { test, expect } from '../../utils/test-utils.js';
 import { LoginPage } from '../../utils/login-page.js';
+import { PageContent } from '../../utils/page-content.js';
+import { Page } from '@playwright/test';
+
+async function redirectToAnalytics(page: Page): Promise<void> {
+	await page.getByTestId('accordion-item-overview').click();
+	await page.getByTestId('accordion-item-analytics').click();
+	await page.waitForTimeout(500);
+}
 
 test('Analytics full flow - creation, validation and cleanup', async ({ page }) => {
 	const loginPage = new LoginPage(page);
@@ -15,7 +23,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 
 		await page.getByRole('button', { name: 'Organization' }).click();
 		await page.getByTestId('accordion-item-perimeters').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('analytics-perimeter');
@@ -28,7 +36,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create Active control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-1');
@@ -43,11 +51,13 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create Deprecated control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-2');
 		await page.getByTestId('form-input-status').selectOption('deprecated');
+
+		await page.getByTestId('form-input-eta').fill('2023-11-11');
 
 		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-folder').click();
@@ -58,7 +68,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create to do control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-3');
@@ -73,7 +83,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create On hold control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-4');
@@ -88,7 +98,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create In progress control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-5');
@@ -103,7 +113,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create audit with NIST', async () => {
 		await page.getByTestId('accordion-item-compliance').click();
 		await page.getByTestId('accordion-item-compliance-assessments').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-audit-1');
@@ -119,7 +129,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create audit with ISO 27001', async () => {
 		await page.getByTestId('accordion-item-compliance').click();
 		await page.getByTestId('accordion-item-compliance-assessments').click();
-		await page.waitForTimeout(200);
+		await page.waitForTimeout(500);
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-audit-2');
@@ -131,6 +141,115 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 		await page.getByRole('option', { name: 'analytics-folder/analytics-perimeter' }).click();
 		await page.getByTestId('save-button').click();
 	});
+
+	await test.step('Create evidence', async () => {
+		await page.getByTestId('accordion-item-compliance').click();
+		await page.getByTestId('accordion-item-evidences').click();
+		await page.waitForTimeout(500);
+		await page.reload();
+
+		await page.getByTestId('add-button').click();
+		await page.getByTestId('form-input-name').fill('test-evidence');
+
+		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-folder').click();
+		await page.getByRole('option', { name: 'analytics-folder' }).click();
+		await page.getByTestId('save-button').click();
+	});
+
+	await test.step('Create risk assessment', async () => {
+		await page.getByTestId('accordion-item-risk').click();
+		await page.getByTestId('accordion-item-risk-assessments').click();
+		await page.waitForTimeout(500);
+
+		await page.getByTestId('add-button').click();
+		await page.getByTestId('form-input-name').fill('test-risk-assessment');
+
+		await page.getByTestId('form-input-perimeter').click();
+		await page.getByRole('option', { name: 'analytics-folder/analytics-perimeter' }).click();
+		await page.getByTestId('save-button').click();
+	});
+
+	await test.step('Verify data view in analytics', async () => {
+		await page.getByTestId('accordion-item-overview').click();
+		await page.getByTestId('accordion-item-analytics').click();
+		await page.waitForTimeout(1000);
+
+		await expect(page.getByTestId('card-controls-total')).toHaveText('5');
+		await expect(page.getByTestId('card-controls-active')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-deprecated')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-to do')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-in progress')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-on hold')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-Missed ETA')).toHaveText('1');
+
+		await expect(page.getByText('test-audit-1')).toBeVisible();
+		await expect(page.getByText('test-audit-1')).toBeVisible();
+
+		await expect(page.getByTestId('card-compliance-Used frameworks')).toHaveText('2');
+		await expect(page.getByTestId('card-compliance-Evidences')).toHaveText('1');
+		await expect(page.getByTestId('card-risk-Assessments')).toHaveText('1');
+
+		let analyticsPage = new PageContent(page, '/analytics?tab=governance', 'Analytics');
+		await analyticsPage.goto();
+		await expect(page.getByTestId('card-Applied controls')).toHaveText('5');
+		await expect(page.getByTestId('card-Risk assessments')).toHaveText('1');
+		await expect(page.getByTestId('card-Audits')).toHaveText('2');
+		await expect(page.getByText('NIST CSF v2.0')).toBeVisible();
+		await expect(page.getByText('International standard ISO/IEC 27001:2022')).toBeVisible();
+		await expect(page.getByText('test-control-2')).toBeVisible();
+		await expect(page.getByText('Outdated')).toBeVisible();
+	});
+
+	await test.step('Verify redirection in analytics', async () => {
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-controls-total').click();
+		await expect(page).toHaveURL('/applied-controls');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-controls-active').click();
+		await expect(page).toHaveURL('/applied-controls?status=active');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-controls-deprecated').click();
+		await expect(page).toHaveURL('/applied-controls?status=deprecated');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-controls-to do').click();
+		await expect(page).toHaveURL('/applied-controls?status=to_do');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-controls-in progress').click();
+		await expect(page).toHaveURL('/applied-controls?status=in_progress');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-controls-on hold').click();
+		await expect(page).toHaveURL('/applied-controls?status=on_hold');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-compliance-Used frameworks').click();
+		await expect(page).toHaveURL('/frameworks');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-compliance-Evidences').click();
+		await expect(page).toHaveURL('/evidences');
+		await redirectToAnalytics(page);
+
+		await page.getByTestId('card-risk-Assessments').click();
+		await expect(page).toHaveURL('/risk-assessments');
+		await redirectToAnalytics(page);
+
+		let analyticsPage = new PageContent(page, '/analytics?tab=governance', 'Analytics');
+		await analyticsPage.goto();
+		await expect(page.getByTestId('card-Applied controls')).toHaveText('5');
+		await expect(page.getByTestId('card-Risk assessments')).toHaveText('1');
+		await expect(page.getByTestId('card-Audits')).toHaveText('2');
+		await expect(page.getByText('NIST CSF v2.0')).toBeVisible();
+		await expect(page.getByText('International standard ISO/IEC 27001:2022')).toBeVisible();
+		await expect(page.getByText('test-control-2')).toBeVisible();
+		await expect(page.getByText('Outdated')).toBeVisible();
+	});
 });
 
 test('Cleanup - delete the folder', async ({ page }) => {
@@ -140,7 +259,7 @@ test('Cleanup - delete the folder', async ({ page }) => {
 
 	await page.getByRole('button', { name: 'Organization' }).click();
 	await page.getByTestId('accordion-item-folders').click();
-	await page.waitForTimeout(200);
+	await page.waitForTimeout(500);
 
 	const folderRow = page.getByRole('row', { name: /analytics-folder/i });
 	await folderRow.getByTestId('tablerow-delete-button').click();
