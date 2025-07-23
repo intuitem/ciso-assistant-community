@@ -1,21 +1,19 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "additionalProperties": false,
+    "type": "object",
     "properties": {
         "backend": {
-            "additionalProperties": false,
+            "type": "object",
             "properties": {
                 "annotations": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "config": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "databaseType": {
-                            "type": "string",
-                            "enum": ["sqlite", "pgsql", "externalPgsql"]
+                            "type": "string"
                         },
                         "djangoDebug": {
                             "type": "boolean"
@@ -27,11 +25,10 @@
                             "type": "string"
                         },
                         "emailAdmin": {
-                            "type": "string",
-                            "format": "email"
+                            "type": "string"
                         },
                         "smtp": {
-                            "additionalProperties": false,
+                            "type": "object",
                             "properties": {
                                 "defaultFrom": {
                                     "type": "string"
@@ -46,9 +43,7 @@
                                     "type": "string"
                                 },
                                 "port": {
-                                    "type": "integer",
-                                    "minimum": 1,
-                                    "maximum": 65535
+                                    "type": "integer"
                                 },
                                 "useTls": {
                                     "type": "boolean"
@@ -57,21 +52,20 @@
                                     "type": "string"
                                 }
                             },
-                            "type": "object"
+                            "additionalProperties": false
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "containerSecurityContext": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "env": {
                     "type": "array"
                 },
                 "huey": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "env": {
                             "type": "array"
@@ -80,15 +74,14 @@
                             "type": "string"
                         },
                         "resources": {
-                            "additionalProperties": true,
-                            "properties": {},
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "image": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "imagePullPolicy": {
                             "type": "string"
@@ -103,7 +96,7 @@
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "imagePullSecrets": {
                     "type": "array"
@@ -112,10 +105,10 @@
                     "type": "string"
                 },
                 "persistence": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "localStorage": {
-                            "additionalProperties": false,
+                            "type": "object",
                             "properties": {
                                 "accessMode": {
                                     "type": "string"
@@ -133,10 +126,10 @@
                                     "type": "string"
                                 }
                             },
-                            "type": "object"
+                            "additionalProperties": false
                         },
                         "sqlite": {
-                            "additionalProperties": false,
+                            "type": "object",
                             "properties": {
                                 "accessMode": {
                                     "type": "string"
@@ -154,54 +147,47 @@
                                     "type": "string"
                                 }
                             },
-                            "type": "object"
+                            "additionalProperties": false
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "podAnnotations": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "replicas": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "resources": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "service": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "annotations": {
-                            "additionalProperties": true,
-                            "properties": {},
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "labels": {
-                            "additionalProperties": true,
-                            "properties": {},
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "port": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 65535
+                            "type": "integer"
                         },
                         "portName": {
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 }
             },
-            "type": "object"
+            "additionalProperties": false
         },
         "externalPgsql": {
-            "additionalProperties": false,
+            "type": "object",
             "properties": {
                 "database": {
                     "type": "string"
@@ -216,43 +202,39 @@
                     "type": "string"
                 },
                 "port": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 65535
+                    "type": "integer"
                 },
                 "user": {
                     "type": "string"
                 }
             },
-            "type": "object"
+            "additionalProperties": false
         },
         "frontend": {
-            "additionalProperties": false,
+            "type": "object",
             "properties": {
                 "annotations": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "config": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "bodySizeLimit": {
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "containerSecurityContext": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "env": {
                     "type": "array"
                 },
                 "image": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "imagePullPolicy": {
                             "type": "string"
@@ -267,7 +249,7 @@
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "imagePullSecrets": {
                     "type": "array"
@@ -276,59 +258,51 @@
                     "type": "string"
                 },
                 "podAnnotations": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "replicas": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "resources": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "service": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "annotations": {
-                            "additionalProperties": true,
-                            "properties": {},
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "labels": {
-                            "additionalProperties": true,
-                            "properties": {},
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "port": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 65535
+                            "type": "integer"
                         },
                         "portName": {
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 }
             },
-            "type": "object"
+            "additionalProperties": false
         },
         "fullnameOverride": {
             "type": "string"
         },
         "global": {
-            "additionalProperties": false,
+            "type": "object",
             "properties": {
                 "clusterDomain": {
                     "type": "string"
                 },
                 "commonLabels": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "domain": {
                     "type": "string"
@@ -337,7 +311,7 @@
                     "type": "string"
                 },
                 "image": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "imagePullPolicy": {
                             "type": "string"
@@ -349,20 +323,18 @@
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 },
                 "imagePullSecrets": {
                     "type": "array"
                 },
                 "nodeSelector": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "securityContext": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "tls": {
                     "type": "boolean"
@@ -371,15 +343,14 @@
                     "type": "array"
                 }
             },
-            "type": "object"
+            "additionalProperties": false
         },
         "ingress": {
-            "additionalProperties": false,
+            "type": "object",
             "properties": {
                 "annotations": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "enabled": {
                     "type": "boolean"
@@ -388,31 +359,21 @@
                     "type": "string"
                 },
                 "labels": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "path": {
                     "type": "string"
                 },
                 "pathType": {
-                    "type": "string",
-                    "enum": ["Exact", "Prefix", "ImplementationSpecific"]
+                    "type": "string"
                 },
                 "tls": {
-                    "additionalProperties": false,
+                    "type": "object",
                     "properties": {
                         "certificateSecret": {
-                            "additionalProperties": true,
-                            "properties": {
-                                "key": {
-                                    "type": "string"
-                                },
-                                "certificate": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
+                            "type": "object",
+                            "additionalProperties": true
                         },
                         "enabled": {
                             "type": "boolean"
@@ -421,28 +382,28 @@
                             "type": "string"
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": false
                 }
             },
-            "type": "object"
+            "additionalProperties": false
         },
         "nameOverride": {
             "type": "string"
         },
         "postgresql": {
-            "additionalProperties": true,
+            "type": "object",
             "properties": {
                 "enabled": {
                     "type": "boolean"
                 },
                 "global": {
-                    "additionalProperties": true,
+                    "type": "object",
                     "properties": {
                         "postgresql": {
-                            "additionalProperties": true,
+                            "type": "object",
                             "properties": {
                                 "auth": {
-                                    "additionalProperties": true,
+                                    "type": "object",
                                     "properties": {
                                         "database": {
                                             "type": "string"
@@ -457,32 +418,32 @@
                                             "type": "string"
                                         }
                                     },
-                                    "type": "object"
+                                    "additionalProperties": true
                                 }
                             },
-                            "type": "object"
+                            "additionalProperties": true
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": true
                 },
                 "primary": {
-                    "additionalProperties": true,
+                    "type": "object",
                     "properties": {
                         "persistence": {
-                            "additionalProperties": true,
+                            "type": "object",
                             "properties": {
                                 "size": {
                                     "type": "string"
                                 }
                             },
-                            "type": "object"
+                            "additionalProperties": true
                         }
                     },
-                    "type": "object"
+                    "additionalProperties": true
                 }
             },
-            "type": "object"
+            "additionalProperties": true
         }
     },
-    "type": "object"
+    "additionalProperties": false
 }
