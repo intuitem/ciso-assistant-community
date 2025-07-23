@@ -25,7 +25,7 @@ env:
 
 jobs:
   build_frontends:
-    runs-on: ubuntu-${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
     outputs:
       build_done: "true"
     steps:
@@ -76,7 +76,7 @@ jobs:
 
   get_playwright_test_files:
     needs: build_frontends
-    runs-on: ubuntu-${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
     outputs:
       community_test_files: ${{ steps.list_community_files.outputs.test_files }}
       enterprise_test_files: ${{ steps.list_enterprise_files.outputs.test_files }}
@@ -112,7 +112,7 @@ jobs:
 
   functional-tests:
     needs: get_playwright_test_files
-    runs-on: ubuntu-${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
@@ -249,7 +249,7 @@ jobs:
 
   enterprise-functional-tests:
     needs: get_playwright_test_files
-    runs-on: ubuntu-${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
