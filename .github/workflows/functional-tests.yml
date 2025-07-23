@@ -24,7 +24,7 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
-  build_frontends:
+  build_community_frontend:
     runs-on: ubuntu-24.04
     outputs:
       build_done: "true"
@@ -63,6 +63,30 @@ jobs:
           path: ${{ env.frontend-directory }}/build/
           retention-days: 1
 
+  build_enterprise_frontend:
+    runs-on: ubuntu-24.04
+    outputs:
+      build_done: "true"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cache pnpm modules for Build
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.frontend-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make
@@ -75,7 +99,9 @@ jobs:
           retention-days: 1
 
   get_playwright_test_files:
-    needs: build_frontends
+    needs:
+      - build_community_frontend
+      - build_enterprise_frontend
     runs-on: ubuntu-24.04
     outputs:
       community_test_files: ${{ steps.list_community_files.outputs.test_files }}
