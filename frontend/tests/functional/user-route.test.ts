@@ -2,7 +2,7 @@ import { LoginPage } from '../utils/login-page.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
 import { m } from '$paraglide/messages';
 const vars = TestContent.generateTestVars();
-z;
+
 test('user usual routine actions are working correctly', async ({
 	logedPage,
 	pages,
