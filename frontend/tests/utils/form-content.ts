@@ -8,7 +8,8 @@ export enum FormFieldType {
 	SELECT_AUTOCOMPLETE = 'select-autocomplete',
 	SELECT_MULTIPLE_AUTOCOMPLETE = 'select-multi-autocomplete',
 	TEXT = 'text',
-	NUMBER = 'number'
+	NUMBER = 'number',
+	DURATION = 'duration'
 }
 
 type FormField = {
@@ -108,6 +109,14 @@ export class FormContent {
 					await field.locator.clear();
 				case FormFieldType.NUMBER:
 					await field?.locator.fill(values[key].toString());
+					break;
+				case FormFieldType.DURATION:
+					for (const unit of Object.keys(values[key])) {
+						const locator = field?.locator.getByTestId(
+							`form-input-${key.replaceAll('_', '-')}-${unit}`
+						);
+						await locator?.fill(values[key][unit].toString());
+					}
 					break;
 				default:
 					await field?.locator.fill(values[key]);
