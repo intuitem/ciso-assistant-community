@@ -6,6 +6,7 @@ from pathlib import Path
 from openpyxl import load_workbook, Workbook
 import re
 
+
 def convert_v1_to_v2(input_path: str, output_path: str):
     wb = load_workbook(input_path, data_only=False)
 
@@ -22,8 +23,14 @@ def convert_v1_to_v2(input_path: str, output_path: str):
     scores_logical_name = None
 
     known_object_types = {
-        "framework", "threats", "reference_controls",
-        "scores", "implementation_groups", "risk_matrix", "mapping", "answers"
+        "framework",
+        "threats",
+        "reference_controls",
+        "scores",
+        "implementation_groups",
+        "risk_matrix",
+        "mapping",
+        "answers",
     }
 
     # --- Parse library_content ---
@@ -32,9 +39,9 @@ def convert_v1_to_v2(input_path: str, output_path: str):
         if not any(row):
             continue
         key = str(row[0]).strip().lower() if row[0] else None
-        val1 = str(row[1]).strip() if len(row) > 1 and row[1] else None
-        val2 = str(row[2]).strip() if len(row) > 2 and row[2] else None
-        val3 = str(row[3]).strip() if len(row) > 3 and row[3] else None
+        val1 = str(row[1]).strip() if len(row) > 1 and row[1] is not None else None
+        val2 = str(row[2]).strip() if len(row) > 2 and row[2] is not None else None
+        val3 = str(row[3]).strip() if len(row) > 3 and row[3] is not None else None
 
         if not key:
             continue
@@ -64,20 +71,22 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 ig_logical_name = val1
 
         if key in ["reference_control_base_urn", "threat_base_urn"] and val1:
-            object_type = "reference_control" if "reference_control" in key else "threat"
+            object_type = (
+                "reference_control" if "reference_control" in key else "threat"
+            )
             object_metadata.setdefault(object_type, {})["base_urn"] = val1
             if val2:
                 urn_prefixes[val2] = val1
 
         for obj_type in known_object_types:
             if key.startswith(f"{obj_type}_"):
-                field = key[len(obj_type)+1:]
-                normalized_type = "requirement_mapping_set" if obj_type == "mapping" else obj_type
+                field = key[len(obj_type) + 1 :]
+                normalized_type = (
+                    "requirement_mapping_set" if obj_type == "mapping" else obj_type
+                )
                 object_metadata.setdefault(normalized_type, {})[field] = val1
 
-    sheets_out = {
-        "library_meta": library_meta
-    }
+    sheets_out = {"library_meta": library_meta}
 
     used_tabs = set()
 
@@ -92,7 +101,6 @@ def convert_v1_to_v2(input_path: str, output_path: str):
         clean_type = obj_type.rstrip("s")
         for k, v in object_metadata.get(clean_type, {}).items():
             meta_rows.append((k, v))
-
 
         if obj_type == "framework":
             if scores_logical_name:
@@ -124,7 +132,11 @@ def convert_v1_to_v2(input_path: str, output_path: str):
         ]
 
     for sheet_name in wb.sheetnames:
-        if sheet_name not in {"library_content"} and sheet_name not in sheets_out and sheet_name not in used_tabs:
+        if (
+            sheet_name not in {"library_content"}
+            and sheet_name not in sheets_out
+            and sheet_name not in used_tabs
+        ):
             ws = wb[sheet_name]
             raw = [[cell.value for cell in row] for row in ws.iter_rows()]
             if raw:
@@ -156,8 +168,11 @@ def convert_v1_to_v2(input_path: str, output_path: str):
     wb_out.save(output_path)
     print(f"✅ Conversion complete: {output_path}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Convert Excel library v1 to v2 format.")
+    parser = argparse.ArgumentParser(
+        description="Convert Excel library v1 to v2 format."
+    )
     parser.add_argument("input_file", type=str, help="Path to the v1 Excel file")
     args = parser.parse_args()
 
@@ -167,6 +182,7 @@ def main():
 
     output_path = input_path.with_name(f"{input_path.stem}_new.xlsx")
     convert_v1_to_v2(str(input_path), str(output_path))
+
 
 if __name__ == "__main__":
     main()
