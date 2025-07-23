@@ -270,7 +270,6 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('feature-flag-folder');
 	await page.getByTestId('save-button').click();
-	
 
 	// Create perimeter
 	await page.getByRole('button', { name: 'Organization' }).click();
@@ -383,7 +382,6 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ pag
 	await expect(page.locator('#page-title')).toHaveText('Ebios RM');
 	await expect(page).toHaveURL('/ebios-rm');
 	await page.getByText('test-ebios-rm').click();
-	
 
 	await page.getByText('Generate the risk assessment').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment-ebios-rm');
