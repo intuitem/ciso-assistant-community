@@ -8,14 +8,14 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching the CSV file');
+		error(400, 'Error fetching the Excel file');
 	}
 
 	const fileName = `AP-${params.id}-${new Date().toISOString()}.xlsx`;
 
 	return new Response(await res.blob(), {
 		headers: {
-			'Content-Type': 'text/csv',
+			'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 			'Content-Disposition': `attachment; filename="${fileName}"`
 		}
 	});
