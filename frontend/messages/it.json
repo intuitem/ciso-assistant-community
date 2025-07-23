@@ -1335,5 +1335,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Scenari corrispondenti"
+	"matchingScenarios": "Scenari corrispondenti",
+	"select": "Seleziona",
+	"deselect": "Deseleziona"
 }

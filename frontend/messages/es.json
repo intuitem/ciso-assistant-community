@@ -962,5 +962,7 @@
 		}
 	],
 	"matchingScenarios": "Escenarios coincidentes",
+	"select": "Seleccionar",
+	"deselect": "Deseleccionar",
 	"fearedEventAssetHelpText": "Los eventos temidos suelen estar vinculados a valores comerciales (activos primarios). Los activos de soporte se permiten aquí por flexibilidad."
 }
