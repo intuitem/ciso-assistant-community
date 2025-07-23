@@ -6,7 +6,8 @@ import { Page } from '@playwright/test';
 async function redirectToAnalytics(page: Page): Promise<void> {
 	await page.getByTestId('accordion-item-overview').click();
 	await page.getByTestId('accordion-item-analytics').click();
-	await page.waitForTimeout(500);
+	await expect(page.locator('#page-title')).toHaveText('Analytics');
+	await expect(page).toHaveURL('/analytics');
 }
 
 test('Analytics full flow - creation, validation and cleanup', async ({ page }) => {
@@ -23,7 +24,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 
 		await page.getByRole('button', { name: 'Organization' }).click();
 		await page.getByTestId('accordion-item-perimeters').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Perimeters');
+		await expect(page).toHaveURL('/perimeters');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('analytics-perimeter');
@@ -36,7 +38,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create Active control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Applied controls');
+		await expect(page).toHaveURL('/applied-controls');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-1');
@@ -51,7 +54,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create Deprecated control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Applied controls');
+		await expect(page).toHaveURL('/applied-controls');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-2');
@@ -68,7 +72,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create to do control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Applied controls');
+		await expect(page).toHaveURL('/applied-controls');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-3');
@@ -83,7 +88,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create On hold control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Applied controls');
+		await expect(page).toHaveURL('/applied-controls');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-4');
@@ -98,7 +104,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create In progress control', async () => {
 		await page.getByText('Operations').click();
 		await page.getByTestId('accordion-item-applied-controls').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Applied controls');
+		await expect(page).toHaveURL('/applied-controls');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-control-5');
@@ -113,7 +120,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create audit with NIST', async () => {
 		await page.getByTestId('accordion-item-compliance').click();
 		await page.getByTestId('accordion-item-compliance-assessments').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Audits');
+		await expect(page).toHaveURL('/compliance-assessments');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-audit-1');
@@ -129,7 +137,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create audit with ISO 27001', async () => {
 		await page.getByTestId('accordion-item-compliance').click();
 		await page.getByTestId('accordion-item-compliance-assessments').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Audits');
+		await expect(page).toHaveURL('/compliance-assessments');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-audit-2');
@@ -145,8 +154,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create evidence', async () => {
 		await page.getByTestId('accordion-item-compliance').click();
 		await page.getByTestId('accordion-item-evidences').click();
-		await page.waitForTimeout(500);
-		await page.reload();
+		await expect(page.locator('#page-title')).toHaveText('Evidences');
+		await expect(page).toHaveURL('/evidences');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-evidence');
@@ -160,7 +169,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Create risk assessment', async () => {
 		await page.getByTestId('accordion-item-risk').click();
 		await page.getByTestId('accordion-item-risk-assessments').click();
-		await page.waitForTimeout(500);
+		await expect(page.locator('#page-title')).toHaveText('Risk assessments');
+		await expect(page).toHaveURL('/risk-assessments');
 
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('test-risk-assessment');
@@ -173,7 +183,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await test.step('Verify data view in analytics', async () => {
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-analytics').click();
-		await page.waitForTimeout(1000);
+		await expect(page.locator('#page-title')).toHaveText('Analytics');
+		await expect(page).toHaveURL('/analytics');
 
 		await expect(page.getByTestId('card-controls-total')).toHaveText('5');
 		await expect(page.getByTestId('card-controls-active')).toHaveText('1');
@@ -259,7 +270,8 @@ test('Cleanup - delete the folder', async ({ page }) => {
 
 	await page.getByRole('button', { name: 'Organization' }).click();
 	await page.getByTestId('accordion-item-folders').click();
-	await page.waitForTimeout(500);
+	await expect(page.locator('#page-title')).toHaveText('Domains');
+	await expect(page).toHaveURL('/folders');
 
 	const folderRow = page.getByRole('row', { name: /analytics-folder/i });
 	await folderRow.getByTestId('tablerow-delete-button').click();
