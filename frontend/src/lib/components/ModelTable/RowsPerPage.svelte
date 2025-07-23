@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { tableStates } from '$lib/utils/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		handler: DataHandler;
@@ -15,43 +15,30 @@
 	const rowsPerPage = handler.getRowsPerPage();
 	const rowCount = handler.getRowCount();
 
-	let lastRowsPerPage = $derived($rowsPerPage ?? 10);
+	let lastRowsPerPage = $derived(
+		$rowsPerPage ?? $tableStates[page.url.pathname]?.rowsPerPage ?? 10
+	);
 
 	const setRowsPerPage = () => {
-		const pageNumberCache: { [key: string]: [number, number] } = JSON.parse(
-			localStorage.getItem('pageNumberCache') ?? '{}'
-		);
-
-		for (const [endpoint, [savedPageNumber, savedRowsPerPage]] of Object.entries(pageNumberCache)) {
-			if ($rowsPerPage === null) {
-				break;
-			}
-			const itemNumber = (savedPageNumber - 1) * savedRowsPerPage + 1;
-			const newPageNumber = Math.ceil(itemNumber / $rowsPerPage);
-			pageNumberCache[endpoint] = [newPageNumber, $rowsPerPage];
-		}
-
-		localStorage.setItem('pageNumberCache', JSON.stringify(pageNumberCache));
-		localStorage.setItem('rowsPerPageCache', `${$rowsPerPage}`);
-
 		const itemNumber = ($pageNumber - 1) * lastRowsPerPage + 1;
 		const newPageNumber = Math.ceil(itemNumber / ($rowsPerPage ?? 10));
+		$tableStates[page.url.pathname] = { pageNumber: newPageNumber, rowsPerPage: $rowsPerPage };
 		handler.setPage(newPageNumber);
+
 		handler.invalidate();
 	};
 
-	run(() => {
+	$effect(() => {
 		if ($rowsPerPage && $rowCount?.start >= $rowCount?.total) {
 			handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
 		}
 	});
 
 	onMount(() => {
-		const cachedValue = Number(localStorage.getItem('rowsPerPageCache') ?? '10');
+		const cachedValue = $tableStates[page.url.pathname]?.rowsPerPage ?? 10;
 
 		if ($rowsPerPage !== cachedValue) {
 			rowsPerPage.set(cachedValue); // will trigger reactivity
-			handler.invalidate(); // refetch with updated rowsPerPage
 		}
 	});
 

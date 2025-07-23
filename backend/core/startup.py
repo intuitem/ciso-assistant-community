@@ -67,6 +67,12 @@ READER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    # campaigns,
+    "view_campaign",
+    # operating modes
+    "view_elementaryaction",
+    "view_operatingmode",
+    "view_killchain",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -114,6 +120,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    # campaigns,
+    "view_campaign",
     # privacy,
     "view_processing",
     "view_processingnature",
@@ -123,6 +131,10 @@ APPROVER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    # operating modes
+    "view_elementaryaction",
+    "view_operatingmode",
+    "view_killchain",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -272,6 +284,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "view_campaign",
     # privacy,
     "add_processing",
     "change_processing",
@@ -302,6 +316,19 @@ ANALYST_PERMISSIONS_LIST = [
     "change_datatransfer",
     "view_datatransfer",
     "delete_datatransfer",
+    # operating modes
+    "view_elementaryaction",
+    "add_elementaryaction",
+    "change_elementaryaction",
+    "delete_elementaryaction",
+    "view_operatingmode",
+    "add_operatingmode",
+    "change_operatingmode",
+    "delete_operatingmode",
+    "view_killchain",
+    "add_killchain",
+    "change_killchain",
+    "delete_killchain",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -459,6 +486,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
     # privacy,
     "add_processing",
     "change_processing",
@@ -489,6 +521,19 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_datatransfer",
     "view_datatransfer",
     "delete_datatransfer",
+    # operating modes
+    "view_elementaryaction",
+    "add_elementaryaction",
+    "change_elementaryaction",
+    "delete_elementaryaction",
+    "view_operatingmode",
+    "add_operatingmode",
+    "change_operatingmode",
+    "delete_operatingmode",
+    "view_killchain",
+    "add_killchain",
+    "change_killchain",
+    "delete_killchain",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -635,6 +680,19 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
+    "view_elementaryaction",
+    "add_elementaryaction",
+    "change_elementaryaction",
+    "delete_elementaryaction",
+    "view_operatingmode",
+    "add_operatingmode",
+    "change_operatingmode",
+    "delete_operatingmode",
+    "view_killchain",
+    "add_killchain",
+    "change_killchain",
+    "delete_killchain",
+    # qualifications,
     "view_qualification",
     "add_qualification",
     "change_qualification",
@@ -712,6 +770,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

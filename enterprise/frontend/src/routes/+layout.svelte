@@ -14,7 +14,6 @@
 	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import ParaglideJsProvider from './ParaglideJsProvider.svelte';
 	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
 	import {
 		initializeToastStore,
@@ -86,47 +85,60 @@
 
 	let { children }: Props = $props();
 
-	const faviconB64 = persisted('favicon', {
-		data: '',
-		hash: '',
-		mimeType: ''
-	});
+	// const faviconB64 = persisted('favicon', {
+	// 	data: '',
+	// 	hash: '',
+	// 	mimeType: ''
+	// });
 
 	const clientSettings = $page.data.clientSettings;
-	let favicon = $derived(`data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}`);
-	let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
-
-	onMount(async () => {
-		if (!clientSettings?.settings?.favicon) {
-			return;
-		}
-		if (faviconHash !== $faviconB64.hash) {
-			console.log('favicon changed, fetching new favicon...');
-			const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
-			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
-		}
-	});
-
-	run(() => {
-		if (browser && $page.url.searchParams.has('refresh')) {
-			$page.url.searchParams.delete('refresh');
-			window.location.href = $page.url.href;
-		}
-	});
+	// let favicon = $state($faviconB64?.hash ? `data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}` : undefined);
+	// let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
+	//
+	//  if (typeof window !== 'undefined') {
+	// 	// stash the value...
+	// 	const _favicon = favicon;
+	//
+	// 	// unset it...
+	// 	favicon = undefined;
+	//
+	// 	$effect(() => {
+	// 		// ...and reset after we've mounted
+	//      // IMPORTANT: if show_images_unauthenticated is true, we show the favicon
+	//      if (clientSettings?.settings?.show_images_unauthenticated || $page.data?.user) {
+	//          favicon = _favicon;
+	//          return;
+	//      }
+	//      favicon = '/favicon.ico';
+	// 	});
+	// }
+	//
+	// onMount(async () => {
+	// 	if (!clientSettings?.settings?.favicon) {
+	// 		return;
+	// 	}
+	// 	if (faviconHash !== $faviconB64?.hash) {
+	// 		console.log('favicon changed, fetching new favicon...');
+	// 		const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
+	// 		faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
+	// 	}
+	// });
 </script>
 
 <svelte:head>
-  <link rel="icon" href={favicon?.url ?? favicon} />
+	<link
+		rel="icon"
+		type={clientSettings?.settings?.favicon_mime_type ?? 'image/x-icon'}
+		href="/favicon"
+	/>
 </svelte:head>
 
-<ParaglideJsProvider>
-	<Modal components={modalRegistry} />
-	<Toast />
-	<CommandPalette />
-	{@render children?.()}
+<Modal components={modalRegistry} />
+<Toast />
+<CommandPalette />
+{@render children?.()}
 
-	{#if $flash}
-		{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
-		<div style:background-color={bg} class="flash">{$flash.message}</div>
-	{/if}
-</ParaglideJsProvider>
+{#if $flash}
+	{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
+	<div style:background-color={bg} class="flash">{$flash.message}</div>
+{/if}

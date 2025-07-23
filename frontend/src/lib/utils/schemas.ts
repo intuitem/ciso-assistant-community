@@ -90,7 +90,8 @@ export const PerimeterSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	lc_status: z.string().optional().default('in_design')
+	lc_status: z.string().optional().default('in_design'),
+	default_assignee: z.array(z.string().optional()).optional()
 });
 
 export const RiskMatrixSchema = z.object({
@@ -132,6 +133,8 @@ export const RiskScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	applied_controls: z.string().uuid().optional().array().optional(),
 	existing_applied_controls: z.string().uuid().optional().array().optional(),
+	inherent_proba: z.number().optional(),
+	inherent_impact: z.number().optional(),
 	current_proba: z.number().optional(),
 	current_impact: z.number().optional(),
 	residual_proba: z.number().optional(),
@@ -324,6 +327,19 @@ export const ComplianceAssessmentSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
+export const CampaignSchema = z.object({
+	...NameDescriptionMixin,
+	frameworks: z.array(z.string()),
+	selected_implementation_groups: z
+		.array(z.object({ value: z.string(), framework: z.string() }))
+		.optional(),
+	perimeters: z.array(z.string()),
+	status: z.string().optional().nullable(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
+});
+
 export const EvidenceSchema = z.object({
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
@@ -371,7 +387,8 @@ export const FeatureFlagsSchema = z.object({
 	tprm: z.boolean().optional(),
 	ebiosrm: z.boolean().optional(),
 	privacy: z.boolean().optional(),
-	experimental: z.boolean().optional()
+	experimental: z.boolean().optional(),
+	inherent_risk: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -379,10 +396,9 @@ export const SSOSettingsSchema = z.object({
 	force_sso: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
-	provider_name: z.string(),
+	provider_name: z.string().optional(),
 	client_id: z.string(),
 	secret: z.string().optional(),
-	key: z.string().optional(),
 
 	// SAML specific fields
 	attribute_mapping_uid: z
@@ -416,7 +432,19 @@ export const SSOSettingsSchema = z.object({
 	want_attribute_statement: z.boolean().optional().nullable(),
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
-	want_name_id_encrypted: z.boolean().optional().nullable()
+	want_name_id_encrypted: z.boolean().optional().nullable(),
+	server_url: z.string().optional().nullable(),
+	token_auth_method: z
+		.enum([
+			'client_secret_basic',
+			'client_secret_post',
+			'client_secret_jwt',
+			'private_key_jwt',
+			'none'
+		])
+		.optional()
+		.nullable(),
+	oauth_pkce_enabled: z.boolean().optional().default(false)
 });
 
 export const EntitiesSchema = z.object({
@@ -528,10 +556,11 @@ export const processingSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
-	legal_basis: z.string().optional(),
+	legal_basis: z.string(),
 	dpia_required: z.boolean().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
-	nature: z.string().optional().array().optional()
+	nature: z.string().optional().array().optional(),
+	associated_controls: z.array(z.string().optional()).optional()
 });
 
 export const purposeSchema = z.object({
@@ -594,6 +623,7 @@ export const personalDataSchema = z.object({
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
+	quotation_method: z.string().optional().default('manual'),
 	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),
@@ -811,6 +841,32 @@ export const AuthTokenCreateSchema = z.object({
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
+export const ElementaryActionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	threat: z.string().uuid().optional(),
+	icon: z.string().optional().nullable(),
+	attack_stage: z.number().default(0),
+	operating_modes: z.string().uuid().optional().array().optional()
+});
+
+export const OperatingModeSchema = z.object({
+	...NameDescriptionMixin,
+	operational_scenario: z.string().uuid(),
+	ref_id: z.string().optional(),
+	elementary_actions: z.string().uuid().optional().array().optional(),
+	likelihood: z.number().optional().default(-1)
+});
+
+export const KillChainSchema = z.object({
+	operating_mode: z.string().uuid(),
+	elementary_action: z.string().uuid(),
+	// is_highlighted: z.boolean().default(false),
+	antecedents: z.string().uuid().optional().array().optional(),
+	logic_operator: z.string().optional().nullable()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -827,6 +883,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
+	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
@@ -861,7 +918,10 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'task-templates': TaskTemplateSchema,
-	'task-nodes': TaskNodeSchema
+	'task-nodes': TaskNodeSchema,
+	'elementary-actions': ElementaryActionSchema,
+	'operating-modes': OperatingModeSchema,
+	'kill-chains': KillChainSchema
 };
 
 export const modelSchema = (model: string) => {

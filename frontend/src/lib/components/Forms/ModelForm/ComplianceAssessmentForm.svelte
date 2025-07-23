@@ -57,6 +57,7 @@
 		bind:cachedValue={formDataCache['baseline']}
 		label={m.baseline()}
 		optionsEndpoint="compliance-assessments"
+		disabled="true"
 	/>
 {/if}
 {#if initialData.ebios_rm_studies}
@@ -155,6 +156,14 @@
 		optionsEndpoint="assets"
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		field="assets"
 		label={m.assets()}
 	/>

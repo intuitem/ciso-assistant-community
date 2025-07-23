@@ -103,7 +103,7 @@
 				href={`/ebios-rm/${data.data.id}`}
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left" />
+				<i class="fa-solid fa-arrow-left"></i>
 				<p>{m.goBackToEbiosRmStudy()}</p>
 			</Anchor>
 
@@ -149,6 +149,10 @@
 				<Anchor class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
 					>{ebiosRmStudy.risk_matrix.str}</Anchor
 				>
+			</span>
+			<span class="text-sm text-gray-500"
+				>{m.quotationMethodSemiColon()}
+				<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method)}</span>
 			</span>
 		</div>
 		<div
@@ -247,6 +251,7 @@
 											URLModel={urlmodel}
 											canSelectObject={canEditObject}
 											baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
+											disableDelete={true}
 										>
 											{#snippet selectButton()}
 												<div>

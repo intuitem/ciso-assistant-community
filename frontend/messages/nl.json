@@ -925,8 +925,8 @@
 	"taskScheduleWarning": "Alle taken die niet deel uitmaken van het nieuwe schema zullen permanent worden verwijderd",
 	"mappingSuggested": "Suggestie voor in kaart brengen",
 	"mappingSuggestedHelpText": "Suggesties voor in kaart brengen gebaseerd op geladen kaders",
-	"mappingSuggestionTeasing": "Suggesties voor in kaart brengen zijn nu beschikbaar! U kunt de filters gebruiken om suggesties te verkennen op basis van geladen kaders.",
 	"associatedFindingsAssessments": "Geassocieerde vervolgstappen",
+	"mappingSuggestionTeasing": "Suggesties voor in kaart brengen zijn nu beschikbaar! U kunt de filters gebruiken om suggesties te verkennen op basis van geladen kaders.",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -959,5 +959,6 @@
 	],
 	"matchingScenarios": "Overeenkomende scenario's",
 	"select": "Selecteer",
-	"deselect": "Deselecteer"
+	"deselect": "Deselecteer",
+	"fearedEventAssetHelpText": "Gevreesde gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit."
 }
