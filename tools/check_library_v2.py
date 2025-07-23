@@ -4,28 +4,29 @@ import sys
 import argparse
 import pandas as pd
 from openpyxl import load_workbook
-from pydot import Any
 
 
 # ─────────────────────────────────────────────────────────────
 # VALIDATE UTILS
 # ─────────────────────────────────────────────────────────────
 
-def validate_urn(urn: str, context: str = None):
+def validate_urn(urn: str, context: str = None, row = None):
     pattern = r"^urn:([a-z0-9._-]+:)*[a-z0-9._-]+$"
     if not re.fullmatch(pattern, urn):
-        raise ValueError(f"({context if context else 'validate_urn'}) Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_urn'}) {'Row #'+str(row+2)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed")
 
-def validate_ref_id(ref_id: str, context: str = None):
+def validate_ref_id(ref_id: str, context: str = None, row = None):
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
-        raise ValueError(f"({context if context else 'validate_ref_id'}) Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row+2)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
 
 def validate_sheet_name(sheet_name: str, context: str = None):
     if not (sheet_name.endswith("_meta") or sheet_name.endswith("_content")):
         raise ValueError(f"({context if context else 'validate_sheet_name'}) Invalid sheet name \"{sheet_name}\". Sheet names must end with '_meta' or '_content'")
 
-def print_sheet_validation(sheet_name: str, warnings: Any = None):
-    
+def is_valid_locale(locale_str):
+    return bool(re.fullmatch(r"[a-z0-9]{2}", locale_str))
+
+def print_sheet_validation(sheet_name: str, warnings = None):
     if not warnings:
         print(f"🟢 [CHECK] Valid sheet: \"{sheet_name}\"")
     else:
@@ -82,12 +83,30 @@ def validate_library_meta(df, sheet_name):
 
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
+    # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    validate_urn(urn_value, context="validate_library_meta")
+    validate_urn(urn_value, fct_name)
 
+    # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    validate_ref_id(ref_id_value, context="validate_library_meta")
-    
+    validate_ref_id(ref_id_value, context=fct_name)
+
+    # version
+    version_value = df[df.iloc[:, 0] == "version"].iloc[0, 1]
+    try:
+        version_int = int(str(version_value).strip())
+        if version_int <= 0:
+            raise ValueError
+    except Exception:
+        raise ValueError(f"({fct_name}) [{sheet_name}] Invalid \"version\": must be a positive non-zero integer, got \"{version_value}\"")
+
+    # locale
+    locale_value = str(df[df.iloc[:, 0] == "locale"].iloc[0, 1]).strip()
+    if not is_valid_locale(locale_value):
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Invalid \"locale\" value: \"{locale_value}\""
+            "\n💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
+
     print_sheet_validation(sheet_name)
 
 
@@ -103,10 +122,10 @@ def validate_framework_meta(df, sheet_name):
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    validate_urn(urn_value, context="validate_framework_meta")
+    validate_urn(urn_value, fct_name)
 
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    validate_ref_id(ref_id_value, context="validate_framework_meta")
+    validate_ref_id(ref_id_value, fct_name)
     
     print_sheet_validation(sheet_name)
 
@@ -145,10 +164,10 @@ def validate_risk_matrix_meta(df, sheet_name):
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    validate_urn(urn_value, context="validate_risk_matrix_meta")
+    validate_urn(urn_value, fct_name)
 
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    validate_ref_id(ref_id_value, context="validate_risk_matrix_meta")
+    validate_ref_id(ref_id_value, fct_name)
     
     print_sheet_validation(sheet_name)
 
@@ -243,6 +262,9 @@ def validate_content_sheet(df, sheet_name, required_columns, context):
                 if pd.isna(value) or str(value).strip() == "":
                     raise ValueError(f"({context}) [{sheet_name}] Row #{idx + 2}: required value missing in column \"{col}\"")
 
+                if col in ["ref_id", "id"]:
+                    validate_ref_id(value, context, idx)
+
 
 
 # [CONTENT] Framework
@@ -268,6 +290,9 @@ def validate_framework_content(df, sheet_name):
                 f"({fct_name}) [{sheet_name}] Row #{idx + 2}: Invalid row: Both \"ref_id\" and \"name\" are empty"
                 "\n💡 Tip: At least one of them must be filled."
             )
+
+        if ref_id:
+            validate_ref_id(ref_id, fct_name, idx)
 
     print_sheet_validation(sheet_name)
 
