@@ -40,7 +40,7 @@ jobs:
       - name: Cache pnpm modules for Build
         uses: actions/cache@v4
         with:
-          path: ~/.pnpm-store
+          path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
@@ -329,17 +329,13 @@ jobs:
       - name: Cache pnpm modules
         uses: actions/cache@v4
         with:
-          path: ${{ env.enterprise-frontend-directory }}/node_modules
+          path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}/pnpm-lock.yaml', env.enterprise-frontend-directory)) }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm globally
         run: npm install -g pnpm
-
-      - name: Install enterprise frontend dependencies (if not cached/part of build artifact)
-        working-directory: ${{ env.enterprise-frontend-directory }}
-        run: pnpm i --frozen-lockfile
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
