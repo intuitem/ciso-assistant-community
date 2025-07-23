@@ -1240,5 +1240,7 @@
 			}
 		}
 	],
-	"matchingScenarios": "Matchende scenarier"
+	"matchingScenarios": "Matchende scenarier",
+	"select": "Vælg",
+	"deselect": "Fravælg"
 }

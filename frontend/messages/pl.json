@@ -1678,6 +1678,8 @@
 		}
 	],
 	"matchingScenarios": "Dopasowane scenariusze",
+	"select": "Wybierz",
+	"deselect": "Odznacz",
 	"serverURL": "URL serwera",
 	"oidcConfiguration": "Openid-Configuration",
 	"tokenAuthMethod": "Metoda tokenu",
