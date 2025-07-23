@@ -214,7 +214,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.frontend-directory }}/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}/pnpm-lock.yaml', env.frontend-directory)) }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
@@ -356,7 +356,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}/pnpm-lock.yaml', env.enterprise-frontend-directory)) }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
