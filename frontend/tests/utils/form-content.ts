@@ -62,12 +62,12 @@ export class FormContent {
 					await field.locator.selectOption(values[key]);
 					break;
 				case FormFieldType.SELECT_AUTOCOMPLETE:
+					for (const spinner of await this.page.locator('.loading-spinner').all()) {
+						await expect(spinner).not.toBeVisible({
+							timeout: 20_000
+						});
+					}
 					await expect(async () => {
-						for (const spinner of await this.page.locator('.loading-spinner').all()) {
-							await expect(spinner).not.toBeVisible({
-								timeout: 5000
-							});
-						}
 						if (
 							(await field.locator.getByRole('option').isVisible()) &&
 							(await field.locator
@@ -76,14 +76,14 @@ export class FormContent {
 						) {
 							await expect(field.locator.getByRole('searchbox')).toContainText(values[key]);
 						} else {
-							await field.locator.click();
 							if (typeof values[key] === 'object' && 'request' in values[key]) {
 								const responsePromise = this.page.waitForResponse(
 									(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 								);
+								await field.locator.click();
 								await expect(
 									field.locator.getByRole('option', { name: values[key].value }).first()
-								).toBeVisible({ timeout: 1000 });
+								).toBeVisible({ timeout: 10_000 });
 								await field.locator
 									.getByRole('option', { name: values[key].value })
 									.first()
@@ -91,9 +91,10 @@ export class FormContent {
 
 								await responsePromise;
 							} else {
+								await field.locator.click();
 								await expect(
 									field.locator.getByRole('option', { name: values[key] }).first()
-								).toBeVisible({ timeout: 1000 });
+								).toBeVisible({ timeout: 10_000 });
 								await field.locator.getByRole('option', { name: values[key] }).first().click();
 							}
 						}
