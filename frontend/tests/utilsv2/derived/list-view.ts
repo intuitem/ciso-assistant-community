@@ -174,4 +174,11 @@ export class LibraryListViewPage extends ListViewPage {
 			`${safeTranslate('loadedLibraries')} ${count}`
 		);
 	}
+
+	/** Returns the number of currently loaded libraries. */
+	async getLoadedLibraryCount(): Promise<number> {
+		const text = await this._loadedLibrariesTab.innerText();
+		const libraryCount = Number(text.match(/[0-9]+$/));
+		return libraryCount;
+	}
 }

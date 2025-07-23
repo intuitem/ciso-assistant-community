@@ -156,12 +156,13 @@ testV2('user usual routine actions are working correctly', async ({ page }) => {
 
 		let firstRow = modelTable.getFirstRow();
 		await firstRow.checkValue(expectV2, 1, 'anssi-architectures-si-sensibles-dr');
+		const libraryCount = await libraryListView.getLoadedLibraryCount();
 		await firstRow.doLoadLibrary();
 		const toast = libraryListView.getToast();
 		await toast.checkIfVisible(expectV2);
 		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
 
-		await libraryListView.checkLoadedLibraryCount(expectV2, 1);
+		await libraryListView.checkLoadedLibraryCount(expectV2, libraryCount + 1);
 	});
 
 	await testV2.step('User can load a risk matrix', async () => {
@@ -170,12 +171,13 @@ testV2('user usual routine actions are working correctly', async ({ page }) => {
 
 		const firstRow = modelTable.getFirstRow();
 		await firstRow.checkValue(expectV2, 1, 'critical_5x5');
+		const libraryCount = await libraryListView.getLoadedLibraryCount();
 		await firstRow.doLoadLibrary();
 		const toast = libraryListView.getToast();
 		await toast.checkIfVisible(expectV2);
 		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
 
-		await libraryListView.checkLoadedLibraryCount(expectV2, 2);
+		await libraryListView.checkLoadedLibraryCount(expectV2, libraryCount + 1);
 	});
 
 	for (const testData of TEST_DATA) {
