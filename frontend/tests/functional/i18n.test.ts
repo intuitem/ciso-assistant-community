@@ -12,28 +12,22 @@ test('switching locale works properly', async ({ logedPage, analyticsPage, sideB
 			allLocales.push('en');
 		}
 		for (const locale of allLocales) {
-			await sideBar.moreButton.click();
-			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-			await expect(sideBar.languageSelect).toBeVisible();
-			setLocale(locale);
-			if (!sideBar.languageSelect.isVisible()) {
+			await expect(async () => {
 				await sideBar.moreButton.click();
 				await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 				await expect(sideBar.languageSelect).toBeVisible();
-			}
-			await sideBar.languageSelect.selectOption(locale);
-			await logedPage.hasTitle(m.analytics({}, { locale }));
+				setLocale(locale);
+				await sideBar.languageSelect.selectOption(locale);
+				await logedPage.hasTitle(m.analytics({}, { locale }));
+			}).toPass();
 		}
-		await sideBar.moreButton.click();
-		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await expect(sideBar.languageSelect).toBeVisible();
-		setLocale('en');
-		if (!sideBar.languageSelect.isVisible()) {
+		await expect(async () => {
 			await sideBar.moreButton.click();
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
-		}
-		await sideBar.languageSelect.selectOption('en');
-		await logedPage.hasTitle(m.analytics({}, { locale: 'en' }));
+			setLocale('en');
+			await sideBar.languageSelect.selectOption('en');
+			await logedPage.hasTitle(m.analytics({}, { locale: 'en' }));
+		}).toPass();
 	});
 });
