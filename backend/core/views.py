@@ -1,4 +1,5 @@
-import csv
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 import json
 import mimetypes
 import re
@@ -1041,8 +1042,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-    @action(detail=True, name="Get action plan CSV")
-    def action_plan_csv(self, request, pk):
+    @action(detail=True, name="Get action plan Excel")
+    def action_plan_excel(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
@@ -1050,60 +1051,85 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
         risk_assessment = RiskAssessment.objects.get(id=pk)
         risk_scenarios = risk_assessment.risk_scenarios.all()
         queryset = AppliedControl.objects.filter(
             risk_scenarios__in=risk_scenarios
         ).distinct()
 
-        # Use the same serializer to maintain consistency - to review
         serializer = RiskAssessmentActionPlanSerializer(
             queryset, many=True, context={"pk": pk}
         )
 
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="action_plan_{pk}.csv"'
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Action Plan"
 
-        writer = csv.writer(response)
-
-        writer.writerow(
-            [
-                "Name",
-                "Description",
-                "Domain",
-                "Category",
-                "CSF Function",
-                "Priority",
-                "Status",
-                "ETA",
-                "Expiry date",
-                "Effort",
-                "Impact",
-                "Cost",
-                "Assigned to",
-                "Covered scenarios",
-            ]
-        )
+        headers = [
+            "Name",
+            "Description",
+            "Domain",
+            "Category",
+            "CSF Function",
+            "Priority",
+            "Status",
+            "ETA",
+            "Expiry date",
+            "Effort",
+            "Impact",
+            "Cost",
+            "Assigned to",
+            "Covered scenarios",
+        ]
+        ws.append(headers)
 
         for item in serializer.data:
-            writer.writerow(
-                [
-                    item.get("name"),
-                    item.get("description"),
-                    item.get("folder").get("str"),
-                    item.get("category"),
-                    item.get("csf_function"),
-                    item.get("priority"),
-                    item.get("status"),
-                    item.get("eta"),
-                    item.get("expiry_date"),
-                    item.get("effort"),
-                    item.get("impact"),
-                    item.get("cost"),
-                    "\n".join([ra.get("str") for ra in item.get("owner")]),
-                    "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
-                ]
-            )
+            row = [
+                item.get("name"),
+                item.get("description"),
+                item.get("folder").get("str"),
+                item.get("category"),
+                item.get("csf_function"),
+                item.get("priority"),
+                item.get("status"),
+                item.get("eta"),
+                item.get("expiry_date"),
+                item.get("effort"),
+                item.get("impact"),
+                item.get("cost"),
+                "\n".join([ra.get("str") for ra in item.get("owner")]),
+                "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
+            ]
+            ws.append(row)
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
+            max_lines = 1
+            for cell in row:
+                if cell.value and isinstance(cell.value, str):
+                    line_count = cell.value.count("\n") + 1
+                    max_lines = max(max_lines, line_count)
+            ws.row_dimensions[row_idx].height = max(15, max_lines * 15)
+
+        for col in ws.columns:
+            max_length = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                try:
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                except Exception as e:
+                    logger.error(f"Error processing cell value: {e}")
+                    pass
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="action_plan_{pk}.xlsx"'
+        )
+        wb.save(response)
 
         return response
 
