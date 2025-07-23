@@ -1070,6 +1070,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             [
                 "Name",
                 "Description",
+                "Domain",
                 "Category",
                 "CSF Function",
                 "Priority",
@@ -1079,6 +1080,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "Effort",
                 "Impact",
                 "Cost",
+                "Assigned to",
                 "Covered scenarios",
             ]
         )
@@ -1088,6 +1090,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 [
                     item.get("name"),
                     item.get("description"),
+                    item.get("folder").get("str"),
                     item.get("category"),
                     item.get("csf_function"),
                     item.get("priority"),
@@ -1097,6 +1100,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     item.get("effort"),
                     item.get("impact"),
                     item.get("cost"),
+                    "\n".join([ra.get("str") for ra in item.get("owner")]),
                     "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
                 ]
             )
