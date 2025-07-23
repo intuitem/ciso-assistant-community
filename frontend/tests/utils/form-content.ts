@@ -63,9 +63,11 @@ export class FormContent {
 					break;
 				case FormFieldType.SELECT_AUTOCOMPLETE:
 					await expect(async () => {
-						await expect(this.page.getByTestId('loading-spinner')).not.toBeVisible({
-							timeout: 5000
-						});
+						for (const spinner of await this.page.locator('.loading-spinner').all()) {
+							await expect(spinner).not.toBeVisible({
+								timeout: 5000
+							});
+						}
 						if (
 							(await field.locator.getByRole('option').isVisible()) &&
 							(await field.locator
