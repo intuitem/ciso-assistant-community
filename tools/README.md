@@ -287,8 +287,8 @@ A `_meta` of type `implementation_groups` contains the following keys:
 - name (*): the name of the object, will be used in framework objects
 
 The `_content` tab for a `implementation_groups` object contains the following columns:
-- ref_id
-- name
+- ref_id (*)
+- name (*)
 - description
 
 ### Scores
