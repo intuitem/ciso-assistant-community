@@ -1,18 +1,18 @@
 import { test, TestContent } from '../../utils/test-utils.js';
 
-let vars = TestContent.generateTestVars();
-let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+const vars = TestContent.generateTestVars();
+const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
-test('user can create asset assessments inside BIA', async ({
+test('user can create findings inside a follow up', async ({
 	page,
-	pages,
 	logedPage,
 	foldersPage,
 	perimetersPage,
-	findingsAssessmentsPage
+	findingsAssessmentsPage,
+	findingsPage
 }) => {
-	//NOTE: This is duplicated form business-impact-analysis.test.ts
-	// It could be moved to a Fixture
+	//TODO: The first 2 steps are duplicated form business-impact-analysis.test.ts
+	// They should be replaced when using the new create-fixture.py or create-tests-db.py approach
 	await test.step('create required folder', async () => {
 		await foldersPage.goto();
 		await foldersPage.hasUrl();
@@ -46,16 +46,16 @@ test('user can create asset assessments inside BIA', async ({
 		});
 	});
 
-	await test.step('create findings assessment', async () => {
+	await test.step('create follow up', async () => {
 		await findingsAssessmentsPage.goto();
 		await findingsAssessmentsPage.hasUrl();
 		await findingsAssessmentsPage.createItem(testObjectsData.findingsAssessmentsPage.build);
 	});
 
-	await test.step('create findings inside', async () => {
+	await test.step('create finding inside follow up', async () => {
 		await findingsAssessmentsPage.viewItemDetail(
 			testObjectsData.findingsAssessmentsPage.build.name
 		);
-		// await findingsAssessmentsPage.createItem({ asset: vars.assetName }, undefined, page);
+		await findingsPage.createItem({ name: vars.findingName }, undefined, page);
 	});
 });

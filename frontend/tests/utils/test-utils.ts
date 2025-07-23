@@ -7,7 +7,6 @@ import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
-import { description } from '$paraglide/messages/ro.js';
 
 type Fixtures = {
 	data: { [key: string]: any };
@@ -33,6 +32,7 @@ type Fixtures = {
 	usersPage: PageContent;
 	securityExceptionsPage: PageContent;
 	findingsAssessmentsPage: PageContent;
+	findingsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	logedPage: LoginPage;
@@ -282,6 +282,17 @@ export const test = base.extend<Fixtures>({
 		]);
 		await use(fPage);
 	},
+
+	findingsPage: async ({ page }, use) => {
+		const fPage = new PageContent(page, '/findings', 'Findings', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT }
+			// { name: 'status', type: type.SELECT }
+		]);
+		await use(fPage);
+	},
+
 	businessImpactAnalysisPage: async ({ page }, use) => {
 		const bPage = new PageContent(page, '/business-impact-analysis', /Business Impact Analysis?/, [
 			{ name: 'name', type: type.TEXT },
