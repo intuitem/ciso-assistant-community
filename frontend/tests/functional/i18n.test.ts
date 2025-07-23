@@ -17,17 +17,17 @@ test('switching locale works properly', async ({ logedPage, analyticsPage, sideB
 				await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 				await expect(sideBar.languageSelect).toBeVisible();
 				setLocale(locale);
-				await sideBar.languageSelect.selectOption(locale);
+				await sideBar.languageSelect.selectOption(locale, { timeout: 5000 });
 				await logedPage.hasTitle(m.analytics({}, { locale }));
-			}).toPass();
+			}).toPass({ timeout: 20_000, intervals: [1000, 2000, 5000] });
 		}
 		await expect(async () => {
 			await sideBar.moreButton.click();
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
 			setLocale('en');
-			await sideBar.languageSelect.selectOption('en');
+			await sideBar.languageSelect.selectOption('en', { timeout: 5000 });
 			await logedPage.hasTitle(m.analytics({}, { locale: 'en' }));
-		}).toPass();
+		}).toPass({ timeout: 20_000, intervals: [1000, 2000, 5000] });
 	});
 });
