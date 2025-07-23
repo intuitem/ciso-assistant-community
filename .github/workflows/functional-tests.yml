@@ -1,12 +1,9 @@
-name: Functional Tests
+name: Functional Tests (i18n reliability testing)
 permissions:
   contents: read
   actions: write
 
 on:
-  pull_request:
-    branches: [main, develop]
-    types: [opened, synchronize]
   workflow_dispatch:
 
 env:
@@ -36,9 +33,9 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -111,7 +108,7 @@ jobs:
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" i18n
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
@@ -142,9 +139,9 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -219,7 +216,7 @@ jobs:
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" i18n
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
