@@ -117,7 +117,7 @@
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
 			const nodeDocumentationScore = data.compliance_assessment.show_documentation_score
 				? node.documentation_score
-				: null;
+				: 0;
 			resultCounts['total_documentation_score'] =
 				(resultCounts['total_documentation_score'] || 0) + nodeDocumentationScore;
 			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
