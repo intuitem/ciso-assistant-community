@@ -1688,6 +1688,8 @@
 	"resetClientSecret": "Reset client secret",
 	"oidcTokenAuthMethodHelpText": "Optional token endpoint authentication method. If omitted, a method from the server's auth token method list is used",
 	"oidcPKCEEnabledHelpText": "Enable OAuth PKCE (Proof Key for Code Exchange) support. This is recommended for public clients.",
+	"select": "Select",
+	"deselect": "Deselect",
 	"clickToUpload": "Click to upload",
 	"orDragAndDrop": "or drag and drop",
 	"dataWizardSelectFile": "Select your file and make sure it matches the templates",
