@@ -4561,7 +4561,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     category=reference_control.category,
                     defaults={
                         "name": reference_control.get_name_translated
-                        or reference_control.ref.id,
+                        or reference_control.ref_id,
                         "ref_id": reference_control.ref_id
                         if not reference_control.get_name_translated
                         else None,
