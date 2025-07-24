@@ -21,7 +21,6 @@ DB_DIRECTORY = settings.DATABASES["default"]["NAME"].parent
 TEST_DB_DIRECTORY = DB_DIRECTORY / "tests"
 BLANK_DB_NAME = "blank-test-database.sqlite3"
 
-# mapping(test_name => list of objects/lazy-loaded objects to create)
 TEST_DATA: dict[str, list[models.Model | Callable[[], models.Model]]] = {
     "detailed/compliance-assessments.test.ts": [
         # Lambda functions serve as lazy-loaded objects
@@ -33,14 +32,14 @@ TEST_DATA: dict[str, list[models.Model | Callable[[], models.Model]]] = {
 
 
 class Command(BaseCommand):
-    help = "Create functional test databases (if this command corrupted the main database use the backup stored at initial-db-backup.sqlite3)"
+    help = "Create functional test databases. If this command corrupts the main database, use the backup located at 'db/initial-db-backup.sqlite3'."
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
             "-k",
             "--keep-blank-db",
             action="store_true",
-            help=f"Use the current cached blank database({BLANK_DB_NAME}) if it exists, otherwise create it and store it for later use.",
+            help=f"Use the cached blank database at 'db/{BLANK_DB_NAME}' if it exists; otherwise, create and store it for future use.",
         )
 
     def handle(self, *args, **options):
