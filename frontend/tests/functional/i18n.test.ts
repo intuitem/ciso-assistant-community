@@ -14,8 +14,8 @@ test('switching locale works properly', async ({ logedPage, analyticsPage, sideB
 		for (const locale of allLocales) {
 			await expect(async () => {
 				await sideBar.moreButton.click();
-				await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-				await expect(sideBar.languageSelect).toBeVisible();
+				await expect(sideBar.morePanel).not.toHaveAttribute('inert', { timeout: 1000 });
+				await expect(sideBar.languageSelect).toBeVisible({ timeout: 1000 });
 				setLocale(locale);
 				await sideBar.languageSelect.selectOption(locale, { timeout: 5000 });
 				await logedPage.hasTitle(m.analytics({}, { locale }));
@@ -23,8 +23,8 @@ test('switching locale works properly', async ({ logedPage, analyticsPage, sideB
 		}
 		await expect(async () => {
 			await sideBar.moreButton.click();
-			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-			await expect(sideBar.languageSelect).toBeVisible();
+			await expect(sideBar.morePanel).not.toHaveAttribute('inert', { timeout: 1000 });
+			await expect(sideBar.languageSelect).toBeVisible({ timeout: 1000 });
 			setLocale('en');
 			await sideBar.languageSelect.selectOption('en', { timeout: 5000 });
 			await logedPage.hasTitle(m.analytics({}, { locale: 'en' }));
