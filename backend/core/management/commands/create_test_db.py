@@ -62,10 +62,13 @@ class Command(BaseCommand):
             app_config = apps.get_app_config("core")
             startup(app_config)
 
-            call_command("createsuperuser", interactive=False, email=TEST_ADMIN_EMAIL)
-            user = User.objects.get(email=TEST_ADMIN_EMAIL)
-            user.set_password(TEST_ADMIN_PASSWORD)
-            user.save()
+            if not User.objects.filter(email=TEST_ADMIN_EMAIL).exists():
+                call_command(
+                    "createsuperuser", interactive=False, email=TEST_ADMIN_EMAIL
+                )
+                user = User.objects.get(email=TEST_ADMIN_EMAIL)
+                user.set_password(TEST_ADMIN_PASSWORD)
+                user.save()
             shutil.copy(sqlite_file_path, blank_test_db_file_path)
 
         for test_file_path, objects_to_create in TEST_DATA.items():
