@@ -190,7 +190,7 @@ jobs:
           path: ${{ env.frontend-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -230,7 +230,7 @@ jobs:
         run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
 
       - name: Cache playwright binaries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: playwright-cache
         with:
           path: |
@@ -393,7 +393,7 @@ jobs:
         run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
 
       - name: Cache playwright binaries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: playwright-cache
         with:
           path: |
