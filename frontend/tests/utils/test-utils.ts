@@ -664,6 +664,7 @@ export class TestContent {
 
 			findingsAssessmentsPage: {
 				displayName: 'Follow-ups',
+				modelName: 'findingsassessment',
 				build: {
 					name: vars.findingsAssessmentName,
 					description: vars.description,
