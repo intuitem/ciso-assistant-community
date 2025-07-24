@@ -112,9 +112,9 @@ jobs:
 
       - name: Get Community Playwright Test Files
         id: list_community_files
-        working-directory: ${{ env.frontend-directory }}/tests/
+        working-directory: ${{ env.frontend-directory }}/
         run: |
-          COMMUNITY_TEST_FILES=$(find . -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
+          COMMUNITY_TEST_FILES=$(find tests -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
           echo "Community Test files found: $COMMUNITY_TEST_FILES"
           echo "test_files=$COMMUNITY_TEST_FILES" >> $GITHUB_OUTPUT
 
@@ -126,9 +126,9 @@ jobs:
 
       - name: Get Enterprise Playwright Test Files
         id: list_enterprise_files
-        working-directory: ./enterprise-frontend-build/tests
+        working-directory: ./enterprise-frontend-build/
         run: |
-          ENTERPRISE_TEST_FILES=$(find . -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
+          ENTERPRISE_TEST_FILES=$(find tests -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
           echo "Enterprise Test files found: $ENTERPRISE_TEST_FILES"
           echo "test_files=$ENTERPRISE_TEST_FILES" >> $GITHUB_OUTPUT
 
@@ -222,6 +222,7 @@ jobs:
         run: pnpm i --frozen-lockfile
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
+        working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
 
       - name: Run migrations
@@ -237,7 +238,7 @@ jobs:
           nohup poetry run python manage.py runserver &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.frontend-directory }}/tests/
+        working-directory: ${{ env.frontend-directory }}/
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           TEST_FILE: ${{ matrix.test_file }}
@@ -380,7 +381,7 @@ jobs:
           nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.enterprise-frontend-build-directory }}/tests/
+        working-directory: ${{ env.enterprise-frontend-build-directory }}/
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           TEST_FILE: ${{ matrix.test_file }}
