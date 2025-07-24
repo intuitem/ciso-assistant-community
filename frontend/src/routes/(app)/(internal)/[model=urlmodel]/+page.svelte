@@ -140,8 +140,8 @@
 										href={`/libraries?object_type=${URLModel}`}
 										label={m.libraries()}
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										data-testid="import-button"
-										id="import-button"
+										data-testid="add-button"
+										id="add-button"
 										{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 									>
 								{/if}
@@ -176,8 +176,8 @@
 									onclick={handleClickForGT}
 									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="import-button"
-									id="import-button"
+									data-testid="add-button"
+									id="add-button"
 									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{:else if URLModel === 'frameworks'}
@@ -186,8 +186,8 @@
 									onclick={handleClickForGT}
 									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="import-button"
-									id="import-button"
+									data-testid="add-button"
+									id="add-button"
 									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{:else if URLModel === 'requirement-mapping-sets'}
@@ -195,8 +195,8 @@
 									href="/libraries?object_type=requirement_mapping_set"
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									label={m.libraries()}
-									data-testid="import-button"
-									id="import-button"
+									data-testid="add-button"
+									id="add-button"
 									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{/if}
