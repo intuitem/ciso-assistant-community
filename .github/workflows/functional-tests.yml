@@ -60,6 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: community-frontend-build
+          include-hidden-files: true
           path: |
             ${{ env.frontend-directory }}/build/
             ${{ env.frontend-directory }}/.svelte-kit/
@@ -97,6 +98,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: enterprise-frontend-build
+          include-hidden-files: true
           path: ${{ env.enterprise-frontend-build-directory }}/
           retention-days: 1
 
@@ -280,6 +282,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
+          include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/build/tests/results/
@@ -439,6 +442,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
+          include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/
