@@ -237,7 +237,7 @@ jobs:
           nohup poetry run python manage.py runserver &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.frontend-directory }}/build/
+        working-directory: ${{ env.frontend-directory }}/tests/
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           TEST_FILE: ${{ matrix.test_file }}
@@ -380,11 +380,12 @@ jobs:
           nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        working-directory: ${{ env.enterprise-frontend-build-directory }}/tests/
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+          TEST_FILE: ${{ matrix.test_file }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "${{ matrix.test_file }}"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
 
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
