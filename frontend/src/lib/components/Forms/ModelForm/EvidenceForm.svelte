@@ -90,3 +90,24 @@
 	label={m.labels()}
 	allowUserOptions="append"
 />
+
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+
+<TextField
+	type="date"
+	{form}
+	field="expiry_date"
+	label={m.expiryDate()}
+	helpText={m.expiryDateHelpText()}
+	cacheLock={cacheLocks['expiry_date']}
+	bind:cachedValue={formDataCache['expiry_date']}
+/>
