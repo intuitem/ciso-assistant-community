@@ -87,6 +87,10 @@ jobs:
       - name: Install pnpm globally
         run: npm install -g pnpm
 
+      - name: Install enterprise frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make
@@ -195,7 +199,6 @@ jobs:
         with:
           virtualenvs-create: false
           installer-parallel: true
-          cache-poetry: true
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
@@ -223,6 +226,8 @@ jobs:
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
         run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
 
       - name: Run migrations
@@ -339,7 +344,6 @@ jobs:
         with:
           virtualenvs-create: false
           installer-parallel: true
-          cache-poetry: true
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
