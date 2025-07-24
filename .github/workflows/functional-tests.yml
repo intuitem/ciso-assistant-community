@@ -88,7 +88,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install enterprise frontend dependencies
-        working-directory: ${{ env.enterprise-frontend-directory }}
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm i --frozen-lockfile
 
       - name: Build enterprise frontend
