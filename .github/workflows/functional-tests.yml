@@ -87,10 +87,6 @@ jobs:
       - name: Install pnpm globally
         run: npm install -g pnpm
 
-      - name: Install enterprise frontend dependencies
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm i --frozen-lockfile
-
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make
@@ -363,6 +359,10 @@ jobs:
 
       - name: Install pnpm globally
         run: npm install -g pnpm
+
+      - name: Install enterprise frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: pnpm i --frozen-lockfile
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
