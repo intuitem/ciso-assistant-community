@@ -341,25 +341,20 @@
 								>
 							{/if}
 						{/if}
-					{:else}
-						<!-- {@const displayedScore = showDocumentationScore
-							? (nodeScore() + nodeDocumentationScore()) / 2
-							: nodeScore()} -->
-						{#if nodeScore() !== null}
+					{:else if nodeScore() !== null}
+						<ProgressRing
+							strokeWidth="20px"
+							value={formatScoreValue(nodeScore(), node.max_score)}
+							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+							size="size-12">{nodeScore()}</ProgressRing
+						>
+						{#if showDocumentationScore}
 							<ProgressRing
 								strokeWidth="20px"
-								value={formatScoreValue(nodeScore(), node.max_score)}
-								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
-								size="size-12">{nodeScore()}</ProgressRing
+								value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+								size="size-12">{nodeDocumentationScore()}</ProgressRing
 							>
-							{#if showDocumentationScore}
-								<ProgressRing
-									strokeWidth="20px"
-									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
-									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
-									size="size-12">{nodeDocumentationScore()}</ProgressRing
-								>
-							{/if}
 						{/if}
 					{/if}
 				</div>
