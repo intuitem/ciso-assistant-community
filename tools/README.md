@@ -270,7 +270,7 @@ A `_meta` of type `requirement_mapping_set` contains the following keys:
 - type (*): must be `requirement_mapping_set`
 - source_framework_urn (*)
 - source_node_base_urn (*)
-- target_framework_base_urn (*)
+- target_framework_urn (*)
 - target_node_base_urn (*)
 
 The `_content` tab for a `requirement_mapping_set` object contains the following columns:
