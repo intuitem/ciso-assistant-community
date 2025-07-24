@@ -102,8 +102,10 @@
 				<option value={defaultValue} selected>--</option>
 			{/if}
 			{#each options || [] as option}
+				{@const camelKey = toCamelCase(option.value)}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
+					<!-- Skipping "m" key because it's a named export in messages.js, not an actual translation key it causes false positives. -->
+					{camelKey !== "m" && m[camelKey] ? safeTranslate(option.value) : safeTranslate(option.label)}
 				</option>
 			{/each}
 		</select>
