@@ -287,8 +287,9 @@ export const test = base.extend<Fixtures>({
 		const fPage = new PageContent(page, '/findings', 'Findings', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'ref_id', type: type.TEXT }
-			// { name: 'status', type: type.SELECT }
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
+			{ name: 'severity', type: type.SELECT }
 		]);
 		await use(fPage);
 	},
