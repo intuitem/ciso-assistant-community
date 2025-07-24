@@ -228,7 +228,7 @@ jobs:
 
       - name: Cache playwright binaries
         uses: actions/cache@v3
-        id: playwright-cache-${{ matrix.playwright-browser }}
+        id: playwright-cache
         with:
           path: |
             ~/.cache/ms-playwright
@@ -385,7 +385,7 @@ jobs:
 
       - name: Cache playwright binaries
         uses: actions/cache@v3
-        id: playwright-cache-${{ matrix.playwright-browser }}
+        id: playwright-cache
         with:
           path: |
             ~/.cache/ms-playwright
