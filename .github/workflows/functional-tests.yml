@@ -377,6 +377,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
+      - name: Pre-build Enterprise Frontend
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make pre-build
+
       - name: Install pnpm globally
         run: npm install -g pnpm
 
