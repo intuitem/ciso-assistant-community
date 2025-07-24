@@ -50,7 +50,7 @@ export class SideBar {
 			}
 
 			if (await this.page.locator('#driver-dummy-element').isVisible()) {
-				await modalBackdrop.press('Escape');
+				await this.page.locator('#driver-dummy-element').press('Escape');
 			}
 
 			// Attempt to close any remaining modals
