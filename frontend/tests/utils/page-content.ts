@@ -30,7 +30,7 @@ export class PageContent extends BasePage {
 				? new FormContent(page, 'New ' + name.substring(0, name.length - 1), fields)
 				: new FormContent(page, new RegExp(/New /.source + name.source), fields);
 		this.itemDetail = new PageDetail(page, url, this.form, '');
-		this.addButton = this.page.getByTestId('add-button').first();
+		this.addButton = this.page.getByTestId('add-button');
 		this.editButton = this.page.getByTestId('edit-button');
 		this.searchInput = this.page.getByRole('searchbox').first();
 		this.deleteModalTitle = this.page.getByTestId('modal-title');
@@ -40,7 +40,12 @@ export class PageContent extends BasePage {
 		this.deleteModalPromptConfirmText = this.page.getByTestId('delete-prompt-confirm-text');
 	}
 
-	async createItem(values: { [k: string]: any }, dependency?: any, page?: Page) {
+	async createItem(
+		values: { [k: string]: any },
+		dependency?: any,
+		page?: Page,
+		addButtonValue?: string
+	) {
 		if (dependency) {
 			await this.page.goto('/libraries');
 			await this.page.waitForURL('/libraries');
@@ -49,7 +54,13 @@ export class PageContent extends BasePage {
 			await this.goto();
 		}
 
-		await this.addButton.click();
+		// Default to the first add button if no value is provided
+		// addButtonValue is useful when there is multiple tabs with add buttons
+		if (addButtonValue === undefined) {
+			await this.addButton.first().click();
+		} else {
+			await this.addButton.filter({ hasText: addButtonValue }).click();
+		}
 		await this.form.hasTitle();
 		if (page) {
 			await page.waitForLoadState('networkidle');
