@@ -1833,20 +1833,30 @@ class Asset(
 
     def ancestors_plus_self(self) -> set[Self]:
         result = {self}
-        for x in self.parent_assets.all():
-            result.update(x.ancestors_plus_self())
-        return set(result)
+        # load whole m2m table in memory to avoid multiple queries
+        m2m_entries = set(Asset.parent_assets.through.objects.all())
+        parent_assets = {
+            a.id: a for a in Asset.objects.filter(child_assets__isnull=False)
+        }
+        for x in m2m_entries:
+            if x.from_asset_id == self.id and parent_assets.get(x.to_asset_id):
+                result.add(parent_assets[x.to_asset_id])
+        return result
 
     def get_children(self):
         return self.child_assets.all()
 
     def get_descendants(self) -> set[Self]:
-        children = self.get_children()
-        sub_children = set()
-        for child in children:
-            sub_children.add(child)
-            sub_children.update(child.get_descendants())
-        return sub_children
+        result = {self}
+        # load whole m2m table in memory to avoid multiple queries
+        m2m_entries = set(Asset.parent_assets.through.objects.all())
+        children_assets = {
+            a.id: a for a in Asset.objects.filter(parent_assets__isnull=False)
+        }
+        for x in m2m_entries:
+            if x.to_asset_id == self.id and children_assets.get(x.from_asset_id):
+                result.add(children_assets[x.from_asset_id])
+        return result
 
     @property
     def children_assets(self):
