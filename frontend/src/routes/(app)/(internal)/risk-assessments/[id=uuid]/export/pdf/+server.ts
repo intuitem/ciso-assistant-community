@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, params }) => {
-	const URLModel = 'risk-assessments';
+	const URLModel = 'risk-evaluations';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/risk_assessment_pdf/`;
 
 	const risk_assessment = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/`).then((res) =>

@@ -10,7 +10,7 @@ import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/risk-evaluations/${params.id}/`;
 
 	const risk_assessment = await fetch(endpoint).then((res) => res.json());
 	const scenarios = await fetch(`${BASE_API_URL}/risk-scenarios/?risk_assessment=${params.id}`)

@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Fetch the metrics data
 	const metricsData = await event
-		.fetch(`${BASE_API_URL}/findings-assessments/${event.params.id}/metrics/`)
+		.fetch(`${BASE_API_URL}/issue-trackers/${event.params.id}/metrics/`)
 		.then((res) => res.json());
 
 	// Return the original data with the metrics added

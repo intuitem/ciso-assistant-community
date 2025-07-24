@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
-	const URLModel = 'risk-assessments';
+	const URLModel = 'risk-evaluations';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
 	const res = await fetch(endpoint);

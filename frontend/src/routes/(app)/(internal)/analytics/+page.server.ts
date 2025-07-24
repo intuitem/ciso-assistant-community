@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
 	const applied_control_status = await req_applied_control_status.json();
 
-	const riskAssessmentsPerStatus = await fetch(`${BASE_API_URL}/risk-assessments/per_status/`)
+	const riskAssessmentsPerStatus = await fetch(`${BASE_API_URL}/risk-evaluations/per_status/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
 	const complianceAssessmentsPerStatus = await fetch(
@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		res.json()
 	);
 
-	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
+	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-evaluations/`);
 	const risk_assessments = await req_risk_assessments.json();
 
 	const composerForm = await superValidate(zod(composerSchema));

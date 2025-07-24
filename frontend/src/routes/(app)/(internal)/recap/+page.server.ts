@@ -32,14 +32,14 @@ interface PerimeterAnalytics extends Perimeter {
 }
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	const perimeters: PerimeterAnalytics[] = await fetch(`${BASE_API_URL}/perimeters/`)
+	const perimeters: PerimeterAnalytics[] = await fetch(`${BASE_API_URL}/departments/`)
 		.then((res) => res.json())
 		.then(async (perimeters) => {
 			if (perimeters && Array.isArray(perimeters.results)) {
 				const perimeterPromises = perimeters.results.map(async (perimeter) => {
 					try {
 						const complianceAssessmentsResponse = await fetch(
-							`${BASE_API_URL}/compliance-assessments/?perimeter=${perimeter.id}`
+							`${BASE_API_URL}/compliance-assessments/?department=${perimeter.id}`
 						);
 						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
 

@@ -17,16 +17,16 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
-router.register(r"entities", EntityViewSet, basename="entities")
+router.register(r"externalorganizations", EntityViewSet, basename="externalorganizations")
 router.register(
-    r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
+    r"organization-evaluations", EntityAssessmentViewSet, basename="organization-evaluations"
 )
-router.register(r"solutions", SolutionViewSet, basename="solutions")
-router.register(r"representatives", RepresentativeViewSet, basename="representatives")
-router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
+router.register(r"remediationplans", SolutionViewSet, basename="remediationplans")
+router.register(r"externalstakeholders", RepresentativeViewSet, basename="externalstakeholders")
+router.register(r"departments", PerimeterViewSet, basename="departments")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
-router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
-router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
+router.register(r"systemvulnerabilities", VulnerabilityViewSet, basename="systemvulnerabilities")
+router.register(r"risk-evaluations", RiskAssessmentViewSet, basename="risk-evaluations")
 router.register(r"threats", ThreatViewSet, basename="threats")
 router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios")
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
@@ -83,12 +83,12 @@ router.register(
     basename="security-exceptions",
 )
 router.register(
-    r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
+    r"issue-trackers", FindingsAssessmentViewSet, basename="issue-trackers"
 )
 router.register(r"findings", FindingViewSet, basename="findings")
-router.register(r"incidents", IncidentViewSet, basename="incidents")
+router.register(r"occurrences", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
-router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
+router.register(r"action-centers", TaskTemplateViewSet, basename="action-centers")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 
 ROUTES = settings.ROUTES
@@ -142,7 +142,7 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
-        "risk-assessments/<uuid:pk>/action-plan/",
+        "risk-evaluations/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),

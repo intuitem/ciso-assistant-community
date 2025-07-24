@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		`${BASE_API_URL}/threats/threats_count/?folder=${params.id}`
 	).then((res) => res.json());
 
-	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
+	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-evaluations/`);
 	const risk_assessments = await req_risk_assessments.json();
 
 	return {

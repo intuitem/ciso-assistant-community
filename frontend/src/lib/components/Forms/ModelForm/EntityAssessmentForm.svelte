@@ -83,15 +83,17 @@
 		/>
 	{/if}
 {/if}
+<!-- xxx -->
 <AutocompleteSelect
-	{form}
-	optionsEndpoint="entities"
-	field="entity"
-	cacheLock={cacheLocks['entity']}
-	bind:cachedValue={formDataCache['entity']}
-	label={m.entity()}
-	hidden={initialData.entity}
+{form}
+optionsEndpoint="entities"
+field="entity"
+cacheLock={cacheLocks['entity']}
+bind:cachedValue={formDataCache['entity']}
+label={m.entity()}
+hidden={initialData.entity}
 />
+<!-- xxx -->
 <AutocompleteSelect
 	{form}
 	multiple
