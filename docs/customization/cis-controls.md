@@ -1,8 +1,8 @@
 ---
-description: importing CIS Controls
+description: importing CIS Controls or CSA CCM
 ---
 
-# CIS Controls
+# CIS Controls / Cloud Controls Matrix (CCM)
 
 Since CSA and CIS have more restrictive terms on their licenses, users need to perform an extra action by downloading the sheet on their side and running the preparation script as described in the tools folder.
 
