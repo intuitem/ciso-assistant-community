@@ -107,8 +107,12 @@ def validate_urn(urn: str, context: str = None, row = None):
         raise ValueError(f"({context if context else 'validate_urn'}) {'Row #'+str(row+2)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed")
 
 def validate_ref_id(ref_id: str, context: str = None, row = None):
-    if not re.fullmatch(r"[a-zA-Z0-9._\- ]+", ref_id):
+    if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
         raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row+2)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
+
+def validate_ref_id_with_spaces(ref_id: str, context: str = None, row = None):
+    if not re.fullmatch(r"[a-zA-Z0-9._\- ]+", ref_id):
+        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row+2)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
 
 def validate_sheet_name(sheet_name: str, context: str = None):
     if not (sheet_name.endswith("_meta") or sheet_name.endswith("_content")):
@@ -490,7 +494,7 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
             )
 
         if ref_id:
-            validate_ref_id(ref_id, fct_name, idx)
+            validate_ref_id_with_spaces(ref_id, fct_name, idx)
 
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
@@ -706,9 +710,8 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
 
     # Warn about ignored sheets
     for sheet_name in ignored_sheets:
-        warn_msg = f"⚠️  [WARNING] Ignored sheet \"{sheet_name}\" (does not end with \"_meta\" or \"_content\")"
-        print(warn_msg)
-        ctx.add_function_warning_msg(fct_name, warn_msg)
+        msg = f"⏩ [SKIP] Ignored sheet \"{sheet_name}\" (does not end with \"_meta\" or \"_content\")"
+        print(msg)
 
     print("")
     print(f"✅ [SUCCESS] Excel structure is valid for \"{file_name}\"")
