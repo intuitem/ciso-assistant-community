@@ -6,7 +6,7 @@ import argparse
 from typing import Dict, List
 
 import pandas as pd
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 
 
 
@@ -207,11 +207,8 @@ def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List
             value = matches.iloc[0, 1] if matches.shape[1] > 1 else None
 
             if pd.isna(value) or str(value).strip() == "":
-                msg = (f"⚠️  [WARNING] ({context}) [{sheet_name}] Row #{row_index + 1}: Optional key \"{key}\" is present but has no value"
-                        "\n💡 Tip: If you don't need this key, you can simply remove it from the sheet.")
-                if ctx:
-                    ctx.add_function_warning_msg(context, msg)
-                print(msg)
+                raise ValueError(f"({context}) [{sheet_name}] Row #{row_index + 1}: Optional key \"{key}\" is present but has no value"
+                                  "\n💡 Tip: If you don't need this key, you can simply remove it from the sheet.")
 
         else:
             if verbose:
@@ -606,7 +603,7 @@ def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: Cons
 # DISPATCHING
 # ─────────────────────────────────────────────────────────────
 
-def dispatch_meta_validation(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = dispatch_meta_validation.__name__
     
@@ -638,7 +635,7 @@ def dispatch_meta_validation(df, sheet_name, verbose: bool = False, ctx: Console
         raise ValueError(f"({fct_name}) [{sheet_name}] Unknown meta type \"{type_value}\"")
 
 
-def dispatch_content_validation(df, sheet_name, corresponding_meta_type, verbose: bool = False, ctx: ConsoleContext = None):
+def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding_meta_type: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = dispatch_content_validation.__name__
     
@@ -676,7 +673,7 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
         ctx = ConsoleContext()
     
     wb = load_workbook(filepath, data_only=True)
-    fct_name = validate_excel_structure.__name__
+    fct_name = get_current_fct_name()
     file_name = os.path.basename(filepath)
 
     meta_sheets = {}
@@ -697,16 +694,26 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
 
     # Handle "_meta" sheets
     for sheet_name, df in meta_sheets.items():
-        dispatch_meta_validation(df, sheet_name, verbose, ctx)
+
+        base_name = re.sub(r'_meta$', '', sheet_name)
+        
+        expected_content_sheet = base_name + "_content"
+        if sheet_name != "library_meta" and expected_content_sheet not in content_sheets:
+            raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding content sheet found for this meta"
+                            f"\n💡 Tip: Make sure the corresponding content sheet for \"{sheet_name}\" is named \"{expected_content_sheet}\"")
+
+        dispatch_meta_validation(wb, df, sheet_name, verbose, ctx)
         type_row = df[df.iloc[:, 0] == "type"]
-        meta_types[sheet_name.replace("_meta", "")] = str(type_row.iloc[0, 1]).strip()
+        meta_types[base_name] = str(type_row.iloc[0, 1]).strip()
 
     # Handle "_content" sheets
     for sheet_name, df in content_sheets.items():
-        base_name = sheet_name.replace("_content", "")
+        base_name = re.sub(r'_content$', '', sheet_name)
+
         if base_name not in meta_types:
-            raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding meta sheet found for this content")
-        dispatch_content_validation(df, sheet_name, meta_types[base_name], verbose, ctx)
+            raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding meta sheet found for this content"
+                             f"\n💡 Tip: Make sure the corresponding meta sheet for \"{sheet_name}\" is named \"{re.sub(r'_content$', '_meta', sheet_name)}\"")
+        dispatch_content_validation(wb, df, sheet_name, meta_types[base_name], verbose, ctx)
 
     # Warn about ignored sheets
     for sheet_name in ignored_sheets:
