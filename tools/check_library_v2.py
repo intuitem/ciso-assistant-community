@@ -134,7 +134,7 @@ def print_sheet_validation(sheet_name: str, function_name: str = None, verbose: 
     else:
         
         if not function_name:
-            raise ValueError(f"({print_sheet_validation.__name__}) \"function_name\" must be defined")
+            raise ValueError(f"({get_current_fct_name()}) \"function_name\" must be defined")
         
         function_warnings = ctx.get_function_warning_msg(function_name)
         function_verbose = ctx.get_function_verbose_msg(function_name)
@@ -208,7 +208,7 @@ def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List
 
             if pd.isna(value) or str(value).strip() == "":
                 raise ValueError(f"({context}) [{sheet_name}] Row #{row_index + 1}: Optional key \"{key}\" is present but has no value"
-                                  "\n💡 Tip: If you don't need this key, you can simply remove it from the sheet.")
+                                  "\n> 💡 Tip: If you don't need this key, you can simply remove it from the sheet.")
 
         else:
             if verbose:
@@ -217,6 +217,42 @@ def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List
                 if ctx:
                     ctx.add_function_verbose_msg(context, msg)
                 print(msg)
+
+
+def validate_extra_locales_in_meta(df, sheet_name: str, context: str):
+
+    keys = df.iloc[:, 0].dropna().astype(str)
+
+    for key in keys:
+        match = re.fullmatch(r"(.+)\[(.+)\]", key)  # Match "value_name[locale]"
+        if not match:
+            continue
+        
+        base_key, locale = match.groups()
+        row_index = df[df.iloc[:, 0] == key].index[0]  # Get the row index of the localized key
+
+        # Validate locale format
+        if not is_valid_locale(locale):
+            raise ValueError(
+                f"({context}) [{sheet_name}] Row #{row_index + 1}: Invalid locale \"{locale}\" in key \"{key}\""
+                "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes"
+            )
+
+        # Check if base key exists in the meta sheet
+        if base_key not in df.iloc[:, 0].values:
+            raise ValueError(
+                f"({context}) [{sheet_name}] Row #{row_index + 1}: Localized key \"{key}\" found, but base key \"{base_key}\" is missing"
+                f"\n> 💡 Tip: Add the base key \"{base_key}\" or simply remove the key \"{key}\"."
+            )
+
+        # Check that the localized value is not empty
+        row = df[df.iloc[:, 0] == key]
+        value = row.iloc[0, 1] if row.shape[1] > 1 else None
+        if pd.isna(value) or str(value).strip() == "":
+            raise ValueError(
+                f"({context}) [{sheet_name}] Row #{row_index + 1}: Localized key \"{key}\" is present but has no value"
+                "\n> 💡 Tip: If you don't need this key, you can simply remove it from the sheet."
+            )
 
 
 
@@ -257,7 +293,10 @@ def validate_library_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
     if not is_valid_locale(locale_value):
         raise ValueError(
             f"({fct_name}) [{sheet_name}] Invalid \"locale\" value: \"{locale_value}\""
-            "\n💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
+            "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
@@ -278,12 +317,17 @@ def validate_framework_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleC
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
 
+    # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
     validate_urn(urn_value, fct_name)
 
+    # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
     validate_ref_id(ref_id_value, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -296,7 +340,10 @@ def validate_threats_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -309,7 +356,10 @@ def validate_reference_controls_meta(df, sheet_name, verbose: bool = False, ctx:
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -323,12 +373,17 @@ def validate_risk_matrix_meta(df, sheet_name, verbose: bool = False, ctx: Consol
 
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
+    # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
     validate_urn(urn_value, fct_name)
 
+    # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
     validate_ref_id(ref_id_value, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -341,7 +396,10 @@ def validate_implementation_groups_meta(df, sheet_name, verbose: bool = False, c
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -359,7 +417,10 @@ def validate_requirement_mapping_set_meta(df, sheet_name, verbose, ctx: ConsoleC
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -372,7 +433,10 @@ def validate_scores_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCont
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -385,7 +449,10 @@ def validate_answers_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -398,7 +465,10 @@ def validate_urn_prefix_meta(df, sheet_name, verbose: bool = False, ctx: Console
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, None, expected_type, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -451,7 +521,42 @@ def validate_optional_columns_content_sheet(df, sheet_name: str, optional_column
 
         if is_entirely_empty:
             msg = (f"⚠️  [WARNING] ({context}) [{sheet_name}] Optional column \"{col}\" is present but entirely empty"
-                    "\n💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
+                    "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
+            if ctx:
+                ctx.add_function_warning_msg(context, msg)
+            print(msg)
+
+
+def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None):
+
+    for col in df.columns:
+        match = re.fullmatch(r"(.+)\[(.+)\]", str(col))  # Match "column_name[locale]"
+        if not match:
+            continue
+        
+        base_col, locale = match.groups()
+
+        # Validate locale format
+        if not is_valid_locale(locale):
+            raise ValueError(
+                f"({context}) [{sheet_name}] Column \"{col}\": Invalid locale \"{locale}\""
+                "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes"
+            )
+
+        # Check if base column exists
+        if base_col not in df.columns:
+            raise ValueError(
+                f"({context}) [{sheet_name}] Column \"{col}\": Localized column found, but base column \"{base_col}\" is missing"
+                f"\n> 💡 Tip: Add the base column \"{base_col}\" or simply remove the column \"{col}\"."
+            )
+
+        # If column exists but is entirely empty, emit a warning
+        non_empty_found = any(pd.notna(val) and str(val).strip() != "" for val in df[col])
+        if not non_empty_found:
+            msg = (
+                f"⚠️  [WARNING] ({context}) [{sheet_name}] Column \"{col}\": Localized column is present but entirely empty"
+                "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet."
+            )
             if ctx:
                 ctx.add_function_warning_msg(context, msg)
             print(msg)
@@ -487,11 +592,14 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
         if not ref_id and not name:
             raise ValueError(
                 f"({fct_name}) [{sheet_name}] Row #{idx + 2}: Invalid row: Both \"ref_id\" and \"name\" are empty"
-                "\n💡 Tip: At least one of them must be filled."
+                "\n> 💡 Tip: At least one of them must be filled."
             )
 
         if ref_id:
             validate_ref_id_with_spaces(ref_id, fct_name, idx)
+
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
@@ -506,6 +614,9 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -519,6 +630,9 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -530,7 +644,10 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     # No optional columns
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -543,6 +660,9 @@ def validate_implementation_groups_content(df, sheet_name, verbose: bool = False
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
@@ -557,6 +677,9 @@ def validate_requirement_mapping_set_content(df, sheet_name, verbose: bool = Fal
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -569,6 +692,9 @@ def validate_scores_content(df, sheet_name, verbose: bool = False, ctx: ConsoleC
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
@@ -583,6 +709,9 @@ def validate_answers_content(df, sheet_name, verbose: bool = False, ctx: Console
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -594,7 +723,10 @@ def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: Cons
     # No optional columns
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    
+
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
@@ -605,7 +737,7 @@ def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: Cons
 
 def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
-    fct_name = dispatch_meta_validation.__name__
+    fct_name = get_current_fct_name()
     
     type_row = df[df.iloc[:, 0] == "type"]
     if type_row.empty:
@@ -637,7 +769,7 @@ def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = 
 
 def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding_meta_type: str, verbose: bool = False, ctx: ConsoleContext = None):
     
-    fct_name = dispatch_content_validation.__name__
+    fct_name = get_current_fct_name()
     
     if corresponding_meta_type == "framework":
         validate_framework_content(df, sheet_name, verbose, ctx)
@@ -700,7 +832,7 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
         expected_content_sheet = base_name + "_content"
         if sheet_name != "library_meta" and expected_content_sheet not in content_sheets:
             raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding content sheet found for this meta"
-                            f"\n💡 Tip: Make sure the corresponding content sheet for \"{sheet_name}\" is named \"{expected_content_sheet}\"")
+                            f"\n> 💡 Tip: Make sure the corresponding content sheet for \"{sheet_name}\" is named \"{expected_content_sheet}\"")
 
         dispatch_meta_validation(wb, df, sheet_name, verbose, ctx)
         type_row = df[df.iloc[:, 0] == "type"]
@@ -712,7 +844,7 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
 
         if base_name not in meta_types:
             raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding meta sheet found for this content"
-                             f"\n💡 Tip: Make sure the corresponding meta sheet for \"{sheet_name}\" is named \"{re.sub(r'_content$', '_meta', sheet_name)}\"")
+                             f"\n> 💡 Tip: Make sure the corresponding meta sheet for \"{sheet_name}\" is named \"{re.sub(r'_content$', '_meta', sheet_name)}\"")
         dispatch_content_validation(wb, df, sheet_name, meta_types[base_name], verbose, ctx)
 
     # Warn about ignored sheets
