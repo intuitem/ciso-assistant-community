@@ -23,6 +23,7 @@ jobs:
       - name: Lint Helm Chart
         run: |
           cd charts
+          helm dependency build ciso-assistant-next
           helm lint ciso-assistant-next
 
   helm-check-lock:
