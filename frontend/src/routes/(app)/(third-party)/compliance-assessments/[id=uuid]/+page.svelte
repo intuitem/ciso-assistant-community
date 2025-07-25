@@ -117,10 +117,12 @@
 		}
 		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
-			const nodeMeanScore = data.compliance_assessment.show_documentation_score
-				? (node.score + node.documentation_score) / 2
-				: node.score;
-			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + nodeMeanScore;
+			const nodeDocumentationScore = data.compliance_assessment.show_documentation_score
+				? node.documentation_score
+				: 0;
+			resultCounts['total_documentation_score'] =
+				(resultCounts['total_documentation_score'] || 0) + nodeDocumentationScore;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
@@ -177,7 +179,7 @@
 					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
 		);
 	}
-	function transformToTreeView(nodes: Node[]) {
+	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
@@ -188,6 +190,8 @@
 				contentProps: {
 					...node,
 					canEditRequirementAssessment,
+					hasParentNode,
+					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					hidden,
 					selectedStatus
 				},
@@ -204,7 +208,7 @@
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score
 				},
-				children: node.children ? transformToTreeView(Object.entries(node.children)) : []
+				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
 		});
 	}
