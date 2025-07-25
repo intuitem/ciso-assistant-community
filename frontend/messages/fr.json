@@ -1659,6 +1659,8 @@
 		}
 	],
 	"matchingScenarios": "Scénarios correspondants",
+	"select": "Sélectionner",
+	"deselect": "Désélectionner",
 	"associatedCampaigns": "Campagnes associées",
 	"serverURL": "URL serveur",
 	"oidcConfiguration": "openid-configuration",
