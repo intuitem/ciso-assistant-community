@@ -259,6 +259,26 @@ def validate_extra_locales_in_meta(df, sheet_name: str, context: str):
             )
 
 
+# Check that if the "name" key exists and has a value, and if the corresponding "<name>_content" sheet exists.
+def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: str, context: str):
+
+    key_row = df[df.iloc[:, 0] == "name"]
+    if key_row.empty:
+        return  # 'name' key is not present, skip check
+
+    value = str(key_row.iloc[0, 1]).strip()
+    row = key_row.index[0] + 1
+    if not value:
+        return  # value is empty, skip check
+
+    expected_sheet = f"{value}_content"
+    if expected_sheet not in wb.sheetnames:
+        raise ValueError(
+            f"({context}) [{sheet_name}] Row #{row}: Key \"name\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
+            f"\n> 💡 Tip: Make sure the \"{expected_sheet}\" sheet exists or set the right value for key \"name\"."
+        )
+
+
 
 # [META] Library {OK}
 def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
@@ -458,8 +478,8 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Implementation Groups
-def validate_implementation_groups_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+# [META] Implementation Groups {OK}
+def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "implementation_groups"
     fct_name = get_current_fct_name()
@@ -467,6 +487,9 @@ def validate_implementation_groups_meta(df, sheet_name: str, verbose: bool = Fal
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+
+    # name
+    validate_related_content_sheet_from_name_key(wb, df, sheet_name, fct_name)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -495,8 +518,8 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Scores
-def validate_scores_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+# [META] Scores {OK}
+def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "scores"
     fct_name = get_current_fct_name()
@@ -505,14 +528,17 @@ def validate_scores_meta(df, sheet_name: str, verbose: bool = False, ctx: Consol
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
+    # name
+    validate_related_content_sheet_from_name_key(wb, df, sheet_name, fct_name)
+
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Answers
-def validate_answers_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+# [META] Answers {OK}
+def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "answers"
     fct_name = get_current_fct_name()
@@ -520,6 +546,9 @@ def validate_answers_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+
+    # name
+    validate_related_content_sheet_from_name_key(wb, df, sheet_name, fct_name)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -827,11 +856,11 @@ def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = 
     elif type_value == "requirement_mapping_set":
         validate_requirement_mapping_set_meta(df, sheet_name, verbose, ctx)
     elif type_value == "implementation_groups":
-        validate_implementation_groups_meta(df, sheet_name, verbose, ctx)
+        validate_implementation_groups_meta(wb, df, sheet_name, verbose, ctx)
     elif type_value == "scores":
-        validate_scores_meta(df, sheet_name, verbose, ctx)
+        validate_scores_meta(wb, df, sheet_name, verbose, ctx)
     elif type_value == "answers":
-        validate_answers_meta(df, sheet_name, verbose, ctx)
+        validate_answers_meta(wb, df, sheet_name, verbose, ctx)
     elif type_value == "urn_prefix":
         validate_urn_prefix_meta(df, sheet_name, verbose, ctx)
     else:
