@@ -578,6 +578,253 @@ class AssetViewSet(BaseModelViewSet):
             )
         )
 
+    def list(self, request, *args, **kwargs):
+        """
+        Override the list method to inject optimized data into the serializer context.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # 1. Perform the bulk calculation for the entire queryset
+        optimized_data = self._get_optimized_asset_data(queryset)
+
+        # 2. Pass the data to the serializer via context
+        context = self.get_serializer_context()
+        context["optimized_data"] = optimized_data
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context=context)
+        return Response(serializer.data)
+
+    def _get_optimized_asset_data(self, queryset):
+        """
+        Calculates objectives and descendants for a queryset of assets
+        in a query-efficient manner.
+        """
+        initial_assets = list(queryset)
+        if not initial_assets:
+            return {}
+
+        initial_ids = {asset.id for asset in initial_assets}
+
+        # A. Find all unique ancestors for the assets in the queryset
+        all_ancestor_ids = set(initial_ids)
+        level_ids = set(initial_ids)
+        while level_ids:
+            parent_ids = set(
+                Asset.parent_assets.through.objects.filter(
+                    from_asset_id__in=level_ids
+                ).values_list("to_asset_id", flat=True)
+            )
+            new_parent_ids = parent_ids - all_ancestor_ids
+            if not new_parent_ids:
+                break
+            all_ancestor_ids.update(new_parent_ids)
+            level_ids = new_parent_ids
+
+        # B. Fetch all relevant assets and relationships in bulk
+        all_related_assets = Asset.objects.filter(id__in=all_ancestor_ids)
+        asset_map = {asset.id: asset for asset in all_related_assets}
+
+        links = Asset.parent_assets.through.objects.filter(
+            from_asset_id__in=all_ancestor_ids
+        ).values_list("from_asset_id", "to_asset_id")
+
+        child_to_parents = {}
+        parent_to_children = {}
+        for child_id, parent_id in links:
+            child_to_parents.setdefault(child_id, set()).add(parent_id)
+            parent_to_children.setdefault(parent_id, set()).add(child_id)
+
+        # C. Cache settings and prepare result dictionaries
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
+
+        sec_obj_results = {}
+        dro_obj_results = {}
+        descendant_results = {}
+
+        # D. Process each asset from the original queryset
+        for asset in initial_assets:
+            # Calculate descendants
+            descendants = set()
+            q = [asset.id]
+            visited_descendants = {asset.id}
+            while q:
+                curr_id = q.pop(0)
+                if curr_id != asset.id:
+                    descendants.add(curr_id)
+                for child_id in parent_to_children.get(curr_id, []):
+                    if child_id not in visited_descendants:
+                        visited_descendants.add(child_id)
+                        q.append(child_id)
+            descendant_results[asset.id] = [{"id": id} for id in descendants]
+
+            # Calculate objectives
+            if asset.is_primary:
+                sec_obj_results[asset.id] = asset.get_security_objectives_display()
+                dro_obj_results[asset.id] = (
+                    asset.get_disaster_recovery_objectives_display()
+                )
+                continue
+
+            # Find ancestors using the pre-fetched map
+            ancestors = set()
+            q = [asset.id]
+            visited_ancestors = {asset.id}
+            while q:
+                curr_id = q.pop(0)
+                if curr_id in asset_map:
+                    ancestors.add(asset_map[curr_id])
+                for parent_id in child_to_parents.get(curr_id, []):
+                    if parent_id not in visited_ancestors:
+                        visited_ancestors.add(parent_id)
+                        q.append(parent_id)
+
+            primary_ancestors = {anc for anc in ancestors if anc.is_primary}
+
+            # Aggregate objectives (logic copied from your model)
+            # You can refactor this into helper functions for cleanliness
+            agg_sec_obj = {}
+            for p_asset in primary_ancestors:
+                for key, content in p_asset.security_objectives.get(
+                    "objectives", {}
+                ).items():
+                    if not content.get("is_enabled", False):
+                        continue
+                    if key not in agg_sec_obj:
+                        agg_sec_obj[key] = content
+                    else:
+                        agg_sec_obj[key]["value"] = max(
+                            agg_sec_obj[key].get("value", 0), content.get("value", 0)
+                        )
+
+            agg_dro_obj = {}
+            for p_asset in primary_ancestors:
+                for key, content in p_asset.disaster_recovery_objectives.get(
+                    "objectives", {}
+                ).items():
+                    if key not in agg_dro_obj:
+                        agg_dro_obj[key] = content
+                    else:
+                        agg_dro_obj[key]["value"] = min(
+                            agg_dro_obj[key].get("value", 0), content.get("value", 0)
+                        )
+
+        path_results = {}
+
+        # Get the initial set of folder IDs from the assets
+        folder_ids = {asset.folder_id for asset in initial_assets if asset.folder_id}
+
+        if folder_ids:
+            # Iteratively find all parent folders
+            all_folder_ids = set(folder_ids)
+            level_ids = set(folder_ids)
+            while level_ids:
+                parent_ids = set(
+                    Folder.objects.filter(id__in=level_ids).values_list(
+                        "parent_folder", flat=True
+                    )
+                )
+                parent_ids.discard(None)  # Remove the root's null parent
+
+                new_parent_ids = parent_ids - all_folder_ids
+                if not new_parent_ids:
+                    break
+                all_folder_ids.update(new_parent_ids)
+                level_ids = new_parent_ids
+
+            # Fetch all relevant folder data in one query
+            all_folders = Folder.objects.filter(id__in=all_folder_ids)
+            folder_map = {
+                f.id: {
+                    "id": f.id,
+                    "str": str(f),
+                    "parent_id": f.parent_folder.id if f.parent_folder else None,
+                }
+                for f in all_folders
+            }
+
+        # Build the path for each asset
+        for asset in initial_assets:
+            if not asset.folder_id:
+                path_results[asset.id] = []
+                continue
+
+            path = []
+            curr_folder_id = asset.folder_id
+            while curr_folder_id in folder_map:
+                folder_data = folder_map[curr_folder_id]
+                path.append(folder_data)
+                curr_folder_id = folder_data["parent_id"]
+
+            # The original method reversed the path and optionally removed the root
+            path.reverse()
+            path_results[asset.id] = path[1:] if len(path) > 1 else path
+
+            # Format results
+            # Note: This requires extracting the formatting logic into standalone functions
+            # or temporarily creating an Asset instance to call the display methods.
+            # For simplicity here, we re-implement the formatting logic from your model.
+            sec_obj_results[asset.id] = self._format_security_objectives(
+                agg_sec_obj, scale
+            )
+            dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
+                agg_dro_obj
+            )
+
+        return {
+            "security": sec_obj_results,
+            "disaster": dro_obj_results,
+            "descendants": descendant_results,
+            "paths": path_results,  # Add the new path data
+        }
+
+    # Helper methods to format the objectives, extracted from your model
+    def _format_security_objectives(self, objectives, scale):
+        # Implementation adapted from Asset.get_security_objectives_display
+        return [
+            {
+                "str": f"{key}: {Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}"
+            }
+            for key, content in sorted(
+                objectives.items(),
+                key=lambda x: Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
+            )
+            if content.get("is_enabled", False)
+            and content.get("value", -1) in range(0, 5)
+        ]
+
+    def _format_disaster_recovery_objectives(self, objectives):
+        # Implementation adapted from Asset.get_disaster_recovery_objectives_display
+        def format_seconds(s: int) -> str:
+            h, r = divmod(s, 3600)
+            m, s = divmod(r, 60)
+            parts = []
+            if h > 0:
+                parts.append(f"{h}h")
+            if m > 0:
+                parts.append(f"{m:02d}m")
+            if s > 0 or not parts:
+                parts.append(f"{s:02d}s")
+            return "".join(parts)
+
+        return [
+            {"str": f"{key}: {format_seconds(content.get('value', 0))}"}
+            for key, content in sorted(
+                objectives.items(),
+                key=lambda x: Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0]),
+            )
+            if content.get("value", 0)
+        ]
+
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")
         if type == Asset.Type.PRIMARY:
