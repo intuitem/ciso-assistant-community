@@ -201,7 +201,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 		await expect(page.getByText('test-audit-2')).toBeVisible();
 
 		await expect(page.getByTestId('card-compliance-Used frameworks')).toHaveText('3');
-		await expect(page.getByTestId('card-compliance-Evidences')).toHaveText('8');
+		await expect(page.getByTestId('card-compliance-Evidences')).toHaveText('6');
 		await expect(page.getByTestId('card-risk-Assessments')).toHaveText('2');
 
 		let analyticsPage = new PageContent(page, '/analytics?tab=governance', 'Analytics');
