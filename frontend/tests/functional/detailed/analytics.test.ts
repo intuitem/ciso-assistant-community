@@ -16,6 +16,9 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 	await loginPage.login();
 
 	await test.step('Create folder and perimeter', async () => {
+		await page.getByText('Load demo data').click();
+		await expect(page.locator('#page-title')).toHaveText('Analytics');
+
 		await page.getByRole('button', { name: 'Organization' }).click();
 		await page.getByTestId('accordion-item-folders').click();
 		await page.getByTestId('add-button').click();
@@ -186,30 +189,29 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 		await expect(page.locator('#page-title')).toHaveText('Analytics');
 		await expect(page).toHaveURL('/analytics');
 
-		await expect(page.getByTestId('card-controls-total')).toHaveText('5');
-		await expect(page.getByTestId('card-controls-active')).toHaveText('1');
-		await expect(page.getByTestId('card-controls-deprecated')).toHaveText('1');
-		await expect(page.getByTestId('card-controls-to do')).toHaveText('1');
-		await expect(page.getByTestId('card-controls-in progress')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-total')).toHaveText('46');
+		await expect(page.getByTestId('card-controls-active')).toHaveText('4');
+		await expect(page.getByTestId('card-controls-deprecated')).toHaveText('2');
+		await expect(page.getByTestId('card-controls-to do')).toHaveText('2');
+		await expect(page.getByTestId('card-controls-in progress')).toHaveText('5');
 		await expect(page.getByTestId('card-controls-on hold')).toHaveText('1');
-		await expect(page.getByTestId('card-controls-Missed ETA')).toHaveText('1');
+		await expect(page.getByTestId('card-controls-Missed ETA')).toHaveText('6');
 
 		await expect(page.getByText('test-audit-1')).toBeVisible();
-		await expect(page.getByText('test-audit-1')).toBeVisible();
+		await expect(page.getByText('test-audit-2')).toBeVisible();
 
-		await expect(page.getByTestId('card-compliance-Used frameworks')).toHaveText('2');
-		await expect(page.getByTestId('card-compliance-Evidences')).toHaveText('1');
-		await expect(page.getByTestId('card-risk-Assessments')).toHaveText('1');
+		await expect(page.getByTestId('card-compliance-Used frameworks')).toHaveText('3');
+		await expect(page.getByTestId('card-compliance-Evidences')).toHaveText('8');
+		await expect(page.getByTestId('card-risk-Assessments')).toHaveText('2');
 
 		let analyticsPage = new PageContent(page, '/analytics?tab=governance', 'Analytics');
 		await analyticsPage.goto();
-		await expect(page.getByTestId('card-Applied controls')).toHaveText('5');
-		await expect(page.getByTestId('card-Risk assessments')).toHaveText('1');
-		await expect(page.getByTestId('card-Audits')).toHaveText('2');
+		await expect(page.getByTestId('card-Applied controls')).toHaveText('46');
+		await expect(page.getByTestId('card-Risk assessments')).toHaveText('2');
+		await expect(page.getByTestId('card-Audits')).toHaveText('5');
 		await expect(page.getByText('NIST CSF v2.0')).toBeVisible();
 		await expect(page.getByText('International standard ISO/IEC 27001:2022')).toBeVisible();
 		await expect(page.getByText('test-control-2')).toBeVisible();
-		await expect(page.getByText('Outdated')).toBeVisible();
 	});
 
 	await test.step('Verify redirection in analytics', async () => {
@@ -250,16 +252,6 @@ test('Analytics full flow - creation, validation and cleanup', async ({ page }) 
 		await page.getByTestId('card-risk-Assessments').click();
 		await expect(page).toHaveURL('/risk-assessments');
 		await redirectToAnalytics(page);
-
-		let analyticsPage = new PageContent(page, '/analytics?tab=governance', 'Analytics');
-		await analyticsPage.goto();
-		await expect(page.getByTestId('card-Applied controls')).toHaveText('5');
-		await expect(page.getByTestId('card-Risk assessments')).toHaveText('1');
-		await expect(page.getByTestId('card-Audits')).toHaveText('2');
-		await expect(page.getByText('NIST CSF v2.0')).toBeVisible();
-		await expect(page.getByText('International standard ISO/IEC 27001:2022')).toBeVisible();
-		await expect(page.getByText('test-control-2')).toBeVisible();
-		await expect(page.getByText('Outdated')).toBeVisible();
 	});
 });
 
@@ -273,10 +265,17 @@ test('Cleanup - delete the folder', async ({ page }) => {
 	await expect(page.locator('#page-title')).toHaveText('Domains');
 	await expect(page).toHaveURL('/folders');
 
-	const folderRow = page.getByRole('row', { name: /analytics-folder/i });
+	let folderRow = page.getByRole('row', { name: /analytics-folder/i });
 	await folderRow.getByTestId('tablerow-delete-button').click();
 	await expect(page.getByTestId('delete-prompt-confirm-textfield')).toBeVisible();
 	await page.getByTestId('delete-prompt-confirm-textfield').fill('yes');
 	await page.getByRole('button', { name: 'Submit' }).click();
 	await expect(page.getByRole('row', { name: /analytics-folder/i })).toHaveCount(0);
+
+	folderRow = page.getByRole('row', { name: /DEMO/i });
+	await folderRow.getByTestId('tablerow-delete-button').click();
+	await expect(page.getByTestId('delete-prompt-confirm-textfield')).toBeVisible();
+	await page.getByTestId('delete-prompt-confirm-textfield').fill('yes');
+	await page.getByRole('button', { name: 'Submit' }).click();
+	await expect(page.getByRole('row', { name: /DEMO/i })).toHaveCount(0);
 });
