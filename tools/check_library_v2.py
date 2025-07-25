@@ -454,7 +454,7 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Risk Matrix
+# [META] Risk Matrix {OK}
 def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "risk_matrix"
