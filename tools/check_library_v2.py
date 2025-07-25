@@ -123,7 +123,7 @@ def is_valid_locale(locale_str):
 
 def validate_no_spaces(value: str, value_name: str, context: str = None, row: int = None):
     if " " in str(value):
-        raise ValueError(f"({context if context else 'validate_no_spaces'}) {'Row #' + str(row) + ': ' if row is not None else ''} Invalid value for \"{value_name}\": Spaces are not allowed (got \"{value}\")")
+        raise ValueError(f"({context if context else 'validate_no_spaces'}) {'Row #' + str(row) + ':' if row is not None else ''} Invalid value for \"{value_name}\": Spaces are not allowed (got \"{value}\")")
 
 def print_sheet_validation(sheet_name: str, function_name: str = None, verbose: bool = False, ctx: ConsoleContext = None):
         
@@ -297,27 +297,30 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
     # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    urn_row = df[df.iloc[:, 0] == "urn"].index[0]
-    validate_urn(urn_value, fct_name, urn_row+1)
+    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
+    validate_urn(urn_value, fct_name, urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    validate_ref_id(ref_id_value, context=fct_name)
+    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # version
     version_value = df[df.iloc[:, 0] == "version"].iloc[0, 1]
+    version_row = df[df.iloc[:, 0] == "version"].index[0] + 1
     try:
         version_int = int(str(version_value).strip())
         if version_int <= 0:
             raise ValueError
     except Exception:
-        raise ValueError(f"({fct_name}) [{sheet_name}] Invalid \"version\": must be a positive non-zero integer, got \"{version_value}\"")
+        raise ValueError(f"({fct_name}) [{sheet_name}] Row #{version_row}: Invalid \"version\": must be a positive non-zero integer, got \"{version_value}\"")
 
     # locale
     locale_value = str(df[df.iloc[:, 0] == "locale"].iloc[0, 1]).strip()
+    locale_row = df[df.iloc[:, 0] == "locale"].index[0] + 1
     if not is_valid_locale(locale_value):
         raise ValueError(
-            f"({fct_name}) [{sheet_name}] Invalid \"locale\" value: \"{locale_value}\""
+            f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"locale\" value: \"{locale_value}\""
             "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
 
     # Extra locales
@@ -344,17 +347,18 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
 
     # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    urn_row = df[df.iloc[:, 0] == "urn"].index[0]
-    validate_urn(urn_value, fct_name, urn_row+1)
+    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1
+    validate_urn(urn_value, fct_name, urn_row)
 
     # base_urn
     base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
-    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0]
-    validate_urn(base_urn_value, fct_name, base_urn_row+1)
+    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
+    validate_urn(base_urn_value, fct_name, base_urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    validate_ref_id(ref_id_value, fct_name)
+    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    validate_ref_id(ref_id_value, fct_name, ref_id_row)
     
     # Check that *_definition keys (if present) point to an existing *_meta sheet
     for def_key in ["implementation_groups_definition", "answers_definition", "scores_definition"]:
@@ -424,8 +428,8 @@ def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
     # base_urn
     base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
-    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0]
-    validate_urn(base_urn_value, fct_name, base_urn_row+1)
+    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
+    validate_urn(base_urn_value, fct_name, base_urn_row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -445,8 +449,8 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
 
     # base_urn
     base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
-    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0]
-    validate_urn(base_urn_value, fct_name, base_urn_row+1)
+    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
+    validate_urn(base_urn_value, fct_name, base_urn_row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -466,11 +470,13 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
 
     # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    validate_urn(urn_value, fct_name)
+    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
+    validate_urn(urn_value, fct_name, urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    validate_ref_id(ref_id_value, fct_name)
+    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -497,12 +503,14 @@ def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbo
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Mappings
+# [META] Mappings {OK}
 def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: ConsoleContext = None):
     
     expected_type = "requirement_mapping_set"
     fct_name = get_current_fct_name()
     expected_keys = [
+        "urn", "ref_id",
+        "name", "description",
         "source_framework_urn",
         "source_node_base_urn",
         "target_framework_urn",
@@ -511,6 +519,34 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
     # No optional keys
     
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+
+    # URN
+    urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
+    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
+    validate_urn(urn_value, fct_name, urn_row)
+
+    # ref_id
+    ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
+    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    validate_ref_id(ref_id_value, fct_name, ref_id_row)
+
+    # Duplicate the list to avoid future modifications of expected_keys affecting the validation
+    keys_to_check_no_spaces = [
+        "source_framework_urn",
+        "source_node_base_urn",
+        "target_framework_urn",
+        "target_node_base_urn"
+    ]
+
+    # Validate that the values for specific keys do not contain spaces
+    for key in keys_to_check_no_spaces:
+        row_data = df[df.iloc[:, 0] == key]
+        if row_data.empty:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Missing required key \"{key}\"")
+
+        value = str(row_data.iloc[0, 1]).strip()
+        row = row_data.index[0] + 1  # Excel-style row number (1-based index)
+        validate_no_spaces(value, key, fct_name, row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
