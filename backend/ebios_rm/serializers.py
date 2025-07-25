@@ -397,7 +397,7 @@ class ElementaryActionReadSerializer(BaseModelSerializer):
 class OperatingModeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = OperatingMode
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class OperatingModeReadSerializer(BaseModelSerializer):
@@ -415,7 +415,7 @@ class OperatingModeReadSerializer(BaseModelSerializer):
 class KillChainWriteSerializer(BaseModelSerializer):
     class Meta:
         model = KillChain
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
     def validate(self, attrs):
         elementary_action = attrs.get("elementary_action")

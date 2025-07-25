@@ -861,7 +861,8 @@ export const OperatingModeSchema = z.object({
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
 	elementary_actions: z.string().uuid().optional().array().optional(),
-	likelihood: z.number().optional().default(-1)
+	likelihood: z.number().optional().default(-1),
+	folder: z.string()
 });
 
 export const KillChainSchema = z.object({
@@ -869,7 +870,8 @@ export const KillChainSchema = z.object({
 	elementary_action: z.string().uuid(),
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
-	logic_operator: z.string().optional().nullable()
+	logic_operator: z.string().optional().nullable(),
+	folder: z.string()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
