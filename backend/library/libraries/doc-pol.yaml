@@ -5,7 +5,7 @@ name: Usual reference controls
 description: Usual documents, policies, procedures, training and technical controls
   recommended by intuitem
 copyright: "\xA9 intuitem - 2024"
-version: 3
+version: 4
 publication_date: 2024-02-11
 provider: intuitem
 packager: intuitem
@@ -341,7 +341,7 @@ objects:
         description: Gestion des risques
   - urn: urn:intuitem:risk:function:doc-pol:doc.educ_plan
     ref_id: DOC.EDUC_PLAN
-    name: Information security awareness and traning plan
+    name: Information security awareness and training plan
     category: process
     csf_function: govern
     description: 'Objective: Raise awareness for all employees and provide targeted
@@ -754,7 +754,7 @@ objects:
           s\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.educ
     ref_id: POL.EDUC
-    name: Information security awareness and traning policy
+    name: Information security awareness and training policy
     category: policy
     csf_function: govern
     description: 'implications of not respecting
