@@ -222,6 +222,7 @@
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
+	translateOptions={false}
 	allowUserOptions="append"
 />
 {#if initialData.ebios_rm_studies}
