@@ -10,6 +10,14 @@ To import the CIS Controls, you need to prepare the file first. The easy way, on
 
 
 
+
+
+CIS controls converter can be found under `tools/excel/cis`
+
+CCM converter can be found under `tools/excel/ccm`
+
+
+
 Afterwards, you can upload the generated yaml file as a custom library and load it.
 
 
