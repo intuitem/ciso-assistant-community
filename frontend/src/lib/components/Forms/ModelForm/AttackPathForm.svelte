@@ -37,6 +37,14 @@
 />
 <AutocompleteSelect
 	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
+<AutocompleteSelect
+	{form}
 	multiple
 	optionsEndpoint="stakeholders"
 	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
