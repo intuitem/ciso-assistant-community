@@ -268,6 +268,10 @@ The `_content` tab for a `reference_controls` object contains the following colu
 
 A `_meta` of type `requirement_mapping_set` contains the following keys:
 - type (*): must be `requirement_mapping_set`
+- urn (*)
+- ref_id (*)
+- name (*)
+- description (*)
 - source_framework_urn (*)
 - source_node_base_urn (*)
 - target_framework_urn (*)
