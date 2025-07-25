@@ -640,6 +640,15 @@
 								>{m.edit()}</Anchor
 							>
 						</ContextMenu.Item>
+						<ContextMenu.Item
+							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+						>
+							<Anchor
+								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
+								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
+								>{m.view()}</Anchor
+							>
+						</ContextMenu.Item>
 					{/if}
 					<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
 					<!-- 	<ContextMenu.Item -->
