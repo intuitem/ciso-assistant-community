@@ -12,6 +12,8 @@ export default {
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
 	securityExceptionName: 'Test exception',
+	findingsAssessmentName: 'Test findings assessment',
+	findingName: 'Test finding',
 	threatName: 'Test threat',
 	description: 'Test description',
 	biaName: 'Test BIA',
