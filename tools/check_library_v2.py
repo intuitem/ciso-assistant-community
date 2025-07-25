@@ -261,7 +261,7 @@ def validate_extra_locales_in_meta(df, sheet_name: str, context: str):
 
 
 # [META] Library {OK}
-def validate_library_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "library"
     fct_name = get_current_fct_name()
@@ -306,8 +306,8 @@ def validate_library_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Framework
-def validate_framework_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+# [META] Framework {OK}
+def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "framework"
     fct_name = get_current_fct_name()
@@ -335,6 +335,56 @@ def validate_framework_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleC
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
     validate_ref_id(ref_id_value, fct_name)
+    
+    # Check that *_definition keys (if present) point to an existing *_meta sheet
+    for def_key in ["implementation_groups_definition", "answers_definition", "scores_definition"]:
+        matches = df[df.iloc[:, 0] == def_key]
+        if matches.empty:
+            continue
+
+        value = str(matches.iloc[0, 1]).strip()
+        if not value:
+            continue
+
+        expected_sheet = f"{value}_meta"
+        if expected_sheet in wb.sheetnames:
+            continue
+
+        row = matches.index[0] + 1
+        sheet_type = def_key.split('_')[0]
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{def_key}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
+            f"\n> 💡 Tip: Make sure \"{sheet_type}\" sheets start with \"{value}\", set the right value for key \"{def_key}\" or simply remove the key \"{def_key}\"."
+        )
+        
+    # Validate min_score and max_score if present
+    min_score = None
+    max_score = None
+
+    for key in ["min_score", "max_score"]:
+        matches = df[df.iloc[:, 0] == key]
+        if matches.empty:
+            continue
+
+        value_str = str(matches.iloc[0, 1]).strip()
+        row = matches.index[0] + 1
+
+        if not value_str.isdigit():
+            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{key}\" must be a non-negative integer, got \"{value_str}\"")
+
+        value = int(value_str)
+        if value < 0:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{key}\" must be >= 0, got \"{value}\"")
+
+        if key == "min_score":
+            min_score = value
+        else:
+            max_score = value
+
+    # Validate min <= max if both are present
+    if min_score is not None and max_score is not None:
+        if min_score > max_score:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Invalid score range: 'min_score' ({min_score}) must be less than or equal to 'max_score' ({max_score})")
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -343,7 +393,7 @@ def validate_framework_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleC
 
 
 # [META] Threats {OK}
-def validate_threats_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "threats"
     fct_name = get_current_fct_name()
@@ -364,7 +414,7 @@ def validate_threats_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
 
 
 # [META] Reference Controls {OK}
-def validate_reference_controls_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "reference_controls"
     fct_name = get_current_fct_name()
@@ -385,7 +435,7 @@ def validate_reference_controls_meta(df, sheet_name, verbose: bool = False, ctx:
 
 
 # [META] Risk Matrix
-def validate_risk_matrix_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "risk_matrix"
     fct_name = get_current_fct_name()
@@ -409,7 +459,7 @@ def validate_risk_matrix_meta(df, sheet_name, verbose: bool = False, ctx: Consol
 
 
 # [META] Implementation Groups
-def validate_implementation_groups_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_implementation_groups_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "implementation_groups"
     fct_name = get_current_fct_name()
@@ -425,7 +475,7 @@ def validate_implementation_groups_meta(df, sheet_name, verbose: bool = False, c
 
 
 # [META] Mappings
-def validate_requirement_mapping_set_meta(df, sheet_name, verbose, ctx: ConsoleContext = None):
+def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: ConsoleContext = None):
     
     expected_type = "requirement_mapping_set"
     fct_name = get_current_fct_name()
@@ -446,7 +496,7 @@ def validate_requirement_mapping_set_meta(df, sheet_name, verbose, ctx: ConsoleC
 
 
 # [META] Scores
-def validate_scores_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_scores_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "scores"
     fct_name = get_current_fct_name()
@@ -462,7 +512,7 @@ def validate_scores_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCont
 
 
 # [META] Answers
-def validate_answers_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_answers_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "answers"
     fct_name = get_current_fct_name()
@@ -478,7 +528,7 @@ def validate_answers_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
 
 
 # [META] URN Prefix {OK}
-def validate_urn_prefix_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "urn_prefix"
     fct_name = get_current_fct_name()
@@ -767,7 +817,7 @@ def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = 
     if type_value == "library":
         validate_library_meta(df, sheet_name, verbose, ctx)
     elif type_value == "framework":
-        validate_framework_meta(df, sheet_name, verbose, ctx)
+        validate_framework_meta(wb, df, sheet_name, verbose, ctx)
     elif type_value == "threats":
         validate_threats_meta(df, sheet_name, verbose, ctx)
     elif type_value == "reference_controls":
