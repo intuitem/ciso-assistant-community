@@ -260,7 +260,7 @@ def validate_extra_locales_in_meta(df, sheet_name: str, context: str):
 
 
 
-# [META] Library
+# [META] Library {OK}
 def validate_library_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "library"
