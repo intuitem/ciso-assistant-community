@@ -20,13 +20,13 @@ jobs:
   migrations-check:
     runs-on: ubuntu-24.04
     env:
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -59,13 +59,13 @@ jobs:
   enterprise-migrations-check:
     runs-on: ubuntu-24.04
     env:
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password

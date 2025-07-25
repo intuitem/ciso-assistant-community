@@ -20,17 +20,17 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       POSTGRES_NAME: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
       EMAIL_HOST: localhost
       EMAIL_PORT: 1025
-      EMAIL_HOST_USER: ''
-      EMAIL_HOST_PASSWORD: ''
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@alsigo.net'
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     services:
       postgres:
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"

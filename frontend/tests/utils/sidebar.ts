@@ -41,11 +41,27 @@ export class SideBar {
 	}
 
 	async logout() {
-		await this.moreButton.click();
-		await expect(this.morePanel).not.toHaveAttribute('inert');
-		await expect(this.logoutButton).toBeVisible();
-		await this.logoutButton.click();
-		await expect(this.page).toHaveURL(/^.*\/login$/);
+		await expect(async () => {
+			const modalBackdrop = this.page.getByTestId('modal-backdrop');
+
+			if (await modalBackdrop.isVisible()) {
+				await modalBackdrop.press('Escape');
+				await expect(modalBackdrop).not.toBeVisible();
+			}
+
+			if (await this.page.locator('#driver-dummy-element').isVisible()) {
+				await this.page.locator('#driver-dummy-element').press('Escape');
+			}
+
+			// Attempt to close any remaining modals
+			await this.page.locator('body').press('Escape');
+
+			await this.moreButton.click({ timeout: 500 });
+			await expect(this.morePanel).not.toHaveAttribute('inert');
+			await expect(this.logoutButton).toBeVisible();
+			await this.logoutButton.click();
+			await expect(this.page).toHaveURL(/^.*\/login$/);
+		}).toPass({ timeout: 10000, intervals: [500, 1000, 3000] });
 	}
 
 	async click(parent: string, tab: string, waitForURL = true) {
