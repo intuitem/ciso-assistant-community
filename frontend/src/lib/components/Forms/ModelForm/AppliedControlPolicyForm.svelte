@@ -221,6 +221,7 @@
 			{form}
 			createFromSelection={true}
 			optionsEndpoint="filtering-labels"
+			translateOptions={false}
 			optionsLabelField="label"
 			field="filtering_labels"
 			helpText={m.labelsHelpText()}
