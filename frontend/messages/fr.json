@@ -53,6 +53,7 @@
 	"associatedSolutions": "Solutions associées",
 	"home": "Accueil",
 	"edit": "Modifier",
+	"view": "Voir",
 	"changePassword": "Changer le mot de passe",
 	"overview": "Vue d'ensemble",
 	"context": "Contexte",
@@ -1659,6 +1660,8 @@
 		}
 	],
 	"matchingScenarios": "Scénarios correspondants",
+	"select": "Sélectionner",
+	"deselect": "Désélectionner",
 	"associatedCampaigns": "Campagnes associées",
 	"serverURL": "URL serveur",
 	"oidcConfiguration": "openid-configuration",
