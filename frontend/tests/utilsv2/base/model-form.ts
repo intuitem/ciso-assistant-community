@@ -16,6 +16,17 @@ export class ModelForm extends Element {
 	}
 
 	async doSubmit() {
-		await this._saveButton.click();
+		await this._saveButton.click({ force: true });
+		const isStillVisible = await this._saveButton.isVisible();
+		if (isStillVisible) {
+			await this._saveButton.click();
+		}
+	}
+
+	async _waitLoadingSpins() {
+		const loadingSpins = await this._self.getByTestId('autocomplete-select-loading-elem').all();
+		for (const loadingSpin of loadingSpins) {
+			await loadingSpin.waitFor({ state: 'detached' });
+		}
 	}
 }
