@@ -104,15 +104,15 @@ def get_current_fct_name():
 def validate_urn(urn: str, context: str = None, row = None):
     pattern = r"^urn:([a-z0-9._-]+:)*[a-z0-9._-]+$"
     if not re.fullmatch(pattern, urn):
-        raise ValueError(f"({context if context else 'validate_urn'}) {'Row #'+str(row+2)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_urn'}) {'Row #'+str(row)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed")
 
 def validate_ref_id(ref_id: str, context: str = None, row = None):
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
-        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row+2)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
 
 def validate_ref_id_with_spaces(ref_id: str, context: str = None, row = None):
     if not re.fullmatch(r"[a-zA-Z0-9._\- ]+", ref_id):
-        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row+2)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
 
 def validate_sheet_name(sheet_name: str, context: str = None):
     if not (sheet_name.endswith("_meta") or sheet_name.endswith("_content")):
@@ -120,6 +120,10 @@ def validate_sheet_name(sheet_name: str, context: str = None):
 
 def is_valid_locale(locale_str):
     return bool(re.fullmatch(r"[a-z0-9]{2}", locale_str))
+
+def validate_no_spaces(value: str, value_name: str, context: str = None, row: int = None):
+    if " " in str(value):
+        raise ValueError(f"({context if context else 'validate_no_spaces'}) {'Row #' + str(row) + ': ' if row is not None else ''} Invalid value for \"{value_name}\": Spaces are not allowed (got \"{value}\")")
 
 def print_sheet_validation(sheet_name: str, function_name: str = None, verbose: bool = False, ctx: ConsoleContext = None):
         
@@ -273,7 +277,8 @@ def validate_library_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
 
     # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    validate_urn(urn_value, fct_name)
+    urn_row = df[df.iloc[:, 0] == "urn"].index[0]
+    validate_urn(urn_value, fct_name, urn_row+1)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
@@ -319,7 +324,13 @@ def validate_framework_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleC
 
     # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    validate_urn(urn_value, fct_name)
+    urn_row = df[df.iloc[:, 0] == "urn"].index[0]
+    validate_urn(urn_value, fct_name, urn_row+1)
+
+    # base_urn
+    base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
+    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0]
+    validate_urn(base_urn_value, fct_name, base_urn_row+1)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
@@ -331,15 +342,20 @@ def validate_framework_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleC
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Threats
+# [META] Threats {OK}
 def validate_threats_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "threats"
     fct_name = get_current_fct_name()
     expected_keys = ["base_urn"]
     # No optional keys
-    
+
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+
+    # base_urn
+    base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
+    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0]
+    validate_urn(base_urn_value, fct_name, base_urn_row+1)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -347,15 +363,20 @@ def validate_threats_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] Reference Controls
+# [META] Reference Controls {OK}
 def validate_reference_controls_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "reference_controls"
     fct_name = get_current_fct_name()
     expected_keys = ["base_urn"]
     # No optional keys
-    
+
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+
+    # base_urn
+    base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
+    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0]
+    validate_urn(base_urn_value, fct_name, base_urn_row+1)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -456,7 +477,7 @@ def validate_answers_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleCon
     print_sheet_validation(sheet_name, fct_name, verbose, ctx)
 
 
-# [META] URN Prefix
+# [META] URN Prefix {OK}
 def validate_urn_prefix_meta(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     expected_type = "urn_prefix"
