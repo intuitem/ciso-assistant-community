@@ -2553,8 +2553,7 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         if self.timestamp > now():
             raise ValidationError("Timestamp cannot be in the future.")
-        if not self.folder and self.incident:
-            self.folder = self.incident.folder
+        self.folder = self.incident.folder
         super().save(*args, **kwargs)
 
 
@@ -4568,15 +4567,19 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         applied_controls: list[AppliedControl] = []
         for reference_control in self.requirement.reference_controls.all():
             try:
-                _name = (
-                    reference_control.get_name_translated or reference_control.ref_id
-                )
                 applied_control, created = AppliedControl.objects.get_or_create(
-                    name=_name,
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
+                    defaults={
+                        "name": reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        "ref_id": reference_control.ref_id
+                        if not reference_control.get_name_translated
+                        else None,
+                    },
                 )
+
                 if (
                     reference_control.description
                     and applied_control.description is None
