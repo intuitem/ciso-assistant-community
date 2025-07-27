@@ -6,7 +6,6 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	interface Props {
@@ -29,7 +28,37 @@
 		object = {}
 	}: Props = $props();
 
-	// export let updated_fields: Set<string> = new Set();
+	let riskToleranceChoices = $state<{ label: string; value: string }[]>([]);
+
+	async function handleRiskMatrixChange(id: string) {
+		riskToleranceChoices = [];
+
+		if (id) {
+			try {
+				const response = await fetch(`/risk-matrices/${id}`);
+				if (response.ok) {
+					const data = await response.json();
+
+					const riskMatrix =
+						data.results && data.results.length > 0
+							? data.results.find((item) => item.id === id)
+							: null;
+
+					if (riskMatrix && riskMatrix.json_definition) {
+						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
+						const riskLevels = jsonDefinition.risk || [];
+						riskToleranceChoices = riskLevels.map((level, index) => ({
+							label: level.name,
+							value: level.id ?? index
+						}));
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching risk matrix data:', error);
+				riskToleranceChoices = [];
+			}
+		}
+	}
 </script>
 
 <TextField
@@ -39,7 +68,6 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
@@ -61,6 +89,7 @@
 	<Select
 		{form}
 		options={model.selectOptions['status']}
+		translateOptions={false}
 		field="status"
 		hide
 		label={m.status()}
@@ -70,6 +99,8 @@
 	<AutocompleteSelect
 		{form}
 		disabled={object.id}
+		translateOptions={false}
+		disableDoubleDash
 		optionsEndpoint="risk-matrices"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
@@ -77,7 +108,21 @@
 		label={m.riskMatrix()}
 		helpText={m.riskAssessmentMatrixHelpText()}
 		hidden={initialData.risk_matrix}
+		onChange={async (e) => await handleRiskMatrixChange(e)}
+		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
+	{#if riskToleranceChoices.length > 0}
+		<Select
+			{form}
+			translateOptions={false}
+			options={riskToleranceChoices}
+			field="risk_tolerance"
+			cacheLock={cacheLocks['risk_tolerance']}
+			bind:cachedValue={formDataCache['risk_tolerance']}
+			label={m.riskTolerance()}
+			helpText={m.riskToleranceHelpText()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple

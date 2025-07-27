@@ -2957,6 +2957,9 @@ class RiskAssessment(Assessment):
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
     )
+    risk_tolerance = models.SmallIntegerField(
+        default=-1, verbose_name=_("Risk tolerance")
+    )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -3493,6 +3496,16 @@ class RiskScenario(NameDescriptionMixin):
 
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
+
+    @property
+    def within_tolerance(self):
+        tolerance = self.risk_assessment.risk_tolerance
+        if tolerance >= 0:
+            if self.current_level <= tolerance:
+                return "YES"
+            else:
+                return "NO"
+        return "--"
 
     def _get_risk_data(self, value: int, data_key: str):
         """
