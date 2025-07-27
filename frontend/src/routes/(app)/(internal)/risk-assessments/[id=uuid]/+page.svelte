@@ -112,6 +112,7 @@
 		...(page.data?.featureflags?.inherent_risk ? ['inherent_level'] : []),
 		'existing_applied_controls',
 		'current_level',
+		'within_tolerance',
 		'applied_controls',
 		'residual_level'
 	];
