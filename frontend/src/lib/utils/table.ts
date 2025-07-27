@@ -3,7 +3,8 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
-import { getModelInfo, URL_MODEL_MAP } from './crud';
+import { getModelInfo } from './crud';
+import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -801,16 +802,8 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: [
-			'ref_id',
-			'name',
-			'framework',
-			'description',
-			'perimeter',
-			'reviewProgress',
-			'updated_at'
-		],
-		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress', 'updated_at'],
+		head: ['ref_id', 'name', 'framework', 'perimeter', 'reviewProgress', 'createdAt', 'updatedAt'],
+		body: ['ref_id', 'name', 'framework', 'perimeter', 'progress', 'created_at', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1193,7 +1186,14 @@ export type FilterKeys = {
 		: never;
 }[keyof typeof listViewFields];
 
-export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
+export const contextMenuActions = {
+	'applied-controls': [{ component: ChangeStatus, props: {} }],
+	'feared-events': [{ component: SelectObject, props: {} }],
+	'ro-to': [{ component: SelectObject, props: {} }],
+	stakeholders: [{ component: SelectObject, props: {} }],
+	'attack-paths': [{ component: SelectObject, props: {} }],
+	'operational-scenarios': [{ component: SelectObject, props: {} }]
+};
 
 export const getListViewFields = ({
 	key,
