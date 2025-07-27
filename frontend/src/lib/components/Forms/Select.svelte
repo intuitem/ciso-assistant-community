@@ -106,13 +106,13 @@
 			{#each options || [] as option}
 				{@const camelKey = toCamelCase(option.value)}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-				{#if !translateOptions}
-					{option.label}
-				{:else if camelKey !== 'm' && m[camelKey]}
-					{safeTranslate(option.value)}
-				{:else}
-					{safeTranslate(option.label)}
-				{/if}
+					{#if !translateOptions}
+						{option.label}
+					{:else if camelKey !== 'm' && m[camelKey]}
+						{safeTranslate(option.value)}
+					{:else}
+						{safeTranslate(option.label)}
+					{/if}
 				</option>
 			{/each}
 		</select>
