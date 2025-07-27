@@ -53,7 +53,7 @@
 		color_map = {},
 		form,
 		options = [],
-		translateOptions = false,
+		translateOptions = true,
 		...rest
 	}: Props = $props();
 
