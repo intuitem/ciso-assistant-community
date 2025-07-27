@@ -89,6 +89,7 @@
 	<Select
 		{form}
 		options={model.selectOptions['status']}
+		translateOptions={false}
 		field="status"
 		hide
 		label={m.status()}
@@ -113,6 +114,7 @@
 	{#if riskToleranceChoices.length > 0}
 		<Select
 			{form}
+			translateOptions={false}
 			options={riskToleranceChoices}
 			field="risk_tolerance"
 			cacheLock={cacheLocks['risk_tolerance']}
