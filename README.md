@@ -262,11 +262,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
 
-Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
+Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library_v2.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting YAML file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
-There is also a tool to facilitate the creation of mappings, called `prepare_mapping.py` that will create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
+There is also a tool to facilitate the creation of mappings, called `prepare_mapping_v2.py` that will create an Excel file based on two framework libraries in YAML. Once properly filled, this Excel file can be processed by the `convert_library_v2.py` tool to get the resulting mapping library.
 
 ## Community
 
@@ -558,24 +558,25 @@ Set DJANGO_DEBUG=False for security reason.
 
 ## Supported languages 🌐
 
-- FR: French
-- EN: English
-- AR: Arabic
-- PT: Portuguese
-- ES: Spanish
-- DE: German
-- NL: Dutch
-- IT: Italian
-- PL: Polish
-- RO: Romanian
-- HI: Hindi
-- UR: Urdu
-- CS: Czech
-- SV: Swedish
-- ID: Indonesian
-- DA: Danish
-- HU: Hungarian
-- UK: Ukrainian
+1. FR: French
+2. EN: English
+3. AR: Arabic
+4. PT: Portuguese
+5. ES: Spanish
+6. DE: German
+7. NL: Dutch
+8. IT: Italian
+9. PL: Polish
+10. RO: Romanian
+11. HI: Hindi
+12. UR: Urdu
+13. CS: Czech
+14. SV: Swedish
+15. ID: Indonesian
+16. DA: Danish
+17. HU: Hungarian
+18. UK: Ukrainian
+19. EL: Greek
 
 ## Contributors 🤝
 

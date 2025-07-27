@@ -1577,6 +1577,11 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         choices=PRJ_LC_STATUS,
         verbose_name=_("Status"),
     )
+    default_assignee = models.ManyToManyField(
+        User,
+        verbose_name="Default assignee",
+        blank=True,
+    )
     fields_to_check = ["name"]
 
     class Meta:
@@ -2548,8 +2553,7 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         if self.timestamp > now():
             raise ValidationError("Timestamp cannot be in the future.")
-        if not self.folder and self.incident:
-            self.folder = self.incident.folder
+        self.folder = self.incident.folder
         super().save(*args, **kwargs)
 
 
@@ -3866,7 +3870,7 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
+            .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
@@ -4550,15 +4554,19 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         applied_controls: list[AppliedControl] = []
         for reference_control in self.requirement.reference_controls.all():
             try:
-                _name = (
-                    reference_control.get_name_translated or reference_control.ref_id
-                )
                 applied_control, created = AppliedControl.objects.get_or_create(
-                    name=_name,
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
+                    defaults={
+                        "name": reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        "ref_id": reference_control.ref_id
+                        if not reference_control.get_name_translated
+                        else None,
+                    },
                 )
+
                 if (
                     reference_control.description
                     and applied_control.description is None

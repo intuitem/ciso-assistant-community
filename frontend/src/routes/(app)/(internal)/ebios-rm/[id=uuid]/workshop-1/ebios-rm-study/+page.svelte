@@ -150,6 +150,10 @@
 					>{ebiosRmStudy.risk_matrix.str}</Anchor
 				>
 			</span>
+			<span class="text-sm text-gray-500"
+				>{m.quotationMethodSemiColon()}
+				<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method)}</span>
+			</span>
 		</div>
 		<div
 			id="activityOne"
@@ -247,6 +251,7 @@
 											URLModel={urlmodel}
 											canSelectObject={canEditObject}
 											baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
+											disableDelete={true}
 										>
 											{#snippet selectButton()}
 												<div>

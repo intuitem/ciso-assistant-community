@@ -15,6 +15,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context: string;
+		object?: any; // Optional object for additional data
 	}
 
 	let {
@@ -23,7 +24,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context
+		context,
+		object = null // Optional object for additional data
 	}: Props = $props();
 
 	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
@@ -47,6 +49,14 @@
 	bind:cachedValue={formDataCache['ebios_rm_study']}
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
+/>
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
 />
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
@@ -87,7 +97,7 @@
 			optionsEndpoint="attack-paths?is_selected=true&used=false"
 			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 			field="attack_path"
-			label={m.attackPath()}
+			label={m.attackPath() + ` (${m.strategicScenario()})`}
 		/>
 	{/if}
 </div>
@@ -103,15 +113,17 @@
 	>
 		{m.activityTwo()}
 	</p>
-	<Select
-		{form}
-		options={model.selectOptions['likelihood']}
-		field="likelihood"
-		label={m.likelihood()}
-		cacheLock={cacheLocks['likelihood']}
-		bind:cachedValue={formDataCache['likelihood']}
-		helpText={m.likelihoodHelpText()}
-	/>
+	{#if object.quotation_method === 'manual'}
+		<Select
+			{form}
+			options={model.selectOptions['likelihood']}
+			field="likelihood"
+			label={m.likelihood()}
+			cacheLock={cacheLocks['likelihood']}
+			bind:cachedValue={formDataCache['likelihood']}
+			helpText={m.likelihoodHelpText()}
+		/>
+	{/if}
 	<TextArea
 		{form}
 		field="justification"

@@ -7,12 +7,15 @@
 # REQUIRED FIELDS:
 # - urn_root: (str) Unique identifier base. Must contain only lowercase letters,
 #   digits, dashes (-), underscores (_) or dots (.) — no uppercase or special chars.
-# - locale: (str) Locale setting (e.g., "en", "fr").
-# - ref_id: (str) Reference ID for the framework.
+# - locale: (str) Locale setting complying with ISO 639 Set 1 (e.g., "en", "fr").
+#   See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes.
+# - ref_id: (str) Reference ID for the framework. Must contain only letters,
+#   digits, dashes (-), underscores (_) or dots (.) — no special chars.
 # - framework_name: (str) Name of the framework.
 # - description: (str, multiline supported) Description of the framework.
 # - copyright: (str) Copyright information.
 # - provider: (str) Name of the providing organization.
+# - packager: (str) Name of the organisation / person creating the package.
 # - framework_sheet_base_name: (str) Base name used for the framework-related sheets.
 #
 # OPTIONAL / CONDITIONAL FIELDS:
@@ -25,7 +28,8 @@
 #
 # - implementation_groups: (list of objects) Only required if you use 
 #   "implementation_groups_sheet_base_name". Each object must contain:
-#     - ref_id (str, required)
+#     - ref_id (str, required) Must contain only letters,
+#       digits, dashes (-), underscores (_) or dots (.) — no special chars.
 #     - name (str, required)
 #     - description (str, optional) — warning shown if missing
 #
@@ -40,12 +44,12 @@
 
 
 # --- Output Excel file name (optional) ---
-# excel_file_name: "output.xlsx"
+# excel_file_name: "my_framework.xlsx"
 
 # --- Metadata sheets ---
 urn_root: "risk-framework_2025.example"
 locale: "en"
-ref_id: "rfw001"
+ref_id: "risk-framework_2025.example"
 framework_name: "Example Risk Framework"
 description: |
   This is a demonstration framework.
@@ -53,12 +57,13 @@ description: |
   Designed for illustration and testing of the Excel generator.
 copyright: "© 2025 Example Organization"
 provider: "intuitem"
+packager: "intuitem"
 
 # --- Specific to Framework sheets ---
-framework_sheet_base_name: "examplefw"
+framework_sheet_base_name: "framework"
 
 # --- To enable implementation groups, uncomment the lines below ---
-# implementation_groups_sheet_base_name: "examplegroups"
+# implementation_groups_sheet_base_name: "imp_grp"
 
 # implementation_groups:
 #   - ref_id: "grp001"

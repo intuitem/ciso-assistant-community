@@ -20,7 +20,7 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
-	import { listViewFields } from '$lib/utils/table';
+	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
 		getModalStore,
@@ -31,7 +31,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
+	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str', 'path'];
 
 	interface Props {
 		data: any;
@@ -75,13 +75,16 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
-	if (data.model?.detailViewFields) {
-		data.data = Object.fromEntries(
-			Object.entries(data.data).filter(
-				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
-			)
-		);
-	}
+	let filteredData = $derived(
+		data.model?.detailViewFields
+			? Object.fromEntries(
+					Object.entries(data.data).filter(
+						([key, _]) =>
+							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+					)
+				)
+			: data.data
+	);
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -285,7 +288,7 @@
 			<!-- Left side - Details (now takes half width) -->
 			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4"
 						>
@@ -399,6 +402,9 @@
 											{:else if value === 'P4'}
 												<li class="fa-solid fa-flag text-gray-500"></li>
 												{m.p4()}
+											{:else if key === 'icon'}
+												<i class="text-lg fa {data.data.icon_fa_class}"></i>
+												{safeTranslate((value.str || value.name) ?? value)}
 											{:else if isURL(value) && !value.startsWith('urn')}
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor
@@ -549,7 +555,10 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+							{@const fieldsToUse = getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
@@ -563,6 +572,7 @@
 									{#snippet addButton()}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
+											data-testid="add-button"
 											onclick={(_) => modalCreateForm(model)}
 											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 												'add-' + model.info.localName
