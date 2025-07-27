@@ -1,5 +1,6 @@
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment
 import csv
 import json
 import mimetypes
@@ -1123,6 +1124,10 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     logger.error(f"Error processing cell value: {e}")
                     pass
             ws.column_dimensions[col_letter].width = max_length + 2
+
+        last_col_letter = get_column_letter(len(headers))
+        for cell in ws[last_col_letter]:
+            cell.alignment = Alignment(wrap_text=True)
 
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
