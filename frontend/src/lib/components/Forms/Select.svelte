@@ -34,6 +34,7 @@
 		form: SuperForm<AnyZodObject>;
 		options?: Option[];
 		[key: string]: any;
+		translateValues?: boolean;
 	}
 
 	let {
@@ -52,6 +53,7 @@
 		color_map = {},
 		form,
 		options = [],
+		translateValues = false,
 		...rest
 	}: Props = $props();
 
@@ -104,10 +106,13 @@
 			{#each options || [] as option}
 				{@const camelKey = toCamelCase(option.value)}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					<!-- Skipping "m" key because it's a named export in messages.js, not an actual translation key it causes false positives. -->
-					{camelKey !== 'm' && m[camelKey]
-						? safeTranslate(option.value)
-						: safeTranslate(option.label)}
+				{#if !translateValues}
+					{option.label}
+				{:else if camelKey !== 'm' && m[camelKey]}
+					{safeTranslate(option.value)}
+				{:else}
+					{safeTranslate(option.label)}
+				{/if}
 				</option>
 			{/each}
 		</select>
