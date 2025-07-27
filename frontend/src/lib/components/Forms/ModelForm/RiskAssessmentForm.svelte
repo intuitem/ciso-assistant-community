@@ -39,15 +39,17 @@
 				if (response.ok) {
 					const data = await response.json();
 
-					// Access the first item in the results array
-					const riskMatrix = data.results && data.results.length > 0 ? data.results[0] : null;
+					const riskMatrix =
+						data.results && data.results.length > 0
+							? data.results.find((item) => item.id === id)
+							: null;
 
 					if (riskMatrix && riskMatrix.json_definition) {
 						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
 						const riskLevels = jsonDefinition.risk || [];
-						riskAppetiteChoices = riskLevels.map((level) => ({
+						riskAppetiteChoices = riskLevels.map((level, index) => ({
 							label: level.name,
-							value: level.id
+							value: level.id ?? index
 						}));
 					}
 				}
@@ -96,6 +98,8 @@
 	<AutocompleteSelect
 		{form}
 		disabled={object.id}
+		translateOptions={false}
+		disableDoubleDash
 		optionsEndpoint="risk-matrices"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
