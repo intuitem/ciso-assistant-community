@@ -107,7 +107,7 @@
 				{@const camelKey = toCamelCase(option.value)}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
 				{#if !translateOptions}
-					{option.value}
+					{option.label}
 				{:else if camelKey !== 'm' && m[camelKey]}
 					{safeTranslate(option.value)}
 				{:else}
