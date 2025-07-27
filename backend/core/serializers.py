@@ -551,7 +551,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
 
-    within_appetite = serializers.CharField()
+    within_tolerance = serializers.CharField()
 
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):

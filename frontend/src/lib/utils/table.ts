@@ -142,10 +142,10 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_APPETITE_FILTER: ListViewFilterConfig = {
+const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'withinAppetite',
+		label: 'withinTolerance',
 		options: YES_NO_UNSET_OPTIONS,
 		multiple: true
 	}
@@ -624,7 +624,7 @@ export const listViewFields = {
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
-			'withinAppetite',
+			'withinTolerance',
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
@@ -637,7 +637,7 @@ export const listViewFields = {
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
-			'within_appetite',
+			'within_tolerance',
 			'applied_controls',
 			'residual_level',
 			'treatment',
@@ -652,7 +652,7 @@ export const listViewFields = {
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
-			within_appetite: RISK_APPETITE_FILTER
+			within_tolerance: RISK_TOLERANCE_FILTER
 		}
 	},
 	'risk-acceptances': {

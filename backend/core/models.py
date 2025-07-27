@@ -2958,8 +2958,8 @@ class RiskAssessment(Assessment):
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
     )
-    risk_appetite = models.SmallIntegerField(
-        default=-1, verbose_name=_("Risk appetite")
+    risk_tolerance = models.SmallIntegerField(
+        default=-1, verbose_name=_("Risk tolerance")
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -3499,10 +3499,10 @@ class RiskScenario(NameDescriptionMixin):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
     @property
-    def within_appetite(self):
-        appetite = self.risk_assessment.risk_appetite
-        if appetite >= 0:
-            if self.current_level <= appetite:
+    def within_tolerance(self):
+        tolerance = self.risk_assessment.risk_tolerance
+        if tolerance >= 0:
+            if self.current_level <= tolerance:
                 return "YES"
             else:
                 return "NO"

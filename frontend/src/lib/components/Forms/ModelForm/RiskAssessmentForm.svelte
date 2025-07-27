@@ -28,10 +28,10 @@
 		object = {}
 	}: Props = $props();
 
-	let riskAppetiteChoices = $state<{ label: string; value: string }[]>([]);
+	let riskToleranceChoices = $state<{ label: string; value: string }[]>([]);
 
 	async function handleRiskMatrixChange(id: string) {
-		riskAppetiteChoices = [];
+		riskToleranceChoices = [];
 
 		if (id) {
 			try {
@@ -47,7 +47,7 @@
 					if (riskMatrix && riskMatrix.json_definition) {
 						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
 						const riskLevels = jsonDefinition.risk || [];
-						riskAppetiteChoices = riskLevels.map((level, index) => ({
+						riskToleranceChoices = riskLevels.map((level, index) => ({
 							label: level.name,
 							value: level.id ?? index
 						}));
@@ -55,7 +55,7 @@
 				}
 			} catch (error) {
 				console.error('Error fetching risk matrix data:', error);
-				riskAppetiteChoices = [];
+				riskToleranceChoices = [];
 			}
 		}
 	}
@@ -110,15 +110,15 @@
 		onChange={async (e) => await handleRiskMatrixChange(e)}
 		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
-	{#if riskAppetiteChoices.length > 0}
+	{#if riskToleranceChoices.length > 0}
 		<Select
 			{form}
-			options={riskAppetiteChoices}
-			field="risk_appetite"
-			cacheLock={cacheLocks['risk_appetite']}
-			bind:cachedValue={formDataCache['risk_appetite']}
-			label={m.riskAppetite()}
-			helpText={m.riskAppetiteHelpText()}
+			options={riskToleranceChoices}
+			field="risk_tolerance"
+			cacheLock={cacheLocks['risk_tolerance']}
+			bind:cachedValue={formDataCache['risk_tolerance']}
+			label={m.riskTolerance()}
+			helpText={m.riskToleranceHelpText()}
 		/>
 	{/if}
 	<AutocompleteSelect
