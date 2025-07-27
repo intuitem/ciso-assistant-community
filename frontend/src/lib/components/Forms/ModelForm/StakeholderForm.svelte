@@ -87,6 +87,14 @@
 	);
 </script>
 
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <div
 	class="relative p-2 space-y-2 rounded-container {activeActivity === 'one'
 		? 'border-2 border-primary-500'
