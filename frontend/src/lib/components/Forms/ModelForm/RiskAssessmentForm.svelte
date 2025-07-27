@@ -113,6 +113,7 @@
 	{#if riskToleranceChoices.length > 0}
 		<Select
 			{form}
+			translateOptions={false}
 			options={riskToleranceChoices}
 			field="risk_tolerance"
 			cacheLock={cacheLocks['risk_tolerance']}
