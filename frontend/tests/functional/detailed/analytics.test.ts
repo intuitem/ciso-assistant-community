@@ -1,7 +1,7 @@
 import { m } from '$paraglide/messages.js';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
-import { expect, test, TestContent } from '../../utils/test-utils.js';
+import { expect, test, TestContent, type Locator } from '../../utils/test-utils.js';
 
 const vars = TestContent.generateTestVars();
 const testObjectsData = TestContent.itemBuilder(vars);
@@ -21,7 +21,8 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 	appliedControlsPage,
 	complianceAssessmentsPage,
 	evidencesPage,
-	riskAssessmentsPage
+	riskAssessmentsPage,
+	librariesPage
 }) => {
 	await test.step('Create required folder', async () => {
 		await foldersPage.goto();
@@ -63,10 +64,30 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 		}
 	});
 
+	await test.step('Import a library', async () => {
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
+
+		// Find one library to import
+
+		await librariesPage.importLibrary(
+			'International standard ISO/IEC 27001:2022',
+			undefined,
+			'any'
+		);
+
+		await librariesPage.importLibrary('NIST CSF v2.0', undefined, 'any');
+
+		// Optional: Confirm import
+		await librariesPage.tab('Libraries store').click();
+		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+	});
+
 	await test.step('Create audits', async () => {
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-1',
+			framework: 'NIST CSF v2.0',
 			authors: ['admin@tests.com'],
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
@@ -74,6 +95,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-2',
 			authors: ['admin@tests.com'],
+			framework: 'International standard ISO/IEC 27001:2022',
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
 	});
