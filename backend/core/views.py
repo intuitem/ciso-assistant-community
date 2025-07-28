@@ -363,7 +363,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
-class PerimeterFilter(df.FilterSet):
+class PerimeterFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(
         queryset=Folder.objects.all(),
     )
@@ -531,7 +531,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(df.FilterSet):
+class AssetFilter(GenericFilterSet):
     exclude_childrens = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
         method="filter_exclude_childrens",
@@ -1395,7 +1395,7 @@ def convert_date_to_timestamp(date):
     return None
 
 
-class AppliedControlFilterSet(df.FilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     todo = df.BooleanFilter(method="filter_todo")
     to_review = df.BooleanFilter(method="filter_to_review")
     compliance_assessments = df.ModelMultipleChoiceFilter(
@@ -2108,7 +2108,7 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
-class RiskScenarioFilter(df.FilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     # Aliased filters for user-friendly query params
     folder = df.UUIDFilter(
         field_name="risk_assessment__perimeter__folder", label="Folder ID"
@@ -2277,7 +2277,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
             )
 
 
-class RiskAcceptanceFilterSet(df.FilterSet):
+class RiskAcceptanceFilterSet(GenericFilterSet):
     to_review = df.BooleanFilter(method="filter_to_review")
 
     def filter_to_review(self, queryset, name, value):
@@ -2430,7 +2430,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         return Response(dict(RiskAcceptance.ACCEPTANCE_STATE))
 
 
-class UserFilter(df.FilterSet):
+class UserFilter(GenericFilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
     is_applied_control_owner = df.BooleanFilter(
         method="filter_applied_control_owner", label="Applied control owner"
@@ -2563,7 +2563,7 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
 
-class FolderFilter(df.FilterSet):
+class FolderFilter(GenericFilterSet):
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
@@ -3762,7 +3762,7 @@ def get_composer_data(request):
 # Compliance Assessment
 
 
-class FrameworkFilter(df.FilterSet):
+class FrameworkFilter(GenericFilterSet):
     baseline = df.ModelChoiceFilter(
         queryset=ComplianceAssessment.objects.all(),
         method="filter_framework",
