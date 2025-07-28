@@ -278,12 +278,7 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('test-risk-scenario');
-	await page.getByTestId('form-input-risk-assessment').click();
-	await page
-		.getByRole('option', {
-			name: 'feature-flag-folder/feature-flag-perimeter/test-risk-assessment - 1.0'
-		})
-		.click();
+
 	await page.getByTestId('save-button').click();
 	await page.getByText('test-risk-scenario').click();
 
@@ -314,8 +309,6 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ log
 
 	await page.getByText('Generate the risk assessment').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment-ebios-rm');
-	await page.getByTestId('form-input-perimeter').click();
-	await page.getByRole('option', { name: 'feature-flag-folder/feature-flag-perimeter' }).click();
 	await page.getByTestId('save-button').click();
 
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
