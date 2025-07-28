@@ -1,82 +1,79 @@
-import { test, expect } from '../../utils/test-utils.js';
+import { m } from '$paraglide/messages.js';
 import { LoginPage } from '../../utils/login-page.js';
+import { PageContent } from '../../utils/page-content.js';
+import { expect, test, TestContent } from '../../utils/test-utils.js';
+
+const vars = TestContent.generateTestVars();
+const testObjectsData = TestContent.itemBuilder(vars);
 
 test('My assignments full flow - creation, validation, negative case and cleanup', async ({
-	page
+	page,
+	logedPage,
+	foldersPage,
+	perimetersPage,
+	appliedControlsPage,
+	complianceAssessmentsPage,
+	riskAssessmentsPage
 }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
+	await test.step('Create required folder', async () => {
+		await foldersPage.goto();
+		await foldersPage.createItem({
+			name: vars.folderName,
+			description: vars.description
+		});
+	});
 
-	await test.step('Create folder and perimeter', async () => {
-		await page.getByRole('button', { name: 'Organization' }).click();
-		await page.getByTestId('accordion-item-folders').click();
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('my-assignments-folder');
-		await page.getByTestId('save-button').click();
-
-		await page.getByRole('button', { name: 'Organization' }).click();
-		await page.getByTestId('accordion-item-perimeters').click();
-		await expect(page.locator('#page-title')).toHaveText('Perimeters');
-		await expect(page).toHaveURL('/perimeters');
-
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('my-assignments-perimeter');
-		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
-		await page.getByTestId('form-input-folder').click();
-		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
-		await page.getByTestId('save-button').click();
+	await test.step('Create perimeter', async () => {
+		await perimetersPage.goto();
+		await perimetersPage.createItem({
+			name: vars.perimeterName,
+			description: vars.description,
+			folder: vars.folderName,
+			ref_id: 'PERIM.001',
+			lc_status: 'Production'
+		});
 	});
 
 	await test.step('Create risk assessment', async () => {
-		await page.getByTestId('accordion-item-risk').click();
-		await page.getByTestId('accordion-item-risk-assessments').click();
-		await expect(page.locator('#page-title')).toHaveText('Risk assessments');
-		await expect(page).toHaveURL('/risk-assessments');
-
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('test-risk-assessment');
+		await riskAssessmentsPage.goto();
+		await riskAssessmentsPage.createItem({
+			name: 'test-risk-assessment',
+			perimeter: `${vars.folderName}/${vars.perimeterName}`
+		});
+		const riskRow = page.getByRole('row', { name: /test-risk-assessment/i });
+		await riskRow.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-authors').click();
 		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('form-input-perimeter').click();
-		await page
-			.getByRole('option', { name: 'my-assignments-folder/my-assignments-perimeter' })
-			.click();
 		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('Create control with owner', async () => {
-		await page.getByText('Operations').click();
-		await page.getByTestId('accordion-item-applied-controls').click();
-		await expect(page.locator('#page-title')).toHaveText('Applied controls');
-		await expect(page).toHaveURL('/applied-controls');
+		await appliedControlsPage.goto();
+		await appliedControlsPage.createItem({
+			name: 'test-control',
+			folder: vars.folderName
+		});
 
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('test-control');
+		const riskRow = page.getByRole('row', { name: /test-control/i });
+		await riskRow.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-owner').click();
 		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
-		await page.getByTestId('form-input-folder').click();
-		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
 		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('Create audit', async () => {
-		await page.getByTestId('accordion-item-compliance').click();
-		await page.getByTestId('accordion-item-compliance-assessments').click();
-		await expect(page.locator('#page-title')).toHaveText('Audits');
-		await expect(page).toHaveURL('/compliance-assessments');
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.createItem({
+			name: 'test-audit',
+			framework: 'NIST CSF',
+			perimeter: `${vars.folderName}/${vars.perimeterName}`
+		});
 
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('test-audit');
+		await complianceAssessmentsPage.goto();
+		const riskRow = page.getByRole('row', { name: /test-audit/i });
+		await riskRow.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-authors').click();
 		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('form-input-framework').click();
-		await page.getByRole('option', { name: 'NIST CSF' }).click();
-		await page.getByTestId('form-input-perimeter').click();
-		await page
-			.getByRole('option', { name: 'my-assignments-folder/my-assignments-perimeter' })
-			.click();
 		await page.getByTestId('save-button').click();
 	});
 
@@ -85,6 +82,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('accordion-item-my-assignments').click();
 		await expect(page.locator('#page-title')).toHaveText('My assignments');
 		await expect(page).toHaveURL('/my-assignments');
+		await page.reload();
 
 		await expect(page.getByText('test-control')).toBeVisible();
 		await expect(page.getByText('test-risk-assessment')).toBeVisible();
@@ -92,37 +90,31 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	});
 
 	await test.step('Create control without owner and verify absence in my assignments', async () => {
-		await page.getByText('Operations').click();
-		await page.getByTestId('accordion-item-applied-controls').click();
-		await expect(page.locator('#page-title')).toHaveText('Applied controls');
-		await expect(page).toHaveURL('/applied-controls');
-
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('control-without-owner');
-		await page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
-		await page.getByTestId('form-input-folder').click();
-		await page.getByRole('option', { name: 'my-assignments-folder' }).click();
-		await page.getByTestId('save-button').click();
+		await appliedControlsPage.goto();
+		await appliedControlsPage.createItem({
+			name: 'control-without-owner',
+			folder: vars.folderName
+		});
 
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
-		await expect(page.locator('#page-title')).toHaveText('My assignments');
-		await expect(page).toHaveURL('/my-assignments');
-
 		await expect(page.getByText('control-without-owner')).toHaveCount(0);
 	});
+});
 
-	await test.step('Cleanup - delete the folder', async () => {
-		await page.getByRole('button', { name: 'Organization' }).click();
-		await page.getByTestId('accordion-item-folders').click();
-		await expect(page.locator('#page-title')).toHaveText('Domains');
-		await expect(page).toHaveURL('/folders');
+test.afterAll('cleanup', async ({ browser }) => {
+	const page = await browser.newPage();
+	const loginPage = new LoginPage(page);
+	const foldersPage = new PageContent(page, '/folders', 'Domains');
 
-		const folderRow = page.getByRole('row', { name: /my-assignments-folder/i });
-		await folderRow.getByTestId('tablerow-delete-button').click();
-		await expect(page.getByTestId('delete-prompt-confirm-textfield')).toBeVisible();
-		await page.getByTestId('delete-prompt-confirm-textfield').fill('yes');
-		await page.getByRole('button', { name: 'Submit' }).click();
-		await expect(page.getByRole('row', { name: /my-assignments-folder/i })).toHaveCount(0);
-	});
+	await loginPage.goto();
+	await loginPage.login();
+	await foldersPage.goto();
+
+	await foldersPage.deleteItemButton(vars.folderName).click();
+	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+	await foldersPage.deletePromptConfirmButton().click();
+
+	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 });
