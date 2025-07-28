@@ -383,9 +383,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         initial_ids = {obj.id for obj in initial_objects}
 
         path_results = {}
+        folder_map = {}
 
-        # Get the initial set of folder IDs from the assets
-        folder_ids = {obj.folder_id for obj in initial_objects if obj.folder_id}
+        folder_ids = {obj.folder.id for obj in initial_objects if obj.folder}
 
         if folder_ids:
             # Iteratively find all parent folders
@@ -416,25 +416,24 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 for f in all_folders
             }
 
-        # Build the path for each asset
+        # Build the path for each object
         for obj in initial_objects:
-            if not obj.folder_id:
+            if not obj.folder.id:
                 path_results[obj.id] = []
                 continue
 
             path = []
-            curr_folder_id = obj.folder_id
+            curr_folder_id = obj.folder.id
             while curr_folder_id in folder_map:
                 folder_data = folder_map[curr_folder_id]
                 path.append(folder_data)
                 curr_folder_id = folder_data["parent_id"]
 
-            # The original method reversed the path and optionally removed the root
             path.reverse()
             path_results[obj.id] = path[1:] if len(path) > 1 else path
 
         return {
-            "paths": path_results,  # Add the new path data
+            "paths": path_results,
         }
 
     class Meta:
