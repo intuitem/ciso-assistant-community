@@ -53,6 +53,7 @@
 	"associatedSolutions": "Associated solutions",
 	"home": "Home",
 	"edit": "Edit",
+	"view": "View",
 	"changePassword": "Change password",
 	"overview": "Overview",
 	"context": "Context",
@@ -1748,5 +1749,8 @@
 	"graphStop": "Stop",
 	"graphMoHelp": "You can move the graph nodes to improve the rendering and reduce links crossover. It's better to have one killchain per operating mode for readibility and independent quotation.",
 	"defaultAssignee": "Default assignee",
-	"defaultAssigneeHelpText": "This user will be preset automatically as author for all assessments of this perimeter"
+	"defaultAssigneeHelpText": "This user will be preset automatically as author for all assessments of this perimeter",
+	"riskTolerance": "Risk tolerance",
+	"riskToleranceHelpText": "Threshold of tolerable risk level",
+	"withinTolerance": "Within tolerance"
 }

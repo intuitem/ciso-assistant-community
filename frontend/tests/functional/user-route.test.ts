@@ -290,7 +290,9 @@ test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 
 	await usersPage.goto();
-	await usersPage.deleteItemButton(vars.user.email).click();
-	await usersPage.deleteModalConfirmButton.click();
-	await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
+	if (await usersPage.getRow(vars.user.email).isVisible()) {
+		await usersPage.deleteItemButton(vars.user.email).click();
+		await usersPage.deleteModalConfirmButton.click();
+		await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
+	}
 });
