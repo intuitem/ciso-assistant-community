@@ -25,11 +25,11 @@ class ConsoleContext:
 
     # Getters 
     
-    def get_function_warning_msg(self, function_name: str) -> List[str]:
-        return self.warning_messages.get(function_name)
+    def get_sheet_warning_msg(self, sheet_name: str) -> List[str]:
+        return self.warning_messages.get(sheet_name)
     
-    def get_function_verbose_msg(self, function_name: str) -> List[str]:
-        return self.verbose_messages.get(function_name)
+    def get_sheet_verbose_msg(self, sheet_name: str) -> List[str]:
+        return self.verbose_messages.get(sheet_name)
     
     def get_all_warning_msg(self) -> Dict[str, List]:
         return self.warning_messages
@@ -40,20 +40,20 @@ class ConsoleContext:
 
     # Setters
 
-    def add_function_warning_msg(self, function_name: str, msg: str):
+    def add_sheet_warning_msg(self, sheet_name: str, msg: str):
         
-        if function_name in self.warning_messages:
-            self.warning_messages[function_name].append(msg)
+        if sheet_name in self.warning_messages:
+            self.warning_messages[sheet_name].append(msg)
         else:
-            self.warning_messages[function_name] = [msg]
+            self.warning_messages[sheet_name] = [msg]
         return
     
-    def add_function_verbose_msg(self, function_name: str, msg):
+    def add_sheet_verbose_msg(self, sheet_name: str, msg):
         
-        if function_name in self.verbose_messages:
-            self.verbose_messages[function_name].append(msg)
+        if sheet_name in self.verbose_messages:
+            self.verbose_messages[sheet_name].append(msg)
         else:
-            self.verbose_messages[function_name] = [msg]
+            self.verbose_messages[sheet_name] = [msg]
         return
 
 
@@ -67,25 +67,25 @@ class ConsoleContext:
         """Return total number of verbose messages."""
         return sum(len(msgs) for msgs in self.verbose_messages.values())
 
-    # Counters (Per function)
+    # Counters (Per sheet)
 
-    def count_warnings_for_function(self, function_name: str) -> int:
-        """Return number of warning messages for a function (0 if none exist)."""
-        return len(self.warning_messages.get(function_name, []))
+    def count_warnings_for_sheet(self, sheet_name: str) -> int:
+        """Return number of warning messages for a sheet (0 if none exist)."""
+        return len(self.warning_messages.get(sheet_name, []))
 
-    def count_verbose_for_function(self, function_name: str) -> int:
-        """Return number of verbose messages for a function (0 if none exist)."""
-        return len(self.verbose_messages.get(function_name, []))
+    def count_verbose_for_sheet(self, sheet_name: str) -> int:
+        """Return number of verbose messages for a sheet (0 if none exist)."""
+        return len(self.verbose_messages.get(sheet_name, []))
 
-    # Aggregators by function
+    # Aggregators by sheet
 
-    def get_warning_count_by_function(self) -> Dict[str, int]:
-        """Return dict {function_name: warning count}, including 0 where applicable."""
-        return {fn: len(self.warning_messages.get(fn, [])) for fn in self._all_function_names}
+    def get_warning_count_by_sheet(self) -> Dict[str, int]:
+        """Return dict {sheet_name: warning count}, including 0 where applicable."""
+        return {fn: len(self.warning_messages.get(fn, [])) for fn in self._all_sheet_names}
 
-    def get_verbose_count_by_function(self) -> Dict[str, int]:
-        """Return dict {function_name: verbose count}, including 0 where applicable."""
-        return {fn: len(self.verbose_messages.get(fn, [])) for fn in self._all_function_names}
+    def get_verbose_count_by_sheet(self) -> Dict[str, int]:
+        """Return dict {sheet_name: verbose count}, including 0 where applicable."""
+        return {fn: len(self.verbose_messages.get(fn, [])) for fn in self._all_sheet_names}
 
 
 class MetaTypes(Enum):
@@ -139,6 +139,25 @@ def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
     return meta_sheets_with_type
 
 
+# Retrieve the value associated with a given key in a meta sheet (2-column format).
+def get_meta_value(df, key_name: str, sheet_name: str, required: bool = False):
+    
+    matches = df[df.iloc[:, 0] == key_name]
+
+    if matches.empty:
+        if required:
+            raise ValueError(f"[{sheet_name}] Missing required key \"{key_name}\" in meta sheet.")
+        return None
+
+    value = matches.iloc[0, 1]
+    if pd.isna(value) or str(value).strip() == "":
+        if required:
+            raise ValueError(f"[{sheet_name}] Key \"{key_name}\" is present but has an empty value.")
+        return None
+
+    return str(value).strip()
+
+
 
 # ─────────────────────────────────────────────────────────────
 # VALIDATE UTILS
@@ -168,7 +187,7 @@ def validate_no_spaces(value: str, value_name: str, context: str = None, row: in
     if " " in str(value):
         raise ValueError(f"({context if context else 'validate_no_spaces'}) {'Row #' + str(row) + ':' if row is not None else ''} Invalid value for \"{value_name}\": Spaces are not allowed (got \"{value}\")")
 
-def print_sheet_validation(sheet_name: str, function_name: str = None, verbose: bool = False, ctx: ConsoleContext = None):
+def print_sheet_validation(sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
         
     if not ctx:
         
@@ -180,26 +199,23 @@ def print_sheet_validation(sheet_name: str, function_name: str = None, verbose: 
             print(f"ℹ️   [INFO] Check for warnings in the console, if any")
     else:
         
-        if not function_name:
-            raise ValueError(f"({get_current_fct_name()}) \"function_name\" must be defined")
-        
-        function_warnings = ctx.get_function_warning_msg(function_name)
-        function_verbose = ctx.get_function_verbose_msg(function_name)
+        sheet_warnings = ctx.get_sheet_warning_msg(sheet_name)
+        sheet_verbose = ctx.get_sheet_verbose_msg(sheet_name)
         
         if verbose:
-            if function_warnings:
-                if function_verbose:
-                    print(f"🟣 [CHECK] Valid sheet with warnings and verbose messages : \"{sheet_name}\" (Warn: {len(function_warnings)} / Verb: {len(function_verbose)})")
+            if sheet_warnings:
+                if sheet_verbose:
+                    print(f"🟣 [CHECK] Valid sheet with warnings and verbose messages : \"{sheet_name}\" (Warn: {len(sheet_warnings)} / Verb: {len(sheet_verbose)})")
                 else:
-                    print(f"🟡 [CHECK] Valid sheet with warnings: \"{sheet_name}\" (Warn: {len(function_warnings)} / Verb: 0)")
+                    print(f"🟡 [CHECK] Valid sheet with warnings: \"{sheet_name}\" (Warn: {len(sheet_warnings)} / Verb: 0)")
             else:
-                if function_verbose:
-                    print(f"🔵 [CHECK] Valid sheet with verbose messages : \"{sheet_name}\" (Warn: 0 / Verb: {len(function_verbose)})")
+                if sheet_verbose:
+                    print(f"🔵 [CHECK] Valid sheet with verbose messages : \"{sheet_name}\" (Warn: 0 / Verb: {len(sheet_verbose)})")
                 else:
                     print(f"🟢 [CHECK] Valid sheet: \"{sheet_name}\"")   
         else:
-            if function_warnings:
-                print(f"🟡 [CHECK] Valid sheet with warnings: \"{sheet_name}\" (Warn: {len(function_warnings)})")
+            if sheet_warnings:
+                print(f"🟡 [CHECK] Valid sheet with warnings: \"{sheet_name}\" (Warn: {len(sheet_warnings)})")
             else:
                 print(f"🟢 [CHECK] Valid sheet: \"{sheet_name}\"")
 
@@ -262,7 +278,7 @@ def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List
                 msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] Missing optional key \"{key}\" in meta sheet"
                 
                 if ctx:
-                    ctx.add_function_verbose_msg(context, msg)
+                    ctx.add_sheet_verbose_msg(sheet_name, msg)
                 print(msg)
 
 
@@ -369,7 +385,7 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Framework {OK}
@@ -456,7 +472,7 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Threats {OK}
@@ -477,7 +493,7 @@ def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Reference Controls {OK}
@@ -498,7 +514,7 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Risk Matrix {OK}
@@ -524,7 +540,7 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Implementation Groups {OK}
@@ -543,7 +559,7 @@ def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbo
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Mappings {OK}
@@ -594,7 +610,7 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Scores {OK}
@@ -613,7 +629,7 @@ def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fals
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Answers {OK}
@@ -632,7 +648,7 @@ def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fal
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] URN Prefix {OK}
@@ -648,7 +664,7 @@ def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: Co
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 
@@ -690,7 +706,7 @@ def validate_optional_columns_content_sheet(df, sheet_name: str, optional_column
                 msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] Missing optional column \"{col}\" in meta sheet"
                 
                 if ctx:
-                    ctx.add_function_verbose_msg(context, msg)
+                    ctx.add_sheet_verbose_msg(sheet_name, msg)
                 print(msg)
                 
             continue
@@ -702,8 +718,38 @@ def validate_optional_columns_content_sheet(df, sheet_name: str, optional_column
             msg = (f"⚠️  [WARNING] ({context}) [{sheet_name}] Optional column \"{col}\" is present but entirely empty"
                     "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
             if ctx:
-                ctx.add_function_warning_msg(context, msg)
+                ctx.add_sheet_warning_msg(sheet_name, msg)
             print(msg)
+
+
+# Check that values in each column from the given list are unique. Raise error or emit warning if duplicates are found
+def validate_unique_column_values(df, column_names: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+
+    context = context or "validate_unique_column_values"
+
+    for column_name in column_names:
+        if column_name not in df.columns:
+            raise ValueError(f"({context}) [{sheet_name}] Column \"{column_name}\" not found in sheet")
+
+        duplicates = df[column_name][df[column_name].duplicated(keep=False)]
+
+        if not duplicates.empty:
+            duplicate_rows = duplicates.index + 2  # assuming header is row 1
+            duplicate_values = duplicates.unique()
+            quoted_values = ', '.join(f'"{str(val)}"' for val in duplicate_values)
+
+            msg = (
+                f"({context}) [{sheet_name}] Duplicate value(s) found in column \"{column_name}\": {quoted_values}"
+                f"\n> Rows: {', '.join(map(str, duplicate_rows))}"
+            )
+
+            if warn_only:
+                msg = f"⚠️  [WARNING] {msg}"
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_warning_msg(sheet_name, msg)
+            else:
+                raise ValueError(msg)
 
 
 def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None):
@@ -737,8 +783,54 @@ def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: Co
                 "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet."
             )
             if ctx:
-                ctx.add_function_warning_msg(context, msg)
+                ctx.add_sheet_warning_msg(sheet_name, msg)
             print(msg)
+
+
+# Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
+def get_content_sheet_base_name(content_sheet_name: str) -> str:
+    if not content_sheet_name.endswith("_content"):
+        raise ValueError(f"Invalid sheet name: \"{content_sheet_name}\" does not end with \"_content\"")
+
+    base_name = re.sub(r'_content$', '', content_sheet_name)
+    return base_name
+
+
+# Check if a content sheet is referenced in any 'framework' meta sheet via a specific meta field (e.g., 'scores_definition')
+def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_field: str, fct_name: str, ctx: ConsoleContext = None):
+    """
+    Args:
+        wb (Workbook): The Excel workbook.
+        sheet_name (str): Name of the current content sheet.
+        meta_field (str): The meta key in framework sheets that should reference this sheet.
+        fct_name (str): Name of the calling function (used in messages).
+        ctx (ConsoleContext, optional): Context object for collecting warnings.
+    """
+
+    sheet_base_name = get_content_sheet_base_name(sheet_name)
+    meta_sheets = get_meta_sheets_with_type(wb)
+    frameworks_with_reference = []
+
+    for sheet, sheet_type in meta_sheets.items():
+        if sheet_type != MetaTypes.FRAMEWORK.value:
+            continue
+
+        sheet_df = pd.DataFrame(wb[sheet].values)
+        meta_value = get_meta_value(sheet_df, meta_field, sheet)
+
+        if meta_value == sheet_base_name:
+            frameworks_with_reference.append(sheet)
+
+    if frameworks_with_reference:
+        print(f"ℹ️  ({fct_name}) [{sheet_name}] Sheet referenced by the sheet(s): {', '.join(f'\"{s}\"' for s in frameworks_with_reference)}")
+    else:
+        warn_msg = (
+            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any \"framework\" sheet via the field \"{meta_field}\""
+            f"\n> 💡 Tip: Set \"{meta_field}\" in your framework meta sheet to \"{sheet_base_name}\"."
+        )
+        print(warn_msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, warn_msg)
 
 
 
@@ -780,7 +872,7 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Threats
@@ -796,7 +888,7 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Reference Controls
@@ -812,7 +904,7 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Risk Matrix
@@ -827,7 +919,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Implementation Groups
@@ -843,7 +935,7 @@ def validate_implementation_groups_content(df, sheet_name, verbose: bool = False
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Requirement Mapping Set
@@ -859,11 +951,11 @@ def validate_requirement_mapping_set_content(df, sheet_name, verbose: bool = Fal
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Scores
-def validate_scores_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["score", "name", "description"]
@@ -872,10 +964,26 @@ def validate_scores_content(df, sheet_name, verbose: bool = False, ctx: ConsoleC
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Validate each "score" value is a non-negative integer
+    for idx, value in enumerate(df["score"], start=2):  # Row number starts at 2
+        value_str = str(value).strip()
+        if not value_str.isdigit():
+            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{idx}: Key \"score\" must be a non-negative integer, got \"{value_str}\"")
+        
+        value_int = int(value_str)
+        if value_int < 0:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{idx}: Key \"score\" must be >= 0, got \"{value_int}\"")
+
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["score"], sheet_name, fct_name, ctx=ctx)
+
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    # Check if the score sheet is actually used in a "framework" sheet
+    check_content_sheet_usage_in_frameworks(wb, sheet_name, "scores_definition", fct_name, ctx)
+
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Answers
@@ -891,7 +999,7 @@ def validate_answers_content(df, sheet_name, verbose: bool = False, ctx: Console
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] URN Prefix
@@ -906,7 +1014,7 @@ def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: Cons
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    print_sheet_validation(sheet_name, fct_name, verbose, ctx)
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 
@@ -963,7 +1071,7 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
     elif corresponding_meta_type == MetaTypes.IMPLEMENTATION_GROUPS.value:
         validate_implementation_groups_content(df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.SCORES.value:
-        validate_scores_content(df, sheet_name, verbose, ctx)
+        validate_scores_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.ANSWERS.value:
         validate_answers_content(df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.URN_PREFIX.value:
@@ -1043,7 +1151,7 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
         print(f"📜 [SUMMARY] ⚠️  Total [WARNING] for \"{file_name}\": {ctx.count_all_warnings()}")
     
     if verbose and ctx.count_all_verbose() > 0:
-        print(f"💬📜 [SUMMARY] ℹ️  Total [Verbose Messages] for \"{file_name}\": {ctx.count_all_verbose()}")
+        print(f"📜 [SUMMARY] 💬 Total [Verbose Messages] for \"{file_name}\": {ctx.count_all_verbose()}")
     
     
 
