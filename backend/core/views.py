@@ -1,3 +1,6 @@
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment
 import csv
 import json
 import mimetypes
@@ -1041,8 +1044,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-    @action(detail=True, name="Get action plan CSV")
-    def action_plan_csv(self, request, pk):
+    @action(detail=True, name="Get action plan Excel")
+    def action_plan_excel(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
@@ -1050,56 +1053,89 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
         risk_assessment = RiskAssessment.objects.get(id=pk)
         risk_scenarios = risk_assessment.risk_scenarios.all()
         queryset = AppliedControl.objects.filter(
             risk_scenarios__in=risk_scenarios
         ).distinct()
 
-        # Use the same serializer to maintain consistency - to review
         serializer = RiskAssessmentActionPlanSerializer(
             queryset, many=True, context={"pk": pk}
         )
 
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="action_plan_{pk}.csv"'
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Action Plan"
 
-        writer = csv.writer(response)
-
-        writer.writerow(
-            [
-                "Name",
-                "Description",
-                "Category",
-                "CSF Function",
-                "Priority",
-                "Status",
-                "ETA",
-                "Expiry date",
-                "Effort",
-                "Impact",
-                "Cost",
-                "Covered scenarios",
-            ]
-        )
+        headers = [
+            "Name",
+            "Description",
+            "Domain",
+            "Category",
+            "CSF Function",
+            "Priority",
+            "Status",
+            "ETA",
+            "Expiry date",
+            "Effort",
+            "Impact",
+            "Cost",
+            "Assigned to",
+            "Covered scenarios",
+        ]
+        ws.append(headers)
 
         for item in serializer.data:
-            writer.writerow(
-                [
-                    item.get("name"),
-                    item.get("description"),
-                    item.get("category"),
-                    item.get("csf_function"),
-                    item.get("priority"),
-                    item.get("status"),
-                    item.get("eta"),
-                    item.get("expiry_date"),
-                    item.get("effort"),
-                    item.get("impact"),
-                    item.get("cost"),
-                    "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
-                ]
-            )
+            row = [
+                item.get("name"),
+                item.get("description"),
+                item.get("folder").get("str"),
+                item.get("category"),
+                item.get("csf_function"),
+                item.get("priority"),
+                item.get("status"),
+                item.get("eta"),
+                item.get("expiry_date"),
+                item.get("effort"),
+                item.get("impact"),
+                item.get("cost"),
+                "\n".join([ra.get("str") for ra in item.get("owner")]),
+                "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
+            ]
+            ws.append(row)
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
+            max_lines = 1
+            for cell in row:
+                if cell.value and isinstance(cell.value, str):
+                    line_count = cell.value.count("\n") + 1
+                    max_lines = max(max_lines, line_count)
+            ws.row_dimensions[row_idx].height = max(15, max_lines * 15)
+
+        for col in ws.columns:
+            max_length = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                try:
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                except Exception as e:
+                    logger.error(f"Error processing cell value: {e}")
+                    pass
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        last_col_letter = get_column_letter(len(headers))
+        for cell in ws[last_col_letter]:
+            cell.alignment = Alignment(wrap_text=True)
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="action_plan_{pk}.xlsx"'
+        )
+        wb.save(response)
 
         return response
 
@@ -1460,6 +1496,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "findings": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
+            "processings": ["exact"],
         }
 
 
@@ -2079,6 +2116,25 @@ class RiskScenarioFilter(df.FilterSet):
     perimeter = df.UUIDFilter(
         field_name="risk_assessment__perimeter", label="Perimeter ID"
     )
+    within_tolerance = df.ChoiceFilter(
+        choices=[("YES", "YES"), ("NO", "NO"), ("--", "--")],
+        method="filter_within_tolerance",
+    )
+
+    def filter_within_tolerance(self, queryset, name, value):
+        if value == "YES":
+            return queryset.filter(
+                risk_assessment__risk_tolerance__gte=0,
+                current_level__lte=models.F("risk_assessment__risk_tolerance"),
+            )
+        elif value == "NO":
+            return queryset.filter(
+                risk_assessment__risk_tolerance__gte=0,
+                current_level__gt=models.F("risk_assessment__risk_tolerance"),
+            )
+        elif value == "--":
+            return queryset.filter(risk_assessment__risk_tolerance__lt=0)
+        return queryset
 
     class Meta:
         model = RiskScenario
@@ -3818,8 +3874,8 @@ class FrameworkViewSet(BaseModelViewSet):
                 "urn": rn.urn,
                 "assessable": rn.assessable,
                 "ref_id": rn.ref_id,
-                "name": rn.name,
-                "description": rn.description,
+                "name": rn.get_name_translated,
+                "description": rn.get_description_translated,
                 "compliance_result": "",
                 "requirement_progress": "",
                 "score": "",
@@ -4350,8 +4406,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "urn": req_node.urn,
                 "assessable": req_node.assessable,
                 "ref_id": req_node.ref_id,
-                "name": req_node.name,
-                "description": req_node.description,
+                "name": req_node.get_name_translated,
+                "description": req_node.get_description_translated,
                 "compliance_result": req.result,
                 "requirement_progress": req.status,
                 "observations": req.observation,

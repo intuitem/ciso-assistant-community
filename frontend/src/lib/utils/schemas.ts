@@ -112,6 +112,7 @@ export const RiskAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
+	risk_tolerance: z.number().optional().default(-1),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -556,10 +557,11 @@ export const processingSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
-	legal_basis: z.string().optional(),
+	legal_basis: z.string(),
 	dpia_required: z.boolean().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
-	nature: z.string().optional().array().optional()
+	nature: z.string().optional().array().optional(),
+	associated_controls: z.array(z.string().optional()).optional()
 });
 
 export const purposeSchema = z.object({
@@ -648,6 +650,7 @@ export const fearedEventsSchema = z.object({
 
 export const roToSchema = z.object({
 	ebios_rm_study: z.string(),
+	folder: z.string(),
 	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
@@ -674,14 +677,16 @@ export const StakeholderSchema = z.object({
 	residual_trust: z.number().min(1).max(4).default(1).optional(),
 	residual_criticality: z.number().min(0).max(16).default(0).optional(),
 	is_selected: z.boolean().default(true),
-	justification: z.string().optional()
+	justification: z.string().optional(),
+	folder: z.string()
 });
 
 export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
-	ref_id: z.string().optional()
+	ref_id: z.string().optional(),
+	folder: z.string()
 });
 
 export const AttackPathSchema = z.object({
@@ -689,7 +694,8 @@ export const AttackPathSchema = z.object({
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().default(true),
-	justification: z.string().optional()
+	justification: z.string().optional(),
+	folder: z.string()
 });
 
 export const operationalScenarioSchema = z.object({
@@ -699,7 +705,8 @@ export const operationalScenarioSchema = z.object({
 	operating_modes_description: z.string(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
-	justification: z.string().optional()
+	justification: z.string().optional(),
+	folder: z.string()
 });
 
 export const SecurityExceptionSchema = z.object({
@@ -855,7 +862,8 @@ export const OperatingModeSchema = z.object({
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
 	elementary_actions: z.string().uuid().optional().array().optional(),
-	likelihood: z.number().optional().default(-1)
+	likelihood: z.number().optional().default(-1),
+	folder: z.string()
 });
 
 export const KillChainSchema = z.object({
@@ -863,7 +871,8 @@ export const KillChainSchema = z.object({
 	elementary_action: z.string().uuid(),
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
-	logic_operator: z.string().optional().nullable()
+	logic_operator: z.string().optional().nullable(),
+	folder: z.string()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

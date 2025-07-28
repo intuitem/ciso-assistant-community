@@ -20,7 +20,7 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
-	import { listViewFields } from '$lib/utils/table';
+	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
 		getModalStore,
@@ -31,7 +31,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
+	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str', 'path'];
 
 	interface Props {
 		data: any;
@@ -555,7 +555,10 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+							{@const fieldsToUse = getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
@@ -569,6 +572,7 @@
 									{#snippet addButton()}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
+											data-testid="add-button"
 											onclick={(_) => modalCreateForm(model)}
 											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 												'add-' + model.info.localName
