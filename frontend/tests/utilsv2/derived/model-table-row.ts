@@ -41,7 +41,11 @@ export class ModelTableRow extends Element {
 	 * Load the library represented by the row.
 	 * This method will not work if there is no library load button on the row.
 	 */
-	async doLoadLibrary(): Promise<void> {
+	async doLoadLibrary(existsOk: boolean = false): Promise<void> {
+		if (existsOk) {
+			const isVisible = await this._importButton.isVisible();
+			if (!isVisible) return;
+		}
 		await this._importButton.click();
 	}
 

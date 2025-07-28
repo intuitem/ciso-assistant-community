@@ -157,7 +157,7 @@ testV2('user usual routine actions are working correctly', async ({ page }) => {
 		let firstRow = modelTable.getFirstRow();
 		await firstRow.checkValue(expectV2, 1, 'anssi-architectures-si-sensibles-dr');
 		const libraryCount = await libraryListView.getLoadedLibraryCount();
-		await firstRow.doLoadLibrary();
+		await firstRow.doLoadLibrary(true);
 		const toast = libraryListView.getToast();
 		await toast.checkIfVisible(expectV2);
 		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
@@ -172,7 +172,7 @@ testV2('user usual routine actions are working correctly', async ({ page }) => {
 		const firstRow = modelTable.getFirstRow();
 		await firstRow.checkValue(expectV2, 1, 'critical_5x5');
 		const libraryCount = await libraryListView.getLoadedLibraryCount();
-		await firstRow.doLoadLibrary();
+		await firstRow.doLoadLibrary(true);
 		const toast = libraryListView.getToast();
 		await toast.checkIfVisible(expectV2);
 		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
