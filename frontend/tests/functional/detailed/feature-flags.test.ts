@@ -204,6 +204,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model 
 
 test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment details', async ({
 	logedPage,
+	librariesPage,
 	page
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
@@ -226,6 +227,14 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
 	await page.getByTestId('save-button').click();
 
+	await librariesPage.goto();
+	await librariesPage.hasUrl();
+
+	await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
+
+	await librariesPage.tab('Libraries store').click();
+	await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+
 	// Create risk assessment
 	await page.getByTestId('accordion-item-risk').click();
 	await page.getByTestId('accordion-item-risk-assessments').click();
@@ -233,8 +242,6 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await expect(page).toHaveURL('/risk-assessments');
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment');
-	await page.getByTestId('form-input-perimeter').click();
-	await page.getByRole('option', { name: 'feature-flag-folder/feature-flag-perimeter' }).click();
 	await page.getByTestId('save-button').click();
 
 	// Check visibility
@@ -252,6 +259,7 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 
 test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({
 	logedPage,
+	librariesPage,
 	page
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
@@ -269,6 +277,7 @@ test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({
 
 test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page and in edit page', async ({
 	logedPage,
+	librariesPage,
 	page
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
