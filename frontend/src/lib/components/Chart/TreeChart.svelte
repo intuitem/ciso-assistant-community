@@ -44,12 +44,14 @@
 					left: '5%',
 					bottom: '10%',
 					right: '20%',
-					symbolSize: 10,
+					symbolSize: 14,
+					symbol: 'roundRect',
 					label: {
 						backgroundColor: '#fff',
 						position: 'left',
 						verticalAlign: 'middle',
-						align: 'right'
+						align: 'right',
+						fontSize: 14
 					},
 					leaves: {
 						label: {
