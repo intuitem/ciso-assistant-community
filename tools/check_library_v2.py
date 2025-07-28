@@ -954,7 +954,7 @@ def validate_requirement_mapping_set_content(df, sheet_name, verbose: bool = Fal
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Scores
+# [CONTENT] Scores {OK}
 def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
