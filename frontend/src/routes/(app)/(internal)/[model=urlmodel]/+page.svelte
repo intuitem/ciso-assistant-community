@@ -140,7 +140,7 @@
 										href={`/libraries?object_type=${URLModel}`}
 										label={m.libraries()}
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										data-testid="add-button"
+										data-testid="import-button"
 										id="add-button"
 										{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 									>
@@ -176,7 +176,7 @@
 									onclick={handleClickForGT}
 									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="add-button"
+									data-testid="import-button"
 									id="add-button"
 									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
@@ -186,7 +186,7 @@
 									onclick={handleClickForGT}
 									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="add-button"
+									data-testid="import-button"
 									id="add-button"
 									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
@@ -195,7 +195,7 @@
 									href="/libraries?object_type=requirement_mapping_set"
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									label={m.libraries()}
-									data-testid="add-button"
+									data-testid="import-button"
 									id="add-button"
 									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
