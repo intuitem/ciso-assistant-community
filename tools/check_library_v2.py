@@ -884,7 +884,7 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Threats
+# [CONTENT] Threats {OK}
 def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -903,7 +903,7 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Reference Controls
+# [CONTENT] Reference Controls {OK}
 def validate_reference_controls_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
