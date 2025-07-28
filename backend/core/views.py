@@ -385,7 +385,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         path_results = {}
         folder_map = {}
 
-        folder_ids = {obj.folder.id for obj in initial_objects if obj.folder}
+        folder_ids = {
+            Folder.get_folder(obj).id
+            for obj in initial_objects
+            if Folder.get_folder(obj) is not None
+        }
 
         if folder_ids:
             # Iteratively find all parent folders
@@ -418,12 +422,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         # Build the path for each object
         for obj in initial_objects:
-            if not obj.folder.id:
+            if not Folder.get_folder(obj):
                 path_results[obj.id] = []
                 continue
 
             path = []
-            curr_folder_id = obj.folder.id
+            curr_folder_id = Folder.get_folder(obj).id
             while curr_folder_id in folder_map:
                 folder_data = folder_map[curr_folder_id]
                 path.append(folder_data)
