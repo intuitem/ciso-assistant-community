@@ -5,13 +5,23 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		updated_fields?: Set<string>;
+	}
 
-	export let updated_fields: Set<string> = new Set();
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		updated_fields = new Set()
+	}: Props = $props();
 
 	async function fetchDefaultRefId(riskAssessmentId: string) {
 		try {
@@ -43,9 +53,9 @@
 	bind:cachedValue={formDataCache['risk_assessment']}
 	label={m.riskAssessment()}
 	hidden={initialData.risk_assessment}
-	on:change={async (e) => {
-		if (e.detail) {
-			await fetchDefaultRefId(e.detail);
+	onChange={async (e) => {
+		if (e) {
+			await fetchDefaultRefId(e);
 		}
 	}}
 />
@@ -63,6 +73,14 @@
 	multiple
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
 	optionsLabelField="auto"
 	field="assets"
 	cacheLock={cacheLocks['assets']}

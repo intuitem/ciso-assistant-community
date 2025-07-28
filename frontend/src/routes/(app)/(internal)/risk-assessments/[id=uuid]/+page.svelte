@@ -1,18 +1,10 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		PopupSettings
-	} from '@skeletonlabs/skeleton';
-	import { getModalStore, popup } from '@skeletonlabs/skeleton';
-
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -20,15 +12,25 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { getLocale } from '$paraglide/runtime';
 	import { listViewFields } from '$lib/utils/table';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
-	export let data;
+	let { data } = $props();
+
+	let exportPopupOpen = $state(false);
+
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -78,7 +80,7 @@
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
-		risk: 'current' | 'residual'
+		risk: 'current' | 'residual' | 'inherent'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
@@ -103,16 +105,22 @@
 		'residual'
 	);
 
-	const popupDownload: PopupSettings = {
-		event: 'click',
-		target: 'popupDownload',
-		placement: 'bottom'
-	};
+	let fields = [
+		'ref_id',
+		'name',
+		'threats',
+		...(page.data?.featureflags?.inherent_risk ? ['inherent_level'] : []),
+		'existing_applied_controls',
+		'current_level',
+		'within_tolerance',
+		'applied_controls',
+		'residual_level'
+	];
 </script>
 
-<main class="flex-grow main">
+<main class="grow main">
 	<div>
-		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
+		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -179,56 +187,61 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
-						><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
+					<Popover
+						open={exportPopupOpen}
+						onOpenChange={(e) => (exportPopupOpen = e.open)}
+						triggerClasses="btn preset-filled-primary-500 w-full"
 					>
-					<div
-						class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-						data-popup="popupDownload"
-					>
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-						>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-							>... {m.asCSV()}</a
-						>
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-						>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-							>... {m.asCSV()}</a
-						>
-					</div>
+						{#snippet trigger()}
+							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+						{/snippet}
+						{#snippet content()}
+							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+									>... {m.asCSV()}</a
+								>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
+									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+									>... {m.asXLSX()}</a
+								>
+							</div>
+						{/snippet}
+					</Popover>
 					{#if canEditObject}
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
 							label={m.edit()}
-							class="btn variant-filled-primary"
+							class="btn preset-filled-primary-500"
 							data-testid="edit-button"
 						>
-							<i class="fa-solid fa-edit mr-2" />
+							<i class="fa-solid fa-edit mr-2"></i>
 							{m.edit()}</Anchor
 						>
 					{/if}
 				</div>
 				<Anchor
-					label={m.remediationPlan()}
-					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
-					class="btn variant-filled-primary"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</Anchor
+					label={m.actionPlan()}
+					href="/risk-assessments/{risk_assessment.id}/action-plan"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
-					on:click={(_) => modalDuplicateForm()}
+					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					onclick={(_) => modalDuplicateForm()}
 					data-testid="duplicate-button"
 				>
 					<i class="fa-solid fa-copy mr-2"></i>
@@ -238,7 +251,7 @@
 		</div>
 	</div>
 	<!--Risk risk_assessment-->
-	<div class="card m-4 p-4 shadow bg-white">
+	<div class="card m-4 p-4 shadow-sm bg-white">
 		<div class="bg-white">
 			<div class="flex flex-row justify-between">
 				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
@@ -253,31 +266,42 @@
 				search={false}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
-				fields={[
-					'ref_id',
-					'name',
-					'threats',
-					'existing_applied_controls',
-					'current_level',
-					'applied_controls',
-					'residual_level'
-				]}
+				{fields}
 			>
-				<button
-					slot="addButton"
-					class="btn variant-filled-primary self-end my-auto"
-					on:click={(_) => modalCreateForm()}
-					><i class="fa-solid fa-plus mr-2 lowercase" />
-					{m.addRiskScenario()}
-				</button>
+				{#snippet addButton()}
+					<button
+						class="btn preset-filled-primary-500 self-end my-auto"
+						onclick={(_) => modalCreateForm()}
+					>
+						<i class="fa-solid fa-plus mr-2 lowercase"></i>
+						{m.addRiskScenario()}
+					</button>
+				{/snippet}
 			</ModelTable>
 		</div>
 	</div>
 	<!--Matrix view-->
-	<div class="card m-4 p-4 shadow bg-white page-break">
+	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
-			<div class="flex-1">
+		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
+			{#if page.data?.featureflags?.inherent_risk}
+				<div>
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+
+					<RiskMatrix
+						riskMatrix={risk_assessment.risk_matrix}
+						matrixName={'inherent'}
+						data={buildRiskCluster(
+							risk_assessment.risk_scenarios,
+							risk_assessment.risk_matrix,
+							'inherent'
+						)}
+						dataItemComponent={RiskScenarioItem}
+						{useBubbles}
+					/>
+				</div>
+			{/if}
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
 				<RiskMatrix
@@ -285,11 +309,10 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
 					{useBubbles}
 				/>
 			</div>
-			<div class="flex-1">
+			<div>
 				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 
 				<RiskMatrix
@@ -297,7 +320,7 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					{showRisks}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>

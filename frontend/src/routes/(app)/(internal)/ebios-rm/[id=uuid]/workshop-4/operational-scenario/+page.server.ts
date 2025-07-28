@@ -13,15 +13,24 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { listViewFields } from '$lib/utils/table';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'operational-scenarios';
 	const createSchema = modelSchema(URLModel);
+	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
+	const objectResponse = await fetch(objectEndpoint);
+	let object: any = {};
+	if (objectResponse.ok) {
+		object = await objectResponse.json();
+	} else {
+		console.error(`Failed to fetch study object: ${objectResponse.statusText}`);
+	}
 	const initialData = {
-		ebios_rm_study: params.id
+		ebios_rm_study: params.id,
+		folder: object.folder
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);

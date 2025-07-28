@@ -930,6 +930,7 @@
 	"mappingSuggested": "Vorgeschlagene Zuordnung",
 	"mappingSuggestedHelpText": "Vorschläge zur Zuordnung basierend auf geladenen Frameworks",
 	"mappingSuggestionTeasing": "Zuordnungen werden nun vorgeschlagen! Sie können die Filter verwenden, um Vorschläge basierend auf geladenen Frameworks zu erkunden.",
+	"associatedFindingsAssessments": "Zugeordnete Nachverfolgungen",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -959,5 +960,9 @@
 				"countPlural=other": "{count} Tage"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Übereinstimmende Szenarien",
+	"select": "Auswählen",
+	"deselect": "Abwählen",
+	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt."
 }

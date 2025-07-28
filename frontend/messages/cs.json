@@ -913,6 +913,7 @@
 	"mappingSuggested": "Navrhované mapování",
 	"mappingSuggestedHelpText": "Návrhy mapování založené na načtených rámcích",
 	"mappingSuggestionTeasing": "Nyní jsou navrhována mapování! Můžete použít filtry k prozkoumání návrhů založených na načtených rámcích.",
+	"associatedFindingsAssessments": "Přidružené následné kroky",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -942,5 +943,9 @@
 				"countPlural=other": "{count} Dny"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Shodné scénáře",
+	"select": "Vybrat",
+	"deselect": "Zrušit výběr",
+	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu."
 }

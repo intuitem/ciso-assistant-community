@@ -6,12 +6,23 @@
 	import Checkbox from '../Checkbox.svelte';
 	import TextArea from '../TextArea.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let additionalInitialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		additionalInitialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		additionalInitialData = {}
+	}: Props = $props();
 </script>
 
 <AutocompleteSelect
@@ -23,6 +34,14 @@
 	bind:cachedValue={formDataCache['strategic_scenario']}
 	label={m.strategicScenario()}
 	hidden={initialData['strategic_scenario']}
+/>
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
 />
 <AutocompleteSelect
 	{form}

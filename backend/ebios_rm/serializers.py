@@ -11,6 +11,9 @@ from .models import (
     StrategicScenario,
     AttackPath,
     OperationalScenario,
+    ElementaryAction,
+    OperatingMode,
+    KillChain,
 )
 from rest_framework import serializers
 
@@ -84,7 +87,7 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
 class FearedEventWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FearedEvent
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class FearedEventReadSerializer(BaseModelSerializer):
@@ -129,7 +132,7 @@ class FearedEventImportExportSerializer(BaseModelSerializer):
 class RoToWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RoTo
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class RoToReadSerializer(BaseModelSerializer):
@@ -184,7 +187,7 @@ class StakeholderWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Stakeholder
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class StakeholderReadSerializer(BaseModelSerializer):
@@ -238,7 +241,7 @@ class StakeholderImportExportSerializer(BaseModelSerializer):
 class StrategicScenarioWriteSerializer(BaseModelSerializer):
     class Meta:
         model = StrategicScenario
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class StrategicScenarioReadSerializer(BaseModelSerializer):
@@ -275,7 +278,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "folder", "ebios_rm_study"]
+        exclude = ["created_at", "updated_at", "ebios_rm_study"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
@@ -317,9 +320,11 @@ class AttackPathImportExportSerializer(BaseModelSerializer):
 
 
 class OperationalScenarioWriteSerializer(BaseModelSerializer):
+    quotation_method = serializers.CharField(read_only=True)
+
     class Meta:
         model = OperationalScenario
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class OperationalScenarioReadSerializer(BaseModelSerializer):
@@ -360,3 +365,106 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class ElementaryActionWriteSerializer(BaseModelSerializer):
+    operating_modes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=OperatingMode.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+
+    class Meta:
+        model = ElementaryAction
+        exclude = ["created_at", "updated_at"]
+
+
+class ElementaryActionReadSerializer(BaseModelSerializer):
+    icon = serializers.CharField(source="get_icon_display")
+    icon_fa_class = serializers.CharField()
+    icon_fa_hex = serializers.CharField()
+    threat = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    attack_stage = serializers.CharField(source="get_attack_stage_display")
+
+    class Meta:
+        model = ElementaryAction
+        fields = "__all__"
+
+
+class OperatingModeWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = OperatingMode
+        exclude = ["created_at", "updated_at"]
+
+
+class OperatingModeReadSerializer(BaseModelSerializer):
+    operational_scenario = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    elementary_actions = FieldsRelatedField(many=True)
+    likelihood = serializers.JSONField(source="get_likelihood_display")
+    ebios_rm_study = FieldsRelatedField()
+
+    class Meta:
+        model = OperatingMode
+        fields = "__all__"
+
+
+class KillChainWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = KillChain
+        exclude = ["created_at", "updated_at"]
+
+    def validate(self, attrs):
+        elementary_action = attrs.get("elementary_action")
+        antecedents = attrs.get("antecedents", [])
+        attack_stage = elementary_action.attack_stage
+
+        if attack_stage == ElementaryAction.AttackStage.KNOW and antecedents:
+            raise serializers.ValidationError(
+                "Antecedents cannot be selected in attack stage 'Know'."
+            )
+
+        if elementary_action in antecedents:
+            raise serializers.ValidationError(
+                "An elementary action cannot be its own antecedent."
+            )
+
+        if antecedents:
+            for antecedent in antecedents:
+                if not KillChain.objects.filter(
+                    operating_mode=attrs.get("operating_mode"),
+                    elementary_action=antecedent,
+                ).exists():
+                    raise serializers.ValidationError(
+                        f"Antecedent '{antecedent}' has not been used in the operating mode yet"
+                    )
+
+                antecedent_kill_chain = KillChain.objects.filter(
+                    operating_mode=attrs.get("operating_mode"),
+                    elementary_action=antecedent,
+                ).first()
+
+                if antecedent_kill_chain and antecedent.attack_stage > attack_stage:
+                    raise serializers.ValidationError(
+                        {
+                            "antecedents": f"The attack stage of the antecedent '{antecedent}' needs to be the same or before the attack stage of the elementary action"
+                        }
+                    )
+
+        return super().validate(attrs)
+
+
+class KillChainReadSerializer(BaseModelSerializer):
+    operating_mode = FieldsRelatedField()
+    elementary_action = FieldsRelatedField()
+    antecedents = FieldsRelatedField(many=True)
+    attack_stage = serializers.CharField()
+    folder = FieldsRelatedField()
+    str = serializers.CharField(source="__str__")
+
+    class Meta:
+        model = KillChain
+        fields = "__all__"

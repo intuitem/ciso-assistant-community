@@ -1,19 +1,26 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
-
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
-	let form: HTMLFormElement;
-	let file: HTMLInputElement;
+	let form: HTMLFormElement = $state();
+	let file: HTMLInputElement = $state();
 
 	// Function to handle modal confirmation for any action
 	function modalConfirm(): void {
@@ -34,27 +41,27 @@
 		if (file) modalStore.trigger(modal);
 	}
 
-	$: uploadButtonStyles = file ? '' : 'chip-disabled';
+	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
 
 	const authorizedExtensions = ['.bak'];
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canBackup: boolean = Object.hasOwn(user.permissions, 'backup');
 </script>
 
 {#if canBackup}
 	<div class="grid grid-cols-2 space-y-2 lg:space-y-0 lg:space-x-4">
-		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
-			<h4 class="h4 font-semibold">{m.exportBackup()} <i class="fa-solid fa-download" /></h4>
+		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
+			<h4 class="h4 font-semibold">{m.exportBackup()} <i class="fa-solid fa-download"></i></h4>
 			<div class=" py-4">
 				{m.exportBackupDescription()}
 			</div>
 			<form action="/backup-restore/dump-db/">
-				<button type="submit" class="btn variant-filled-primary">{m.exportDatabase()}</button>
+				<button type="submit" class="btn preset-filled-primary-500">{m.exportDatabase()}</button>
 			</form>
 		</div>
 
-		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
-			<h4 class="h4 font-semibold">{m.importBackup()} <i class="fa-solid fa-upload" /></h4>
+		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
+			<h4 class="h4 font-semibold">{m.importBackup()} <i class="fa-solid fa-upload"></i></h4>
 			<div class=" py-4">
 				{m.importBackupDescription()}
 			</div>
@@ -68,9 +75,9 @@
 					bind:value={file}
 				/>
 				<button
-					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
+					class="btn preset-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
-					on:click={modalConfirm}>{m.upload()}</button
+					onclick={modalConfirm}>{m.upload()}</button
 				>
 			</form>
 		</div>

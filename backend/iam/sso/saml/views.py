@@ -18,7 +18,6 @@ from allauth.socialaccount.providers.saml.views import (
     httpkit,
     render_authentication_error,
 )
-from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.utils import ValidationError
 from django.http import HttpRequest, HttpResponseRedirect
@@ -29,22 +28,13 @@ from django.views import View
 from rest_framework.views import csrf_exempt
 
 from iam.models import User
+from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
 from iam.utils import generate_token
 
 DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["email"]
 
 logger = structlog.get_logger(__name__)
-
-
-class AuthError(AllauthAuthError):
-    IDP_INITIATED_SSO_REJECTED = "idpInitiatedSSORejected"
-    SIGNUP_CLOSED = "signupClosed"
-    PERMISSION_DENIED = "permissionDenied"
-    FAILED_SSO = "failedSSO"
-    FAILED_TO_CONTACT_PROVIDER = "failedToContactProvider"
-    USER_DOES_NOT_EXIST = "UserDoesNotExist"
-    USER_IS_NOT_SSO = "userIsNotSSO"
 
 
 @method_decorator(csrf_exempt, name="dispatch")

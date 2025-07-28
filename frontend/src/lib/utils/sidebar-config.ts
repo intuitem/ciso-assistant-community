@@ -34,18 +34,18 @@ export function getSidebarVisibleItems(
 	featureFlags: Partial<SidebarBackendKeys>
 ): SidebarFrontendKeys {
 	return {
-		xRays: featureFlags.xrays ?? false,
-		incidents: featureFlags.incidents ?? false,
-		tasks: featureFlags.tasks ?? false,
-		riskAcceptances: featureFlags.risk_acceptances ?? false,
-		securityExceptions: featureFlags.exceptions ?? false,
-		followUp: featureFlags.follow_up ?? false,
-		ebiosRM: featureFlags.ebiosrm ?? false,
-		scoringAssistant: featureFlags.scoring_assistant ?? false,
-		vulnerabilities: featureFlags.vulnerabilities ?? false,
-		compliance: featureFlags.compliance ?? false,
-		thirdPartyCategory: featureFlags.tprm ?? false,
-		privacy: featureFlags.privacy ?? false,
-		experimental: featureFlags.experimental ?? false
+		xRays: featureFlags?.xrays ?? false,
+		incidents: featureFlags?.incidents ?? false,
+		tasks: featureFlags?.tasks ?? false,
+		riskAcceptances: featureFlags?.risk_acceptances ?? false,
+		securityExceptions: featureFlags?.exceptions ?? false,
+		followUp: featureFlags?.follow_up ?? false,
+		ebiosRM: featureFlags?.ebiosrm ?? false,
+		scoringAssistant: featureFlags?.scoring_assistant ?? false,
+		vulnerabilities: featureFlags?.vulnerabilities ?? false,
+		compliance: featureFlags?.compliance ?? false,
+		thirdPartyCategory: featureFlags?.tprm ?? false,
+		privacy: featureFlags?.privacy ?? false,
+		experimental: featureFlags?.experimental ?? false
 	};
 }

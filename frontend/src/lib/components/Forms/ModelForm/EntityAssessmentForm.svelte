@@ -11,12 +11,23 @@
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let data: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		data?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model = $bindable(),
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		data = {}
+	}: Props = $props();
 </script>
 
 <AutocompleteSelect
@@ -46,9 +57,9 @@
 		cacheLock={cacheLocks['framework']}
 		bind:cachedValue={formDataCache['framework']}
 		label={m.framework()}
-		on:change={async (e) => {
-			if (e.detail) {
-				await fetch(`/frameworks/${e.detail}`)
+		onChange={async (e) => {
+			if (e) {
+				await fetch(`/frameworks/${e}`)
 					.then((r) => r.json())
 					.then((r) => {
 						const implementation_groups = r['implementation_groups_definition'] || [];

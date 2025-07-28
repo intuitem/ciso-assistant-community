@@ -893,6 +893,7 @@
 	"mappingSuggested": "تم اقتراح رسم الخرائط",
 	"mappingSuggestedHelpText": "اقتراحات رسم الخرائط بناءً على الأطر المحملة",
 	"mappingSuggestionTeasing": "تم اقتراح خرائط! يمكنك استخدام المرشحات لاستكشاف الاقتراحات بناءً على الأطر المحملة.",
+	"associatedFindingsAssessments": "التقييمات المرتبطة",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -922,5 +923,9 @@
 				"countPlural=other": "أيام {count}"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "السيناريوهات المطابقة",
+	"select": "تحديد",
+	"deselect": "إلغاء التحديد",
+	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة"
 }

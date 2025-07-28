@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import {
@@ -12,10 +13,14 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
 	const reference_controls =
 		data.requirementAssessment.requirement.associated_reference_controls ?? [];
@@ -25,12 +30,12 @@
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
 
-	$: mappingInference = {
+	let mappingInference = $derived({
 		sourceRequirementAssessment:
 			data.requirementAssessment.mapping_inference.source_requirement_assessment,
 		result: data.requirementAssessment.mapping_inference.result,
 		annotation: ''
-	};
+	});
 
 	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
@@ -38,9 +43,9 @@
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
-	let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id)
-		? true
-		: false;
+	let hideSuggestion = $state(
+		requirementAssessmentsList.includes(data.requirementAssessment.id) ? true : false
+	);
 
 	function toggleSuggestions() {
 		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
@@ -55,23 +60,22 @@
 	}
 
 	function cancel(): void {
-		var currentUrl = window.location.href;
-		var url = new URL(currentUrl);
-		var nextValue = getSecureRedirect(url.searchParams.get('next'));
-		if (nextValue) window.location.href = nextValue;
+		const AuditURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
+		goto(AuditURL);
 	}
 
-	$: classesText =
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
+	let classesText = $derived(
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+	);
 
 	const max_score = data.complianceAssessmentScore.max_score;
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
 
-	let tabSet = $page.data.user.is_third_party ? 1 : 0;
+	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
 </script>
 
-<div class="card space-y-2 p-4 bg-white shadow">
+<div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
 		<span
@@ -89,22 +93,20 @@
 			{safeTranslate(data.requirementAssessment.result)}
 		</span>
 		{#if data.requirementAssessment.is_scored}
-			<ProgressRadial
-				stroke={100}
-				meter={displayScoreColor(score, max_score)}
+			<ProgressRing
+				strokeWidth="20px"
+				meterStroke={displayScoreColor(score, max_score)}
 				value={formatScoreValue(score, max_score)}
-				font={150}
-				class="shrink-0"
-				width={'w-10'}>{score}</ProgressRadial
+				classes="shrink-0"
+				size="size-10">{score}</ProgressRing
 			>
 			{#if data.complianceAssessmentScore.show_documentation_score}
-				<ProgressRadial
-					stroke={100}
-					meter={displayScoreColor(documentationScore, max_score)}
+				<ProgressRing
+					strokeWidth="20px"
+					meterStroke={displayScoreColor(documentationScore, max_score)}
 					value={formatScoreValue(documentationScore, max_score)}
-					font={150}
-					class="shrink-0"
-					width={'w-10'}>{documentationScore}</ProgressRadial
+					classes="shrink-0"
+					size="size-10">{documentationScore}</ProgressRing
 				>
 			{/if}
 		{/if}
@@ -115,16 +117,16 @@
 		</p>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
-		<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
+		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-lg flex flex-row justify-between">
 				<div>
-					<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
+					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 				</div>
-				<button on:click={toggleSuggestions}>
+				<button onclick={toggleSuggestions}>
 					{#if !hideSuggestion}
-						<i class="fa-solid fa-eye" />
+						<i class="fa-solid fa-eye"></i>
 					{:else}
-						<i class="fa-solid fa-eye-slash" />
+						<i class="fa-solid fa-eye-slash"></i>
 					{/if}
 				</button>
 			</h2>
@@ -134,7 +136,7 @@
 						<div class="flex-1">
 							{#if reference_controls.length > 0}
 								<p class="font-medium">
-									<i class="fa-solid fa-gears" />
+									<i class="fa-solid fa-gears"></i>
 									{m.suggestedReferenceControls()}
 								</p>
 								<ul class="list-disc ml-4">
@@ -155,7 +157,7 @@
 						<div class="flex-1">
 							{#if threats.length > 0}
 								<p class="font-medium">
-									<i class="fa-solid fa-gears" />
+									<i class="fa-solid fa-gears"></i>
 									{m.threatsCovered()}
 								</p>
 								<ul class="list-disc ml-4">
@@ -178,7 +180,7 @@
 				{#if annotation}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-pencil" />
+							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
 						<p class="whitespace-pre-line py-1">
@@ -189,7 +191,7 @@
 				{#if typical_evidence}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-pencil" />
+							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
 						<p class="whitespace-pre-line py-1">
@@ -200,7 +202,7 @@
 				{#if mappingInference.result}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-link" />
+							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
 						<span class="text-xs text-gray-500"
@@ -248,50 +250,52 @@
 		</div>
 	{/if}
 	<div>
-		<TabGroup>
-			{#if !$page.data.user.is_third_party}
-				<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
-					>{m.appliedControls()}
-				</Tab>
-			{/if}
-			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
-			<svelte:fragment slot="panel">
-				{#if tabSet === 0 && !$page.data.user.is_third_party}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle" />
-						<p>{m.requirementAppliedControlHelpText()}</p>
-					</div>
-					<div
-						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-					>
-						<ModelTable
-							source={data.tables['applied-controls']}
-							hideFilters={true}
-							URLModel="applied-controls"
-							baseEndpoint="/applied-controls?requirement_assessments={$page.data
-								.requirementAssessment.id}"
-						/>
-					</div>
+		<Tabs
+			value={group}
+			onValueChange={(e) => {
+				group = e.value;
+			}}
+		>
+			{#snippet list()}
+				{#if !page.data.user.is_third_party}
+					<Tabs.Control value="applied_controls">{m.appliedControls()}</Tabs.Control>
 				{/if}
-				{#if tabSet === 1}
+				<Tabs.Control value="evidence">{m.evidences()}</Tabs.Control>
+			{/snippet}
+			{#snippet content()}
+				<Tabs.Panel value="applied_controls">
+					{#if !page.data.user.is_third_party}
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementAppliedControlHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['applied-controls']}
+								hideFilters={true}
+								URLModel="applied-controls"
+								baseEndpoint="/applied-controls?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					{/if}
+				</Tabs.Panel>
+				<Tabs.Panel value="evidence">
 					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle" />
+						<i class="fa-solid fa-info-circle"></i>
 						<p>{m.requirementEvidenceHelpText()}</p>
 					</div>
-					<div
-						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-					>
+					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 						<ModelTable
 							source={data.tables['evidences']}
 							hideFilters={true}
 							URLModel="evidences"
-							baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
-								.id}"
+							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
 						/>
 					</div>
-				{/if}
-			</svelte:fragment>
-		</TabGroup>
+				</Tabs.Panel>
+			{/snippet}
+		</Tabs>
 	</div>
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.questions()}</h1>
@@ -302,13 +306,13 @@
 		{/each}
 	{/if}
 	{#if data.requirementAssessment.observation}
-		<div class="card p-4 space-y-2 variant-glass-primary">
+		<div class="card p-4 space-y-2 preset-tonal-primary">
 			<h1 class="font-semibold text-sm">{m.observation()}</h1>
 			<span class="text-sm">{data.requirementAssessment.observation}</span>
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
-		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" on:click={cancel}
+		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
 			>{m.back()}</button
 		>
 	</div>

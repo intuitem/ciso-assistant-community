@@ -6,16 +6,59 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let duplicate: boolean = false;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let object: Record<string, any> = {};
-	// export let context: string = 'default';
-	// export let updated_fields: Set<string> = new Set();
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		duplicate?: boolean;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: Record<string, any>; // export let context: string = 'default';
+	}
+
+	let {
+		form,
+		model,
+		duplicate = false,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {}
+	}: Props = $props();
+
+	let riskToleranceChoices = $state<{ label: string; value: string }[]>([]);
+
+	async function handleRiskMatrixChange(id: string) {
+		riskToleranceChoices = [];
+
+		if (id) {
+			try {
+				const response = await fetch(`/risk-matrices/${id}`);
+				if (response.ok) {
+					const data = await response.json();
+
+					const riskMatrix =
+						data.results && data.results.length > 0
+							? data.results.find((item) => item.id === id)
+							: null;
+
+					if (riskMatrix && riskMatrix.json_definition) {
+						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
+						const riskLevels = jsonDefinition.risk || [];
+						riskToleranceChoices = riskLevels.map((level, index) => ({
+							label: level.name,
+							value: level.id ?? index
+						}));
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching risk matrix data:', error);
+				riskToleranceChoices = [];
+			}
+		}
+	}
 </script>
 
 <TextField
@@ -25,7 +68,6 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
@@ -47,6 +89,7 @@
 	<Select
 		{form}
 		options={model.selectOptions['status']}
+		translateOptions={false}
 		field="status"
 		hide
 		label={m.status()}
@@ -56,6 +99,8 @@
 	<AutocompleteSelect
 		{form}
 		disabled={object.id}
+		translateOptions={false}
+		disableDoubleDash
 		optionsEndpoint="risk-matrices"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
@@ -63,7 +108,21 @@
 		label={m.riskMatrix()}
 		helpText={m.riskAssessmentMatrixHelpText()}
 		hidden={initialData.risk_matrix}
+		onChange={async (e) => await handleRiskMatrixChange(e)}
+		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
+	{#if riskToleranceChoices.length > 0}
+		<Select
+			{form}
+			translateOptions={false}
+			options={riskToleranceChoices}
+			field="risk_tolerance"
+			cacheLock={cacheLocks['risk_tolerance']}
+			bind:cachedValue={formDataCache['risk_tolerance']}
+			label={m.riskTolerance()}
+			helpText={m.riskToleranceHelpText()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -74,41 +133,43 @@
 		bind:cachedValue={formDataCache['authors']}
 		label={m.authors()}
 	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
-		field="reviewers"
-		cacheLock={cacheLocks['reviewers']}
-		bind:cachedValue={formDataCache['reviewers']}
-		label={m.reviewers()}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="eta"
-		label={m.eta()}
-		helpText={m.etaHelpText()}
-		cacheLock={cacheLocks['eta']}
-		bind:cachedValue={formDataCache['eta']}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="due_date"
-		label={m.dueDate()}
-		helpText={m.dueDateHelpText()}
-		cacheLock={cacheLocks['due_date']}
-		bind:cachedValue={formDataCache['due_date']}
-	/>
-	<TextArea
-		{form}
-		field="observation"
-		label={m.observation()}
-		cacheLock={cacheLocks['observation']}
-		bind:cachedValue={formDataCache['observation']}
-	/>
+	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="users?is_third_party=false"
+			optionsLabelField="email"
+			field="reviewers"
+			cacheLock={cacheLocks['reviewers']}
+			bind:cachedValue={formDataCache['reviewers']}
+			label={m.reviewers()}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
+		/>
+		<TextArea
+			{form}
+			field="observation"
+			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
+		/>
+	</Dropdown>
 	{#if initialData.ebios_rm_study}
 		<AutocompleteSelect
 			{form}

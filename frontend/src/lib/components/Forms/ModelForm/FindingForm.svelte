@@ -5,21 +5,38 @@
 	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
-	export let form: SuperForm<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context = 'default';
+	interface Props {
+		form: SuperForm<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context?: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context = 'default'
+	}: Props = $props();
 
 	const modalStore = getModalStore();
 
@@ -31,7 +48,7 @@
 			props: {
 				form: defaults(
 					{
-						findings: [$page.data.object.id]
+						findings: [page.data.object.id]
 					},
 					zod(AppliedControlSchema)
 				),
@@ -55,6 +72,21 @@
 	}
 </script>
 
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<Select
+	{form}
+	options={model.selectOptions['severity']}
+	field="severity"
+	label={m.severity()}
+	cacheLock={cacheLocks['severity']}
+	bind:cachedValue={formDataCache['severity']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -74,13 +106,6 @@
 	bind:cachedValue={formDataCache['status']}
 />
 <TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<TextField
 	type="date"
 	{form}
 	field="eta"
@@ -88,14 +113,6 @@
 	helpText={m.etaHelpText()}
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
-/>
-<Select
-	{form}
-	options={model.selectOptions['severity']}
-	field="severity"
-	label={m.severity()}
-	cacheLock={cacheLocks['severity']}
-	bind:cachedValue={formDataCache['severity']}
 />
 <AutocompleteSelect
 	{form}
@@ -106,28 +123,9 @@
 	label={m.findingsAssessment()}
 	hidden={initialData.findings_assessment}
 />
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	allowUserOptions="append"
-/>
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="vulnerabilities"
-	optionsExtraFields={[['folder', 'str']]}
-	field="vulnerabilities"
-	label={m.vulnerabilities()}
-/>
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
-		{#key $page.data}
+		{#key page.data}
 			<AutocompleteSelect
 				multiple
 				{form}
@@ -142,18 +140,51 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
-				on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
-				type="button"><i class="fa-solid fa-plus text-sm" /></button
+				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
+				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>
 		</div>
 	{/if}
 </div>
-<TextField
-	type="date"
-	{form}
-	field="due_date"
-	label={m.dueDate()}
-	helpText={m.dueDateHelpText()}
-	cacheLock={cacheLocks['due_date']}
-	bind:cachedValue={formDataCache['due_date']}
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="vulnerabilities"
+		optionsExtraFields={[['folder', 'str']]}
+		field="vulnerabilities"
+		label={m.vulnerabilities()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="evidences"
+		label={m.evidences()}
+		cacheLock={cacheLocks['evidences']}
+		bind:cachedValue={formDataCache['evidences']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="due_date"
+		label={m.dueDate()}
+		helpText={m.dueDateHelpText()}
+		cacheLock={cacheLocks['due_date']}
+		bind:cachedValue={formDataCache['due_date']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
+</Dropdown>

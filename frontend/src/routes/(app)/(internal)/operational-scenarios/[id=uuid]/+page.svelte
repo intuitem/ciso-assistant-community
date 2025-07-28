@@ -1,21 +1,35 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	export let data: PageData;
+	const modalStore: ModalStore = getModalStore();
 
-	const operationalScenario = data.data;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+
+	const operationalScenario = $derived(data.data);
 
 	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));
 
-	let activeActivity: string | null = null;
-	$page.url.searchParams.forEach((value, key) => {
+	let activeActivity: string | null = $state(null);
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -25,23 +39,11 @@
 		}
 	});
 
-	const popupLikelihood: PopupSettings = {
-		event: 'click',
-		target: 'popupLikelihood',
-		placement: 'bottom'
-	};
-	const popupGravity: PopupSettings = {
-		event: 'click',
-		target: 'popupGravity',
-		placement: 'bottom'
-	};
-	const popupRiskLevel: PopupSettings = {
-		event: 'click',
-		target: 'popupRiskLevel',
-		placement: 'bottom'
-	};
+	let likelihoodPopupOpen = $state(false);
+	let gravityPopupOpen = $state(false);
+	let riskLevelPopupOpen = $state(false);
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	const model = URL_MODEL_MAP['operational-scenarios'];
 	const canEditObject = (operational_scenarios): boolean =>
@@ -51,6 +53,26 @@
 			model: model.name,
 			domain: operational_scenarios.folder?.id
 		});
+
+	function modalCreateForm(model: Record<string, any>): void {
+		let modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: model.createForm,
+				model: model,
+				debug: false
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + model.info.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	let group = $state(Object.keys(data.relatedModels)[0]);
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -60,7 +82,7 @@
 				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left" />
+				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</a>
 			<div class="flex font-bold text-2xl space-x-2">
@@ -82,10 +104,10 @@
 			</div>
 			{#if canEditObject(operationalScenario)}
 				<a
-					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-					class="btn variant-filled-primary h-fit justify-self-end"
+					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
+					class="btn preset-filled-primary-500 h-fit justify-self-end"
 				>
-					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}
 				</a>
 			{/if}
@@ -124,7 +146,7 @@
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
 					<div
-						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
@@ -133,7 +155,7 @@
 						</p>
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
@@ -148,7 +170,7 @@
 						{/each}
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
@@ -156,7 +178,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
@@ -171,6 +193,63 @@
 					{/if}
 				</ul>
 			</div>
+			{#if Object.keys(data.relatedModels).length > 0}
+				<div class="card shadow-lg mt-8 bg-white w-full">
+					<Tabs
+						value={group}
+						onValueChange={(e) => {
+							group = e.value;
+						}}
+						listJustify="justify-center"
+					>
+						{#snippet list()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Control value={urlmodel}>
+									{safeTranslate(model.info.localNamePlural)}
+									{#if model.table.body.length > 0}
+										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+									{/if}
+								</Tabs.Control>
+							{/each}
+						{/snippet}
+						{#snippet content()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Panel value={urlmodel}>
+									<div class="flex flex-row justify-between px-4 py-2">
+										<h4 class="font-semibold lowercase capitalize-first my-auto">
+											{safeTranslate('associated-' + model.info.localNamePlural)}
+										</h4>
+									</div>
+									{#if model.table}
+										<ModelTable
+											source={model.table}
+											deleteForm={model.deleteForm}
+											URLModel={urlmodel}
+											baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
+										>
+											{#snippet addButton()}
+												<div>
+													<span
+														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													>
+														<button
+															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+															data-testid="add-button"
+															title={safeTranslate('add-' + model.info.localName)}
+															onclick={(_) => modalCreateForm(model)}
+															><i class="fa-solid fa-file-circle-plus"></i>
+														</button>
+													</span>
+												</div>
+											{/snippet}
+										</ModelTable>
+									{/if}
+								</Tabs.Panel>
+							{/each}
+						{/snippet}
+					</Tabs>
+				</div>
+			{/if}
 		</div>
 		<div
 			id="activityTwo"
@@ -190,84 +269,108 @@
 				{m.ebiosWs4_2()}
 			</h1>
 			<div
-				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-sm space-x-4 justify-between"
+				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-xs space-x-4 justify-between"
 			>
 				<div
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
 					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20"
-						style="color: {operationalScenario.likelihood.hexcolor}"
-						data-popup={'popupLikelihood'}
+					<Popover
+						open={likelihoodPopupOpen}
+						onOpenChange={(e) => (likelihoodPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						zIndex="100"
+						contentBase="max-w-sm"
 					>
-						<p data-testid="likelihood-description" class="font-semibold">
-							{operationalScenario.likelihood.description}
-						</p>
-						<div class="arrow bg-black" />
-					</div>
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-dice text-black opacity-75"></i>
-						<span>{m.likelihood()}</span>
-					</h3>
-					<span>{operationalScenario.likelihood.name}</span>
-					<i
-						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
-						use:popup={popupLikelihood}
-					></i>
+						{#snippet trigger()}
+							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+								<i class="fa-solid fa-dice text-black opacity-75"></i>
+								<span>{m.likelihood()}</span>
+							</h3>
+							<span>{operationalScenario.likelihood.name}</span>
+							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card bg-black text-gray-200 p-4 z-20"
+								style="color: {operationalScenario.likelihood.hexcolor}"
+							>
+								<p data-testid="likelihood-description" class="font-semibold">
+									{operationalScenario.likelihood.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 				<i class="fa-solid fa-xmark"></i>
 				<div
 					style="background-color: {operationalScenario.gravity.hexcolor}"
 					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20"
-						style="color: {operationalScenario.gravity.hexcolor}"
-						data-popup={'popupGravity'}
+					<Popover
+						open={gravityPopupOpen}
+						onOpenChange={(e) => (gravityPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						zIndex="100"
+						contentBase="max-w-sm"
 					>
-						<p data-testid="gravity-description" class="font-semibold">
-							{operationalScenario.gravity.description}
-						</p>
-						<div class="arrow bg-black" />
-					</div>
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-bomb text-black opacity-75"></i>
-						<span>{m.gravity()}</span>
-					</h3>
-					<span>{operationalScenario.gravity.name}</span>
-					<i
-						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
-						use:popup={popupGravity}
-					></i>
+						{#snippet trigger()}
+							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+								<i class="fa-solid fa-bomb text-black opacity-75"></i>
+								<span>{m.gravity()}</span>
+							</h3>
+							<span>{operationalScenario.gravity.name}</span>
+							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card bg-black text-gray-200 p-4 z-20"
+								style="color: {operationalScenario.gravity.hexcolor}"
+							>
+								<p data-testid="gravity-description" class="font-semibold">
+									{operationalScenario.gravity.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 				<i class="fa-solid fa-equals"></i>
 				<div
 					style="background-color: {operationalScenario.risk_level.hexcolor}"
 					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20"
-						style="color: {operationalScenario.risk_level.hexcolor}"
-						data-popup={'popupRiskLevel'}
+					<Popover
+						open={riskLevelPopupOpen}
+						onOpenChange={(e) => (riskLevelPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						zIndex="100"
+						contentBase="max-w-sm"
 					>
-						<p data-testid="risk-level-description" class="font-semibold">
-							{operationalScenario.risk_level.description}
-						</p>
-						<div class="arrow bg-black" />
-					</div>
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
-						<span>{m.riskLevel()}</span>
-					</h3>
-					<span>{operationalScenario.risk_level.name}</span>
-					<i
-						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
-						use:popup={popupRiskLevel}
-					></i>
+						{#snippet trigger()}
+							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+								<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+								<span>{m.riskLevel()}</span>
+							</h3>
+							<span>{operationalScenario.risk_level.name}</span>
+							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card bg-black text-gray-200 p-4 z-20"
+								style="color: {operationalScenario.risk_level.hexcolor}"
+							>
+								<p data-testid="riskLevel-description" class="font-semibold">
+									{operationalScenario.risk_level.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
 					<span>{m.justification()}</span>

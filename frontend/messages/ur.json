@@ -893,6 +893,7 @@
 	"mappingSuggested": "نقشہ سازی تجویز کردہ",
 	"mappingSuggestedHelpText": "لوڈ کردہ فریم ورکس کے بنیاد پر نقشہ سازی کی تجویزیں",
 	"mappingSuggestionTeasing": "اب نقشہ سازی کی تجویزیں دی جاتی ہیں! آپ لوڈ کردہ فریم ورکس کے بنیاد پر تجویزوں کو تلاش کرنے کے لیے فلٹرز استعمال کر سکتے ہیں۔",
+	"associatedFindingsAssessments": "متعلقہ فالو اپز",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -922,5 +923,9 @@
 				"countPlural=other": "دن {count}"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "مطابق منظرنامے",
+	"select": "منتخب کریں",
+	"deselect": "انتخاب ختم کریں",
+	"fearedEventAssetHelpText": "خوفناک واقعات عام طور پر کاروباری قیمتیں (پہلی جائیدادیں) سے منسلک ہوتے ہیں۔ ان کے لیے اندرونی جائیدادیں بھی ان کے لچکدار ہونے کی وجہ سے اجازت دی جاتی ہیں۔"
 }

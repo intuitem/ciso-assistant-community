@@ -20,11 +20,124 @@ env:
   enterprise-backend-settings-module: enterprise_core.settings
   DEBUG: pw:webserver
   POSTGRES_VERSION: "16"
-  UBUNTU_VERSION: "ubuntu-24.04"
+  UBUNTU_VERSION: "24.04"
   PYTHON_VERSION: "3.12"
 
 jobs:
+  build_community_frontend:
+    runs-on: ubuntu-24.04
+    outputs:
+      build_done: "true"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cache pnpm modules for Build
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.frontend-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
+      - name: Install community frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Build community frontend
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm run build
+
+      - name: Upload Community Frontend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: community-frontend-build
+          include-hidden-files: true
+          path: |
+            ${{ env.frontend-directory }}/build/
+            ${{ env.frontend-directory }}/.svelte-kit/
+          retention-days: 1
+
+  build_enterprise_frontend:
+    runs-on: ubuntu-24.04
+    outputs:
+      build_done: "true"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cache pnpm modules for Build
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.enterprise-frontend-build-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
+      - name: Build enterprise frontend
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make
+
+      - name: Upload Enterprise Frontend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: enterprise-frontend-build
+          include-hidden-files: true
+          path: |
+            ${{ env.enterprise-frontend-build-directory }}/build/
+            ${{ env.enterprise-frontend-build-directory }}/.svelte-kit/
+          retention-days: 1
+
+  get_playwright_test_files:
+    needs:
+      - build_community_frontend
+      - build_enterprise_frontend
+    runs-on: ubuntu-24.04
+    outputs:
+      community_test_files: ${{ steps.list_community_files.outputs.test_files }}
+      enterprise_test_files: ${{ steps.list_enterprise_files.outputs.test_files }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Community Playwright Test Files
+        id: list_community_files
+        working-directory: ${{ env.frontend-directory }}/
+        run: |
+          COMMUNITY_TEST_FILES=$(find tests -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
+          echo "Community Test files found: $COMMUNITY_TEST_FILES"
+          echo "test_files=$COMMUNITY_TEST_FILES" >> $GITHUB_OUTPUT
+
+      - name: Pre-build Enterprise Frontend
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make pre-build
+
+      - name: Get Enterprise Playwright Test Files
+        id: list_enterprise_files
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          ENTERPRISE_TEST_FILES=$(find tests -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
+          echo "Enterprise Test files found: $ENTERPRISE_TEST_FILES"
+          echo "test_files=$ENTERPRISE_TEST_FILES" >> $GITHUB_OUTPUT
+
   functional-tests:
+    needs: get_playwright_test_files
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -36,9 +149,9 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -60,58 +173,97 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 4
+      max-parallel: 16
+      fail-fast: false
       matrix:
         python-version: ["3.12"]
         playwright-browser: ["chromium"]
+        test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.community_test_files) }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download Community Frontend Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: community-frontend-build
+          path: ${{ env.frontend-directory }}/
+
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: false
           installer-parallel: true
+
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
-      - name: Install dependencies
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.frontend-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
+      - name: Install community frontend dependencies (if not cached/part of build artifact)
         working-directory: ${{ env.frontend-directory }}
-        run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
+
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
         run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
           poetry run python manage.py makemigrations
           poetry run python manage.py migrate
+
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
-      - name: Build frontend
-        working-directory: ${{ env.frontend-directory }}
-        run: pnpm run build
+
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.frontend-directory }}
+        working-directory: ${{ env.frontend-directory }}/
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+          TEST_FILE: ${{ matrix.test_file }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
+
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
@@ -120,17 +272,26 @@ jobs:
         run: |
           SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
+      - name: Sanitize test file name
+        if: ${{ !cancelled() }}
+        env:
+          TEST_FILE: ${{ matrix.test_file }}
+        run: |
+          SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
+          include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
-            ${{ env.frontend-directory }}/tests/results/
-            ${{ env.frontend-directory }}/tests/reports/
+            ${{ env.frontend-directory }}/build/tests/results/
+            ${{ env.frontend-directory }}/build/tests/reports/
           retention-days: 5
 
   enterprise-functional-tests:
+    needs: get_playwright_test_files
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -142,9 +303,9 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -168,45 +329,90 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 4
+      max-parallel: 16
+      fail-fast: false
       matrix:
         python-version: ["3.12"]
         playwright-browser: ["chromium"]
+        test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.enterprise_test_files) }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download Enterprise Frontend Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: enterprise-frontend-build
+          path: ${{ env.enterprise-frontend-build-directory }}/
+
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: false
           installer-parallel: true
+
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
-      - name: Install enterprise backend
+
+      - name: Install enterprise backend requirements
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
-      - name: Build enterprise frontend
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.enterprise-frontend-build-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Pre-build Enterprise Frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
-        run: make
+        run: make pre-build
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
+      - name: Install enterprise frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
+
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
         run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
+
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:
@@ -214,12 +420,15 @@ jobs:
         run: |
           poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
           nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
+
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        working-directory: ${{ env.enterprise-frontend-build-directory }}/
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+          TEST_FILE: ${{ matrix.test_file }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
+
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
@@ -228,10 +437,18 @@ jobs:
         run: |
           SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
+      - name: Sanitize test file name
+        if: ${{ !cancelled() }}
+        env:
+          TEST_FILE: ${{ matrix.test_file }}
+        run: |
+          SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
+          include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/
