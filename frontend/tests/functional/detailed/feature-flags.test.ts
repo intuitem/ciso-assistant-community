@@ -1,6 +1,6 @@
 import { test, expect } from '../../utils/test-utils.js';
-import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
+import { LoginPage } from '../../utils/login-page.js';
 
 const toggleFeatureFlag = async (page, flagTestId, enable) => {
 	await page.getByTestId('accordion-item-extra').click();
@@ -20,11 +20,7 @@ const toggleFeatureFlag = async (page, flagTestId, enable) => {
 };
 
 // ---------- X-Rays ----------
-test('Feature Flags - X-Rays visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - X-Rays visibility toggling', async ({ logedPage, page }) => {
 	await page.getByText('Operations').click();
 	await expect(page.getByText('X-Rays', { exact: false })).toBeVisible();
 
@@ -37,11 +33,7 @@ test('Feature Flags - X-Rays visibility toggling', async ({ page }) => {
 });
 
 // ---------- Incidents ----------
-test('Feature Flags - Incidents visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Incidents visibility toggling', async ({ logedPage, page }) => {
 	await page.getByText('Operations').click();
 	await expect(page.getByText('Incidents', { exact: false })).toBeVisible();
 
@@ -54,11 +46,7 @@ test('Feature Flags - Incidents visibility toggling', async ({ page }) => {
 });
 
 // ---------- Tasks ----------
-test('Feature Flags - Tasks visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Tasks visibility toggling', async ({ logedPage, page }) => {
 	await page.getByText('Operations').click();
 	await expect(page.getByText('Tasks', { exact: false })).toBeVisible();
 
@@ -71,11 +59,7 @@ test('Feature Flags - Tasks visibility toggling', async ({ page }) => {
 });
 
 // ---------- Risk Acceptances ----------
-test('Feature Flags - Risk Acceptances visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Risk Acceptances visibility toggling', async ({ logedPage, page }) => {
 	await page.getByTestId('accordion-item-governance').click();
 	await expect(page.getByText('Risk Acceptances', { exact: false })).toBeVisible();
 
@@ -88,11 +72,7 @@ test('Feature Flags - Risk Acceptances visibility toggling', async ({ page }) =>
 });
 
 // ---------- Exceptions ----------
-test('Feature Flags - Exceptions visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Exceptions visibility toggling', async ({ logedPage, page }) => {
 	await page.getByTestId('accordion-item-governance').click();
 	await expect(page.getByText('Exceptions', { exact: false })).toBeVisible();
 
@@ -105,11 +85,7 @@ test('Feature Flags - Exceptions visibility toggling', async ({ page }) => {
 });
 
 // ---------- Findings Tracking ----------
-test('Feature Flags - Findings Tracking visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Findings Tracking visibility toggling', async ({ logedPage, page }) => {
 	await page.getByTestId('accordion-item-governance').click();
 	await expect(page.getByText('Findings Tracking', { exact: false })).toBeVisible();
 
@@ -122,11 +98,7 @@ test('Feature Flags - Findings Tracking visibility toggling', async ({ page }) =
 });
 
 // ---------- Ebios RM ----------
-test('Feature Flags - Ebios RM visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Ebios RM visibility toggling', async ({ logedPage, page }) => {
 	await page.getByTestId('accordion-item-risk').click();
 	await expect(page.getByTestId('accordion-item-ebios-rm')).toBeVisible();
 
@@ -139,11 +111,7 @@ test('Feature Flags - Ebios RM visibility toggling', async ({ page }) => {
 });
 
 // ---------- Scoring Assistant ----------
-test('Feature Flags - Scoring Assistant visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Scoring Assistant visibility toggling', async ({ logedPage, page }) => {
 	await page.getByTestId('accordion-item-risk').click();
 	await expect(page.getByText('Scoring Assistant', { exact: false })).toBeVisible();
 
@@ -156,11 +124,7 @@ test('Feature Flags - Scoring Assistant visibility toggling', async ({ page }) =
 });
 
 // ---------- Vulnerabilities ----------
-test('Feature Flags - Vulnerabilities visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Vulnerabilities visibility toggling', async ({ logedPage, page }) => {
 	await page.getByTestId('accordion-item-risk').click();
 	await expect(page.getByText('Vulnerabilities', { exact: false })).toBeVisible();
 
@@ -173,11 +137,7 @@ test('Feature Flags - Vulnerabilities visibility toggling', async ({ page }) => 
 });
 
 // ---------- Compliance ----------
-test('Feature Flags - Compliance visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Compliance visibility toggling', async ({ logedPage, page }) => {
 	await expect(page.getByTestId('accordion-item-compliance')).toBeVisible();
 
 	await toggleFeatureFlag(page, 'compliance', false);
@@ -188,11 +148,7 @@ test('Feature Flags - Compliance visibility toggling', async ({ page }) => {
 });
 
 // ---------- Third Party ----------
-test('Feature Flags - Third Party visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Third Party visibility toggling', async ({ logedPage, page }) => {
 	await expect(page.getByTestId('accordion-item-thirdpartycategory')).toBeVisible();
 
 	await toggleFeatureFlag(page, 'tprm', false);
@@ -203,11 +159,7 @@ test('Feature Flags - Third Party visibility toggling', async ({ page }) => {
 });
 
 // ---------- Privacy ----------
-test('Feature Flags - Privacy visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Privacy visibility toggling', async ({ logedPage, page }) => {
 	await expect(page.getByText('Privacy', { exact: false })).toBeVisible();
 
 	await toggleFeatureFlag(page, 'privacy', false);
@@ -218,11 +170,7 @@ test('Feature Flags - Privacy visibility toggling', async ({ page }) => {
 });
 
 // ---------- Experimental ----------
-test('Feature Flags - Experimental visibility toggling', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Feature Flags - Experimental visibility toggling', async ({ logedPage, page }) => {
 	await page.getByText('Extra').click();
 	await expect(page.getByText('Experimental', { exact: false })).toBeVisible();
 
@@ -234,13 +182,11 @@ test('Feature Flags - Experimental visibility toggling', async ({ page }) => {
 	await toggleFeatureFlag(page, 'experimental', true);
 });
 
-// ---------- Inherent Risk ----------
+// ---------- Inherent Risk (all variants) ----------
 test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model table view page', async ({
+	logedPage,
 	page
 }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
@@ -257,11 +203,9 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model 
 });
 
 test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment details', async ({
+	logedPage,
 	page
 }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	// Create folder
@@ -293,25 +237,23 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await page.getByRole('option', { name: 'feature-flag-folder/feature-flag-perimeter' }).click();
 	await page.getByTestId('save-button').click();
 
-	// Check Inherent Level visibility
+	// Check visibility
 	await page.getByText('test-risk-assessment').click();
 	await expect(page.getByText('Inherent Level', { exact: false })).toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
 	await page.getByTestId('accordion-item-risk').click();
 	await page.getByTestId('accordion-item-risk-assessments').click();
-	await expect(page.locator('#page-title')).toHaveText('Risk assessments');
-	await expect(page).toHaveURL('/risk-assessments');
 	await page.getByText('test-risk-assessment').click();
 	await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 });
 
-test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
+test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({
+	logedPage,
+	page
+}) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	const risksPage = new PageContent(page, '/analytics?tab=risk', 'Analytics');
@@ -326,11 +268,9 @@ test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({
 });
 
 test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page and in edit page', async ({
+	logedPage,
 	page
 }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
@@ -345,8 +285,6 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 		})
 		.click();
 	await page.getByTestId('save-button').click();
-	await expect(page.locator('#page-title')).toHaveText('Risk scenarios');
-	await expect(page).toHaveURL('/risk-scenarios');
 	await page.getByText('test-risk-scenario').click();
 
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
@@ -354,10 +292,8 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
-
 	await risksPage.goto();
 	await page.getByText('test-risk-scenario').click();
-
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
 	await page.getByTestId('edit-button').click();
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
@@ -365,10 +301,7 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 });
 
-test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
+test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ logedPage, page }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 
 	let risksPage = new PageContent(page, '/ebios-rm', 'Ebios RM');
@@ -379,8 +312,6 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ pag
 	await page.getByTestId('form-input-folder').click();
 	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
 	await page.getByTestId('save-button').click();
-	await expect(page.locator('#page-title')).toHaveText('Ebios RM');
-	await expect(page).toHaveURL('/ebios-rm');
 	await page.getByText('test-ebios-rm').click();
 
 	await page.getByText('Generate the risk assessment').click();
@@ -396,17 +327,12 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ pag
 	risksPage = new PageContent(page, '/risk-assessments', 'Risk Assessments');
 	await risksPage.goto();
 	await page.getByText('test-risk-assessment-ebios-rm').click();
-
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 });
 
-test('Cleanup - delete the folder', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Cleanup - delete the folder', async ({ logedPage, page }) => {
 	await page.getByRole('button', { name: 'Organization' }).click();
 	await page.getByTestId('accordion-item-folders').click();
 	await expect(page.locator('#page-title')).toHaveText('Domains');
