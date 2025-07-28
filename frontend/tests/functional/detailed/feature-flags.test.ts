@@ -223,8 +223,6 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await expect(page).toHaveURL('/perimeters');
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('feature-flag-perimeter');
-	await page.getByTestId('form-input-folder').click();
-	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
 	await page.getByTestId('save-button').click();
 
 	await librariesPage.goto();
