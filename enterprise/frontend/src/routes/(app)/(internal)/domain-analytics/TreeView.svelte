@@ -42,7 +42,7 @@
 		{:else}
 			<div class="node-container">
 				<span class="no-arrow"></span>
-				{#if uuid}
+				{#if uuid && viewable}
 					<a {href} class="label-text">{name}</a>
 				{:else}
 					<span class="label-text">{name}</span>
