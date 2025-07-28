@@ -731,10 +731,16 @@ def validate_unique_column_values(df, column_names: List[str], sheet_name: str, 
         if column_name not in df.columns:
             raise ValueError(f"({context}) [{sheet_name}] Column \"{column_name}\" not found in sheet")
 
-        duplicates = df[column_name][df[column_name].duplicated(keep=False)]
+        # Drop rows with empty or whitespace-only values before checking duplicates
+        column_series = df[column_name].dropna().astype(str).map(str.strip)
+        column_series = column_series[column_series != ""]
+
+        # Re-index the filtered series to map back to original DataFrame indices
+        filtered_df = df.loc[column_series.index]
+        duplicates = filtered_df[column_name][filtered_df[column_name].duplicated(keep=False)]
 
         if not duplicates.empty:
-            duplicate_rows = duplicates.index + 2  # assuming header is row 1
+            duplicate_rows = duplicates.index + 2  # Excel-like row number (1-based + header)
             duplicate_values = duplicates.unique()
             quoted_values = ', '.join(f'"{str(val)}"' for val in duplicate_values)
 
@@ -826,7 +832,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
     else:
         warn_msg = (
             f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any \"framework\" sheet via the field \"{meta_field}\""
-            f"\n> 💡 Tip: Set \"{meta_field}\" in your framework meta sheet to \"{sheet_base_name}\"."
+            f"\n> 💡 Tip: Set \"{meta_field}\" in your framework meta sheet to \"{sheet_base_name}\" if needed."
         )
         print(warn_msg)
         if ctx:
@@ -847,6 +853,9 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
     
     # Enforce presence of "assessable" column (even if values can be empty)
     if "assessable" not in df.columns:
@@ -885,6 +894,9 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
@@ -900,6 +912,9 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
@@ -923,7 +938,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
 
 
 # [CONTENT] Implementation Groups
-def validate_implementation_groups_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["ref_id", "name"]
@@ -932,8 +947,14 @@ def validate_implementation_groups_content(df, sheet_name, verbose: bool = False
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
+    # Check if the "implementation_groups" sheet is actually used in a "framework" sheet
+    check_content_sheet_usage_in_frameworks(wb, sheet_name, "implementation_groups_definition", fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -980,14 +1001,14 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
-    # Check if the score sheet is actually used in a "framework" sheet
+    # Check if the "score" sheet is actually used in a "framework" sheet
     check_content_sheet_usage_in_frameworks(wb, sheet_name, "scores_definition", fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Answers
-def validate_answers_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_answers_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["id", "question_type"]
@@ -996,8 +1017,15 @@ def validate_answers_content(df, sheet_name, verbose: bool = False, ctx: Console
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["id"], sheet_name, fct_name, ctx=ctx)
+
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+
+    # Check if the "answers" sheet is actually used in a "framework" sheet
+    check_content_sheet_usage_in_frameworks(wb, sheet_name, "answers_definition", fct_name, ctx)
+    ### ===> Make "check_content_sheet_usage_in_frameworks" return the content sheets so we can check them to see if the answers ID are there, using another function  <===  ###
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1010,6 +1038,9 @@ def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: Cons
     # No optional columns
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
+
+    # Check uniqueness of some column values
+    validate_unique_column_values(df, ["prefix_id", "prefix_value"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
@@ -1069,11 +1100,11 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
     elif corresponding_meta_type == MetaTypes.REQUIREMENT_MAPPING_SET.value:
         validate_requirement_mapping_set_content(df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.IMPLEMENTATION_GROUPS.value:
-        validate_implementation_groups_content(df, sheet_name, verbose, ctx)
+        validate_implementation_groups_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.SCORES.value:
         validate_scores_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.ANSWERS.value:
-        validate_answers_content(df, sheet_name, verbose, ctx)
+        validate_answers_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.URN_PREFIX.value:
         validate_urn_prefix_content(df, sheet_name, verbose, ctx)
     else:
