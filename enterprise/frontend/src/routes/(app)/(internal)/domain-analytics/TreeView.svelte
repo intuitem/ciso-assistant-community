@@ -8,7 +8,7 @@
 <script>
 	import TreeView from './TreeView.svelte';
 	let { tree } = $props();
-	const { name, children, uuid } = tree;
+	const { name, children, uuid, viewable } = tree;
 	let expanded = $state(_expansionState[name] || false);
 
 	// Generate href from uuid if it exists
@@ -28,7 +28,7 @@
 				<span class="arrow-container" onclick={toggleExpansion}>
 					<span class="arrow" class:arrowDown>▶</span>
 				</span>
-				{#if uuid}
+				{#if uuid && viewable}
 					<a {href} class="label-text">{name}</a>
 				{:else}
 					<span class="label-text">{name}</span>

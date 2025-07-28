@@ -2638,9 +2638,15 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
-            entry = {"name": folder.name, "uuid": folder.id}
+            entry = {
+                "name": folder.name,
+                "uuid": folder.id,
+                "viewable": folder.id in viewable_objects,
+            }
             folder_content = get_folder_content(
-                folder, include_perimeters=include_perimeters
+                folder,
+                include_perimeters=include_perimeters,
+                viewable_objects=set(viewable_objects),
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
