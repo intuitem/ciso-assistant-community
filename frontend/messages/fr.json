@@ -53,6 +53,7 @@
 	"associatedSolutions": "Solutions associées",
 	"home": "Accueil",
 	"edit": "Modifier",
+	"view": "Voir",
 	"changePassword": "Changer le mot de passe",
 	"overview": "Vue d'ensemble",
 	"context": "Contexte",
@@ -1661,6 +1662,8 @@
 		}
 	],
 	"matchingScenarios": "Scénarios correspondants",
+	"select": "Sélectionner",
+	"deselect": "Désélectionner",
 	"associatedCampaigns": "Campagnes associées",
 	"serverURL": "URL serveur",
 	"oidcConfiguration": "openid-configuration",
@@ -1714,5 +1717,8 @@
 	"inherentLevel": "Niveau inhérent",
 	"inherentRiskLevelPerScenario": "Niveau de risque inhérent par scénario",
 	"inherentRiskLevel": "Niveau de risque inhérent",
-	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure"
+	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure",
+	"riskTolerance": "Tolérance au risque",
+	"riskToleranceHelpText": "Seuil du niveau de risque tolérable",
+	"withinTolerance": "Tolérable"
 }

@@ -2553,8 +2553,7 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         if self.timestamp > now():
             raise ValidationError("Timestamp cannot be in the future.")
-        if not self.folder and self.incident:
-            self.folder = self.incident.folder
+        self.folder = self.incident.folder
         super().save(*args, **kwargs)
 
 
@@ -2957,6 +2956,9 @@ class RiskAssessment(Assessment):
         on_delete=models.PROTECT,
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
+    )
+    risk_tolerance = models.SmallIntegerField(
+        default=-1, verbose_name=_("Risk tolerance")
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -3495,6 +3497,16 @@ class RiskScenario(NameDescriptionMixin):
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
+    @property
+    def within_tolerance(self):
+        tolerance = self.risk_assessment.risk_tolerance
+        if tolerance >= 0:
+            if self.current_level <= tolerance:
+                return "YES"
+            else:
+                return "NO"
+        return "--"
+
     def _get_risk_data(self, value: int, data_key: str):
         """
         A generic helper method to retrieve and format risk-related data.
@@ -3871,7 +3883,7 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
+            .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
@@ -4555,15 +4567,19 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         applied_controls: list[AppliedControl] = []
         for reference_control in self.requirement.reference_controls.all():
             try:
-                _name = (
-                    reference_control.get_name_translated or reference_control.ref_id
-                )
                 applied_control, created = AppliedControl.objects.get_or_create(
-                    name=_name,
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
+                    defaults={
+                        "name": reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        "ref_id": reference_control.ref_id
+                        if not reference_control.get_name_translated
+                        else None,
+                    },
                 )
+
                 if (
                     reference_control.description
                     and applied_control.description is None

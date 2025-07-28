@@ -3,7 +3,8 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
-import { getModelInfo, URL_MODEL_MAP } from './crud';
+import { getModelInfo } from './crud';
+import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -36,6 +37,11 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
+const YES_NO_UNSET_OPTIONS = [
+	{ label: 'YES', value: 'YES' },
+	{ label: 'NO', value: 'NO' },
+	{ label: '--', value: '--' }
+];
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -136,6 +142,14 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'withinTolerance',
+		options: YES_NO_UNSET_OPTIONS,
+		multiple: true
+	}
+};
 const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -610,6 +624,7 @@ export const listViewFields = {
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
+			'withinTolerance',
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
@@ -622,6 +637,7 @@ export const listViewFields = {
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
+			'within_tolerance',
 			'applied_controls',
 			'residual_level',
 			'treatment',
@@ -635,7 +651,8 @@ export const listViewFields = {
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
-			residual_level: RESIDUAL_RISK_LEVEL_FILTER
+			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
+			within_tolerance: RISK_TOLERANCE_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -1169,7 +1186,14 @@ export type FilterKeys = {
 		: never;
 }[keyof typeof listViewFields];
 
-export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
+export const contextMenuActions = {
+	'applied-controls': [{ component: ChangeStatus, props: {} }],
+	'feared-events': [{ component: SelectObject, props: {} }],
+	'ro-to': [{ component: SelectObject, props: {} }],
+	stakeholders: [{ component: SelectObject, props: {} }],
+	'attack-paths': [{ component: SelectObject, props: {} }],
+	'operational-scenarios': [{ component: SelectObject, props: {} }]
+};
 
 export const getListViewFields = ({
 	key,
