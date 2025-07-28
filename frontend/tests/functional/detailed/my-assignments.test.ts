@@ -29,10 +29,19 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await perimetersPage.createItem({
 			name: vars.perimeterName,
 			description: vars.description,
-			folder: vars.folderName,
-			ref_id: 'PERIM.001',
-			lc_status: 'Production'
+			folder: vars.folderName
 		});
+	});
+
+	await test.step('Import a risk matrix', async () => {
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
+
+		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
+
+		// Optional: Confirm import
+		await librariesPage.tab('Libraries store').click();
+		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
 
 	await test.step('Create risk assessment', async () => {
