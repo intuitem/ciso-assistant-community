@@ -2612,35 +2612,41 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the tree of domains and perimeters
         """
-        # Get include_perimeters parameter from query params, default to True if not provided
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
         ).lower() in ["true", "1", "yes"]
 
-        tree = {"name": "Global", "children": []}
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
             object_type=Folder,
         )
-        folders_list = list()
+
+        # Add ancestors so viewable folders aren't orphaned
+        folders = {f.id: f for f in Folder.objects.exclude(content_type="GL")}
+        needed_folders = set(viewable_objects)
+
+        for folder_id in viewable_objects:
+            current = folders.get(folder_id)
+            while current and current.parent_folder_id:
+                needed_folders.add(current.parent_folder_id)
+                current = folders.get(current.parent_folder_id)
+
+        folders_list = []
         for folder in (
             Folder.objects.exclude(content_type="GL")
-            .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
+            .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
-            entry = {
-                "name": folder.name,
-                "uuid": folder.id,
-            }
+            entry = {"name": folder.name, "uuid": folder.id}
             folder_content = get_folder_content(
                 folder, include_perimeters=include_perimeters
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
             folders_list.append(entry)
-        tree.update({"children": folders_list})
-        return Response(tree)
+
+        return Response({"name": "Global", "children": folders_list})
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
