@@ -104,6 +104,20 @@ class BaseModelSerializer(serializers.ModelSerializer):
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
+    def get_path(self, obj):
+        """
+        Gets the pre-calculated folder path for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use the pre-calculated path data if available
+            return optimized_data.get("paths", {}).get(obj.id, [])
+
+        # Fallback for single object serialization (e.g., retrieve endpoint)
+        # We manually serialize the folder objects to match the new optimized output
+        folders = obj.get_folder_full_path()
+        return [{"id": f.id, "name": f.name} for f in folders]
+
     class Meta:
         model: models.Model
 
@@ -367,20 +381,6 @@ class AssetReadSerializer(AssetWriteSerializer):
     security_objectives = serializers.SerializerMethodField()
     disaster_recovery_objectives = serializers.SerializerMethodField()
 
-    def get_path(self, obj):
-        """
-        Gets the pre-calculated folder path for list views, with a fallback.
-        """
-        optimized_data = self.context.get("optimized_data")
-        if optimized_data:
-            # Use the pre-calculated path data if available
-            return optimized_data.get("paths", {}).get(obj.id, [])
-
-        # Fallback for single object serialization (e.g., retrieve endpoint)
-        # We manually serialize the folder objects to match the new optimized output
-        folders = obj.get_folder_full_path()
-        return [{"id": f.id, "name": f.name} for f in folders]
-
     def get_children_assets(self, obj):
         """
         Gets pre-calculated descendant IDs for list views, with a fallback for detail views.
@@ -399,7 +399,7 @@ class AssetReadSerializer(AssetWriteSerializer):
         """
         optimized_data = self.context.get("optimized_data")
         if optimized_data:
-            return optimized_data.get("security", {}).get(obj.id, [])
+            return optimized_data.get("security_objectives", {}).get(obj.id, [])
 
         # Fallback for single object serialization
         return obj.get_security_objectives_display()
@@ -410,7 +410,9 @@ class AssetReadSerializer(AssetWriteSerializer):
         """
         optimized_data = self.context.get("optimized_data")
         if optimized_data:
-            return optimized_data.get("disaster", {}).get(obj.id, [])
+            return optimized_data.get("disaster_recovery_objectives", {}).get(
+                obj.id, []
+            )
 
         # Fallback for single object serialization
         return obj.get_disaster_recovery_objectives_display()
