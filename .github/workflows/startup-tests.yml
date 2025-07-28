@@ -109,6 +109,7 @@ jobs:
 
   startup-docker-compose-test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 22
     env:
       COMPOSE_TEST: True
     steps:
@@ -151,6 +152,7 @@ jobs:
 
   enterprise-startup-functional-test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 19
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
