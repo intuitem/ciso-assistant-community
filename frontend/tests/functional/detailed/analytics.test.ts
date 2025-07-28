@@ -109,6 +109,16 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 		});
 	});
 
+	await test.step('Import a risk matrix', async () => {
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
+
+		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
+
+		await librariesPage.tab('Libraries store').click();
+		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+	});
+
 	await test.step('Create risk assessment', async () => {
 		await riskAssessmentsPage.goto();
 		await riskAssessmentsPage.createItem({
