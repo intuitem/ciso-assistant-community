@@ -1,6 +1,6 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -142,7 +142,7 @@ class FearedEventViewSet(BaseModelViewSet):
         return Response(choices)
 
 
-class RoToFilter(df.FilterSet):
+class RoToFilter(GenericFilterSet):
     class Meta:
         model = RoTo
         fields = [
@@ -203,7 +203,7 @@ class StrategicScenarioViewSet(BaseModelViewSet):
     }
 
 
-class AttackPathFilter(df.FilterSet):
+class AttackPathFilter(GenericFilterSet):
     used = df.BooleanFilter(method="is_used", label="Used")
 
     def is_used(self, queryset, name, value):
@@ -253,7 +253,7 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         return Response(choices)
 
 
-class ElementaryActionFilter(df.FilterSet):
+class ElementaryActionFilter(GenericFilterSet):
     operating_mode_available_actions = df.ModelChoiceFilter(
         queryset=OperatingMode.objects.all(),
         method="filter_operating_mode_available_actions",
