@@ -13,6 +13,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	perimetersPage,
 	appliedControlsPage,
 	complianceAssessmentsPage,
+	librariesPage,
 	riskAssessmentsPage
 }) => {
 	await test.step('Create required folder', async () => {
@@ -61,6 +62,17 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('form-input-owner').click();
 		await page.getByRole('option', { name: 'admin@tests.com' }).click();
 		await page.getByTestId('save-button').click();
+	});
+
+	await test.step('Import a library', async () => {
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
+
+		await librariesPage.importLibrary('NIST CSF v2.0', undefined, 'any');
+
+		// Optional: Confirm import
+		await librariesPage.tab('Libraries store').click();
+		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
 
 	await test.step('Create audit', async () => {
