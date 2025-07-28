@@ -444,7 +444,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
-    def get_pertinence(self):
+    def get_pertinence_display(self):
         PERTINENCE_MATRIX = [
             [1, 1, 2, 2],
             [1, 2, 3, 3],
