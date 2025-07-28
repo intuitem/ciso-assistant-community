@@ -67,14 +67,12 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-1',
-			framework: 'NIST CSF',
 			authors: ['admin@tests.com'],
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-2',
-			framework: '27001',
 			authors: ['admin@tests.com'],
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
