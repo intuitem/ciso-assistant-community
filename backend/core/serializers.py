@@ -598,6 +598,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
 
+    within_tolerance = serializers.CharField()
+
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
     threats = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)

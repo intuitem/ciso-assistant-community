@@ -112,6 +112,7 @@
 		...(page.data?.featureflags?.inherent_risk ? ['inherent_level'] : []),
 		'existing_applied_controls',
 		'current_level',
+		'within_tolerance',
 		'applied_controls',
 		'residual_level'
 	];
@@ -212,9 +213,9 @@
 									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 								>
 								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/csv"
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asCSV()}</a
+									>... {m.asXLSX()}</a
 								>
 							</div>
 						{/snippet}
