@@ -24,7 +24,7 @@ export class ModelForm extends Element {
 	}
 
 	async _waitLoadingSpins() {
-		const loadingSpins = await this._self.getByTestId('autocomplete-select-loading-elem').all();
+		const loadingSpins = await this._self.getByTestId('autocomplete-select-loading-spinner-elem').all();
 		for (const loadingSpin of loadingSpins) {
 			await loadingSpin.waitFor({ state: 'detached' });
 		}
