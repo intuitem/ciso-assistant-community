@@ -4,6 +4,7 @@ import sys
 import inspect
 import argparse
 from typing import Dict, List
+from enum import Enum
 
 import pandas as pd
 from openpyxl import Workbook, load_workbook
@@ -87,13 +88,55 @@ class ConsoleContext:
         return {fn: len(self.verbose_messages.get(fn, [])) for fn in self._all_function_names}
 
 
+class MetaTypes(Enum):
+    LIBRARY                 = "library"
+    FRAMEWORK               = "framework"
+    THREATS                 = "threats"
+    REFERENCE_CONTROLS      = "reference_controls"
+    RISK_MATRIX             = "risk_matrix"
+    REQUIREMENT_MAPPING_SET = "requirement_mapping_set"
+    IMPLEMENTATION_GROUPS   = "implementation_groups"
+    SCORES                  = "scores"
+    ANSWERS                 = "answers"
+    URN_PREFIX              = "urn_prefix"
+
+
 
 # ─────────────────────────────────────────────────────────────
 # MISC
 # ─────────────────────────────────────────────────────────────
 
+# Get the name of the calling function
 def get_current_fct_name():
     return inspect.stack()[1][3]
+
+
+def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
+    """
+    Return a dictionary of all sheets ending with '_meta' and their corresponding type value.
+    Format: {sheet_name: type_value}
+    """
+    
+    meta_sheets_with_type = {}
+
+    for sheet_name in wb.sheetnames:
+        if not sheet_name.endswith("_meta"):
+            continue
+
+        ws = wb[sheet_name]
+        df = pd.DataFrame(ws.values)
+
+        if df.shape[1] < 2:
+            continue  # not enough columns to contain key/value pairs
+
+        # Find row where first column == 'type'
+        type_rows = df[df.iloc[:, 0] == "type"]
+
+        if not type_rows.empty:
+            type_value = str(type_rows.iloc[0, 1]).strip()
+            meta_sheets_with_type[sheet_name] = type_value
+
+    return meta_sheets_with_type
 
 
 
@@ -879,25 +922,25 @@ def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = 
     if type_row.empty:
         raise ValueError(f"({fct_name}) [{sheet_name}] Missing or empty \"type\" field in meta sheet")
     type_value = type_row.iloc[0, 1]
-    if type_value == "library":
+    if type_value == MetaTypes.LIBRARY.value:
         validate_library_meta(df, sheet_name, verbose, ctx)
-    elif type_value == "framework":
+    elif type_value == MetaTypes.FRAMEWORK.value:
         validate_framework_meta(wb, df, sheet_name, verbose, ctx)
-    elif type_value == "threats":
+    elif type_value == MetaTypes.THREATS.value:
         validate_threats_meta(df, sheet_name, verbose, ctx)
-    elif type_value == "reference_controls":
+    elif type_value == MetaTypes.REFERENCE_CONTROLS.value:
         validate_reference_controls_meta(df, sheet_name, verbose, ctx)
-    elif type_value == "risk_matrix":
+    elif type_value == MetaTypes.RISK_MATRIX.value:
         validate_risk_matrix_meta(df, sheet_name, verbose, ctx)
-    elif type_value == "requirement_mapping_set":
+    elif type_value == MetaTypes.REQUIREMENT_MAPPING_SET.value:
         validate_requirement_mapping_set_meta(df, sheet_name, verbose, ctx)
-    elif type_value == "implementation_groups":
+    elif type_value == MetaTypes.IMPLEMENTATION_GROUPS.value:
         validate_implementation_groups_meta(wb, df, sheet_name, verbose, ctx)
-    elif type_value == "scores":
+    elif type_value == MetaTypes.SCORES.value:
         validate_scores_meta(wb, df, sheet_name, verbose, ctx)
-    elif type_value == "answers":
+    elif type_value == MetaTypes.ANSWERS.value:
         validate_answers_meta(wb, df, sheet_name, verbose, ctx)
-    elif type_value == "urn_prefix":
+    elif type_value == MetaTypes.URN_PREFIX.value:
         validate_urn_prefix_meta(df, sheet_name, verbose, ctx)
     else:
         raise ValueError(f"({fct_name}) [{sheet_name}] Unknown meta type \"{type_value}\"")
@@ -907,23 +950,23 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
     
     fct_name = get_current_fct_name()
     
-    if corresponding_meta_type == "framework":
+    if corresponding_meta_type == MetaTypes.FRAMEWORK.value:
         validate_framework_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "threats":
+    elif corresponding_meta_type == MetaTypes.THREATS.value:
         validate_threats_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "reference_controls":
+    elif corresponding_meta_type == MetaTypes.REFERENCE_CONTROLS.value:
         validate_reference_controls_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "risk_matrix":
+    elif corresponding_meta_type == MetaTypes.RISK_MATRIX.value:
         validate_risk_matrix_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "requirement_mapping_set":
+    elif corresponding_meta_type == MetaTypes.REQUIREMENT_MAPPING_SET.value:
         validate_requirement_mapping_set_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "implementation_groups":
+    elif corresponding_meta_type == MetaTypes.IMPLEMENTATION_GROUPS.value:
         validate_implementation_groups_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "scores":
+    elif corresponding_meta_type == MetaTypes.SCORES.value:
         validate_scores_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "answers":
+    elif corresponding_meta_type == MetaTypes.ANSWERS.value:
         validate_answers_content(df, sheet_name, verbose, ctx)
-    elif corresponding_meta_type == "urn_prefix":
+    elif corresponding_meta_type == MetaTypes.URN_PREFIX.value:
         validate_urn_prefix_content(df, sheet_name, verbose, ctx)
     else:
         raise ValueError(f"({fct_name}) [{sheet_name}] Cannot determine validation for content of type \"{corresponding_meta_type}\"")
@@ -974,13 +1017,18 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
         type_row = df[df.iloc[:, 0] == "type"]
         meta_types[base_name] = str(type_row.iloc[0, 1]).strip()
 
-    # Handle "_content" sheets
+    # Check "_content" sheets
+    # As some checks in "_content" sheets need to check the contents of other "_content" sheets, we make sure that all such sheets first have a "_meta" sheet
     for sheet_name, df in content_sheets.items():
         base_name = re.sub(r'_content$', '', sheet_name)
 
         if base_name not in meta_types:
             raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding meta sheet found for this content"
                              f"\n> 💡 Tip: Make sure the corresponding meta sheet for \"{sheet_name}\" is named \"{re.sub(r'_content$', '_meta', sheet_name)}\"")
+
+    # Handle "_content" sheets
+    for sheet_name, df in content_sheets.items():
+        base_name = re.sub(r'_content$', '', sheet_name)
         dispatch_content_validation(wb, df, sheet_name, meta_types[base_name], verbose, ctx)
 
     # Warn about ignored sheets
