@@ -104,10 +104,10 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
 		await expect(page.locator('#page-title')).toHaveText('My assignments');
-		await page.reload();
+		const assignmentsPage = new PageContent(page, '/my-assignments', 'My assignments');
+		await assignmentsPage.goto();
 
 		await expect(page).toHaveURL('/my-assignments');
-		await page.reload();
 
 		await expect(page.getByText('test-control')).toBeVisible();
 		await expect(page.getByText('test-risk-assessment')).toBeVisible();
