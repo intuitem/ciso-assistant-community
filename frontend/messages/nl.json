@@ -958,5 +958,7 @@
 		}
 	],
 	"matchingScenarios": "Overeenkomende scenario's",
+	"select": "Selecteer",
+	"deselect": "Deselecteer",
 	"fearedEventAssetHelpText": "Gevreesde gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit."
 }
