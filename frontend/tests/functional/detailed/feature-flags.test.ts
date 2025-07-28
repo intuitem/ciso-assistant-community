@@ -309,8 +309,6 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ log
 
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('test-ebios-rm');
-	await page.getByTestId('form-input-folder').click();
-	await page.getByRole('option', { name: 'feature-flag-folder' }).click();
 	await page.getByTestId('save-button').click();
 	await page.getByText('test-ebios-rm').click();
 
