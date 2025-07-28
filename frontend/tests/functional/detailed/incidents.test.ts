@@ -9,17 +9,16 @@ async function redirectToIncidents(page: Page): Promise<void> {
 	await page.waitForTimeout(500);
 }
 
-test('Incidents full flow - creation, validation and cleanup', async ({ page }) => {
-	const loginPage = new LoginPage(page);
-	await loginPage.goto();
-	await loginPage.login();
-
+test('Incidents full flow - creation, validation and cleanup', async ({
+	page,
+	logedPage,
+	foldersPage
+}) => {
 	await test.step('Create folder and incident', async () => {
-		await page.getByRole('button', { name: 'Organization' }).click();
-		await page.getByTestId('accordion-item-folders').click();
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').fill('incidents-folder');
-		await page.getByTestId('save-button').click();
+		await foldersPage.goto();
+		await foldersPage.createItem({
+			name: 'incidents-folder'
+		});
 
 		await redirectToIncidents(page);
 		await page.getByTestId('add-button').click();
