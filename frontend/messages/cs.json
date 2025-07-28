@@ -945,5 +945,7 @@
 		}
 	],
 	"matchingScenarios": "Shodné scénáře",
+	"select": "Vybrat",
+	"deselect": "Zrušit výběr",
 	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu."
 }
