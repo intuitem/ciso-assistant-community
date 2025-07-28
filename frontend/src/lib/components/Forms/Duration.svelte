@@ -116,7 +116,10 @@
 			</div>
 		{/if}
 	</div>
-	<div class="control flex flex-row space-x-2">
+	<div
+		class="control flex flex-row space-x-2"
+		data-testid="form-input-{field.replaceAll('_', '-')}"
+	>
 		{#each timeUnits as timeUnit}
 			{#if timeUnit.enabled}
 				<div>
@@ -125,7 +128,7 @@
 						type="number"
 						min="0"
 						class="{'input ' + _class} {classesTextField($errors)}"
-						data-testid="form-input-{field.replaceAll('_', '-')}"
+						data-testid="form-input-{field.replaceAll('_', '-')}-{timeUnit.unit}"
 						name={field}
 						aria-invalid={$errors ? 'true' : undefined}
 						placeholder=""

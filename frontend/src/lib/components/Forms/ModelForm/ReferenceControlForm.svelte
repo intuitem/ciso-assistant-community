@@ -76,6 +76,7 @@
 	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
 	optionsLabelField="label"
+	translateOptions={false}
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
