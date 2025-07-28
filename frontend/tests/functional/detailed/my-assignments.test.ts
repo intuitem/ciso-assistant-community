@@ -40,6 +40,8 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 			name: 'test-risk-assessment',
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
+		await riskAssessmentsPage.goto();
+
 		const riskRow = page.getByRole('row', { name: /test-risk-assessment/i });
 		await riskRow.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-authors').click();
