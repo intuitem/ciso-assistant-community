@@ -1281,15 +1281,20 @@ def get_folder_content(folder: Folder, include_perimeters=True, viewable_objects
             content.append(
                 {
                     "name": p.name,
+                    "symbol": "circle",
+                    "symbolSize": 10,
+                    "itemStyle": {"color": "#222436"},
                     "children": [
                         {
                             "name": "Audits",
+                            "symbol": "diamond",
                             "value": ComplianceAssessment.objects.filter(
                                 perimeter=p
                             ).count(),
                         },
                         {
                             "name": "Risk assessments",
+                            "symbol": "diamond",
                             "value": RiskAssessment.objects.filter(perimeter=p).count(),
                         },
                     ],
