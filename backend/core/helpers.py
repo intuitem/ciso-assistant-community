@@ -1279,7 +1279,7 @@ def get_folder_content(
                 entry.update({"children": children})
             content.append(entry)
 
-    if include_perimeters:
+    if include_perimeters and folder.id in viewable_objects:
         for p in Perimeter.objects.filter(folder=folder).distinct():
             content.append(
                 {
