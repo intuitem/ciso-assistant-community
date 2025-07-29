@@ -956,6 +956,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "risk_matrix",
         "status",
         "ebios_rm_study",
+        "authors",
+        "reviewers",
     ]
 
     def perform_create(self, serializer):
@@ -2152,6 +2154,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "assets": ["exact"],
             "applied_controls": ["exact"],
             "security_exceptions": ["exact"],
+            "owner": ["exact"],
         }
 
 
@@ -4309,6 +4312,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "ebios_rm_studies",
         "assets",
         "evidences",
+        "authors",
+        "reviewers",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -5532,7 +5537,12 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     """
 
     model = SecurityException
-    filterset_fields = ["requirement_assessments", "risk_scenarios"]
+    filterset_fields = [
+        "requirement_assessments",
+        "risk_scenarios",
+        "owners",
+        "approver",
+    ]
     search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get severity choices")
@@ -5674,7 +5684,14 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = ["folder", "status", "severity", "qualifications", "detection"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "severity",
+        "qualifications",
+        "detection",
+        "owners",
+    ]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5744,6 +5761,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
+    filterset_fields = ["assigned_to"]
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
