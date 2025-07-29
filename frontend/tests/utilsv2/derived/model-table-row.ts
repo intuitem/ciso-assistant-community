@@ -29,7 +29,8 @@ export class ModelTableRow extends Element {
 	 * Requires `expect` to assert that the `data-href` attribute is present.
 	 */
 	async gotoDetailView(expect: Expect): Promise<DetailViewPage> {
-		const detailViewHref = await this.getSelf().getAttribute('data-href');
+		const detailButton = await this._self.getByTestId('tablerow-detail-button');
+		const detailViewHref = detailButton.getAttribute('href');
 		expect(detailViewHref).not.toBeNull();
 		await this.getSelf().click();
 		// The class passed to this._goto must be either DetailViewPage or DetailViewPage derived class.

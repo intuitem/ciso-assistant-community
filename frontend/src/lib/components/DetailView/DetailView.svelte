@@ -518,7 +518,7 @@
 					<button
 						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
 						onclick={(_) => modalAppliedControlDuplicateForm()}
-						data-testid="duplicate-button"
+						data-testid="duplicate-button-elem"
 					>
 						<i class="fa-solid fa-copy mr-2"></i>
 						{m.duplicate()}</button

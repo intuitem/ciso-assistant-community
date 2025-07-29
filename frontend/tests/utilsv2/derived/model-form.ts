@@ -7,6 +7,21 @@ async function selectChoice(input: Locator, value: string) {
 	const inputSearch = input.locator('ul.selected input');
 	const firstOption = input.locator(`[role="option"]`).first();
 
+	// role="searchbox" class contains disabled
+	const searchBox = input.getByRole('searchbox');
+	const searchBoxClasses = await searchBox.getAttribute('class');
+	console.log('======>', value);
+	console.log(searchBoxClasses);
+
+	await new Promise((res) => setTimeout(res, 5000));
+	const searchBoxClasses2 = await searchBox.getAttribute('class');
+	console.log('[2]', searchBoxClasses2);
+
+	console.log(searchBoxClasses && searchBoxClasses.indexOf('disabled'));
+	if (searchBoxClasses && searchBoxClasses.indexOf('disabled') >= 0) return;
+
+	console.log('PASSED !!!');
+
 	await inputSearch.fill(value);
 	// Clicking only once doesn't seem to work for whatever reason
 	await firstOption.click({ force: true });
@@ -37,23 +52,27 @@ export class FolderCreateForm extends ModelForm {
 interface PerimeterData {
 	name: string;
 	description?: string;
+	folder?: string;
 }
 
 export class PerimeterCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
+	private _domainInput: Locator;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
+		this._domainInput = this._self.getByTestId('form-input-folder');
 	}
 
 	/** This function doesn't support the `folder` argument. */
 	async doFillForm(data: PerimeterData) {
-		await this._waitLoadingSpins();
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
+		await this._waitLoadingSpins();
+		if (data.folder) await selectChoice(this._domainInput, data.folder);
 	}
 }
 
@@ -87,7 +106,7 @@ export class AssetCreateForm extends ModelForm {
 interface AppliedControlData {
 	name: string;
 	description?: string;
-	folder: string;
+	folder?: string;
 }
 
 export class AppliedControlCreateForm extends ModelForm {
@@ -107,7 +126,7 @@ export class AppliedControlCreateForm extends ModelForm {
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._domainInput, data.folder);
+		if (data.folder) await selectChoice(this._domainInput, data.folder);
 	}
 }
 
@@ -214,16 +233,22 @@ export class RiskScenarioCreateForm extends ModelForm {
 interface RiskAssessmentData {
 	name: string;
 	description?: string;
+	perimeter: string;
+	risk_matrix: string;
 }
 
 export class RiskAssessmentCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
+	private _perimeterInput: Locator;
+	private _risk_matrixInput: Locator;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
+		this._perimeterInput = this._self.getByTestId('form-input-perimeter');
+		this._risk_matrixInput = this._self.getByTestId('form-input-risk_matrix');
 	}
 
 	async doFillForm(data: RiskAssessmentData) {
@@ -231,6 +256,8 @@ export class RiskAssessmentCreateForm extends ModelForm {
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
+		await selectChoice(this._perimeterInput, data.perimeter);
+		await selectChoice(this._risk_matrixInput, data.risk_matrix);
 	}
 }
 

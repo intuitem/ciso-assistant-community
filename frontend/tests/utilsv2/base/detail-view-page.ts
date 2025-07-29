@@ -1,7 +1,8 @@
 import { Page } from '../core/page';
-import type { Page as _Page, Locator } from '@playwright/test';
-import type { Expect } from '@playwright/test';
+import type { Element } from '../core/element';
+import type { Page as _Page, Locator, Expect } from '@playwright/test';
 import { safeTranslate } from '$lib/utils/i18n';
+import { CreateModal } from './create-modal';
 
 export class DetailViewPage extends Page {
 	protected _descriptionList: Locator;
@@ -30,5 +31,14 @@ export class DetailViewPage extends Page {
 			).toBeTruthy();
 			expect(currentValues[translatedKey]).toBe(value);
 		}
+	}
+
+	// This must become a protected method like _getOpenCreateModal
+	async getOpenDuplicateModal<T = CreateModal>(createModalClass: Element.Class<T>): Promise<T> {
+		// Should it be renamed "add-button-elem" instead ?
+		const locator = this._self.getByTestId('duplicate-button-elem');
+		await locator.click();
+
+		return this._getSubElement(createModalClass);
 	}
 }

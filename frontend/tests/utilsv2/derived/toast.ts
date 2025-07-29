@@ -5,7 +5,7 @@ import type { Expect } from '@playwright/test';
 export class Toast extends Element {
 	static DATA_TESTID = 'toast';
 
-	async checkContainText(expect: Expect, text: string) {
+	async checkContainText(expect: Expect, text: string | RegExp) {
 		await expect(this._self).toContainText(text);
 	}
 }
