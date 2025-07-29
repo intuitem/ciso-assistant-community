@@ -337,6 +337,24 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_active',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_third_party',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 const IS_ASSESSABLE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -808,7 +826,11 @@ export const listViewFields = {
 			'is_active',
 			'keep_local_login',
 			'is_third_party'
-		]
+		],
+		filters: {
+			is_active: USER_IS_ACTIVE_FILTER,
+			is_third_party: USER_IS_THIRD_PARTY_FILTER
+		}
 	},
 	'user-groups': {
 		head: ['name'],
