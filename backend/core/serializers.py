@@ -817,6 +817,7 @@ class UserReadSerializer(BaseModelSerializer):
             "user_groups",
             "keep_local_login",
             "is_third_party",
+            "observation",
         ]
 
 
@@ -836,6 +837,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "is_local",
+            "observation",
         ]
 
     def validate_email(self, email):
