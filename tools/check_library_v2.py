@@ -870,7 +870,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
 
 
 # Check whether each answer ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
-def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None):
+def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
 
     ids_to_check = get_non_empty_column_values(df_ids, id_column)
     unused_ids = []
@@ -910,6 +910,12 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
         print(msg)
         if ctx:
             ctx.add_sheet_warning_msg(sheet_name, msg)
+    else:
+        if verbose:
+            msg = (f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] All ID(s) from column \"{id_column}\" are used in framework sheets")
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
 
 
@@ -1010,7 +1016,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Implementation Groups
+# [CONTENT] Implementation Groups {OK}
 def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -1027,7 +1033,12 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
     # Check if the "implementation_groups" sheet is actually used in a "framework" sheet
-    check_content_sheet_usage_in_frameworks(wb, sheet_name, "implementation_groups_definition", fct_name, ctx)
+    frameworks_with_imp_grp = check_content_sheet_usage_in_frameworks(wb, sheet_name, "implementation_groups_definition", fct_name, ctx)
+    frameworks_with_imp_grp = get_corresponding_content_sheet_name(frameworks_with_imp_grp)
+
+    # Check if every implementation groups are actually used in "framework" sheets
+    if frameworks_with_imp_grp:
+        check_unused_ids_in_frameworks(wb, df, "ref_id", "implementation_groups", frameworks_with_imp_grp, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1114,7 +1125,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
 
     # Check if every answers are actually used in "framework" sheets
     if frameworks_with_answers:
-        check_unused_ids_in_frameworks(wb, df, "id", "answer", frameworks_with_answers, sheet_name, fct_name, ctx)
+        check_unused_ids_in_frameworks(wb, df, "id", "answer", frameworks_with_answers, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
