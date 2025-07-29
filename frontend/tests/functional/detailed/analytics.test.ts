@@ -7,6 +7,7 @@ const vars = TestContent.generateTestVars();
 const testObjectsData = TestContent.itemBuilder(vars);
 
 async function redirectToAnalytics(page) {
+	await expect(page.locator('#page-title')).not.toHaveText('Analytics');
 	await page.getByTestId('accordion-item-overview').click();
 	await page.getByTestId('accordion-item-analytics').click();
 	await expect(page.locator('#page-title')).toHaveText('Analytics');
