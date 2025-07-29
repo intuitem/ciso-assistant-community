@@ -34,6 +34,12 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByRole('option', { name: 'confidentiality' }).click();
 		await page.getByRole('option', { name: 'human' }).click();
 
+		page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
+		await page.getByTestId('form-input-folder').click();
+		await page.getByRole('option', { name: 'incidents-folder' }).click();
+
+		await page.getByTestId('form-input-ref-id').fill('test');
+		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('save-button').click();
 
 		await page.getByRole('gridcell', { name: 'New' }).locator('span').waitFor({ state: 'visible' });
