@@ -1259,7 +1259,7 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
 
 
 def get_folder_content(
-    folder: Folder, include_perimeters=True, viewable_objects=None, needed_folders=None
+    folder: Folder, include_perimeters, viewable_objects, needed_folders
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
