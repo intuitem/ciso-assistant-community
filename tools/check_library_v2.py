@@ -3,7 +3,7 @@ import re
 import sys
 import inspect
 import argparse
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from enum import Enum
 
 import pandas as pd
@@ -137,6 +137,20 @@ def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
             meta_sheets_with_type[sheet_name] = type_value
 
     return meta_sheets_with_type
+
+
+def get_meta_sheets_names_from_type(wb: Workbook, sheet_type: MetaTypes) -> List[str]:
+
+    meta_sheets = get_meta_sheets_with_type(wb)
+    sheets = []
+
+    for sheet, sht_type in meta_sheets.items():
+        if sht_type != sheet_type.value:
+            continue
+
+        sheets.append(sheet)
+
+    return sheets
 
 
 # Retrieve the value associated with a given key in a meta sheet (2-column format).
@@ -869,7 +883,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
     return frameworks_with_reference
 
 
-# Check whether each answer ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
+# Check whether each ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
 def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
 
     ids_to_check = get_non_empty_column_values(df_ids, id_column)
@@ -897,7 +911,7 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
                     break  # No need to keep looking in this sheet
 
             if found:
-                break  # Found in one sheet → stop checking this ID
+                break  # Found in one sheet : Stop checking this ID
 
         if not found:
             unused_ids.append(_id)
@@ -916,6 +930,140 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
             print(msg)
             if ctx:
                 ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+
+# Check whether each Prefix URN ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
+def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
+
+    target_columns = ["threats", "reference_controls"]
+    id_column = "prefix_id"
+    ids_to_check = get_non_empty_column_values(df_ids, id_column)
+    unused_ids = []
+
+    for _id in ids_to_check:
+        found = False
+
+        for fw_sheet in frameworks_sheet_names:
+            values = list(wb[fw_sheet].values)
+            if not values:
+                continue  # skip empty sheet
+
+            df_fw = pd.DataFrame(values[1:], columns=values[0])  # headers
+
+            for target_column in target_columns:
+                if target_column not in df_fw.columns:
+                    continue
+
+                for cell in df_fw[target_column]:
+                    if pd.isna(cell):
+                        continue
+                    entries = [entry.strip() for entry in str(cell).split(",") if entry.strip()]
+                    prefix_parts = [entry.split(":", 1)[0].strip() for entry in entries if ":" in entry]
+
+                    if _id in prefix_parts:
+                        found = True
+                        break  # Found : No need to continue on this column
+
+                if found:
+                    break  # Found : No need to continue on this sheet
+
+            if found:
+                break  # Found : Skip to next ID
+
+        if not found:
+            unused_ids.append(_id)
+
+    if unused_ids:
+        msg = (
+            f"⚠️  [WARNING] ({context}) [{sheet_name}] The following Prefix ID(s) from column \"{id_column}\" are not used in any framework sheet: "
+            f"{', '.join(f'\"{x}\"' for x in unused_ids)}"
+        )
+        print(msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, msg)
+    elif verbose:
+        msg = (
+            f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] All Prefix ID(s) from column \"{id_column}\" are used in framework sheets"
+        )
+        print(msg)
+        if ctx:
+            ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+
+#  Classify each prefix_value as 'internal' or 'external' depending on whether it's used in the base_urn field of the corresponding *_meta sheets.
+def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame, meta_sheets: List[str], meta_type: MetaTypes, sheet_name: str, fct_name: str, ctx: ConsoleContext = None) -> Tuple[List[str], List[str]]:
+    """
+    Args:
+        wb: Workbook object.
+        df_urn_prefix: DataFrame of the URN Prefix content sheet.
+        meta_sheets: List of *_meta sheet names to check.
+        meta_type: One of MetaTypes.THREATS or MetaTypes.REFERENCE_CONTROLS.
+        sheet_name: Name of the sheet currently being validated (URN Prefix).
+        fct_name: Name of the calling validation function (for error formatting).
+        ctx: Optional ConsoleContext to store warnings/info messages.
+    Returns:
+        Tuple of (internal_prefixes, external_prefixes)
+    """
+
+    # Define expected type_object depending on the meta_type
+    if meta_type == MetaTypes.THREATS:
+        expected_type_object = "threat"
+    elif meta_type == MetaTypes.REFERENCE_CONTROLS:
+        expected_type_object = "function"
+    else:
+        raise ValueError(f"({fct_name}) [{sheet_name}] Unsupported meta_type: {meta_type}")
+
+    prefix_values = df_urn_prefix["prefix_value"].dropna().astype(str).str.strip().unique()
+    internal_prefixes = []
+    external_prefixes = []
+
+    # Filter prefix_values by expected type_object (based on the 4th segment of the URN)
+    filtered_prefix_values = []
+    for prefix in prefix_values:
+        parts = prefix.split(":")
+        if len(parts) > 3 and parts[3].strip() == expected_type_object:
+            filtered_prefix_values.append(prefix)
+
+
+    for prefix in filtered_prefix_values:
+        found = False
+
+        for sheet in meta_sheets:
+            try:
+                rows = list(wb[sheet].values)
+
+                # Convert the meta sheet into a key-value dictionary
+                meta_dict = {
+                    str(row[0]).strip(): str(row[1]).strip()
+                    for row in rows if row and len(row) >= 2 and row[0] and row[1]
+                }
+
+                base_urn = meta_dict.get("base_urn")
+                if not base_urn:
+                    continue
+
+                parts = base_urn.split(":")
+                
+                # Make sure the 4th element in base_urn matches the expected type
+                if len(parts) > 3 and parts[3].strip() == expected_type_object:
+                    if base_urn.strip() == prefix.strip():
+                        found = True
+                        # print("GOOD !")
+                        break  # No need to keep checking other sheets
+
+            except Exception as e:
+                msg = f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] Could not process sheet \"{sheet}\": {e}"
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_warning_msg(sheet_name, msg)
+                continue
+
+        if found:
+            internal_prefixes.append(prefix)
+        else:
+            external_prefixes.append(prefix)
+
+    return internal_prefixes, external_prefixes
 
 
 
@@ -1130,8 +1278,8 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] URN Prefix
-def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+# [CONTENT] URN Prefix {OK}
+def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["prefix_id", "prefix_value"]
@@ -1141,6 +1289,125 @@ def validate_urn_prefix_content(df, sheet_name, verbose: bool = False, ctx: Cons
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["prefix_id", "prefix_value"], sheet_name, fct_name, ctx=ctx)
+
+    ### Check if URN Prefix IDs are used in "framework" sheets ###
+    
+    # 1. Get "framework" content sheets
+    framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK)
+    framework_sheets = get_corresponding_content_sheet_name(framework_sheets)
+
+    # 2. Check if every Prefix IDs are actually used in "framework" sheets
+    if framework_sheets:
+        _URN_prefix_check_unused_ids_in_frameworks(wb, df, framework_sheets, sheet_name, fct_name, ctx, verbose)
+    else:
+        msg = (
+            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not used in any framework sheet"
+            f"\n> 💡 Tip: You can remove this sheet and its meta sheet if you are not using it"
+        )
+        print(msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, msg)
+
+
+    ### Check if "prefix_value" come from internal sheets or external framework ###
+
+    # 1. Get "threats" meta sheets
+    threats_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
+
+    # 2. Get "reference_controls" sheets
+    ref_ctrl_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
+    
+    # 3. Check whether the values for each "prefix_value" come from internal sheets or external framework
+    internal_threats = []; external_threats = []
+    internal_ref_ctrl = []; external_ref_ctrl = []
+    
+    if threats_sheets:
+        internal_threats, external_threats = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, fct_name, ctx)
+    if ref_ctrl_sheets:
+        internal_ref_ctrl, external_ref_ctrl = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, fct_name, ctx)
+
+    # Info messages for "threats"
+    if internal_threats:
+        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Internal \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_threats)}")
+    else:
+        if verbose:
+            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"threats\" prefixes found")
+
+    if external_threats:
+        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] External \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in external_threats)}")
+    else:
+        if verbose:
+            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"threats\" prefixes found")
+
+    # Info messages for "reference_controls"
+    if internal_ref_ctrl:
+        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Internal \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_ref_ctrl)}")
+    else:
+        if verbose:
+            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"reference_controls\" prefixes found")
+
+    if external_ref_ctrl:
+        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] External \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in external_ref_ctrl)}")
+    else:
+        if verbose:
+            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"reference_controls\" prefixes found")
+
+    ### 4. Check if external prefixes are declared in "dependencies" from "library_meta" ###
+
+    # 1. Normalize external URNs by replacing the object type (4th element) with "library"
+    def normalize_to_library(urn_list: List[str], target_type: str) -> List[str]:
+        normalized = []
+        for urn in urn_list:
+            parts = urn.split(":")
+            if len(parts) > 3 and parts[3].strip() == target_type:
+                parts[3] = "library"
+                normalized.append(":".join(parts))
+        return normalized
+
+    normalized_ext_threats = normalize_to_library(external_threats, "threat")
+    normalized_ext_ref_ctrl = normalize_to_library(external_ref_ctrl, "function")
+
+    # 2. Merge and deduplicate normalized external URNs
+    required_dependencies = sorted(set(normalized_ext_threats + normalized_ext_ref_ctrl))
+
+    if required_dependencies:
+
+        # 3. Load "library_meta" sheet as a key-value dictionary
+        try:
+            rows = list(wb["library_meta"].values)
+            meta_dict = {
+                str(row[0]).strip(): str(row[1]).strip()
+                for row in rows if row and len(row) >= 2 and row[0] and row[1]
+            }
+        except Exception as e:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Could not read \"library_meta\" sheet: {e}")
+
+        # 4. Ensure "dependencies" field exists and is non-empty
+        if "dependencies" not in meta_dict or not meta_dict["dependencies"].strip():
+            raise ValueError(
+                f"({fct_name}) [{sheet_name}] \"library_meta\" is missing a non-empty \"dependencies\" field, "
+                f"required to declare external libraries: {', '.join(f'\"{d}\"' for d in required_dependencies)}"
+            )
+
+        # 5. Parse declared dependencies
+        declared_dependencies = [
+            dep.strip() for dep in meta_dict.get("dependencies", "").split(",") if dep.strip()
+        ]
+
+        # 6. Compare with required dependencies
+        missing_dependencies = [dep for dep in required_dependencies if dep not in declared_dependencies]
+
+        if missing_dependencies:
+            missing_list = ", ".join(f'"{d}"' for d in missing_dependencies)
+            threat_list = ", ".join(f'"{t}"' for t in external_threats)
+            ref_ctrl_list = ", ".join(f'"{r}"' for r in external_ref_ctrl)
+
+            raise ValueError(
+                f"({fct_name}) [{sheet_name}] Missing required dependencies in \"library_meta\": {missing_list}\n"
+                f"> 💡 Tip: These are required due to the following external prefixes:\n"
+                f"   - External \"threats\": {threat_list or 'None'}\n"
+                f"   - External \"reference_controls\": {ref_ctrl_list or 'None'}"
+            )
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
@@ -1206,7 +1473,7 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
     elif corresponding_meta_type == MetaTypes.ANSWERS.value:
         validate_answers_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.URN_PREFIX.value:
-        validate_urn_prefix_content(df, sheet_name, verbose, ctx)
+        validate_urn_prefix_content(wb, df, sheet_name, verbose, ctx)
     else:
         raise ValueError(f"({fct_name}) [{sheet_name}] Cannot determine validation for content of type \"{corresponding_meta_type}\"")
 
@@ -1218,6 +1485,7 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
 def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+    print(f"⌛ Parsing \"{os.path.basename(filepath)}\"...")
     
     if not ctx:
         ctx = ConsoleContext()
