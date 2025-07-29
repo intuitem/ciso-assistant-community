@@ -2647,6 +2647,7 @@ class FolderViewSet(BaseModelViewSet):
                 folder,
                 include_perimeters=include_perimeters,
                 viewable_objects=set(viewable_objects),
+                needed_folders=needed_folders,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
