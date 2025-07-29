@@ -7,11 +7,8 @@ const vars = TestContent.generateTestVars();
 const testObjectsData = TestContent.itemBuilder(vars);
 
 async function redirectToAnalytics(page) {
-	await expect(page.locator('#page-title')).not.toHaveText('Analytics');
-	await page.getByTestId('accordion-item-overview').click();
-	await page.getByTestId('accordion-item-analytics').click();
-	await expect(page.locator('#page-title')).toHaveText('Analytics');
-	await expect(page).toHaveURL('/analytics');
+	const analyticsPage = new PageContent(page, '/analytics', 'Analytics');
+	await analyticsPage.goto();
 }
 
 test('Analytics full flow - creation, validation and cleanup', async ({
@@ -160,10 +157,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 	});
 
 	await test.step('Verify redirection in analytics', async () => {
-		await page.getByTestId('accordion-item-overview').click();
-		await page.getByTestId('accordion-item-analytics').click();
-		await expect(page.locator('#page-title')).toHaveText('Analytics');
-		await expect(page).toHaveURL('/analytics');
+		await redirectToAnalytics(page);
 
 		await page.getByTestId('card-controls-total').click();
 		await expect(page).toHaveURL('/applied-controls');
