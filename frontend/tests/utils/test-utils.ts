@@ -39,6 +39,7 @@ type Fixtures = {
 	entitiesPage: PageContent;
 	solutionsPage: PageContent;
 	representativesPage: PageContent;
+	entityAssessmentsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -345,7 +346,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	solutionsPage: async ({ page }, use) => {
-		const ePage = new PageContent(page, '/escalation-thresholds', 'Escalation thresholds', [
+		const ePage = new PageContent(page, '/solutions', 'Solutions', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
@@ -354,7 +355,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	representativesPage: async ({ page }, use) => {
-		const ePage = new PageContent(page, '/escalation-thresholds', 'Escalation thresholds', [
+		const ePage = new PageContent(page, '/representatives', 'Representatives', [
 			{ name: 'description', type: type.TEXT },
 			{ name: 'email', type: type.TEXT },
 			{ name: 'create_user', type: type.CHECKBOX },
@@ -363,6 +364,21 @@ export const test = base.extend<Fixtures>({
 			{ name: 'last_name', type: type.TEXT },
 			{ name: 'phone', type: type.TEXT },
 			{ name: 'role', type: type.TEXT }
+		]);
+		await use(ePage);
+	},
+
+	entityAssessmentsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/entity-assessments', 'Entity assessments', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'create_audit', type: type.CHECKBOX },
+			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'solutions', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'due_date', type: type.DATE },
+			{ name: 'representatives', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'conclusion', type: type.SELECT }
 		]);
 		await use(ePage);
 	},
