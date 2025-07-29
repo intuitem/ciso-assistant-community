@@ -24,10 +24,6 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-name').fill('incidents-test');
 
-		page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
-		await page.getByTestId('form-input-folder').click();
-		await page.getByRole('option', { name: 'incidents-folder' }).click();
-
 		page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-severity').selectOption('4');
 
