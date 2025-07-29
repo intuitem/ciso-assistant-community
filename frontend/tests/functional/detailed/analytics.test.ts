@@ -159,38 +159,47 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 	await test.step('Verify redirection in analytics', async () => {
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-controls-total')).toBeVisible();
 		await page.getByTestId('card-controls-total').click();
 		await expect(page).toHaveURL('/applied-controls');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-controls-active')).toBeVisible();
 		await page.getByTestId('card-controls-active').click();
 		await expect(page).toHaveURL('/applied-controls?status=active');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-controls-deprecated')).toBeVisible();
 		await page.getByTestId('card-controls-deprecated').click();
 		await expect(page).toHaveURL('/applied-controls?status=deprecated');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-controls-to do')).toBeVisible();
 		await page.getByTestId('card-controls-to do').click();
 		await expect(page).toHaveURL('/applied-controls?status=to_do');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-controls-in progress')).toBeVisible();
 		await page.getByTestId('card-controls-in progress').click();
 		await expect(page).toHaveURL('/applied-controls?status=in_progress');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-controls-on hold')).toBeVisible();
 		await page.getByTestId('card-controls-on hold').click();
 		await expect(page).toHaveURL('/applied-controls?status=on_hold');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-compliance-Used frameworks')).toBeVisible();
 		await page.getByTestId('card-compliance-Used frameworks').click();
 		await expect(page).toHaveURL('/frameworks');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-compliance-Evidences')).toBeVisible();
 		await page.getByTestId('card-compliance-Evidences').click();
 		await expect(page).toHaveURL('/evidences');
 		await redirectToAnalytics(page);
 
+		await expect(page.getByTestId('card-risk-Assessments')).toBeVisible();
 		await page.getByTestId('card-risk-Assessments').click();
 		await expect(page).toHaveURL('/risk-assessments');
 		await redirectToAnalytics(page);
