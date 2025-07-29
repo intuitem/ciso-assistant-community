@@ -5115,6 +5115,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "requirement__ref_id",
         "compliance_assessment__ref_id",
         "compliance_assessment__assets__ref_id",
+        "requirement__assessable",
     ]
     search_fields = ["requirement__name", "requirement__description"]
 
