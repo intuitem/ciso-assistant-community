@@ -158,6 +158,19 @@ def get_meta_value(df, key_name: str, sheet_name: str, required: bool = False):
     return str(value).strip()
 
 
+# Return a list of non-empty, stripped string values from a specified column in a DataFrame.
+def get_non_empty_column_values(df: pd.DataFrame, column_name: str) -> List[str]:
+
+    if column_name not in df.columns:
+        raise ValueError(f"Column \"{column_name}\" not found in DataFrame")
+
+    return [
+        str(value).strip()
+        for value in df[column_name]
+        if pd.notna(value) and str(value).strip() != ""
+    ]
+
+
 
 # ─────────────────────────────────────────────────────────────
 # VALIDATE UTILS
@@ -715,8 +728,8 @@ def validate_optional_columns_content_sheet(df, sheet_name: str, optional_column
         is_entirely_empty = all(pd.isna(val) or str(val).strip() == "" for val in df[col])
 
         if is_entirely_empty:
-            msg = (f"⚠️  [WARNING] ({context}) [{sheet_name}] Optional column \"{col}\" is present but entirely empty"
-                    "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
+            msg = (f"⚠️  [WARNING] ({context}) [{sheet_name}] Optional column \"{col}\" is present but entirely empty")
+                    # "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
             if ctx:
                 ctx.add_sheet_warning_msg(sheet_name, msg)
             print(msg)
@@ -802,8 +815,23 @@ def get_content_sheet_base_name(content_sheet_name: str) -> str:
     return base_name
 
 
+# Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
+def get_corresponding_content_sheet_name(meta_sheet_names: List[str]) -> str:
+
+    content_sheet_names = []
+
+    for sheet in meta_sheet_names:
+        if not sheet.endswith("_meta"):
+            raise ValueError(f"Invalid sheet name: \"{sheet}\" does not end with \"_meta\"")
+
+        content_name = re.sub(r'_meta$', '_content', sheet)
+        content_sheet_names.append(content_name)
+
+    return content_sheet_names
+
+
 # Check if a content sheet is referenced in any 'framework' meta sheet via a specific meta field (e.g., 'scores_definition')
-def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_field: str, fct_name: str, ctx: ConsoleContext = None):
+def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_field: str, fct_name: str, ctx: ConsoleContext = None) -> List[str]:
     """
     Args:
         wb (Workbook): The Excel workbook.
@@ -837,6 +865,51 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
         print(warn_msg)
         if ctx:
             ctx.add_sheet_warning_msg(sheet_name, warn_msg)
+
+    return frameworks_with_reference
+
+
+# Check whether each answer ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
+def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None):
+
+    ids_to_check = get_non_empty_column_values(df_ids, id_column)
+    unused_ids = []
+
+    for _id in ids_to_check:
+        found = False
+        for fw_sheet in frameworks_sheet_names:
+            values = list(wb[fw_sheet].values)
+            if not values:
+                continue  # skip empty sheets
+
+            df_fw = pd.DataFrame(values[1:], columns=values[0])  # use header
+
+            if target_column not in df_fw.columns:
+                continue
+
+            for cell in df_fw[target_column]:
+                if pd.isna(cell):
+                    continue
+
+                entries = [entry.strip() for entry in str(cell).split("\n") if entry.strip()]
+                if _id in entries:
+                    found = True
+                    break  # No need to keep looking in this sheet
+
+            if found:
+                break  # Found in one sheet → stop checking this ID
+
+        if not found:
+            unused_ids.append(_id)
+
+    if unused_ids:
+        msg = (
+            f"⚠️  [WARNING] ({context}) [{sheet_name}] The following ID(s) from column \"{id_column}\" are not used in any framework sheet: "
+            f"{', '.join(f'\"{x}\"' for x in unused_ids)}"
+        )
+        print(msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, msg)
 
 
 
@@ -1007,8 +1080,8 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Answers
-def validate_answers_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+# [CONTENT] Answers {OK}
+def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["id", "question_type"]
@@ -1023,9 +1096,25 @@ def validate_answers_content(wb: Workbook, df, sheet_name, verbose: bool = False
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
 
+    # Check that "question_choices" is filled for relevant question types ("unique_choice" & "multiple_choice")
+    for row_idx, row in df.iterrows():
+        question_type_raw = row.get("question_type", "")
+        if pd.isna(question_type_raw):
+            continue
+
+        question_type = str(question_type_raw).strip().lower()
+        if question_type in {"unique_choice", "multiple_choice"}:
+            question_choices = row.get("question_choices", "")
+            if pd.isna(question_choices) or str(question_choices).strip() == "":
+                raise ValueError(f"({fct_name}) [{sheet_name}] Row #{row_idx + 2}: For question_type \"{question_type}\", the field \"question_choices\" must not be empty")
+
     # Check if the "answers" sheet is actually used in a "framework" sheet
-    check_content_sheet_usage_in_frameworks(wb, sheet_name, "answers_definition", fct_name, ctx)
-    ### ===> Make "check_content_sheet_usage_in_frameworks" return the content sheets so we can check them to see if the answers ID are there, using another function  <===  ###
+    frameworks_with_answers = check_content_sheet_usage_in_frameworks(wb, sheet_name, "answers_definition", fct_name, ctx)
+    frameworks_with_answers = get_corresponding_content_sheet_name(frameworks_with_answers)
+
+    # Check if every answers are actually used in "framework" sheets
+    if frameworks_with_answers:
+        check_unused_ids_in_frameworks(wb, df, "id", "answer", frameworks_with_answers, sheet_name, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
