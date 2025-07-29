@@ -84,25 +84,27 @@ poetry install
 
 #### Configuration Options
 
-- `--port=8080` : Backend server port (default: 8173)
-- `--mailer=1025/8025` : SMTP/Web ports for mail service
-- `--no-sudo` : Run Docker without sudo
+- `--port=8080`: Backend server port (default: 8173)
+- `--mailer=1025/8025`: SMTP/Web ports for mail service
+- `--no-sudo`: Run Docker without sudo
 
 #### Execution Options
 
-- `-q` : Quick mode (single project, no retry)
-- `-v` : Show backend server logs
-- `-k` : Keep initial database snapshot
-- `-m` : Use existing mail service
+- `-q`: Quick mode (single project, no retry)
+- `--no-quick`: Run all projects with retries
+- `-v`: Show backend server logs
+- `-k`: Keep initial database snapshot
+- `--no-snapshot`: Build initial database snapshot
+- `-m`: Use existing mail service
 
 #### Playwright Options
 
-- `--browser=chromium` : Specific browser (chromium/firefox/webkit)
-- `--headed` : Run with graphical interface
-- `--grep="pattern"` : Filter tests by name
-- `--project=chromium` : Specific project
-- `--workers=1` : Number of parallel workers
-- `--retries=2` : Number of retry attempts on failure
+- `--browser=chromium`: Specific browser (chromium/firefox/webkit)
+- `--headed`: Run with graphical interface
+- `--grep="pattern"`: Filter tests by name
+- `--project=chromium`: Specific project
+- `--workers=1`: Number of parallel workers
+- `--retries=2`: Number of retry attempts on failure
 
 ### Usage Examples
 

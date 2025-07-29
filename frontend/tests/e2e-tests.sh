@@ -18,8 +18,6 @@ KEEP_DATABASE_SNAPSHOT=1
 # Check if user can run docker without sudo
 if docker info >/dev/null 2>&1; then
   DO_NOT_USE_SUDO=1
-else
-  DO_NOT_USE_SUDO=0
 fi
 
 for arg in "$@"; do
@@ -43,10 +41,14 @@ for arg in "$@"; do
     fi
   elif [[ $arg == -q ]]; then
     QUICK_MODE_ACTIVATED=1
+  elif [[ $arg == --no-quick ]]; then
+    QUICK_MODE_ACTIVATED=0
   elif [[ $arg == -v ]]; then
     STORE_BACKEND_OUTPUT=1
   elif [[ $arg == -k ]]; then
     KEEP_DATABASE_SNAPSHOT=1
+  elif [[ $arg == --no-snapshot ]]; then
+    KEEP_DATABASE_SNAPSHOT=0
   elif [[ $arg == --no-sudo ]]; then
     DO_NOT_USE_SUDO=1
   elif [[ $arg == --* ]]; then
@@ -63,9 +65,11 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
   echo "Run the end-to-end tests for the CISO Assistant application."
   echo "Options:"
   echo "  -q                      Quick mode: execute only the tests 1 time with no retries and only 1 project"
+  echo "  --no-quick              Disable quick mode: execute the tests with retries and all projects"
   echo "  -k                      Keep a saved snapshot of the initial database and use it to avoid executing useless migrations."
   echo "                          If the initial database hasn't been created running the tests with this option will create it."
   echo "                          Running the tests without this option will delete the saved initial database."
+  echo "  --no-snapshot           Do not keep a saved snapshot of the initial database, the database will be created from scratch."
   echo "  --no-sudo               Run docker commands without using sudo as a prefix."
   echo "  --port=PORT             Run the backend server on the specified port (default: $BACKEND_PORT)"
   echo "  -m, --mailer=PORT/PORT  Use an existing mailer service on the optionally defined ports (default: $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT)"
@@ -139,7 +143,7 @@ cleanup() {
     rm "$DB_DIR/$DB_NAME"
     echo "| test database deleted"
   fi
-  if [[ -z "$KEEP_DATABASE_SNAPSHOT" && -f "$DB_DIR/$DB_INIT_NAME" ]]; then
+  if [[ "$KEEP_DATABASE_SNAPSHOT" -ne 1 && -f "$DB_DIR/$DB_INIT_NAME" ]]; then
     rm "$DB_DIR/$DB_INIT_NAME"
     echo "| test initial database snapshot deleted"
   fi
@@ -208,7 +212,7 @@ export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
 export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 
 cd "$APP_DIR"/backend/ || exit 1
-if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
+if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]] || ! poetry run python3 manage.py migrate --check; then
@@ -257,7 +261,7 @@ if [ "$(cat "$FRONTEND_HASH_FILE")" != "$FRONTEND_HASH" ]; then
   echo "$FRONTEND_HASH" >"$FRONTEND_HASH_FILE"
 fi
 
-if [[ -n "$QUICK_MODE_ACTIVATED" ]]; then
+if [[ "$QUICK_MODE_ACTIVATED" -eq 1 ]]; then
   pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" --project=chromium "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
 else
   pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
