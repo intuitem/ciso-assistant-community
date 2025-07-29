@@ -36,6 +36,7 @@ type Fixtures = {
 	businessImpactAnalysisPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	entitiesPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -77,6 +78,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			entitiesPage,
 			usersPage
 		},
 		use
@@ -100,6 +102,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			entitiesPage,
 			usersPage
 		});
 	},
@@ -325,6 +328,16 @@ export const test = base.extend<Fixtures>({
 			{ name: 'qualifications', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'quali_impact', type: type.SELECT },
 			{ name: 'justification', type: type.TEXT }
+		]);
+		await use(ePage);
+	},
+
+	entitiesPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/entities', /Entit(y|ies)/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'mission', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(ePage);
 	},
@@ -736,6 +749,22 @@ export class TestContent {
 					str: vars.assetName,
 					asset: vars.folderName + '/' + vars.assetName,
 					bia: vars.biaName
+				}
+			},
+			entitiesPage: {
+				displayName: 'Entities',
+				modelName: 'entity',
+				build: {
+					name: 'Test Entity',
+					description: 'Test description',
+					mission: 'Test mission',
+					folder: vars.folderName
+				},
+				editParams: {
+					name: '',
+					description: '',
+					mission: '',
+					folder: vars.folderName
 				}
 			}
 		};
