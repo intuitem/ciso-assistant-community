@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-APP_DIR=$(realpath "$(dirname $0)/../..")
+APP_DIR=$(realpath "$(dirname "$0")/../..")
 DB_DIR=$APP_DIR/backend/db
 DB_NAME=test-database.sqlite3
 DB_INIT_NAME=test-database-initial.sqlite3
@@ -11,6 +11,16 @@ TEST_PATHS=()
 BACKEND_PORT=8173
 MAILER_WEB_SERVER_PORT=8073
 MAILER_SMTP_SERVER_PORT=1073
+
+QUICK_MODE_ACTIVATED=1
+KEEP_DATABASE_SNAPSHOT=1
+
+# Check if user can run docker without sudo
+if docker info >/dev/null 2>&1; then
+  DO_NOT_USE_SUDO=1
+else
+  DO_NOT_USE_SUDO=0
+fi
 
 for arg in "$@"; do
   if [[ $arg == --port* ]]; then
@@ -135,11 +145,11 @@ cleanup() {
   fi
   if [[ -n "$MAILER_PID" ]]; then
     if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-      sudo docker stop $MAILER_PID &>/dev/null
-      sudo docker rm $MAILER_PID &>/dev/null
+      sudo docker stop "$MAILER_PID" &>/dev/null
+      sudo docker rm "$MAILER_PID" &>/dev/null
     else
-      docker stop $MAILER_PID &>/dev/null
-      docker rm $MAILER_PID &>/dev/null
+      docker stop "$MAILER_PID" &>/dev/null
+      docker rm "$MAILER_PID" &>/dev/null
     fi
     echo "| mailer service stopped"
   fi
@@ -165,9 +175,9 @@ if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   if command -v docker &>/dev/null; then
     echo "Starting mailer service..."
     if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-      MAILER_PID=$(sudo docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+      MAILER_PID=$(sudo docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
     else
-      MAILER_PID=$(docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+      MAILER_PID=$(docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
     fi
     echo "Mailer service started on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT (Container ID: ${MAILER_PID:0:6})"
   else
@@ -197,11 +207,11 @@ export EMAIL_PORT=$MAILER_SMTP_SERVER_PORT
 export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
 export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 
-cd $APP_DIR/backend/ || exit 1
+cd "$APP_DIR"/backend/ || exit 1
 if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
-elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
+elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]] || ! poetry run python3 manage.py migrate --check; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
@@ -212,10 +222,10 @@ fi
 
 poetry run python3 manage.py createsuperuser --noinput
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup poetry run python3 manage.py runserver $BACKEND_PORT >$APP_DIR/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup poetry run python3 manage.py runserver "$BACKEND_PORT" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup poetry run python3 manage.py runserver $BACKEND_PORT >/dev/null 2>&1 &
+  nohup poetry run python3 manage.py runserver "$BACKEND_PORT" >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"
@@ -225,7 +235,7 @@ export ORIGIN=http://localhost:4173
 export PUBLIC_BACKEND_API_URL=http://127.0.0.1:$BACKEND_PORT/api
 export MAILER_WEB_SERVER_PORT=$MAILER_WEB_SERVER_PORT
 
-cd $APP_DIR/frontend/
+cd "$APP_DIR"/frontend/ || exit
 
 if ((${#TEST_PATHS[@]} == 0)); then
   echo "| running every functional test"
