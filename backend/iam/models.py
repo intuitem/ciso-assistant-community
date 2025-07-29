@@ -452,6 +452,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "granted to each of their user groups."
         ),
     )
+    observation = models.TextField(
+        null=True, blank=True, verbose_name="Notes about a user"
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
