@@ -37,6 +37,8 @@ type Fixtures = {
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
 	entitiesPage: PageContent;
+	solutionsPage: PageContent;
+	representativesPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -338,6 +340,29 @@ export const test = base.extend<Fixtures>({
 			{ name: 'description', type: type.TEXT },
 			{ name: 'mission', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(ePage);
+	},
+
+	solutionsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/escalation-thresholds', 'Escalation thresholds', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+		]);
+		await use(ePage);
+	},
+
+	representativesPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/escalation-thresholds', 'Escalation thresholds', [
+			{ name: 'description', type: type.TEXT },
+			{ name: 'email', type: type.TEXT },
+			{ name: 'create_user', type: type.CHECKBOX },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'first_name', type: type.TEXT },
+			{ name: 'last_name', type: type.TEXT },
+			{ name: 'phone', type: type.TEXT },
+			{ name: 'role', type: type.TEXT }
 		]);
 		await use(ePage);
 	},
@@ -763,8 +788,7 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					mission: '',
-					folder: vars.folderName
+					mission: ''
 				}
 			}
 		};
