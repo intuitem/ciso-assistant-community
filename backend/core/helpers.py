@@ -1273,6 +1273,7 @@ def get_folder_content(
                 f,
                 include_perimeters=include_perimeters,
                 viewable_objects=viewable_objects,
+                needed_folders=needed_folders,
             )
             if len(children) > 0:
                 entry.update({"children": children})

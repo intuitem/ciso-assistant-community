@@ -2623,14 +2623,13 @@ class FolderViewSet(BaseModelViewSet):
         )
 
         # Add ancestors so viewable folders aren't orphaned
-        folders = {f.id: f for f in Folder.objects.exclude(content_type="GL")}
         needed_folders = set(viewable_objects)
 
         for folder_id in viewable_objects:
-            current = folders.get(folder_id)
+            current = Folder.objects.get(pk=folder_id)
             while current and current.parent_folder_id:
                 needed_folders.add(current.parent_folder_id)
-                current = folders.get(current.parent_folder_id)
+                current = Folder.objects.get(pk=current.parent_folder_id)
 
         folders_list = []
         for folder in (
@@ -2646,7 +2645,7 @@ class FolderViewSet(BaseModelViewSet):
             folder_content = get_folder_content(
                 folder,
                 include_perimeters=include_perimeters,
-                viewable_objects=set(viewable_objects),
+                viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
             if len(folder_content) > 0:
