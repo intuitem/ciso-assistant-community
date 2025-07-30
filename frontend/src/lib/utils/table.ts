@@ -239,6 +239,15 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'complianceAssessment',
+		optionsEndpoint: 'compliance-assessments',
+		multiple: true
+	}
+};
+
 const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -323,6 +332,33 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_selected',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_active',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_third_party',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const IS_ASSESSABLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'assessable',
 		options: YES_NO_OPTIONS,
 		multiple: true
 	}
@@ -773,8 +809,28 @@ export const listViewFields = {
 		body: ['name', 'description']
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'userGroups', 'keep_local_login', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'user_groups', 'keep_local_login', 'is_third_party']
+		head: [
+			'email',
+			'firstName',
+			'lastName',
+			'userGroups',
+			'isActive',
+			'keep_local_login',
+			'is_third_party'
+		],
+		body: [
+			'email',
+			'first_name',
+			'last_name',
+			'user_groups',
+			'is_active',
+			'keep_local_login',
+			'is_third_party'
+		],
+		filters: {
+			is_active: USER_IS_ACTIVE_FILTER,
+			is_third_party: USER_IS_THIRD_PARTY_FILTER
+		}
 	},
 	'user-groups': {
 		head: ['name'],
@@ -812,9 +868,13 @@ export const listViewFields = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['name', 'description', 'complianceAssessment'],
-		body: ['name', 'description', 'compliance_assessment'],
-		breadcrumb_link_disabled: true
+		head: ['assessable', 'name', 'description', 'complianceAssessment', 'result'],
+		body: ['assessable', 'name', 'description', 'compliance_assessment', 'result'],
+		breadcrumb_link_disabled: true,
+		filters: {
+			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
+			requirement__assessable: IS_ASSESSABLE_FILTER
+		}
 	},
 	evidences: {
 		head: ['name', 'file', 'size', 'description', 'folder', 'labels'],
