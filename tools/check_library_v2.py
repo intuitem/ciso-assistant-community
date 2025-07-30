@@ -786,7 +786,7 @@ def validate_unique_column_values(df, column_names: List[str], sheet_name: str, 
                 raise ValueError(msg)
 
 
-def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None):
+def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
 
     for col in df.columns:
         match = re.fullmatch(r"(.+)\[(.+)\]", str(col))  # Match "column_name[locale]"
@@ -812,13 +812,14 @@ def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: Co
         # If column exists but is entirely empty, emit a warning
         non_empty_found = any(pd.notna(val) and str(val).strip() != "" for val in df[col])
         if not non_empty_found:
-            msg = (
-                f"⚠️  [WARNING] ({context}) [{sheet_name}] Column \"{col}\": Localized column is present but entirely empty"
-                "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet."
-            )
-            if ctx:
-                ctx.add_sheet_warning_msg(sheet_name, msg)
-            print(msg)
+            if verbose:
+                msg = (
+                    f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] Column \"{col}\": Localized column is present but entirely empty"
+                    "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet."
+                )
+                if ctx:
+                    ctx.add_sheet_verbose_msg(sheet_name, msg)
+                print(msg)
 
 
 # Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
@@ -871,7 +872,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
             frameworks_with_reference.append(sheet)
 
     if frameworks_with_reference:
-        print(f"ℹ️  ({fct_name}) [{sheet_name}] Sheet referenced by the sheet(s): {', '.join(f'\"{s}\"' for s in frameworks_with_reference)}")
+        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Sheet referenced by the sheet(s): {', '.join(f'\"{s}\"' for s in frameworks_with_reference)}")
     else:
         warn_msg = (
             f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any \"framework\" sheet via the field \"{meta_field}\""
@@ -1107,7 +1108,7 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
             validate_ref_id_with_spaces(ref_id, fct_name, idx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1126,7 +1127,7 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1145,7 +1146,7 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1160,7 +1161,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1179,7 +1180,7 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     # Check if the "implementation_groups" sheet is actually used in a "framework" sheet
     frameworks_with_imp_grp = check_content_sheet_usage_in_frameworks(wb, sheet_name, "implementation_groups_definition", fct_name, ctx)
@@ -1203,7 +1204,7 @@ def validate_requirement_mapping_set_content(df, sheet_name, verbose: bool = Fal
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1232,7 +1233,7 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
     validate_unique_column_values(df, ["score"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     # Check if the "score" sheet is actually used in a "framework" sheet
     check_content_sheet_usage_in_frameworks(wb, sheet_name, "scores_definition", fct_name, ctx)
@@ -1254,7 +1255,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
     validate_unique_column_values(df, ["id"], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     # Check that "question_choices" is filled for relevant question types ("unique_choice" & "multiple_choice")
     for row_idx, row in df.iterrows():
@@ -1411,7 +1412,7 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
             )
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
