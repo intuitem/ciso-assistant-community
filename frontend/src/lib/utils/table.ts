@@ -1262,6 +1262,7 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings', 'perimeter'],
 		body: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings_count', 'perimeter'],
 		filters: {
+			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER
 		}
