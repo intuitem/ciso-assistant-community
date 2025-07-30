@@ -7,10 +7,6 @@ import type { Expect, Locator } from '@playwright/test';
 export class AutoCompleteSelectInput extends Element {
 	static DATA_TESTID = undefined; // Dynamic data-testid.
 
-	/* getForm<T = ModelForm>(formClass: Element.Class<T>): T {
-    return this._getSubElement(formClass);
-  } */
-
 	async select(expect: Expect, value: string) {
 		const inputSearch = this._self.locator('ul.selected input');
 		const activeOption = this._self.locator('[role="option"].active');
@@ -25,7 +21,7 @@ export class AutoCompleteSelectInput extends Element {
 						return 1;
 					}
 					optionCount = await this._self.locator('[role="option"]').count();
-					return optionCount; // document.querySelectorAll(`[role="option"]`);
+					return optionCount;
 				},
 				{ timeout: 20_000 }
 			)
