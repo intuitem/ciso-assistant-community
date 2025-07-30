@@ -1356,11 +1356,19 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
     required_columns = ["ref_id"]
     optional_columns = ["description", "category", "csf_function", "annotation"]
 
+    # Special values
+    category_values = ["policy", "process", "technical", "physical", "procedure"]
+    csf_function_values = ["govern", "identify", "protect", "detect", "respond", "recover"]
+
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+
+    # Check if values in "category" and "csf_function" columns are valid
+    validate_allowed_column_values(df, "category", category_values, sheet_name, fct_name,ctx=ctx)
+    validate_allowed_column_values(df, "csf_function", csf_function_values, sheet_name, fct_name,ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -1375,7 +1383,13 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     required_columns = ["type", "id", "color", "abbreviation", "name", "description", "grid"]
     # No optional columns
 
+    # Special values
+    type_values = ["probability", "impact", "risk"]
+
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
+
+    # Check if values in "type" column are valid
+    validate_allowed_column_values(df, "type", type_values, sheet_name, fct_name,ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -1479,11 +1493,17 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
     required_columns = ["id", "question_type"]
     optional_columns = ["question_choices"]
 
+    # Special values
+    question_type_values = ["unique_choice", "multiple_choice", "text", "date"]
+
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["id"], sheet_name, fct_name, ctx=ctx)
+
+    # Check if values in "question_type" column are valid
+    validate_allowed_column_values(df, "question_type", question_type_values, sheet_name, fct_name,ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
