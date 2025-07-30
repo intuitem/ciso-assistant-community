@@ -1,6 +1,8 @@
 # Disclaimer
 
 The spec for the functional tests can be found at `./documentation/tests/functional/architecture.md`.
+This spec is about using the hot-reloader which is a feature meant to develop test faster by executing fragmented piece of codes and rerun them as you please.
+This makes development faster as re-executing the entire playwright test for each test code modification is quite slow.
 
 # Quick start
 
