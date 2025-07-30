@@ -25,6 +25,12 @@ export default {
 		firstName: 'Test',
 		lastName: 'User'
 	},
+	thirdPartyUser: {
+		email: 'third-party@tests.com',
+		password: 'pass123wordTest',
+		firstName: 'Third',
+		lastName: 'Party'
+	},
 	usergroups: {
 		// this lists needs to be updated when updating permissions in apps.py in order to avoid test failures
 		analyst: {

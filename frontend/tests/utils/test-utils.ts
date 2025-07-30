@@ -41,6 +41,7 @@ type Fixtures = {
 	representativesPage: PageContent;
 	entityAssessmentsPage: PageContent;
 	logedPage: LoginPage;
+	thirdPartyAuthenticatedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
 };
@@ -401,6 +402,14 @@ export const test = base.extend<Fixtures>({
 		await loginPage.goto();
 		await loginPage.login();
 		await loginPage.skipWelcome();
+		await use(loginPage);
+	},
+
+	thirdPartyAuthenticatedPage: async ({ page }, use) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.goto();
+		await loginPage.login(testData.thirdPartyUser.email, testData.thirdPartyUser.password);
+		await loginPage.skipWelcome(/^.*\/compliance-assessments$/);
 		await use(loginPage);
 	},
 
