@@ -3,8 +3,9 @@ import re
 import sys
 import inspect
 import argparse
-from typing import Dict, List, Tuple
 from enum import Enum
+from collections import Counter
+from typing import Dict, List, Tuple
 
 import pandas as pd
 from openpyxl import Workbook, load_workbook
@@ -934,6 +935,53 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
                 ctx.add_sheet_verbose_msg(sheet_name, msg)
 
 
+# Validate that all non-empty values in a specific column are in the allowed list. Ignores blank or whitespace-only cells.
+def validate_allowed_column_values(df: pd.DataFrame, column_name: str, allowed_values: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+    """
+    Args:
+        df: The DataFrame to validate.
+        column_name: The name of the column to check.
+        allowed_values: A list of allowed string values.
+        sheet_name: Name of the Excel sheet.
+        context: Optional context string (e.g., function name).
+        warn_only: If True, warnings are printed instead of raising errors.
+        ctx: Optional ConsoleContext to collect warning messages.
+    """
+
+    context = context or "validate_allowed_column_values"
+
+    if column_name not in df.columns:
+        return
+        # raise ValueError(f"({context}) [{sheet_name}] Column \"{column_name}\" not found in sheet")
+
+    # Drop NA and strip values
+    cleaned_series = df[column_name].dropna().map(lambda x: str(x).strip())
+    cleaned_series = cleaned_series[cleaned_series != ""]
+
+    # Find invalid values
+    invalid_mask = ~cleaned_series.isin(allowed_values)
+
+    if invalid_mask.any():
+        invalid_values = cleaned_series[invalid_mask]
+        invalid_entries = invalid_values.unique()
+        invalid_rows = invalid_values.index + 2  # Excel-style row numbers
+
+        quoted_values = ', '.join(f'"{v}"' for v in invalid_entries)
+        msg = (
+            f"({context}) [{sheet_name}] Invalid value(s) found in column \"{column_name}\": {quoted_values}"
+            f"\n> Rows: {', '.join(map(str, invalid_rows))}"
+            f"\n> Allowed values are: {', '.join(f'\"{v}\"' for v in allowed_values)}"
+        )
+
+        if warn_only:
+            msg = f"⚠️  [WARNING] {msg}"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_warning_msg(sheet_name, msg)
+        else:
+            raise ValueError(msg)
+
+
 # Check whether each Prefix URN ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
 def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
 
@@ -1068,6 +1116,175 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
     return internal_prefixes, external_prefixes
 
 
+# Check that each (source_node_id, target_node_id) pair is unique. Emits a warning or raises an error depending on "warn_only".
+def _req_map_set_validate_unique_mappings(df, sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+
+    context = context or "validate_unique_mappings"
+
+    if "source_node_id" not in df.columns or "target_node_id" not in df.columns:
+        raise ValueError(f"({context}) [{sheet_name}] Columns \"source_node_id\" and/or \"target_node_id\" not found")
+
+    df_clean = df[["source_node_id", "target_node_id"]].dropna()
+
+    df_clean["source_node_id"] = df_clean["source_node_id"].map(lambda x: str(x).strip())
+    df_clean["target_node_id"] = df_clean["target_node_id"].map(lambda x: str(x).strip())
+
+    # Remove rows with empty values
+    df_clean = df_clean[(df_clean["source_node_id"] != "") & (df_clean["target_node_id"] != "")]
+
+    duplicates = df_clean[df_clean.duplicated(subset=["source_node_id", "target_node_id"], keep=False)]
+
+
+    if not duplicates.empty:
+        duplicate_rows = duplicates.index + 2  # 1-based row index (+ header)
+        duplicate_pairs = duplicates.drop_duplicates().values.tolist()
+        quoted_pairs = ' ; '.join(f'["{s}", "{t}"]' for s, t in duplicate_pairs)
+
+        msg = (
+            f"({context}) [{sheet_name}] Duplicate mapping(s) found for [source_node_id + target_node_id] pair(s): {quoted_pairs}"
+            f"\n> Rows: {', '.join(map(str, duplicate_rows))}"
+        )
+
+        if warn_only:
+            msg = f"⚠️  [WARNING] {msg}"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_warning_msg(sheet_name, msg)
+        else:
+            raise ValueError(msg)
+
+
+# Validate if the "source_node_id" and "target_node_id" used in the mapping exist in the corresponding 'source' and 'target' sheets.
+def _req_map_set_validate_mapping_node_ids_against_sheets(wb: Workbook, df: pd.DataFrame, sheet_name: str, fct_name: str, ctx: ConsoleContext = None, verbose: bool = False):
+
+    sheets = wb.sheetnames
+    source_ids = set()
+    target_ids = set()
+    source_sheet_available = "source" in sheets
+    target_sheet_available = "target" in sheets
+
+    # Load source node IDs
+    if source_sheet_available:
+        source_sheet = wb["source"]
+        source_header = [cell.value for cell in source_sheet[1]]
+        if "node_id" in source_header:
+            idx = source_header.index("node_id")
+            for row in source_sheet.iter_rows(min_row=2):
+                if idx < len(row) and row[idx].value:
+                    source_ids.add(str(row[idx].value).strip())
+        else:
+            source_sheet_available = False
+            if verbose:
+                msg = f'💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] Column "node_id" not found in sheet "source"'
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_verbose_msg(sheet_name, msg)
+    else:
+        if verbose:
+            msg = f'💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] Sheet "source" not found'
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+    # Load target node IDs
+    if target_sheet_available:
+        target_sheet = wb["target"]
+        target_header = [cell.value for cell in target_sheet[1]]
+        if "node_id" in target_header:
+            idx = target_header.index("node_id")
+            for row in target_sheet.iter_rows(min_row=2):
+                if idx < len(row) and row[idx].value:
+                    target_ids.add(str(row[idx].value).strip())
+        else:
+            target_sheet_available = False
+            if verbose:
+                msg = f'💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] Column "node_id" not found in sheet "target"'
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_verbose_msg(sheet_name, msg)
+    else:
+        if verbose:
+            msg = f'💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] Sheet "target" not found'
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+
+    if not source_sheet_available:
+        msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] Invalid or missing "source" sheet. The "source_node_id" column cannot be checked.'
+        print(msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, msg)
+
+    if not target_sheet_available:
+        msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] Invalid or missing "target" sheet. The "target_node_id" column cannot be checked.'
+        print(msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, msg)
+
+
+    # Used IDs
+    used_source_ids = [
+        str(val).split(":")[-1] for val in df["source_node_id"].dropna()
+    ]
+    used_target_ids = [
+        str(val).split(":")[-1] for val in df["target_node_id"].dropna()
+    ]
+
+    source_missing_counts = Counter(
+        node_id for node_id in used_source_ids
+        if source_sheet_available and node_id not in source_ids
+    )
+    target_missing_counts = Counter(
+        node_id for node_id in used_target_ids
+        if target_sheet_available and node_id not in target_ids
+    )
+
+    # Warnings: Missing IDs
+    if source_sheet_available:
+        for sid in source_missing_counts:
+            msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] source_node_id "{sid}" not found in sheet "source"'
+            print(msg)
+            if ctx:
+                ctx.add_sheet_warning_msg(sheet_name, msg)
+
+    if target_sheet_available:
+        for tid in target_missing_counts:
+            msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] target_node_id "{tid}" not found in sheet "target"'
+            print(msg)
+            if ctx:
+                ctx.add_sheet_warning_msg(sheet_name, msg)
+
+    # Duplicates
+    if source_sheet_available:
+        for sid, count in source_missing_counts.items():
+            if count > 1:
+                msg = f'🔁 [DUPLICATE] ({fct_name}) [{sheet_name}] source_node_id "{sid}" appears {count} times in mappings'
+                print(msg)
+
+    if target_sheet_available:
+        for tid, count in target_missing_counts.items():
+            if count > 1:
+                msg = f'🔁 [DUPLICATE] ({fct_name}) [{sheet_name}] target_node_id "{tid}" appears {count} times in mappings'
+                print(msg)
+
+    # Final summary
+    total_missing_sources = '???' if not source_sheet_available else sum(source_missing_counts.values())
+    total_missing_targets = '???' if not target_sheet_available else sum(target_missing_counts.values())
+    if total_missing_sources or total_missing_targets:
+        msg = f"⚠️  [MAPPING CHECK SUMMARY] ({fct_name}) [{sheet_name}] Missing usage count - Source: {total_missing_sources}, Target: {total_missing_targets}"
+        print(msg)
+        if ctx:
+            ctx.add_sheet_warning_msg(sheet_name, msg)
+
+        if source_sheet_available or target_sheet_available:
+            msg2 = (
+                "ℹ️  [INFO] Please note that these incorrect node IDs have been added to the mapping anyway."
+                "\n> 💡 Tip: If you want to correct them, please do so in your Excel file."
+            )
+            print(msg2)
+
+
 
 # [CONTENT] Framework
 def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
@@ -1193,18 +1410,32 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Requirement Mapping Set
-def validate_requirement_mapping_set_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+# [CONTENT] Requirement Mapping Set {OK}
+def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["source_node_id", "target_node_id", "relationship"]
     optional_columns = ["rationale", "strength_of_relationship"]
+    
+    # Special values
+    relationship_values = ["subset", "intersect", "equal", "superset", "not_related"]
+    rationale_values = ["syntactic", "semantic", "functional"]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
-    # Extra locales
+    # Extra locales (Not needed for mappings, but added just in case)
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
+
+    # Check if there are duplicated mappings
+    _req_map_set_validate_unique_mappings(df, sheet_name, fct_name, ctx=ctx)
+
+    # Check if values in "relationship" and "rationale" columns are valid
+    validate_allowed_column_values(df, "relationship", relationship_values, sheet_name, fct_name,ctx=ctx)
+    validate_allowed_column_values(df, "rationale", rationale_values, sheet_name, fct_name,ctx=ctx)
+
+    # Check mapping validity using the "source" and "target" sheets
+    _req_map_set_validate_mapping_node_ids_against_sheets(wb, df, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1467,7 +1698,7 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
     elif corresponding_meta_type == MetaTypes.RISK_MATRIX.value:
         validate_risk_matrix_content(df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.REQUIREMENT_MAPPING_SET.value:
-        validate_requirement_mapping_set_content(df, sheet_name, verbose, ctx)
+        validate_requirement_mapping_set_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.IMPLEMENTATION_GROUPS.value:
         validate_implementation_groups_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.SCORES.value:
