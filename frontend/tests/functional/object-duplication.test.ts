@@ -30,6 +30,7 @@ interface LocalTestData {
 	modalClass: Element.Class<CreateModal>;
 	objectName: string;
 	formData: { [key: string]: any };
+	duplicateFormData: { [key: string]: any };
 }
 
 const TEST_DATA: LocalTestData[] = [
@@ -39,7 +40,11 @@ const TEST_DATA: LocalTestData[] = [
 		objectName: 'Applied control',
 		formData: {
 			name: 'Object-Duplication Applied control',
-			foder: DOMAIN_NAME
+			folder: DOMAIN_NAME
+		},
+		duplicateFormData: {
+			name: 'Object-Duplication Applied control_duplicated',
+			folder: DOMAIN_NAME
 		}
 	},
 	{
@@ -50,9 +55,17 @@ const TEST_DATA: LocalTestData[] = [
 			name: 'Object-Duplication Risk assessment',
 			perimeter: PERIMETER_NAME,
 			risk_matrix: RISK_MATRIX_NAME
+		},
+		duplicateFormData: {
+			name: 'Object-Duplication Risk assessment_duplicated',
+			perimeter: PERIMETER_NAME
 		}
 	}
 ];
+
+import { hotReloadLoop } from '../utilsv2/core/hot-reloader';
+
+hotReloadLoop();
 
 testV2('object duplication is working properly', async ({ page }) => {
 	testV2.slow();
@@ -78,7 +91,7 @@ testV2('object duplication is working properly', async ({ page }) => {
 		const firstRow = modelTable.getFirstRow();
 		await firstRow.checkValue(expectV2, 1, RISK_MATRIX_NAME);
 		const libraryCount = await libraryListView.getLoadedLibraryCount();
-		await firstRow.doLoadLibrary();
+		await firstRow.doLoadLibrary(true);
 		const toast = libraryListView.getToast();
 		await toast.checkIfVisible(expectV2);
 		await toast.checkContainText(expectV2, safeTranslate('librarySuccessfullyLoaded'));
@@ -91,7 +104,7 @@ testV2('object duplication is working properly', async ({ page }) => {
 		await folderListView.gotoSelf();
 		const folderCreateModal = await folderListView.getOpenCreateModal();
 		const folderForm = folderCreateModal.getForm();
-		await folderForm.doFillForm({
+		await folderForm.doFillForm(expectV2, {
 			name: DOMAIN_NAME
 		});
 		await folderForm.doSubmit();
@@ -102,7 +115,7 @@ testV2('object duplication is working properly', async ({ page }) => {
 		await perimeterListView.gotoSelf();
 		const folderCreateModal = await perimeterListView.getOpenCreateModal();
 		const perimeterForm = folderCreateModal.getForm();
-		await perimeterForm.doFillForm({
+		await perimeterForm.doFillForm(expectV2, {
 			name: PERIMETER_NAME,
 			folder: DOMAIN_NAME
 		});
@@ -118,7 +131,8 @@ testV2('object duplication is working properly', async ({ page }) => {
 			const createModal = await listView.getOpenCreateModal();
 			const createForm = createModal.getForm();
 			const formData = structuredClone(testData.formData);
-			await createForm.doFillForm(formData);
+			const duplicateFormData = structuredClone(testData.duplicateFormData);
+			await createForm.doFillForm(expectV2, formData);
 			await createForm.doSubmit();
 
 			await listView.gotoSelf();
@@ -133,13 +147,12 @@ testV2('object duplication is working properly', async ({ page }) => {
 			const duplicateModal = await detailView.getOpenDuplicateModal(testData.modalClass);
 			const duplicateForm = duplicateModal.getForm();
 
-			formData.name += '_duplicated';
-			await duplicateForm.doFillForm(formData);
+			await duplicateForm.doFillForm(expectV2, duplicateFormData);
 			await duplicateForm.doSubmit();
 
 			await listView.gotoSelf();
 			// await appliedControlListView.waitUntilLoaded();
-			await modelTable.doSearch(formData.name);
+			await modelTable.doSearch(duplicateFormData.name);
 			await modelTable.checkDisplayedRowCount(expectV2, 1);
 		});
 	}

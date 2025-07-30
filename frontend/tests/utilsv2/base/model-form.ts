@@ -1,6 +1,6 @@
 import { Element } from '../core/element';
 import { notImplemented } from '../core/base';
-import type { Locator } from '@playwright/test';
+import type { Locator, Expect } from '@playwright/test';
 
 export class ModelForm extends Element {
 	static DATA_TESTID = 'model-form';
@@ -11,7 +11,7 @@ export class ModelForm extends Element {
 		this._saveButton = this._self.getByTestId('save-button');
 	}
 
-	async doFillForm(formData: { [key: string]: any }) {
+	async doFillForm(expect: Expect, formData: { [key: string]: any }) {
 		notImplemented();
 	}
 

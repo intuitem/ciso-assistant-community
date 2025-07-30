@@ -4,10 +4,12 @@ import {
 	PerimeterCreateForm,
 	AssetCreateForm,
 	AppliedControlCreateForm,
+	AppliedControlDuplicateForm,
 	ExceptionCreateForm,
 	ComplianceAssessmentCreateForm,
 	EvidenceCreateForm,
 	RiskAssessmentCreateForm,
+	RiskAssessmentDuplicateForm,
 	ThreatCreateForm,
 	RiskScenarioCreateForm,
 	RiskAcceptanceCreateForm,
@@ -38,6 +40,12 @@ export class AppliedControlCreateModal extends CreateModal {
 	}
 }
 
+export class AppliedControlDuplicateModal extends CreateModal {
+	getForm(): AppliedControlDuplicateForm {
+		return this._getSubElement(AppliedControlDuplicateForm);
+	}
+}
+
 export class ExceptionCreateModal extends CreateModal {
 	getForm(): ExceptionCreateForm {
 		return this._getSubElement(ExceptionCreateForm);
@@ -59,6 +67,12 @@ export class EvidenceCreateModal extends CreateModal {
 export class RiskAssessmentCreateModal extends CreateModal {
 	getForm(): RiskAssessmentCreateForm {
 		return this._getSubElement(RiskAssessmentCreateForm);
+	}
+}
+
+export class RiskAssessmentDuplicateModal extends CreateModal {
+	getForm(): RiskAssessmentDuplicateForm {
+		return this._getSubElement(RiskAssessmentDuplicateForm);
 	}
 }
 

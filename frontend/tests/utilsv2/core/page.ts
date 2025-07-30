@@ -83,7 +83,6 @@ export class Page {
 	 * This way of closing modal may not work for all modals.
 	 */
 	async doCloseModal() {
-		// Press the ESC key instead
 		await this._self.mouse.click(1, 1);
 	}
 }

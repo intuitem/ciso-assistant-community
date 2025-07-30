@@ -1,31 +1,46 @@
 import { ModelForm } from '../base/model-form';
-import type { Locator } from '@playwright/test';
+import type { Locator, Expect } from '@playwright/test';
 import type { Element } from '../core/element';
+import { AutoCompleteSelect } from '../base/autocomplete-select-input';
 
 // The AutoCompleteSelect should be later handled by a class instead of a single function like this.
-async function selectChoice(input: Locator, value: string) {
+async function selectChoice(expect: Expect, input: Locator, value: string) {
 	const inputSearch = input.locator('ul.selected input');
-	const firstOption = input.locator(`[role="option"]`).first();
-
-	// role="searchbox" class contains disabled
+	const activeOption = input.locator('[role="option"].active');
 	const searchBox = input.getByRole('searchbox');
-	const searchBoxClasses = await searchBox.getAttribute('class');
-	console.log('======>', value);
-	console.log(searchBoxClasses);
 
-	await new Promise((res) => setTimeout(res, 5000));
-	const searchBoxClasses2 = await searchBox.getAttribute('class');
-	console.log('[2]', searchBoxClasses2);
+	let optionCount = 0;
+	await expect
+		.poll(
+			async () => {
+				const classes = await searchBox.getAttribute('class');
+				if (classes && classes.indexOf('disabled') >= 0) {
+					return 1;
+				}
+				optionCount = await input.locator('[role="option"]').count();
+				return optionCount;
+			},
+			{ timeout: 20_000 }
+		)
+		.toBeGreaterThan(0);
 
-	console.log(searchBoxClasses && searchBoxClasses.indexOf('disabled'));
-	if (searchBoxClasses && searchBoxClasses.indexOf('disabled') >= 0) return;
-
-	console.log('PASSED !!!');
+	if (optionCount <= 1) {
+		return;
+	}
 
 	await inputSearch.fill(value);
-	// Clicking only once doesn't seem to work for whatever reason
-	await firstOption.click({ force: true });
-	await firstOption.click({ force: true });
+	const lastOption = input.locator('[role="option"]').last();
+
+	const start = Date.now();
+	while (true) {
+		const html = await lastOption.innerHTML();
+		if (html !== 'No matching options<!---->') break;
+		if (Date.now() - start > 10_000) {
+			expect(false, 'Expected condition was not met').toBeTruthy();
+		}
+	}
+	await lastOption.evaluate((node) => node.classList.add('active'));
+	await activeOption.click({ force: true });
 }
 
 interface FolderData {
@@ -43,7 +58,7 @@ export class FolderCreateForm extends ModelForm {
 		this._descriptionInput = this._self.getByTestId('form-input-description');
 	}
 
-	async doFillForm(data: FolderData) {
+	async doFillForm(expect: Expect, data: FolderData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 	}
@@ -58,21 +73,23 @@ interface PerimeterData {
 export class PerimeterCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: Locator;
+	private _domainInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._self.getByTestId('form-input-folder');
+		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-folder'
+		});
 	}
 
 	/** This function doesn't support the `folder` argument. */
-	async doFillForm(data: PerimeterData) {
+	async doFillForm(expect: Expect, data: PerimeterData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 		await this._waitLoadingSpins();
-		if (data.folder) await selectChoice(this._domainInput, data.folder);
+		if (data.folder) await this._domainInput.select(expect, data.folder);
 	}
 }
 
@@ -85,21 +102,23 @@ interface AssetData {
 export class AssetCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: Locator;
+	private _domainInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._self.getByTestId('form-input-folder');
+		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-folder'
+		});
 	}
 
-	async doFillForm(data: AssetData) {
+	async doFillForm(expect: Expect, data: AssetData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._domainInput, data.folder);
+		await this._domainInput.select(expect, data.folder);
 	}
 }
 
@@ -112,23 +131,27 @@ interface AppliedControlData {
 export class AppliedControlCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: Locator;
+	private _domainInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._self.getByTestId('form-input-folder');
+		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-folder'
+		});
 	}
 
-	async doFillForm(data: AppliedControlData) {
+	async doFillForm(expect: Expect, data: AppliedControlData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		if (data.folder) await selectChoice(this._domainInput, data.folder);
+		if (data.folder) await this._domainInput.select(expect, data.folder);
 	}
 }
+
+export const AppliedControlDuplicateForm = AppliedControlCreateForm;
 
 interface ExceptionData {
 	name: string;
@@ -139,21 +162,23 @@ interface ExceptionData {
 export class ExceptionCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: Locator;
+	private _domainInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._self.getByTestId('form-input-folder');
+		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-folder'
+		});
 	}
 
-	async doFillForm(data: ExceptionData) {
+	async doFillForm(expect: Expect, data: ExceptionData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._domainInput, data.folder);
+		await this._domainInput.select(expect, data.folder);
 	}
 }
 
@@ -172,7 +197,7 @@ export class ComplianceAssessmentCreateForm extends ModelForm {
 		this._descriptionInput = this._self.getByTestId('form-input-description');
 	}
 
-	async doFillForm(data: ComplianceAssessmentData) {
+	async doFillForm(expect: Expect, data: ComplianceAssessmentData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
@@ -189,21 +214,23 @@ interface RiskAcceptanceData {
 export class RiskAcceptanceCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _riskScenariosInput: Locator;
+	private _riskScenariosInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._riskScenariosInput = this._self.getByTestId('form-input-risk-scenarios');
+		this._riskScenariosInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-risk-scenarios'
+		});
 	}
 
-	async doFillForm(data: RiskAcceptanceData) {
+	async doFillForm(expect: Expect, data: RiskAcceptanceData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._riskScenariosInput, data.riskScenarios);
+		await this._riskScenariosInput.select(expect, data.riskScenarios);
 	}
 }
 
@@ -222,7 +249,7 @@ export class RiskScenarioCreateForm extends ModelForm {
 		this._descriptionInput = this._self.getByTestId('form-input-description');
 	}
 
-	async doFillForm(data: RiskScenarioData) {
+	async doFillForm(expect: Expect, data: RiskScenarioData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
@@ -240,24 +267,57 @@ interface RiskAssessmentData {
 export class RiskAssessmentCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _perimeterInput: Locator;
-	private _risk_matrixInput: Locator;
+	private _perimeterInput: AutoCompleteSelect;
+	private _riskMatrixInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._perimeterInput = this._self.getByTestId('form-input-perimeter');
-		this._risk_matrixInput = this._self.getByTestId('form-input-risk_matrix');
+		this._perimeterInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-perimeter'
+		});
+		this._riskMatrixInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-risk-matrix'
+		});
 	}
 
-	async doFillForm(data: RiskAssessmentData) {
+	async doFillForm(expect: Expect, data: RiskAssessmentData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._perimeterInput, data.perimeter);
-		await selectChoice(this._risk_matrixInput, data.risk_matrix);
+		await this._perimeterInput.select(expect, data.perimeter);
+		if (data.risk_matrix) await this._riskMatrixInput.select(expect, data.risk_matrix);
+	}
+}
+
+interface RiskAssessmentDuplicateData {
+	name: string;
+	description?: string;
+	perimeter: string;
+}
+
+export class RiskAssessmentDuplicateForm extends ModelForm {
+	private _nameInput: Locator;
+	private _descriptionInput: Locator;
+	private _perimeterInput: AutoCompleteSelect;
+
+	constructor(...args: Element.Args) {
+		super(...args);
+		this._nameInput = this._self.getByTestId('form-input-name');
+		this._descriptionInput = this._self.getByTestId('form-input-description');
+		this._perimeterInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-perimeter'
+		});
+	}
+
+	async doFillForm(expect: Expect, data: RiskAssessmentDuplicateData) {
+		await this._nameInput.fill(data.name);
+		await this._descriptionInput.fill(data.description ?? '');
+
+		await this._waitLoadingSpins();
+		await this._perimeterInput.select(expect, data.perimeter);
 	}
 }
 
@@ -270,21 +330,23 @@ interface EvidenceData {
 export class EvidenceCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: Locator;
+	private _domainInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._self.getByTestId('form-input-folder');
+		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-folder'
+		});
 	}
 
-	async doFillForm(data: EvidenceData) {
+	async doFillForm(expect: Expect, data: EvidenceData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._domainInput, data.folder);
+		await this._domainInput.select(expect, data.folder);
 	}
 }
 
@@ -297,21 +359,23 @@ interface ThreatData {
 export class ThreatCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: Locator;
+	private _domainInput: AutoCompleteSelect;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._self.getByTestId('form-input-folder');
+		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+			dataTestId: 'form-input-folder'
+		});
 	}
 
-	async doFillForm(data: ThreatData) {
+	async doFillForm(expect: Expect, data: ThreatData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
 
 		await this._waitLoadingSpins();
-		await selectChoice(this._domainInput, data.folder);
+		await this._domainInput.select(expect, data.folder);
 	}
 }
 
@@ -327,7 +391,7 @@ export class UserCreateForm extends ModelForm {
 		this._emailInput = this._self.getByTestId('form-input-email');
 	}
 
-	async doFillForm(data: UserData) {
+	async doFillForm(expect: Expect, data: UserData) {
 		await this._emailInput.fill(data.email);
 	}
 }

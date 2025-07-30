@@ -3,7 +3,7 @@ import { Page } from './page';
 
 /** This is a fundamental class, it must be inherited by any base/derived class that represents an HTML element. */
 export class Element {
-	static DATA_TESTID: string = '';
+	static DATA_TESTID: string | undefined = undefined;
 	protected _self: Locator;
 
 	private _page: Page;
@@ -149,13 +149,13 @@ export class Element {
 	 * Retrieves a sub-element instance of the specified element class, applying locator filters and optionally passing it a context.
 	 *
 	 * @template T - The type of the Element class to instantiate.
-	 * @param elementClass - The constructor of the Element class, which must have a static `DATA_TESTID` property.
+	 * @param elementClass - The constructor of the Element class, which usually have a static `DATA_TESTID` property.
 	 * @param filters - Optional locator filters used to refine the element selection. Defaults to an empty object.
 	 * @param context - Optional context to be passed to the element instance. Defaults to an empty object.
 	 * @param page - Reserved solely for internal use by the Page._getSubElement method.
 	 * @returns A new instance of the specified element class (`InstanceType<T>`).
 	 *
-	 * @throws If the static `DATA_TESTID` property is missing on the provided element class.
+	 * @throws If both the `DATA_TESTID` property and the dataTestId filter are falsy evaluated.
 	 *
 	 * @remarks
 	 * This method extracts a data test identifier from either the provided filters or the static `DATA_TESTID` property
@@ -169,6 +169,10 @@ export class Element {
 		page: Page | null = null
 	): InstanceType<T> {
 		const dataTestId = filters.dataTestId || elementClass.DATA_TESTID;
+		if (!dataTestId)
+			throw new Error(
+				`Both the DATA_TESTID (${elementClass.DATA_TESTID}) property and the dataTestId filter (${filters.dataTestId}) are falsy evaluated.`
+			);
 		// Should i really check if this property is undefined ?
 		// After all typescript should reveal if the class is missing this property when using this method.
 		if (!dataTestId) {
@@ -257,7 +261,7 @@ export namespace Element {
 	 * @template T - The base class of the Element class this type represents.
 	 * This type represents an Element class which is usefull for methods that accept an Element class as a parameter.
 	 */
-	export type Class<T> = (new (...args: Element.Args) => T) & { DATA_TESTID: string };
+	export type Class<T> = (new (...args: Element.Args) => T) & { DATA_TESTID: string | undefined };
 
 	/**
 	 * This represents the context of an element (see in the spec)
