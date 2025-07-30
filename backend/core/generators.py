@@ -7,6 +7,7 @@ from docxtpl import InlineImage
 from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
+from icecream import ic
 
 from django.utils.translation import gettext_lazy as _
 # from icecream import ic
@@ -307,6 +308,27 @@ def plot_spider_chart(data, colors=None, title=None):
     return chart_buffer
 
 
+def calculate_depths(framework):
+    depth_map = dict()
+    req_nodes = RequirementNode.objects.filter(framework=framework)
+    # pass 1 for top levels
+    for rn in req_nodes:
+        depth_map[rn.urn] = 1 if rn.parent_urn is None else None
+    # pass 2+ for children levels
+    changed = True
+    while changed:
+        changed = False
+        for rn in req_nodes:
+            if (
+                depth_map[rn.urn] is None
+                and rn.parent_urn in depth_map
+                and depth_map[rn.parent_urn] is not None
+            ):
+                depth_map[rn.urn] = depth_map[rn.parent_urn] + 1
+                changed = True
+    return depth_map
+
+
 def gen_audit_context(id, doc, tree, lang):
     def count_category_results(data):
         def recursive_result_count(node_data):
@@ -381,29 +403,29 @@ def gen_audit_context(id, doc, tree, lang):
 
         # Dictionary to store category scores
         category_scores = {}
-
-        # Process only top-level nodes (categories)
         for node_id, node_data in data.items():
-            if node_data.get("parent_urn") is None:
-                scores = recursive_score_calculation(node_data)
+            # this acts only at the top level nodes since it's not crawling the children.
+            # TODO: we need a new param to control on which depth we want to report now that we have the depth map
+            scores = recursive_score_calculation(node_data)
 
-                # Calculate average score for the category
-                average_score = 0
-                if scores["scored_count"] > 0:
-                    average_score = scores["total_score"] / scores["scored_count"]
+            # Calculate average score for the category
+            average_score = 0
+            if scores["scored_count"] > 0:
+                average_score = scores["total_score"] / scores["scored_count"]
 
-                category_scores[node_data["urn"]] = {
-                    "name": node_data["node_content"],
-                    "total_score": scores["total_score"],
-                    "item_count": scores["item_count"],
-                    "scored_count": scores["scored_count"],
-                    "average_score": round(average_score, 1),
-                }
+            category_scores[node_data["urn"]] = {
+                "name": node_data["node_content"].split(":")[0],
+                "total_score": scores["total_score"],
+                "item_count": scores["item_count"],
+                "scored_count": scores["scored_count"],
+                "average_score": round(average_score, 1),
+            }
 
         return category_scores
 
-    context = dict()
     audit = ComplianceAssessment.objects.get(id=id)
+
+    context = dict()
 
     authors = ", ".join([a.email for a in audit.authors.all()])
     reviewers = ", ".join([a.email for a in audit.reviewers.all()])
@@ -415,6 +437,7 @@ def gen_audit_context(id, doc, tree, lang):
 
     # Calculate category scores
     category_scores = aggregate_category_scores(tree)
+
     max_score = 100  # default
     for node in tree.values():
         if node.get("max_score") is not None:
@@ -429,10 +452,9 @@ def gen_audit_context(id, doc, tree, lang):
         ].get("not_applicable", 0)
         ok_perc = ceil(ok_items / total * 100) if total > 0 else 0
         not_ok_count = total - ok_items
-        spider_data.append({"category": content["node_content"], "value": ok_perc})
-        agg_drifts.append(
-            {"name": content["node_content"], "drift_count": not_ok_count}
-        )
+        name = content["node_content"].split(":")[0]
+        spider_data.append({"category": name, "value": ok_perc})
+        agg_drifts.append({"name": name, "drift_count": not_ok_count})
 
     aggregated = {
         "compliant": 0,
