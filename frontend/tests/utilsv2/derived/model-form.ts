@@ -44,7 +44,6 @@ export class PerimeterCreateForm extends ModelForm {
 		});
 	}
 
-	/** This function doesn't support the `folder` argument. */
 	async doFillForm(expect: Expect, data: PerimeterData) {
 		await this._nameInput.fill(data.name);
 		await this._descriptionInput.fill(data.description ?? '');
