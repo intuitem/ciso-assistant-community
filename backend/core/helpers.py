@@ -7,6 +7,7 @@ from typing import Dict, List
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
+from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -1011,6 +1012,62 @@ def get_metrics(user: User, folder_id):
         "csf_functions": csf_functions(user, folder_id),
     }
     return data
+
+
+def get_instance_metrics():
+    """
+    Returns the instance metrics such as the number of users, domains, perimeters, etc.
+    """
+    nb_users = User.objects.all().count()
+    nb_first_login = User.objects.filter(first_login=True).count()
+    nb_libraries = LoadedLibrary.objects.all().count()
+    nb_domains = Folder.objects.filter(content_type="DO").count()
+    nb_perimeters = Perimeter.objects.all().count()
+    nb_assets = Asset.objects.all().count()
+    nb_threats = Threat.objects.all().count()
+    nb_functions = ReferenceControl.objects.all().count()
+    nb_measures = AppliedControl.objects.all().count()
+    nb_evidences = Evidence.objects.all().count()
+    nb_compliance_assessments = ComplianceAssessment.objects.all().count()
+    nb_risk_assessments = RiskAssessment.objects.all().count()
+    nb_risk_scenarios = RiskScenario.objects.all().count()
+    nb_risk_acceptances = RiskAcceptance.objects.all().count()
+    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
+    nb_editors = len(User.get_editors())
+    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
+
+    created_at = int(Folder.get_root_folder().created_at.timestamp())
+    last_login_dt = max(
+        [
+            x["last_login"]
+            for x in User.objects.all().values("last_login")
+            if x["last_login"]
+        ],
+        default=None,
+    )
+    last_login = int(last_login_dt.timestamp()) if last_login_dt else 0
+
+    return {
+        "nb_users": nb_users,
+        "nb_first_login": nb_first_login,
+        "nb_libraries": nb_libraries,
+        "nb_domains": nb_domains,
+        "nb_perimeters": nb_perimeters,
+        "nb_assets": nb_assets,
+        "nb_threats": nb_threats,
+        "nb_functions": nb_functions,
+        "nb_measures": nb_measures,
+        "nb_evidences": nb_evidences,
+        "nb_compliance_assessments": nb_compliance_assessments,
+        "nb_risk_assessments": nb_risk_assessments,
+        "nb_risk_scenarios": nb_risk_scenarios,
+        "nb_risk_acceptances": nb_risk_acceptances,
+        "nb_seats": nb_seats,
+        "nb_editors": nb_editors,
+        "expiration": expiration,
+        "created_at": created_at,
+        "last_login": last_login,
+    }
 
 
 def risk_status(user: User, risk_assessment_list):
