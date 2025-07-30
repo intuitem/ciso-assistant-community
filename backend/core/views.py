@@ -4251,7 +4251,7 @@ class QualificationViewSet(BaseModelViewSet):
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = ["folder", "frameworks", "perimeters"]
+    filterset_fields = ["folder", "frameworks", "perimeters", "status"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -5542,6 +5542,9 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         "risk_scenarios",
         "owners",
         "approver",
+        "folder",
+        "severity",
+        "status",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -5761,7 +5764,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to"]
+    filterset_fields = ["assigned_to", "is_recurrent", "folder"]
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""

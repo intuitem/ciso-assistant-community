@@ -133,7 +133,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["provider_entity", "assets"]
+    filterset_fields = ["provider_entity", "assets", "criticality"]
 
     def perform_create(self, serializer):
         serializer.save()
