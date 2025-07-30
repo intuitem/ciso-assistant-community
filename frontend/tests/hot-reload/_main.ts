@@ -46,8 +46,7 @@ const main = (async ({ test, expect, allFixtures, counter, HotReload }) => {
 				await analyticsPage.doCloseModal();
 			},
 			async () => {
-				// ACTION = 3
-				// Navigates to the library list view.
+				// ACTION = 3 (Navigates to the library list view)
 				const listView = new LibraryListViewPage(page);
 				await listView.gotoSelf();
 				// m.firstTimeLoginModalTitle() can't be used directly in the hot reloader so we use safeTranslate instead.
