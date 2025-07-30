@@ -63,10 +63,6 @@ const TEST_DATA: LocalTestData[] = [
 	}
 ];
 
-import { hotReloadLoop } from '../utilsv2/core/hot-reloader';
-
-hotReloadLoop();
-
 testV2('object duplication is working properly', async ({ page }) => {
 	testV2.slow();
 
