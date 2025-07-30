@@ -742,11 +742,12 @@ def validate_optional_columns_content_sheet(df, sheet_name: str, optional_column
         is_entirely_empty = all(pd.isna(val) or str(val).strip() == "" for val in df[col])
 
         if is_entirely_empty:
-            msg = (f"⚠️  [WARNING] ({context}) [{sheet_name}] Optional column \"{col}\" is present but entirely empty")
-                    # "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
-            if ctx:
-                ctx.add_sheet_warning_msg(sheet_name, msg)
-            print(msg)
+            if verbose:
+                msg = (f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] Optional column \"{col}\" is present but entirely empty")
+                        # "\n> 💡 Tip: If you don't need this column, you can simply remove it from the sheet.")
+                if ctx:
+                    ctx.add_sheet_verbose_msg(sheet_name, msg)
+                print(msg)
 
 
 # Check that values in each column from the given list are unique. Raise error or emit warning if duplicates are found
