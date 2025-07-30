@@ -126,7 +126,7 @@
 
 	let selected: typeof options = $state([]);
 	let selectedValues: (string | undefined)[] = $derived(
-		selected.map((item) => item.value || item.label || item)
+		selected.map((item) => item.value ?? item.label ?? item)
 	);
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
