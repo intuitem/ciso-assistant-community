@@ -7,7 +7,6 @@
 		isFlipped = !isFlipped;
 	}
 
-	import { m } from '$paraglide/messages';
 	interface Props {
 		// Accept entity_assessment.data as a prop
 		entity_assessment: {
@@ -49,7 +48,7 @@
 	}
 </script>
 
-<div class="perspective-1000 w-full h-full min-h-[420px]">
+<div class="perspective-1000 w-full h-full min-h-[420px]" role="listitem">
 	<div
 		class="relative w-full h-full transition-transform duration-800 {isFlipped
 			? 'rotate-x-180'
@@ -66,6 +65,7 @@
 				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-sm opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
 				onclick={handleFlip}
 				aria-label="Flip card"
+				data-testid="flip-button-front"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -191,6 +191,7 @@
 				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-sm opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
 				onclick={handleFlip}
 				aria-label="Flip card back"
+				data-testid="flip-button-back"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
