@@ -4,7 +4,7 @@ import type { Expect, Locator } from '@playwright/test';
 
 /** Represents the `<AutoCompleteSelect/>` component.
  * The dataTestId filter must be used to access it with the _getSubElement method as its ID is dynamic. */
-export class AutoCompleteSelect extends Element {
+export class AutoCompleteSelectInput extends Element {
 	static DATA_TESTID = undefined; // Dynamic data-testid.
 
 	/* getForm<T = ModelForm>(formClass: Element.Class<T>): T {

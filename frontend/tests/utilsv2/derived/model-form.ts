@@ -1,47 +1,7 @@
 import { ModelForm } from '../base/model-form';
 import type { Locator, Expect } from '@playwright/test';
 import type { Element } from '../core/element';
-import { AutoCompleteSelect } from '../base/autocomplete-select-input';
-
-// The AutoCompleteSelect should be later handled by a class instead of a single function like this.
-async function selectChoice(expect: Expect, input: Locator, value: string) {
-	const inputSearch = input.locator('ul.selected input');
-	const activeOption = input.locator('[role="option"].active');
-	const searchBox = input.getByRole('searchbox');
-
-	let optionCount = 0;
-	await expect
-		.poll(
-			async () => {
-				const classes = await searchBox.getAttribute('class');
-				if (classes && classes.indexOf('disabled') >= 0) {
-					return 1;
-				}
-				optionCount = await input.locator('[role="option"]').count();
-				return optionCount;
-			},
-			{ timeout: 20_000 }
-		)
-		.toBeGreaterThan(0);
-
-	if (optionCount <= 1) {
-		return;
-	}
-
-	await inputSearch.fill(value);
-	const lastOption = input.locator('[role="option"]').last();
-
-	const start = Date.now();
-	while (true) {
-		const html = await lastOption.innerHTML();
-		if (html !== 'No matching options<!---->') break;
-		if (Date.now() - start > 10_000) {
-			expect(false, 'Expected condition was not met').toBeTruthy();
-		}
-	}
-	await lastOption.evaluate((node) => node.classList.add('active'));
-	await activeOption.click({ force: true });
-}
+import { AutoCompleteSelectInput } from '../base/autocomplete-select-input';
 
 interface FolderData {
 	name: string;
@@ -73,13 +33,13 @@ interface PerimeterData {
 export class PerimeterCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: AutoCompleteSelect;
+	private _domainInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+		this._domainInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-folder'
 		});
 	}
@@ -102,13 +62,13 @@ interface AssetData {
 export class AssetCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: AutoCompleteSelect;
+	private _domainInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+		this._domainInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-folder'
 		});
 	}
@@ -131,13 +91,13 @@ interface AppliedControlData {
 export class AppliedControlCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: AutoCompleteSelect;
+	private _domainInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+		this._domainInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-folder'
 		});
 	}
@@ -162,13 +122,13 @@ interface ExceptionData {
 export class ExceptionCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: AutoCompleteSelect;
+	private _domainInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+		this._domainInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-folder'
 		});
 	}
@@ -214,13 +174,13 @@ interface RiskAcceptanceData {
 export class RiskAcceptanceCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _riskScenariosInput: AutoCompleteSelect;
+	private _riskScenariosInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._riskScenariosInput = this._getSubElement(AutoCompleteSelect, {
+		this._riskScenariosInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-risk-scenarios'
 		});
 	}
@@ -267,17 +227,17 @@ interface RiskAssessmentData {
 export class RiskAssessmentCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _perimeterInput: AutoCompleteSelect;
-	private _riskMatrixInput: AutoCompleteSelect;
+	private _perimeterInput: AutoCompleteSelectInput;
+	private _riskMatrixInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._perimeterInput = this._getSubElement(AutoCompleteSelect, {
+		this._perimeterInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-perimeter'
 		});
-		this._riskMatrixInput = this._getSubElement(AutoCompleteSelect, {
+		this._riskMatrixInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-risk-matrix'
 		});
 	}
@@ -301,13 +261,13 @@ interface RiskAssessmentDuplicateData {
 export class RiskAssessmentDuplicateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _perimeterInput: AutoCompleteSelect;
+	private _perimeterInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._perimeterInput = this._getSubElement(AutoCompleteSelect, {
+		this._perimeterInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-perimeter'
 		});
 	}
@@ -330,13 +290,13 @@ interface EvidenceData {
 export class EvidenceCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: AutoCompleteSelect;
+	private _domainInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+		this._domainInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-folder'
 		});
 	}
@@ -359,13 +319,13 @@ interface ThreatData {
 export class ThreatCreateForm extends ModelForm {
 	private _nameInput: Locator;
 	private _descriptionInput: Locator;
-	private _domainInput: AutoCompleteSelect;
+	private _domainInput: AutoCompleteSelectInput;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
-		this._domainInput = this._getSubElement(AutoCompleteSelect, {
+		this._domainInput = this._getSubElement(AutoCompleteSelectInput, {
 			dataTestId: 'form-input-folder'
 		});
 	}
