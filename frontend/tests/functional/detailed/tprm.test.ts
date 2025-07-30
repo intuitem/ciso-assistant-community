@@ -2,6 +2,7 @@ import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 import { m } from '$paraglide/messages';
+import { SideBar } from '../../utils/sidebar.js';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -10,7 +11,8 @@ const entityAssessment = {
 	name: 'Test entity assessment',
 	perimeter: vars.perimeterName,
 	create_audit: true,
-	framework: vars.questionnaire.name
+	framework: vars.questionnaire.name,
+	representatives: 'third-party@tests.com'
 };
 
 test('user can create representatives, solutions and entity assessments inside entity', async ({
@@ -24,6 +26,8 @@ test('user can create representatives, solutions and entity assessments inside e
 	entityAssessmentsPage,
 	librariesPage,
 	complianceAssessmentsPage,
+	sideBar,
+	mailer,
 	page
 }) => {
 	await test.step('create required folder', async () => {
@@ -92,7 +96,7 @@ test('user can create representatives, solutions and entity assessments inside e
 		).toBeVisible();
 		await representativesPage.createItem(
 			{
-				email: 'john.doe@example.com',
+				email: 'third-party@tests.com',
 				entity: testObjectsData.entitiesPage.build.name,
 				create_user: true
 			},
@@ -107,11 +111,11 @@ test('user can create representatives, solutions and entity assessments inside e
 		await expect(
 			page.getByTestId('tabs-panel').getByText('Associated representatives')
 		).toBeVisible();
-		await representativesPage.viewItemDetail('john.doe@example.com');
+		await representativesPage.viewItemDetail('third-party@tests.com');
 		await expect(page.getByTestId('user-field-value')).not.toBeEmpty();
 		await page.getByTestId('user-field-value').locator('a').first().click();
 		await usersPage.hasUrl();
-		await usersPage.hasTitle('john.doe@example.com');
+		await usersPage.hasTitle('third-party@tests.com');
 	});
 
 	await test.step('go back to entity detail', async () => {
@@ -168,6 +172,63 @@ test('user can create representatives, solutions and entity assessments inside e
 		// flip back to front
 		await cards.first().getByTestId('flip-button-back').click();
 		await expect(cards.first()).not.toHaveClass(/rotate-x-180/);
+	});
+});
+
+test('third-party representative can set their password', async ({ sideBar, mailer, page }) => {
+	await test.step('set password and log in as third party representative', async () => {
+		await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
+		const lastMail = await mailer.getLastEmail();
+		await lastMail.hasWelcomeEmailDetails();
+		await lastMail.hasEmailRecipient('third-party@tests.com');
+
+		await lastMail.open();
+		const pagePromise = page.context().waitForEvent('page');
+		await expect(mailer.emailContent.setPasswordButton).toBeVisible();
+		await mailer.emailContent.setPasswordButton.click();
+		const setPasswordPage = await pagePromise;
+		await setPasswordPage.waitForLoadState();
+		await expect(setPasswordPage).toHaveURL(
+			(await mailer.emailContent.setPasswordButton.getAttribute('href')) ||
+				'Set password link could not be found'
+		);
+
+		const setLoginPage = new LoginPage(setPasswordPage);
+		await setLoginPage.newPasswordInput.fill(vars.thirdPartyUser.password);
+		await setLoginPage.confirmPasswordInput.fill(vars.thirdPartyUser.password);
+		if (
+			setLoginPage.newPasswordInput.inputValue() !== vars.thirdPartyUser.password ||
+			setLoginPage.confirmPasswordInput.inputValue() !== vars.thirdPartyUser.password
+		) {
+			await setLoginPage.newPasswordInput.fill(vars.thirdPartyUser.password);
+			await setLoginPage.confirmPasswordInput.fill(vars.thirdPartyUser.password);
+		}
+		await setLoginPage.setPasswordButton.click();
+
+		await setLoginPage.isToastVisible(
+			'Your password has been successfully set. Welcome to CISO Assistant!'
+		);
+
+		await setLoginPage.login('third-party@tests.com', vars.thirdPartyUser.password);
+
+		// third party user lands on compliance assessments page
+		await expect(setLoginPage.page).toHaveURL('/compliance-assessments');
+
+		// logout to prevent sessions conflicts
+		const passwordPageSideBar = new SideBar(setPasswordPage);
+		await passwordPageSideBar.logout();
+	});
+});
+
+test('third-party representative can fill their assigned audit', async ({
+	thirdPartyAuthenticatedPage,
+	complianceAssessmentsPage,
+	page
+}) => {
+	await test.step('third party representative can open their assigned audit', async () => {
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.hasTitle('Audits');
+		await complianceAssessmentsPage.viewItemDetail(entityAssessment.name);
 	});
 });
 
