@@ -29,9 +29,9 @@ export class ModelTableFilter extends Element {
 		const filter = this._self.getByTestId(filterDataTestId);
 		await filter.click();
 
-		const mutliSelect = filter.getByRole('searchbox');
+		const multiSelect = filter.getByRole('searchbox');
 		const filterChoices = await filter.locator('ul').last().locator('li').all();
-		await mutliSelect.click();
+		await multiSelect.click();
 
 		const filterChoicesMap = Object.fromEntries(
 			await Promise.all(

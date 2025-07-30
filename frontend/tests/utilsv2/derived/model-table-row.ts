@@ -30,7 +30,7 @@ export class ModelTableRow extends Element {
 	 */
 	async gotoDetailView(expect: Expect): Promise<DetailViewPage> {
 		const detailButton = await this._self.getByTestId('tablerow-detail-button');
-		const detailViewHref = detailButton.getAttribute('href');
+		const detailViewHref = await detailButton.getAttribute('href');
 		expect(detailViewHref).not.toBeNull();
 		await this.getSelf().click();
 		// The class passed to this._goto must be either DetailViewPage or DetailViewPage derived class.
