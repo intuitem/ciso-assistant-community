@@ -551,6 +551,11 @@ export default {
 		ref: 'NIST-CSF-1.1',
 		urn: 'urn:intuitem:risk:library:nist-csf-1.1'
 	},
+	questionnaire: {
+		name: 'CMMC version 2.0',
+		ref: 'CMMC-2.0',
+		urn: 'urn:intuitem:risk:framework:cmmc-2.0'
+	},
 	matrix: {
 		name: 'Critical risk matrix 5x5',
 		displayName: 'critical 5x5',

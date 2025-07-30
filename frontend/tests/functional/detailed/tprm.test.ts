@@ -52,10 +52,10 @@ test('user can create representatives, solutions and entity assessments inside e
 		});
 	});
 
-	await test.step('import framework', async () => {
+	await test.step('import questionnaire', async () => {
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
-		await librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
+		await librariesPage.importLibrary(vars.questionnaire.name, vars.framework.urn);
 	});
 
 	await test.step('create entity', async () => {
@@ -122,7 +122,7 @@ test('user can create representatives, solutions and entity assessments inside e
 				name: 'Test entity assessment',
 				perimeter: vars.perimeterName,
 				create_audit: true,
-				framework: vars.framework.name
+				framework: vars.questionnaire.name
 			},
 			undefined,
 			undefined,
