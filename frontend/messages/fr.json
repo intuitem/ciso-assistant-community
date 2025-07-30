@@ -456,7 +456,7 @@
 	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
 	"attachmentHelpText": "Fichier de preuve (ex. capture d'écran, fichier journal, etc.). Quand le champ est sélectionné, vous pouvez y coller une copie d'écran de votre presse-papiers.",
 	"attachmentWarningText": "ATTENTION : le téléchargement d'un nouveau fichier écrasera celui existant",
-	"isActiveHelpText": "Désigne si cet utilisateur doit être traité comme actif",
+	"isActiveHelpText": "Utilisez cette fonctionnalité pour désactiver ou réactiver l'accès à la plateforme. Notez que le mot de passe sera réinitialisé si un utilisateur est désactivé.",
 	"helloThere": "Bonjour 👋",
 	"thisIsCisoAssistant": "Voici CISO Assistant.",
 	"yourStreamlined": "Votre solution",

@@ -170,6 +170,8 @@ def agg_countries():
 class ProcessingViewSet(BaseModelViewSet):
     model = Processing
 
+    filterset_fields = ["folder", "nature", "status", "legal_basis"]
+
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
