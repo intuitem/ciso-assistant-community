@@ -288,7 +288,8 @@ export const UserEditSchema = z.object({
 });
 
 export const UserCreateSchema = z.object({
-	email: z.string().email()
+	email: z.string().email(),
+	observation: z.string().optional().nullable()
 });
 
 export const ChangePasswordSchema = z.object({
