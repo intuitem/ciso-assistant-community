@@ -85,8 +85,6 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
 
 
 class FearedEventWriteSerializer(BaseModelSerializer):
-    folder = serializers.PrimaryKeyRelatedField(read_only=True)
-
     class Meta:
         model = FearedEvent
         exclude = ["created_at", "updated_at"]
@@ -134,7 +132,7 @@ class FearedEventImportExportSerializer(BaseModelSerializer):
 class RoToWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RoTo
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class RoToReadSerializer(BaseModelSerializer):
@@ -146,7 +144,7 @@ class RoToReadSerializer(BaseModelSerializer):
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
     activity = serializers.CharField(source="get_activity_display")
-    pertinence = serializers.CharField(source="get_pertinence")
+    pertinence = serializers.CharField(source="get_pertinence_display")
 
     class Meta:
         model = RoTo
@@ -189,7 +187,7 @@ class StakeholderWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Stakeholder
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class StakeholderReadSerializer(BaseModelSerializer):
@@ -243,7 +241,7 @@ class StakeholderImportExportSerializer(BaseModelSerializer):
 class StrategicScenarioWriteSerializer(BaseModelSerializer):
     class Meta:
         model = StrategicScenario
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class StrategicScenarioReadSerializer(BaseModelSerializer):
@@ -280,7 +278,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "folder", "ebios_rm_study"]
+        exclude = ["created_at", "updated_at", "ebios_rm_study"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
@@ -326,7 +324,7 @@ class OperationalScenarioWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = OperationalScenario
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class OperationalScenarioReadSerializer(BaseModelSerializer):
@@ -399,7 +397,7 @@ class ElementaryActionReadSerializer(BaseModelSerializer):
 class OperatingModeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = OperatingMode
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class OperatingModeReadSerializer(BaseModelSerializer):
@@ -417,7 +415,7 @@ class OperatingModeReadSerializer(BaseModelSerializer):
 class KillChainWriteSerializer(BaseModelSerializer):
     class Meta:
         model = KillChain
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
     def validate(self, attrs):
         elementary_action = attrs.get("elementary_action")
