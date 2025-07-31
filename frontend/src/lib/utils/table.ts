@@ -885,8 +885,8 @@ export const listViewFields = {
 		filters: {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
 			requirement__assessable: IS_ASSESSABLE_FILTER,
-      result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
-      compliance_assessment__perimeter: PERIMETER_FILTER
+			result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
+			compliance_assessment__perimeter: PERIMETER_FILTER
 		}
 	},
 	evidences: {
