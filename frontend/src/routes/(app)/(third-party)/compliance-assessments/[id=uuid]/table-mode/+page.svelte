@@ -329,9 +329,9 @@
 							class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 						></div>
 
-						<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
+						<h3 class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
 							{getTitle(requirementAssessment)}
-						</span>
+						</h3>
 					</span>
 					<div class="h-2"></div>
 					<div
@@ -452,7 +452,7 @@
 							{/if}
 
 							<form
-								class="flex flex-col space-y-2 items-center justify-evenly w-full"
+								class="flex flex-col space-y-2 items-center justify-evenly w-full tale-mode-form"
 								id="tableModeForm-{requirementAssessment.id}"
 								action="{actionPath}?/updateRequirementAssessment"
 								method="post"
