@@ -130,6 +130,17 @@ const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const REQUIREMENT_ASSESSMENT_RESULT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'requirement-assessments/result',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'result',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -868,12 +879,14 @@ export const listViewFields = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['assessable', 'name', 'description', 'complianceAssessment', 'result'],
-		body: ['assessable', 'name', 'description', 'compliance_assessment', 'result'],
+		head: ['assessable', 'name', 'description', 'complianceAssessment', 'perimeter', 'result'],
+		body: ['assessable', 'name', 'description', 'compliance_assessment', 'perimeter', 'result'],
 		breadcrumb_link_disabled: true,
 		filters: {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
-			requirement__assessable: IS_ASSESSABLE_FILTER
+			requirement__assessable: IS_ASSESSABLE_FILTER,
+      result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
+      compliance_assessment__perimeter: PERIMETER_FILTER
 		}
 	},
 	evidences: {

@@ -5118,11 +5118,18 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "applied_controls",
         "security_exceptions",
         "requirement__ref_id",
+        "result",
         "compliance_assessment__ref_id",
+        "compliance_assessment__perimeter",
+        "compliance_assessment__perimeter__name",
         "compliance_assessment__assets__ref_id",
         "requirement__assessable",
     ]
-    search_fields = ["requirement__name", "requirement__description"]
+    search_fields = [
+        "requirement__name",
+        "requirement__description",
+        "requirement__ref_id",
+    ]
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
