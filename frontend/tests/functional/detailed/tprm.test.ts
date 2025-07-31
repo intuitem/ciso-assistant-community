@@ -232,78 +232,101 @@ test('third-party representative can fill their assigned audit', async ({
 	});
 
 	await test.step('third party respondent can answer questions in table mode', async () => {
-		await page.getByTestId('table-mode-button').click();
-		await expect(page.getByTestId('requirement-assessments')).toBeVisible();
+		await test.step('third party respondent can open table mode', async () => {
+			await page.getByTestId('table-mode-button').click();
+			await expect(page.getByTestId('requirement-assessments')).toBeVisible();
+		});
+
 		const assessableRequirements = page
 			.getByRole('listitem')
 			.filter({ has: page.getByRole('button', { name: /.*Observation.*/ }) });
-		await expect(assessableRequirements).not.toHaveCount(0);
-		await assessableRequirements.first().locator('.text-base').first().click();
-		await assessableRequirements
-			.first()
-			.locator('li:nth-child(2) > .control > .p-1 > label:nth-child(2) > .text-base')
-			.first()
-			.click();
-		await assessableRequirements
-			.first()
-			.locator('li:nth-child(3) > .control > .p-1 > label > .text-base')
-			.first()
-			.click();
-		await assessableRequirements
-			.first()
-			.locator('li:nth-child(4) > .control > .p-1 > label > .text-base')
-			.first()
-			.click();
-		await assessableRequirements
-			.first()
-			.locator('li:nth-child(5) > .control > .p-1 > label:nth-child(3) > .text-base')
-			.first()
-			.click();
-		await assessableRequirements
-			.first()
-			.locator('li:nth-child(6) > .control > .p-1 > label:nth-child(3) > .text-base')
-			.first()
-			.click();
-		await assessableRequirements
-			.first()
-			.getByRole('button', { name: /.*Evidence.*/ })
-			.click();
-		await assessableRequirements.first().getByTestId('create-evidence-button').click();
-		await page.getByTestId('form-input-name').click();
-		await page.getByTestId('form-input-name').fill('tp-evidence');
-		await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
-		await page.getByTestId('save-button').click();
-		await complianceAssessmentsPage.isToastVisible(
-			'The evidence object has been successfully created' + /.+/.source
-		);
-		await page.getByTestId('back-to-audit').click();
 
-		await complianceAssessmentsPage.hasUrl();
-		await complianceAssessmentsPage.hasTitle(entityAssessment.name);
-		const editedRequirementAssessment = await complianceAssessmentsPage.itemDetail.treeViewItem(
-			'AC.L1-3.1.1 - Authorized Access Control',
-			['AC - ACCESS CONTROL']
-		);
-		editedRequirementAssessment.content.click();
-		await page.waitForURL('/requirement-assessments/**');
-		await expect(
-			page.locator('li:nth-child(1) > .control > .p-1 > label:nth-child(1)')
-		).toHaveClass(/.*preset-filled-primary-500.*/);
-		await expect(
-			page.locator('li:nth-child(2) > .control > .p-1 > label:nth-child(2)')
-		).toHaveClass(/.*preset-filled-primary-500.*/);
-		await expect(
-			page.locator('li:nth-child(3) > .control > .p-1 > label:nth-child(1)')
-		).toHaveClass(/.*preset-filled-primary-500.*/);
-		await expect(
-			page.locator('li:nth-child(4) > .control > .p-1 > label:nth-child(1)')
-		).toHaveClass(/.*preset-filled-primary-500.*/);
-		await expect(
-			page.locator('li:nth-child(5) > .control > .p-1 > label:nth-child(3)')
-		).toHaveClass(/.*preset-filled-primary-500.*/);
-		await expect(
-			page.locator('li:nth-child(6) > .control > .p-1 > label:nth-child(3)')
-		).toHaveClass(/.*preset-filled-primary-500.*/);
+		await test.step('third party respondent can fill questionnaire', async () => {
+			await expect(assessableRequirements).not.toHaveCount(0);
+			await assessableRequirements.first().locator('.text-base').first().click();
+			await assessableRequirements
+				.first()
+				.locator('li:nth-child(2) > .control > .p-1 > label:nth-child(2) > .text-base')
+				.first()
+				.click();
+			await assessableRequirements
+				.first()
+				.locator('li:nth-child(3) > .control > .p-1 > label > .text-base')
+				.first()
+				.click();
+			await assessableRequirements
+				.first()
+				.locator('li:nth-child(4) > .control > .p-1 > label > .text-base')
+				.first()
+				.click();
+			await assessableRequirements
+				.first()
+				.locator('li:nth-child(5) > .control > .p-1 > label:nth-child(3) > .text-base')
+				.first()
+				.click();
+			await assessableRequirements
+				.first()
+				.locator('li:nth-child(6) > .control > .p-1 > label:nth-child(3) > .text-base')
+				.first()
+				.click();
+		});
+
+		await test.step('third party respondent can create evidence', async () => {
+			await assessableRequirements
+				.first()
+				.getByRole('button', { name: /.*Evidence.*/ })
+				.click();
+			await assessableRequirements.first().getByTestId('create-evidence-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('tp-evidence');
+			await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
+			await page.getByTestId('save-button').click();
+			await complianceAssessmentsPage.isToastVisible(
+				'The evidence object has been successfully created' + /.+/.source
+			);
+		});
+
+		await test.step('check that evidence count was updated', async () => {
+			await expect(assessableRequirements.first().getByTestId('evidence-count')).toContainText('1');
+		});
+
+		await test.step('check that selected evidences were updated', async () => {
+			await assessableRequirements.first().getByTestId('select-evidence-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
+			await page.getByTestId('cancel-button').click();
+		});
+
+		await test.step('check modified requirement assessment', async () => {
+			await page.getByTestId('back-to-audit').click();
+
+			await complianceAssessmentsPage.hasUrl();
+			await complianceAssessmentsPage.hasTitle(entityAssessment.name);
+			const editedRequirementAssessment = await complianceAssessmentsPage.itemDetail.treeViewItem(
+				'AC.L1-3.1.1 - Authorized Access Control',
+				['AC - ACCESS CONTROL']
+			);
+			editedRequirementAssessment.content.click();
+			await page.waitForURL('/requirement-assessments/**');
+			await expect(
+				page.locator('li:nth-child(1) > .control > .p-1 > label:nth-child(1)')
+			).toHaveClass(/.*preset-filled-primary-500.*/);
+			await expect(
+				page.locator('li:nth-child(2) > .control > .p-1 > label:nth-child(2)')
+			).toHaveClass(/.*preset-filled-primary-500.*/);
+			await expect(
+				page.locator('li:nth-child(3) > .control > .p-1 > label:nth-child(1)')
+			).toHaveClass(/.*preset-filled-primary-500.*/);
+			await expect(
+				page.locator('li:nth-child(4) > .control > .p-1 > label:nth-child(1)')
+			).toHaveClass(/.*preset-filled-primary-500.*/);
+			await expect(
+				page.locator('li:nth-child(5) > .control > .p-1 > label:nth-child(3)')
+			).toHaveClass(/.*preset-filled-primary-500.*/);
+			await expect(
+				page.locator('li:nth-child(6) > .control > .p-1 > label:nth-child(3)')
+			).toHaveClass(/.*preset-filled-primary-500.*/);
+		});
 	});
 });
 
