@@ -34,6 +34,7 @@ type Fixtures = {
 	findingsAssessmentsPage: PageContent;
 	findingsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
+	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
 	logedPage: LoginPage;
@@ -75,6 +76,7 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
+			ebiosRmStudyPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -98,6 +100,7 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
+			ebiosRmStudyPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -305,6 +308,19 @@ export const test = base.extend<Fixtures>({
 			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'due_date', type: type.DATE }
+		]);
+		await use(bPage);
+	},
+
+	ebiosRmStudyPage: async ({ page }, use) => {
+		const bPage = new PageContent(page, '/ebios-rm', /Ebios RM stud(ies|y)/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(bPage);
 	},
@@ -727,6 +743,26 @@ export class TestContent {
 					name: '',
 					description: '',
 					due_date: '2025-12-31'
+				}
+			},
+			ebiosRmStudyPage: {
+				displayName: 'Ebios RM',
+				modelName: 'ebiosrmstudy',
+				dependency: vars.matrix,
+				build: {
+					name: 'Test Ebios RM Study',
+					description: vars.description,
+					risk_matrix: vars.matrix.displayName
+					// eta: "2025-01-01",
+					// due_date: "2025-05-01"
+				},
+				editParams: {
+					name: '',
+					description: '',
+					version: vars.riskAssessmentVersion2
+					//TODO add risk_matrix
+					// eta: "2025-12-31",
+					// due_date: "2026-02-25"
 				}
 			},
 			assetAssessmentsPage: {
