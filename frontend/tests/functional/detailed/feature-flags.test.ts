@@ -241,7 +241,9 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment');
 	await page.getByTestId('form-input-version').fill('2.0');
-
+	await page.getByTestId('form-input-authors').click();
+	await page.getByRole('option', { name: 'admin@tests.com' }).click();
+	await expect(page.getByTestId('save-button')).toBeVisible();
 	await page.getByTestId('save-button').click();
 
 	// Check visibility
