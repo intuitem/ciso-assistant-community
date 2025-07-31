@@ -240,6 +240,8 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment detai
 	await expect(page).toHaveURL('/risk-assessments');
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment');
+	await page.getByTestId('form-input-version').fill('2.0');
+
 	await page.getByTestId('save-button').click();
 
 	// Check visibility
