@@ -79,7 +79,7 @@
 		hideSuggestionHashmap[ra.id] = false;
 	});
 
-	let createdEvidence = $derived(form?.createdEvidence);
+	let createdEvidence = $derived(form?.newEvidence);
 
 	// Memoized title function
 	const titleMap = new Map();
@@ -103,7 +103,7 @@
 			`tableModeForm-${requirementAssessment.id}`
 		) as HTMLFormElement;
 		const formData = {
-			...data,
+			...form.data,
 			id: requirementAssessment.id
 		};
 		const res = await fetch(form.action, {
@@ -173,13 +173,16 @@
 	let addedEvidence = $state(0);
 
 	run(() => {
-		if (createdEvidence && shallow) {
-			const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
-			if (requirement) {
-				requirement.evidences.push({
+		if (createdEvidence) {
+			const requirementAssessment = requirementAssessments.find(
+				(ra) => ra.id === createdEvidence.requirement_assessments[0]
+			);
+			if (requirementAssessment) {
+				requirementAssessment.evidences.push({
 					str: createdEvidence.name,
 					id: createdEvidence.id
 				});
+				requirementAssessment?.updateForm?.data?.evidences?.push(createdEvidence.id);
 				createdEvidence = undefined;
 				addedEvidence += 1;
 			}
@@ -687,14 +690,18 @@
 												{#snippet panel()}
 													<div class="flex flex-row space-x-2 items-center">
 														{#if !shallow}
-															<button
-																class="btn preset-filled-primary-500 self-start"
-																onclick={() =>
-																	modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-																type="button"
-																data-testid="create-evidence-button"
-																><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
-															>
+															{#key requirementAssessment.evidences}
+																<button
+																	class="btn preset-filled-primary-500 self-start"
+																	onclick={() =>
+																		modalEvidenceCreateForm(
+																			requirementAssessment.evidenceCreateForm
+																		)}
+																	type="button"
+																	data-testid="create-evidence-button"
+																	><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+																>
+															{/key}
 															<button
 																class="btn preset-filled-secondary-500 self-start"
 																type="button"
