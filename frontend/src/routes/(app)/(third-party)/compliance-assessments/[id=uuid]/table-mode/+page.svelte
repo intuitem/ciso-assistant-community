@@ -103,7 +103,7 @@
 			`tableModeForm-${requirementAssessment.id}`
 		) as HTMLFormElement;
 		const formData = {
-			...form.data,
+			...data,
 			id: requirementAssessment.id
 		};
 		const res = await fetch(form.action, {
