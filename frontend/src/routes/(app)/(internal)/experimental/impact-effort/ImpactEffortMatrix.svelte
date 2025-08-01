@@ -82,8 +82,8 @@
 
 	function getCircleRadius(count: number): number {
 		// Scale radius based on number of tasks (min 8, max 30)
-		const minRadius = 8;
-		const maxRadius = 30;
+		const minRadius = 10;
+		const maxRadius = 20;
 		const maxCount = Math.max(...Object.values(cellData).map((cell) => cell.count));
 
 		// If all cells have same count, return middle size
@@ -147,7 +147,7 @@
 					x={60 + (width - 120) * 0.4}
 					y="60"
 					width={(width - 120) * 0.6}
-					height={(height - 120) * 0.4}
+					height={(height - 120) * 0.6}
 					class="quadrant major-projects-bg"
 				/>
 				<!-- Fill-ins - bottom left -->
@@ -161,9 +161,9 @@
 				<!-- Questionable - bottom right -->
 				<rect
 					x={60 + (width - 120) * 0.4}
-					y={60 + (height - 120) * 0.4}
+					y={60 + (height - 120) * 0.6}
 					width={(width - 120) * 0.6}
-					height={(height - 120) * 0.6}
+					height={(height - 120) * 0.4}
 					class="quadrant questionable-bg"
 				/>
 			{/if}
