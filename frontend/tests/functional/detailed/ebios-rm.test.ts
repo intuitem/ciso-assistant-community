@@ -97,6 +97,7 @@ test('ebios rm study', async ({
 				reviewers: [LoginPage.defaultEmail]
 			});
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await expect(
 				page
 					.locator('#activityOne div')
@@ -128,10 +129,12 @@ test('ebios rm study', async ({
 			await page.getByRole('option', { name: `${vars.folderName}/${vars.assetName}` }).click();
 			await page.getByText(`Assets ${vars.folderName}/${vars.assetName}`).click();
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('added asset');
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
@@ -156,6 +159,7 @@ test('ebios rm study', async ({
 			await page.getByRole('option', { name: 'Authenticity' }).click();
 			await page.getByRole('option', { name: 'Availability' }).click();
 			await page.getByTestId('save-button').press('Enter');
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 2');
@@ -168,6 +172,7 @@ test('ebios rm study', async ({
 			await page.getByRole('option', { name: 'Environmental' }).click();
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').press('Escape');
 			await page.getByTestId('save-button').press('Enter');
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
@@ -192,6 +197,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-authors').getByRole('textbox').click();
 			await page.getByRole('option', { name: LoginPage.defaultEmail }).click();
 			await page.getByTestId('save-button').press('Enter');
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await expect(page.getByRole('gridcell', { name: 'security foundation audit' })).toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
@@ -219,6 +225,7 @@ test('ebios rm study', async ({
 				'Pariatur proident qui cupidatat nulla fugiat voluptate veniam nisi officia dolore consequat.'
 			);
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 		await page
 			.getByRole('listitem')
@@ -235,6 +242,7 @@ test('ebios rm study', async ({
 		await page.getByTestId('form-input-resources').selectOption('1');
 		await page.getByTestId('form-input-activity').selectOption('3');
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 		await page
 			.getByRole('listitem')
@@ -253,6 +261,7 @@ test('ebios rm study', async ({
 		await page.getByRole('option', { name: `${vars.folderName}/test feared event 1` }).click();
 		await page.getByRole('option', { name: `${vars.folderName}/test feared event 2` }).click();
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 		await page
 			.getByRole('listitem')
@@ -275,6 +284,7 @@ test('ebios rm study', async ({
 			await page.getByText('1', { exact: true }).nth(2).click();
 			await page.getByText('1', { exact: true }).nth(3).click();
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('button', { name: ' Ecosystem radar +' }).click();
 			await page.getByRole('button', { name: ' Ecosystem radar −' }).click();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
@@ -294,6 +304,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test strategic scenario 1');
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.locator('div').filter({ hasText: 'Reminder: Do not forget to' }).nth(2).click();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await expect(async () => {
@@ -306,10 +317,12 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test attack path 1');
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test attack path 2');
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: 'Develop strategic scenarios' }).click();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
@@ -331,6 +344,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test applied control 1');
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test applied control 2');
@@ -352,6 +366,7 @@ test('ebios rm study', async ({
 				.first()
 				.click();
 			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
