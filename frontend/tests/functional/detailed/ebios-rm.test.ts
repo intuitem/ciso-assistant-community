@@ -189,4 +189,296 @@ test('ebios rm study', async ({
 			await page.getByRole('button', { name: 'Mark as done' }).click();
 		});
 	});
+
+	await test.step('workshop 2', async () => {
+		await expect(async () => {
+			await page.getByTestId('workshop-2-step-1-link').click();
+			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
+		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+		await page.getByTestId('add-button').click();
+		await page.getByTestId('form-input-risk-origin').selectOption('amateur');
+		await page.getByTestId('form-input-risk-origin').selectOption('state');
+		await page.getByTestId('form-input-risk-origin').selectOption('amateur');
+		await page.getByTestId('form-input-target-objective').click();
+		await page
+			.getByTestId('form-input-target-objective')
+			.fill(
+				'Pariatur proident qui cupidatat nulla fugiat voluptate veniam nisi officia dolore consequat.'
+			);
+		await page.getByTestId('save-button').click();
+		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+		await page
+			.getByRole('listitem')
+			.filter({ hasText: 'Step 1 Identify risk sources' })
+			.getByTestId('sidebar-more-btn')
+			.click();
+		await page.getByRole('button', { name: 'Mark as done' }).click();
+		await expect(async () => {
+			await page.getByTestId('workshop-2-step-2-link').click();
+			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
+		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+		await page.getByTestId('tablerow-edit-button').click();
+		await page.getByTestId('form-input-motivation').selectOption('3');
+		await page.getByTestId('form-input-resources').selectOption('1');
+		await page.getByTestId('form-input-activity').selectOption('3');
+		await page.getByTestId('save-button').click();
+		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+		await page
+			.getByRole('listitem')
+			.filter({ hasText: 'Step 2 Evaluate RS/TO pairs' })
+			.getByTestId('sidebar-more-btn')
+			.click();
+		await page.getByRole('button', { name: 'Mark as done' }).click();
+		await expect(async () => {
+			await page.getByTestId('workshop-2-step-3-link').click();
+			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
+		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+		await page.getByTestId('tablerow-edit-button').click();
+		await page.getByTestId('form-input-is-selected').uncheck();
+		await page.getByTestId('form-input-is-selected').check();
+		await page.getByTestId('form-input-feared-events').getByRole('textbox').click();
+		await page.getByRole('option', { name: `${vars.folderName}/test feared event 1` }).click();
+		await page.getByRole('option', { name: `${vars.folderName}/test feared event 2` }).click();
+		await page.getByTestId('save-button').click();
+		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+		await page
+			.getByRole('listitem')
+			.filter({ hasText: 'Step 3 Select RS/TO pairs' })
+			.getByTestId('sidebar-more-btn')
+			.click();
+		await page.getByRole('button', { name: 'Mark as done' }).click();
+	});
+
+	await test.step('workshop 3', async () => {
+		await test.step('step 1', async () => {
+			await expect(async () => {
+				await page.getByTestId('workshop-3-step-1-link').click();
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-category').selectOption('partner');
+			await page.getByText('4').first().click();
+			await page.getByText('4').nth(1).click();
+			await page.getByText('1', { exact: true }).nth(2).click();
+			await page.getByText('1', { exact: true }).nth(3).click();
+			await page.getByTestId('save-button').click();
+			await page.getByRole('button', { name: ' Ecosystem radar +' }).click();
+			await page.getByRole('button', { name: ' Ecosystem radar −' }).click();
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await page
+				.getByRole('listitem')
+				.filter({ hasText: 'Step 1 Map the ecosystem' })
+				.getByTestId('sidebar-more-btn')
+				.click();
+			await page.getByRole('button', { name: 'Mark as done' }).click();
+		});
+		await test.step('step 2', async () => {
+			await expect(async () => {
+				await page.getByTestId('workshop-3-step-2-link').click();
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test strategic scenario 1');
+			await page.getByTestId('save-button').click();
+			await page.locator('div').filter({ hasText: 'Reminder: Do not forget to' }).nth(2).click();
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await expect(async () => {
+				await page.getByTestId('workshop-3-step-2-link').click();
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByRole('gridcell', { name: 'test strategic scenario' }).click();
+			await expect(page).not.toHaveURL(/.*workshop-3.*/);
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test attack path 1');
+			await page.getByTestId('save-button').click();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test attack path 2');
+			await page.getByTestId('save-button').click();
+			await page.getByRole('link', { name: 'Develop strategic scenarios' }).click();
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await page
+				.getByRole('listitem')
+				.filter({ hasText: 'Step 2 Develop strategic' })
+				.getByTestId('sidebar-more-btn')
+				.click();
+			await page.getByRole('button', { name: 'Mark as done' }).click();
+		});
+		await test.step('step 3', async () => {
+			await expect(async () => {
+				await page.getByTestId('workshop-3-step-3-link').click();
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByRole('gridcell', { name: 'Partner' }).first().click();
+			await expect(page).not.toHaveURL(/.*workshop-3.*/);
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-reference-control').getByRole('textbox').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test applied control 1');
+			await page.getByTestId('save-button').click();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test applied control 2');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByRole('link', { name: 'Define security measures for' }).click();
+			await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
+			await page.getByTestId('tablerow-edit-button').click();
+			await page
+				.locator(
+					'div:nth-child(4) > .flex.flex-col.space-y-4 > span > div:nth-child(3) > .p-1 > label:nth-child(3) > .text-base'
+				)
+				.first()
+				.click();
+			await page
+				.locator(
+					'div:nth-child(4) > .flex.flex-col.space-y-4 > span > div > .p-1 > label:nth-child(2) > .text-base'
+				)
+				.first()
+				.click();
+			await page.getByTestId('save-button').click();
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await page
+				.getByRole('listitem')
+				.filter({ hasText: 'Step 3 Define security measures for the ecosystem' })
+				.getByTestId('sidebar-more-btn')
+				.click();
+			await page.getByRole('button', { name: 'Mark as done' }).click();
+		});
+	});
+	await test.step('workshop 4', async () => {
+		await test.step('step 0', async () => {
+			await expect(async () => {
+				await page.getByTestId('workshop-4-step-0-link').click();
+				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test elementary action 1');
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('reconnaissance');
+			await page.getByTestId('form-input-threat').getByRole('textbox').click();
+			await page.getByText('Icon --').click();
+			await page.getByTestId('form-input-icon').selectOption('cube');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-attack-stage').selectOption('1');
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('initial access');
+			await page.getByTestId('form-input-icon').selectOption('server');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-attack-stage').selectOption('2');
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('DISCO');
+			await page.getByTestId('form-input-icon').selectOption('diamond');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-attack-stage').selectOption('3');
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('exploitation');
+			await page.getByTestId('form-input-icon').selectOption('skull');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByRole('gridcell', { name: 'reconnaissance', exact: true }).click();
+			await expect(page).not.toHaveURL(/.*workshop-4.*/);
+			await page.getByRole('link', { name: 'Prepare elementary actions' }).click();
+			await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await page
+				.getByRole('listitem')
+				.filter({ hasText: 'Step 0 Prepare elementary' })
+				.getByTestId('sidebar-more-btn')
+				.click();
+			await page.getByRole('button', { name: 'Mark as done' }).click();
+		});
+		await test.step('step 1', async () => {
+			await expect(async () => {
+				await page.getByTestId('workshop-4-step-1-link').click();
+				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-operating-modes-description').click();
+			await page
+				.getByTestId('form-input-operating-modes-description')
+				.fill(
+					'Minim ad dolore do pariatur non. Nostrud enim dolore est fugiat occaecat deserunt minim labore. Commodo minim adipisicing proident esse irure. Veniam nostrud et adipisicing.'
+				);
+			await page.getByTestId('form-input-threats').getByRole('textbox').click();
+			await page.getByTestId('form-input-attack-path').getByRole('textbox').click();
+			await page.getByRole('option', { name: 'test attack path 1' }).click();
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-operating-modes-description').click();
+			await page
+				.getByTestId('form-input-operating-modes-description')
+				.fill(
+					'Sint reprehenderit non sint dolor mollit non velit tempor ipsum culpa. Amet culpa voluptate est do aute tempor in aliquip ipsum dolore commodo nulla. Quis irure culpa dolore ad irure nisi ea deserunt in ad eu. Aliqua sunt voluptate et eu officia sit. Minim labore ea exercitation elit duis officia. Incididunt reprehenderit incididunt id deserunt quis. Ea irure Lorem cillum tempor. Voluptate ullamco et commodo veniam ex irure dolore dolore.'
+				);
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await page
+				.getByRole('listitem')
+				.filter({ hasText: 'Step 1 Develop operational' })
+				.getByTestId('sidebar-more-btn')
+				.click();
+			await page.getByRole('button', { name: 'Mark as done' }).click();
+		});
+		await test.step('step 2', async () => {
+			await expect(async () => {
+				await page.getByTestId('workshop-4-step-2-link').click();
+				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			await page.getByRole('gridcell', { name: 'test attack path 1' }).click();
+			await expect(page).not.toHaveURL(/.*workshop-4.*/);
+			await page.getByRole('button', { name: ' Severity High ' }).click();
+			await page.getByRole('link', { name: ' Edit' }).click();
+			await page.getByTestId('form-input-likelihood').selectOption('3');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByRole('button', { name: ' Likelihood High ' }).click();
+			await page.getByRole('button', { name: ' Risk level High ' }).click();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test operating mode 1');
+			await page.getByTestId('form-input-likelihood').selectOption('1');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByTestId('add-button').click();
+			await page.getByTestId('form-input-name').click();
+			await page.getByTestId('form-input-name').fill('test operating mode 2');
+			await page.getByTestId('form-input-likelihood').selectOption('4');
+			await page.getByTestId('save-button').click();
+			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
+			await page
+				.getByRole('listitem')
+				.filter({ hasText: 'Step 2 Evaluate the' })
+				.getByTestId('sidebar-more-btn')
+				.click();
+			await page.getByRole('button', { name: 'Mark as done' }).click();
+		});
+	});
+
+	await test.step('workshop 5', async () => {
+		await page.getByRole('button', { name: ' Step 1 Generate the risk' }).click();
+		await page.getByTestId('form-input-name').click();
+		await page.getByTestId('form-input-name').fill('generated risk assessment 1');
+		await page.getByTestId('form-input-perimeter').getByRole('textbox').click();
+		await page.getByRole('option', { name: `${vars.folderName}/${vars.perimeterName}` }).click();
+		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
+		await page
+			.getByRole('gridcell', { name: 'test strategic scenario 1 - test attack path 1' })
+			.click();
+		await expect(page).not.toHaveURL(/.*workshop-5.*/);
+		await page.getByText('High').nth(2).click();
+	});
 });
