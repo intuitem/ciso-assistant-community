@@ -1,3 +1,25 @@
+"""
+v2 Excel Structure Validator
+
+This script validates the structure and consistency of an Excel file following the expected v2 format. It checks:
+- The presence and format of *_meta and *_content sheets.
+- Required keys and values in meta sheets.
+- Structural correctness and references in content sheets.
+- Column-level validation against other sheets (e.g. implementation_groups, answers, threats, reference_controls).
+- Validity of URNs using prefix definitions and corresponding content sheets.
+
+Usage:
+    python check_library_v2.py file.xlsx [--verbose]
+
+Arguments:
+    file.xlsx    Path to the Excel file to validate.
+    --verbose    Optional flag to display additional information and validation feedback.
+
+The script exits with code 1 and displays an error message if validation fails.
+"""
+
+
+
 import os
 import re
 import sys
@@ -1055,7 +1077,7 @@ def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFram
 
 
 #  Classify each prefix_value as 'internal' or 'external' depending on whether it's used in the base_urn field of the corresponding *_meta sheets.
-def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame, meta_sheets: List[str], meta_type: MetaTypes, sheet_name: str, fct_name: str, ctx: ConsoleContext = None) -> Tuple[List[str], List[str]]:
+def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame, meta_sheets: List[str], meta_type: MetaTypes, sheet_name: str, fct_name: str, ctx: ConsoleContext = None) -> Tuple[List[str], List[str], List[str]]:
     """
     Args:
         wb: Workbook object.
@@ -1080,6 +1102,7 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
     prefix_values = df_urn_prefix["prefix_value"].dropna().astype(str).str.strip().unique()
     internal_prefixes = []
     external_prefixes = []
+    internal_meta_sheets = []
 
     # Filter prefix_values by expected type_object (based on the 4th segment of the URN)
     filtered_prefix_values = []
@@ -1112,7 +1135,7 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
                 if len(parts) > 3 and parts[3].strip() == expected_type_object:
                     if base_urn.strip() == prefix.strip():
                         found = True
-                        # print("GOOD !")
+                        internal_meta_sheets.append(sheet)
                         break  # No need to keep checking other sheets
 
             except Exception as e:
@@ -1127,7 +1150,93 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
         else:
             external_prefixes.append(prefix)
 
-    return internal_prefixes, external_prefixes
+    return internal_prefixes, external_prefixes, internal_meta_sheets
+
+
+# Print information indicating whether the references mentioned in a URN prefix sheet are internal or external to the current workbook.
+def print_info_about_internal_external_URN_prefix(sheet_name: str, internal_threats: List[str], external_threats: List[str], internal_ref_ctrl: List[str], external_ref_ctrl: List[str], context: str = None, verbose: bool = False, ctx: ConsoleContext = None, all_verbose: bool = False):
+    
+    verbose_icon = "💬 "
+    
+    if internal_threats:
+        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] Internal \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_threats)}"
+
+        if all_verbose and verbose:
+            msg = verbose_icon + msg
+            print(msg)
+
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+        elif not all_verbose:
+            print(msg)
+
+    else:
+        if verbose:
+            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No internal \"threats\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+    if external_threats:
+        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] External \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in external_threats)}"
+
+        if all_verbose and verbose:
+            msg = verbose_icon + msg
+            print(msg)
+
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+        elif not all_verbose:
+            print(msg)
+
+    else:
+        if verbose:
+            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No external \"threats\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+    # Info messages for "reference_controls"
+    if internal_ref_ctrl:
+        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] Internal \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_ref_ctrl)}"
+
+        if all_verbose and verbose:
+            msg = verbose_icon + msg
+            print(msg)
+
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+        elif not all_verbose:
+            print(msg)
+
+    else:
+        if verbose:
+            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No internal \"reference_controls\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+    if external_ref_ctrl:
+        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] External \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in external_ref_ctrl)}"
+
+        if all_verbose and verbose:
+            msg = verbose_icon + msg
+            print(msg)
+
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+        elif not all_verbose:
+            print(msg)
+
+    else:
+        if verbose:
+            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No external \"reference_controls\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
 
 # Check that each (source_node_id, target_node_id) pair is unique. Emits a warning or raises an error depending on "warn_only".
@@ -1409,8 +1518,242 @@ def _framework_validate_question_answer_alignment(df: pd.DataFrame, sheet_name: 
                 ctx.add_sheet_verbose_msg(sheet_name, msg)
 
 
+# Validate that all URNs in the column use defined prefix_ids and reference existing ref_ids when required
+# TODO : Check "ref_id" for external references (by importing a YAML file)
+def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+    
+    fct_name = get_current_fct_name()
+
+    if column_name not in ("threats", "reference_controls"):
+        raise ValueError(f"({fct_name}) [{current_sheet_name}] Column \"{column_name}\" is not supported for URN validation")
+
+    # ───────────────────────────────────────────────────────────────
+    # 1st Part: Load and validate all URN_PREFIX sheets
+    # ───────────────────────────────────────────────────────────────
+
+    urn_meta_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.URN_PREFIX)
+
+    if not urn_meta_sheets:
+        raise ValueError(
+            f"({fct_name}) [{current_sheet_name}] Column \"{column_name}\" cannot be validated because no URN_PREFIX meta sheet exists.\n"
+            f"> 💡 Tip: Either remove column \"{column_name}\" or define a valid URN prefix sheet."
+        )
+
+    urn_prefix_map = {}     # {prefix_id: (prefix_value, sheet_name)}
+    seen_prefix_ids = {}    # {prefix_id: sheet_name}
+
+    for meta_sheet_name in urn_meta_sheets:
+        content_sheet = get_corresponding_type_sheet_names([meta_sheet_name], SheetTypes.CONTENT)[0]
+        if content_sheet not in wb.sheetnames:
+            raise ValueError(f"({fct_name}) [{current_sheet_name}] URN_PREFIX content sheet \"{content_sheet}\" not found")
+
+        content_df = pd.DataFrame(wb[content_sheet].values)
+        content_df.columns = content_df.iloc[0]
+        content_df = content_df.drop(index=0).reset_index(drop=True)
+
+        # Filter out rows where both 'prefix_id' and 'prefix_value' are empty or null
+        content_df = content_df.dropna(subset=["prefix_id", "prefix_value"], how='all')
+        content_df = content_df[(content_df["prefix_id"].astype(str).str.strip() != "") | (content_df["prefix_value"].astype(str).str.strip() != "")]
+
+        for _, row in content_df.iterrows():
+            prefix_id = str(row.get("prefix_id", "")).strip()
+            prefix_value = str(row.get("prefix_value", "")).strip()
+            if not prefix_id:
+                continue
+            if prefix_id in seen_prefix_ids:
+                other_sheet = seen_prefix_ids[prefix_id]
+                raise ValueError(
+                    f"({fct_name}) [{current_sheet_name}] Duplicate prefix_id \"{prefix_id}\" found in sheets \"{meta_sheet_name}\" and \"{other_sheet}\""
+                )
+            urn_prefix_map[prefix_id] = (prefix_value, content_sheet)
+            seen_prefix_ids[prefix_id] = content_sheet
+
+    all_prefix_ids = set(urn_prefix_map.keys())
+
+    # ───────────────────────────────────────────────────────────────
+    # 2nd Part: Validate that all URN prefix_id used in the column are known
+    # ───────────────────────────────────────────────────────────────
+
+    for idx, value in df[column_name].dropna().astype(str).items():
+        elements = re.split(r"[\n,]", value)
+        for i, raw in enumerate(elements, start=1):
+            raw = raw.strip()
+            if not raw or ":" not in raw:
+                continue
+            prefix_id = raw.split(":", 1)[0].strip()
+            if prefix_id not in all_prefix_ids:
+                raise ValueError(
+                    f"({fct_name}) [{current_sheet_name}] Row #{idx + 2} - Invalid URN prefix \"{prefix_id}\" (element #{i}) in column \"{column_name}\".\n"
+                    f"> 💡 Tip: This prefix must be defined in a URN Prefix sheet."
+                )
+
+    # ───────────────────────────────────────────────────────────────
+    # 3rd Part: Determine internal and external prefixes for threats / reference_controls
+    # ───────────────────────────────────────────────────────────────
+
+    threats_meta = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
+    ref_ctrl_meta = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
+
+    all_internal_threats = []
+    all_external_threats = []
+    all_internal_threat_sheets = []
+    all_internal_ref_ctrl = []
+    all_external_ref_ctrl = []
+    all_internal_ref_ctrl_sheets = []
+
+    for meta_sheet_name in urn_meta_sheets:
+        urn_content_sheet = get_corresponding_type_sheet_names([meta_sheet_name], SheetTypes.CONTENT)[0]
+        if urn_content_sheet not in wb.sheetnames:
+            raise ValueError(f"({fct_name}) [{current_sheet_name}] URN_PREFIX content sheet \"{urn_content_sheet}\" not found")
+
+        df_urn = pd.DataFrame(wb[urn_content_sheet].values)
+        df_urn.columns = df_urn.iloc[0]
+        df_urn = df_urn.drop(index=0).reset_index(drop=True)
+
+        # Filter out empty rows
+        df_urn = df_urn.dropna(how='all')
+        df_urn = df_urn[
+            df_urn.apply(lambda row: any(str(cell).strip() != "" for cell in row), axis=1)
+        ]
+
+        if threats_meta:
+            internal_threats, external_threats, internal_threat_sheets = _URN_prefix_classify_prefix_usage(
+                wb, df_urn, threats_meta, MetaTypes.THREATS, current_sheet_name, fct_name, ctx
+            )
+            all_internal_threats.extend(internal_threats)
+            all_external_threats.extend(external_threats)
+            all_internal_threat_sheets.extend(internal_threat_sheets)
+
+        if ref_ctrl_meta:
+            internal_ref_ctrl, external_ref_ctrl, internal_ref_ctrl_sheets = _URN_prefix_classify_prefix_usage(
+                wb, df_urn, ref_ctrl_meta, MetaTypes.REFERENCE_CONTROLS, current_sheet_name, fct_name, ctx
+            )
+            all_internal_ref_ctrl.extend(internal_ref_ctrl)
+            all_external_ref_ctrl.extend(external_ref_ctrl)
+            all_internal_ref_ctrl_sheets.extend(internal_ref_ctrl_sheets)
+
+    print_info_about_internal_external_URN_prefix(
+        current_sheet_name,
+        all_internal_threats, all_external_threats,
+        all_internal_ref_ctrl, all_external_ref_ctrl,
+        fct_name, verbose, ctx, True
+    )
+
+    # ───────────────────────────────────────────────────────────────
+    # 4th Part: Validate prefix_id types based on column context
+    # ───────────────────────────────────────────────────────────────
+
+    allowed_prefix_ids = set()
+    forbidden_prefix_ids = set()
+
+    # We must use prefix_id (not URNs) to detect valid or invalid use
+    if column_name == "threats":
+        allowed_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_threats or pval in all_external_threats}
+        forbidden_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_ref_ctrl or pval in all_external_ref_ctrl}
+    elif column_name == "reference_controls":
+        allowed_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_ref_ctrl or pval in all_external_ref_ctrl}
+        forbidden_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_threats or pval in all_external_threats}
+
+    for idx, value in df[column_name].dropna().astype(str).items():
+        elements = re.split(r"[\n,]", value)
+        for i, raw in enumerate(elements, start=1):
+            raw = raw.strip()
+            if not raw:
+                continue
+
+            prefix_id = raw.split(":", 1)[0].strip()
+
+            if prefix_id in forbidden_prefix_ids:
+                raise ValueError(
+                    f"({fct_name}) [{current_sheet_name}] Row #{idx + 2} - Invalid URN prefix \"{prefix_id}\" (element #{i}) in column \"{column_name}\"."
+                    f"\n> 💡 Tip: This prefix is not allowed in column \"{column_name}\", as the URN to which it refers is not a \"{column_name}\" URN."
+                )
+
+    # Dict prefix_value -> "sheet_content" for "threats"
+    prefix_to_threats_content_sheet = {}
+
+    for i, prefix_val in enumerate(all_internal_threats):
+        # Correspondence index => internal threat content sheet
+        if i < len(all_internal_threat_sheets):
+            meta_sheet_name = all_internal_threat_sheets[i]
+            content_sheet_name = get_corresponding_type_sheet_names([meta_sheet_name], SheetTypes.CONTENT)[0]
+            prefix_to_threats_content_sheet[prefix_val] = content_sheet_name
+
+    # Dict prefix_value -> "sheet_content" for "reference_controls"
+    prefix_to_refctrl_content_sheet = {}
+
+    for i, prefix_val in enumerate(all_internal_ref_ctrl):
+        if i < len(all_internal_ref_ctrl_sheets):
+            meta_sheet_name = all_internal_ref_ctrl_sheets[i]
+            content_sheet_name = get_corresponding_type_sheet_names([meta_sheet_name], SheetTypes.CONTENT)[0]
+            prefix_to_refctrl_content_sheet[prefix_val] = content_sheet_name
+
+    # ───────────────────────────────────────────────────────────────
+    # 5th Part: Validate that internal URN values exist in ref_id column only
+    # ───────────────────────────────────────────────────────────────
+
+    if column_name == "threats":
+        internal_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_threats}
+    else:  # reference_controls
+        internal_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_ref_ctrl}
+
+    
+    for prefix_id in internal_prefix_ids:
+        prefix_value, _ = urn_prefix_map[prefix_id]
+
+        # Get the actual content sheet name based on the column type
+        if column_name == "threats":
+            content_sheet = prefix_to_threats_content_sheet.get(prefix_value)
+        else:  # reference_controls
+            content_sheet = prefix_to_refctrl_content_sheet.get(prefix_value)
+
+        if not content_sheet:
+            raise ValueError(
+                f"({fct_name}) [{current_sheet_name}] Referenced content sheet for prefix_value \"{prefix_value}\" (prefix_id \"{prefix_id}\") not found"
+            )
+
+        if content_sheet not in wb.sheetnames:
+            raise ValueError(
+                f"({fct_name}) [{current_sheet_name}] Referenced content sheet \"{content_sheet}\" not found in workbook"
+            )
+
+        content_df = pd.DataFrame(wb[content_sheet].values)
+        content_df.columns = content_df.iloc[0]
+        content_df = content_df.drop(index=0).reset_index(drop=True)
+
+        # Only check "ref_id" column
+        if "ref_id" not in content_df.columns:
+            raise ValueError(
+                f"({fct_name}) [{current_sheet_name}] Sheet \"{content_sheet}\" has no \"ref_id\" column"
+            )
+
+        valid_ref_ids = set(content_df["ref_id"].astype(str).str.strip())
+
+        for idx, value in df[column_name].dropna().astype(str).items():
+            elements = re.split(r"[\n,]", value)
+            for i, raw in enumerate(elements, start=1):
+                raw = raw.strip()
+                if not raw:
+                    continue
+                if not raw.startswith(prefix_id + ":"):
+                    continue
+                urn_id = raw.split(":", 1)[1].strip()
+                if urn_id not in valid_ref_ids:
+                    raise ValueError(
+                        f"({fct_name}) [{current_sheet_name}] Row #{idx + 2} - Invalid ref_id \"{urn_id}\" (element #{i}) with prefix \"{prefix_id}\" in column \"{column_name}\".\n"
+                        f"> 💡 Tip: This ID must exist in the sheet \"{content_sheet}\" in column \"ref_id\"."
+                    )
+
+    if verbose:
+        msg = f'💬 ℹ️  [INFO] ({fct_name}) [{current_sheet_name}] Column \"{column_name}\" contains valid URN references'
+        print(msg)
+        if ctx:
+            ctx.add_sheet_verbose_msg(current_sheet_name, msg)
+
+
 
 # [CONTENT] Framework
+# {ALMOST OK} TODO : Finish "_framework_validate_framework_column_urns()"
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -1459,10 +1802,19 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbo
         if ref_id:
             validate_ref_id_with_spaces(ref_id, fct_name, idx)
 
-    # Validate columns that reference other sheets
+    # Validate columns that reference other sheets (only if they contain non-empty values)
     for column in ["implementation_groups", "answer"]:
         if column in df.columns:
-            _framework_validate_column_against_reference_sheet(wb, df, column, sheet_name, verbose, ctx)
+            non_empty_values = df[column].dropna().astype(str).map(str.strip)
+            if not non_empty_values[non_empty_values != ""].empty:
+                _framework_validate_column_against_reference_sheet(wb, df, column, sheet_name, verbose, ctx)
+
+    # Validate URN-related columns only if they contain non-empty values
+    for column in ["threats", "reference_controls"]:
+        if column in df.columns:
+            non_empty_values = df[column].dropna().astype(str).map(str.strip)
+            if not non_empty_values[non_empty_values != ""].empty:
+                _framework_validate_framework_column_urns(wb, df, column, sheet_name, verbose, ctx)
 
     # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
     _framework_validate_question_answer_alignment(df, sheet_name, fct_name, verbose, ctx)
@@ -1718,47 +2070,12 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
     internal_ref_ctrl = []; external_ref_ctrl = []
     
     if threats_sheets:
-        internal_threats, external_threats = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, fct_name, ctx)
+        internal_threats, external_threats, _ = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, fct_name, ctx)
     if ref_ctrl_sheets:
-        internal_ref_ctrl, external_ref_ctrl = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, fct_name, ctx)
+        internal_ref_ctrl, external_ref_ctrl, _ = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, fct_name, ctx)
 
     # Info messages for "threats"
-    if internal_threats:
-        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Internal \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_threats)}")
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"threats\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-    if external_threats:
-        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] External \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in external_threats)}")
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"threats\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-    # Info messages for "reference_controls"
-    if internal_ref_ctrl:
-        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Internal \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_ref_ctrl)}")
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"reference_controls\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-    if external_ref_ctrl:
-        print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] External \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in external_ref_ctrl)}")
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"reference_controls\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
+    print_info_about_internal_external_URN_prefix(sheet_name, internal_threats, external_threats, internal_ref_ctrl, external_ref_ctrl, fct_name, verbose, ctx)
 
     ### 4. Check if external prefixes are declared in "dependencies" from "library_meta" ###
 
