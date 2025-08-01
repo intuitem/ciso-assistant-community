@@ -71,7 +71,7 @@ python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
 
 Usage: 
 ```bash
-python check_library_v2.py your_library_file [--verbose]
+python check_library_v2.py your_library_file.xlsx [--verbose]
 ```
 
 Arguments:
@@ -81,7 +81,7 @@ Arguments:
 To launch it, open a shell in a command line, and type:
 
 ```bash
-python check_library_v2.py your_library_file
+python check_library_v2.py your_library_file.xlsx
 ```
 
 Messages will be displayed in the shell, telling you if there's a problem with your library, if there's anything to consider, and if your library is suitable for conversion with `convert_library_v2.py`.
