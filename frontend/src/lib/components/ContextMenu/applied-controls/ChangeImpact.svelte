@@ -23,13 +23,13 @@
 	});
 
 	async function changeImpact(newImpact: string) {
-		const endpoint = `/applied-controls/${row?.meta?.id}/impact`;
+		const endpoint = `/applied-controls/${row?.meta?.id}/control_impact`;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ impact: newImpact })
+			body: JSON.stringify({ control_impact: newImpact })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);

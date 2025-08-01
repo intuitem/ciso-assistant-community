@@ -161,6 +161,30 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/control_impact',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/effort',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -778,7 +802,9 @@ export const listViewFields = {
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
-			'riskAssessment'
+			'riskAssessment',
+			'control_impact',
+			'effort'
 		],
 		body: [
 			'ref_id',
@@ -791,7 +817,9 @@ export const listViewFields = {
 			'applied_controls',
 			'residual_level',
 			'treatment',
-			'risk_assessment'
+			'risk_assessment',
+			'control_impact',
+			'effort'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -802,7 +830,9 @@ export const listViewFields = {
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
-			within_tolerance: RISK_TOLERANCE_FILTER
+			within_tolerance: RISK_TOLERANCE_FILTER,
+			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
+			effort: APPLIED_CONTROL_EFFORT_FILTER
 		}
 	},
 	'risk-acceptances': {
