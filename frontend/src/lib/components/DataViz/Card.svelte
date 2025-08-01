@@ -43,7 +43,7 @@
 			{/if}
 		</div>
 		<div class="mt-auto">
-			<p class="text-4xl font-bold text-left">{count}</p>
+			<p class="text-4xl font-bold text-left" data-testid="card-{section}-{label}">{count}</p>
 			<div class="text-sm capitalize">{label}</div>
 		</div>
 	</Anchor>
@@ -58,7 +58,7 @@
 			{/if}
 		</div>
 		<div class="mt-auto">
-			<p class="text-4xl font-bold text-left">{count}</p>
+			<p class="text-4xl font-bold text-left" data-testid="card-{section}-{label}">{count}</p>
 			<div class="text-sm capitalize">{label}</div>
 		</div>
 	</div>
