@@ -1548,6 +1548,8 @@
 	"time": "temps",
 	"delete": "Supprimer",
 	"changeStatus": "Changer le statut",
+	"changeImpact": "Changer l'impact",
+	"changeEffort": "Changer l'effort",
 	"errorUpdatingObject": "Une erreur s'est produite lors de la mise à jour de l'objet {object}.",
 	"assetClassDevices": "Appareils",
 	"assetClassEnterpriseAssets": "Actifs d'Entreprise",
