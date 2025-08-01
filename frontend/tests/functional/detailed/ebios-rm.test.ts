@@ -4,6 +4,19 @@ import { TestContent, test, expect } from '../../utils/test-utils.js';
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
+const ebiosRmStudy = {
+	displayName: 'Ebios RM studies',
+	modelName: 'ebiosrmstudy',
+	dependency: vars.matrix,
+	build: {
+		name: 'Test Ebios RM Study',
+		risk_matrix: vars.matrix.displayName,
+		folder: vars.folderName
+		// eta: "2025-01-01",
+		// due_date: "2025-05-01"
+	}
+};
+
 test('ebios rm study', async ({
 	logedPage,
 	foldersPage,
@@ -69,10 +82,10 @@ test('ebios rm study', async ({
 		await ebiosRmStudyPage.hasUrl();
 		await ebiosRmStudyPage.hasTitle();
 		await ebiosRmStudyPage.createItem({
-			name: testObjectsData.ebiosRmStudyPage.build.name,
+			name: ebiosRmStudy.build.name,
 			folder: vars.folderName
 		});
-		await page.getByRole('gridcell', { name: testObjectsData.ebiosRmStudyPage.build.name }).click();
+		await page.getByRole('gridcell', { name: ebiosRmStudy.build.name }).click();
 	});
 
 	await test.step('workshop 1', async () => {

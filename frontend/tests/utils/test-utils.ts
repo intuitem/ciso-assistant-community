@@ -76,7 +76,6 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
-			ebiosRmStudyPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -100,7 +99,6 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
-			ebiosRmStudyPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -743,26 +741,6 @@ export class TestContent {
 					name: '',
 					description: '',
 					due_date: '2025-12-31'
-				}
-			},
-			ebiosRmStudyPage: {
-				displayName: 'Ebios RM',
-				modelName: 'ebiosrmstudy',
-				dependency: vars.matrix,
-				build: {
-					name: 'Test Ebios RM Study',
-					description: vars.description,
-					risk_matrix: vars.matrix.displayName
-					// eta: "2025-01-01",
-					// due_date: "2025-05-01"
-				},
-				editParams: {
-					name: '',
-					description: '',
-					version: vars.riskAssessmentVersion2
-					//TODO add risk_matrix
-					// eta: "2025-12-31",
-					// due_date: "2026-02-25"
 				}
 			},
 			assetAssessmentsPage: {
