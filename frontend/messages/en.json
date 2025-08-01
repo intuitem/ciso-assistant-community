@@ -1558,6 +1558,7 @@
 	"update": "Update",
 	"delete": "Delete",
 	"changeStatus": "Change status",
+	"changeImpact": "Change impact",
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
 	"auditLog": "Audit log",
 	"actor": "Actor",

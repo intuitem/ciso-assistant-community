@@ -3,6 +3,7 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 
@@ -1397,7 +1398,10 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
-	'applied-controls': [{ component: ChangeStatus, props: {} }],
+	'applied-controls': [
+		{ component: ChangeStatus, props: {} },
+		{ component: ChangeImpact, props: {} }
+	],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
