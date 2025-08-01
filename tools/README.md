@@ -4,6 +4,8 @@ The `example_framework.xlsx` file will help you understand the structure of a fr
 
 The `prepare_framework_v2.py` script can be used to create an Excel file with the base structure of a CISO Assistant framework in v2 format.
 
+The `check_library_v2.py` script can be used to check that the structure of a CISO Assistant Excel library file is correct.
+
 The `convert_library_v2.py` script can be used to transform an Excel file to a CISO Assistant library.
 
 The `convert_library_v1.py` script is the previous version working on the previous Excel file format.
@@ -63,6 +65,28 @@ python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
 
 > [!TIP]
 > See ["Format of Excel files"](#format-of-excel-files) for a better understanding of Excel and YAML configuration file values.
+
+
+### > `check_library_v2.py`
+
+Usage: 
+```bash
+python check_library_v2.py your_library_file [--verbose]
+```
+
+Arguments:
+- **`--verbose`**: Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.
+
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python check_library_v2.py your_library_file
+```
+
+Messages will be displayed in the shell, telling you if there's a problem with your library, if there's anything to consider, and if your library is suitable for conversion with `convert_library_v2.py`.
+
+By reading the output messages and reading the instructions when they're displayed, you will be able to fix your Excel library easily, saving you from wasting time figuring out what's wrong with your framework.
 
 
 ### > `convert_library_v2.py`
