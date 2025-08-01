@@ -542,7 +542,6 @@ export class TestContent {
 					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'To do',
-					owner: [LoginPage.defaultEmail],
 					//eta: '2025-01-01',
 					//expiry_date: '2025-05-01',
 					//link: 'https://intuitem.com/',
