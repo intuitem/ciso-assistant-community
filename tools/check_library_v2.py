@@ -112,19 +112,19 @@ class ConsoleContext:
 
 
 class MetaTypes(Enum):
-    LIBRARY                 = "library"
-    FRAMEWORK               = "framework"
-    THREATS                 = "threats"
-    REFERENCE_CONTROLS      = "reference_controls"
-    RISK_MATRIX             = "risk_matrix"
+    LIBRARY = "library"
+    FRAMEWORK = "framework"
+    THREATS = "threats"
+    REFERENCE_CONTROLS = "reference_controls"
+    RISK_MATRIX = "risk_matrix"
     REQUIREMENT_MAPPING_SET = "requirement_mapping_set"
-    IMPLEMENTATION_GROUPS   = "implementation_groups"
-    SCORES                  = "scores"
-    ANSWERS                 = "answers"
-    URN_PREFIX              = "urn_prefix"
+    IMPLEMENTATION_GROUPS = "implementation_groups"
+    SCORES = "scores"
+    ANSWERS = "answers"
+    URN_PREFIX = "urn_prefix"
 
 class SheetTypes(Enum):
-    META    = "_meta"
+    META = "_meta"
     CONTENT = "_content"
 
 
@@ -2066,8 +2066,10 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
     ref_ctrl_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
     
     # 3. Check whether the values for each "prefix_value" come from internal sheets or external framework
-    internal_threats = []; external_threats = []
-    internal_ref_ctrl = []; external_ref_ctrl = []
+    internal_threats = []
+    external_threats = []
+    internal_ref_ctrl = []
+    external_ref_ctrl = []
     
     if threats_sheets:
         internal_threats, external_threats, _ = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, fct_name, ctx)
