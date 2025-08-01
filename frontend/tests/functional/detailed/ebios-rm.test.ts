@@ -1,3 +1,4 @@
+import { LoginPage } from '../../utils/login-page.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 
 let vars = TestContent.generateTestVars();
@@ -19,11 +20,6 @@ test('ebios rm study', async ({
 			name: vars.folderName,
 			description: vars.description
 		});
-		// NOTE: creating one more folder not to trip up the autocomplete test utils
-		await foldersPage.createItem({
-			name: vars.folderName + ' foo',
-			description: vars.description
-		});
 	});
 
 	await test.step('create required perimeter', async () => {
@@ -37,10 +33,10 @@ test('ebios rm study', async ({
 			lc_status: 'Production'
 		});
 		await perimetersPage.createItem({
-			name: vars.perimeterName + ' bar',
+			name: 'additional perimeter',
 			description: vars.description,
 			folder: vars.folderName,
-			ref_id: 'R.12345',
+			ref_id: 'R.1234',
 			lc_status: 'Production'
 		});
 	});
@@ -54,13 +50,6 @@ test('ebios rm study', async ({
 			folder: vars.folderName,
 			type: 'Primary'
 		});
-		// NOTE: creating one more asset not to trip up the autocomplete test utils
-		await assetsPage.createItem({
-			name: vars.assetName + ' foo',
-			description: vars.description,
-			folder: vars.folderName,
-			type: 'Primary'
-		});
 	});
 
 	await test.step('import risk matrix', async () => {
@@ -69,41 +58,44 @@ test('ebios rm study', async ({
 		await librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
 	});
 
+	await test.step('import framework', async () => {
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
+		await librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
+	});
+
 	await test.step('create ebios rm study', async () => {
 		await page.goto('/ebios-rm');
 		await ebiosRmStudyPage.hasUrl();
 		await ebiosRmStudyPage.hasTitle();
-		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-name').click();
-		await page.getByTestId('form-input-name').fill('test ebios rm study');
-		await page.getByTestId('form-input-folder').getByRole('textbox').click();
-		await page.getByRole('option', { name: 'DEMO' }).click();
-		await page.getByTestId('save-button').click();
-		await page.getByRole('gridcell', { name: 'test ebios rm study' }).click();
+		await ebiosRmStudyPage.createItem({
+			name: testObjectsData.ebiosRmStudyPage.build.name,
+			folder: vars.folderName
+		});
+		await page.getByRole('gridcell', { name: testObjectsData.ebiosRmStudyPage.build.name }).click();
 	});
 
 	await test.step('workshop 1', async () => {
 		await test.step('step 1', async () => {
-			await page.getByRole('link', { name: 'Step 1 Define the study' }).click();
+			await page.getByTestId('workshop-1-step-1-link').click();
 			await page.getByRole('link', { name: ' Edit' }).click();
-			await page.getByTestId('form-input-authors').getByRole('textbox').click();
-			await page.getByRole('option', { name: vars.user.email }).click();
-			await page.getByTestId('form-input-reviewers').getByRole('textbox').click();
-			await page
-				.getByTestId('form-input-reviewers')
-				.getByRole('option', { name: vars.user.email })
-				.click();
+			await ebiosRmStudyPage.form.fill({
+				authors: [LoginPage.defaultEmail],
+				reviewers: [LoginPage.defaultEmail]
+			});
 			await page.getByTestId('save-button').click();
-			await page
-				.locator('#activityOne div')
-				.filter({ hasText: `Authors ${vars.user.email}` })
-				.getByRole('link')
-				.click();
-			await page
-				.locator('#activityOne div')
-				.filter({ hasText: `Reviewers ${vars.user.email}` })
-				.getByRole('link')
-				.click();
+			await expect(
+				page
+					.locator('#activityOne div')
+					.filter({ hasText: `Authors ${LoginPage.defaultEmail}` })
+					.getByRole('link')
+			).toBeVisible();
+			await expect(
+				page
+					.locator('#activityOne div')
+					.filter({ hasText: `Reviewers ${LoginPage.defaultEmail}` })
+					.getByRole('link')
+			).toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
@@ -114,7 +106,10 @@ test('ebios rm study', async ({
 		});
 
 		await test.step('step 2', async () => {
-			await page.getByRole('link', { name: 'Step 2 Define business and' }).click();
+			await expect(async () => {
+				await page.getByTestId('workshop-1-step-2-link').click();
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
 			await page.getByRole('textbox').click();
 			await page.getByRole('option', { name: `${vars.folderName}/${vars.assetName}` }).click();
@@ -134,7 +129,10 @@ test('ebios rm study', async ({
 		});
 
 		await test.step('step 3', async () => {
-			await page.getByRole('link', { name: 'Step 3 Identify feared events' }).click();
+			await expect(async () => {
+				await page.getByTestId('workshop-1-step-3-link').click();
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 1');
@@ -144,7 +142,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
 			await page.getByRole('option', { name: 'Authenticity' }).click();
 			await page.getByRole('option', { name: 'Availability' }).click();
-			await page.getByTestId('save-button').click();
+			await page.getByTestId('save-button').press('Enter');
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 2');
@@ -156,7 +154,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
 			await page.getByRole('option', { name: 'Environmental' }).click();
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').press('Escape');
-			await page.getByTestId('save-button').click();
+			await page.getByTestId('save-button').press('Enter');
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
@@ -167,17 +165,20 @@ test('ebios rm study', async ({
 		});
 
 		await test.step('step 4', async () => {
-			await page.getByRole('link', { name: 'Step 4 Determine the security' }).click();
+			await expect(async () => {
+				await page.getByTestId('workshop-1-step-4-link').click();
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
+			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('security foundation audit');
 			await page.getByTestId('form-input-perimeter').getByRole('textbox').click();
 			await page.getByRole('option', { name: `${vars.folderName}/${vars.perimeterName}` }).click();
 			await page.getByTestId('form-input-framework').getByRole('searchbox').click();
-			await page.getByRole('option', { name: 'NIST CSF v2.0' }).click();
+			await page.getByRole('option', { name: vars.framework.name }).click();
 			await page.getByTestId('form-input-authors').getByRole('textbox').click();
-			await page.getByRole('option', { name: vars.user.email }).click();
-			await page.getByTestId('save-button').click();
+			await page.getByRole('option', { name: LoginPage.defaultEmail }).click();
+			await page.getByTestId('save-button').press('Enter');
 			await expect(page.getByRole('gridcell', { name: 'security foundation audit' })).toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
