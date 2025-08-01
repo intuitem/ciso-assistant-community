@@ -1,4 +1,4 @@
-import { assigned, m } from '$paraglide/messages.js';
+import { assigned, m, riskAssessment } from '$paraglide/messages.js';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { expect, test, TestContent } from '../../utils/test-utils.js';
@@ -79,7 +79,8 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create risk scenario', async () => {
 		await riskScenariosPage.goto();
 		await riskScenariosPage.createItem({
-			name: 'test-risk-scenario'
+			name: 'test-risk-scenario',
+			riskAssessment: 'test-risk-assessment'
 		});
 		await riskScenariosPage.goto();
 
