@@ -1370,7 +1370,43 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
         print(msg)
         if ctx:
             ctx.add_sheet_verbose_msg(current_sheet_name, msg)
-        
+
+
+# For each row, ensure that the number of entries in "questions" matches the number of entries in "answer" (or is 1), unless both are empty.
+def _framework_validate_question_answer_alignment(df: pd.DataFrame, sheet_name: str, context: str, verbose: bool = False, ctx: ConsoleContext = None):
+
+    if "questions" not in df.columns or "answer" not in df.columns:
+        return  # Skip if one of them is missing — already validated elsewhere
+
+    for idx, row in df.iterrows():
+        q_raw = str(row["questions"]).strip() if pd.notna(row["questions"]) else ""
+        a_raw = str(row["answer"]).strip() if pd.notna(row["answer"]) else ""
+
+        if not q_raw:
+            if a_raw:
+                raise ValueError(
+                    f"({context}) [{sheet_name}] Row #{idx + 2}: \"questions\" is empty but \"answer\" is not."
+                    "\n> 💡 Tip: Either remove the answer or provide a question."
+                )
+            continue  # both empty = OK
+
+        q_list = [q.strip() for q in q_raw.split("\n") if q.strip()]
+        a_list = [a.strip() for a in a_raw.split("\n") if a.strip()]
+
+        q_count = len(q_list)
+        a_count = len(a_list)
+
+        if a_count not in [1, q_count]:
+            raise ValueError(
+                f"({context}) [{sheet_name}] Row #{idx + 2}: Found {q_count} question(s) but {a_count} answer(s)."
+                f"\n> 💡 Tip: You must provide either 1 answer for all questions ({q_count} answer{'s' if q_count > 1 else ''}), or one answer per question."
+            )
+
+    if verbose:
+            msg = f'💬 ℹ️  [INFO] ({context}) [{sheet_name}] Number of entries in the column "questions" matches the number of entries in the column "answer"'
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
 
 
@@ -1395,8 +1431,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbo
     if has_questions != has_answer:
         missing_col = "answer" if has_questions else "questions"
         raise ValueError(
-            f"({fct_name}) [{sheet_name}] Column \"{missing_col}\" is required when column \"{'questions' if missing_col == 'answer' else 'answer'}\" is present.\n"
-            f"> 💡 Tip: Either provide both \"questions\" and \"answer\" columns, or remove both."
+            f"({fct_name}) [{sheet_name}] Column \"{missing_col}\" is required when column \"{'questions' if missing_col == 'answer' else 'answer'}\" is present."
+            f"\n> 💡 Tip: Either provide both \"questions\" and \"answer\" columns, or remove both."
         )
 
     # Check uniqueness of some column values
@@ -1428,6 +1464,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbo
         if column in df.columns:
             _framework_validate_column_against_reference_sheet(wb, df, column, sheet_name, verbose, ctx)
 
+    # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
+    _framework_validate_question_answer_alignment(df, sheet_name, fct_name, verbose, ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
