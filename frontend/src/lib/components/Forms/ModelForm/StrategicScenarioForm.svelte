@@ -36,6 +36,14 @@
 	bind:cachedValue={formDataCache['ro_to_couple']}
 	label={m.roToCouple()}
 />
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <TextField
 	{form}
 	field="ref_id"

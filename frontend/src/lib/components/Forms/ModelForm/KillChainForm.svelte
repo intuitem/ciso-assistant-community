@@ -24,6 +24,14 @@
 	}: Props = $props();
 </script>
 
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 {#if !initialData['operating_mode']}
 	<AutocompleteSelect
 		{form}

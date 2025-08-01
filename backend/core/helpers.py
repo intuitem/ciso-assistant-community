@@ -7,6 +7,7 @@ from typing import Dict, List
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
+from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -1013,6 +1014,62 @@ def get_metrics(user: User, folder_id):
     return data
 
 
+def get_instance_metrics():
+    """
+    Returns the instance metrics such as the number of users, domains, perimeters, etc.
+    """
+    nb_users = User.objects.all().count()
+    nb_first_login = User.objects.filter(first_login=True).count()
+    nb_libraries = LoadedLibrary.objects.all().count()
+    nb_domains = Folder.objects.filter(content_type="DO").count()
+    nb_perimeters = Perimeter.objects.all().count()
+    nb_assets = Asset.objects.all().count()
+    nb_threats = Threat.objects.all().count()
+    nb_functions = ReferenceControl.objects.all().count()
+    nb_measures = AppliedControl.objects.all().count()
+    nb_evidences = Evidence.objects.all().count()
+    nb_compliance_assessments = ComplianceAssessment.objects.all().count()
+    nb_risk_assessments = RiskAssessment.objects.all().count()
+    nb_risk_scenarios = RiskScenario.objects.all().count()
+    nb_risk_acceptances = RiskAcceptance.objects.all().count()
+    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
+    nb_editors = len(User.get_editors())
+    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
+
+    created_at = int(Folder.get_root_folder().created_at.timestamp())
+    last_login_dt = max(
+        [
+            x["last_login"]
+            for x in User.objects.all().values("last_login")
+            if x["last_login"]
+        ],
+        default=None,
+    )
+    last_login = int(last_login_dt.timestamp()) if last_login_dt else 0
+
+    return {
+        "nb_users": nb_users,
+        "nb_first_login": nb_first_login,
+        "nb_libraries": nb_libraries,
+        "nb_domains": nb_domains,
+        "nb_perimeters": nb_perimeters,
+        "nb_assets": nb_assets,
+        "nb_threats": nb_threats,
+        "nb_functions": nb_functions,
+        "nb_measures": nb_measures,
+        "nb_evidences": nb_evidences,
+        "nb_compliance_assessments": nb_compliance_assessments,
+        "nb_risk_assessments": nb_risk_assessments,
+        "nb_risk_scenarios": nb_risk_scenarios,
+        "nb_risk_acceptances": nb_risk_acceptances,
+        "nb_seats": nb_seats,
+        "nb_editors": nb_editors,
+        "expiration": expiration,
+        "created_at": created_at,
+        "last_login": last_login,
+    }
+
+
 def risk_status(user: User, risk_assessment_list):
     risk_color_map = get_risk_color_map(user)
     names = list()
@@ -1258,37 +1315,51 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     return {"labels": labels, "values": values}
 
 
-def get_folder_content(folder: Folder, include_perimeters=True):
+def get_folder_content(
+    folder: Folder, include_perimeters, viewable_objects, needed_folders
+):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
-        entry = {
-            "name": f.name,
-            "uuid": f.id,
-        }
-        children = get_folder_content(f, include_perimeters=include_perimeters)
-        if len(children) > 0:
-            entry.update({"children": children})
-        content.append(entry)
-    if include_perimeters:
+        if f.id in viewable_objects or f.id in needed_folders:
+            entry = {
+                "name": f.name,
+                "uuid": f.id,
+                "viewable": viewable_objects and f.id in viewable_objects,
+            }
+            children = get_folder_content(
+                f,
+                include_perimeters=include_perimeters,
+                viewable_objects=viewable_objects,
+                needed_folders=needed_folders,
+            )
+            if len(children) > 0:
+                entry.update({"children": children})
+            content.append(entry)
+
+    if include_perimeters and folder.id in viewable_objects:
         for p in Perimeter.objects.filter(folder=folder).distinct():
             content.append(
                 {
                     "name": p.name,
+                    "symbol": "circle",
+                    "symbolSize": 10,
+                    "itemStyle": {"color": "#222436"},
                     "children": [
                         {
                             "name": "Audits",
+                            "symbol": "diamond",
                             "value": ComplianceAssessment.objects.filter(
                                 perimeter=p
                             ).count(),
                         },
                         {
                             "name": "Risk assessments",
+                            "symbol": "diamond",
                             "value": RiskAssessment.objects.filter(perimeter=p).count(),
                         },
                     ],
                 }
             )
-
     return content
 
 
