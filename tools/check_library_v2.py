@@ -101,6 +101,10 @@ class MetaTypes(Enum):
     ANSWERS                 = "answers"
     URN_PREFIX              = "urn_prefix"
 
+class SheetTypes(Enum):
+    META    = "_meta"
+    CONTENT = "_content"
+
 
 
 # ─────────────────────────────────────────────────────────────
@@ -832,19 +836,27 @@ def get_content_sheet_base_name(content_sheet_name: str) -> str:
     return base_name
 
 
-# Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
-def get_corresponding_content_sheet_name(meta_sheet_names: List[str]) -> str:
+# Replace the suffix of each sheet name in the list with the target sheet type suffix. Valid suffixes are defined in SheetTypes.
+def get_corresponding_type_sheet_names(sheet_names: List[str], sheet_type: SheetTypes) -> List[str]:
 
-    content_sheet_names = []
+    suffixes = [t.value for t in SheetTypes]
+    result = []
 
-    for sheet in meta_sheet_names:
-        if not sheet.endswith("_meta"):
-            raise ValueError(f"Invalid sheet name: \"{sheet}\" does not end with \"_meta\"")
+    for name in sheet_names:
+        matched = False
 
-        content_name = re.sub(r'_meta$', '_content', sheet)
-        content_sheet_names.append(content_name)
+        for suffix in suffixes:
+            if name.endswith(suffix):
+                # Replace the exact matching suffix at the end of the name with the target suffix
+                new_name = re.sub(re.escape(suffix) + r'$', sheet_type.value, name)
+                result.append(new_name)
+                matched = True
+                break
 
-    return content_sheet_names
+        if not matched:
+            raise ValueError(f"Invalid sheet name: \"{name}\" does not end with a known sheet type suffix {suffixes}")
+
+    return result
 
 
 # Check if a content sheet is referenced in any 'framework' meta sheet via a specific meta field (e.g., 'scores_definition')
@@ -1415,7 +1427,7 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
 
     # Check if the "implementation_groups" sheet is actually used in a "framework" sheet
     frameworks_with_imp_grp = check_content_sheet_usage_in_frameworks(wb, sheet_name, "implementation_groups_definition", fct_name, ctx)
-    frameworks_with_imp_grp = get_corresponding_content_sheet_name(frameworks_with_imp_grp)
+    frameworks_with_imp_grp = get_corresponding_type_sheet_names(frameworks_with_imp_grp, SheetTypes.CONTENT)
 
     # Check if every implementation groups are actually used in "framework" sheets
     if frameworks_with_imp_grp:
@@ -1522,7 +1534,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
 
     # Check if the "answers" sheet is actually used in a "framework" sheet
     frameworks_with_answers = check_content_sheet_usage_in_frameworks(wb, sheet_name, "answers_definition", fct_name, ctx)
-    frameworks_with_answers = get_corresponding_content_sheet_name(frameworks_with_answers)
+    frameworks_with_answers = get_corresponding_type_sheet_names(frameworks_with_answers, SheetTypes.CONTENT)
 
     # Check if every answers are actually used in "framework" sheets
     if frameworks_with_answers:
@@ -1547,7 +1559,7 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
     
     # 1. Get "framework" content sheets
     framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK)
-    framework_sheets = get_corresponding_content_sheet_name(framework_sheets)
+    framework_sheets = get_corresponding_type_sheet_names(framework_sheets, SheetTypes.CONTENT)
 
     # 2. Check if every Prefix IDs are actually used in "framework" sheets
     if framework_sheets:
