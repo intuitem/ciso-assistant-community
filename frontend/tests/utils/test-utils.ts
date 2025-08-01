@@ -7,6 +7,7 @@ import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
+import { author, owner } from '$paraglide/messages.js';
 
 type Fixtures = {
 	data: { [key: string]: any };
@@ -116,7 +117,8 @@ export const test = base.extend<Fixtures>({
 			//{ name: 'version', type: type.TEXT },
 			//{ name: 'status', type: type.SELECT },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'eta', type: type.DATE }
+			{ name: 'eta', type: type.DATE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 			//{ name: 'due_date', type: type.DATE }
 		]);
 		await use(aPage);
@@ -191,7 +193,8 @@ export const test = base.extend<Fixtures>({
 			{ name: 'status', type: type.SELECT },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'eta', type: type.DATE },
-			{ name: 'due_date', type: type.DATE }
+			{ name: 'due_date', type: type.DATE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE } // Optional field
 		]);
 		await use(rPage);
 	},
@@ -214,7 +217,8 @@ export const test = base.extend<Fixtures>({
 			{ name: 'applied_controls', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'residual_proba', type: type.SELECT },
 			{ name: 'residual_impact', type: type.SELECT },
-			{ name: 'justification', type: type.TEXT }
+			{ name: 'justification', type: type.TEXT },
+			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(rPage);
 	},
@@ -244,7 +248,8 @@ export const test = base.extend<Fixtures>({
 			//{ name: 'effort', type: type.SELECT },
 			//{ name: 'cost', type: type.NUMBER },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
+			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'owner', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(sPage);
 	},
@@ -537,6 +542,7 @@ export class TestContent {
 					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'To do',
+					owner: [LoginPage.defaultEmail],
 					//eta: '2025-01-01',
 					//expiry_date: '2025-05-01',
 					//link: 'https://intuitem.com/',
@@ -575,7 +581,8 @@ export class TestContent {
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					// status: 'Planned',
 					// version: "1.4.2",
-					framework: vars.framework.name
+					framework: vars.framework.name,
+					author: [LoginPage.defaultEmail]
 					// eta: "2025-01-01",
 					// due_date: "2025-05-01"
 				},
@@ -617,7 +624,8 @@ export class TestContent {
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					version: vars.riskAssessmentVersion,
 					status: 'Planned',
-					risk_matrix: vars.matrix.displayName
+					risk_matrix: vars.matrix.displayName,
+					author: [LoginPage.defaultEmail]
 					// eta: "2025-01-01",
 					// due_date: "2025-05-01"
 				},
@@ -651,7 +659,8 @@ export class TestContent {
 					applied_controls: [vars.folderName + '/' + vars.appliedControlName],
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
-					justification: 'Test comments'
+					justification: 'Test comments',
+					owners: [LoginPage.defaultEmail]
 				}
 			},
 			riskAcceptancesPage: {

@@ -1,4 +1,4 @@
-import { assigned, m, riskAssessment } from '$paraglide/messages.js';
+import { assigned, author, m, owners, riskAssessment } from '$paraglide/messages.js';
 import { version } from 'os';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
@@ -50,46 +50,33 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create risk assessment', async () => {
 		await riskAssessmentsPage.goto();
 		await riskAssessmentsPage.createItem({
-			name: 'test-risk-assessment',
+			name: vars.riskAssessmentName,
 			perimeter: `${vars.folderName}/${vars.perimeterName}`,
-			version: '2.0',
-			description: 'Hi from ciso-assistant dev'
+			description: vars.description,
+			authors: ['admin@tests.com']
 		});
-		await riskAssessmentsPage.goto();
-
-		const riskRow = page.getByRole('row', { name: /test-risk-assessment/i });
-		await riskRow.getByTestId('tablerow-edit-button').click();
-		await page.getByTestId('form-input-authors').click();
-		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('Create security exception', async () => {
 		await securityExceptionsPage.goto();
 		await securityExceptionsPage.createItem({
-			name: 'test-security-exception',
-			folder: vars.folderName
+			name: vars.securityExceptionName,
+			folder: vars.folderName,
+			owners: ['admin@tests.com']
 		});
-		await securityExceptionsPage.goto();
-
-		const riskRow = page.getByRole('row', { name: /test-security-exception/i });
-		await riskRow.getByTestId('tablerow-edit-button').click();
-		await page.getByTestId('form-input-owners').click();
-		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('Create risk scenario', async () => {
 		await riskScenariosPage.goto();
 		await riskScenariosPage.createItem({
-			name: 'test-risk-scenario',
-			riskAssessment: 'test-risk-assessment',
+			name: vars.riskScenarioName,
+			risk_assessment: vars.riskAssessmentName,
 			description: 'Hi from ciso-assistant dev',
 			ref_id: 'R.1234'
 		});
 		await riskScenariosPage.goto();
 
-		const riskRow = page.getByRole('row', { name: /test-risk-scenario/i });
+		const riskRow = page.getByRole('row', { name: vars.riskScenarioName });
 		await riskRow.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-owner').click();
 		await page.getByRole('option', { name: 'admin@tests.com' }).click();
@@ -99,15 +86,10 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create control with owner', async () => {
 		await appliedControlsPage.goto();
 		await appliedControlsPage.createItem({
-			name: 'test-control',
-			folder: vars.folderName
+			name: vars.appliedControlName,
+			folder: vars.folderName,
+			owner: ['admin@tests.com']
 		});
-
-		const riskRow = page.getByRole('row', { name: /test-control/i });
-		await riskRow.getByTestId('tablerow-edit-button').click();
-		await page.getByTestId('form-input-owner').click();
-		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('Import a library', async () => {
@@ -124,17 +106,11 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Create audit', async () => {
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
-			name: 'test-audit',
+			name: vars.assessmentName,
 			framework: 'NIST CSF',
-			perimeter: `${vars.folderName}/${vars.perimeterName}`
+			perimeter: `${vars.folderName}/${vars.perimeterName}`,
+			authors: ['admin@tests.com']
 		});
-
-		await complianceAssessmentsPage.goto();
-		const riskRow = page.getByRole('row', { name: /test-audit/i });
-		await riskRow.getByTestId('tablerow-edit-button').click();
-		await page.getByTestId('form-input-authors').click();
-		await page.getByRole('option', { name: 'admin@tests.com' }).click();
-		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('Verify my assignments contains created entities', async () => {
@@ -146,11 +122,11 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 
 		await expect(page).toHaveURL('/my-assignments');
 
-		await expect(page.getByText('test-control')).toBeVisible();
-		await expect(page.getByText('test-risk-assessment', { exact: true })).toBeVisible();
-		await expect(page.getByText('test-audit')).toBeVisible();
-		await expect(page.getByText('test-risk-scenario')).toBeVisible();
-		await expect(page.getByText('test-security-exception')).toBeVisible();
+		await expect(page.getByText(vars.appliedControlName)).toBeVisible();
+		await expect(page.getByText(vars.riskAssessmentName, { exact: true })).toBeVisible();
+		await expect(page.getByText(vars.assessmentName)).toBeVisible();
+		await expect(page.getByText(vars.riskScenarioName)).toBeVisible();
+		await expect(page.getByText(vars.securityExceptionName)).toBeVisible();
 	});
 
 	await test.step('Create control without owner and verify absence in my assignments', async () => {
