@@ -1,4 +1,5 @@
 import { assigned, m, riskAssessment } from '$paraglide/messages.js';
+import { version } from 'os';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { expect, test, TestContent } from '../../utils/test-utils.js';
@@ -50,7 +51,9 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await riskAssessmentsPage.goto();
 		await riskAssessmentsPage.createItem({
 			name: 'test-risk-assessment',
-			perimeter: `${vars.folderName}/${vars.perimeterName}`
+			perimeter: `${vars.folderName}/${vars.perimeterName}`,
+			version: '2.0',
+			description: 'Hi from ciso-assistant dev'
 		});
 		await riskAssessmentsPage.goto();
 
@@ -80,7 +83,9 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await riskScenariosPage.goto();
 		await riskScenariosPage.createItem({
 			name: 'test-risk-scenario',
-			riskAssessment: 'test-risk-assessment'
+			riskAssessment: 'test-risk-assessment',
+			description: 'Hi from ciso-assistant dev',
+			ref_id: 'R.1234'
 		});
 		await riskScenariosPage.goto();
 
