@@ -4,6 +4,7 @@ import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
+import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 
@@ -1430,7 +1431,8 @@ export type FilterKeys = {
 export const contextMenuActions = {
 	'applied-controls': [
 		{ component: ChangeStatus, props: {} },
-		{ component: ChangeImpact, props: {} }
+		{ component: ChangeImpact, props: {} },
+		{ component: ChangeEffort, props: {} }
 	],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
