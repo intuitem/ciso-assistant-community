@@ -1797,15 +1797,16 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
         print(msg)
 
     print("")
-    print(f"✅ [SUCCESS] Excel structure is valid for \"{file_name}\"")
-    
+
     if ctx.count_all_warnings() > 0:
+        print(f"✅⚠️  [SUCCESS] Excel structure validation ended with warnings for \"{file_name}\"")
         print(f"📜 [SUMMARY] ⚠️  Total [WARNING] for \"{file_name}\": {ctx.count_all_warnings()}")
-    
+    else:
+        print(f"✅ [SUCCESS] Excel structure is valid for \"{file_name}\"")
+
     if verbose and ctx.count_all_verbose() > 0:
         print(f"📜 [SUMMARY] 💬 Total [Verbose Messages] for \"{file_name}\": {ctx.count_all_verbose()}")
-    
-    
+
 
 
 # ─────────────────────────────────────────────────────────────
