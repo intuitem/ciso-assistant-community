@@ -934,7 +934,8 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
     if unused_ids:
         msg = (
             f"⚠️  [WARNING] ({context}) [{sheet_name}] The following ID(s) from column \"{id_column}\" are not used in any framework sheet: "
-            f"{', '.join(f'\"{x}\"' for x in unused_ids)}"
+            f"{', '.join(f'\"{x}\"' for x in unused_ids)}\n"
+            "> 💡 Tip: Use these IDs in a framework sheet, or remove them if not needed."
         )
         print(msg)
         if ctx:
@@ -1038,7 +1039,8 @@ def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFram
     if unused_ids:
         msg = (
             f"⚠️  [WARNING] ({context}) [{sheet_name}] The following Prefix ID(s) from column \"{id_column}\" are not used in any framework sheet: "
-            f"{', '.join(f'\"{x}\"' for x in unused_ids)}"
+            f"{', '.join(f'\"{x}\"' for x in unused_ids)}\n"
+            "> 💡 Tip: Use these Prefix IDs in a framework sheet, or remove them if not needed."
         )
         print(msg)
         if ctx:
@@ -1297,9 +1299,83 @@ def _req_map_set_validate_mapping_node_ids_against_sheets(wb: Workbook, df: pd.D
             print(msg2)
 
 
+def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+
+    context = get_current_fct_name()
+
+    column_to_key_mapping = {
+        "implementation_groups": "implementation_groups_definition",
+        "answer": "answers_definition"
+    }
+
+    if column_name not in column_to_key_mapping:
+        raise ValueError(f"({context}) [{current_sheet_name}] Unsupported column \"{column_name}\" for this validation")
+
+    # Get associated meta sheet
+    meta_sheet_name = get_corresponding_type_sheet_names([current_sheet_name], SheetTypes.META)[0]
+    if meta_sheet_name not in wb.sheetnames:
+        raise ValueError(f"({context}) [{current_sheet_name}] Missing meta sheet \"{meta_sheet_name}\" required to validate column \"{column_name}\"")
+
+    # Convert meta sheet to DataFrame
+    meta_ws = wb[meta_sheet_name]
+    meta_df = pd.DataFrame(meta_ws.values)
+    meta_df.columns = meta_df.iloc[0]
+    meta_df = meta_df.drop(index=0).reset_index(drop=True)
+
+    # Get the referenced sheet name from meta key
+    meta_key = column_to_key_mapping[column_name]
+    ref_base_name = get_meta_value(meta_df, meta_key, meta_sheet_name)
+
+    if not ref_base_name:
+        raise ValueError(
+            f"({context}) [{current_sheet_name}] The meta key \"{meta_key}\" is missing or empty, required for column \"{column_name}\".\n"
+            f"> 💡 Tip: Either remove column \"{column_name}\" or define a proper value for \"{meta_key}\" in the meta sheet."
+        )
+
+    ref_content_sheet = f"{ref_base_name}_content"
+    if ref_content_sheet not in wb.sheetnames:
+        raise ValueError(f"({context}) [{current_sheet_name}] Referenced sheet \"{ref_content_sheet}\" (from key \"{meta_key}\") not found")
+
+    # Convert referenced sheet to DataFrame
+    ref_ws = wb[ref_content_sheet]
+    ref_df = pd.DataFrame(ref_ws.values)
+    ref_df.columns = ref_df.iloc[0]
+    ref_df = ref_df.drop(index=0).reset_index(drop=True)
+
+    if column_name == "implementation_groups":
+        ref_column = "ref_id"
+        separator = ","
+    elif column_name == "answer":
+        ref_column = "id"
+        separator = "\n"
+    else:
+        raise RuntimeError(f"({context}) [{current_sheet_name}] Unexpected internal error: invalid column dispatch")
+
+    if ref_column not in ref_df.columns:
+        raise ValueError(f"({context}) [{current_sheet_name}] Referenced sheet \"{ref_content_sheet}\" does not contain required column \"{ref_column}\"")
+
+    valid_values = set(ref_df[ref_column].dropna().astype(str).map(str.strip))
+    
+    for idx, value in df[column_name].dropna().astype(str).items():
+        items = [v.strip() for v in value.split(separator) if v.strip()]
+        for i, item in enumerate(items, start=1):
+            if item not in valid_values:
+                raise ValueError(
+                    f"({context}) [{current_sheet_name}] Row #{idx + 2} - Invalid value \"{item}\" (element #{i}) in column \"{column_name}\".\n"
+                    f"> 💡 Tip: Make sure this value exists in column \"{ref_column}\" of the referenced sheet \"{ref_content_sheet}\"."
+                )
+
+    if verbose:
+        msg = f'💬 ℹ️  [INFO] ({context}) [{current_sheet_name}] Column \"{column_name}\" has valid values'
+        print(msg)
+        if ctx:
+            ctx.add_sheet_verbose_msg(current_sheet_name, msg)
+        
+
+
 
 # [CONTENT] Framework
-def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
     required_columns = ["depth"]  # "assessable" isn't there because it can be empty
@@ -1311,6 +1387,17 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+
+    # Check that "questions" and "answer" appear together (or not at all)
+    has_questions = "questions" in df.columns
+    has_answer = "answer" in df.columns
+
+    if has_questions != has_answer:
+        missing_col = "answer" if has_questions else "questions"
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Column \"{missing_col}\" is required when column \"{'questions' if missing_col == 'answer' else 'answer'}\" is present.\n"
+            f"> 💡 Tip: Either provide both \"questions\" and \"answer\" columns, or remove both."
+        )
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
@@ -1335,6 +1422,12 @@ def validate_framework_content(df, sheet_name, verbose: bool = False, ctx: Conso
 
         if ref_id:
             validate_ref_id_with_spaces(ref_id, fct_name, idx)
+
+    # Validate columns that reference other sheets
+    for column in ["implementation_groups", "answer"]:
+        if column in df.columns:
+            _framework_validate_column_against_reference_sheet(wb, df, column, sheet_name, verbose, ctx)
+
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -1596,26 +1689,38 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
         print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Internal \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_threats)}")
     else:
         if verbose:
-            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"threats\" prefixes found")
+            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"threats\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
     if external_threats:
         print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] External \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in external_threats)}")
     else:
         if verbose:
-            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"threats\" prefixes found")
+            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"threats\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
     # Info messages for "reference_controls"
     if internal_ref_ctrl:
         print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Internal \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_ref_ctrl)}")
     else:
         if verbose:
-            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"reference_controls\" prefixes found")
+            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No internal \"reference_controls\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
     if external_ref_ctrl:
         print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] External \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in external_ref_ctrl)}")
     else:
         if verbose:
-            print(f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"reference_controls\" prefixes found")
+            msg = f"💬 ℹ️  [INFO] ({fct_name}) [{sheet_name}] No external \"reference_controls\" prefixes found"
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(sheet_name, msg)
 
     ### 4. Check if external prefixes are declared in "dependencies" from "library_meta" ###
 
@@ -1722,7 +1827,7 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
     fct_name = get_current_fct_name()
     
     if corresponding_meta_type == MetaTypes.FRAMEWORK.value:
-        validate_framework_content(df, sheet_name, verbose, ctx)
+        validate_framework_content(wb, df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.THREATS.value:
         validate_threats_content(df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.REFERENCE_CONTROLS.value:
