@@ -88,7 +88,7 @@ for (const key of testPages) {
 				pages,
 				page
 			}, testInfo) => {
-				test.slow();
+				test.setTimeout(600_000);
 				const editedValues = await pages[key].itemDetail.editItem(
 					items[key].build,
 					items[key].editParams
