@@ -329,6 +329,12 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[32]], false);
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test strategic scenario 1');
 			await page.getByTestId('save-button').click();
@@ -343,11 +349,23 @@ test('ebios rm study', async ({
 			await page.getByRole('gridcell', { name: 'test strategic scenario' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test attack path 1');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test attack path 2');
 			await page.getByTestId('save-button').click();
@@ -405,6 +423,12 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[40]], false);
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test elementary action 1');
 			await page.getByTestId('form-input-name').click();
@@ -415,6 +439,12 @@ test('ebios rm study', async ({
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-attack-stage').selectOption('1');
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('initial access');
@@ -422,6 +452,12 @@ test('ebios rm study', async ({
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-attack-stage').selectOption('2');
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('DISCO');
@@ -429,6 +465,12 @@ test('ebios rm study', async ({
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-attack-stage').selectOption('3');
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('exploitation');
@@ -454,6 +496,12 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[41]], false);
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-operating-modes-description').click();
 			await page
 				.getByTestId('form-input-operating-modes-description')
@@ -466,6 +514,12 @@ test('ebios rm study', async ({
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-operating-modes-description').click();
 			await page
 				.getByTestId('form-input-operating-modes-description')
@@ -498,12 +552,24 @@ test('ebios rm study', async ({
 			await page.getByRole('button', { name: ' Likelihood High ' }).click();
 			await page.getByRole('button', { name: ' Risk level High ' }).click();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test operating mode 1');
 			await page.getByTestId('form-input-likelihood').selectOption('1');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test operating mode 2');
 			await page.getByTestId('form-input-likelihood').selectOption('4');
