@@ -1,5 +1,4 @@
 <script lang="ts">
-	import ImpactEffortMatrix from './ImpactEffortMatrix.svelte';
 	import ImpactEffortMatrix2 from './ImpactEffortMatrix2.svelte';
 	interface Props {
 		data: PageData;
