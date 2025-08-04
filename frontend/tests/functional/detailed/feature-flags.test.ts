@@ -252,7 +252,8 @@ test('Feature Flags - Inherent Risk  reate folder, perimeter and risk assessment
 			name: vars.riskAssessmentName,
 			perimeter: `${vars.folderName}/${vars.perimeterName}`,
 			description: vars.description,
-			authors: ['admin@tests.com']
+			authors: ['admin@tests.com'],
+			version: vars.riskAssessmentVersion
 		});
 	});
 
@@ -290,26 +291,31 @@ test('Feature Flags - Inherent Risk visibility in Risk analytics page', async ({
 test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page and in edit page', async ({
 	logedPage,
 	librariesPage,
+	riskScenariosPage,
+	pages,
+	sideBar,
 	page
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
+	await sideBar.click('Risk', pages.riskScenariosPage.url);
+	await pages.riskScenariosPage.hasUrl();
+	await pages.riskScenariosPage.hasTitle();
 
-	const risksPage = new PageContent(page, '/risk-scenarios', 'Risk Scenarios');
-	await risksPage.goto();
-
-	await page.getByTestId('add-button').click();
-	await page.getByTestId('form-input-name').fill('test-risk-scenario');
-
-	await page.getByTestId('save-button').click();
-	await page.getByText('test-risk-scenario').click();
+	await pages.riskScenariosPage.createItem({
+		name: vars.riskScenarioName,
+		risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`
+	});
+	await page.getByText(vars.riskScenarioName).click();
 
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
 	await page.getByTestId('edit-button').click();
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
-	await risksPage.goto();
-	await page.getByText('test-risk-scenario').click();
+	await sideBar.click('Risk', pages.riskScenariosPage.url);
+	await pages.riskScenariosPage.hasUrl();
+	await pages.riskScenariosPage.hasTitle();
+	await page.getByText(vars.riskScenarioName).click();
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
 	await page.getByTestId('edit-button').click();
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
