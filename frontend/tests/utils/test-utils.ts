@@ -83,6 +83,12 @@ export const test = base.extend<Fixtures>({
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
 			processingsPage,
+			purposesPage,
+			personalDataPage,
+			dataSubjectsPage,
+			dataRecipientsPage,
+			dataContractorsPage,
+			dataTransfersPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -107,6 +113,12 @@ export const test = base.extend<Fixtures>({
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
 			processingsPage,
+			purposesPage,
+			personalDataPage,
+			dataSubjectsPage,
+			dataRecipientsPage,
+			dataContractorsPage,
+			dataTransfersPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -361,7 +373,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	personalDataPage: async ({ page }, use) => {
-		const pPage = new PageContent(page, '/personal-data', 'Personal data', [
+		const pPage = new PageContent(page, '/personal-data', /Personal data?/, [
 			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
@@ -825,14 +837,105 @@ export class TestContent {
 					due_date: '2025-12-31'
 				}
 			},
-			procesingsPage: {
-				displayName: vars.processingName,
+			processingsPage: {
+				displayName: 'Processings',
 				modelName: 'processing',
 				build: {
-					name: 'Test processing',
+					name: vars.processingName,
 					description: 'Test description',
 					legal_basis: 'Consent',
 					folder: vars.folderName
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			personalDataPage: {
+				displayName: 'Personal data',
+				modelName: 'personaldata',
+				build: {
+					processing: vars.processingName,
+					name: 'Test personal data',
+					description: 'Test description',
+					category: 'Basic Identity Information',
+					retention: '1 year',
+					deletion_policy: 'Automatic Deletion'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataSubjectsPage: {
+				displayName: 'Data subjects',
+				modelName: 'datasubject',
+				build: {
+					processing: vars.processingName,
+					name: 'Test data subject',
+					description: 'Test description',
+					category: 'Employee'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataRecipientsPage: {
+				displayName: 'Data recipients',
+				modelName: 'datarecipient',
+				build: {
+					processing: vars.processingName,
+					name: 'Test data recipient',
+					description: 'Test description',
+					category: 'Employee'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataContractorsPage: {
+				displayName: 'Data contractors',
+				modelName: 'datacontractor',
+				build: {
+					processing: vars.processingName,
+					name: 'Test data contractor',
+					description: 'Test description',
+					relationship_type: 'Data Processor',
+					country: 'France'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataTransfersPage: {
+				displayName: 'Data transfers',
+				modelName: 'datatransfer',
+				build: {
+					processing: vars.processingName,
+					name: 'Test data transfer',
+					description: 'Test description',
+					country: 'France',
+					legal_basis: 'Consent'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			purposesPage: {
+				displayName: 'Purposes',
+				modelName: 'purpose',
+				build: {
+					processing: vars.processingName,
+					name: 'Test purpose',
+					description: 'Test description'
+				},
+				editParams: {
+					name: '',
+					description: ''
 				}
 			},
 			assetAssessmentsPage: {
@@ -842,6 +945,10 @@ export class TestContent {
 					str: vars.assetName,
 					asset: vars.folderName + '/' + vars.assetName,
 					bia: vars.biaName
+				},
+				editParams: {
+					name: '',
+					description: ''
 				}
 			}
 		};
