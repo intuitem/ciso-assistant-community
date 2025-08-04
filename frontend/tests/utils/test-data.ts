@@ -17,6 +17,7 @@ export default {
 	threatName: 'Test threat',
 	description: 'Test description',
 	biaName: 'Test BIA',
+	processingName: 'Test processing',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	user: {

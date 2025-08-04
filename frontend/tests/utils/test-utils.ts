@@ -36,6 +36,13 @@ type Fixtures = {
 	businessImpactAnalysisPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	processingsPage: PageContent;
+	purposesPage: PageContent;
+	personalDataPage: PageContent;
+	dataSubjectsPage: PageContent;
+	dataRecipientsPage: PageContent;
+	dataContractorsPage: PageContent;
+	dataTransfersPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -75,6 +82,7 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
+			processingsPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -98,6 +106,7 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
+			processingsPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -327,6 +336,93 @@ export const test = base.extend<Fixtures>({
 			{ name: 'justification', type: type.TEXT }
 		]);
 		await use(ePage);
+	},
+
+	processingsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/processings', 'Processings', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'legal_basis', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'dpia_required', type: type.CHECKBOX },
+			{ name: 'associated_controls', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	purposesPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/purposes', 'Purposes', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT }
+		]);
+		await use(pPage);
+	},
+
+	personalDataPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/personal-data', 'Personal data', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'category', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'retention', type: type.TEXT },
+			{ name: 'deletion_policy', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'is_sensitive', type: type.CHECKBOX }
+		]);
+		await use(pPage);
+	},
+
+	dataSubjectsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-subjects', 'Data subjects', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'category', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	dataRecipientsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-recipients', 'Data recipients', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'category', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	dataContractorsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-contractors', 'Data contractors', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'relationship_type', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'country', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'documentation_link', type: type.TEXT },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	dataTransfersPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-transfers', 'Data transfers', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'country', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'legal_basis', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'guarantees', type: type.TEXT },
+			{ name: 'documentation_link', type: type.TEXT },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -727,6 +823,16 @@ export class TestContent {
 					name: '',
 					description: '',
 					due_date: '2025-12-31'
+				}
+			},
+			procesingsPage: {
+				displayName: vars.processingName,
+				modelName: 'processing',
+				build: {
+					name: 'Test processing',
+					description: 'Test description',
+					legal_basis: 'Consent',
+					folder: vars.folderName
 				}
 			},
 			assetAssessmentsPage: {
