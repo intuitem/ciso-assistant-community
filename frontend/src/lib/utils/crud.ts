@@ -597,6 +597,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		]
 	},
@@ -1253,7 +1254,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Timeline entries',
 		foreignKeyFields: [
 			{ field: 'incident', urlModel: 'incidents' },
-			{ field: 'author', urlModel: 'users' }
+			{ field: 'author', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'entry_type' }],
 		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]

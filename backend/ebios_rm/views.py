@@ -6,6 +6,7 @@ from .models import (
     EbiosRMStudy,
     FearedEvent,
     RoTo,
+    RoToQuerySet,
     Stakeholder,
     StrategicScenario,
     AttackPath,
@@ -37,6 +38,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     """
     API endpoint that allows ebios rm studies to be viewed or edited.
     """
+
+    filterset_fields = ["folder"]
 
     model = EbiosRMStudy
 
@@ -143,6 +146,26 @@ class FearedEventViewSet(BaseModelViewSet):
 
 
 class RoToFilter(GenericFilterSet):
+    # Add the custom ordering filter
+    ordering = df.OrderingFilter(
+        fields=(
+            ("created_at", "created_at"),
+            ("updated_at", "updated_at"),
+            ("risk_origin", "risk_origin"),
+            ("motivation", "motivation"),
+            ("resources", "resources"),
+            ("activity", "activity"),
+            (
+                "pertinence",
+                "pertinence",
+            ),
+        ),
+    )
+
+    pertinence = df.MultipleChoiceFilter(
+        choices=RoTo.Pertinence.choices, label="Pertinence"
+    )
+
     class Meta:
         model = RoTo
         fields = [
@@ -151,6 +174,7 @@ class RoToFilter(GenericFilterSet):
             "risk_origin",
             "motivation",
             "feared_events",
+            "pertinence",
         ]
 
 
@@ -158,6 +182,11 @@ class RoToViewSet(BaseModelViewSet):
     model = RoTo
 
     filterset_class = RoToFilter
+
+    def get_queryset(self):
+        """Always return queryset with pertinence annotation"""
+        queryset = super().get_queryset()
+        return queryset.with_pertinence()
 
     @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
     def risk_origin(self, request):
