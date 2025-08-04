@@ -34,7 +34,6 @@
 
 		modelTableKey++; // Force ModelTable to refresh
 
-		console.log(`Updated ModelTable endpoint: ${modelTableEndpoint}`);
 	}
 
 	$inspect('table handlers:', $tableHandlers);
@@ -52,7 +51,7 @@
 
 <main>
 	<div class="w-full max-w-screen-lg mx-auto p-4">
-		<h1 class="text-2xl font-bold mb-4">Impact/Effort Matrix</h1>
+		<h1 class="text-2xl font-bold mb-4">Controls priority review</h1>
 
 		<div class="grid grid-cols-6 gap-1 mb-6">
 			<div class="flex justify-end items-center p-2 font-semibold">Impact</div>
