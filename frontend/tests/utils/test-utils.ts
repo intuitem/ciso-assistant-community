@@ -856,7 +856,7 @@ export class TestContent {
 				modelName: 'personaldata',
 				build: {
 					processing: vars.processingName,
-					name: 'Test personal data',
+					name: vars.personalDataName,
 					description: 'Test description',
 					category: 'Basic Identity Information',
 					retention: '1 year',
@@ -872,7 +872,7 @@ export class TestContent {
 				modelName: 'datasubject',
 				build: {
 					processing: vars.processingName,
-					name: 'Test data subject',
+					name: vars.dataSubjectName,
 					description: 'Test description',
 					category: 'Employee'
 				},
@@ -886,7 +886,7 @@ export class TestContent {
 				modelName: 'datarecipient',
 				build: {
 					processing: vars.processingName,
-					name: 'Test data recipient',
+					name: vars.dataRecipientName,
 					description: 'Test description',
 					category: 'Employee'
 				},
@@ -900,7 +900,7 @@ export class TestContent {
 				modelName: 'datacontractor',
 				build: {
 					processing: vars.processingName,
-					name: 'Test data contractor',
+					name: vars.dataContractorName,
 					description: 'Test description',
 					relationship_type: 'Data Processor',
 					country: 'France'
@@ -915,7 +915,7 @@ export class TestContent {
 				modelName: 'datatransfer',
 				build: {
 					processing: vars.processingName,
-					name: 'Test data transfer',
+					name: vars.dataTransferName,
 					description: 'Test description',
 					country: 'France',
 					legal_basis: 'Consent'
@@ -930,7 +930,7 @@ export class TestContent {
 				modelName: 'purpose',
 				build: {
 					processing: vars.processingName,
-					name: 'Test purpose',
+					name: vars.purposeName,
 					description: 'Test description'
 				},
 				editParams: {

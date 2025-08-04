@@ -18,6 +18,12 @@ export default {
 	description: 'Test description',
 	biaName: 'Test BIA',
 	processingName: 'Test processing',
+	personalDataName: 'Test personal data',
+	purposeName: 'Test purpose',
+	dataContractorName: 'Test data contractor',
+	dataTransferName: 'Test data transfer',
+	dataRecipientName: 'Test data recipient',
+	dataSubjectName: 'Test data subject',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	user: {
