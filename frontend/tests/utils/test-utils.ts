@@ -218,7 +218,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'residual_proba', type: type.SELECT },
 			{ name: 'residual_impact', type: type.SELECT },
 			{ name: 'justification', type: type.TEXT },
-			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+			{ name: 'owner', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(rPage);
 	},
@@ -659,7 +659,7 @@ export class TestContent {
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
 					justification: 'Test comments',
-					owners: [LoginPage.defaultEmail]
+					owner: [LoginPage.defaultEmail]
 				}
 			},
 			riskAcceptancesPage: {
