@@ -1,7 +1,8 @@
 <script lang="ts">
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { tableHandlers } from '$lib/utils/stores';
 
-	const EFFORT_REVERSE_MAP = {1: 'XS', 2: "S", 3: "M", 4: "L", 5: "XL"};
+	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
 
 	let data = [
 		[
@@ -50,10 +51,10 @@
 		[[], [], [], [], []]
 	];
 
-	let selectedCell: {impact: number, effort: number} | null = null;
+	let selectedCell: { impact: number; effort: number } | null = null;
 	let selectedItems: any[] = [];
 
-	let modelTableEndpoint = "/applied-controls";
+	let modelTableEndpoint = '/applied-controls';
 	let modelTableKey = 0; // Force re-render when incremented
 
 	function handleCellClick(rowIndex: number, colIndex: number) {
@@ -61,16 +62,21 @@
 		const effort = colIndex + 1; // Convert grid position to effort value
 		const items = data[rowIndex][colIndex];
 
-		selectedCell = {impact, effort};
+		selectedCell = { impact, effort };
 		selectedItems = items;
 
 		// Update the ModelTable endpoint reactively
 		const effortLabel = EFFORT_REVERSE_MAP[effort];
 		modelTableEndpoint = `/applied-controls?control_impact=${impact}&effort=${effortLabel}`;
+
+		$tableHandlers?.['/applied-controls'].invalidate();
+
 		modelTableKey++; // Force ModelTable to refresh
 
 		console.log(`Updated ModelTable endpoint: ${modelTableEndpoint}`);
 	}
+
+	$inspect('table handlers:', $tableHandlers);
 
 	function getCellStyle(rowIndex: number, colIndex: number) {
 		const impact = 5 - rowIndex;
@@ -96,7 +102,12 @@
 				{#each data as row, rowIndex}
 					{#each row as col, colIndex}
 						<button
-							class="aspect-square flex flex-col items-center justify-center border border-gray-300 rounded text-xs p-1 transition-colors {getCellStyle(rowIndex, colIndex)} {selectedCell?.impact === (5 - rowIndex) && selectedCell?.effort === (colIndex + 1) ? 'ring-2 ring-blue-500' : ''}"
+							class="aspect-square flex flex-col items-center justify-center border border-gray-300 rounded text-xs p-1 transition-colors {getCellStyle(
+								rowIndex,
+								colIndex
+							)} {selectedCell?.impact === 5 - rowIndex && selectedCell?.effort === colIndex + 1
+								? 'ring-2 ring-blue-500'
+								: ''}"
 							onclick={() => handleCellClick(rowIndex, colIndex)}
 						>
 							{#if col.length > 0}
@@ -117,11 +128,11 @@
 
 			<!-- Effort labels (bottom) -->
 			<div class="flex justify-end items-center p-2 font-semibold">Effort</div>
-			<div class="flex justify-center items-center p-2 text-sm">1<br/>(XS)</div>
-			<div class="flex justify-center items-center p-2 text-sm">2<br/>(S)</div>
-			<div class="flex justify-center items-center p-2 text-sm">3<br/>(M)</div>
-			<div class="flex justify-center items-center p-2 text-sm">4<br/>(L)</div>
-			<div class="flex justify-center items-center p-2 text-sm">5<br/>(XL)</div>
+			<div class="flex justify-center items-center p-2 text-sm">1<br />(XS)</div>
+			<div class="flex justify-center items-center p-2 text-sm">2<br />(S)</div>
+			<div class="flex justify-center items-center p-2 text-sm">3<br />(M)</div>
+			<div class="flex justify-center items-center p-2 text-sm">4<br />(L)</div>
+			<div class="flex justify-center items-center p-2 text-sm">5<br />(XL)</div>
 		</div>
 
 		<!-- Legend -->
@@ -146,16 +157,14 @@
 				</div>
 			</div>
 		</div>
-
-
 	</div>
 </main>
 
 {#key modelTableKey}
-<ModelTable
-	source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder'], body: [] }}
-	hideFilters={true}
-	URLModel="applied-controls"
-	baseEndpoint={modelTableEndpoint}
-/>
+	<ModelTable
+		source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder'], body: [] }}
+		hideFilters={true}
+		URLModel="applied-controls"
+		baseEndpoint={modelTableEndpoint}
+	/>
 {/key}
