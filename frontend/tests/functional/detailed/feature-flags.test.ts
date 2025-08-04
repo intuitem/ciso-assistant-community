@@ -2,6 +2,10 @@ import { test, expect } from '../../utils/test-utils.js';
 import { PageContent } from '../../utils/page-content.js';
 import { LoginPage } from '../../utils/login-page.js';
 
+import { TestContent } from '../../utils/test-utils.js';
+
+const vars = TestContent.generateTestVars();
+
 const toggleFeatureFlag = async (page, flagTestId, enable) => {
 	await page.getByTestId('accordion-item-extra').click();
 	await page.getByTestId('accordion-item-settings').click();
@@ -202,55 +206,64 @@ test('Feature Flags - Inherent Risk visibility toggling on Risk Scenarios model 
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 });
 
-test('Feature Flags - Inherent Risk visibility toggling on Risk Assessment details', async ({
-	logedPage,
+test('Feature Flags - Inherent Risk  reate folder, perimeter and risk assessment', async ({
+	page,
+	pages,
+	foldersPage,
+	perimetersPage,
+	riskAssessmentsPage,
+	sideBar,
 	librariesPage,
-	page
+	logedPage
 }) => {
-	await toggleFeatureFlag(page, 'inherent-risk', true);
+	await test.step('Create required folder', async () => {
+		await foldersPage.goto();
+		await foldersPage.createItem({
+			name: vars.folderName,
+			description: vars.description
+		});
+	});
 
-	// Create folder
-	await page.getByRole('button', { name: 'Organization' }).click();
-	await page.getByTestId('accordion-item-folders').click();
-	await page.getByTestId('add-button').click();
-	await page.getByTestId('form-input-name').fill('feature-flag-folder');
-	await page.getByTestId('save-button').click();
+	await test.step('Create perimeter', async () => {
+		await perimetersPage.goto();
+		await perimetersPage.createItem({
+			name: vars.perimeterName,
+			description: vars.description,
+			folder: vars.folderName
+		});
+	});
 
-	// Create perimeter
-	await page.getByRole('button', { name: 'Organization' }).click();
-	await page.getByTestId('accordion-item-perimeters').click();
-	await expect(page.locator('#page-title')).toHaveText('Perimeters');
-	await expect(page).toHaveURL('/perimeters');
-	await page.getByTestId('add-button').click();
-	await page.getByTestId('form-input-name').fill('feature-flag-perimeter');
-	await page.getByTestId('save-button').click();
+	await test.step('Import a risk matrix', async () => {
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
 
-	await librariesPage.goto();
-	await librariesPage.hasUrl();
+		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
 
-	await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
+		await librariesPage.tab('Libraries store').click();
+		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+	});
 
-	await librariesPage.tab('Libraries store').click();
-	await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+	await test.step('Create risk assessment', async () => {
+		await sideBar.click('Risk', pages.riskAssessmentsPage.url);
+		await pages.riskAssessmentsPage.hasUrl();
+		await pages.riskAssessmentsPage.hasTitle();
 
-	// Create risk assessment
-	await page.getByTestId('accordion-item-risk').click();
-	await page.getByTestId('accordion-item-risk-assessments').click();
-	await expect(page.locator('#page-title')).toHaveText('Risk assessments');
-	await expect(page).toHaveURL('/risk-assessments');
-	await page.getByTestId('add-button').click();
-	await page.getByTestId('form-input-name').fill('test-risk-assessment');
-	await page.getByTestId('form-input-version').fill('2.0');
-	await page.getByTestId('save-button').click();
+		await riskAssessmentsPage.createItem({
+			name: vars.riskAssessmentName,
+			perimeter: `${vars.folderName}/${vars.perimeterName}`,
+			description: vars.description,
+			authors: ['admin@tests.com']
+		});
+	});
 
 	// Check visibility
-	await page.getByText('test-risk-assessment').click();
+	await page.getByText(vars.riskAssessmentName).click();
 	await expect(page.getByText('Inherent Level', { exact: false })).toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
 	await page.getByTestId('accordion-item-risk').click();
 	await page.getByTestId('accordion-item-risk-assessments').click();
-	await page.getByText('test-risk-assessment').click();
+	await page.getByText(vars.riskAssessmentName).click();
 	await expect(page.getByText('Inherent Level', { exact: false })).not.toBeVisible();
 
 	await toggleFeatureFlag(page, 'inherent-risk', true);
