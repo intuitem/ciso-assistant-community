@@ -169,7 +169,7 @@ const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'applied-controls/control_impact',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		label: 'status',
+		label: 'controlImpact',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -181,7 +181,7 @@ const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'applied-controls/effort',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		label: 'status',
+		label: 'effort',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -854,9 +854,9 @@ export const listViewFields = {
 			status: APPLIED_CONTROL_STATUS_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
-			owner: OWNER_FILTER,
 			priority: PRIORITY_FILTER,
 			effort: EFFORT_FILTER,
+			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			eta__lte: undefined
 		}
