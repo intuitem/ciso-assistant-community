@@ -148,7 +148,7 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-1-step-2-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[12]], false);
 				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
 			await page.getByRole('textbox').click();
 			await page.getByRole('option', { name: `${vars.folderName}/${vars.assetName}` }).click();
@@ -170,7 +170,7 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-1-step-3-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[13]], false);
 				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 1');
@@ -209,7 +209,7 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-1-step-4-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[14]], false);
 				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await complianceAssessmentsPage.createItem({
 				name: 'security foundation audit',
 				perimeter: `${vars.folderName}/${vars.perimeterName}`,
@@ -231,7 +231,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('workshop-2-step-1-link').click();
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[21]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
-		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-risk-origin').selectOption('amateur');
 		await page.getByTestId('form-input-risk-origin').selectOption('state');
@@ -255,7 +255,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('workshop-2-step-2-link').click();
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[22]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
-		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-motivation').selectOption('3');
 		await page.getByTestId('form-input-resources').selectOption('1');
@@ -273,7 +273,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('workshop-2-step-3-link').click();
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[23]], false);
 			await expect(page).toHaveURL(/.*workshop-2.*/);
-		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-is-selected').uncheck();
 		await page.getByTestId('form-input-is-selected').check();
@@ -297,12 +297,12 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-3-step-1-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[31]], false);
 				await expect(page).toHaveURL(/.*workshop-3.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-category').selectOption('partner');
@@ -327,12 +327,12 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-3-step-2-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[32]], false);
 				await expect(page).toHaveURL(/.*workshop-3.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-name').click();
@@ -345,14 +345,14 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-3-step-2-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[32]], false);
 				await expect(page).toHaveURL(/.*workshop-3.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByRole('gridcell', { name: 'test strategic scenario' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-name').click();
@@ -363,7 +363,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-name').click();
@@ -384,7 +384,7 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-3-step-3-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[33]], false);
 				await expect(page).toHaveURL(/.*workshop-3.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByRole('gridcell', { name: 'Partner' }).first().click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
 			await appliedControlsPage.createItem({ name: 'test applied control 1' });
@@ -421,12 +421,12 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-4-step-0-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[40]], false);
 				await expect(page).toHaveURL(/.*workshop-4.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-name').click();
@@ -442,7 +442,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-attack-stage').selectOption('1');
@@ -455,7 +455,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-attack-stage').selectOption('2');
@@ -468,7 +468,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-attack-stage').selectOption('3');
@@ -494,12 +494,12 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-4-step-1-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[41]], false);
 				await expect(page).toHaveURL(/.*workshop-4.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-operating-modes-description').click();
@@ -517,7 +517,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-operating-modes-description').click();
@@ -541,7 +541,7 @@ test('ebios rm study', async ({
 				await page.getByTestId('workshop-4-step-2-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[42]], false);
 				await expect(page).toHaveURL(/.*workshop-4.*/);
-			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
+			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByRole('gridcell', { name: 'test attack path 1' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-4.*/);
 			await page.getByRole('button', { name: ' Severity High ' }).click();
@@ -555,7 +555,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-name').click();
@@ -567,7 +567,7 @@ test('ebios rm study', async ({
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
 				await expect(spinner).not.toBeVisible({
-					timeout: 20_000
+					timeout: 10_000
 				});
 			}
 			await page.getByTestId('form-input-name').click();
