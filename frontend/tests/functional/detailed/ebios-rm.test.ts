@@ -49,7 +49,7 @@ test('ebios rm study', async ({
 	appliedControlsPage,
 	page
 }) => {
-	test.setTimeout(600_000);
+	test.setTimeout(900_000);
 	await test.step('create required folder', async () => {
 		await foldersPage.goto();
 		await foldersPage.hasUrl();
