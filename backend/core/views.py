@@ -1822,6 +1822,63 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response(entries)
 
     @action(detail=False, methods=["get"])
+    def impact_effort(self, request):
+        # TODO consider the case of passing the domain as a filter
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        viewable_controls_set = set(viewable_controls_ids)
+
+        output = [
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+        ]
+
+        assessed_controls = AppliedControl.objects.filter(
+            id__in=viewable_controls_set,
+            control_impact__isnull=False,
+            effort__isnull=False,
+        ).values_list(
+            "id",
+            "name",
+            "control_impact",
+            "effort",
+        )
+
+        # MAP_EFFORT for converting effort strings to integers
+        MAP_EFFORT = {None: -1, "XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
+
+        for control_id, name, impact, effort_str in assessed_controls:
+            # Convert effort string to integer
+            effort_int = MAP_EFFORT.get(effort_str, -1)
+
+            # Convert to 0-based indices
+            impact_idx = impact - 1
+            effort_idx = effort_int - 1
+
+            # Add to matrix if both values are valid (1-5)
+            if 0 <= impact_idx < 5 and 0 <= effort_idx < 5:
+                output[impact_idx][effort_idx].append(
+                    {
+                        "id": control_id,
+                        "impact": impact,
+                        "effort": effort_int,
+                        "name": name,
+                    }
+                )
+
+        # Get viewable but not assessed controls
+        all_assessed_ids = set(control_id for control_id, _, _, _ in assessed_controls)
+        viewable_not_assessed = viewable_controls_set - all_assessed_ids
+
+        print(f"Matrix populated with assessed controls")
+        print(f"Viewable but not assessed: {len(viewable_not_assessed)} controls")
+        return Response(output)
+
+    @action(detail=False, methods=["get"])
     def get_timeline_info(self, request):
         entries = []
         COLORS_PALETTE = [

@@ -1,0 +1,161 @@
+<script lang="ts">
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+
+	const EFFORT_REVERSE_MAP = {1: 'XS', 2: "S", 3: "M", 4: "L", 5: "XL"};
+
+	let data = [
+		[
+			[
+				{
+					id: '3fe11835-b7d7-40f6-ae2d-9aa721199f96',
+					impact: 1,
+					effort: 1,
+					name: 'IS incident management policy'
+				},
+				{
+					id: '650b718d-5951-42ae-b24d-09c4da7a3424',
+					impact: 1,
+					effort: 1,
+					name: 'Study multi cloud possibilities'
+				}
+			],
+			[],
+			[],
+			[],
+			[]
+		],
+		[
+			[],
+			[],
+			[
+				{
+					id: 'c87cca66-53db-48ef-a356-61d366769c4d',
+					impact: 2,
+					effort: 3,
+					name: 'Risk management policy'
+				}
+			],
+			[
+				{
+					id: '279ded48-563b-4d63-b212-c5a1748d638b',
+					impact: 2,
+					effort: 4,
+					name: 'Context of organization document'
+				}
+			],
+			[]
+		],
+		[[], [], [], [], []],
+		[[], [], [], [], []],
+		[[], [], [], [], []]
+	];
+
+	let selectedCell: {impact: number, effort: number} | null = null;
+	let selectedItems: any[] = [];
+
+	let modelTableEndpoint = "/applied-controls";
+	let modelTableKey = 0; // Force re-render when incremented
+
+	function handleCellClick(rowIndex: number, colIndex: number) {
+		const impact = 5 - rowIndex; // Convert grid position to impact value
+		const effort = colIndex + 1; // Convert grid position to effort value
+		const items = data[rowIndex][colIndex];
+
+		selectedCell = {impact, effort};
+		selectedItems = items;
+
+		// Update the ModelTable endpoint reactively
+		const effortLabel = EFFORT_REVERSE_MAP[effort];
+		modelTableEndpoint = `/applied-controls?control_impact=${impact}&effort=${effortLabel}`;
+		modelTableKey++; // Force ModelTable to refresh
+
+		console.log(`Updated ModelTable endpoint: ${modelTableEndpoint}`);
+	}
+
+	function getCellStyle(rowIndex: number, colIndex: number) {
+		const impact = 5 - rowIndex;
+		const effort = colIndex + 1;
+
+		if (impact >= 3 && effort <= 2) return 'bg-green-200 hover:bg-green-300';
+		if (impact >= 3 && effort >= 3) return 'bg-yellow-200 hover:bg-yellow-300';
+		if (impact <= 2 && effort >= 4) return 'bg-red-200 hover:bg-red-300';
+		return 'bg-gray-100 hover:bg-gray-200';
+	}
+</script>
+
+<main>
+	<div class="w-full max-w-screen-lg mx-auto p-4">
+		<h1 class="text-2xl font-bold mb-4">Impact/Effort Matrix</h1>
+
+		<div class="grid grid-cols-6 gap-1 mb-6">
+			<div class="flex justify-end items-center p-2 font-semibold">Impact</div>
+			<div class="col-span-5"></div>
+
+			<div class="flex justify-end items-center p-2 text-sm">5 (High)</div>
+			<div class="col-span-5 row-span-5 border-2 border-gray-300 grid grid-cols-5 gap-1 p-1">
+				{#each data as row, rowIndex}
+					{#each row as col, colIndex}
+						<button
+							class="aspect-square flex flex-col items-center justify-center border border-gray-300 rounded text-xs p-1 transition-colors {getCellStyle(rowIndex, colIndex)} {selectedCell?.impact === (5 - rowIndex) && selectedCell?.effort === (colIndex + 1) ? 'ring-2 ring-blue-500' : ''}"
+							onclick={() => handleCellClick(rowIndex, colIndex)}
+						>
+							{#if col.length > 0}
+								<div class="font-semibold text-lg">{col.length}</div>
+								<div class="text-xs text-gray-600">items</div>
+							{:else}
+								<div class="text-gray-400"></div>
+							{/if}
+						</button>
+					{/each}
+				{/each}
+			</div>
+
+			<div class="flex justify-end items-center p-2 text-sm">4</div>
+			<div class="flex justify-end items-center p-2 text-sm">3</div>
+			<div class="flex justify-end items-center p-2 text-sm">2</div>
+			<div class="flex justify-end items-center p-2 text-sm">1 (Low)</div>
+
+			<!-- Effort labels (bottom) -->
+			<div class="flex justify-end items-center p-2 font-semibold">Effort</div>
+			<div class="flex justify-center items-center p-2 text-sm">1<br/>(XS)</div>
+			<div class="flex justify-center items-center p-2 text-sm">2<br/>(S)</div>
+			<div class="flex justify-center items-center p-2 text-sm">3<br/>(M)</div>
+			<div class="flex justify-center items-center p-2 text-sm">4<br/>(L)</div>
+			<div class="flex justify-center items-center p-2 text-sm">5<br/>(XL)</div>
+		</div>
+
+		<!-- Legend -->
+		<div class="mb-4 p-4 bg-gray-50 rounded">
+			<h3 class="font-semibold mb-2">Priority Legend:</h3>
+			<div class="flex flex-wrap gap-4 text-sm">
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 bg-green-200 border"></div>
+					<span>Quick Wins</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 bg-yellow-200 border"></div>
+					<span>Major Projects</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 bg-gray-100 border"></div>
+					<span>Fill-ins</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 bg-red-200 border"></div>
+					<span>Questionable</span>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+</main>
+
+{#key modelTableKey}
+<ModelTable
+	source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder'], body: [] }}
+	hideFilters={true}
+	URLModel="applied-controls"
+	baseEndpoint={modelTableEndpoint}
+/>
+{/key}
