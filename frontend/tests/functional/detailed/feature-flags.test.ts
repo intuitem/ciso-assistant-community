@@ -331,6 +331,8 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ log
 
 	await page.getByTestId('add-button').click();
 	await page.getByTestId('form-input-name').fill('test-ebios-rm');
+	await page.getByTestId('form-input-domain').click();
+	await page.getByRole('option', { name: vars.folderName }).click();
 	await page.getByTestId('save-button').click();
 	await page.getByText('test-ebios-rm').click();
 
@@ -356,10 +358,10 @@ test('Cleanup - delete the folder', async ({ logedPage, page }) => {
 	await expect(page.locator('#page-title')).toHaveText('Domains');
 	await expect(page).toHaveURL('/folders');
 
-	const folderRow = page.getByRole('row', { name: /feature-flag-folder/i });
+	const folderRow = page.getByRole('row', { name: vars.folderName });
 	await folderRow.getByTestId('tablerow-delete-button').click();
 	await expect(page.getByTestId('delete-prompt-confirm-textfield')).toBeVisible();
 	await page.getByTestId('delete-prompt-confirm-textfield').fill('yes');
 	await page.getByRole('button', { name: 'Submit' }).click();
-	await expect(page.getByRole('row', { name: /feature-flag-folder/i })).toHaveCount(0);
+	await expect(page.getByRole('row', { name: vars.folderName })).toHaveCount(0);
 });
