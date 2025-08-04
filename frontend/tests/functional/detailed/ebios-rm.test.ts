@@ -146,8 +146,8 @@ test('ebios rm study', async ({
 		await test.step('step 2', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-1-step-2-link').click();
-				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[12]], false);
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
 			await page.getByRole('textbox').click();
@@ -168,8 +168,8 @@ test('ebios rm study', async ({
 		await test.step('step 3', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-1-step-3-link').click();
-				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[13]], false);
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
@@ -207,8 +207,8 @@ test('ebios rm study', async ({
 		await test.step('step 4', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-1-step-4-link').click();
-				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[14]], false);
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await complianceAssessmentsPage.createItem({
 				name: 'security foundation audit',
@@ -229,8 +229,8 @@ test('ebios rm study', async ({
 	await test.step('workshop 2', async () => {
 		await expect(async () => {
 			await page.getByTestId('workshop-2-step-1-link').click();
-			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[21]], false);
+			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
 		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-risk-origin').selectOption('amateur');
@@ -253,8 +253,8 @@ test('ebios rm study', async ({
 		await page.getByRole('button', { name: 'Mark as done' }).click();
 		await expect(async () => {
 			await page.getByTestId('workshop-2-step-2-link').click();
-			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[22]], false);
+			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
 		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-motivation').selectOption('3');
@@ -271,8 +271,8 @@ test('ebios rm study', async ({
 		await page.getByRole('button', { name: 'Mark as done' }).click();
 		await expect(async () => {
 			await page.getByTestId('workshop-2-step-3-link').click();
-			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[23]], false);
+			await expect(page).toHaveURL(/.*workshop-2.*/, { timeout: 2000 });
 		}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('tablerow-edit-button').click();
 		await page.getByTestId('form-input-is-selected').uncheck();
@@ -295,8 +295,8 @@ test('ebios rm study', async ({
 		await test.step('step 1', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-3-step-1-link').click();
-				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[31]], false);
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
@@ -325,8 +325,8 @@ test('ebios rm study', async ({
 		await test.step('step 2', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-3-step-2-link').click();
-				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[32]], false);
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
@@ -343,8 +343,8 @@ test('ebios rm study', async ({
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await expect(async () => {
 				await page.getByTestId('workshop-3-step-2-link').click();
-				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[32]], false);
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByRole('gridcell', { name: 'test strategic scenario' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
@@ -382,8 +382,8 @@ test('ebios rm study', async ({
 		await test.step('step 3', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-3-step-3-link').click();
-				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[33]], false);
+				await expect(page).toHaveURL(/.*workshop-3.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByRole('gridcell', { name: 'Partner' }).first().click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
@@ -419,8 +419,8 @@ test('ebios rm study', async ({
 		await test.step('step 0', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-4-step-0-link').click();
-				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[40]], false);
+				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
@@ -492,8 +492,8 @@ test('ebios rm study', async ({
 		await test.step('step 1', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-4-step-1-link').click();
-				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[41]], false);
+				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
@@ -539,8 +539,8 @@ test('ebios rm study', async ({
 		await test.step('step 2', async () => {
 			await expect(async () => {
 				await page.getByTestId('workshop-4-step-2-link').click();
-				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[42]], false);
+				await expect(page).toHaveURL(/.*workshop-4.*/, { timeout: 2000 });
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByRole('gridcell', { name: 'test attack path 1' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-4.*/);
