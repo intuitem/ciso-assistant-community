@@ -1856,7 +1856,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             effort_int = MAP_EFFORT.get(effort_str, -1)
 
             # Convert to 0-based indices
-            impact_idx = impact - 1
+            impact_idx = 5 - impact
             effort_idx = effort_int - 1
 
             # Add to matrix if both values are valid (1-5)
