@@ -4,52 +4,13 @@
 
 	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
 
-	let data = [
-		[
-			[
-				{
-					id: '3fe11835-b7d7-40f6-ae2d-9aa721199f96',
-					impact: 1,
-					effort: 1,
-					name: 'IS incident management policy'
-				},
-				{
-					id: '650b718d-5951-42ae-b24d-09c4da7a3424',
-					impact: 1,
-					effort: 1,
-					name: 'Study multi cloud possibilities'
-				}
-			],
-			[],
-			[],
-			[],
-			[]
-		],
-		[
-			[],
-			[],
-			[
-				{
-					id: 'c87cca66-53db-48ef-a356-61d366769c4d',
-					impact: 2,
-					effort: 3,
-					name: 'Risk management policy'
-				}
-			],
-			[
-				{
-					id: '279ded48-563b-4d63-b212-c5a1748d638b',
-					impact: 2,
-					effort: 4,
-					name: 'Context of organization document'
-				}
-			],
-			[]
-		],
-		[[], [], [], [], []],
-		[[], [], [], [], []],
-		[[], [], [], [], []]
-	];
+	interface Props {
+    data
+	}
+
+	let {
+    data
+	}: Props = $props();
 
 	let selectedCell: { impact: number; effort: number } | null = null;
 	let selectedItems: any[] = [];
@@ -60,7 +21,7 @@
 	function handleCellClick(rowIndex: number, colIndex: number) {
 		const impact = 5 - rowIndex; // Convert grid position to impact value
 		const effort = colIndex + 1; // Convert grid position to effort value
-		const items = data[rowIndex][colIndex];
+		const items = data.data[rowIndex][colIndex];
 
 		selectedCell = { impact, effort };
 		selectedItems = items;
@@ -99,7 +60,7 @@
 
 			<div class="flex justify-end items-center p-2 text-sm">5 (High)</div>
 			<div class="col-span-5 row-span-5 border-2 border-gray-300 grid grid-cols-5 gap-1 p-1">
-				{#each data as row, rowIndex}
+				{#each data.data as row, rowIndex}
 					{#each row as col, colIndex}
 						<button
 							class="aspect-square flex flex-col items-center justify-center border border-gray-300 rounded text-xs p-1 transition-colors {getCellStyle(
@@ -114,7 +75,7 @@
 								<div class="font-semibold text-lg">{col.length}</div>
 								<div class="text-xs text-gray-600">items</div>
 							{:else}
-								<div class="text-gray-400"></div>
+								<div class=""></div>
 							{/if}
 						</button>
 					{/each}
@@ -162,7 +123,7 @@
 
 {#key modelTableKey}
 	<ModelTable
-		source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder'], body: [] }}
+		source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder', 'effort', 'control_impact'], body: [] }}
 		hideFilters={true}
 		URLModel="applied-controls"
 		baseEndpoint={modelTableEndpoint}
