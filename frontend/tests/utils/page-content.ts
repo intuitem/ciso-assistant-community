@@ -136,7 +136,7 @@ export class PageContent extends BasePage {
 		return value
 			? additional
 				? this.page
-						.getByRole('row', { name: value })
+						.getByRole('row', { name: value, exact: true })
 						.filter({ has: this.page.getByText(additional).first() })
 						.first()
 				: this.page.getByRole('row', { name: value }).first()
