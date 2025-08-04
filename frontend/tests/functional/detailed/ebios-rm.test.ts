@@ -299,6 +299,12 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[31]], false);
 			}).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
+			await expect(page.getByTestId('modal-title')).toBeVisible();
+			for (const spinner of await page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 			await page.getByTestId('form-input-category').selectOption('partner');
 			await page.getByText('4').first().click();
 			await page.getByText('4').nth(1).click();
