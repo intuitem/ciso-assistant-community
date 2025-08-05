@@ -18,7 +18,7 @@ test.describe('Privacy basic actions', () => {
 	});
 
 	test.use({
-		page: async ({}, use) => {
+		page: async (_, use) => {
 			await use(page);
 		}
 	});
