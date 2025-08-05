@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ImpactEffortMatrix2 from './ImpactEffortMatrix2.svelte';
+	import ImpactEffortMatrix from './ImpactEffortMatrix.svelte';
 	interface Props {
 		data: PageData;
 	}
@@ -7,4 +7,4 @@
 	let { data }: Props = $props();
 </script>
 
-<ImpactEffortMatrix2 data={data} showGrid={false} />
+<ImpactEffortMatrix data={data.data} />

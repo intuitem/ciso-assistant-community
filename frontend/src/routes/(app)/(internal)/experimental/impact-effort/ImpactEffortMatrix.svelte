@@ -5,12 +5,10 @@
 	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
 
 	interface Props {
-    data
+		data;
 	}
 
-	let {
-    data
-	}: Props = $props();
+	let { data }: Props = $props();
 
 	let selectedCell: { impact: number; effort: number } | null = null;
 	let selectedItems: any[] = [];
@@ -21,7 +19,7 @@
 	function handleCellClick(rowIndex: number, colIndex: number) {
 		const impact = 5 - rowIndex; // Convert grid position to impact value
 		const effort = colIndex + 1; // Convert grid position to effort value
-		const items = data.data[rowIndex][colIndex];
+		const items = data[rowIndex][colIndex];
 
 		selectedCell = { impact, effort };
 		selectedItems = items;
@@ -33,10 +31,7 @@
 		$tableHandlers?.['/applied-controls'].invalidate();
 
 		modelTableKey++; // Force ModelTable to refresh
-
 	}
-
-	$inspect('table handlers:', $tableHandlers);
 
 	function getCellStyle(rowIndex: number, colIndex: number) {
 		const impact = 5 - rowIndex;
@@ -49,17 +44,15 @@
 	}
 </script>
 
-<main>
-	<div class="w-full max-w-screen-lg mx-auto p-4">
-		<h1 class="text-2xl font-bold mb-4">Controls priority review</h1>
-
+<main class="grid grid-cols-6">
+	<div class="w-full max-w-screen-lg mx-auto p-4 col-span-4">
 		<div class="grid grid-cols-6 gap-1 mb-6">
 			<div class="flex justify-end items-center p-2 font-semibold">Impact</div>
 			<div class="col-span-5"></div>
 
 			<div class="flex justify-end items-center p-2 text-sm">5 (High)</div>
 			<div class="col-span-5 row-span-5 border-2 border-gray-300 grid grid-cols-5 gap-1 p-1">
-				{#each data.data as row, rowIndex}
+				{#each data as row, rowIndex}
 					{#each row as col, colIndex}
 						<button
 							class="aspect-square flex flex-col items-center justify-center border border-gray-300 rounded text-xs p-1 transition-colors {getCellStyle(
@@ -88,15 +81,16 @@
 
 			<!-- Effort labels (bottom) -->
 			<div class="flex justify-end items-center p-2 font-semibold">Effort</div>
-			<div class="flex justify-center items-center p-2 text-sm">1<br />(XS)</div>
-			<div class="flex justify-center items-center p-2 text-sm">2<br />(S)</div>
-			<div class="flex justify-center items-center p-2 text-sm">3<br />(M)</div>
-			<div class="flex justify-center items-center p-2 text-sm">4<br />(L)</div>
-			<div class="flex justify-center items-center p-2 text-sm">5<br />(XL)</div>
+			<div class="flex justify-center items-center p-2 text-sm">1 (Low)</div>
+			<div class="flex justify-center items-center p-2 text-sm">2</div>
+			<div class="flex justify-center items-center p-2 text-sm">3</div>
+			<div class="flex justify-center items-center p-2 text-sm">4</div>
+			<div class="flex justify-center items-center p-2 text-sm">5 (High)</div>
 		</div>
 
-		<!-- Legend -->
-		<div class="mb-4 p-4 bg-gray-50 rounded">
+	</div>
+    		<!-- Legend -->
+		<div class="mb-4 p-4 rounded">
 			<h3 class="font-semibold mb-2">Priority Legend:</h3>
 			<div class="flex flex-wrap gap-4 text-sm">
 				<div class="flex items-center gap-2">
@@ -117,14 +111,22 @@
 				</div>
 			</div>
 		</div>
-	</div>
+
+
 </main>
 
-{#key modelTableKey}
-	<ModelTable
-		source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder', 'effort', 'control_impact'], body: [] }}
-		hideFilters={true}
-		URLModel="applied-controls"
-		baseEndpoint={modelTableEndpoint}
-	/>
-{/key}
+<div class="px-4 text-xs text-slate-500">Hint: refresh the page to redraw the matrix or reset the filter</div>
+<div class="rounded-lg border shadow-xl p-2 m-4">
+	{#key modelTableKey}
+		<ModelTable
+			source={{
+				head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder', 'effort', 'control_impact'],
+				body: []
+			}}
+			hideFilters={true}
+			URLModel="applied-controls"
+			baseEndpoint={modelTableEndpoint}
+		/>
+	{/key}
+</div>
+<div class="h-4"></div>
