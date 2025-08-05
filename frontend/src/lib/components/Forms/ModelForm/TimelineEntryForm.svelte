@@ -29,7 +29,6 @@
 	const { value, errors, constraints } = formFieldProxy(form, 'entry_type');
 
 	const formStore = form.form;
-	$inspect($formStore);
 </script>
 
 {#if context != 'edit'}
