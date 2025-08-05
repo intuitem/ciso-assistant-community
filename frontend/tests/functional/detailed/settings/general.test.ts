@@ -108,4 +108,91 @@ test.describe('General settings', () => {
 			await expect(page.getByTestId('x-label-flipped')).toHaveText('Likelihood');
 		});
 	});
+
+	test('assets settings', async ({ assetsPage, settingsPage }) => {
+		await test.step('security objectives scales', async () => {
+			await test.step('1-4', async () => {
+				await page.getByRole('button', { name: ' Assets +' }).click();
+				await expect(page.getByTestId('form-input-security-objective-scale')).toHaveValue('1-4');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
+				await page.getByTestId('sidebar').getByRole('button', { name: 'Risk' }).click();
+
+				await assetsPage.goto();
+				await assetsPage.hasTitle();
+				await page.getByTestId('add-button').click();
+				await page.getByRole('button', { name: ' Security objectives' }).click();
+				await expect(page.locator('.text-base').first()).toHaveText('1');
+				await expect(page.locator('label:nth-child(4) > .text-base').first()).toHaveText('4');
+				await page.getByTestId('cancel-button').click();
+			});
+
+			await test.step('0-4', async () => {
+				await settingsPage.goto();
+				await settingsPage.hasTitle();
+				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.getByTestId('form-input-security-objective-scale').selectOption('0-4');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
+				await assetsPage.goto();
+				await assetsPage.hasTitle();
+				await page.getByTestId('add-button').click();
+				await page.getByRole('button', { name: ' Security objectives' }).click();
+				await expect(page.locator('.text-base').first()).toHaveText('0');
+				await expect(page.locator('label:nth-child(5) > .text-base').first()).toHaveText('4');
+				await page.getByTestId('cancel-button').click();
+			});
+
+			await test.step('1-5', async () => {
+				await settingsPage.goto();
+				await settingsPage.hasTitle();
+				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.getByTestId('form-input-security-objective-scale').selectOption('1-5');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
+				await assetsPage.goto();
+				await assetsPage.hasTitle();
+				await page.getByTestId('add-button').click();
+				await page.getByRole('button', { name: ' Security objectives' }).click();
+				await expect(page.locator('.text-base').first()).toHaveText('1');
+				await expect(page.locator('label:nth-child(5) > .text-base').first()).toHaveText('5');
+				await page.getByTestId('cancel-button').click();
+			});
+
+			await test.step('0-3', async () => {
+				await settingsPage.goto();
+				await settingsPage.hasTitle();
+				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.getByTestId('form-input-security-objective-scale').selectOption('0-3');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
+				await assetsPage.goto();
+				await assetsPage.hasTitle();
+				await page.getByTestId('add-button').click();
+				await page.getByRole('button', { name: ' Security objectives' }).click();
+				await expect(page.locator('.text-base').first()).toHaveText('0');
+				await expect(page.locator('label:nth-child(4) > .text-base').first()).toHaveText('3');
+				await page.getByTestId('cancel-button').click();
+			});
+
+			await test.step('FIPS-199', async () => {
+				await settingsPage.goto();
+				await settingsPage.hasTitle();
+				await page.getByRole('button', { name: ' Assets +' }).click();
+				await page.getByTestId('form-input-security-objective-scale').selectOption('FIPS-199');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
+				await assetsPage.goto();
+				await assetsPage.hasTitle();
+				await page.getByTestId('add-button').click();
+				await page.getByRole('button', { name: ' Security objectives' }).click();
+				await expect(page.locator('.text-base').first()).toHaveText('low');
+				await expect(page.locator('label:nth-child(2) > .text-base').first()).toHaveText(
+					'moderate'
+				);
+				await expect(page.locator('label:nth-child(3) > .text-base').first()).toHaveText('high');
+				await page.getByTestId('cancel-button').click();
+			});
+		});
+	});
 });
