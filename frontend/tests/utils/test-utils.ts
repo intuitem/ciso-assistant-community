@@ -333,7 +333,6 @@ export const test = base.extend<Fixtures>({
 	assetAssessmentsPage: async ({ page }, use) => {
 		const aPage = new PageContent(page, '/asset-assessments', 'BIA Assessments', [
 			{ name: 'asset', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'name', type: type.TEXT },
 			{ name: 'bia', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(aPage);
