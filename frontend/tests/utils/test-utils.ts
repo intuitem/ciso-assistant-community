@@ -36,6 +36,7 @@ type Fixtures = {
 	businessImpactAnalysisPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	settingsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -198,6 +199,11 @@ export const test = base.extend<Fixtures>({
 
 	riskMatricesPage: async ({ page }, use) => {
 		const rPage = new PageContent(page, '/risk-matrices', 'Risk matrices');
+		await use(rPage);
+	},
+
+	settingsPage: async ({ page }, use) => {
+		const rPage = new PageContent(page, '/settings', 'Settings');
 		await use(rPage);
 	},
 
