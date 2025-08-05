@@ -783,6 +783,7 @@ export const IncidentSchema = z.object({
 });
 
 export const TimelineEntrySchema = z.object({
+	folder: z.string(),
 	incident: z.string(),
 	entry: z.string(),
 	entry_type: z.string().default('observation'),
