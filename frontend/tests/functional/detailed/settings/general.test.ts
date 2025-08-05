@@ -18,7 +18,7 @@ test.describe('General settings', () => {
 	});
 
 	test.use({
-		page: async (_, use) => {
+		page: async ({}, use) => {
 			await use(page);
 		}
 	});
