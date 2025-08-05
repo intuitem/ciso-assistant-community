@@ -87,35 +87,34 @@
 			<div class="flex justify-center items-center p-2 text-sm">4</div>
 			<div class="flex justify-center items-center p-2 text-sm">5 (High)</div>
 		</div>
-
 	</div>
-    		<!-- Legend -->
-		<div class="mb-4 p-4 rounded">
-			<h3 class="font-semibold mb-2">Priority Legend:</h3>
-			<div class="flex flex-wrap gap-4 text-sm">
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 bg-green-200 border"></div>
-					<span>Quick Wins</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 bg-yellow-200 border"></div>
-					<span>Major Projects</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 bg-gray-100 border"></div>
-					<span>Fill-ins</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 bg-red-200 border"></div>
-					<span>Questionable</span>
-				</div>
+	<!-- Legend -->
+	<div class="mb-4 p-4 rounded">
+		<h3 class="font-semibold mb-2">Priority Legend:</h3>
+		<div class="flex flex-wrap gap-4 text-sm">
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 bg-green-200 border"></div>
+				<span>Quick Wins</span>
+			</div>
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 bg-yellow-200 border"></div>
+				<span>Major Projects</span>
+			</div>
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 bg-gray-100 border"></div>
+				<span>Fill-ins</span>
+			</div>
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 bg-red-200 border"></div>
+				<span>Questionable</span>
 			</div>
 		</div>
-
-
+	</div>
 </main>
 
-<div class="px-4 text-xs text-slate-500">Hint: refresh the page to redraw the matrix or reset the filter</div>
+<div class="px-4 text-xs text-slate-500">
+	Hint: refresh the page to redraw the matrix or reset the filter
+</div>
 <div class="rounded-lg border shadow-xl p-2 m-4">
 	{#key modelTableKey}
 		<ModelTable
