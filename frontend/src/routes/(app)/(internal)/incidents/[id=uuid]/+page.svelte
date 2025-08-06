@@ -234,6 +234,9 @@
 											{form}
 											multiple
 											optionsEndpoint="evidences"
+											optionsDetailedUrlParameters={[
+												['scope_folder_id', page.data.data?.folder?.id]
+											]}
 											field="evidences"
 											{resetForm}
 											label={m.evidences()}
