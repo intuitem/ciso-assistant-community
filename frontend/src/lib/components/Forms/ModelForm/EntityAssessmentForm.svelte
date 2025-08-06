@@ -94,16 +94,18 @@
 	label={m.entity()}
 	hidden={initialData.entity}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="solutions"
-	optionsDetailedUrlParameters={[['provider_entity', $formStore.entity]]}
-	field="solutions"
-	cacheLock={cacheLocks['solutions']}
-	bind:cachedValue={formDataCache['solutions']}
-	label={m.solutions()}
-/>
+{#key $formStore?.entity}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="solutions"
+		optionsDetailedUrlParameters={[['provider_entity', $formStore.entity]]}
+		field="solutions"
+		cacheLock={cacheLocks['solutions']}
+		bind:cachedValue={formDataCache['solutions']}
+		label={m.solutions()}
+	/>
+{/key}
 <Score
 	{form}
 	label={m.criticality()}
