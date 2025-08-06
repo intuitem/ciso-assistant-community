@@ -234,6 +234,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 20. Guides des mécanismes cryptographiques 🇫🇷
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
+23. NIST 800-82 (OT) - appendix 🏭🤖
 
 <br/>
 
@@ -250,7 +251,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
-- NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
