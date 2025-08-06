@@ -28,7 +28,8 @@
 		danish: m.danish(),
 		hungarian: m.hungarian(),
 		ukrainian: m.ukrainian(),
-		greek: m.greek()
+		greek: m.greek(),
+		turkish: m.turkish()
 	};
 
 	const modalStore = getModalStore();
@@ -52,7 +53,8 @@
 		da: 'Dansk',
 		hu: 'Magyar',
 		uk: 'Українська',
-		el: 'Ελληνικά'
+		el: 'Ελληνικά',
+		tr: 'Türkçe'
 	};
 
 	let value = $state(getLocale());
