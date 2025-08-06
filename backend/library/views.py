@@ -20,7 +20,7 @@ from django.http import HttpResponse
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
 from core.models import StoredLibrary, LoadedLibrary, Framework
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
 from .helpers import update_translations, update_translations_in_object
@@ -49,7 +49,7 @@ class MultiStringFilter(df.CharFilter):
         return qs
 
 
-class LibraryMixinFilterSet(df.FilterSet):
+class LibraryMixinFilterSet(GenericFilterSet):
     locale = df.MultipleChoiceFilter(
         choices=[(language[0], language[0]) for language in settings.LANGUAGES],
         method="filter_locale",

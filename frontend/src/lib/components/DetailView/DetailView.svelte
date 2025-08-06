@@ -31,7 +31,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
+	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str', 'path'];
 
 	interface Props {
 		data: any;
@@ -572,6 +572,7 @@
 									{#snippet addButton()}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
+											data-testid="add-button"
 											onclick={(_) => modalCreateForm(model)}
 											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 												'add-' + model.info.localName

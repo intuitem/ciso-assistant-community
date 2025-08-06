@@ -32,6 +32,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'inherentLevel',
 		'existingControls',
 		'currentLevel',
+		'withinTolerance',
 		'extraAppliedControls',
 		'residualLevel'
 	];
@@ -43,6 +44,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'inherent_level',
 		'existing_applied_controls',
 		'current_level',
+		'within_tolerance',
 		'applied_controls',
 		'residual_level'
 	];

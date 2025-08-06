@@ -551,6 +551,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
 
+    within_tolerance = serializers.CharField()
+
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
     threats = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
@@ -815,6 +817,7 @@ class UserReadSerializer(BaseModelSerializer):
             "user_groups",
             "keep_local_login",
             "is_third_party",
+            "observation",
         ]
 
 
@@ -834,6 +837,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "is_local",
+            "observation",
         ]
 
     def validate_email(self, email):
@@ -1230,6 +1234,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)

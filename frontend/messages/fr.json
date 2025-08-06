@@ -19,6 +19,7 @@
 	"hungarian": "Hongrois",
 	"ukrainian": "Ukrainien",
 	"greek": "Grec",
+	"turkish": "Turc",
 	"addThreat": "Ajouter une menace",
 	"addVulnerability": "Ajouter une vulnérabilité",
 	"addReferenceControl": "Ajouter une mesure de référence",
@@ -53,6 +54,7 @@
 	"associatedSolutions": "Solutions associées",
 	"home": "Accueil",
 	"edit": "Modifier",
+	"view": "Voir",
 	"changePassword": "Changer le mot de passe",
 	"overview": "Vue d'ensemble",
 	"context": "Contexte",
@@ -455,7 +457,7 @@
 	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
 	"attachmentHelpText": "Fichier de preuve (ex. capture d'écran, fichier journal, etc.). Quand le champ est sélectionné, vous pouvez y coller une copie d'écran de votre presse-papiers.",
 	"attachmentWarningText": "ATTENTION : le téléchargement d'un nouveau fichier écrasera celui existant",
-	"isActiveHelpText": "Désigne si cet utilisateur doit être traité comme actif",
+	"isActiveHelpText": "Utilisez cette fonctionnalité pour désactiver ou réactiver l'accès à la plateforme. Notez que le mot de passe sera réinitialisé si un utilisateur est désactivé.",
 	"helloThere": "Bonjour 👋",
 	"thisIsCisoAssistant": "Voici CISO Assistant.",
 	"yourStreamlined": "Votre solution",
@@ -1659,6 +1661,8 @@
 		}
 	],
 	"matchingScenarios": "Scénarios correspondants",
+	"select": "Sélectionner",
+	"deselect": "Désélectionner",
 	"associatedCampaigns": "Campagnes associées",
 	"serverURL": "URL serveur",
 	"oidcConfiguration": "openid-configuration",
@@ -1712,5 +1716,8 @@
 	"inherentLevel": "Niveau inhérent",
 	"inherentRiskLevelPerScenario": "Niveau de risque inhérent par scénario",
 	"inherentRiskLevel": "Niveau de risque inhérent",
-	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure"
+	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure",
+	"riskTolerance": "Tolérance au risque",
+	"riskToleranceHelpText": "Seuil du niveau de risque tolérable",
+	"withinTolerance": "Tolérable"
 }
