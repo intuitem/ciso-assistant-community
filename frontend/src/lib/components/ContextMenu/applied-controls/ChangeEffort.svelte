@@ -8,7 +8,12 @@
 	import { page } from '$app/stores';
 
 	interface Props {
-		row: any;
+		row: {
+			meta?: {
+				id: string | number;
+			};
+			[key: string]: any;
+		};
 		handler: DataHandler;
 	}
 
