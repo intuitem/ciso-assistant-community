@@ -7,6 +7,7 @@
 	import Select from '../Select.svelte';
 	import TextArea from '../TextArea.svelte';
 	import TextField from '../TextField.svelte';
+	import HiddenInput from '../HiddenInput.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -31,6 +32,7 @@
 	const formStore = form.form;
 </script>
 
+<HiddenInput {form} field="folder" />
 {#if context != 'edit'}
 	<AutocompleteSelect
 		{form}
