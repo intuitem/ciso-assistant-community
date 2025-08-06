@@ -74,6 +74,10 @@ export const LOCALE_MAP = {
 	el: {
 		name: 'greek',
 		flag: '🇬🇷'
+	},
+	tr: {
+		name: 'turkish',
+		flag: '🇹🇷'
 	}
 };
 
