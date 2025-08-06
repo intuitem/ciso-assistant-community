@@ -278,7 +278,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "ebios_rm_study"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
