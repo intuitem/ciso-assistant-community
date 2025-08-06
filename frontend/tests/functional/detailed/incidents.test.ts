@@ -90,6 +90,9 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 			.getByTestId('form-input-observation')
 			.fill('This is an observation: I love mango juice but I prefer orange juice');
 		await page.getByText('Save').click();
+		await expect(page.getByTestId('toast')).toBeVisible();
+		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 
 		await page.getByText('Add evidence').click();
 		await page.getByTestId('form-input-name').fill('incidents-evidence-1');
