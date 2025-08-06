@@ -1,0 +1,23 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"french": "Fransızca",
+	"english": "İngilizce",
+	"arabic": "Arapça",
+	"portuguese": "Portekizce",
+	"spanish": "İspanyolca",
+	"german": "Almanca",
+	"dutch": "Hollandaca",
+	"italian": "Italyanca",
+	"polish": "lehçe",
+	"romanian": "Romence",
+	"hindi": "Hintçe",
+	"urdu": "Urduca",
+	"czech": "Çekce",
+	"swedish": "İsveçce",
+	"indonesian": "Endonezce",
+	"danish": "Danca",
+	"hungarian": "Macarca",
+	"ukrainian": "Ukraynaca",
+	"greek": "Yunanca",
+	"turkish": "Türkçe"
+}
