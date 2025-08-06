@@ -5,14 +5,14 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Score from '../Score.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import type { SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -28,6 +28,8 @@
 		initialData = {},
 		data = {}
 	}: Props = $props();
+
+	const formStore = form.form;
 </script>
 
 <AutocompleteSelect
@@ -92,15 +94,18 @@
 	label={m.entity()}
 	hidden={initialData.entity}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="solutions"
-	field="solutions"
-	cacheLock={cacheLocks['solutions']}
-	bind:cachedValue={formDataCache['solutions']}
-	label={m.solutions()}
-/>
+{#key $formStore?.entity}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="solutions"
+		optionsDetailedUrlParameters={[['provider_entity', $formStore.entity]]}
+		field="solutions"
+		cacheLock={cacheLocks['solutions']}
+		bind:cachedValue={formDataCache['solutions']}
+		label={m.solutions()}
+	/>
+{/key}
 <Score
 	{form}
 	label={m.criticality()}
