@@ -3,8 +3,11 @@ import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
+import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
+import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -155,6 +158,30 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/control_impact',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'controlImpact',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/effort',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'effort',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -777,7 +804,9 @@ export const listViewFields = {
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
-			'riskAssessment'
+			'riskAssessment',
+			'control_impact',
+			'effort'
 		],
 		body: [
 			'ref_id',
@@ -790,7 +819,9 @@ export const listViewFields = {
 			'applied_controls',
 			'residual_level',
 			'treatment',
-			'risk_assessment'
+			'risk_assessment',
+			'control_impact',
+			'effort'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -801,7 +832,9 @@ export const listViewFields = {
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
-			within_tolerance: RISK_TOLERANCE_FILTER
+			within_tolerance: RISK_TOLERANCE_FILTER,
+			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
+			effort: APPLIED_CONTROL_EFFORT_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -821,9 +854,9 @@ export const listViewFields = {
 			status: APPLIED_CONTROL_STATUS_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
-			owner: OWNER_FILTER,
 			priority: PRIORITY_FILTER,
 			effort: EFFORT_FILTER,
+			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			eta__lte: undefined
 		}
@@ -1397,7 +1430,12 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
-	'applied-controls': [{ component: ChangeStatus, props: {} }],
+	'applied-controls': [
+		{ component: ChangeStatus, props: {} },
+		{ component: ChangeImpact, props: {} },
+		{ component: ChangeEffort, props: {} },
+		{ component: ChangePriority, props: {} }
+	],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
