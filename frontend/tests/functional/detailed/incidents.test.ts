@@ -41,8 +41,10 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('form-input-ref-id').fill('test');
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 
 		await page.getByRole('gridcell', { name: 'New' }).locator('span').waitFor({ state: 'visible' });
 		await page
@@ -69,8 +71,10 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('form-input-status').selectOption({ label: 'Resolved' });
 
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 		await expect(page.getByText('Severity changed')).toBeVisible();
 		await expect(page.getByText('Status changed')).toBeVisible();
 		await expect(page.getByText('Minor->Major')).toBeVisible();
@@ -90,8 +94,10 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByText('Add evidence').click();
 		await page.getByTestId('form-input-name').fill('incidents-evidence-1');
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 
 		await page
 			.getByTestId('incident-field-value')
@@ -103,15 +109,19 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 	await test.step('Incidents detail view & Add an event', async () => {
 		await page.getByTestId('form-input-entry').fill('entry 1');
 		await page.getByTestId('save-button-event').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 		await expect(page.getByTestId('name-entry-0')).toHaveText('entry 1');
 
 		await page.getByTestId('form-input-entry').fill('entry 2');
 		await page.getByTestId('form-input-entry-type').selectOption({ label: 'Mitigation' });
 		await page.getByTestId('save-button-event').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 		await expect(page.getByTestId('name-entry-0')).toHaveText('entry 2');
 
 		await page.getByTestId('form-input-entry').fill('entry 3');
@@ -119,12 +129,16 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('add-button-evidence').click();
 		await page.getByTestId('form-input-name').fill('incidents-evidence-2');
 		await page.getByTestId('save-button').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 		await page.getByTestId('form-input-entry-type').selectOption({ label: 'Detection' });
 		await page.getByTestId('save-button-event').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 		await expect(page.getByTestId('name-entry-0')).toHaveText('entry 3');
 
 		await expect(page.getByText('entry 1')).toBeVisible();
@@ -143,8 +157,10 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('form-input-timestamp').fill('2024-07-17T16:19');
 
 		await page.getByTestId('save-button-event').click();
+		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
+		await expect(page.getByTestId('toast')).not.toBeVisible();
 
 		await expect(page.getByTestId('name-entry-5')).toHaveText('entry 4');
 
