@@ -4,6 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	interface Props {
 		data: PageData;
 	}
@@ -27,11 +28,12 @@
 		return result;
 	};
 
-	const perimeters = $state(
-		Object.entries(data.data).map(([key, value]) => {
+	let tabStates = $state({});
+
+	const processPerimetersData = (rawData: any) => {
+		return Object.entries(rawData).map(([key, value]) => {
 			return {
 				id: key,
-				group: 'compliance_assessments',
 				...(value as Record<string, any>),
 				compliance_assessments: {
 					...value.compliance_assessments,
@@ -42,15 +44,22 @@
 					...aggregateQualityChecks(value.risk_assessments)
 				}
 			};
-		})
-	);
+		});
+	};
 </script>
 
 <div class="card bg-white p-6 shadow-sm flex flex-col space-y-4">
-	{#if perimeters.length == 0}
-		<span class="text-2xl">{m.xRaysEmptyMessage()}</span>
-	{/if}
-	{#each perimeters as perimeter, index}
+	{#await data.stream.data}
+		<div class="flex flex-col items-center justify-center py-8">
+			<div class="text-sm text-gray-600 mb-4">Loading data...</div>
+			<LoadingSpinner />
+		</div>
+	{:then rawData}
+		{@const perimeters = processPerimetersData(rawData)}
+		{#if perimeters.length == 0}
+			<span class="text-2xl">{m.xRaysEmptyMessage()}</span>
+		{/if}
+		{#each perimeters as perimeter, index}
 		{@const compliance_assessments = Object.values(perimeter.compliance_assessments.objects)}
 		{@const risk_assessments = Object.values(perimeter.risk_assessments.objects)}
 		<div>
@@ -62,8 +71,8 @@
 				{perimeter.perimeter.folder.str}/{perimeter.perimeter.name}
 			</Anchor>
 			<Tabs
-				value={perimeter.group}
-				onValueChange={(e) => (perimeter.group = e.value)}
+				value={tabStates[perimeter.id] || 'compliance_assessments'}
+				onValueChange={(e) => (tabStates[perimeter.id] = e.value)}
 				listJustify="justify-center"
 			>
 				{#snippet list()}
@@ -295,4 +304,9 @@
 			<hr />
 		{/if}
 	{/each}
+	{:catch error}
+		<div class="flex flex-col items-center justify-center py-8">
+			<p class="text-red-500">Error loading data</p>
+		</div>
+	{/await}
 </div>
