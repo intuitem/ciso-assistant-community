@@ -171,6 +171,21 @@ jobs:
       mailhog:
         image: mailhog/mailhog
         ports: ["1025:1025", "8025:8025"]
+      keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        ports:
+          - 8080:8080
+        env:
+          KEYCLOAK_ADMIN: admin
+          KEYCLOAK_ADMIN_PASSWORD: admin
+        volumes:
+          - ./realm-config:/opt/keycloak/data/import
+        options: >-
+          --health-cmd "curl --fail http://localhost:8080/health/ready || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          start-dev --import-realm
 
     strategy:
       max-parallel: 16
@@ -327,6 +342,21 @@ jobs:
       mailhog:
         image: mailhog/mailhog
         ports: ["1025:1025", "8025:8025"]
+      keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        ports:
+          - 8080:8080
+        env:
+          KEYCLOAK_ADMIN: admin
+          KEYCLOAK_ADMIN_PASSWORD: admin
+        volumes:
+          - ./realm-config:/opt/keycloak/data/import
+        options: >-
+          --health-cmd "curl --fail http://localhost:8080/health/ready || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          start-dev --import-realm
 
     strategy:
       max-parallel: 16
