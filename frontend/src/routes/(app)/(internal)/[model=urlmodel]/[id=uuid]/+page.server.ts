@@ -27,7 +27,6 @@ export const load: PageServerLoad = async (event) => {
 		model: modelInfo,
 		id: event.params.id
 	});
-
 	if (event.params.model === 'applied-controls') {
 		const appliedControlSchema = modelSchema(event.params.model);
 		const appliedControl = data.data;
