@@ -72,7 +72,12 @@
 			</Anchor>
 			<Tabs
 				value={tabStates[perimeter.id] || 'compliance_assessments'}
-				onValueChange={(e) => (tabStates[perimeter.id] = e.value)}
+				onValueChange={(e) => {
+					if (!tabStates[perimeter.id]) {
+						tabStates[perimeter.id] = 'compliance_assessments';
+					}
+					tabStates[perimeter.id] = e.value;
+				}}
 				listJustify="justify-center"
 			>
 				{#snippet list()}
