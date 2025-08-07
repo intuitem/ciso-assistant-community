@@ -93,7 +93,7 @@ try :
 	# But it increase the execution time of the script with the timeout
 	# A local TCP connection should never reach a 1s delay
 	s.settimeout(1)
-	s.connect(('127.0.0.1', $BACKEND_PORT))
+	s.connect(('localhost', $BACKEND_PORT))
 	port_already_in_used = True
 except :
 	port_already_in_used = False
@@ -147,6 +147,16 @@ cleanup() {
     fi
     echo "| mailer service stopped"
   fi
+  if [[ -n "$KEYCLOAK_PID" ]]; then
+    if [[ -z "$DO_NOT_USE_SUDO" ]]; then
+      sudo docker stop "$KEYCLOAK_PID" &>/dev/null
+      sudo docker rm "$KEYCLOAK_PID" &>/dev/null
+    else
+      docker stop "$KEYCLOAK_PID" &>/dev/null
+      docker rm "$KEYCLOAK_PID" &>/dev/null
+    fi
+    echo "| keycloak service stopped"
+  fi
   if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
     rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
     echo "| test data history removed"
@@ -184,19 +194,19 @@ else
 fi
 
 if command -v docker &>/dev/null; then
-  echo "Starting keycloak..."
+  echo "Starting keycloak with admin user $KEYCLOAK_ADMIN:$KEYCLOAK_ADMIN_PASSWORD on port $KEYCLOAK_PORT..."
   if [[ -z "$DO_NOT_USE_SUDO" ]]; then
     KEYCLOAK_PID=$(sudo docker run -d -p "$KEYCLOAK_PORT":8080 \
       -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
       -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
-      -v ./keycloak:/opt/keycloak/data/import \
+      -v "$APP_DIR"/frontend/tests/keycloak:/opt/keycloak/data/import \
       quay.io/keycloak/keycloak:latest \
       start-dev --import-realm)
   else
     KEYCLOAK_PID=$(docker run -d -p "$KEYCLOAK_PORT":8080 \
-      -e KEYCLOAK_ADMIN=admin \
-      -e KEYCLOAK_ADMIN_PASSWORD=admin \
-      -v ./keycloak:/opt/keycloak/data/import \
+      -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
+      -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
+      -v "$APP_DIR"/frontend/tests/keycloak:/opt/keycloak/data/import \
       quay.io/keycloak/keycloak:latest \
       start-dev --import-realm)
   fi
@@ -240,17 +250,17 @@ fi
 
 poetry run python3 manage.py createsuperuser --noinput
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup poetry run python3 manage.py runserver $BACKEND_PORT >$APP_DIR/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup poetry run python3 manage.py runserver localhost:$BACKEND_PORT >$APP_DIR/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup poetry run python3 manage.py runserver $BACKEND_PORT >/dev/null 2>&1 &
+  nohup poetry run python3 manage.py runserver localhost:$BACKEND_PORT >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"
 
 echo "Starting playwright tests"
 export ORIGIN=http://localhost:4173
-export PUBLIC_BACKEND_API_URL=http://127.0.0.1:$BACKEND_PORT/api
+export PUBLIC_BACKEND_API_URL=http://localhost:$BACKEND_PORT/api
 export MAILER_WEB_SERVER_PORT=$MAILER_WEB_SERVER_PORT
 
 cd $APP_DIR/frontend/
