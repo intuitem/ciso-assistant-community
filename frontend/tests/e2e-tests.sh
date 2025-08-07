@@ -12,6 +12,10 @@ BACKEND_PORT=8173
 MAILER_WEB_SERVER_PORT=8073
 MAILER_SMTP_SERVER_PORT=1073
 
+KEYCLOAK_PORT=8080
+KEYCLOAK_ADMIN="admin"
+KEYCLOAK_ADMIN_PASSWORD="admin"
+
 for arg in "$@"; do
   if [[ $arg == --port* ]]; then
     if [[ "${arg#*=}" =~ ^[0-9]+$ ]]; then
@@ -177,6 +181,30 @@ if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   fi
 else
   echo "Using an existing mailer service on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT"
+fi
+
+if command -v docker &>/dev/null; then
+  echo "Starting keycloak..."
+  if [[ -z "$DO_NOT_USE_SUDO" ]]; then
+    KEYCLOAK_PID=$(sudo docker run -p "$KEYCLOAK_PORT":8080 \
+      -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
+      -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
+      -v ./keycloak:/opt/keycloak/data/import \
+      quay.io/keycloak/keycloak:latest \
+      start-dev --import-realm)
+  else
+    KEYCLOAK_PID=$(docker run -p "$KEYCLOAK_PORT":8080 \
+      -e KEYCLOAK_ADMIN=admin \
+      -e KEYCLOAK_ADMIN_PASSWORD=admin \
+      -v ./keycloak:/opt/keycloak/data/import \
+      quay.io/keycloak/keycloak:latest \
+      start-dev --import-realm)
+  fi
+  echo "Keycloak started on ports $KEYCLOAK_PORT (Container ID: ${KEYCLOAK_PID:0:6})"
+else
+  echo "Docker is not installed!"
+  echo "Please install Docker to use the isolated test mailer service or use -m to tell the tests to use an existing one."
+  exit 1
 fi
 
 echo "Starting backend server..."
