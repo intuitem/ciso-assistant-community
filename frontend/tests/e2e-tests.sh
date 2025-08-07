@@ -186,14 +186,14 @@ fi
 if command -v docker &>/dev/null; then
   echo "Starting keycloak..."
   if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-    KEYCLOAK_PID=$(sudo docker run -p "$KEYCLOAK_PORT":8080 \
+    KEYCLOAK_PID=$(sudo docker run -d -p "$KEYCLOAK_PORT":8080 \
       -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
       -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
       -v ./keycloak:/opt/keycloak/data/import \
       quay.io/keycloak/keycloak:latest \
       start-dev --import-realm)
   else
-    KEYCLOAK_PID=$(docker run -p "$KEYCLOAK_PORT":8080 \
+    KEYCLOAK_PID=$(docker run -d -p "$KEYCLOAK_PORT":8080 \
       -e KEYCLOAK_ADMIN=admin \
       -e KEYCLOAK_ADMIN_PASSWORD=admin \
       -v ./keycloak:/opt/keycloak/data/import \
