@@ -4434,19 +4434,25 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments
 
     def get_progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
-        )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
-        return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
+        """Get the progress percentage based on assessed requirements."""
+        total_requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self
+        ).count()
+        if total_requirements == 0:
+            return 0
+        assessed_requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, status=RequirementAssessment.Status.DONE
+        ).count()
+        return int((assessed_requirements / total_requirements) * 100)
+
+    def get_compliance_percentage(self) -> int:
+        """Get the compliance percentage based on compliant requirements."""
+        requirement_assessments = self.get_requirement_assessments(include_non_assessable=False)
+        total_count = len(requirement_assessments)
+        if total_count == 0:
+            return 0
+        compliant_count = sum(1 for ra in requirement_assessments if ra.result == RequirementAssessment.Result.COMPLIANT)
+        return int((compliant_count / total_count) * 100)
 
     @property
     def answers_progress(self) -> int:

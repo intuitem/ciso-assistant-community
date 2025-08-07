@@ -1,10 +1,7 @@
 import logging
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
 from django.conf import settings
-from core.models import ComplianceAssessment, AppliedControl
+from core.models import ComplianceAssessment, AppliedControl, RequirementAssessment
 import requests
-from core.models import RequirementAssessment
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +77,8 @@ def get_compliance_assessment_payload(instance, old_status):
         'old_status': old_status,
         'new_status': instance.status,
         'ref_id': instance.ref_id,
-        'framework': instance.framework.name,
-        'perimeter': instance.perimeter.name,
+        'framework': instance.framework.name if instance.framework else None,
+        'perimeter': instance.perimeter.name if instance.perimeter else None,
         'min_score': instance.min_score,
         'max_score': instance.max_score,
         'compliance_percentage': compliance_percentage,
