@@ -105,6 +105,22 @@
 			}
 		]
 	},
+	"users": [
+		{
+			"username": "admin@tests.com",
+			"enabled": true,
+			"firstName": "John",
+			"lastName": "Doe",
+			"email": "admin@tests.com",
+			"credentials": [
+				{
+					"type": "password",
+					"value": "1234",
+					"temporary": false
+				}
+			]
+		}
+	],
 	"clients": [
 		{
 			"id": "edc4e8b5-97df-46d3-bc1c-3dc04e05b74e",
@@ -276,9 +292,9 @@
 			"enabled": true,
 			"alwaysDisplayInConsole": false,
 			"clientAuthenticatorType": "client-secret",
-			"secret": "**********",
-			"redirectUris": ["http://127.0.0.1:8173/api/accounts/oidc/openid_connect/login/callback/"],
-			"webOrigins": ["http://127.0.0.1:8173"],
+			"secret": "foobar",
+			"redirectUris": ["http://localhost:8173/api/accounts/oidc/openid_connect/login/callback/"],
+			"webOrigins": ["http://localhost:8173"],
 			"notBefore": 0,
 			"bearerOnly": false,
 			"consentRequired": false,
@@ -324,8 +340,8 @@
 			"enabled": true,
 			"alwaysDisplayInConsole": false,
 			"clientAuthenticatorType": "client-secret",
-			"redirectUris": ["http://127.0.0.1:8173/*"],
-			"webOrigins": ["http://127.0.0.1:8173"],
+			"redirectUris": ["http://localhost:8173/*"],
+			"webOrigins": ["http://localhost:8173"],
 			"notBefore": 0,
 			"bearerOnly": false,
 			"consentRequired": false,
@@ -2079,4 +2095,3 @@
 		"policies": []
 	}
 }
-
