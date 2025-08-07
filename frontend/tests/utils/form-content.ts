@@ -47,6 +47,11 @@ export class FormContent {
 	async fill(values: { [k: string]: any }) {
 		for (const key in values) {
 			const field = this.fields.get(key);
+			for (const spinner of await this.page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 
 			switch (field?.type) {
 				case FormFieldType.CHECKBOX:
@@ -63,11 +68,6 @@ export class FormContent {
 					await field.locator.selectOption(values[key]);
 					break;
 				case FormFieldType.SELECT_AUTOCOMPLETE:
-					for (const spinner of await this.page.locator('.loading-spinner').all()) {
-						await expect(spinner).not.toBeVisible({
-							timeout: 20_000
-						});
-					}
 					await expect(async () => {
 						if (
 							(await field.locator.getByRole('option').isVisible()) &&
