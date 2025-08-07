@@ -3760,7 +3760,17 @@ class ComplianceAssessment(Assessment):
                 old_status = old.status
             except type(self).DoesNotExist:
                 old_status = None
+        # Default framework‐provided scoring when unset
+        if self.min_score is None:
+            self.min_score = self.framework.min_score or 0
+        if self.max_score is None:
+            self.max_score = self.framework.max_score or 100
+        if not self.scores_definition:
+            self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+        # Restore daily metrics tracking
+        self.upsert_daily_metrics()
+
         # After save, check for status change or creation
         if is_new:
             payload = get_compliance_assessment_payload(self, old_status=None)
@@ -3768,6 +3778,7 @@ class ComplianceAssessment(Assessment):
             send_webhook_notification(payload)
         elif old_status != self.status:
             payload = get_compliance_assessment_payload(self, old_status)
+            payload['type'] = 'compliance_assessment_status_changed'
             send_webhook_notification(payload)
 
     def create_requirement_assessments(

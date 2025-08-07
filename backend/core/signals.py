@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from core.models import ComplianceAssessment, AppliedControl
 import requests
+from core.models import RequirementAssessment
 
 logger = logging.getLogger(__name__)
 
@@ -54,16 +55,24 @@ def get_compliance_assessment_payload(instance, old_status):
     # Defensive programming for computed fields
     compliance_percentage = None
     progress_percentage = None
+    
     try:
-        if hasattr(instance, 'get_global_score'):
-            compliance_percentage = instance.get_global_score()
+        # Calculate compliance percentage using the same logic as domain_compliance_percentage
+        requirement_assessments = instance.get_requirement_assessments(include_non_assessable=False)
+        total_count = len(requirement_assessments)
+        compliant_count = sum(1 for ra in requirement_assessments if ra.result == RequirementAssessment.Result.COMPLIANT)
+        
+        compliance_percentage = int((compliant_count / total_count) * 100) if total_count > 0 else 0
+        logger.info(f'ComplianceAssessment {instance.pk}: compliance_percentage={compliance_percentage}% ({compliant_count}/{total_count})')
     except Exception as e:
-        logger.warning(f'Could not compute compliance_percentage: {e}')
+        logger.warning(f'Could not compute compliance_percentage for ComplianceAssessment {instance.pk}: {e}')
+    
     try:
-        if hasattr(instance, 'get_progress'):
-            progress_percentage = instance.get_progress()
+        progress_percentage = instance.get_progress()
+        logger.info(f'ComplianceAssessment {instance.pk}: progress_percentage={progress_percentage}')
     except Exception as e:
-        logger.warning(f'Could not compute progress_percentage: {e}')
+        logger.warning(f'Could not compute progress_percentage for ComplianceAssessment {instance.pk}: {e}')
+    
     return {
         'type': 'compliance_assessment_status_changed',
         'id': str(instance.pk),
@@ -71,15 +80,10 @@ def get_compliance_assessment_payload(instance, old_status):
         'old_status': old_status,
         'new_status': instance.status,
         'ref_id': instance.ref_id,
-        'framework': str(instance.framework) if instance.framework else None,
-        'perimeter': str(instance.perimeter) if hasattr(instance, 'perimeter') and instance.perimeter else None,
+        'framework': instance.framework.name,
+        'perimeter': instance.perimeter.name,
         'min_score': instance.min_score,
         'max_score': instance.max_score,
-        'show_documentation_score': instance.show_documentation_score,
-        'assets': [{'id': a.id, 'name': str(a)} for a in instance.assets.all()],
-        'campaign': str(instance.campaign) if instance.campaign else None,
-        'evidences': [{'id': e.id, 'name': str(e)} for e in instance.evidences.all()],
-        'authors': [{'id': u.id, 'name': str(u)} for u in instance.authors.all()] if hasattr(instance, 'authors') else [],
         'compliance_percentage': compliance_percentage,
         'progress_percentage': progress_percentage,
         # Add other fields as needed
