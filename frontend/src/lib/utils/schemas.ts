@@ -693,6 +693,7 @@ export const StrategicScenarioSchema = z.object({
 
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
+	ebios_rm_study: z.string(),
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().default(true),
@@ -783,6 +784,7 @@ export const IncidentSchema = z.object({
 });
 
 export const TimelineEntrySchema = z.object({
+	folder: z.string(),
 	incident: z.string(),
 	entry: z.string(),
 	entry_type: z.string().default('observation'),

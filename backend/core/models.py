@@ -869,22 +869,22 @@ class LoadedLibrary(LibraryMixin):
     @property
     def _objects(self):
         res = {}
-        if self.frameworks.count() > 0:
+        if self.frameworks.exists():
             res["framework"] = update_translations_in_object(
                 model_to_dict(self.frameworks.first())
             )
             res["framework"].update(self.frameworks.first().library_entry)
-        if self.threats.count() > 0:
+        if self.threats.exists():
             res["threats"] = [
                 update_translations_in_object(model_to_dict(threat))
                 for threat in self.threats.all()
             ]
-        if self.reference_controls.count() > 0:
+        if self.reference_controls.exists():
             res["reference_controls"] = [
                 update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
-        if self.risk_matrices.count() > 0:
+        if self.risk_matrices.exists():
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
             res["risk_matrix"]["probability"] = update_translations(matrix.probability)
@@ -985,7 +985,7 @@ class Threat(
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() > 0:
+        if self.requirements.exists():
             return False
         return True
 
@@ -1051,7 +1051,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() or self.appliedcontrol_set.count() > 0:
+        if self.requirements.exists() or self.appliedcontrol_set.exists():
             return False
         return True
 
@@ -1182,7 +1182,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         """
         Returns True if the framework can be deleted
         """
-        if self.compliance_assessment_set.count() > 0:
+        if self.compliance_assessment_set.exists():
             return False
         return True
 
@@ -2781,7 +2781,7 @@ class AppliedControl(
         return reqs + scenarios + sh_actions
 
     def has_evidences(self):
-        return self.evidences.count() > 0
+        return self.evidences.exists()
 
     def eta_missed(self):
         return (
@@ -3641,7 +3641,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = "Campaigns"
 
     def metrics(self):
-        if ComplianceAssessment.objects.filter(campaign=self).count() == 0:
+        if not ComplianceAssessment.objects.filter(campaign=self).exists():
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
             [

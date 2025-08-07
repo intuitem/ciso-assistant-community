@@ -197,6 +197,12 @@ export interface AppliedControlStatus {
 	values: any[]; // Set these types later on
 }
 
+export interface AppliedControlImpact {
+	localLables: string[];
+	labels: any[];
+	values: any[]; // Set these types later on
+}
+
 export interface CacheLock {
 	promise: Promise<any>;
 	resolve: (_: any) => any;

@@ -32,8 +32,6 @@ Star the project 🌟 to get releases notification and help growing the communit
 <a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
 <a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
 
-
-
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
 - Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,
@@ -236,6 +234,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 20. Guides des mécanismes cryptographiques 🇫🇷
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
+23. NIST 800-82 (OT) - appendix 🏭🤖
 
 <br/>
 
@@ -252,7 +251,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
-- NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
@@ -431,7 +429,7 @@ pre-commit install
 
 - Choose your s3 provider or try s3 feature with miniO with this command:
   - `docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=XXX" -e "MINIO_ROOT_PASSWORD=XXX" quay.io/minio/minio server /data --console-address ":9001"`
-- You can now check your bucket on http://localhost:9001
+- You can now check your bucket on <http://localhost:9001>
   - Fill the login with the credentials you filled on the docker run env variables
 - Export in the backend directory all the env variables asked about S3
   - You can see the list above in the recommanded variables
@@ -577,6 +575,7 @@ Set DJANGO_DEBUG=False for security reason.
 17. HU: Hungarian
 18. UK: Ukrainian
 19. EL: Greek
+20. TR: Turkish
 
 ## Contributors 🤝
 
