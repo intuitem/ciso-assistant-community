@@ -55,10 +55,6 @@ Go into your **Keycloak admin console**
 {% endtab %}
 
 {% tab title="OpenID Connect (OIDC)" %}
-{% hint style="info" %}
-**OIDC support has not been released yet.** You can track our progress on this Pull Request: [https://github.com/intuitem/ciso-assistant-community/pull/2131](https://github.com/intuitem/ciso-assistant-community/pull/2131)
-{% endhint %}
-
 Go into your **Keycloak admin console**
 
 1.  Open the sidebar menu > **Clients** and **Create client**

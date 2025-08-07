@@ -46,10 +46,6 @@ Once you've retrieved the **IdP Entity ID,** the **Metadata URL** and the **Enti
 
 ### Configure CISO Assistant with OpenID Connect (OIDC)
 
-{% hint style="info" %}
-**OIDC support has not been released yet.** You can track our progress on this Pull Request: [https://github.com/intuitem/ciso-assistant-community/pull/2131](https://github.com/intuitem/ciso-assistant-community/pull/2131)
-{% endhint %}
-
 Once you've retrieved the IdP Entity ID, the Metadata URL and the Entity ID from your provider (see the list of providers for specific details), the configuration on CISO Assistant is pretty simple.\
 
 
