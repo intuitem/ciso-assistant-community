@@ -5,20 +5,21 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-WEBHOOK_URL = getattr(settings, 'NOTIFICATION_WEBHOOK_URL', None)
-
 
 def send_webhook_notification(payload):
-    if not WEBHOOK_URL:
+    webhook_url = getattr(settings, 'NOTIFICATION_WEBHOOK_URL', None)
+    if not webhook_url:
         logger.warning('Notification webhook URL is not set. Skipping notification.')
-        return
+        return None
     try:
         logger.info('Sending notification to webhook.')
-        response = requests.post(WEBHOOK_URL, json=payload, timeout=5)
+        response = requests.post(webhook_url, json=payload, timeout=5)
         response.raise_for_status()
         logger.info(f'Notification sent successfully. Response: {response.status_code}')
+        return response
     except requests.RequestException as e:
         logger.error(f'Error sending notification: {e}')
+        raise
 
 
 def get_applied_control_payload(instance, old_status, event_type='applied_control_status_changed'):

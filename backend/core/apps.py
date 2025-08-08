@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 import os
+import importlib
 
 from .startup import startup
 
@@ -15,4 +16,4 @@ class CoreConfig(AppConfig):
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
         # Import webhooks to register webhook notification handlers
-        import core.webhooks
+        importlib.import_module(f"{self.name}.webhooks")
