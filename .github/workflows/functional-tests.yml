@@ -158,7 +158,7 @@ jobs:
       EMAIL_PORT: 1025
       CISO_ASSISTANT_VERSION: v4.2.0
       CISO_ASSISTANT_BUILD: ${{ github.sha }}
-      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
+      PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
         image: postgres:16
@@ -257,7 +257,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           poetry run python manage.py createsuperuser --noinput
-          nohup poetry run python manage.py runserver &
+          nohup poetry run python manage.py runserver localhost:8173 &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}/
@@ -317,7 +317,7 @@ jobs:
       CISO_ASSISTANT_BUILD: ${{ github.sha }}
       DJANGO_SETTINGS_MODULE: enterprise_core.settings
       LICENSE_SEATS: 999
-      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
+      PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
         image: postgres:16
@@ -425,7 +425,7 @@ jobs:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
           poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
-          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
+          nohup poetry run python manage.py runserver localhost:8173 --settings="$SETTINGS_MODULE" &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}/
