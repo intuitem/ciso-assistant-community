@@ -558,6 +558,7 @@
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
 					onclick={() => modalCreateForm()}
+					data-testid="apply-mapping-button"
 					><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
 				</button>
 			{/if}
