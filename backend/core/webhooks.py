@@ -1,6 +1,6 @@
 import logging
 from django.conf import settings
-from core.models import ComplianceAssessment, AppliedControl, RequirementAssessment
+from core.models import ComplianceAssessment, AppliedControl
 import requests
 
 logger = logging.getLogger(__name__)
@@ -11,18 +11,28 @@ def send_webhook_notification(payload):
     if not webhook_url:
         logger.warning('Notification webhook URL is not set. Skipping notification.')
         return None
-    try:
-        logger.info('Sending notification to webhook.')
-        response = requests.post(webhook_url, json=payload, timeout=5)
-        response.raise_for_status()
-        logger.info(f'Notification sent successfully. Response: {response.status_code}')
-        return response
-    except requests.RequestException as e:
-        logger.error(f'Error sending notification: {e}')
-        raise
+    
+    timeout = getattr(settings, "WEBHOOK_TIMEOUT", 5)
+    retries = getattr(settings, "WEBHOOK_RETRIES", 3)
+    
+    for attempt in range(retries):
+        try:
+            logger.info('Sending notification to webhook.')
+            response = requests.post(webhook_url, json=payload, timeout=timeout)
+            response.raise_for_status()
+            logger.info(f'Notification sent successfully. Response: {response.status_code}')
+            return response
+        except requests.RequestException as exc:
+            if attempt == retries - 1:
+                logger.error(f'Error sending notification after {retries} attempts: {exc}')
+                raise
+            logger.warning("Retrying webhook after error: %s", exc)
 
 
 def get_applied_control_payload(instance, old_status, event_type='applied_control_status_changed'):
+    # WARNING: This function performs N+1 queries when accessing related objects.
+    # Callers should use prefetch_related to optimize database queries:
+    # instance = AppliedControl.objects.prefetch_related('owner', 'assets', 'evidences', 'security_exceptions').get(pk=instance.pk)
     return {
         'type': event_type,
         'id': str(instance.pk),
@@ -37,9 +47,9 @@ def get_applied_control_payload(instance, old_status, event_type='applied_contro
         'control_impact': instance.control_impact,
         'cost': instance.cost,
         'progress_field': instance.progress_field,
-        'start_date': str(instance.start_date) if instance.start_date else None,
-        'eta': str(instance.eta) if instance.eta else None,
-        'expiry_date': str(instance.expiry_date) if instance.expiry_date else None,
+        'start_date': instance.start_date.isoformat() if instance.start_date else None,
+        'eta': instance.eta.isoformat() if instance.eta else None,
+        'expiry_date': instance.expiry_date.isoformat() if instance.expiry_date else None,
         'link': instance.link,
         'reference_control': str(instance.reference_control) if instance.reference_control else None,
         'owners': [{'id': u.id, 'name': str(u)} for u in instance.owner.all()],
@@ -50,6 +60,10 @@ def get_applied_control_payload(instance, old_status, event_type='applied_contro
     }
 
 def get_compliance_assessment_payload(instance, old_status, event_type='compliance_assessment_status_changed'):
+    # WARNING: This function may perform N+1 queries when accessing related objects.
+    # Callers should use select_related/prefetch_related to optimize database queries:
+    # instance = ComplianceAssessment.objects.select_related('framework', 'perimeter').get(pk=instance.pk)
+    
     # Defensive programming for computed fields
     compliance_percentage = None
     progress_percentage = None
