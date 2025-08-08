@@ -11,23 +11,22 @@ def send_webhook_notification(payload):
     if not webhook_url:
         logger.warning('Notification webhook URL is not set. Skipping notification.')
         return None
-    
+
     timeout = getattr(settings, "WEBHOOK_TIMEOUT", 5)
     retries = getattr(settings, "WEBHOOK_RETRIES", 3)
-    
+
     for attempt in range(retries):
         try:
             logger.info('Sending notification to webhook.')
             response = requests.post(webhook_url, json=payload, timeout=timeout)
             response.raise_for_status()
-            logger.info(f'Notification sent successfully. Response: {response.status_code}')
+            logger.info("Webhook OK – %s", response.status_code)
             return response
         except requests.RequestException as exc:
             if attempt == retries - 1:
-                logger.error(f'Error sending notification after {retries} attempts: {exc}')
-                raise
+                logger.error("Webhook failed after %s attempts – giving up: %s", retries, exc)
+                return None   # swallow to keep request path healthy
             logger.warning("Retrying webhook after error: %s", exc)
-
 
 def get_applied_control_payload(instance, old_status, event_type='applied_control_status_changed'):
     # WARNING: This function performs N+1 queries when accessing related objects.
