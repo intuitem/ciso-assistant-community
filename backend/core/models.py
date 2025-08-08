@@ -2713,7 +2713,7 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
-        from core.signals import send_webhook_notification, get_applied_control_payload
+        from core.webhooks import send_webhook_notification, get_applied_control_payload
         is_new = self.pk is None
         old_status = None
         if not is_new:
@@ -3751,7 +3751,7 @@ class ComplianceAssessment(Assessment):
         )
 
     def save(self, *args, **kwargs) -> None:
-        from core.signals import send_webhook_notification, get_compliance_assessment_payload
+        from core.webhooks import send_webhook_notification, get_compliance_assessment_payload
         is_new = self.pk is None
         old_status = None
         if not is_new:

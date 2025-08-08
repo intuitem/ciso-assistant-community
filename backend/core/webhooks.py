@@ -21,9 +21,9 @@ def send_webhook_notification(payload):
         logger.error(f'Error sending notification: {e}')
 
 
-def get_applied_control_payload(instance, old_status):
+def get_applied_control_payload(instance, old_status, event_type='applied_control_status_changed'):
     return {
-        'type': 'applied_control_status_changed',
+        'type': event_type,
         'id': str(instance.pk),
         'name': instance.name,
         'old_status': old_status,
@@ -48,19 +48,14 @@ def get_applied_control_payload(instance, old_status):
         # Add other fields as needed for more context
     }
 
-def get_compliance_assessment_payload(instance, old_status):
+def get_compliance_assessment_payload(instance, old_status, event_type='compliance_assessment_status_changed'):
     # Defensive programming for computed fields
     compliance_percentage = None
     progress_percentage = None
     
     try:
-        # Calculate compliance percentage using the same logic as domain_compliance_percentage
-        requirement_assessments = instance.get_requirement_assessments(include_non_assessable=False)
-        total_count = len(requirement_assessments)
-        compliant_count = sum(1 for ra in requirement_assessments if ra.result == RequirementAssessment.Result.COMPLIANT)
-        
-        compliance_percentage = int((compliant_count / total_count) * 100) if total_count > 0 else 0
-        logger.info(f'ComplianceAssessment {instance.pk}: compliance_percentage={compliance_percentage}% ({compliant_count}/{total_count})')
+        compliance_percentage = instance.get_compliance_percentage()
+        logger.info(f'ComplianceAssessment {instance.pk}: compliance_percentage={compliance_percentage}%')
     except Exception as e:
         logger.warning(f'Could not compute compliance_percentage for ComplianceAssessment {instance.pk}: {e}')
     
@@ -71,7 +66,7 @@ def get_compliance_assessment_payload(instance, old_status):
         logger.warning(f'Could not compute progress_percentage for ComplianceAssessment {instance.pk}: {e}')
     
     return {
-        'type': 'compliance_assessment_status_changed',
+        'type': event_type,
         'id': str(instance.pk),
         'name': instance.name,
         'old_status': old_status,
