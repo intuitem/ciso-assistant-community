@@ -13,7 +13,7 @@
 <div class="grid grid-cols-12 gap-4 p-2">
 	<div class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.appliedControls()}
+			<i class="fa-solid fa-fire-extinguisher mr-2" />{m.appliedControls()}
 		</div>
 		<ModelTable
 			source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder'], body: [] }}
@@ -27,7 +27,7 @@
 	</div>
 	<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.tasks()}
+			<i class="fa-solid fa-note-sticky mr-2" />{m.tasks()}
 		</div>
 		<ModelTable
 			source={{
@@ -41,7 +41,7 @@
 	</div>
 	<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.complianceAssessments()}
+			<i class="fa-solid fa-certificate mr-2" />{m.complianceAssessments()}
 		</div>
 		<ModelTable
 			source={{ head: ['name', 'status', 'eta', 'progress', 'perimeter'], body: [] }}
@@ -52,7 +52,7 @@
 	</div>
 	<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.riskAssessments()}
+			<i class="fa-solid fa-magnifying-glass-chart mr-2" />{m.riskAssessments()}
 		</div>
 		<ModelTable
 			source={{ head: ['name', 'status', 'eta', 'perimeter'], body: [] }}
@@ -63,7 +63,7 @@
 	</div>
 	<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.riskScenarios()}
+			<i class="fa-solid fa-clone mr-2" />{m.riskScenarios()}
 		</div>
 		<ModelTable
 			source={{
@@ -77,7 +77,7 @@
 	</div>
 	<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.incidents()}
+			<i class="fa-solid fa-bug mr-2" />{m.incidents()}
 		</div>
 		<ModelTable
 			source={{
@@ -91,7 +91,7 @@
 	</div>
 	<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
 		<div class="font-bold mb-2">
-			{m.securityExceptions()}
+			<i class="fa-solid fa-circle-exclamation mr-2" />{m.securityExceptions()}
 		</div>
 		<ModelTable
 			source={{
@@ -101,6 +101,31 @@
 			hideFilters={true}
 			URLModel="security-exceptions"
 			baseEndpoint="/security-exceptions?owners={data.user.id}"
+		/>
+	</div>
+	<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+		<div class="font-bold mb-2">
+			<i class="fa-solid fa-clipboard-list mr-2" />{m.findingsAssessments()}
+		</div>
+		<ModelTable
+			source={{ head: ['name', 'status', 'category', 'perimeter'], body: [] }}
+			hideFilters={true}
+			URLModel="findings-assessments"
+			baseEndpoint="/findings-assessments?authors={data.user.id}"
+		/>
+	</div>
+	<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+		<div class="font-bold mb-2">
+			<i class="fa-solid fa-triangle-exclamation mr-2" />{m.findings()}
+		</div>
+		<ModelTable
+			source={{
+				head: ['ref_id', 'name', 'severity', 'status'],
+				body: []
+			}}
+			hideFilters={true}
+			URLModel="findings"
+			baseEndpoint="/findings?owner={data.user.id}"
 		/>
 	</div>
 </div>
