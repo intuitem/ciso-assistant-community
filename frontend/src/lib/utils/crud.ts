@@ -424,6 +424,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
+		reverseForeignKeyFields: [
+			{
+				field: 'reference_control',
+				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
 		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]
 	},
