@@ -1481,7 +1481,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "category": ["exact"],
             "csf_function": ["exact"],
             "priority": ["exact"],
-            "reference_control": ["exact"],
+            "reference_control": ["exact", "isnull"],
             "effort": ["exact"],
             "control_impact": ["exact"],
             "cost": ["exact"],

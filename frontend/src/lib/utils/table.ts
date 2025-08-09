@@ -351,6 +351,15 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'referenceControl',
+		optionsEndpoint: 'reference-controls',
+		multiple: true
+	}
+};
+
 const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -858,6 +867,7 @@ export const listViewFields = {
 			effort: EFFORT_FILTER,
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
+			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined
 		}
 	},
