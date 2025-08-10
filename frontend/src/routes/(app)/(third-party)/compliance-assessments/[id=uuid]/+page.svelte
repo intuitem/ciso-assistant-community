@@ -536,6 +536,7 @@
 					href={`${page.url.pathname}/action-plan`}
 					class="btn preset-filled-primary-500 h-fit"
 					breadcrumbAction="push"
+					data-testid="action-plan-button"
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 			{/if}
@@ -545,6 +546,7 @@
 					breadcrumbAction="push"
 					href={`${page.url.pathname}/flash-mode`}
 					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+					data-testid="flash-mode-button"
 					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 				>
 			{/if}
@@ -552,18 +554,23 @@
 				breadcrumbAction="push"
 				href={`${page.url.pathname}/table-mode`}
 				class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
+				data-testid="table-mode-button"
+				><i class="fa-solid fa-table-list mr-2"></i>
+				{m.tableMode()}</Anchor
 			>
 			{#if !page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
 					onclick={() => modalCreateForm()}
-					><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
+					data-testid="apply-mapping-button"
+					><i class="fa-solid fa-diagram-project mr-2"></i>
+					{m.applyMapping()}
 				</button>
 			{/if}
 
 			<button
 				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+				data-testid="sync-to-actions-button"
 				onclick={async () => {
 					await modalConfirmSyncToActions(
 						data.compliance_assessment.id,

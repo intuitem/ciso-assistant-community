@@ -79,9 +79,9 @@ export class LoginPage extends BasePage {
 		}
 	}
 
-	async skipWelcome() {
+	async skipWelcome(url = /^.*\/analytics$/) {
 		// if welcome popup is visible, close it
-		await expect(this.page).toHaveURL(/^.*\/analytics$/);
+		await expect(this.page).toHaveURL(url);
 		const welcomePopup = this.page.getByTestId('modal-component');
 		if (await welcomePopup.isVisible()) {
 			await this.page.keyboard.press('Escape');
