@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { marked } from 'marked';
+	import sanitizeHtml from 'sanitize-html';
 
 	interface Props {
 		class?: string;
@@ -55,7 +56,49 @@
 
 	$effect(() => {
 		if (showPreview && $value) {
-			renderedMarkdown = marked($value) as string;
+			const html = marked($value) as string;
+			renderedMarkdown = sanitizeHtml(html, {
+				allowedTags: [
+					'p',
+					'blockquote',
+					'h1',
+					'h2',
+					'h3',
+					'h4',
+					'h5',
+					'h6',
+					'ul',
+					'ol',
+					'li',
+					'strong',
+					'em',
+					'a',
+					'code',
+					'pre',
+					'table',
+					'thead',
+					'tbody',
+					'tr',
+					'th',
+					'td',
+					'img',
+					'hr',
+					'br'
+				],
+				allowedAttributes: {
+					a: ['href', 'name', 'target', 'rel'],
+					img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
+					code: ['class']
+				},
+				allowedSchemes: ['http', 'https', 'mailto'],
+				transformTags: {
+					a: sanitizeHtml.simpleTransform(
+						'a',
+						{ rel: 'noopener noreferrer', target: '_blank' },
+						true
+					)
+				}
+			});
 		}
 	});
 
