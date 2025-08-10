@@ -35,12 +35,16 @@
 			'td',
 			'img',
 			'hr',
-			'br'
+			'br',
+			'input'
 		],
 		allowedAttributes: {
 			a: ['href', 'name', 'target', 'rel'],
 			img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-			code: ['class']
+			code: ['class'],
+			input: ['type', 'checked', 'disabled'],
+			li: ['class'],
+			ul: ['class']
 		},
 		allowedSchemes: ['http', 'https', 'mailto'],
 		transformTags: {
@@ -48,11 +52,9 @@
 		}
 	};
 
-	let renderedContent = $derived(() => {
-		if (!content || content.trim() === '') return '';
-		const html = marked(content) as string;
-		return sanitizeHtml(html, sanitizeConfig);
-	});
+	let renderedContent = $derived(
+		!content || content.trim() === '' ? '' : sanitizeHtml(marked(content) as string, sanitizeConfig)
+	);
 </script>
 
 {#if renderedContent}

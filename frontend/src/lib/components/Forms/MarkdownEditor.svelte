@@ -83,12 +83,16 @@
 					'td',
 					'img',
 					'hr',
-					'br'
+					'br',
+					'input'
 				],
 				allowedAttributes: {
 					a: ['href', 'name', 'target', 'rel'],
 					img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-					code: ['class']
+					code: ['class'],
+					input: ['type', 'checked', 'disabled'],
+					li: ['class'],
+					ul: ['class']
 				},
 				allowedSchemes: ['http', 'https', 'mailto'],
 				transformTags: {
