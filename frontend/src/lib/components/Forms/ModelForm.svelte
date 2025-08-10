@@ -6,6 +6,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import MarkdownEditor from '$lib/components/Forms/MarkdownEditor.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
@@ -274,14 +275,25 @@
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
-			<TextArea
-				{form}
-				field="description"
-				label={m.description()}
-				cacheLock={cacheLocks['description']}
-				bind:cachedValue={formDataCache['description']}
-				data-focusindex="1"
-			/>
+			{#if URLModel === 'applied-controls'}
+				<MarkdownEditor
+					{form}
+					field="description"
+					label={m.description()}
+					cacheLock={cacheLocks['description']}
+					bind:cachedValue={formDataCache['description']}
+					data-focusindex="1"
+				/>
+			{:else}
+				<TextArea
+					{form}
+					field="description"
+					label={m.description()}
+					cacheLock={cacheLocks['description']}
+					bind:cachedValue={formDataCache['description']}
+					data-focusindex="1"
+				/>
+			{/if}
 		{/if}
 		{#if URLModel === 'perimeters'}
 			<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
