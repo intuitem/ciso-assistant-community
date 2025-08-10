@@ -56,8 +56,8 @@
 
 	$effect(() => {
 		if (showPreview && $value) {
-			const html = marked($value) as string;
-			renderedMarkdown = sanitizeHtml(html, {
+			let html = marked($value) as string;
+			html = sanitizeHtml(html, {
 				allowedTags: [
 					'p',
 					'blockquote',
@@ -103,6 +103,17 @@
 					)
 				}
 			});
+
+			// Clean up excessive spacing
+			html = html
+				.replace(/>\s+</g, '><') // Remove whitespace between tags
+				.replace(/\n\s*\n/g, '\n') // Remove double line breaks
+				.replace(/<\/p>\s*<ul>/g, '</p><ul>') // Remove space between paragraphs and lists
+				.replace(/<\/ul>\s*<p>/g, '</ul><p>') // Remove space between lists and paragraphs
+				.replace(/<\/p>\s*<ol>/g, '</p><ol>') // Remove space between paragraphs and ordered lists
+				.replace(/<\/ol>\s*<p>/g, '</ol><p>'); // Remove space between ordered lists and paragraphs
+
+			renderedMarkdown = html;
 		}
 	});
 
