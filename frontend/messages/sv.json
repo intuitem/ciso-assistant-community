@@ -190,6 +190,8 @@
 	"importMatrices": "Importera matriser",
 	"importFrameworks": "Importera ramverk",
 	"importMappings": "Importera kartläggningar",
+	"importThreats": "Importera hot",
+	"importReferenceControls": "Importera referenskontroller",
 	"summary": "Sammanfattning",
 	"composer": "Kompositör",
 	"statistics": "Statistik",

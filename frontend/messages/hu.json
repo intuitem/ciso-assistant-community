@@ -190,6 +190,8 @@
 	"importMatrices": "Mátrixok importálása",
 	"importFrameworks": "Keretek importálása",
 	"importMappings": "Mappastruktúra importálása",
+	"importThreats": "Fenyegetések importálása",
+	"importReferenceControls": "Referencia kontrollok importálása",
 	"summary": "Összefoglaló",
 	"composer": "Összeállító",
 	"statistics": "Statisztika",

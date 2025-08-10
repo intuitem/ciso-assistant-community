@@ -190,6 +190,8 @@
 	"importMatrices": "Impor matriks",
 	"importFrameworks": "Impor kerangka kerja",
 	"importMappings": "Impor pemetaan",
+	"importThreats": "Impor ancaman",
+	"importReferenceControls": "Impor kontrol referensi",
 	"summary": "Ringkasan",
 	"composer": "Komposer",
 	"statistics": "Statistik",
