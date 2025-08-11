@@ -92,8 +92,6 @@ test('user can csf-1.1 audit map to a new iso27001-2022 audit', async ({
 			testObjectsData.complianceAssessmentsPage.build.name
 		);
 
-		//TODO: remove duplicated code from compliance-assessments.test.ts
-
 		// Click on the ID.AM-1 tree view item
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 			'ID - Identify',
@@ -103,19 +101,17 @@ test('user can csf-1.1 audit map to a new iso27001-2022 audit', async ({
 
 		await page.waitForURL('/requirement-assessments/**');
 		await page.getByTestId('switch').click({ force: true });
-		if (!page.getByTestId('progress-ring-svg').isVisible()) {
+		if (!(await page.getByTestId('progress-ring-svg').isVisible())) {
 			await page.getByTestId('switch').click({ force: true });
 		}
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
-		const IDAM1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
-		IDAM1SliderBoundingBox &&
-			(await page.getByTestId('range-slider-input').click({
-				position: {
-					x: IDAM1SliderBoundingBox.width * IDAM1Score.ratio,
-					y: IDAM1SliderBoundingBox.height / 2
-				}
-			}));
+		const slider = page.getByTestId('range-slider-input');
+		await expect(slider).toBeVisible();
+		await slider.focus();
+		for (let i = 1; i < IDAM1Score.value; i++) {
+			await slider.press('ArrowRight');
+		}
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
 			'aria-valuenow',
 			IDAM1Score.value.toString()
@@ -154,7 +150,6 @@ test('user can csf-1.1 audit map to a new iso27001-2022 audit', async ({
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.viewItemDetail(vars.assessmentName + 'Mapped');
 
-		//TODO: Remove dupicate for checking ID.AM-1 scoring
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 			'ID - Identify',
 			'ID.AM - Asset Management'
@@ -197,4 +192,5 @@ test.afterAll('cleanup', async ({ browser }) => {
 	await foldersPage.deletePromptConfirmButton().click();
 
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
+	await page.close();
 });
