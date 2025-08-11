@@ -59,7 +59,7 @@ test('user can import mappings', async ({
 	});
 });
 
-test('user can csf-1.1 audit map to a new iso27001-2022 audit', async ({
+test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 	page,
 	logedPage,
 	mappingsPage,
