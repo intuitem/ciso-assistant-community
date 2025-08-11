@@ -94,7 +94,7 @@
 					li: ['class'],
 					ul: ['class']
 				},
-				allowedSchemes: ['http', 'https', 'mailto'],
+				allowedSchemes: ['http', 'https'],
 				transformTags: {
 					a: sanitizeHtml.simpleTransform(
 						'a',
