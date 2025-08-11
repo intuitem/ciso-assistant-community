@@ -53,23 +53,130 @@ We’re constantly evolving with input from users and customers. Like an octopus
 
 ---
 
+## Features
+
+
+<style>
+  :root{
+    --c1:#977AB6; /* indigo-50 */
+    --c2:#E77FB2; /* cyan-50  */
+    --c3:#6CC2EC; /* yellow-100 */
+    --c4:#88CFC6; /* green-100  */
+    --c5:#FFE86D; /* rose-100   */
+    --fg:#0f172a; /* slate-900  */
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06);
+  }
+
+  /* Container */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0,1fr));
+    gap: .75rem;
+    align-items: stretch;
+  }
+
+  /* Cells */
+  .bento .cell{
+    padding: 1rem 1.1rem;
+    border-radius: .75rem;
+    box-shadow: var(--shadow);
+    font: 600 0.95rem/1.3 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    color: var(--fg);
+    display: flex;
+    align-items: center;
+  }
+
+  /* Auto-rotate 5 background colors regardless of item type */
+  .bento .cell:nth-child(5n + 1){ background: var(--c1); }
+  .bento .cell:nth-child(5n + 2){ background: var(--c2); }
+  .bento .cell:nth-child(5n + 3){ background: var(--c3); }
+  .bento .cell:nth-child(5n + 4){ background: var(--c4); }
+  .bento .cell:nth-child(5n + 0){ background: var(--c5); }
+
+  /* Simple hover polish (optional) */
+  .bento .cell:hover{ transform: translateY(-1px); transition: transform .15s ease; }
+
+  /* Width utilities for the asymmetric “bento” look */
+  .span-3 { grid-column: span 3; }
+  .span-4 { grid-column: span 4; }
+  .span-5 { grid-column: span 5; }
+  .span-6 { grid-column: span 6; }
+
+  /* Responsive fallbacks */
+  @media (max-width: 1024px){
+    .span-6 { grid-column: span 12; }
+    .span-5 { grid-column: span 6; }
+    .span-4 { grid-column: span 6; }
+    .span-3 { grid-column: span 6; }
+  }
+  @media (max-width: 640px){
+    .bento { grid-template-columns: repeat(6, minmax(0,1fr)); }
+    .bento .cell { grid-column: span 6; }
+  }
+</style>
+
+<div class="bento">
+  <!-- Row 1 -->
+  <div class="cell span-3">Audit management</div>
+  <div class="cell span-3">Campaigns management</div>
+  <div class="cell span-3">+100 frameworks included</div>
+
+  <!-- Row 2 -->
+  <div class="cell span-5">Custom frameworks support</div>
+  <div class="cell span-3">Automatic mapping</div>
+  <div class="cell span-4">Evidences collection</div>
+
+  <!-- Row 3 -->
+  <div class="cell span-6">API, CLI and Kafka integration</div>
+  <div class="cell span-3">Recommendation engine</div>
+  <div class="cell span-3">Automated quality checks</div>
+
+  <!-- Row 4 -->
+  <div class="cell span-4">Dashboards and analytics</div>
+  <div class="cell span-4">Risk Assessment</div>
+  <div class="cell span-4">EBIOS RM module</div>
+
+  <!-- Row 5 -->
+  <div class="cell span-5">Data import/export capabilities</div>
+  <div class="cell span-4">GDPR processings</div>
+  <div class="cell span-3">Exceptions tracking</div>
+
+  <!-- Row 6 -->
+  <div class="cell span-6">Action plan tracking and prioritization</div>
+  <div class="cell span-3">Third Party Risk Management</div>
+  <div class="cell span-3">Business Impact Analysis</div>
+
+  <!-- Row 7 -->
+  <div class="cell span-5">Findings followup</div>
+  <div class="cell span-3">Incidents management</div>
+  <div class="cell span-4">SaaS, on-premises or workstation</div>
+
+  <!-- Row 8 -->
+  <div class="cell span-3">Flexible RBAC</div>
+  <div class="cell span-5">MFA with TOTP and SSO with SAML/OIDC</div>
+  <div class="cell span-3">Maturity tracking</div>
+
+  <!-- Row 9 -->
+  <div class="cell span-6">Available in +20 languages</div>
+  <div class="cell span-6">More coming soon!</div>
+</div>
+
+<br/>
+Upcoming features are listed on the roadmap.
+
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
+
+---
+
 ## Core Concepts
 
-Here’s a snapshot of the fundamental building blocks in CISO Assistant:
+Here’s an extract of some of the building blocks in CISO Assistant to illustrate the decoupling concept that encourages reusability:
 
 ![Core Objects](core_objects.png)
 
 For full details, check the [data model documentation](documentation/architecture/data-model.md).
 
----
 
-## Features
-
-Explore the full range of features and capabilities:
-
-![Features Overview](features.png)
-
-CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
 
 ---
 
