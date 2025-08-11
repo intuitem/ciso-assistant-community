@@ -134,7 +134,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 			await page.waitForLoadState('networkidle');
 		}
 		await applyMappingForm.fill({
-			name: vars.assessmentName + 'Mapped',
+			name: 'Mapped-' + vars.assessmentName,
 			description: vars.description,
 			perimeter: vars.folderName + '/' + vars.perimeterName,
 			framework: vars.framework.name
@@ -150,7 +150,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await complianceAssessmentsPage.goto();
 
 		// NOTE: Mapped must not be added at the end otherwise viewItemDetail might be confused with the original assessment, making the test flaky
-		await complianceAssessmentsPage.viewItemDetail('Mapped' + vars.assessmentName);
+		await complianceAssessmentsPage.viewItemDetail('Mapped-' + vars.assessmentName);
 
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 			'ID - Identify',
