@@ -18,6 +18,7 @@
 		disabled?: boolean;
 		rows?: number;
 		cols?: number;
+		defaultMode?: 'preview' | 'edit';
 		[key: string]: any;
 	}
 
@@ -36,13 +37,14 @@
 		disabled = false,
 		rows = 5,
 		cols = 50,
+		defaultMode = 'preview',
 		...rest
 	}: Props = $props();
 
 	label = label ?? field;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	let showPreview = $state(false);
+	let showPreview = $state(defaultMode === 'preview');
 	let renderedMarkdown = $state('');
 
 	run(() => {
@@ -162,8 +164,18 @@
 		{#if showPreview}
 			<div
 				class="prose prose-sm max-w-none p-3 border border-surface-300 rounded-md min-h-[120px] bg-surface-50"
+				onclick={() => !disabled && (showPreview = false)}
+				role="button"
+				tabindex="0"
+				style="cursor: {disabled ? 'default' : 'pointer'}"
+				onkeydown={(e) => {
+					if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+						e.preventDefault();
+						showPreview = false;
+					}
+				}}
 			>
-				{@html renderedMarkdown || '<p class="text-gray-500 italic">No content to preview</p>'}
+				{@html renderedMarkdown || '<p class="text-gray-500 italic">Click to add content...</p>'}
 			</div>
 		{:else}
 			<textarea

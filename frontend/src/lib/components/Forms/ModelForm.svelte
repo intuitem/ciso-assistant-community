@@ -6,7 +6,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownEditor from '$lib/components/Forms/MarkdownEditor.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
@@ -275,7 +275,7 @@
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
-			<MarkdownEditor
+			<MarkdownField
 				{form}
 				field="description"
 				label={m.description()}
