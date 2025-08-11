@@ -37,7 +37,9 @@ const showConfirmation = async (url: string): Promise<boolean> => {
 	}
 
 	// Fallback to native confirm
-	return confirm(`You are about to leave this site and go to:\n\n${url}\n\nDo you want to continue?`);
+	return confirm(
+		`You are about to leave this site and go to:\n\n${url}\n\nDo you want to continue?`
+	);
 };
 
 const handleLinkClick = async (anchor: HTMLAnchorElement, href: string, event: MouseEvent) => {

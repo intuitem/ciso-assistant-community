@@ -30,18 +30,10 @@
 			</p>
 		</article>
 		<footer class="modal-footer {parent.regionFooter} flex justify-end space-x-2">
-			<button
-				type="button"
-				class="btn variant-ghost"
-				onclick={parent.onClose}
-			>
+			<button type="button" class="btn variant-ghost" onclick={parent.onClose}>
 				{m.cancel()}
 			</button>
-			<button
-				class="btn variant-filled-primary"
-				type="button"
-				onclick={parent.onConfirm}
-			>
+			<button class="btn variant-filled-primary" type="button" onclick={parent.onConfirm}>
 				Continue
 			</button>
 		</footer>
