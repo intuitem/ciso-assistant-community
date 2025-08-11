@@ -275,25 +275,14 @@
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
-			{#if URLModel === 'applied-controls'}
-				<MarkdownEditor
-					{form}
-					field="description"
-					label={m.description()}
-					cacheLock={cacheLocks['description']}
-					bind:cachedValue={formDataCache['description']}
-					data-focusindex="1"
-				/>
-			{:else}
-				<TextArea
-					{form}
-					field="description"
-					label={m.description()}
-					cacheLock={cacheLocks['description']}
-					bind:cachedValue={formDataCache['description']}
-					data-focusindex="1"
-				/>
-			{/if}
+			<MarkdownEditor
+				{form}
+				field="description"
+				label={m.description()}
+				cacheLock={cacheLocks['description']}
+				bind:cachedValue={formDataCache['description']}
+				data-focusindex="1"
+			/>
 		{/if}
 		{#if URLModel === 'perimeters'}
 			<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
