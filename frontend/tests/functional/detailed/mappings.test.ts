@@ -6,6 +6,8 @@ import { expect, test, TestContent } from '../../utils/test-utils.js';
 
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+const FOLDER_WORKAROUND_SUFFIX = ' foo';
+const PERIMETER_WORKAROUND_SUFFIX = ' bar';
 
 test('user can import mappings', async ({
 	page,
@@ -26,7 +28,7 @@ test('user can import mappings', async ({
 		});
 		// NOTE: creating one more folder not to trip up the autocomplete test utils
 		await foldersPage.createItem({
-			name: vars.folderName + ' foo',
+			name: vars.folderName + FOLDER_WORKAROUND_SUFFIX,
 			description: vars.description
 		});
 	});
@@ -42,7 +44,7 @@ test('user can import mappings', async ({
 			lc_status: 'Production'
 		});
 		await perimetersPage.createItem({
-			name: vars.perimeterName + ' bar',
+			name: vars.perimeterName + PERIMETER_WORKAROUND_SUFFIX,
 			description: vars.description,
 			folder: vars.folderName,
 			ref_id: 'R.12345',
@@ -123,7 +125,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 	});
 
 	await test.step('apply mapping to new iso27001:2022 audit', async () => {
-		//NOTE: imitates PageContent.createItem(), since our form is not a "classic one"
+		//NOTE: imitates PageContent.createItem(), since our form is not a "classic"" one
 		// This could be improved
 		await applyMappingButton.click();
 		await applyMappingForm.hasTitle();
@@ -166,6 +168,13 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 	});
 });
 
+async function deleteFolder(foldersPage: PageContent, folderName: string) {
+	await foldersPage.deleteItemButton(folderName).click();
+	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+	await foldersPage.deletePromptConfirmButton().click();
+}
+
 test.afterAll('cleanup', async ({ browser }) => {
 	const page = await browser.newPage();
 	const loginPage = new LoginPage(page);
@@ -175,15 +184,8 @@ test.afterAll('cleanup', async ({ browser }) => {
 	await loginPage.login();
 	await foldersPage.goto();
 
-	await foldersPage.deleteItemButton(vars.folderName).click();
-	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
-	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
-	await foldersPage.deletePromptConfirmButton().click();
-
-	await foldersPage.deleteItemButton(vars.folderName + ' foo').click();
-	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
-	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
-	await foldersPage.deletePromptConfirmButton().click();
+	await deleteFolder(foldersPage, vars.folderName);
+	await deleteFolder(foldersPage, vars.folderName + FOLDER_WORKAROUND_SUFFIX);
 
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 	await page.close();
