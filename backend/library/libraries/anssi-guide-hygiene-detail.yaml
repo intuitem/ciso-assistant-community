@@ -8,7 +8,7 @@ description: "Renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information e
   \ 42 mesures\nVersion d\xE9taill\xE9e\n https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf"
 copyright: Licence Ouverte/Open Licence (Etalab - V1)
 version: 4
-publication_date: 2025-01-23
+publication_date: 2025-08-12
 provider: ANSSI
 packager: intuitem
 dependencies:
@@ -40,8 +40,6 @@ objects:
       ref_id: '1'
       name: "Former les \xE9quipes op\xE9rationnelles \xE0 la s\xE9curit\xE9 des syst\xE8\
         mes d\u2019information"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
       assessable: true
       depth: 3
@@ -172,9 +170,6 @@ objects:
       ref_id: '2'
       name: "Sensibiliser les utilisateurs aux bonnes pratiques \xE9l\xE9mentaires\
         \ de s\xE9curit\xE9 informatique"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:1
       assessable: true
       depth: 3
@@ -278,7 +273,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
-      description: "Pour renforcer ces mesures, l\u2019\xE9laboration et la signature\
+      description: "[R] Pour renforcer ces mesures, l\u2019\xE9laboration et la signature\
         \ d\u2019une charte des moyens informatiques pr\xE9cisant les r\xE8gles et\
         \ consignes que doivent respecter les utilisateurs peut \xEAtre envisag\xE9\
         e."
@@ -294,8 +289,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:i
       ref_id: '3'
       name: "Ma\xEEtriser les risques de l\u2019infog\xE9rance"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:1
       assessable: true
       depth: 3
@@ -404,8 +397,6 @@ objects:
       ref_id: '4'
       name: "Identifier les informations et serveurs les plus sensibles et maintenir\
         \ un sch\xE9ma du r\xE9seau"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4:1
       assessable: true
       depth: 3
@@ -485,8 +476,6 @@ objects:
       ref_id: '5'
       name: "Disposer d\u2019un inventaire exhaustif des comptes privil\xE9gi\xE9\
         s et le maintenir \xE0 jour"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1
       assessable: true
       depth: 3
@@ -586,9 +575,6 @@ objects:
       ref_id: '6'
       name: "Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et de changement\
         \ de fonction des utilisateurs"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1
       assessable: true
       depth: 3
@@ -674,8 +660,8 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6
-      description: "Les proc\xE9dures doivent \xEAtre formalis\xE9es et mises \xE0\
-        \ jour en fonction du contexte."
+      description: "[R] Les proc\xE9dures doivent \xEAtre formalis\xE9es et mises\
+        \ \xE0 jour en fonction du contexte."
       annotation: "V\xE9rifier l'exigence de revue des proc\xE9dures RH et la r\xE9\
         gularit\xE9 effective de leur mise \xE0 jour."
       implementation_groups:
@@ -689,9 +675,6 @@ objects:
       ref_id: '7'
       name: "Autoriser la connexion au r\xE9seau de l\u2019entit\xE9 aux seuls \xE9\
         quipements ma\xEEtris\xE9s"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7:1
       assessable: true
       depth: 3
@@ -746,9 +729,10 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7
-      description: "Ces am\xE9nagements peuvent \xEAtre compl\xE9t\xE9s par des mesures\
-        \ techniques telles que l\u2019authentification des postes sur le r\xE9seau\
-        \ (par exemple \xE0 l\u2019aide du standard 802.1X ou d\u2019un \xE9quivalent)."
+      description: "[R] Ces am\xE9nagements peuvent \xEAtre compl\xE9t\xE9s par des\
+        \ mesures techniques telles que l\u2019authentification des postes sur le\
+        \ r\xE9seau (par exemple \xE0 l\u2019aide du standard 802.1X ou d\u2019un\
+        \ \xE9quivalent)."
       annotation: "802.1X est le standard incontournable pour le contr\xF4le d'acc\xE8\
         s r\xE9seau, aussi bien en LAN qu'en Wi-Fi. V\xE9rifier qu'il est bien mis\
         \ en \u0153uvre."
@@ -769,9 +753,6 @@ objects:
       ref_id: '8'
       name: "Identifier nomm\xE9ment chaque personne acc\xE9dant au syst\xE8me et\
         \ distinguer les r\xF4les utilisateur/administrateur"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8:1
       assessable: true
       depth: 3
@@ -836,9 +817,9 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8
-      description: "D\xE8s que possible la journalisation li\xE9e aux comptes (ex\
-        \ : relev\xE9 des connexions r\xE9ussies/\xE9chou\xE9es) doit \xEAtre activ\xE9\
-        e."
+      description: "[R] D\xE8s que possible la journalisation li\xE9e aux comptes\
+        \ (ex : relev\xE9 des connexions r\xE9ussies/\xE9chou\xE9es) doit \xEAtre\
+        \ activ\xE9e."
       annotation: "Un EDR pourra g\xE9rer la journalisation des \xE9checs de connexion."
       implementation_groups:
       - R
@@ -853,8 +834,6 @@ objects:
       ref_id: '9'
       name: "Attribuer les bons droits sur les ressources sensibles du syst\xE8me\
         \ d\u2019information"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1
       assessable: true
       depth: 3
@@ -960,8 +939,6 @@ objects:
       ref_id: '10'
       name: "D\xE9finir et v\xE9rifier des r\xE8gles de choix et de dimensionnement\
         \ des mots de passe"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:1
       assessable: true
       depth: 3
@@ -1053,8 +1030,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:iii
       ref_id: '11'
       name: "Prot\xE9ger les mots de passe stock\xE9s sur les syst\xE8mes"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:11:1
       assessable: true
       depth: 3
@@ -1104,9 +1079,6 @@ objects:
       ref_id: '12'
       name: "Changer les \xE9l\xE9ments d\u2019authentification par d\xE9faut sur\
         \ les \xE9quipements et services"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12:1
       assessable: true
       depth: 3
@@ -1148,7 +1120,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12
-      description: "Afin de limiter les cons\xE9quences d\u2019une compromission,\
+      description: "[R] Afin de limiter les cons\xE9quences d\u2019une compromission,\
         \ il est par ailleurs essentiel, apr\xE8s changement des \xE9l\xE9ments d\u2019\
         authentification par d\xE9faut, de proc\xE9der \xE0 leur renouvellement r\xE9\
         gulier."
@@ -1164,9 +1136,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:iii
       ref_id: '13'
       name: "Privil\xE9gier lorsque c\u2019est possible une authentification forte"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:13:1
       assessable: true
       depth: 3
@@ -1192,14 +1161,14 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:13
-      description: "Les cartes \xE0 puces doivent \xEAtre privil\xE9gi\xE9es ou, \xE0\
-        \ d\xE9faut, les m\xE9canismes de mots de passe \xE0 usage unique (ou One\
-        \ Time Password) avec jeton physique. Les op\xE9rations cryptographiques mises\
-        \ en place dans ces deux facteurs offrent g\xE9n\xE9ralement de bonnes garanties\
-        \ de s\xE9curit\xE9.\nLes cartes \xE0 puce peuvent \xEAtre plus complexes\
-        \ \xE0 mettre en place car n\xE9cessitant une infrastructure de gestion des\
-        \ cl\xE9s adapt\xE9e. Elles pr\xE9sentent cependant l\u2019avantage d\u2019\
-        \xEAtre r\xE9utilisables \xE0 plusieurs fins : chiffrement, authentification\
+      description: "[R] Les cartes \xE0 puces doivent \xEAtre privil\xE9gi\xE9es ou,\
+        \ \xE0 d\xE9faut, les m\xE9canismes de mots de passe \xE0 usage unique (ou\
+        \ One Time Password) avec jeton physique. Les op\xE9rations cryptographiques\
+        \ mises en place dans ces deux facteurs offrent g\xE9n\xE9ralement de bonnes\
+        \ garanties de s\xE9curit\xE9.\nLes cartes \xE0 puce peuvent \xEAtre plus\
+        \ complexes \xE0 mettre en place car n\xE9cessitant une infrastructure de\
+        \ gestion des cl\xE9s adapt\xE9e. Elles pr\xE9sentent cependant l\u2019avantage\
+        \ d\u2019\xEAtre r\xE9utilisables \xE0 plusieurs fins : chiffrement, authentification\
         \ de messagerie, authentification sur le poste de travail, etc."
       annotation: "L'utilisation du smartphone comme authentifiant (application OTP\
         \ ou application m\xE9tier) s'av\xE8re en g\xE9n\xE9ral plus pratique que\
@@ -1221,9 +1190,6 @@ objects:
       ref_id: '14'
       name: "Mettre en place un niveau de s\xE9curit\xE9 minimal sur l\u2019ensemble\
         \ du parc informatique"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1
       assessable: true
       depth: 3
@@ -1313,7 +1279,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14
-      description: "Les donn\xE9es vitales au bon fonctionnement de l\u2019entit\xE9\
+      description: "[R] Les donn\xE9es vitales au bon fonctionnement de l\u2019entit\xE9\
         \ que d\xE9tiennent les postes utilisateurs et les serveurs doivent faire\
         \ l\u2019objet de sauvegardes r\xE9guli\xE8res et stock\xE9es sur des \xE9\
         quipements d\xE9connect\xE9s, et leur restauration doit \xEAtre v\xE9rifi\xE9\
@@ -1338,9 +1304,6 @@ objects:
       ref_id: '15'
       name: "Se prot\xE9ger des menaces relatives \xE0 l\u2019utilisation de supports\
         \ amovibles"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15:1
       assessable: true
       depth: 3
@@ -1383,7 +1346,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15
-      description: "Sur les postes utilisateur, il est recommand\xE9 d\u2019utiliser\
+      description: "[R] Sur les postes utilisateur, il est recommand\xE9 d\u2019utiliser\
         \ des solutions permettant d\u2019interdire l\u2019ex\xE9cution de programmes\
         \ sur les p\xE9riph\xE9riques amovibles (par exemple Applocker sous Windows\
         \ ou des options de montage noexec sous Unix)."
@@ -1397,10 +1360,10 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15
-      description: "Lors de la fin de vie des supports amovibles, il sera n\xE9cessaire\
-        \ d\u2019impl\xE9menter et de respecter une proc\xE9dure de mise au rebut\
-        \ stricte pouvant aller jusqu\u2019\xE0 leur destruction s\xE9curis\xE9e afin\
-        \ de limiter la fuite d\u2019informations sensibles."
+      description: "[R] Lors de la fin de vie des supports amovibles, il sera n\xE9\
+        cessaire d\u2019impl\xE9menter et de respecter une proc\xE9dure de mise au\
+        \ rebut stricte pouvant aller jusqu\u2019\xE0 leur destruction s\xE9curis\xE9\
+        e afin de limiter la fuite d\u2019informations sensibles."
       annotation: "V\xE9rifier la proc\xE9dure de mise au rebut."
       implementation_groups:
       - R
@@ -1413,8 +1376,6 @@ objects:
       ref_id: '16'
       name: "Utiliser un outil de gestion centralis\xE9e afin d\u2019homog\xE9n\xE9\
         iser les politiques de s\xE9curit\xE9"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:16:1
       assessable: true
       depth: 3
@@ -1452,9 +1413,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:iv
       ref_id: '17'
       name: Activer et configurer le pare-feu local des postes de travail
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17:1
       assessable: true
       depth: 3
@@ -1481,7 +1439,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
-      description: "Le filtrage le plus simple consiste \xE0 bloquer l\u2019acc\xE8\
+      description: "[R] Le filtrage le plus simple consiste \xE0 bloquer l\u2019acc\xE8\
         s aux ports d\u2019administration par d\xE9faut des postes de travail (ports\
         \ TCP 135, 445 et 3389 sous Windows, port TCP 22 sous Unix), except\xE9 depuis\
         \ les ressources explicitement identifi\xE9es (postes d\u2019administration\
@@ -1498,7 +1456,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
-      description: "Une analyse des flux entrants utiles (administration, logiciels\
+      description: "[R] Une analyse des flux entrants utiles (administration, logiciels\
         \ d\u2019infrastructure, applications particuli\xE8res, etc.) doit \xEAtre\
         \ men\xE9e pour d\xE9finir la liste des autorisations \xE0 configurer. Il\
         \ est pr\xE9f\xE9rable de bloquer l\u2019ensemble des flux par d\xE9faut et\
@@ -1515,7 +1473,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
-      description: "Le pare-feu doit \xE9galement \xEAtre configur\xE9 pour journaliser\
+      description: "[R] Le pare-feu doit \xE9galement \xEAtre configur\xE9 pour journaliser\
         \ les flux bloqu\xE9s, et ainsi identifier les erreurs de configuration d\u2019\
         applications ou les tentatives d\u2019intrusion."
       annotation: "V\xE9rifier que les tentatives d'acc\xE8s bloqu\xE9es font bien\
@@ -1533,8 +1491,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:iv
       ref_id: '18'
       name: "Chiffrer les donn\xE9es sensibles transmises par voie Internet"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:18:1
       assessable: true
       depth: 3
@@ -1589,8 +1545,6 @@ objects:
       ref_id: '19'
       name: "Segmenter le r\xE9seau et mettre en place un cloisonnement entre ces\
         \ zones"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19:1
       assessable: true
       depth: 3
@@ -1656,8 +1610,6 @@ objects:
       ref_id: '20'
       name: "S'assurer de la s\xE9curit\xE9 des r\xE9seaux d'acc\xE8s Wi-Fi et de\
         \ la s\xE9paration des usages"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20:1
       assessable: true
       depth: 3
@@ -1754,8 +1706,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:v
       ref_id: '21'
       name: "Utiliser des protocoles r\xE9seaux s\xE9curis\xE9s d\xE8s qu'ils existent"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:21:1
       assessable: true
       depth: 3
@@ -1791,9 +1741,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:v
       ref_id: '22'
       name: "Mettre en place une passerelle d'acc\xE8s s\xE9curis\xE9 \xE0 Internet"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:1
       assessable: true
       depth: 3
@@ -1835,7 +1782,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
-      description: "Des m\xE9canismes compl\xE9mentaires sur le serveur mandataire\
+      description: "[R] Des m\xE9canismes compl\xE9mentaires sur le serveur mandataire\
         \ pourront \xEAtre activ\xE9s selon les besoins de l\u2019entit\xE9 : analyse\
         \ antivirus du contenu, filtrage par cat\xE9gories d\u2019URLs, etc."
       annotation: "V\xE9rifier que la passerelle met en \u0153uvre un antivirus.\n\
@@ -1847,7 +1794,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
-      description: "Le maintien en condition de s\xE9curit\xE9 des \xE9quipements\
+      description: "[R] Le maintien en condition de s\xE9curit\xE9 des \xE9quipements\
         \ de la passerelle est essentiel, il fera donc l\u2019objet de proc\xE9dures\
         \ \xE0 respecter."
       annotation: "V\xE9rifier que la proc\xE9dure de maintenance couvre le maintien\
@@ -1861,7 +1808,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
-      description: "Suivant le nombre de collaborateurs et le besoin de disponibilit\xE9\
+      description: "[R] Suivant le nombre de collaborateurs et le besoin de disponibilit\xE9\
         ,  ces \xE9quipements pourront \xEAtre redond\xE9s."
       annotation: "V\xE9rifier que la passerelle est redond\xE9e."
       implementation_groups:
@@ -1870,7 +1817,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
-      description: "Par ailleurs, pour les terminaux utilisateurs, les r\xE9solutions\
+      description: "[R] Par ailleurs, pour les terminaux utilisateurs, les r\xE9solutions\
         \ DNS en direct de noms de domaines publics seront par d\xE9faut d\xE9sactiv\xE9\
         es, celles-ci \xE9tant d\xE9l\xE9gu\xE9es au serveur mandataire."
       annotation: "V\xE9rifier que les poste de travail n'ont pas acc\xE8s \xE0 la\
@@ -1884,10 +1831,10 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
-      description: "Enfin, il est fortement recommand\xE9 que les postes nomades \xE9\
-        tablissent au pr\xE9alable une connexion s\xE9curis\xE9e au syst\xE8me d\u2019\
-        information de l\u2019entit\xE9 pour naviguer de mani\xE8re s\xE9curis\xE9\
-        e sur le Web \xE0 travers la passerelle."
+      description: "[R] Enfin, il est fortement recommand\xE9 que les postes nomades\
+        \ \xE9tablissent au pr\xE9alable une connexion s\xE9curis\xE9e au syst\xE8\
+        me d\u2019information de l\u2019entit\xE9 pour naviguer de mani\xE8re s\xE9\
+        curis\xE9e sur le Web \xE0 travers la passerelle."
       annotation: "V\xE9rifier que les postes nomades ne peuvent atteindre Internet\
         \ qu'au travers d'un acc\xE8s VPN et de la passerelle web.\nLa plupart des\
         \ firewalls int\xE8grent une passerelle VPN."
@@ -1902,8 +1849,6 @@ objects:
       ref_id: '23'
       name: "Cloisonner les services visibles depuis Internet du reste du syst\xE8\
         me d'information"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23:1
       assessable: true
       depth: 3
@@ -1966,9 +1911,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:v
       ref_id: '24'
       name: "Prot\xE9ger sa messagerie professionnelle"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:1
       assessable: true
       depth: 3
@@ -2055,7 +1997,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
-      description: "Il est souhaitable de ne pas exposer directement les serveurs\
+      description: "[R] Il est souhaitable de ne pas exposer directement les serveurs\
         \ de bo\xEEte aux lettres sur Internet. Dans ce cas, un serveur relai d\xE9\
         di\xE9 \xE0 l\u2019envoi et \xE0 la r\xE9ception des messages doit \xEAtre\
         \ mis en place en coupure d\u2019Internet."
@@ -2072,7 +2014,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
-      description: "Alors que le spam - malveillant ou non - constitue la majorit\xE9\
+      description: "[R] Alors que le spam - malveillant ou non - constitue la majorit\xE9\
         \ des courriels \xE9chang\xE9s sur Internet, le d\xE9ploiement d\u2019un service\
         \ anti-spam doit permettre d\u2019\xE9liminer cette source de risques."
       annotation: "V\xE9rifier la pr\xE9sence d'une capacit\xE9 de filtrage anti-spam\
@@ -2086,8 +2028,8 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
-      description: "Enfin, l\u2019administrateur de messagerie s\u2019assurera de\
-        \ la mise en place des m\xE9canismes de v\xE9rification d\u2019authenticit\xE9\
+      description: "[R] Enfin, l\u2019administrateur de messagerie s\u2019assurera\
+        \ de la mise en place des m\xE9canismes de v\xE9rification d\u2019authenticit\xE9\
         \ et de la bonne configuration des enregistrements DNS publics li\xE9s \xE0\
         \ son infrastructure de messagerie (MX, SPF, DKIM, DMARC)."
       annotation: "V\xE9rifier la bonne configuration MX/SPIF/DKIM/DMARC pour les\
@@ -2105,9 +2047,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:v
       ref_id: '25'
       name: "S\xE9curiser les interconnexions r\xE9seau d\xE9di\xE9es avec les partenaires"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25:1
       assessable: true
       depth: 3
@@ -2149,9 +2088,9 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
-      description: "Pour des entit\xE9s ayant des besoins de s\xE9curit\xE9 plus exigeants,\
-        \ il conviendra de s\u2019assurer que l\u2019\xE9quipement de filtrage IP\
-        \ pour les connexions partenaires est d\xE9di\xE9 \xE0 cet usage."
+      description: "[R] Pour des entit\xE9s ayant des besoins de s\xE9curit\xE9 plus\
+        \ exigeants, il conviendra de s\u2019assurer que l\u2019\xE9quipement de filtrage\
+        \ IP pour les connexions partenaires est d\xE9di\xE9 \xE0 cet usage."
       annotation: "V\xE9rifier que le pare-feu pour les flux \xE9chang\xE9s avec des\
         \ partenaires est d\xE9di\xE9 \xE0 cet usage."
       implementation_groups:
@@ -2162,8 +2101,8 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
-      description: "L\u2019ajout d\u2019un \xE9quipement de d\xE9tection d\u2019intrusions\
-        \ peut \xE9galement constituer une bonne pratique."
+      description: "[R] L\u2019ajout d\u2019un \xE9quipement de d\xE9tection d\u2019\
+        intrusions peut \xE9galement constituer une bonne pratique."
       annotation: "V\xE9rifier la pr\xE9sence d'un IDS/IPS surveillant les flux \xE9\
         chang\xE9s avec des partenaires."
       implementation_groups:
@@ -2174,9 +2113,9 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
-      description: "Par ailleurs la connaissance d\u2019un point de contact \xE0 jour\
-        \ chez le partenaire est n\xE9cessaire pour pouvoir r\xE9agir en cas d\u2019\
-        incident de s\xE9curit\xE9."
+      description: "[R] Par ailleurs la connaissance d\u2019un point de contact \xE0\
+        \ jour chez le partenaire est n\xE9cessaire pour pouvoir r\xE9agir en cas\
+        \ d\u2019incident de s\xE9curit\xE9."
       annotation: "V\xE9rifier que la proc\xE9dure de gestion des incidents permet\
         \ d'acc\xE9der \xE0 un point de contact chez chaque partenaire."
       implementation_groups:
@@ -2190,8 +2129,6 @@ objects:
       ref_id: '26'
       name: "Contr\xF4ler et prot\xE9ger l'acc\xE8s aux salles serveurs et aux locaux\
         \ techniques"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:1
       assessable: true
       depth: 3
@@ -2298,9 +2235,6 @@ objects:
       ref_id: '27'
       name: "Interdire l\u2019acc\xE8s \xE0 Internet depuis les postes ou serveurs\
         \ utilis\xE9s pour l\u2019administration du syst\xE8me d\u2019information"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27:1
       assessable: true
       depth: 3
@@ -2340,7 +2274,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
-      description: "Concernant les mises \xE0 jour logicielles des \xE9quipements\
+      description: "[R] Concernant les mises \xE0 jour logicielles des \xE9quipements\
         \ administr\xE9s, elles doivent \xEAtre r\xE9cup\xE9r\xE9es depuis une source\
         \ s\xFBre (le site de l\u2019\xE9diteur par exemple), contr\xF4l\xE9es puis\
         \ transf\xE9r\xE9es sur le poste ou le serveur utilis\xE9 pour l\u2019administration\
@@ -2356,7 +2290,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
-      description: "Ce transfert peut \xEAtre r\xE9alis\xE9 sur un support amovible\
+      description: "[R] Ce transfert peut \xEAtre r\xE9alis\xE9 sur un support amovible\
         \ d\xE9di\xE9."
       annotation: "V\xE9rifier que ce processus d\xE9rogatoire est correctement document\xE9\
         . Il s'agit d'une exception l\xE9gitime au blocage USB."
@@ -2368,8 +2302,8 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
-      description: "Pour des entit\xE9s voulant automatiser certaines t\xE2ches, la\
-        \ mise en place d\u2019une zone d\u2019\xE9changes est conseill\xE9e."
+      description: "[R] Pour des entit\xE9s voulant automatiser certaines t\xE2ches,\
+        \ la mise en place d\u2019une zone d\u2019\xE9changes est conseill\xE9e."
       annotation: "V\xE9rifier la pr\xE9sence d'une zone d'\xE9changes s\xE9curis\xE9\
         e."
       implementation_groups:
@@ -2383,9 +2317,6 @@ objects:
       ref_id: '28'
       name: "Utiliser un r\xE9seau d\xE9di\xE9 et cloisonn\xE9 pour l\u2019administration\
         \ du syst\xE8me d\u2019information"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:1
       assessable: true
       depth: 3
@@ -2420,9 +2351,9 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2
-      description: "\u2022 de privil\xE9gier en premier lieu un cloisonnement physique\
-        \ des r\xE9seaux d\xE8s que cela est possible, cette solution pouvant repr\xE9\
-        senter des co\xFBts et un temps de d\xE9ploiement importants;"
+      description: "\u2022 [R] de privil\xE9gier en premier lieu un cloisonnement\
+        \ physique des r\xE9seaux d\xE8s que cela est possible, cette solution pouvant\
+        \ repr\xE9senter des co\xFBts et un temps de d\xE9ploiement importants;"
       annotation: "V\xE9rifier que le r\xE9seau d'administration est physiquement\
         \ cloisonn\xE9."
       implementation_groups:
@@ -2463,8 +2394,6 @@ objects:
       ref_id: '29'
       name: "Limiter au strict besoin op\xE9rationnel les droits d\u2019administration\
         \ sur les postes de travail"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:29:1
       assessable: true
       depth: 3
@@ -2517,9 +2446,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:vii
       ref_id: '30'
       name: "Prendre des mesures de s\xE9curisation physique des terminaux nomades"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30:1
       assessable: true
       depth: 3
@@ -2586,11 +2512,11 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30
-      description: "Enfin, afin de rendre inutilisable le poste seul, l\u2019utilisation\
-        \ d\u2019un support externe compl\xE9mentaire (carte \xE0 puce ou jeton USB\
-        \ par exemple) pour conserver des secrets de d\xE9chiffrement ou d\u2019authentification\
-        \ peut \xEAtre envisag\xE9e. Dans ce cas il doit \xEAtre conserv\xE9 \xE0\
-        \ part."
+      description: "[R] Enfin, afin de rendre inutilisable le poste seul, l\u2019\
+        utilisation d\u2019un support externe compl\xE9mentaire (carte \xE0 puce ou\
+        \ jeton USB par exemple) pour conserver des secrets de d\xE9chiffrement ou\
+        \ d\u2019authentification peut \xEAtre envisag\xE9e. Dans ce cas il doit \xEA\
+        tre conserv\xE9 \xE0 part."
       annotation: "V\xE9rifier que les postes nomades sont chiffr\xE9s avec une cl\xE9\
         \ de chiffrement dont la mise en \u0153uvre n\xE9cessite un dispositif externe\
         \ (cl\xE9 USB, carte \xE0 puce, \u2026)."
@@ -2605,8 +2531,6 @@ objects:
       ref_id: '31'
       name: "Chiffrer les donn\xE9es sensibles, en particulier sur le mat\xE9riel\
         \ potentiellement perdable"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31:1
       assessable: true
       depth: 3
@@ -2673,9 +2597,6 @@ objects:
       ref_id: '32'
       name: "S\xE9curiser la connexion r\xE9seau des postes utilis\xE9s en situation\
         \ de nomadisme"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32:1
       assessable: true
       depth: 3
@@ -2730,7 +2651,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32
-      description: "Afin d\u2019\xE9viter toute r\xE9utilisation d\u2019authentifiants\
+      description: "[R] Afin d\u2019\xE9viter toute r\xE9utilisation d\u2019authentifiants\
         \ depuis un poste vol\xE9 ou perdu (identifiant et mot de passe enregistr\xE9\
         s par exemple), il est pr\xE9f\xE9rable d\u2019avoir recours \xE0 une authentification\
         \ forte, par exemple avec un mot de passe et un certificat stock\xE9 sur un\
@@ -2750,9 +2671,6 @@ objects:
       ref_id: '33'
       name: "Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
         \ mobiles"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33:1
       assessable: true
       depth: 3
@@ -2812,7 +2730,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33
-      description: "Entre autres usages potentiellement risqu\xE9s, celui d\u2019\
+      description: "[R] Entre autres usages potentiellement risqu\xE9s, celui d\u2019\
         un assistant vocal int\xE9gr\xE9 augmente sensiblement la surface d\u2019\
         attaque du terminal et des cas d\u2019attaque ont \xE9t\xE9 d\xE9montr\xE9\
         s. Pour ces raisons, il est donc d\xE9conseill\xE9."
@@ -2835,8 +2753,6 @@ objects:
       ref_id: '34'
       name: "D\xE9finir une politique de mise \xE0 jour des composants du syst\xE8\
         me d\u2019information"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:1
       assessable: true
       depth: 3
@@ -2943,8 +2859,6 @@ objects:
       ref_id: '35'
       name: "Anticiper la fin de la maintenance des logiciels et syst\xE8mes et limiter\
         \ les adh\xE9rences logicielles"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
       assessable: false
       depth: 3
@@ -3062,9 +2976,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:ix
       ref_id: '36'
       name: Activer et configurer les journaux des composants les plus importants
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:1
       assessable: true
       depth: 3
@@ -3195,8 +3106,8 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
-      description: "Si toutes les actions pr\xE9c\xE9dentes ont \xE9t\xE9 mises en\
-        \ \u0153uvre, une centralisation des journaux sur un dispositif d\xE9di\xE9\
+      description: "[R] Si toutes les actions pr\xE9c\xE9dentes ont \xE9t\xE9 mises\
+        \ en \u0153uvre, une centralisation des journaux sur un dispositif d\xE9di\xE9\
         \ pourra \xEAtre envisag\xE9e. Cela permet de faciliter la recherche automatis\xE9\
         e d\u2019\xE9v\xE9nements suspects, d\u2019archiver les journaux sur une longue\
         \ dur\xE9e et d\u2019emp\xEAcher un attaquant d\u2019effacer d\u2019\xE9ventuelles\
@@ -3215,9 +3126,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:ix
       ref_id: '37'
       name: "D\xE9finir et appliquer une politique de sauvegarde des composants critiques"
-      implementation_groups:
-      - S
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:1
       assessable: true
       depth: 3
@@ -3358,7 +3266,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37
-      description: "Un fois cette politique de sauvegarde \xE9tablie, il est souhaitable\
+      description: "[R] Un fois cette politique de sauvegarde \xE9tablie, il est souhaitable\
         \ de planifier au moins une fois par an un exercice de restauration des donn\xE9\
         es et de conserver une trace technique des r\xE9sultats."
       annotation: "V\xE9rifier qu'un test de restauration globale est fait r\xE9guli\xE8\
@@ -3376,14 +3284,12 @@ objects:
       ref_id: '38'
       name: "Proc\xE9der \xE0 des contr\xF4les et audits de s\xE9curit\xE9 r\xE9guliers\
         \ puis appliquer les actions correctives associ\xE9es (renforc\xE9)"
-      implementation_groups:
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
-      description: "La r\xE9alisation d\u2019audits r\xE9guliers (au moins une fois\
-        \ par an) du syst\xE8me d\u2019information est essentielle car elle permet\
+      description: "[R] La r\xE9alisation d\u2019audits r\xE9guliers (au moins une\
+        \ fois par an) du syst\xE8me d\u2019information est essentielle car elle permet\
         \ d\u2019\xE9valuer concr\xE8tement l\u2019efficacit\xE9 des mesures mises\
         \ en \u0153uvre et leur maintien dans le temps. Ces contr\xF4les et audits\
         \ permettent \xE9galement de mesurer les \xE9carts pouvant persister entre\
@@ -3397,10 +3303,10 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
-      description: "Ils peuvent \xEAtre r\xE9alis\xE9s par d\u2019\xE9ventuelles \xE9\
-        quipes d\u2019audit internes ou par des soci\xE9t\xE9s externes sp\xE9cialis\xE9\
-        es. Selon le p\xE9rim\xE8tre \xE0 contr\xF4ler, des audits techniques et/ou\
-        \ organisationnels seront effectu\xE9s par les professionnels mobilis\xE9\
+      description: "[R] Ils peuvent \xEAtre r\xE9alis\xE9s par d\u2019\xE9ventuelles\
+        \ \xE9quipes d\u2019audit internes ou par des soci\xE9t\xE9s externes sp\xE9\
+        cialis\xE9es. Selon le p\xE9rim\xE8tre \xE0 contr\xF4ler, des audits techniques\
+        \ et/ou organisationnels seront effectu\xE9s par les professionnels mobilis\xE9\
         s. Ces audits sont d\u2019autant plus n\xE9cessaires que l\u2019entit\xE9\
         \ doit \xEAtre conforme \xE0 des r\xE9glementations et obligations l\xE9gales\
         \ directement li\xE9es \xE0 ses activit\xE9s."
@@ -3417,7 +3323,7 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
-      description: "\xC0 l\u2019issue de ces audits, des actions correctives doivent\
+      description: "[R] \xC0 l\u2019issue de ces audits, des actions correctives doivent\
         \ \xEAtre identifi\xE9es, leur application planifi\xE9e et des points de suivi\
         \ organis\xE9s \xE0 intervalles r\xE9guliers. Pour une plus grande efficacit\xE9\
         , des indicateurs sur l\u2019\xE9tat d\u2019avancement du plan d\u2019action\
@@ -3435,11 +3341,11 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
-      description: "Si les audits de s\xE9curit\xE9 participent \xE0 la s\xE9curit\xE9\
-        \ du syst\xE8me d\u2019information en permettant de mettre en \xE9vidence\
-        \ d\u2019\xE9ventuelles vuln\xE9rabilit\xE9s, ils ne constituent jamais une\
-        \ preuve de leur absence et ne dispensent donc pas d\u2019autres mesures de\
-        \ contr\xF4le."
+      description: "[R] Si les audits de s\xE9curit\xE9 participent \xE0 la s\xE9\
+        curit\xE9 du syst\xE8me d\u2019information en permettant de mettre en \xE9\
+        vidence d\u2019\xE9ventuelles vuln\xE9rabilit\xE9s, ils ne constituent jamais\
+        \ une preuve de leur absence et ne dispensent donc pas d\u2019autres mesures\
+        \ de contr\xF4le."
       annotation: "V\xE9rifier que des mesures de s\xE9curit\xE9 n\xE9cessaires sont\
         \ \xE9tablies ind\xE9pendamment de la politique d'audit."
       implementation_groups:
@@ -3453,8 +3359,6 @@ objects:
       ref_id: '39'
       name: "D\xE9signer un r\xE9f\xE9rent en s\xE9curit\xE9 des syst\xE8mes  d\u2019\
         information et le faire conna\xEEtre  aupr\xE8s du personnel"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39:1
       assessable: true
       depth: 3
@@ -3535,8 +3439,6 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:ix
       ref_id: '40'
       name: "D\xE9finir une proc\xE9dure de gestion des incidents de s\xE9curit\xE9"
-      implementation_groups:
-      - S
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40:1
       assessable: true
       depth: 3
@@ -3623,13 +3525,11 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:x
       ref_id: '41'
       name: "Mener une analyse de risques formelle (renforc\xE9)"
-      implementation_groups:
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41
-      description: "Chaque entit\xE9 \xE9volue dans un environnement informationnel\
+      description: "[R] Chaque entit\xE9 \xE9volue dans un environnement informationnel\
         \ complexe qui lui est propre. Aussi, toute prise de position ou plan d\u2019\
         action impliquant la s\xE9curit\xE9 du syst\xE8me d\u2019information doit\
         \ \xEAtre consid\xE9r\xE9 \xE0 la lumi\xE8re des risques pressentis par la\
@@ -3659,8 +3559,8 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41
-      description: "Trois types d\u2019approches peuvent \xEAtre envisag\xE9s pour\
-        \ ma\xEEtriser les risques associ\xE9s \xE0 son syst\xE8me d\u2019information\
+      description: "[R] Trois types d\u2019approches peuvent \xEAtre envisag\xE9s\
+        \ pour ma\xEEtriser les risques associ\xE9s \xE0 son syst\xE8me d\u2019information\
         \ :\n\u2022  le recours aux bonnes pratiques de s\xE9curit\xE9 informatique\
         \ ;\n\u2022 une analyse de risques syst\xE9matique fond\xE9e sur les retours\
         \ d\u2019exp\xE9rience des utilisateurs ;\n\u2022  une gestion structur\xE9\
@@ -3684,13 +3584,11 @@ objects:
       ref_id: '42'
       name: "Privil\xE9gier l\u2019usage de produits et de services qualifi\xE9s par\
         \ l'ANSSI (renforc\xE9)"
-      implementation_groups:
-      - R
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:42:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:42
-      description: "La qualification prononc\xE9e par l\u2019ANSSI offre des garanties\
+      description: "[R] La qualification prononc\xE9e par l\u2019ANSSI offre des garanties\
         \ de s\xE9curit\xE9 et de confiance aux acheteurs de solutions list\xE9es\
         \ dans les catalogues de produits et de prestataires de service qualifi\xE9\
         s que publie l\u2019agence.\nAu-del\xE0 des entit\xE9s soumises \xE0 r\xE9\
