@@ -19,6 +19,8 @@ export default {
 	biaName: 'Test BIA',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
+	favicon: new URL('../utils/test_favicon.ico', import.meta.url).pathname,
+	logo: new URL('../utils/monke.jpeg', import.meta.url).pathname,
 	user: {
 		email: 'user@tests.com',
 		password: 'pass123wordTest',
