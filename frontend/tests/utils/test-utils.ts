@@ -37,6 +37,7 @@ type Fixtures = {
 	businessImpactAnalysisPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	auditsLogPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -78,7 +79,8 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
-			usersPage
+			usersPage,
+			auditsLogPage
 		},
 		use
 	) => {
@@ -101,7 +103,8 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
-			usersPage
+			usersPage,
+			auditsLogPage
 		});
 	},
 
@@ -345,6 +348,10 @@ export const test = base.extend<Fixtures>({
 			{ name: 'confirm_new_password', type: type.TEXT }
 		]);
 		await use(uPage);
+	},
+	auditsLogPage: async ({ page }, use) => {
+		const alPage = new PageContent(page, '/audit-log', 'Audit log');
+		await use(alPage);
 	},
 
 	logedPage: async ({ page }, use) => {
