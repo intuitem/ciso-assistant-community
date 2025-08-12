@@ -88,9 +88,6 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 			testObjectsData.complianceAssessmentsPage.build,
 			testObjectsData.complianceAssessmentsPage.dependency
 		);
-		await complianceAssessmentsPage.viewItemDetail(
-			testObjectsData.complianceAssessmentsPage.build.name
-		);
 
 		// Click on the ID.AM-1 tree view item
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
@@ -147,11 +144,6 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		);
 	});
 	await test.step('verify that mapping worked correctly', async () => {
-		await complianceAssessmentsPage.goto();
-
-		// NOTE: Mapped must not be added at the end otherwise viewItemDetail might be confused with the original assessment, making the test flaky
-		await complianceAssessmentsPage.viewItemDetail('Mapped-' + vars.assessmentName);
-
 		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
 			'ID - Identify',
 			'ID.AM - Asset Management'
