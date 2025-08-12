@@ -6,6 +6,8 @@
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -614,7 +616,7 @@
 							>
 								{#if shallow}
 									{#if requirementAssessment.observation}
-										<p class="text-primary-500">{requirementAssessment.observation}</p>
+										<MarkdownRenderer content={requirementAssessment.observation} class="text-primary-500" />
 									{:else}
 										<p class="text-gray-400 italic">{m.noObservation()}</p>
 									{/if}
@@ -624,38 +626,13 @@
 											<p class="flex">{m.observation()}</p>
 										{/snippet}
 										{#snippet panel()}
-											<div>
-												<textarea
-													placeholder=""
-													class="input w-full"
-													bind:value={requirementAssessment.observation}
-													onkeydown={(event) => event.key === 'Enter' && event.preventDefault()}
-												></textarea>
-												{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
-													<button
-														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-														onclick={async () => {
-															await update(requirementAssessment, 'observation');
-															requirementAssessment.observationBuffer =
-																requirementAssessment.observation;
-														}}
-														type="button"
-														aria-label="Save observation"
-													>
-														<i class="fa-solid fa-check opacity-70"></i>
-													</button>
-													<button
-														class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
-														onclick={() =>
-															(requirementAssessment.observation =
-																requirementAssessment.observationBuffer)}
-														type="button"
-														aria-label="Reset observation"
-													>
-														<i class="fa-solid fa-xmark opacity-70"></i>
-													</button>
-												{/if}
-											</div>
+											<TableMarkdownField
+												bind:value={requirementAssessment.observation}
+												onSave={async (newValue) => {
+													await update(requirementAssessment, 'observation');
+													requirementAssessment.observationBuffer = newValue;
+												}}
+											/>
 										{/snippet}
 									</Accordion.Item>
 								{/if}
