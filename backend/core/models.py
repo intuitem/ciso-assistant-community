@@ -2326,7 +2326,27 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                         ],
                     },
                 ],
-            }
+            },
+            {
+                "name": "assetClassFacilities",
+                "description": "Facilities",
+                "children": [
+                    {
+                        "name": "assetClassPhysicalAccessPoint",
+                    },
+                    {
+                        "name": "assetClassArchivesRoom",
+                    },
+                    {
+                        "name": "assetClassPrimaryBuilding",
+                    },
+                    {
+                        "name": "assetClassPhysicalSecuritySystem",
+                    },
+                    {"name": "assetClassSafetySystem"},
+                    {"name": "assetClassExternalFacilities"},
+                ],
+            },
         ]
 
         AssetClass.create_hierarchy(cis_hierarchy)
