@@ -200,14 +200,14 @@ if command -v docker &>/dev/null; then
       -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
       -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
       -v "$APP_DIR"/frontend/tests/keycloak:/opt/keycloak/data/import \
-      quay.io/keycloak/keycloak:latest \
+      quay.io/keycloak/keycloak:26.3.0 \
       start-dev --import-realm)
   else
     KEYCLOAK_PID=$(docker run -d -p "$KEYCLOAK_PORT":8080 \
       -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
       -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
       -v "$APP_DIR"/frontend/tests/keycloak:/opt/keycloak/data/import \
-      quay.io/keycloak/keycloak:latest \
+      quay.io/keycloak/keycloak:26.3.0 \
       start-dev --import-realm)
   fi
   echo "Keycloak started on ports $KEYCLOAK_PORT (Container ID: ${KEYCLOAK_PID:0:6})"
