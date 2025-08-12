@@ -164,10 +164,10 @@
 		{#if showPreview}
 			<div
 				class="prose prose-sm max-w-none p-3 border border-surface-300 rounded-md min-h-[120px] bg-surface-50"
-				onclick={() => !disabled && (showPreview = false)}
+				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"
-				style="cursor: {disabled ? 'default' : 'pointer'}"
+				style="cursor: {disabled ? 'default' : 'text'}"
 				onkeydown={(e) => {
 					if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
 						e.preventDefault();
@@ -175,7 +175,7 @@
 					}
 				}}
 			>
-				{@html renderedMarkdown || '<p class="text-gray-500 italic">Click to add content...</p>'}
+				{@html renderedMarkdown || '<p class="text-gray-500 italic">Double-click to add content...</p>'}
 			</div>
 		{:else}
 			<textarea
