@@ -181,7 +181,7 @@ build_frontend() {
   if [[ -n "$ENTERPRISE" ]]; then
     echo "Building the enterprise version of the frontend..."
     cd "$APP_DIR"/enterprise/frontend || exit 1
-    make
+    make clean && make
   else
     echo "Building the community version of the frontend..."
     pnpm run build
@@ -201,6 +201,8 @@ compute_frontend_hash() {
 run_tests() {
   if [[ -n "$ENTERPRISE" ]]; then
     echo "Running tests for the enterprise version..."
+    cd "$APP_DIR"/enterprise/frontend || exit 1
+    make pre-tests
     cd "$APP_DIR"/enterprise/frontend/.build/frontend || exit 1
   else
     echo "Running tests for the community version..."
