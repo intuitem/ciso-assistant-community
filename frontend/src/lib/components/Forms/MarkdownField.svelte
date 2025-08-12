@@ -175,7 +175,8 @@
 					}
 				}}
 			>
-				{@html renderedMarkdown || '<p class="text-gray-500 italic">Double-click to add content...</p>'}
+				{@html renderedMarkdown ||
+					'<p class="text-gray-500 italic">Double-click to add content...</p>'}
 			</div>
 		{:else}
 			<textarea

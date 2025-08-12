@@ -616,7 +616,10 @@
 							>
 								{#if shallow}
 									{#if requirementAssessment.observation}
-										<MarkdownRenderer content={requirementAssessment.observation} class="text-primary-500" />
+										<MarkdownRenderer
+											content={requirementAssessment.observation}
+											class="text-primary-500"
+										/>
 									{:else}
 										<p class="text-gray-400 italic">{m.noObservation()}</p>
 									{/if}

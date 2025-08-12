@@ -7,7 +7,11 @@
 		placeholder?: string;
 	}
 
-	let { value = $bindable(), onSave, placeholder = "Double-click to add content..." }: Props = $props();
+	let {
+		value = $bindable(),
+		onSave,
+		placeholder = 'Double-click to add content...'
+	}: Props = $props();
 
 	let isEditing = $state(false);
 	let editValue = $state(value);
@@ -48,19 +52,11 @@
 				Preview
 			</button>
 			<div class="flex space-x-2">
-				<button
-					class="btn btn-sm variant-filled-success"
-					onclick={saveChanges}
-					type="button"
-				>
+				<button class="btn btn-sm variant-filled-success" onclick={saveChanges} type="button">
 					<i class="fa-solid fa-check mr-1"></i>
 					Save
 				</button>
-				<button
-					class="btn btn-sm variant-filled-error"
-					onclick={cancelEdit}
-					type="button"
-				>
+				<button class="btn btn-sm variant-filled-error" onclick={cancelEdit} type="button">
 					<i class="fa-solid fa-xmark mr-1"></i>
 					Cancel
 				</button>
@@ -90,11 +86,7 @@
 			{/if}
 		</div>
 		<div class="flex justify-between items-center">
-			<button
-				type="button"
-				class="btn btn-sm variant-soft"
-				onclick={startEdit}
-			>
+			<button type="button" class="btn btn-sm variant-soft" onclick={startEdit}>
 				<i class="fas fa-edit mr-1"></i>
 				Edit
 			</button>
