@@ -141,6 +141,7 @@ export class Element {
 	 * @param filters - Optional locator filters used to refine the element selection. Defaults to an empty object.
 	 * @param context - Optional context to be passed to the element instance. Defaults to an empty object.
 	 * @param page - Reserved solely for internal use by the Page._getSubElement method.
+	 * @param locator - Use this locator as a base locator instead of creating the locator from the provided dataTestId (this serves as a "base locator" meaning the filters argument will keep its effect).
 	 * @returns A new instance of the specified element class (`InstanceType<T>`).
 	 *
 	 * @throws If the static `DATA_TESTID` property is missing on the provided element class.
@@ -154,17 +155,19 @@ export class Element {
 		elementClass: T,
 		filters: Element.LocatorFilters = {},
 		context: Element.Context = {},
-		page: Page | null = null
+		page: Page | null = null,
+		locator: Locator | undefined = undefined
 	): InstanceType<T> {
 		const dataTestId = filters.dataTestId || elementClass.DATA_TESTID;
 		// Should i really check if this property is undefined ?
 		// After all typescript should reveal if the class is missing this property when using this method.
-		if (!dataTestId) {
+		if (!dataTestId && !locator) {
 			throw new Error(
-				`Missing required static string property 'DATA_TESTID' in class '${elementClass.name}'.`
+				`One of those 3 must be defined for _getSubElement to work:\n\n- The static string property 'DATA_TESTID' in class '${elementClass.name}'.\n- The filters.dataTestId property.\nThe locator argument.\n`
 			);
 		}
-		let locator = this._self.getByTestId(dataTestId);
+		if (!locator) locator = this._self.getByTestId(dataTestId);
+
 		if (['has', 'hasNot', 'hasNotText', 'hasText'].some((key) => filters[key])) {
 			locator = locator.filter(filters); // I guess invalid filters will be ignored.
 		}
@@ -179,6 +182,15 @@ export class Element {
 
 		const superElement = page ? page : this;
 		return new elementClass(locator, superElement, context);
+	}
+
+	/** Wrapper method which returns `this._getSubElement(elementClass, filters, {}, null, locator)`. */
+	protected _getSubElementFromLocator<T extends Element.Class<any>>(
+		locator: Locator,
+		elementClass: T,
+		filters: Element.LocatorFilters = {}
+	): InstanceType<T> {
+		return this._getSubElement(elementClass, filters, {}, null, locator);
 	}
 
 	/** Print the super-element chain of the element with all its non-empty context sources. */

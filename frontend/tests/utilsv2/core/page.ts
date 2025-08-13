@@ -31,6 +31,7 @@ export class Page {
 	/** Goto the page (by using the endpoint given to its constructor). */
 	async gotoSelf() {
 		await this._self.goto(this._endpoint);
+		await this._self.waitForURL(this._endpoint);
 	}
 
 	/**
@@ -72,13 +73,16 @@ export class Page {
 		return new pageClass(this._self, endpoint);
 	}
 
+	/** Waits until the page is loaded. */
+	async waitUntilLoaded() {
+		await this._self.waitForLoadState('load');
+	}
+
 	/**
-	 * Close a modal by clicking outside of it.
-	 * This method specifically clicks at coordinates (1, 1) which is supposed to outside of the modal.
-	 * This way of closing modal may not work for all modals.
+	 * Close a modal by pressing the Escape key.
 	 */
 	async doCloseModal() {
-		await this._self.mouse.click(1, 1);
+		await this.getSelf().keyboard.press('Escape');
 	}
 }
 export namespace Page {
