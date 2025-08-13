@@ -31,10 +31,6 @@ export class FolderCreateForm extends ModelForm {
 	private _descriptionInput: Locator;
 	private _parentDomainInput: Locator;
 
-	// Replace all the internal this.getSelf() calls by this._self in the codebase !
-	// Replace all the internal this.getSelf() calls by this._self in the codebase !
-	// Replace all the internal this.getSelf() calls by this._self in the codebase !
-
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name'); // document.querySelector(`[data-testid="form-input-name"]`);

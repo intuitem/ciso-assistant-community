@@ -82,7 +82,7 @@ export class Page {
 	 * Close a modal by pressing the Escape key.
 	 */
 	async doCloseModal() {
-		await this.getSelf().keyboard.press('Escape');
+		await this._self.keyboard.press('Escape');
 	}
 }
 export namespace Page {
