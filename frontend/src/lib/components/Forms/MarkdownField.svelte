@@ -181,8 +181,8 @@
 				{#if renderedMarkdown}
 					{@html renderedMarkdown}
 				{:else}
-          <p class="text-gray-500 italic">{m.markdownCTA()}</p>
-        {/if}
+					<p class="text-gray-500 italic">{m.markdownCTA()}</p>
+				{/if}
 			</div>
 		{:else}
 			<textarea
