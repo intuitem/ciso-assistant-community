@@ -22,6 +22,7 @@ type Fixtures = {
 	foldersPage: PageContent;
 	frameworksPage: PageContent;
 	librariesPage: PageContent;
+	mappingsPage: PageContent;
 	perimetersPage: PageContent;
 	riskAcceptancesPage: PageContent;
 	riskAssessmentsPage: PageContent;
@@ -66,6 +67,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
+			mappingsPage,
 			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
@@ -89,6 +91,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
+			mappingsPage,
 			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
@@ -159,6 +162,11 @@ export const test = base.extend<Fixtures>({
 	librariesPage: async ({ page }, use) => {
 		const lPage = new PageContent(page, '/libraries', 'Libraries');
 		await use(lPage);
+	},
+
+	mappingsPage: async ({ page }, use) => {
+		const mPage = new PageContent(page, '/requirement-mapping-sets', 'Mappings');
+		await use(mPage);
 	},
 
 	perimetersPage: async ({ page }, use) => {
