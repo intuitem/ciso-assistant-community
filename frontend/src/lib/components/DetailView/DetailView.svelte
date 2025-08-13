@@ -412,9 +412,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description'}
-												<MarkdownRenderer content={value} />
-											{:else if key === 'observation'}
+											{:else if key === 'description' || key === 'observation'}
 												<MarkdownRenderer content={value} />
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
