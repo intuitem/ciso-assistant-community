@@ -21,17 +21,17 @@
 	let arrowDown = $derived(expanded);
 </script>
 
-<ul>
+<ul data-testid="domain-analytics-treeview">
 	<li>
 		{#if children}
 			<div class="node-container">
 				<span class="arrow-container" onclick={toggleExpansion}>
-					<span class="arrow" class:arrowDown>▶</span>
+					<span class="arrow" class:arrowDown data-testid="treeview-expand-arrow-elem">▶</span>
 				</span>
 				{#if uuid && viewable}
-					<a {href} class="label-text">{name}</a>
+					<a {href} class="label-text" data-testid="treeview-label-text-elem">{name}</a>
 				{:else}
-					<span class="label-text">{name}</span>
+					<span class="label-text" data-testid="treeview-label-text-elem">{name}</span>
 				{/if}
 			</div>
 			{#if expanded}
@@ -43,9 +43,9 @@
 			<div class="node-container">
 				<span class="no-arrow"></span>
 				{#if uuid && viewable}
-					<a {href} class="label-text">{name}</a>
+					<a {href} class="label-text" data-testid="treeview-label-text-elem">{name}</a>
 				{:else}
-					<span class="label-text">{name}</span>
+					<span class="label-text" data-testid="treeview-label-text-elem">{name}</span>
 				{/if}
 			</div>
 		{/if}
