@@ -7,12 +7,14 @@ test.describe.configure({ mode: 'serial' });
 
 test.describe('Client settings', () => {
 	let page: Page;
-	test.beforeAll(async ({ browser }) => {
+	test.beforeAll(async ({ browser }, testInfo) => {
 		// Create a unique page to use for all the tests on this user group and login
 		page = await browser.newPage();
 		const loginPage = new LoginPage(page);
 		await loginPage.goto();
-		await page.getByTestId('logo-image').screenshot({ path: 'login-logo.png' });
+		await page
+			.getByTestId('logo-image')
+			.screenshot({ path: testInfo.snapshotPath('login-logo.png') });
 		await loginPage.login(LoginPage.defaultEmail, LoginPage.defaultPassword);
 		await expect(page).toHaveURL('/analytics');
 		const modalBackdrop = page.getByTestId('modal-backdrop');
@@ -24,7 +26,9 @@ test.describe('Client settings', () => {
 		if (await page.locator('#driver-dummy-element').isVisible()) {
 			await page.locator('.driver-popover-close-btn').first().click();
 		}
-		await page.getByTestId('logo-image').screenshot({ path: 'header-logo.png' });
+		await page
+			.getByTestId('logo-image')
+			.screenshot({ path: testInfo.snapshotPath('header-logo.png') });
 	});
 
 	test.use({
