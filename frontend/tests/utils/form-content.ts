@@ -48,6 +48,15 @@ export class FormContent {
 		for (const key in values) {
 			const field = this.fields.get(key);
 
+			// Check if this is a markdown field (description or observation) and handle it
+			if ((key === 'description' || key === 'observation') && field?.type === FormFieldType.TEXT) {
+				// Try to click the markdown edit button if it exists
+				const markdownEditBtn = this.page.getByTestId('markdown-edit-btn');
+				if (await markdownEditBtn.isVisible()) {
+					await markdownEditBtn.click();
+				}
+			}
+
 			switch (field?.type) {
 				case FormFieldType.CHECKBOX:
 					if (values[key]) {

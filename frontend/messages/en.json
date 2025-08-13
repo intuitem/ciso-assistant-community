@@ -963,7 +963,7 @@
 	"p4": "P4",
 	"processing": "Processing",
 	"addProcessing": "Add Processing",
-	"processingsRegister": "Processings (RoPA)",
+	"processingsRegister": "Processings",
 	"selectAppliedControls": "Select controls",
 	"purpose": "Purpose",
 	"addPurpose": "Add Purpose",
@@ -1633,6 +1633,13 @@
 	"assetClassGovernmentRelations": "Government Relations",
 	"assetClassCommunityRelations": "Community Relations",
 	"assetClassInvestorRelations": "Investor Relations",
+	"assetClassFacilities": "Facilities",
+	"assetClassPhysicalAccessPoint": "Physical access points",
+	"assetClassArchivesRoom": "Archives rooms",
+	"assetClassPrimaryBuilding": "Primary building",
+	"assetClassPhysicalSecuritySystem": "Physical security system",
+	"assetClassSafetySystem": "Safety system",
+	"assetClassExternalFacilities": "External building",
 	"unknownOrDeletedUser": "Unknown or deleted user",
 	"reportedAt": "Reported at",
 	"reportedAtHelpText": "Time stamp of the actual reporting",
@@ -1756,5 +1763,7 @@
 	"defaultAssigneeHelpText": "This user will be preset automatically as author for all assessments of this perimeter",
 	"riskTolerance": "Risk tolerance",
 	"riskToleranceHelpText": "Threshold of tolerable risk level",
-	"withinTolerance": "Within tolerance"
+	"withinTolerance": "Within tolerance",
+	"markdownHelpText": "Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.",
+	"markdownCTA": "Double-click to add content..."
 }

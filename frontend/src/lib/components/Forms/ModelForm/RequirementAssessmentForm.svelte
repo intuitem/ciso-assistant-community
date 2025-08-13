@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -44,7 +45,7 @@
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}

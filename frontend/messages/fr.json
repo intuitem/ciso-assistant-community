@@ -1589,7 +1589,7 @@
 	"assetClassPolicies": "Politiques",
 	"assetClassProcesses": "Processus",
 	"assetClassProcedures": "Procédures",
-	"assetClassBusinessProcess": "Processus d'Affaires",
+	"assetClassBusinessProcess": "Processus métier",
 	"assetClassCoreOperations": "Opérations Principales",
 	"assetClassProductOrServiceDevelopment": "Développement de Produits ou Services",
 	"assetClassProductOrServiceDelivery": "Livraison de Produits ou Services",
@@ -1615,6 +1615,13 @@
 	"assetClassGovernmentRelations": "Relations Gouvernementales",
 	"assetClassCommunityRelations": "Relations Communautaires",
 	"assetClassInvestorRelations": "Relations avec les Investisseurs",
+	"assetClassFacilities": "Locaux",
+	"assetClassPhysicalAccessPoint": "Points d'accès physique",
+	"assetClassArchivesRoom": "Salle des documents/archives",
+	"assetClassPrimaryBuilding": "Bâtiment principal",
+	"assetClassPhysicalSecuritySystem": "Système de sécurité physique ",
+	"assetClassSafetySystem": "Système de sûreté",
+	"assetClassExternalFacilities": "Bâtiment externe",
 	"unknownOrDeletedUser": "Utilisateur inconnu ou supprimé",
 	"reportedAt": "Remonté le",
 	"reportedAtHelpText": "Horodatage de la remontée",
@@ -1722,5 +1729,7 @@
 	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure",
 	"riskTolerance": "Tolérance au risque",
 	"riskToleranceHelpText": "Seuil du niveau de risque tolérable",
-	"withinTolerance": "Tolérable"
+	"withinTolerance": "Tolérable",
+	"markdownHelpText": "Markdown supporté : **gras**, *italique*, `code`, [lien](url), listes, etc.",
+	"markdownCTA": "Double-cliquez pour éditer ..."
 }
