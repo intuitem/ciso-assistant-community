@@ -1,8 +1,9 @@
 import { Element } from '../core/element';
 import { DomainAnalyticsTreeViewNode } from './domain-analytics-treeview';
 
-export class DomainAnalaytics extends Element {
-	static DATA_TESTID = 'domain-analytics';
+/** Represents the domain-analytics <main> HTML element wrapping its root TreeView component. */
+export class DomainAnalytics extends Element {
+	static DATA_TESTID = 'domain-analytics-elem';
 
 	constructor(...args: Element.Args) {
 		super(...args);
