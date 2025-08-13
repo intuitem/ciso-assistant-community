@@ -159,8 +159,6 @@ export class Element {
 		locator: Locator | undefined = undefined
 	): InstanceType<T> {
 		const dataTestId = filters.dataTestId || elementClass.DATA_TESTID;
-		// Should i really check if this property is undefined ?
-		// After all typescript should reveal if the class is missing this property when using this method.
 		if (!dataTestId && !locator) {
 			throw new Error(
 				`One of those 3 must be defined for _getSubElement to work:\n\n- The static string property 'DATA_TESTID' in class '${elementClass.name}'.\n- The filters.dataTestId property.\nThe locator argument.\n`

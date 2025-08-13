@@ -1,7 +1,8 @@
-import { Page } from '../../utilsv2/core/page';
-import { DomainAnalaytics } from '../../utilsv2/derived/domain-analytics';
-import type { Page as _Page } from '@playwright/test';
+import { Page } from "../core/page";
+import { DomainAnalaytics } from "./domain-analytics";
+import type { Page as _Page } from "@playwright/test";
 
+/** Represents the `/domain-analytics` page. (enterprise version) */
 export class DomainAnalyticsPage extends Page {
 	constructor(page: _Page) {
 		super(page, '/domain-analytics');

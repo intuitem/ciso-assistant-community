@@ -7,7 +7,6 @@ async function selectChoice(input: Locator, value: string) {
 	const inputSearch = input.locator('ul.selected input');
 	const firstOption = input.locator(`[role="option"]`, { hasText: value }).first();
 
-	// role="searchbox" class contains disabled
 	const searchBox = input.getByRole('searchbox');
 	const searchBoxClasses = await searchBox.getAttribute('class');
 
