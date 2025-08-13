@@ -25,50 +25,53 @@ const DOMAIN_TREE: DomainTree = {
 	}
 };
 
+async function checkDomainTree(nodes: DomainAnalyticsTreeViewNode[], domainTree: DomainTree) {
+	await expectV2(nodes.length).toBe(Object.keys(domainTree).length);
+
+	for (const [i, [domainName, subdomainTree]] of Object.entries(domainTree).map((data, i) => [
+		i,
+		data
+	])) {
+		const currentNode = nodes[i];
+		const nodeLabelText = await currentNode.getLabelText();
+		await expectV2(nodeLabelText).toBe(domainName);
+		const currentDescendants = await currentNode.getVisibleDescendants(expectV2);
+		if (subdomainTree === null) {
+			expectV2(currentDescendants.length).toBe(0);
+			continue;
+		}
+		await checkDomainTree(currentDescendants, subdomainTree);
+	}
+}
+
 testV2('domain-analytics test', async ({ page }) => {
 	const loginPage = new LoginPage(page);
 	await loginPage.gotoSelf();
 	const analyticsPage = await loginPage.doLoginAdminP();
 	await analyticsPage.doCloseModal();
 
-	const listView = new FolderListViewPage(page);
-	listView.gotoSelf();
-	listView.checkSelf(expectV2);
-	for (const folder of TEST_DATA) {
-		const createModal = await listView.getOpenCreateModal();
-		const createForm = await createModal.getForm();
-		await createForm.doFillForm(folder);
-		await createForm.doSubmit();
-	}
-
-	const domainAnalyticsPage = new DomainAnalyticsPage(page);
-	await domainAnalyticsPage.gotoSelf();
-	await domainAnalyticsPage.checkSelf(expectV2);
-	const domainAnalytics = domainAnalyticsPage.getDomainAnalytics();
-	let globalDomainNode = domainAnalytics.getGlobalFolderTreeViewNode();
-	const globalDomainName = await globalDomainNode.getLabelText();
-	await expectV2(globalDomainName).toBe('Global');
-
-	/** Checks if the domain-analytics `<TreeView/>` nodes in the DOM match the structure of of the root/some part of the `DOMAIN_TREE`. */
-	async function checkDomainTree(nodes: DomainAnalyticsTreeViewNode[], domainTree: DomainTree) {
-		await expectV2(nodes.length).toBe(Object.keys(domainTree).length);
-
-		for (const [i, [domainName, subdomainTree]] of Object.entries(domainTree).map((data, i) => [
-			i,
-			data
-		])) {
-			const currentNode = nodes[i];
-			const nodeLabelText = await currentNode.getLabelText();
-			await expectV2(nodeLabelText).toBe(domainName);
-			const currentDescendants = await currentNode.getVisibleDescendants(expectV2);
-			if (subdomainTree === null) {
-				expectV2(currentDescendants.length).toBe(0);
-				continue;
-			}
-			await checkDomainTree(currentDescendants, subdomainTree);
+	await testV2.step('Create folders', async () => {
+		const listView = new FolderListViewPage(page);
+		listView.gotoSelf();
+		listView.checkSelf(expectV2);
+		for (const folder of TEST_DATA) {
+			const createModal = await listView.getOpenCreateModal();
+			const createForm = await createModal.getForm();
+			await createForm.doFillForm(folder);
+			await createForm.doSubmit();
 		}
-	}
+	});
 
-	const nodes = await globalDomainNode.getVisibleDescendants(expectV2);
-	await checkDomainTree(nodes, DOMAIN_TREE);
+	await testV2.step('Check domain-analytics TreeView validity.', async () => {
+		const domainAnalyticsPage = new DomainAnalyticsPage(page);
+		await domainAnalyticsPage.gotoSelf();
+		await domainAnalyticsPage.checkSelf(expectV2);
+		const domainAnalytics = domainAnalyticsPage.getDomainAnalytics();
+		let globalDomainNode = domainAnalytics.getGlobalFolderTreeViewNode();
+		const globalDomainName = await globalDomainNode.getLabelText();
+		await expectV2(globalDomainName).toBe('Global');
+
+		const nodes = await globalDomainNode.getVisibleDescendants(expectV2);
+		await checkDomainTree(nodes, DOMAIN_TREE);
+	});
 });
