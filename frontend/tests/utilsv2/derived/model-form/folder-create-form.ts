@@ -32,7 +32,7 @@ export class FolderCreateForm extends ModelForm {
 
 	constructor(...args: Element.Args) {
 		super(...args);
-		this._nameInput = this._self.getByTestId('form-input-name'); // document.querySelector(`[data-testid="form-input-name"]`);
+		this._nameInput = this._self.getByTestId('form-input-name');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
 		this._parentDomainInput = this._self.getByTestId('form-input-parent-folder');
 	}
