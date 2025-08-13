@@ -1,7 +1,7 @@
 import { Element } from '../core/element';
 import type { Locator, Expect } from '@playwright/test';
 
-/** Represents the domain-analytics <TreeView/> component. */
+/** Represents the domain-analytics `<TreeView/>` component. */
 export class DomainAnalyticsTreeViewNode extends Element {
 	static DATA_TESTID = 'domain-analytics-treeview';
 	private _expandArrow: Locator;

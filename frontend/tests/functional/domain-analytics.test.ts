@@ -49,6 +49,7 @@ testV2('domain-analytics test', async ({ page }) => {
 	const globalDomainName = await globalDomainNode.getLabelText();
 	await expectV2(globalDomainName).toBe('Global');
 
+	/** Checks if the domain-analytics `<TreeView/>` nodes in the DOM match the structure of of the root/some part of the `DOMAIN_TREE`. */
 	async function checkDomainTree(nodes: DomainAnalyticsTreeViewNode[], domainTree: DomainTree) {
 		await expectV2(nodes.length).toBe(Object.keys(domainTree).length);
 
