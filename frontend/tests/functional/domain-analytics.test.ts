@@ -52,8 +52,8 @@ testV2('domain-analytics test', async ({ page }) => {
 
 	await testV2.step('Create folders', async () => {
 		const listView = new FolderListViewPage(page);
-		listView.gotoSelf();
-		listView.checkSelf(expectV2);
+		await listView.gotoSelf();
+		await listView.checkSelf(expectV2);
 		for (const folder of TEST_DATA) {
 			const createModal = await listView.getOpenCreateModal();
 			const createForm = await createModal.getForm();
