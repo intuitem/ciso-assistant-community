@@ -51,6 +51,7 @@ export class DomainAnalyticsTreeViewNode extends Element {
 		);
 	}
 
+	/** Returns the clean tree view node text (without the UTF-8 arrow and without whitespaces). */
 	async getLabelText(): Promise<string> {
 		return this._labelText.innerText();
 	}
