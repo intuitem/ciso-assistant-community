@@ -10,6 +10,7 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
@@ -618,7 +619,7 @@
 						/>
 					{/if}
 
-					<TextArea {form} field="observation" label="Observation" />
+					<MarkdownField {form} field="observation" label="Observation" />
 					<div class="flex flex-row justify-between space-x-4">
 						<button
 							class="btn bg-gray-400 text-white font-semibold w-full"
