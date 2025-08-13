@@ -120,7 +120,7 @@ jobs:
         id: list_community_files
         working-directory: ${{ env.frontend-directory }}/
         run: |
-          COMMUNITY_TEST_FILES=$(find tests -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js" | jq -R -s -c 'split("\n")[:-1]')
+          COMMUNITY_TEST_FILES=$(find tests -path tests/functional/enterprise -prune -name "*.spec.ts" -o -name "*.spec.js" -o -name "*.test.ts" -o -name "*.test.js")
           echo "Community Test files found: $COMMUNITY_TEST_FILES"
           echo "test_files=$COMMUNITY_TEST_FILES" >> $GITHUB_OUTPUT
 
