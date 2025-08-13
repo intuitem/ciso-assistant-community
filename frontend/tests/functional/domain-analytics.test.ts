@@ -67,7 +67,7 @@ testV2('domain-analytics test', async ({ page }) => {
 		await domainAnalyticsPage.gotoSelf();
 		await domainAnalyticsPage.checkSelf(expectV2);
 		const domainAnalytics = domainAnalyticsPage.getDomainAnalytics();
-		let globalDomainNode = domainAnalytics.getGlobalFolderTreeViewNode();
+		const globalDomainNode = domainAnalytics.getGlobalFolderTreeViewNode();
 		const globalDomainName = await globalDomainNode.getLabelText();
 		await expectV2(globalDomainName).toBe('Global');
 
