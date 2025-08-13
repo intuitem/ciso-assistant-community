@@ -6,6 +6,8 @@
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
 
+	import { m } from '$paraglide/messages';
+
 	interface Props {
 		class?: string;
 		label?: string | undefined;
@@ -176,8 +178,11 @@
 					}
 				}}
 			>
-				{@html renderedMarkdown ||
-					'<p class="text-gray-500 italic">Double-click to add content...</p>'}
+				{#if renderedMarkdown}
+					{@html renderedMarkdown}
+				{:else}
+          <p class="text-gray-500 italic">{m.markdownCTA()}</p>
+        {/if}
 			</div>
 		{:else}
 			<textarea
@@ -185,7 +190,6 @@
 				data-testid="form-input-{field.replaceAll('_', '-')}"
 				name={field}
 				aria-invalid={$errors ? 'true' : undefined}
-				placeholder="You can use markdown formatting here..."
 				bind:value={$value}
 				{...$constraints}
 				{...rest}
@@ -200,7 +204,7 @@
 	{/if}
 	{#if !showPreview}
 		<p class="text-xs text-gray-400 mt-1">
-			Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+			{m.markdownHelpText()}
 		</p>
 	{/if}
 </div>

@@ -1722,5 +1722,7 @@
 	"inherentRiskLevelHelpText": "Le niveau de risque inhérent est le niveau de risque avant l'application de toute mesure",
 	"riskTolerance": "Tolérance au risque",
 	"riskToleranceHelpText": "Seuil du niveau de risque tolérable",
-	"withinTolerance": "Tolérable"
+	"withinTolerance": "Tolérable",
+	"markdownHelpText": "Markdown supporté : **gras**, *italique*, `code`, [lien](url), listes, etc.",
+	"markdownCTA": "Double-cliquez pour éditer ..."
 }
