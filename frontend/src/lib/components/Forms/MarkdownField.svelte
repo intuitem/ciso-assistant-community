@@ -136,6 +136,7 @@
 			<div class="flex space-x-2">
 				<button
 					type="button"
+					data-testid="markdown-edit-btn"
 					class="btn btn-sm {!showPreview ? 'variant-filled-primary' : 'variant-soft'}"
 					onclick={() => (showPreview = false)}
 				>
