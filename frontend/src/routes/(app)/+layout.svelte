@@ -26,11 +26,37 @@
 	} from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
 
 	let sidebarOpen = $state(true);
 
 	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
 
+	interface Props {
+		data: PageData;
+		form: ActionData;
+		sideBarVisibleItems?: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		data,
+		form,
+		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
+		children
+	}: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
+
+	// Initialize external link interceptor
+	$effect(() => {
+		if (browser) {
+			setGlobalModalStore(modalStore);
+			interceptExternalLinks();
+		}
+	});
+
+	// Handle login-specific logic
 	run(() => {
 		if (browser) {
 			const fromLogin = getCookie('from_login');
@@ -53,21 +79,6 @@
 		}
 	});
 
-	interface Props {
-		data: PageData;
-		form: ActionData;
-		sideBarVisibleItems?: any;
-		children?: import('svelte').Snippet;
-	}
-
-	let {
-		data,
-		form,
-		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
-		children
-	}: Props = $props();
-
-	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {
 		let modalComponent: ModalComponent = {
 			ref: QuickStartModal,
