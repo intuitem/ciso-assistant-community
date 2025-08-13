@@ -19,6 +19,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	let { data } = $props();
 
@@ -182,7 +183,7 @@
 					>
 				</div>
 				<div class="text-sm" data-testid="description-field-value">
-					{risk_assessment.description ?? '--'}
+					<MarkdownRenderer content={risk_assessment.description} />
 				</div>
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
