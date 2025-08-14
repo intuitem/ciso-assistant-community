@@ -53,23 +53,25 @@ We’re constantly evolving with input from users and customers. Like an octopus
 
 ---
 
+## Features
+
+![Current features](features.png)
+
+Upcoming features are listed on the roadmap.
+
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
+
+---
+
 ## Core Concepts
 
-Here’s a snapshot of the fundamental building blocks in CISO Assistant:
+Here’s an extract of some of the building blocks in CISO Assistant to illustrate the decoupling concept that encourages reusability:
 
 ![Core Objects](core_objects.png)
 
 For full details, check the [data model documentation](documentation/architecture/data-model.md).
 
----
 
-## Features
-
-Explore the full range of features and capabilities:
-
-![Features Overview](features.png)
-
-CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
 
 ---
 
