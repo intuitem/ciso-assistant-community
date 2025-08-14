@@ -4996,6 +4996,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         related_name="task_templates",
     )
 
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
+        verbose_name=_("Link"),
+    )
+
     @property
     def next_occurrence(self):
         today = datetime.today().date()
