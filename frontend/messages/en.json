@@ -195,6 +195,7 @@
 	"dueDate": "Due date",
 	"attachment": "Attachment",
 	"observation": "Observation",
+	"observationHelpText": "Additional notes and comments in markdown format",
 	"noObservation": "No observation",
 	"importMatrices": "Import matrices",
 	"importFrameworks": "Import frameworks",
