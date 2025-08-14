@@ -542,92 +542,105 @@
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 			{/if}
-			<span class="pt-4 text-sm">{m.powerUps()}</span>
-			{#if !page.data.user.is_third_party}
+			<span class="pt-4 text-sm font-semibold">{m.powerUps()}</span>
+			<div class="grid grid-cols-2 gap-3 max-w-sm">
+				{#if !page.data.user.is_third_party}
+					<Anchor
+						breadcrumbAction="push"
+						href={`${page.url.pathname}/flash-mode`}
+						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-16 flex flex-col items-center justify-center p-2"
+						title={m.flashMode()}
+					>
+						<i class="fa-solid fa-bolt text-xl mb-1"></i>
+						<span class="text-xs font-medium">Flash</span>
+					</Anchor>
+				{/if}
+
 				<Anchor
 					breadcrumbAction="push"
-					href={`${page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+					href={`${page.url.pathname}/table-mode`}
+					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-16 flex flex-col items-center justify-center p-2"
+					title={m.tableMode()}
 				>
-			{/if}
-			<Anchor
-				breadcrumbAction="push"
-				href={`${page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
-			>
-			{#if !page.data.user.is_third_party}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
-					onclick={() => modalCreateForm()}
-					><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
-				</button>
-			{/if}
+					<i class="fa-solid fa-table-list text-xl mb-1"></i>
+					<span class="text-xs font-medium">Table</span>
+				</Anchor>
 
-			<button
-				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-				onclick={async () => {
-					await modalConfirmSyncToActions(
-						data.compliance_assessment.id,
-						data.compliance_assessment.name,
-						'?/syncToActions'
-					);
-				}}
-			>
-				<span class="mr-2">
+				{#if !page.data.user.is_third_party}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-16 flex flex-col items-center justify-center p-2"
+						onclick={() => modalCreateForm()}
+						title={m.applyMapping()}
+					>
+						<i class="fa-solid fa-diagram-project text-xl mb-1"></i>
+						<span class="text-xs font-medium">Mapping</span>
+					</button>
+				{/if}
+
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-16 flex flex-col items-center justify-center p-2"
+					onclick={async () => {
+						await modalConfirmSyncToActions(
+							data.compliance_assessment.id,
+							data.compliance_assessment.name,
+							'?/syncToActions'
+						);
+					}}
+					title={m.syncToAppliedControls()}
+				>
 					{#if syncingToActionsIsLoading}
 						<ProgressRing
 							strokeWidth="16px"
 							meterStroke="stroke-white"
 							size="size-6"
-							classes="-ml-2"
+							classes="mb-1"
 						/>
 					{:else}
-						<i class="fa-solid fa-arrows-rotate mr-2"></i>
+						<i class="fa-solid fa-arrows-rotate text-xl mb-1"></i>
 					{/if}
-				</span>
-				{m.syncToAppliedControls()}
-			</button>
+					<span class="text-xs font-medium">Sync</span>
+				</button>
 
-			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
-					onclick={() => {
-						modalConfirmCreateSuggestedControls(
-							data.compliance_assessment.id,
-							data.compliance_assessment.name,
-							'?/createSuggestedControls'
-						);
-					}}
-				>
-					<span class="mr-2">
+				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-16 flex flex-col items-center justify-center p-2"
+						onclick={() => {
+							modalConfirmCreateSuggestedControls(
+								data.compliance_assessment.id,
+								data.compliance_assessment.name,
+								'?/createSuggestedControls'
+							);
+						}}
+						title={m.suggestControls()}
+					>
 						{#if createAppliedControlsLoading}
 							<ProgressRing
 								strokeWidth="16px"
 								meterStroke="stroke-white"
-								classes="-ml-2"
+								classes="mb-1"
 								size="size-6"
 							/>
 						{:else}
-							<i class="fa-solid fa-wand-magic-sparkles"></i>
+							<i class="fa-solid fa-wand-magic-sparkles text-xl mb-1"></i>
 						{/if}
-					</span>
-					{m.suggestControls()}
-				</button>
-			{/if}
-			{#if has_threats}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
-					onclick={openThreatsDialog}
-				>
-					<div class="flex items-center space-x-2">
-						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
-						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
-						<span>{m.potentialThreats()}</span>
-					</div>
-				</button>
-			{/if}
+						<span class="text-xs font-medium">Suggest</span>
+					</button>
+				{/if}
+
+				{#if has_threats}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-16 flex flex-col items-center justify-center p-2 relative"
+						onclick={openThreatsDialog}
+						title={m.potentialThreats()}
+					>
+						<i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i>
+						<span class="text-xs font-medium">Threats</span>
+						<span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+							{data.threats.total_unique_threats}
+						</span>
+					</button>
+				{/if}
+			</div>
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
