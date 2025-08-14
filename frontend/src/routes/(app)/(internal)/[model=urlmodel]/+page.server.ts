@@ -125,12 +125,5 @@ export const actions: Actions = {
 		);
 
 		return withFiles({ form });
-	},
-	publish: async (event) => {
-		return defaultWriteFormAction({
-			event,
-			urlModel: event.params.model!,
-			action: 'publish'
-		});
 	}
 };

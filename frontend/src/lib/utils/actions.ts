@@ -98,7 +98,8 @@ export async function defaultWriteFormAction({
 	action,
 	doRedirect = true,
 	redirectToWrittenObject = false,
-	httpMethod = undefined
+	httpMethod = undefined,
+	schema
 }: {
 	event: RequestEvent;
 	urlModel: string;
@@ -106,13 +107,14 @@ export async function defaultWriteFormAction({
 	doRedirect?: boolean;
 	redirectToWrittenObject?: boolean;
 	httpMethod?: 'PUT' | 'PATCH' | undefined;
+	schema?: Record<string, any> | undefined;
 }) {
 	const formData = await event.request.formData();
 	if (!formData) {
 		return fail(400, { form: null });
 	}
 
-	const schema = modelSchema(urlModel!);
+	schema = schema || modelSchema(urlModel!);
 	const form = await superValidate(formData, zod(schema));
 
 	if (!form.valid) {

@@ -12,7 +12,8 @@ import { z } from 'zod';
 import {
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
-	handleErrorResponse
+	handleErrorResponse,
+	defaultWriteFormAction
 } from '$lib/utils/actions';
 import { modelSchema } from '$lib/utils/schemas';
 
@@ -57,6 +58,15 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
+	},
+	publish: async (event) => {
+		console.log('publish');
+		return defaultWriteFormAction({
+			event,
+			urlModel: event.params.model!,
+			action: 'publish',
+			schema: z.object({ is_published: z.boolean().default(true) })
+		});
 	},
 	duplicate: async (event) => {
 		const formData = await event.request.formData();

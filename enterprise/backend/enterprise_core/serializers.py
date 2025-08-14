@@ -6,6 +6,10 @@ from core.serializers import (
 )
 from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User
+from global_settings.models import GlobalSettings
+from global_settings.serializers import (
+    FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
+)
 
 from .models import ClientSettings
 from auditlog.models import LogEntry
@@ -126,3 +130,36 @@ class LogEntrySerializer(serializers.ModelSerializer):
         model = LogEntry
         fields = "__all__"
         read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]
+
+
+class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
+    """
+    Serializer for managing Feature Flags stored within the 'value' JSON field
+    of a GlobalSettings instance. Each flag is represented as an explicit
+    BooleanField, mapping directly to keys within the 'value' dictionary.
+    """
+
+    publish = serializers.BooleanField(
+        source="value.publish", required=False, default=False
+    )
+
+    class Meta:
+        model = GlobalSettings
+        fields = [
+            "xrays",
+            "incidents",
+            "tasks",
+            "risk_acceptances",
+            "exceptions",
+            "follow_up",
+            "ebiosrm",
+            "scoring_assistant",
+            "vulnerabilities",
+            "compliance",
+            "tprm",
+            "privacy",
+            "experimental",
+            "inherent_risk",
+            "publish",
+        ]
+        read_only_fields = ["name"]

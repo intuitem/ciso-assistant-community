@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -29,6 +30,9 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -229,6 +233,23 @@
 	}
 
 	let openStateRA = $state(false);
+
+	let isPublished = $derived(data?.data?.is_published ?? false);
+
+	const _form = () => {
+		return superForm(
+			defaults({ is_published: !isPublished }, zod(z.object({ is_published: z.boolean() }))),
+			{
+				validators: zod(z.object({ is_published: z.boolean() })),
+				dataType: 'json',
+				invalidateAll: true,
+				applyAction: true,
+				resetForm: false,
+				taintedMessage: false,
+				validationMethod: 'auto'
+			}
+		);
+	};
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -527,6 +548,31 @@
 						{m.duplicate()}</button
 					>
 				{/if}
+			{/if}
+			{#if page?.data?.featureflags?.publish}
+				<SuperForm {_form} action="?/publish" validators={z.object({ is_published: z.boolean() })}>
+					{#if data.data.is_published === true}
+						<input type="hidden" name="is_published" value={false} />
+						<button
+							class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+							data-testid="publish-button"
+							type="submit"
+						>
+							<i class="fa-solid fa-copy mr-2"></i>
+							m.unpublish()</button
+						>
+					{:else}
+						<input type="hidden" name="is_published" value={true} />
+						<button
+							class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+							data-testid="publish-button"
+							type="submit"
+						>
+							<i class="fa-solid fa-copy mr-2"></i>
+							m.publish()</button
+						>
+					{/if}
+				</SuperForm>
 			{/if}
 			{@render actions?.()}
 		</div>
