@@ -170,7 +170,7 @@
 				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"
-				style="cursor: {disabled ? 'default' : 'text'}"
+				style="cursor: {disabled ? 'default' : 'text'}; min-width: {cols}ch;"
 				onkeydown={(e) => {
 					if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
 						e.preventDefault();
