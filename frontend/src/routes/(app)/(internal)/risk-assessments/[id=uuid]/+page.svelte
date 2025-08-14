@@ -193,7 +193,8 @@
 						triggerClasses="btn preset-filled-primary-500 w-full"
 					>
 						{#snippet trigger()}
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							<i class="fa-solid fa-download mr-2" data-testid="export-button"
+							></i>{m.exportButton()}
 						{/snippet}
 						{#snippet content()}
 							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
