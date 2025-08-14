@@ -195,6 +195,7 @@
 	"dueDate": "Date d'échéance",
 	"attachment": "Pièce jointe",
 	"observation": "Observation",
+	"observationHelpText": "Notes et commentaires supplémentaires au format markdown",
 	"noObservation": "Aucune observation",
 	"importMatrices": "Importer des matrices",
 	"importFrameworks": "Importer des référentiels",
