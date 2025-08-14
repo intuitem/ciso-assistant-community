@@ -14,6 +14,7 @@
 	import Duration from '../Duration.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -224,6 +225,14 @@
 	label={m.labels()}
 	translateOptions={false}
 	allowUserOptions="append"
+/>
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
 />
 {#if initialData.ebios_rm_studies}
 	<AutocompleteSelect
