@@ -546,6 +546,7 @@
 	"successfullyCreatedObject": "The {object} object has been successfully created",
 	"successfullyDuplicateObject": "The {object} object has been successfully duplicated",
 	"successfullyUpdatedObject": "The {object} object has been successfully updated",
+	"successfullyPublishedObject": "The {object} object has been successfully published",
 	"successfullySavedObject": "The {object} object has been successfully saved",
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
 	"successfullyDeletedLibrary": "The library has been successfully deleted",
