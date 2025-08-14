@@ -86,7 +86,7 @@
 			{
 				field: 'type',
 				translate: true
-			},
+			}
 		],
 		classes: 'text-blue-500'
 	}}
