@@ -1,0 +1,14 @@
+name: "Start Keycloak with Realm Import"
+description: "Runs Keycloak with a preconfigured realm"
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker run -d --name keycloak-test \
+          -p 8080:8080 \
+          -e KEYCLOAK_ADMIN=admin \
+          -e KEYCLOAK_ADMIN_PASSWORD=admin \
+          -v "${{ github.workspace }}/frontend/tests/keycloak:/opt/keycloak/data/import" \
+          quay.io/keycloak/keycloak:26.3.0 \
+          start-dev --import-realm
+      shell: bash
