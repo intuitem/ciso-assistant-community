@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl
+from core.models import AppliedControl, Asset
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -232,6 +232,7 @@ class PersonalData(NameDescriptionFolderMixin):
         max_length=50, choices=DELETION_POLICY_CHOICES, blank=True
     )
     is_sensitive = models.BooleanField(default=False)
+    assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
