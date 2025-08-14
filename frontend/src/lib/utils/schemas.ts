@@ -839,6 +839,12 @@ export const TaskTemplateSchema = z.object({
 			interval: 1,
 			frequency: 'DAILY'
 		})
+		.optional(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: 'Invalid URL format'
+		})
 		.optional()
 });
 
