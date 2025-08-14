@@ -51,7 +51,7 @@ export class FormContent {
 			// Check if this is a markdown field (description or observation) and handle it
 			if ((key === 'description' || key === 'observation') && field?.type === FormFieldType.TEXT) {
 				// Try to click the markdown edit button if it exists
-				const markdownEditBtn = this.page.getByTestId('markdown-edit-btn');
+				const markdownEditBtn = this.page.getByTestId(`markdown-edit-btn-${key}`);
 				if (await markdownEditBtn.isVisible()) {
 					await markdownEditBtn.click();
 				}

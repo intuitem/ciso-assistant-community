@@ -6,6 +6,7 @@
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -227,6 +228,14 @@
 			helpText={m.labelsHelpText()}
 			label={m.labels()}
 			allowUserOptions="append"
+		/>
+		<MarkdownField
+			{form}
+			field="observation"
+			label={m.observation()}
+			helpText={m.observationHelpText()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
 		/>
 	</Dropdown>
 {/if}
