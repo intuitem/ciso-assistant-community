@@ -234,21 +234,16 @@
 
 	let openStateRA = $state(false);
 
-	let isPublished = $derived(data?.data?.is_published ?? false);
-
 	const _form = () => {
-		return superForm(
-			defaults({ is_published: !isPublished }, zod(z.object({ is_published: z.boolean() }))),
-			{
-				validators: zod(z.object({ is_published: z.boolean() })),
-				dataType: 'json',
-				invalidateAll: true,
-				applyAction: true,
-				resetForm: false,
-				taintedMessage: false,
-				validationMethod: 'auto'
-			}
-		);
+		return superForm(defaults({}, zod(z.object({ is_published: z.boolean() }))), {
+			validators: zod(z.object({ is_published: z.boolean() })),
+			dataType: 'json',
+			invalidateAll: true,
+			applyAction: true,
+			resetForm: true,
+			taintedMessage: false,
+			validationMethod: 'auto'
+		});
 	};
 </script>
 
@@ -555,11 +550,11 @@
 						<input type="hidden" name="is_published" value={false} />
 						<button
 							class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-							data-testid="publish-button"
+							data-testid="unpublish-button"
 							type="submit"
 						>
-							<i class="fa-solid fa-copy mr-2"></i>
-							m.unpublish()</button
+							<i class="fa-solid fa-lock mr-2"></i>
+							{m.unpublish()}</button
 						>
 					{:else}
 						<input type="hidden" name="is_published" value={true} />
@@ -568,8 +563,8 @@
 							data-testid="publish-button"
 							type="submit"
 						>
-							<i class="fa-solid fa-copy mr-2"></i>
-							m.publish()</button
+							<i class="fa-solid fa-globe mr-2"></i>
+							{m.publish()}</button
 						>
 					{/if}
 				</SuperForm>

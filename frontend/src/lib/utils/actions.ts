@@ -37,7 +37,7 @@ function getSuccessMessage({ action, urlModel }: { action: FormAction; urlModel:
 			object: safeTranslate(modelVerboseName).toLowerCase()
 		});
 	} else if (action === 'publish') {
-		return m.successfullyPublishedObject({
+		return m.successfullyUpdatedObject({
 			object: safeTranslate(modelVerboseName).toLowerCase()
 		});
 	}
