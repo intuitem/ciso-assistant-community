@@ -546,7 +546,6 @@
 	"successfullyCreatedObject": "The {object} object has been successfully created",
 	"successfullyDuplicateObject": "The {object} object has been successfully duplicated",
 	"successfullyUpdatedObject": "The {object} object has been successfully updated",
-	"successfullyPublishedObject": "The {object} object has been successfully published",
 	"successfullySavedObject": "The {object} object has been successfully saved",
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
 	"successfullyDeletedLibrary": "The library has been successfully deleted",
@@ -1767,5 +1766,7 @@
 	"riskToleranceHelpText": "Threshold of tolerable risk level",
 	"withinTolerance": "Within tolerance",
 	"markdownHelpText": "Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.",
-	"markdownCTA": "Double-click to add content..."
+	"markdownCTA": "Double-click to add content...",
+	"publish": "Publish",
+	"unpublish": "Unpublish"
 }
