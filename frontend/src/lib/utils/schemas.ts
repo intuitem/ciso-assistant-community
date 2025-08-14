@@ -393,7 +393,8 @@ export const FeatureFlagsSchema = z.object({
 	ebiosrm: z.boolean().optional(),
 	privacy: z.boolean().optional(),
 	experimental: z.boolean().optional(),
-	inherent_risk: z.boolean().optional()
+	inherent_risk: z.boolean().optional(),
+	publish: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

@@ -71,12 +71,12 @@
 {/if}
 
 <form method="POST" use:enhance {...rest}>
-	{#if $errors._errors}
+	{#if $errors?._errors}
 		{#each $errors._errors as error}
 			<p class="text-error-500 text-sm font-medium">{error}</p>
 		{/each}
 	{/if}
-	{#if $errors.non_field_errors}
+	{#if $errors?.non_field_errors}
 		<p class="text-error-500 text-sm font-medium">{$errors.non_field_errors}</p>
 	{/if}
 	{@render children?.({
