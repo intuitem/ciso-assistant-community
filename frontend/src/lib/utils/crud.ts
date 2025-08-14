@@ -293,7 +293,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
-			{ field: 'task_templates', urlModel: 'task-templates' },
+			{ field: 'applied_controls', urlModel: 'task-templates' },
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
