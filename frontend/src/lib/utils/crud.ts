@@ -277,6 +277,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' },
 			{ field: 'progress_field' },
+			{ field: 'observation' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -423,6 +424,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'reference_control',
+				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]

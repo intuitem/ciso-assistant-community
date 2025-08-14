@@ -86,6 +86,7 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await expect(page.locator('#page-title')).toHaveText('Minor->Major');
 
 		await page.getByTestId('edit-button').click();
+		// await page.getByTestId(`markdown-edit-btn-${field}`).click();
 		await page
 			.getByTestId('form-input-observation')
 			.fill('This is an observation: I love mango juice but I prefer orange juice');
