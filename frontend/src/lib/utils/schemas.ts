@@ -622,7 +622,8 @@ export const personalDataSchema = z.object({
 	retention: z.string(),
 	deletion_policy: z.string(),
 	is_sensitive: z.boolean().optional(),
-	processing: z.string()
+	processing: z.string(),
+	assets: z.array(z.string()).optional().default([])
 });
 
 export const ebiosRMSchema = z.object({
