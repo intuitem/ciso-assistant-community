@@ -543,42 +543,39 @@
 				>
 			{/if}
 			<span class="pt-4 text-sm font-semibold">{m.powerUps()}</span>
-			<div class="grid grid-cols-2 gap-3 max-w-sm">
+			<div class="grid grid-cols-3 gap-3 w-full max-w-sm">
 				{#if !page.data.user.is_third_party}
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-16 flex flex-col items-center justify-center p-2"
+						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 aspect-square flex items-center justify-center"
 						title={m.flashMode()}
 					>
-						<i class="fa-solid fa-bolt text-xl mb-1"></i>
-						<span class="text-xs font-medium">Flash</span>
+						<i class="fa-solid fa-bolt text-lg"></i>
 					</Anchor>
 				{/if}
 
 				<Anchor
 					breadcrumbAction="push"
 					href={`${page.url.pathname}/table-mode`}
-					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-16 flex flex-col items-center justify-center p-2"
+					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 aspect-square flex items-center justify-center"
 					title={m.tableMode()}
 				>
-					<i class="fa-solid fa-table-list text-xl mb-1"></i>
-					<span class="text-xs font-medium">Table</span>
+					<i class="fa-solid fa-table-list text-lg"></i>
 				</Anchor>
 
 				{#if !page.data.user.is_third_party}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-16 flex flex-col items-center justify-center p-2"
+						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 aspect-square flex items-center justify-center"
 						onclick={() => modalCreateForm()}
 						title={m.applyMapping()}
 					>
-						<i class="fa-solid fa-diagram-project text-xl mb-1"></i>
-						<span class="text-xs font-medium">Mapping</span>
+						<i class="fa-solid fa-diagram-project text-lg"></i>
 					</button>
 				{/if}
 
 				<button
-					class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-16 flex flex-col items-center justify-center p-2"
+					class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 aspect-square flex items-center justify-center"
 					onclick={async () => {
 						await modalConfirmSyncToActions(
 							data.compliance_assessment.id,
@@ -592,18 +589,17 @@
 						<ProgressRing
 							strokeWidth="16px"
 							meterStroke="stroke-white"
-							size="size-6"
-							classes="mb-1"
+							size="size-5"
+							classes=""
 						/>
 					{:else}
-						<i class="fa-solid fa-arrows-rotate text-xl mb-1"></i>
+						<i class="fa-solid fa-arrows-rotate text-lg"></i>
 					{/if}
-					<span class="text-xs font-medium">Sync</span>
-				</button>
+									</button>
 
 				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-16 flex flex-col items-center justify-center p-2"
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 aspect-square flex items-center justify-center"
 						onclick={() => {
 							modalConfirmCreateSuggestedControls(
 								data.compliance_assessment.id,
@@ -617,24 +613,22 @@
 							<ProgressRing
 								strokeWidth="16px"
 								meterStroke="stroke-white"
-								classes="mb-1"
-								size="size-6"
+								classes=""
+								size="size-5"
 							/>
 						{:else}
-							<i class="fa-solid fa-wand-magic-sparkles text-xl mb-1"></i>
+							<i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
 						{/if}
-						<span class="text-xs font-medium">Suggest</span>
-					</button>
+											</button>
 				{/if}
 
 				{#if has_threats}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-16 flex flex-col items-center justify-center p-2 relative"
+						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 aspect-square flex items-center justify-center relative"
 						onclick={openThreatsDialog}
 						title={m.potentialThreats()}
 					>
-						<i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i>
-						<span class="text-xs font-medium">Threats</span>
+						<i class="fa-solid fa-triangle-exclamation text-lg"></i>
 						<span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
 							{data.threats.total_unique_threats}
 						</span>
