@@ -698,7 +698,7 @@
 	"sourceFramework": "Référentiel source",
 	"targetFramework": "Référentiel cible",
 	"baseline": "Référence de base",
-	"createAuditFromBaseline": "Créer un audit à partir d'une base",
+	"createAuditFromBaseline": "Mapper ou cloner un audit",
 	"coverageColon": "Couverture :",
 	"full": "Complète",
 	"partial": "Partielle",

@@ -726,7 +726,7 @@
 	"sourceFramework": "Source framework",
 	"targetFramework": "Target framework",
 	"baseline": "Baseline",
-	"createAuditFromBaseline": "Create audit from baseline",
+	"createAuditFromBaseline": "Map or clone an audit",
 	"coverageColon": "Coverage:",
 	"full": "Full",
 	"partial": "Partial",
