@@ -4373,7 +4373,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
     ]
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):
         qs = super().get_queryset()
