@@ -29,7 +29,8 @@
 		hungarian: m.hungarian(),
 		ukrainian: m.ukrainian(),
 		greek: m.greek(),
-		turkish: m.turkish()
+		turkish: m.turkish(),
+		croatian: m.croatian()
 	};
 
 	const modalStore = getModalStore();
@@ -54,7 +55,8 @@
 		hu: 'Magyar',
 		uk: 'Українська',
 		el: 'Ελληνικά',
-		tr: 'Türkçe'
+		tr: 'Türkçe',
+		hr: 'Hrvatski'
 	};
 
 	let value = $state(getLocale());
