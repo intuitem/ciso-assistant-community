@@ -69,11 +69,12 @@
   * [Translating the interface](contributing/internationalization/translating-the-interface.md)
 * [Submit a library](contributing/submit-a-library-framework.md)
 
-## Academy
+## CA Journeys
 
-* [Overview](academy/overview.md)
-* [Third Parties Risk Management](academy/third-parties-risk-management.md)
-* [Etude EBIOS RM](academy/etude-ebios-rm.md)
+* [00 - initial setup](ca-journeys/00-initial-setup.md)
+* [Overview](ca-journeys/overview.md)
+* [Third Parties Risk Management](ca-journeys/third-parties-risk-management.md)
+* [Etude EBIOS RM](ca-journeys/etude-ebios-rm.md)
 
 ## Integration
 
