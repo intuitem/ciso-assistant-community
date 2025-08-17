@@ -1807,3 +1807,86 @@ If a non-empty list of frameworks is set for TPRM scope, an entity assessment is
 If a non-empty list of frameworks is set for internal scope, a compliance assessment is generated for each (framework, perimeter) couple. Frameworks can be added or removed at any time. If a framework is removed, the corresponding assessments are either deleted or detached, as decided by the user. A detached assessment cannot be reattached.
 
 If a matrix is set for a campaign, a risk analysis is generated for each perimeter. This can be added or removed at any time. If a matrix is removed, the corresponding risk assessments are either deleted or detached, as decided by the user. A detached risk assessment cannot be reattached.
+
+## Quantitative Risk Analysis
+
+```mermaid
+erDiagram
+
+ROOT_FOLDER_OR_DOMAIN ||--o{ QUANT_STUDY           : contains
+QUANT_STUDY           ||--o{ QUANT_SCENARIO        : contains
+QUANT_STUDY           ||--o{ QUANT_HYPOTHESIS      : contains
+QUANT_STUDY           ||--o{ QUANT_AGGREGATION     : contains
+QUANT_SCENARIO        }o--o{ ASSET                 : concerns
+QUANT_SCENARIO        }o--o{ THREAT                : concerns
+QUANT_SCENARIO        }o--o{ VULNERABILITY         : concerns
+QUANT_SCENARIO        }o--o{ QUALIFICATION         : concerns
+QUANT_HYPOTHESIS      }o--|| QUANT_SCENARIO        : applies_to
+QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : removes
+QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : adds
+QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : already_contains
+QUANT_HYPOTHESIS      }o--o{ LABEL                 : contains
+QUANT_AGGREGATION     }o--o{ QUANT_HYPOTHESIS      : contains
+
+QUANT_STUDY {
+    string      ref_id
+    string      name
+    string      description
+
+    date        eta
+    date        due_date
+    string      status
+    principal[] author
+    principal[] reviewer
+    string      observation
+}
+
+QUANT_SCENARIO {
+    string      ref_id
+    string      name
+    string      description
+}
+
+QUANT_HYPOTHESIS {
+    string      ref_id
+    string      name
+    string      description
+    json        estimated_parameters
+    string      justification
+    json        simulation_data
+}
+
+QUANT_AGGREGATION {
+    string      ref_id
+    string      name
+    string      description
+    json        simulation_data
+}
+
+```
+
+### Approach for basic Cybersecurity Risk Quantification
+
+1. Define a study to establish the context, selecting the relevant assets.
+2. Identify risk scenarios relevant for the context, e.g. by decomposing by asset and by qualfification (CIA).
+3. For each risk scenario, explore one or several hypotheses corresponding to various applied control setups (removing, highlighting, adding applied controls), and provide estimation of probability and 90% confidence interval for impact.
+4. For each hypothesis, a Loss Exceedence Curve is calculated dynamically (Monte Carlo).
+5. Define relavant aggregations of compatible hypotheses, and simulate them (Monte Carlo) to get the corresponding LEC.
+6. All the LEC generated for the study are available in a reporting section.
+
+The json field `estimated_parameters` contains:
+- the reference period as a drop-down value (hour/day/week/month/year)
+- the reference period in seconds (for calculations)
+- the probability expressed either as:
+  - a decimal number between 0 and 1
+  - a frequency in the form X per Y, with X a decimal number and Y = hour/day/week/month/year
+  - a proportion in the form X in Y, with X and Y integers
+- the impact expressed as:
+  - the reference distribution (LOGNORMAL for the moment)
+  - the LB value for the 90% CI
+  - the UB value for the 90% CI
+
+The json field `simulation_data` contains the MC simulation parameters, and the LEC points.
+
+An aggregation can only be simulated if it contains compatible hypotheses. Two hypotheses are compatible if and only if the don't contain any control that is added in one and removed from the other.
+
