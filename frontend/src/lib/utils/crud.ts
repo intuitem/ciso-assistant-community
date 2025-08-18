@@ -277,6 +277,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' },
 			{ field: 'progress_field' },
+			{ field: 'observation' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -293,6 +294,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
+			{ field: 'applied_controls', urlModel: 'task-templates' },
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
@@ -449,7 +451,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'assets', urlModel: 'vulnerabilities' },
-			{ field: 'assets', urlModel: 'solutions' }
+			{ field: 'assets', urlModel: 'solutions' },
+			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -863,9 +866,28 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'personal data',
 		verboseNamePlural: 'personal data',
 		foreignKeyFields: [
-			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }
+			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
+			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
 		],
-		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }]
+		reverseForeignKeyFields: [
+			{ field: 'personal_data', urlModel: 'assets', disableCreate: true, disableDelete: true }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'category' },
+			{ field: 'retention' },
+			{ field: 'deletion_policy' },
+			{ field: 'is_sensitive' },
+			{ field: 'processing' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
+		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }],
+		filters: [{ field: 'processing' }, { field: 'category' }, { field: 'assets' }]
 	},
 	'data-subjects': {
 		endpointUrl: 'privacy/data-subjects',

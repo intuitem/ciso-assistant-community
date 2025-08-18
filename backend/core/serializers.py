@@ -367,6 +367,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
+    personal_data = FieldsRelatedField(many=True)
 
     asset_class = FieldsRelatedField(["name"])
 
