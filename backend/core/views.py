@@ -556,6 +556,7 @@ class AssetFilter(GenericFilterSet):
             "applied_controls",
             "filtering_labels",
             "asset_class",
+            "personal_data",
         ]
 
 
@@ -4372,7 +4373,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
     ]
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -5828,7 +5829,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to", "is_recurrent", "folder"]
+    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
