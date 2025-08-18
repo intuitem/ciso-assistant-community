@@ -12,7 +12,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
 
-type FormAction = 'create' | 'edit';
+type FormAction = 'create' | 'edit' | 'publish';
 
 function getHTTPMethod({
 	action,
@@ -22,6 +22,7 @@ function getHTTPMethod({
 	fileFields: Record<string, File>;
 }) {
 	if (action === 'create') return 'POST';
+	else if (action === 'publish') return 'PATCH';
 	return Object.keys(fileFields).length > 0 ? 'PATCH' : 'PUT';
 }
 
@@ -31,8 +32,11 @@ function getSuccessMessage({ action, urlModel }: { action: FormAction; urlModel:
 		return m.successfullyCreatedObject({
 			object: safeTranslate(modelVerboseName).toLowerCase()
 		});
-	}
-	if (action === 'edit') {
+	} else if (action === 'edit') {
+		return m.successfullyUpdatedObject({
+			object: safeTranslate(modelVerboseName).toLowerCase()
+		});
+	} else if (action === 'publish') {
 		return m.successfullyUpdatedObject({
 			object: safeTranslate(modelVerboseName).toLowerCase()
 		});
@@ -93,20 +97,24 @@ export async function defaultWriteFormAction({
 	urlModel,
 	action,
 	doRedirect = true,
-	redirectToWrittenObject = false
+	redirectToWrittenObject = false,
+	httpMethod = undefined,
+	schema
 }: {
 	event: RequestEvent;
 	urlModel: string;
 	action: FormAction;
 	doRedirect?: boolean;
 	redirectToWrittenObject?: boolean;
+	httpMethod?: 'PUT' | 'PATCH' | undefined;
+	schema?: Record<string, any> | undefined;
 }) {
 	const formData = await event.request.formData();
 	if (!formData) {
 		return fail(400, { form: null });
 	}
 
-	const schema = modelSchema(urlModel!);
+	schema = schema || modelSchema(urlModel!);
 	const form = await superValidate(formData, zod(schema));
 
 	if (!form.valid) {
@@ -126,7 +134,7 @@ export async function defaultWriteFormAction({
 	});
 
 	const requestInitOptions: RequestInit = {
-		method: getHTTPMethod({ action, fileFields }),
+		method: httpMethod || getHTTPMethod({ action, fileFields }),
 		body: JSON.stringify(form.data)
 	};
 
