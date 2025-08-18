@@ -1768,5 +1768,7 @@
 	"markdownHelpText": "Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.",
 	"markdownCTA": "Double-click to add content...",
 	"publish": "Publish",
-	"unpublish": "Unpublish"
+	"unpublish": "Unpublish",
+	"publishConfirmMessage": "Are you sure you want to publish this object? Once published, it will be visible to all users with read permission on {object_type} in the {folder} domain's sub-domains.",
+	"unpublishConfirmMessage": "Are you sure you want to unpublish this object? Once unpublished, it will no longer be visible to users with read permission on {object_type} in the {folder} domain's sub-domains."
 }

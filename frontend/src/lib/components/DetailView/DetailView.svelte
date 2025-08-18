@@ -212,8 +212,16 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.confirmModalTitle(),
-			body: `${m.confirmModalMessage()}: ${name}?`
+			title: data.data.is_published ? m.unpublish() : m.publish(),
+			body: data.data.is_published
+				? m.unpublishConfirmMessage({
+						object_type: safeTranslate(data.model.localNamePlural).toLowerCase(),
+						folder: data.data?.folder?.str
+					})
+				: m.publishConfirmMessage({
+						object_type: safeTranslate(data.model.localNamePlural).toLowerCase(),
+						folder: data.data?.folder?.str
+					})
 		};
 		modalStore.trigger(modal);
 	}
