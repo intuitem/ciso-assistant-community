@@ -217,6 +217,7 @@
 								return obj.str;
 							})
 						: [];
+				path.pop(); // remove first level folder 'global'
 
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
@@ -410,6 +411,7 @@
 		{:else if $value}
 			<input type="hidden" name={field} value={$value} />
 		{/if}
+
 		<MultiSelect
 			bind:selected
 			{options}
