@@ -367,6 +367,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
+    personal_data = FieldsRelatedField(many=True)
 
     asset_class = FieldsRelatedField(["name"])
 
@@ -817,6 +818,7 @@ class UserReadSerializer(BaseModelSerializer):
             "user_groups",
             "keep_local_login",
             "is_third_party",
+            "observation",
         ]
 
 
@@ -836,6 +838,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "is_local",
+            "observation",
         ]
 
     def validate_email(self, email):
@@ -1232,6 +1235,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)

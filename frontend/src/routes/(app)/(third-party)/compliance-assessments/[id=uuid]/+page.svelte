@@ -37,6 +37,7 @@
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -413,6 +414,8 @@
 									{:else}
 										{value.str}
 									{/if}
+								{:else if key === 'description'}
+									<MarkdownRenderer content={value} />
 								{:else}
 									{safeTranslate(value.str ?? value)}
 								{/if}
