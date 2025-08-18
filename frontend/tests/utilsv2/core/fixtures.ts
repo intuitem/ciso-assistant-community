@@ -1,5 +1,6 @@
 import type { Page as _Page } from '@playwright/test';
 import { LoginPage } from '../derived/login-page';
+import { AuditLogPage } from '../derived/audit-log-page';
 
 export interface Fixtures extends AllFixtures {
 	page: _Page;
@@ -10,6 +11,7 @@ export interface Fixtures extends AllFixtures {
 export interface AllFixtures {
 	page: _Page;
 	loginPage: LoginPage;
+	auditLogPage: AuditLogPage;
 }
 
 type FixtureType = {
@@ -21,11 +23,16 @@ export const fixtures: FixtureType = {
 		const fixture = new LoginPage(page);
 		await use(fixture);
 	},
+	auditLogPage: async ({ page }, use) => {
+		const fixture = new AuditLogPage(page);
+		await use(fixture);
+	},
 
-	allFixtures: async ({ page, loginPage }, use) => {
+	allFixtures: async ({ page, loginPage, auditLogPage }, use) => {
 		use({
 			page,
-			loginPage
+			loginPage,
+			auditLogPage
 		});
 	}
 };
