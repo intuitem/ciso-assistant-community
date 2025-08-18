@@ -42,7 +42,9 @@ export class FolderCreateForm extends ModelForm {
 	async doFillForm(expect: Expect, data: FolderData) {
 		await this._nameInput.fill(data.name);
 
-		await this._descriptionMarkdownCTA.dblclick();
+		if (await this._descriptionMarkdownCTA.isVisible()) {
+			await this._descriptionMarkdownCTA.dblclick();
+		}
 		expect(this._descriptionInput).toBeVisible();
 		await this._descriptionInput.fill(data.description ?? '');
 
