@@ -171,6 +171,7 @@
 				role="button"
 				tabindex="0"
 				style="cursor: {disabled ? 'default' : 'text'}"
+				data-testid="dyn-form-markdown-cta-{field.replaceAll('_', '-')}-elem"
 				onkeydown={(e) => {
 					if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
 						e.preventDefault();

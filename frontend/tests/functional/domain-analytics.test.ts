@@ -57,7 +57,7 @@ testV2('domain-analytics test', async ({ page }) => {
 		for (const folder of TEST_DATA) {
 			const createModal = await listView.getOpenCreateModal();
 			const createForm = await createModal.getForm();
-			await createForm.doFillForm(folder);
+			await createForm.doFillForm(expectV2, folder);
 			await createForm.doSubmit();
 		}
 	});

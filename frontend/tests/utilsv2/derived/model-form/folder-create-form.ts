@@ -1,5 +1,5 @@
 import { ModelForm } from '../../base/model-form';
-import type { Locator } from '@playwright/test';
+import type { Locator, Expect } from '@playwright/test';
 import type { Element } from '../../core/element';
 
 // The AutoCompleteSelect should be later handled by a class instead of a single function like this.
@@ -27,18 +27,23 @@ interface FolderData {
 
 export class FolderCreateForm extends ModelForm {
 	private _nameInput: Locator;
+	private _descriptionMarkdownCTA: Locator;
 	private _descriptionInput: Locator;
 	private _parentDomainInput: Locator;
 
 	constructor(...args: Element.Args) {
 		super(...args);
 		this._nameInput = this._self.getByTestId('form-input-name');
+		this._descriptionMarkdownCTA = this._self.getByTestId('dyn-form-markdown-cta-description-elem');
 		this._descriptionInput = this._self.getByTestId('form-input-description');
 		this._parentDomainInput = this._self.getByTestId('form-input-parent-folder');
 	}
 
-	async doFillForm(data: FolderData) {
+	async doFillForm(expect: Expect, data: FolderData) {
 		await this._nameInput.fill(data.name);
+
+		await this._descriptionMarkdownCTA.dblclick();
+		expect(this._descriptionInput).toBeVisible();
 		await this._descriptionInput.fill(data.description ?? '');
 
 		if (data.parentDomain) {
