@@ -17,6 +17,9 @@ async function exportPdfAndVerify(page: Page, pdfButton: Locator) {
 
 	await test.step('verify file is PDF and has content', async () => {
 		expect(fileName.endsWith('.pdf')).toBeTruthy();
+		const failure = await download.failure();
+		expect(failure).toBeNull();
+
 		const stream = await download.createReadStream();
 		if (!stream) {
 			throw new Error('Failed to obtain download stream');
@@ -28,6 +31,10 @@ async function exportPdfAndVerify(page: Page, pdfButton: Locator) {
 		}
 		const buffer = Buffer.concat(chunks);
 		expect(buffer.length).toBeGreaterThan(0);
+
+		// Basic PDF magic header check
+		const header = buffer.subarray(0, 5).toString('ascii');
+		expect(header).toBe('%PDF-');
 	});
 }
 
@@ -82,7 +89,7 @@ test('pdf export works properly for compliance assessments', async ({
 
 	await test.step('test pdf export on compliance assessment', async () => {
 		await page.getByTestId('export-button').click();
-		await exportPdfAndVerify(page, page.getByText('PDF'));
+		await exportPdfAndVerify(page, page.getByRole('link', { name: /pdf/i }));
 	});
 });
 
@@ -103,10 +110,12 @@ test('pdf export works properly for risk assessment', async ({
 
 	await test.step('test risk assessment export as pdf', async () => {
 		await page.getByTestId('export-button').click(); // this will be necessary only one time,since it will stay open
-		await exportPdfAndVerify(page, page.getByText('PDF').first());
+		const pdfLinks = page.getByRole('link', { name: /pdf/i });
+		await exportPdfAndVerify(page, pdfLinks.first());
 	});
 	await test.step('test action plan export as pdf', async () => {
-		await exportPdfAndVerify(page, page.getByText('PDF').last());
+		const pdfLinks = page.getByRole('link', { name: /pdf/i });
+		await exportPdfAndVerify(page, pdfLinks.last());
 	});
 });
 
@@ -130,5 +139,6 @@ test.afterAll('cleanup', async ({ browser }) => {
 	await deleteFolder(foldersPage, vars.folderName + FOLDER_WORKAROUND_SUFFIX);
 
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
+	await expect(foldersPage.getRow(vars.folderName + FOLDER_WORKAROUND_SUFFIX)).not.toBeVisible();
 	await page.close();
 });
