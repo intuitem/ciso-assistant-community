@@ -1,9 +1,14 @@
-import { test as testV2, expect as expectV2 } from '../utilsv2/core/base';
+import {
+	enterpriseTest as enterpriseTestV2,
+	test as testV2,
+	expect as expectV2
+} from '../utilsv2/core/base';
 
 import { LoginPage } from '../utilsv2/derived/login-page';
 import { FolderListViewPage } from '../utilsv2/derived/list-view';
 import { DomainAnalyticsPage } from '../utilsv2/derived/domain-analytics-page';
 import { DomainAnalyticsTreeViewNode } from '../utilsv2/derived/domain-analytics-treeview';
+import { isEnterpriseMode } from '../utilsv2/core/utils';
 
 const TEST_DATA = [
 	{ name: 'Domain 1' },
@@ -44,7 +49,7 @@ async function checkDomainTree(nodes: DomainAnalyticsTreeViewNode[], domainTree:
 	}
 }
 
-testV2('domain-analytics test', async ({ page }) => {
+enterpriseTestV2('domain-analytics test', async ({ page }) => {
 	const loginPage = new LoginPage(page);
 	await loginPage.gotoSelf();
 	const analyticsPage = await loginPage.doLoginAdminP();
