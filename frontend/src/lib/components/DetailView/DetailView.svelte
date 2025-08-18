@@ -33,6 +33,7 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+	import BaseModal from '../Modals/BaseModal.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -200,6 +201,23 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalPublishUnpublish(): void {
+		const modalComponent: ModalComponent = {
+			ref: BaseModal,
+			props: {
+				children: publishUnpublishModal
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -246,6 +264,32 @@
 		});
 	};
 </script>
+
+{#snippet publishUnpublishModal()}
+	<SuperForm {_form} action="?/publish" validators={z.object({ is_published: z.boolean() })}>
+		{#if data.data.is_published === true}
+			<input type="hidden" name="is_published" value={false} />
+			<button
+				class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+				data-testid="unpublish-button"
+				type="submit"
+			>
+				<i class="fa-solid fa-lock mr-2"></i>
+				{m.unpublish()}</button
+			>
+		{:else}
+			<input type="hidden" name="is_published" value={true} />
+			<button
+				class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+				data-testid="publish-button"
+				type="submit"
+			>
+				<i class="fa-solid fa-globe mr-2"></i>
+				{m.publish()}</button
+			>
+		{/if}
+	</SuperForm>
+{/snippet}
 
 <div class="flex flex-col space-y-2">
 	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
@@ -545,29 +589,27 @@
 				{/if}
 			{/if}
 			{#if page?.data?.featureflags?.publish}
-				<SuperForm {_form} action="?/publish" validators={z.object({ is_published: z.boolean() })}>
-					{#if data.data.is_published === true}
-						<input type="hidden" name="is_published" value={false} />
-						<button
-							class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-							data-testid="unpublish-button"
-							type="submit"
-						>
-							<i class="fa-solid fa-lock mr-2"></i>
-							{m.unpublish()}</button
-						>
-					{:else}
-						<input type="hidden" name="is_published" value={true} />
-						<button
-							class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-							data-testid="publish-button"
-							type="submit"
-						>
-							<i class="fa-solid fa-globe mr-2"></i>
-							{m.publish()}</button
-						>
-					{/if}
-				</SuperForm>
+				{#if data.data.is_published === true}
+					<input type="hidden" name="is_published" value={false} />
+					<button
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						data-testid="unpublish-button"
+						onclick={modalPublishUnpublish}
+					>
+						<i class="fa-solid fa-lock mr-2"></i>
+						{m.unpublish()}</button
+					>
+				{:else}
+					<input type="hidden" name="is_published" value={true} />
+					<button
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						data-testid="publish-button"
+						onclick={modalPublishUnpublish}
+					>
+						<i class="fa-solid fa-globe mr-2"></i>
+						{m.publish()}</button
+					>
+				{/if}
 			{/if}
 			{@render actions?.()}
 		</div>
