@@ -138,7 +138,7 @@
 			<div class="flex space-x-2">
 				<button
 					type="button"
-					data-testid="markdown-edit-btn"
+					data-testid="markdown-edit-btn-{field}"
 					class="btn btn-sm {!showPreview ? 'variant-filled-primary' : 'variant-soft'}"
 					onclick={() => (showPreview = false)}
 				>
@@ -170,7 +170,7 @@
 				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"
-				style="cursor: {disabled ? 'default' : 'text'}"
+				style="cursor: {disabled ? 'default' : 'text'}; min-width: {cols}ch;"
 				data-testid="dyn-form-markdown-cta-{field.replaceAll('_', '-')}-elem"
 				onkeydown={(e) => {
 					if ((e.key === 'Enter' || e.key === ' ') && !disabled) {

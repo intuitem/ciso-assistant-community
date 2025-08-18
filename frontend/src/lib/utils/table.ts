@@ -1162,24 +1162,8 @@ export const listViewFields = {
 		}
 	},
 	'personal-data': {
-		head: [
-			'processing',
-			'name',
-			'description',
-			'category',
-			'isSensitive',
-			'retention',
-			'deletionPolicy'
-		],
-		body: [
-			'processing',
-			'name',
-			'description',
-			'category',
-			'is_sensitive',
-			'retention',
-			'deletion_policy'
-		],
+		head: ['processing', 'name', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
+		body: ['processing', 'name', 'category', 'is_sensitive', 'retention', 'deletion_policy'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER
@@ -1315,8 +1299,8 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings', 'perimeter'],
-		body: ['ref_id', 'name', 'description', 'category', 'evidences', 'findings_count', 'perimeter'],
+		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter'],
+		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1390,7 +1374,6 @@ export const listViewFields = {
 	'task-templates': {
 		head: [
 			'name',
-			'description',
 			'is_recurrent',
 			'assigned_to',
 			'lastOccurrenceStatus',
@@ -1399,7 +1382,6 @@ export const listViewFields = {
 		],
 		body: [
 			'name',
-			'description',
 			'is_recurrent',
 			'assigned_to',
 			'last_occurrence_status',

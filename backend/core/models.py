@@ -1803,6 +1803,7 @@ class Asset(
         "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -2725,6 +2726,7 @@ class AppliedControl(
         related_name="applied_controls",
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -4792,6 +4794,8 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         verbose_name=_("Evidences"),
     )
 
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
     class Meta:
         verbose_name = _("Finding")
         verbose_name_plural = _("Findings")
@@ -5014,6 +5018,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         blank=True,
         help_text="Finding assessments related to the task",
         related_name="task_templates",
+    )
+
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
+        verbose_name=_("Link"),
     )
 
     @property

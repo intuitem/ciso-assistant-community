@@ -181,7 +181,8 @@ export const AppliedControlSchema = z.object({
 	stakeholders: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0),
 	filtering_labels: z.string().optional().array().optional(),
-	findings: z.string().uuid().optional().array().optional()
+	findings: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -253,7 +254,8 @@ export const AssetSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	ref_id: z.string().max(100).optional()
+	ref_id: z.string().max(100).optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -620,7 +622,8 @@ export const personalDataSchema = z.object({
 	retention: z.string(),
 	deletion_policy: z.string(),
 	is_sensitive: z.boolean().optional(),
-	processing: z.string()
+	processing: z.string(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const ebiosRMSchema = z.object({
@@ -738,7 +741,8 @@ export const FindingSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	observation: z.string().optional().nullable()
 });
 
 export const FindingsAssessmentSchema = z.object({
@@ -817,7 +821,7 @@ export const TaskTemplateSchema = z.object({
 	is_recurrent: z.boolean().optional(),
 	enabled: z.boolean().default(true).optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	applied_controls: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
@@ -835,6 +839,12 @@ export const TaskTemplateSchema = z.object({
 		.default({
 			interval: 1,
 			frequency: 'DAILY'
+		})
+		.optional(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: 'Invalid URL format'
 		})
 		.optional()
 });
