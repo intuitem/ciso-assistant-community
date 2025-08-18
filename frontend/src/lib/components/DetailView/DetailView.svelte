@@ -266,29 +266,37 @@
 </script>
 
 {#snippet publishUnpublishModal()}
-	<SuperForm {_form} action="?/publish" validators={z.object({ is_published: z.boolean() })}>
-		{#if data.data.is_published === true}
-			<input type="hidden" name="is_published" value={false} />
-			<button
-				class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-				data-testid="unpublish-button"
-				type="submit"
-			>
-				<i class="fa-solid fa-lock mr-2"></i>
-				{m.unpublish()}</button
-			>
-		{:else}
-			<input type="hidden" name="is_published" value={true} />
-			<button
-				class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-				data-testid="publish-button"
-				type="submit"
-			>
-				<i class="fa-solid fa-globe mr-2"></i>
-				{m.publish()}</button
-			>
-		{/if}
-	</SuperForm>
+	<div class="flex w-full justify-end gap-2">
+		<button
+			class="btn bg-gray-400 text-white"
+			data-testid="cancel-button"
+			type="button"
+			onclick={() => modalStore.close()}>{m.cancel()}</button
+		>
+		<SuperForm {_form} action="?/publish" validators={z.object({ is_published: z.boolean() })}>
+			{#if data.data.is_published === true}
+				<input type="hidden" name="is_published" value={false} />
+				<button
+					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					data-testid="unpublish-button"
+					type="submit"
+				>
+					<i class="fa-solid fa-lock mr-2"></i>
+					{m.unpublish()}</button
+				>
+			{:else}
+				<input type="hidden" name="is_published" value={true} />
+				<button
+					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					data-testid="publish-button"
+					type="submit"
+				>
+					<i class="fa-solid fa-globe mr-2"></i>
+					{m.publish()}</button
+				>
+			{/if}
+		</SuperForm>
+	</div>
 {/snippet}
 
 <div class="flex flex-col space-y-2">
@@ -590,7 +598,6 @@
 			{/if}
 			{#if page?.data?.featureflags?.publish}
 				{#if data.data.is_published === true}
-					<input type="hidden" name="is_published" value={false} />
 					<button
 						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
 						data-testid="unpublish-button"
@@ -600,7 +607,6 @@
 						{m.unpublish()}</button
 					>
 				{:else}
-					<input type="hidden" name="is_published" value={true} />
 					<button
 						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
 						data-testid="publish-button"
