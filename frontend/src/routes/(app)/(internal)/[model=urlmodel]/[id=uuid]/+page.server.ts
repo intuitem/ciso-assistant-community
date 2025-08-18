@@ -60,7 +60,6 @@ export const actions: Actions = {
 		return nestedDeleteFormAction({ event });
 	},
 	publish: async (event) => {
-		console.log('publish');
 		return defaultWriteFormAction({
 			event,
 			urlModel: event.params.model!,
