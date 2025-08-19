@@ -2819,7 +2819,7 @@ class AppliedControl(
         return max(-1, days_remaining)
 
 
-class Issue(
+class OrganisationIssue(
     NameDescriptionMixin,
     FolderMixin,
     PublishInRootFolderMixin,
@@ -2836,18 +2836,28 @@ class Issue(
         )
         ENVIRONMENTAL = "environmental", "Environmental"
 
+    class Origin(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        INTERNAL = "internal", "Internal"
+        EXTERNAL = "external", "External"
+
     category = models.CharField(
         verbose_name=_("Category"),
         choices=Category.choices,
         max_length=32,
         default=Category.UNDEFINED,
     )
+    origin = models.CharField(
+        verbose_name=_("Origin"),
+        choices=Origin.choices,
+        max_length=32,
+        default=Origin.UNDEFINED,
+    )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     assets = models.ManyToManyField(
         Asset,
         blank=True,
         verbose_name="asset",
-        related_name="assets",
     )
     fields_to_check = ["name"]
 
@@ -2856,17 +2866,22 @@ class Issue(
         verbose_name_plural = _("Issues")
 
 
-class Objective(
+class OrganisationObjective(
     NameDescriptionMixin,
     FolderMixin,
     PublishInRootFolderMixin,
 ):
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     issues = models.ManyToManyField(
-        Issue,
+        OrganisationIssue,
         blank=True,
         verbose_name="issues",
         related_name="issues",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
     )
     tasks = models.ManyToManyField(
         "TaskTemplate",

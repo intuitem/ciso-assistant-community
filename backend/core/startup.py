@@ -775,6 +775,16 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_campaign",
     "change_campaign",
     "delete_campaign",
+    # objectives,
+    "add_organisationobjective",
+    "view_organisationobjective",
+    "change_organisationobjective",
+    "delete_organisationobjective",
+    # issues,
+    "add_organisationissue",
+    "view_organisationissue",
+    "change_organisationissue",
+    "delete_organisationissue",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
