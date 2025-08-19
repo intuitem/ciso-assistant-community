@@ -12,11 +12,11 @@ export class ModelTable extends Element {
 	/**
 	 * Gets a specific row from the table
 	 * @param index The row index to retrieve
-	 * @returns The row element
+	 * @returns The row element at index (first row by default)
 	 * @todo Implement this method
 	 */
-	getRow(index?: number) {
-		// TODO: Implement row retrieval logic
-		throw new Error('Method not implemented');
+	async getRow(index?: number) {
+		const rows = await this._self.getByTestId('modeltable-body-row-elem').all();
+		return rows.at(index ?? 0);
 	}
 }
