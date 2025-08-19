@@ -628,10 +628,12 @@ export const personalDataSchema = z.object({
 
 export const organisationObjectiveSchema = z.object({
 	...NameDescriptionMixin,
+	folder: z.string(),
 	assets: z.string().uuid().optional().array().optional()
 });
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
+	folder: z.string(),
 	category: z.string(),
 	origin: z.string(),
 	assets: z.string().uuid().optional().array().optional()
