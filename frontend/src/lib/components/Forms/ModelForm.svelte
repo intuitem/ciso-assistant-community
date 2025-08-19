@@ -56,6 +56,8 @@
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
+  import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
+  import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -350,6 +352,10 @@
 			/>
 		{:else if URLModel === 'campaigns'}
 			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
+		{:else if URLModel === 'organisation-objectives'}
+			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
+		{:else if URLModel === 'organisation-issues'}
+			<OrganisationIssueForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'assets'}
 			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}

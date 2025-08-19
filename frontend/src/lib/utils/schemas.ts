@@ -626,6 +626,16 @@ export const personalDataSchema = z.object({
 	assets: z.string().uuid().optional().array().optional()
 });
 
+export const organisationObjectiveSchema = z.object({
+	...NameDescriptionMixin,
+	assets: z.string().uuid().optional().array().optional()
+});
+export const organisationIssueSchema = z.object({
+	...NameDescriptionMixin,
+	category: z.string(),
+	origin: z.string(),
+	assets: z.string().uuid().optional().array().optional()
+});
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -943,7 +953,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,
 	'operating-modes': OperatingModeSchema,
-	'kill-chains': KillChainSchema
+	'kill-chains': KillChainSchema,
+	'organisation-objectives': organisationObjectiveSchema,
+	'organisation-issues': organisationIssueSchema
 };
 
 export const modelSchema = (model: string) => {

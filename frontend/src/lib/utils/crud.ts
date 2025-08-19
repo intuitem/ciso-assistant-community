@@ -1362,6 +1362,25 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'perimeters' }
 		]
+	},
+	'organisation-objectives': {
+		name: 'organisationObjective',
+		localName: 'organisationObjective',
+		localNamePlural: 'organisationObjectives',
+		verboseName: 'Organisation objective',
+		verboseNamePlural: 'Organisation objectives',
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
+		filters: [{ field: 'folder' }]
+	},
+	'organisation-issues': {
+		name: 'organisationIssue',
+		localName: 'organisationIssue',
+		localNamePlural: 'organisationIssues',
+		verboseName: 'Organisation issue',
+		verboseNamePlural: 'Organisation issues',
+		selectFields: [{ field: 'category' }, { field: 'origin' }],
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
+		filters: [{ field: 'folder' }]
 	}
 };
 
