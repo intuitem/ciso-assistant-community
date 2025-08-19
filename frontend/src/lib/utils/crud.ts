@@ -1364,7 +1364,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'organisation-objectives': {
-		name: 'organisationObjective',
+		name: 'organisationobjective',
 		localName: 'organisationObjective',
 		localNamePlural: 'organisationObjectives',
 		verboseName: 'Organisation objective',
@@ -1373,7 +1373,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'folder' }]
 	},
 	'organisation-issues': {
-		name: 'organisationIssue',
+		name: 'organisationissue',
 		localName: 'organisationIssue',
 		localNamePlural: 'organisationIssues',
 		verboseName: 'Organisation issue',

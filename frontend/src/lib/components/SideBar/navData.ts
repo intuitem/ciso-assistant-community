@@ -169,6 +169,18 @@ export const navData = {
 					permissions: ['view_appliedcontrol']
 				},
 				{
+					name: 'organisationObjectives',
+					fa_icon: 'fa-solid fa-bullseye',
+					href: '/organisation-objectives',
+					permissions: ['view_organisationobjective']
+				},
+				{
+					name: 'organisationIssues',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/organisation-issues',
+					permissions: ['view_organisationissue']
+				},
+				{
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-signature',
 					href: '/risk-acceptances'

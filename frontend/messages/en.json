@@ -1768,8 +1768,9 @@
 	"withinTolerance": "Within tolerance",
 	"markdownHelpText": "Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.",
 	"markdownCTA": "Double-click to add content...",
-	"organisationObjective": "Organisation objective",
-	"organisationObjectives": "Organisation objectives",
-	"organisationIssue": "Organisation issue",
-	"organisationIssues": "Organisation issues"
+	"organisationObjective": "Objective",
+	"organisationObjectives": "Objectives",
+	"organisationIssue": "Issue",
+	"organisationIssues": "Issues",
+	"origin": "origin"
 }

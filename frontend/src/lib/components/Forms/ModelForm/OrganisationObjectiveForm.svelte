@@ -23,3 +23,12 @@
 		initialData = {}
 	}: Props = $props();
 </script>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	hidden={initialData.folder}
+/>

@@ -23,3 +23,30 @@
 		initialData = {}
 	}: Props = $props();
 </script>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	hidden={initialData.folder}
+/>
+<Select
+	{form}
+	options={model.selectOptions['category']}
+	field="category"
+	hide
+	label={m.category()}
+	cacheLock={cacheLocks['category']}
+	bind:cachedValue={formDataCache['category']}
+/>
+<Select
+	{form}
+	options={model.selectOptions['origin']}
+	field="origin"
+	hide
+	label={m.origin()}
+	cacheLock={cacheLocks['origin']}
+	bind:cachedValue={formDataCache['origin']}
+/>
