@@ -8,8 +8,12 @@ export const expect = baseExpect.extend({});
 export const test = base.extend<Fixtures>(fixtures);
 
 /** This must be used to construct the enterprise-only tests, this can't replace the real test object (e.g. enterpriseTest.step doesn't exist). */
-export const enterpriseTest = (...args: any[]) => {
-	if (isEnterpriseMode()) test(...args);
+export const enterpriseTest = (title: string, testFunction: (...args: any[]) => Promise<any>) => {
+	if (isEnterpriseMode()) {
+		test(title, testFunction);
+	} else {
+		test(`${title} (enterprise-only)`, async () => {});
+	}
 };
 
 /**
