@@ -14,6 +14,13 @@
 		value: string | number;
 		suggested?: boolean;
 		translatedLabel?: string;
+		path?: string[];
+		infoString?: {
+			string: string;
+			position: 'suffix' | 'prefix';
+			classes?: string;
+		};
+		contentType?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -59,7 +66,6 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
-		disabled?: boolean;
 		mount?: (value: any) => void;
 	}
 
@@ -217,7 +223,7 @@
 								return obj.str;
 							})
 						: [];
-				path.pop(); // remove first level folder 'global'
+				path.pop(); // remove duplicate last part if it exists
 
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
