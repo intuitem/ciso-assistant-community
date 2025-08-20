@@ -36,7 +36,6 @@
 	{form}
 	options={model.selectOptions['origin']}
 	field="origin"
-	hide
 	label={m.origin()}
 	cacheLock={cacheLocks['origin']}
 	bind:cachedValue={formDataCache['origin']}
@@ -45,7 +44,6 @@
 	{form}
 	options={model.selectOptions['category']}
 	field="category"
-	hide
 	label={m.category()}
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
