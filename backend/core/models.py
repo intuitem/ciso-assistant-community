@@ -2819,6 +2819,122 @@ class AppliedControl(
         return max(-1, days_remaining)
 
 
+class OrganisationIssue(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Category(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        POLITICAL = "political", "Political"
+        ECONOMIC = "economic", "Economic"
+        SOCIAL = "social", "Social"
+        TECHNOLOGY = "technology", "Technology"
+        LEGAL = (
+            "legal",
+            "Legal",
+        )
+        ENVIRONMENTAL = "environmental", "Environmental"
+
+    class Origin(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        INTERNAL = "internal", "Internal"
+        EXTERNAL = "external", "External"
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=Category.choices,
+        max_length=32,
+        default=Category.UNDEFINED,
+        blank=True,
+    )
+    origin = models.CharField(
+        verbose_name=_("Origin"),
+        choices=Origin.choices,
+        max_length=32,
+        default=Origin.UNDEFINED,
+        blank=True,
+    )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Issue")
+        verbose_name_plural = _("Issues")
+
+
+class OrganisationObjective(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        IN_PROGRESS = "in_progress", "In progress"
+        ACHIEVED = "achieved", "Achieved"
+        DEGRADED = "degraded", "Degraded"
+        DEPRECATED = "deprecated", "Deprecated"
+
+    class Health(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        ON_TRACK = "on_track", "On track"
+        AT_RISK = "at_risk", "At risk"
+        OFF_TRACK = "off_track", "Off track"
+
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    issues = models.ManyToManyField(
+        OrganisationIssue,
+        blank=True,
+        verbose_name="issues",
+        related_name="objectives",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    tasks = models.ManyToManyField(
+        "TaskTemplate",
+        blank=True,
+        verbose_name="Issue",
+        related_name="objectives",
+    )
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    health = models.CharField(
+        max_length=100,
+        choices=Health.choices,
+        default=Health.UNDEFINED,
+        verbose_name=_("Health"),
+    )
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Objective")
+        verbose_name_plural = _("Objectives")
+
+
 class PolicyManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(category="policy")

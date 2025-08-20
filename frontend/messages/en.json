@@ -1767,5 +1767,18 @@
 	"riskToleranceHelpText": "Threshold of tolerable risk level",
 	"withinTolerance": "Within tolerance",
 	"markdownHelpText": "Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.",
-	"markdownCTA": "Double-click to add content..."
+	"markdownCTA": "Double-click to add content...",
+	"organisationObjective": "Objective",
+	"organisationObjectives": "Objectives",
+	"addOrganisationObjective": "Add an objective",
+	"addOrganisationIssue": "Add an issue",
+	"organisationIssue": "Issue",
+	"organisationIssues": "Issues (ISO)",
+	"origin": "Origin",
+	"health": "Health",
+	"achieved": "Achieved",
+	"degraded": "Degraded",
+	"onTrack": "On track",
+	"atRisk": "At risk",
+	"offTrack": "Off track"
 }

@@ -12,6 +12,8 @@ type SidebarBackendKeys = {
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
+	organisation_objectives: boolean;
+	organisation_issues: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -28,6 +30,8 @@ type SidebarFrontendKeys = {
 	thirdPartyCategory: boolean;
 	privacy: boolean;
 	experimental: boolean;
+	organisationObjectives: boolean;
+	organisationIssues: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -46,6 +50,8 @@ export function getSidebarVisibleItems(
 		compliance: featureFlags?.compliance ?? false,
 		thirdPartyCategory: featureFlags?.tprm ?? false,
 		privacy: featureFlags?.privacy ?? false,
-		experimental: featureFlags?.experimental ?? false
+		experimental: featureFlags?.experimental ?? false,
+		organisationObjectives: featureFlags?.organisation_objectives ?? false,
+		organisationIssues: featureFlags?.organisation_issues ?? false
 	};
 }
