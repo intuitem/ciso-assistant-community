@@ -6,7 +6,7 @@
 	type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
 	interface Props {
-		log: { changes: Record<string, any> };
+    log: { action: string, changes: Record<string, any>};
 	}
 
 	let { log }: Props = $props();
@@ -46,7 +46,6 @@
 			return false; // Assume not equal if stringify fails
 		}
 	};
-
 	// Calculate the changes, filtering out non-changes
 	const changes: Record<string, ProcessedChange> = Object.entries(log.changes || {}) // Handle case where log.changes might be undefined
 		.reduce(
@@ -57,13 +56,20 @@
 					const afterValue = value[1];
 
 					// Process both the 'before' and 'after' values first
-					const processedBefore = tryParseJsonIfNeeded(beforeValue);
-					const processedAfter = tryParseJsonIfNeeded(afterValue);
+					let processedBefore = tryParseJsonIfNeeded(beforeValue);
+					let processedAfter = tryParseJsonIfNeeded(afterValue);
+
 
 					if (deepCompare(processedBefore, processedAfter)) {
 						// If values are identical after processing, skip this entry
 						return acc;
 					}
+          if (processedBefore === null || processedBefore === ""|| Array.isArray(processedBefore) && Object.keys(processedBefore).length === 0) {
+             processedBefore = "None";
+          }
+          if (processedAfter === null || processedAfter === "" || Array.isArray(processedAfter) && Object.keys(processedAfter).length === 0) {
+            processedAfter = "None";
+          }
 
 					acc[key] = {
 						before: processedBefore,
@@ -107,7 +113,7 @@
 					</span>
 				</div>
 			{:else}
-				<LogEntryChange {field} before={change.before} after={change.after} />
+				<LogEntryChange action={log.action} {field} before={change.before} after={change.after} />
 			{/if}
 		</div>
 	{/each}

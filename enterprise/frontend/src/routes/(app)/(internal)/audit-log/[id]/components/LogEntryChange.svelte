@@ -4,12 +4,13 @@
 	type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
 	interface Props {
+    action: string;
 		field: string;
 		before: ProcessedValue;
 		after: ProcessedValue;
 	}
 
-	let { field, before, after }: Props = $props();
+	let { action, field, before, after }: Props = $props();
 </script>
 
 <div class="px-4 grid grid-cols-6">
@@ -17,14 +18,18 @@
 		{safeTranslate(field)}
 	</dt>
 	<dd class="px-2 text-gray-700 col-span-2 whitespace-pre-line">
+    {#if action === "update" || before !== "None"}
 		<span>
 			{before}
 		</span>
+    {/if}
 	</dd>
-	<i class="fa-solid fa-arrow-right my-auto"></i>
-	<dd class="px-2 text-gray-700 col-span-2 whitespace-pre-line">
-		<span>
-			{after}
-		</span>
-	</dd>
+  {#if action === "update" || after !== "None"}
+    <i class="fa-solid fa-arrow-right my-auto"></i>
+    <dd class="px-2 text-gray-700 col-span-2 whitespace-pre-line">
+      <span>
+        {after}
+      </span>
+    </dd>
+  {/if}
 </div>
