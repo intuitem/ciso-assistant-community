@@ -68,7 +68,7 @@
 
 {#if opened}
 	<div
-		class="backdrop-blur-xs fixed inset-0 z-9999 w-full h-full m-auto flex items-center justify-center bg-black/50"
+		class="backdrop-blur-xs fixed inset-0 z-[9999] w-full h-full m-auto flex items-center justify-center bg-black/50"
 	>
 		<div class="h-auto overflow-hidden flex flex-col max-h-88 w-md rounded-lg">
 			<input
