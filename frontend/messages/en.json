@@ -1775,5 +1775,10 @@
 	"organisationIssue": "Issue",
 	"organisationIssues": "Issues",
 	"origin": "Origin",
-	"health": "Health"
+	"health": "Health",
+	"achieved": "Achieved",
+	"degraded": "Degraded",
+	"onTrack": "On track",
+	"atRisk": "At risk",
+	"offTrack": "Off track"
 }
