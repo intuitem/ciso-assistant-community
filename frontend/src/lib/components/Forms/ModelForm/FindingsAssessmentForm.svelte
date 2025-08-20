@@ -37,7 +37,6 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
-	disabled={isLocked}
 />
 
 <AutocompleteSelect
@@ -49,7 +48,6 @@
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
 	hidden={initialData.perimeter}
-	disabled={isLocked}
 />
 <TextField
 	{form}
@@ -57,7 +55,6 @@
 	label={m.version()}
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
-	disabled={isLocked}
 />
 <Select
 	{form}
@@ -67,7 +64,6 @@
 	label={m.category()}
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
-	disabled={isLocked}
 />
 <Select
 	{form}
@@ -77,7 +73,6 @@
 	label={m.status()}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
-	disabled={isLocked}
 />
 <AutocompleteSelect
 	{form}
@@ -88,7 +83,6 @@
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
-	disabled={isLocked}
 />
 <AutocompleteSelect
 	multiple
@@ -100,7 +94,6 @@
 	label={m.evidences()}
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}
-	disabled={isLocked}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
@@ -112,7 +105,6 @@
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
 		label={m.reviewers()}
-		disabled={isLocked}
 	/>
 	<TextField
 		type="date"
@@ -122,7 +114,6 @@
 		helpText={m.etaHelpText()}
 		cacheLock={cacheLocks['eta']}
 		bind:cachedValue={formDataCache['eta']}
-		disabled={isLocked}
 	/>
 	<TextField
 		type="date"
@@ -132,7 +123,6 @@
 		helpText={m.dueDateHelpText()}
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
-		disabled={isLocked}
 	/>
 	<MarkdownField
 		{form}
@@ -140,7 +130,6 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
-		disabled={isLocked}
 	/>
 	<Checkbox
 		{form}

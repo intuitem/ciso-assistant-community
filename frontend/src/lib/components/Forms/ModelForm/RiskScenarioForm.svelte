@@ -57,7 +57,6 @@
 	bind:cachedValue={formDataCache['risk_assessment']}
 	label={m.riskAssessment()}
 	hidden={initialData.risk_assessment}
-	disabled={isParentLocked}
 	onChange={async (e) => {
 		if (e) {
 			await fetchDefaultRefId(e);
@@ -71,7 +70,6 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
-	disabled={isParentLocked}
 />
 
 <AutocompleteSelect
@@ -92,7 +90,6 @@
 	cacheLock={cacheLocks['assets']}
 	bind:cachedValue={formDataCache['assets']}
 	label={m.assets()}
-	disabled={isParentLocked}
 />
 <AutocompleteSelect
 	{form}
@@ -104,5 +101,4 @@
 	cacheLock={cacheLocks['threats']}
 	bind:cachedValue={formDataCache['threats']}
 	label={m.threats()}
-	disabled={isParentLocked}
 />

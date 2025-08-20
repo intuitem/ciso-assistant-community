@@ -46,7 +46,6 @@
 		label={m.status()}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
-		disabled={isParentLocked}
 	/>
 	<Select
 		{form}
@@ -55,7 +54,6 @@
 		label={m.result()}
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
-		disabled={isParentLocked}
 	/>
 	<MarkdownField
 		{form}
@@ -63,7 +61,6 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
-		disabled={isParentLocked}
 	/>
 	<HiddenInput {form} field="folder" />
 	<HiddenInput {form} field="requirement" />
