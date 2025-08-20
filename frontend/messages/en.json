@@ -1780,5 +1780,7 @@
 	"degraded": "Degraded",
 	"onTrack": "On track",
 	"atRisk": "At risk",
-	"offTrack": "Off track"
+	"offTrack": "Off track",
+	"isLocked": "Locked",
+	"isLockedHelpText": "Lock this assessment to prevent changes on it or the associated requirements."
 }

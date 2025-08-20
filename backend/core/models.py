@@ -3837,6 +3837,11 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
+    is_locked = models.BooleanField(
+        default=False,
+        verbose_name=_("Is locked"),
+    )
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -4664,6 +4669,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             },
             "description",
         )
+
+    @property
+    def is_locked(self) -> bool:
+        return self.compliance_assessment.is_locked
 
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self

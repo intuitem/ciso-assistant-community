@@ -1217,6 +1217,20 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         write_only=True, required=False, default=False
     )
 
+    def validate(self, attrs):
+        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
+            # If we're unlocking (setting is_locked to False), allow the operation
+            if "is_locked" in attrs and attrs["is_locked"] is False:
+                return super().validate(attrs)
+
+            # Otherwise, only allow modifying the is_locked field
+            locked_fields = [field for field in attrs.keys() if field != "is_locked"]
+            if locked_fields:
+                raise serializers.ValidationError(
+                    f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
+                )
+        return super().validate(attrs)
+
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
         return super().create(validated_data)
@@ -1282,6 +1296,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)
+    is_locked = serializers.BooleanField()
 
     class Meta:
         model = RequirementAssessment
@@ -1289,6 +1304,16 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        compliance_assessment = self.get_compliance_assessment()
+
+        if compliance_assessment and compliance_assessment.is_locked:
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the requirement when the audit is locked."
+            )
+
+        return super().validate(attrs)
+
     def validate_score(self, value):
         compliance_assessment = self.get_compliance_assessment()
 

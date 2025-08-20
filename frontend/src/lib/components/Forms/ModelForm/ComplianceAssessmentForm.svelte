@@ -34,6 +34,8 @@
 
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 
+	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -81,10 +83,11 @@
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
 	hidden={initialData.perimeter}
+	disabled={isLocked}
 />
 <AutocompleteSelect
 	{form}
-	disabled={object.id}
+	disabled={object.id || isLocked}
 	optionsEndpoint="frameworks"
 	optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
 	field="framework"
@@ -104,6 +107,7 @@
 		cacheLock={cacheLocks['selected_implementation_groups']}
 		bind:cachedValue={formDataCache['selected_implementation_groups']}
 		label={m.selectedImplementationGroups()}
+		disabled={isLocked}
 	/>
 {/if}
 <AutocompleteSelect
@@ -115,6 +119,7 @@
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
+	disabled={isLocked}
 />
 <TextField
 	type="date"
@@ -124,6 +129,7 @@
 	helpText={m.etaHelpText()}
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
+	disabled={isLocked}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	{#if context === 'create' && suggestions}
@@ -143,6 +149,15 @@
 		helpText={m.useDocumentationScoreHelpText()}
 		cacheLock={cacheLocks['show_documentation_score']}
 		bind:cachedValue={formDataCache['show_documentation_score']}
+		disabled={isLocked}
+	/>
+	<Checkbox
+		{form}
+		field="is_locked"
+		label={m.isLocked()}
+		helpText={m.isLockedHelpText()}
+		cacheLock={cacheLocks['is_locked']}
+		bind:cachedValue={formDataCache['is_locked']}
 	/>
 	<TextField
 		{form}
@@ -150,6 +165,7 @@
 		label={m.refId()}
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
+		disabled={isLocked}
 	/>
 	<AutocompleteSelect
 		multiple
@@ -167,6 +183,7 @@
 		}}
 		field="assets"
 		label={m.assets()}
+		disabled={isLocked}
 	/>
 	<AutocompleteSelect
 		multiple
@@ -176,6 +193,7 @@
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidences"
 		label={m.evidences()}
+		disabled={isLocked}
 	/>
 	<TextField
 		{form}
@@ -183,6 +201,7 @@
 		label={m.version()}
 		cacheLock={cacheLocks['version']}
 		bind:cachedValue={formDataCache['version']}
+		disabled={isLocked}
 	/>
 	<Select
 		{form}
@@ -191,6 +210,7 @@
 		label={m.status()}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
+		disabled={isLocked}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -201,6 +221,7 @@
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
 		label={m.reviewers()}
+		disabled={isLocked}
 	/>
 	<TextField
 		type="date"
@@ -210,6 +231,7 @@
 		helpText={m.dueDateHelpText()}
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
+		disabled={isLocked}
 	/>
 	<MarkdownField
 		{form}
@@ -217,5 +239,6 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+		disabled={isLocked}
 	/>
 </Dropdown>

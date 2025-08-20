@@ -14,9 +14,12 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		context: string;
+		object?: any;
 	}
 
-	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), context }: Props = $props();
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), context, object }: Props = $props();
+
+	let isParentLocked = $derived(object?.compliance_assessment?.is_locked || false);
 </script>
 
 {#if context === 'selectEvidences'}
@@ -36,6 +39,7 @@
 		label={m.status()}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
+		disabled={isParentLocked}
 	/>
 	<Select
 		{form}
@@ -44,6 +48,7 @@
 		label={m.result()}
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
+		disabled={isParentLocked}
 	/>
 	<MarkdownField
 		{form}
@@ -51,6 +56,7 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+		disabled={isParentLocked}
 	/>
 	<HiddenInput {form} field="folder" />
 	<HiddenInput {form} field="requirement" />

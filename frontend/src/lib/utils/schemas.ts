@@ -329,7 +329,8 @@ export const ComplianceAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
