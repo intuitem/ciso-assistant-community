@@ -153,10 +153,18 @@
 			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
-				createModalCache.data[model.urlModel] ??= {};
-				formDataCache = createModalCache.data[model.urlModel];
+				const currentCache = createModalCache.data[model.urlModel];
+				if (!currentCache) {
+					createModalCache.data[model.urlModel] = formDataCache;
+				} else {
+					formDataCache = currentCache;
+				}
 			}
 		}
+	});
+
+	$effect(() => {
+		createModalCache.data[model.urlModel] = formDataCache;
 	});
 
 	run(() => {
