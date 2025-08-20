@@ -7,7 +7,6 @@
 
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 
 	import Toast from '$lib/components/Toast/Toast.svelte';
 	import Modal from '$lib/components/Modals/Modal.svelte';
@@ -135,7 +134,6 @@
 
 <Modal components={modalRegistry} />
 <Toast />
-<CommandPalette />
 {@render children?.()}
 
 {#if $flash}
