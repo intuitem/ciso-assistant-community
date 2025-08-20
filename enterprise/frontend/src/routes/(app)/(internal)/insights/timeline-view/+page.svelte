@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import MyGantt from '$lib/components/GanttView/MyGantt.svelte';
-	const tasks = data.data;
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	interface Props {
@@ -10,6 +9,7 @@
 
 	let { data }: Props = $props();
 	const lang = getLocale();
+	const tasks = data.data;
 </script>
 
 <main class="w-full p-2 items-center justify-center">
