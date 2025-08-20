@@ -50,7 +50,7 @@
 	// Store the display value separately from the actual form value
 	let displayValue: string = $state();
 
-	run(() => {
+	$effect(() => {
 		cachedValue = $value;
 	});
 
