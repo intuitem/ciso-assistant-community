@@ -1371,6 +1371,20 @@ export const listViewFields = {
 			frameworks: FRAMEWORK_FILTER
 		}
 	},
+	'organisation-objectives': {
+		head: ['name', 'domain', 'status', 'health'],
+		body: ['name', 'folder', 'status', 'health'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'organisation-issues': {
+		head: ['name', 'category', 'origin', 'domain'],
+		body: ['name', 'category', 'origin', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	'task-templates': {
 		head: [
 			'name',
