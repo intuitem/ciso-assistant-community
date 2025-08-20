@@ -1770,7 +1770,10 @@
 	"markdownCTA": "Double-click to add content...",
 	"organisationObjective": "Objective",
 	"organisationObjectives": "Objectives",
+	"addOrganisationObjective": "Add an objective",
+	"addOrganisationIssue": "Add an issue",
 	"organisationIssue": "Issue",
 	"organisationIssues": "Issues",
-	"origin": "origin"
+	"origin": "Origin",
+	"health": "Health"
 }

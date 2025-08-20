@@ -4309,10 +4309,18 @@ class QualificationViewSet(BaseModelViewSet):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = [
-        "folder",
-    ]
+    filterset_fields = ["folder", "status", "health"]
     search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(OrganisationObjective.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get health choices")
+    def health(self, request):
+        return Response(dict(OrganisationObjective.Health.choices))
 
 
 class OrganisationIssueViewSet(BaseModelViewSet):
@@ -4323,7 +4331,7 @@ class OrganisationIssueViewSet(BaseModelViewSet):
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
-    def category(self, reqlest):
+    def category(self, request):
         return Response(dict(OrganisationIssue.Category.choices))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

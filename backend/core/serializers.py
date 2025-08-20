@@ -1100,6 +1100,12 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 class OrganisationObjectiveReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    issues = FieldsRelatedField(many=True)
+    tasks = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
+    health = serializers.CharField(source="get_health_display")
+    assigned_to = FieldsRelatedField(many=True)
 
     class Meta:
         model = OrganisationObjective
@@ -1117,7 +1123,7 @@ class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
 
 class OrganisationIssueReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-
+    assets = FieldsRelatedField(many=True)
     category = serializers.CharField(source="get_category_display")
     origin = serializers.CharField(source="get_origin_display")
 

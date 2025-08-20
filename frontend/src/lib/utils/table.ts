@@ -1372,15 +1372,15 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'description', 'domain'],
-		body: ['name', 'description', 'folder'],
+		head: ['name', 'domain', 'status', 'health'],
+		body: ['name', 'folder', 'status', 'health'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
 	},
 	'organisation-issues': {
-		head: ['name', 'description', 'category', 'origin', 'domain'],
-		body: ['name', 'description', 'category', 'origin', 'folder'],
+		head: ['name', 'category', 'origin', 'domain'],
+		body: ['name', 'category', 'origin', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}

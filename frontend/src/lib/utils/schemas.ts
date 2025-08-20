@@ -628,14 +628,23 @@ export const personalDataSchema = z.object({
 
 export const organisationObjectiveSchema = z.object({
 	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
 	folder: z.string(),
-	assets: z.string().uuid().optional().array().optional()
+	status: z.string().optional().default('draft'),
+	health: z.string().optional(),
+	assigned_to: z.string().optional().array().optional(),
+	issues: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	tasks: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable()
 });
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
-	category: z.string(),
-	origin: z.string(),
+	ref_id: z.string().optional().default(''),
+	observation: z.string().optional().nullable(),
+	category: z.string().optional(),
+	origin: z.string().optional(),
 	assets: z.string().uuid().optional().array().optional()
 });
 export const ebiosRMSchema = z.object({

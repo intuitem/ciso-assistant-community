@@ -1369,7 +1369,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'organisationObjectives',
 		verboseName: 'Organisation objective',
 		verboseNamePlural: 'Organisation objectives',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
+		selectFields: [{ field: 'status' }, { field: 'health' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'issues', urlModel: 'organisation-issues' },
+			{ field: 'tasks', urlModel: 'task-templates' },
+			{ field: 'assigned_to', urlModel: 'users' }
+		],
 		filters: [{ field: 'folder' }]
 	},
 	'organisation-issues': {
@@ -1379,7 +1386,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Organisation issue',
 		verboseNamePlural: 'Organisation issues',
 		selectFields: [{ field: 'category' }, { field: 'origin' }],
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'assets', urlModel: 'assets' }
+		],
 		filters: [{ field: 'folder' }]
 	}
 };
