@@ -8,6 +8,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Checkbox from '../Checkbox.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -30,6 +31,8 @@
 	}: Props = $props();
 
 	let riskToleranceChoices = $state<{ label: string; value: string }[]>([]);
+
+	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
 	async function handleRiskMatrixChange(id: string) {
 		riskToleranceChoices = [];
@@ -68,6 +71,7 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+	disabled={isLocked}
 />
 <AutocompleteSelect
 	{form}
@@ -78,6 +82,7 @@
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
 	hidden={initialData.perimeter}
+	disabled={isLocked}
 />
 <TextField
 	{form}
@@ -85,6 +90,7 @@
 	label={m.version()}
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
+	disabled={isLocked}
 />
 {#if !duplicate}
 	<Select
@@ -96,10 +102,11 @@
 		label={m.status()}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
+		disabled={isLocked}
 	/>
 	<AutocompleteSelect
 		{form}
-		disabled={object.id}
+		disabled={object.id || isLocked}
 		translateOptions={false}
 		disableDoubleDash
 		optionsEndpoint="risk-matrices"
@@ -122,6 +129,7 @@
 			bind:cachedValue={formDataCache['risk_tolerance']}
 			label={m.riskTolerance()}
 			helpText={m.riskToleranceHelpText()}
+			disabled={isLocked}
 		/>
 	{/if}
 	<AutocompleteSelect
@@ -133,6 +141,7 @@
 		cacheLock={cacheLocks['authors']}
 		bind:cachedValue={formDataCache['authors']}
 		label={m.authors()}
+		disabled={isLocked}
 	/>
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<AutocompleteSelect
@@ -144,6 +153,7 @@
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
 			label={m.reviewers()}
+			disabled={isLocked}
 		/>
 		<TextField
 			type="date"
@@ -153,6 +163,7 @@
 			helpText={m.etaHelpText()}
 			cacheLock={cacheLocks['eta']}
 			bind:cachedValue={formDataCache['eta']}
+			disabled={isLocked}
 		/>
 		<TextField
 			type="date"
@@ -162,6 +173,7 @@
 			helpText={m.dueDateHelpText()}
 			cacheLock={cacheLocks['due_date']}
 			bind:cachedValue={formDataCache['due_date']}
+			disabled={isLocked}
 		/>
 		<MarkdownField
 			{form}
@@ -169,7 +181,16 @@
 			label={m.observation()}
 			cacheLock={cacheLocks['observation']}
 			bind:cachedValue={formDataCache['observation']}
+			disabled={isLocked}
 		/>
+	<Checkbox
+		{form}
+		field="is_locked"
+		label={m.isLocked()}
+		helpText={m.isLockedHelpText()}
+		cacheLock={cacheLocks['is_locked']}
+		bind:cachedValue={formDataCache['is_locked']}
+	/>
 	</Dropdown>
 	{#if initialData.ebios_rm_study}
 		<AutocompleteSelect
@@ -179,6 +200,7 @@
 			bind:cachedValue={formDataCache['ebios_rm_study']}
 			label={m.ebiosRmStudy()}
 			hidden
+			disabled={isLocked}
 		/>
 	{/if}
 {/if}

@@ -3077,6 +3077,10 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    is_locked = models.BooleanField(
+        default=False,
+        verbose_name=_("Is locked"),
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -3619,6 +3623,10 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
+    @property
+    def is_locked(self) -> bool:
+        return self.risk_assessment.is_locked
+
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
@@ -3835,11 +3843,6 @@ class ComplianceAssessment(Assessment):
         blank=True,
         help_text=_("Evidences related to the compliance assessment"),
         related_name="compliance_assessments",
-    )
-
-    is_locked = models.BooleanField(
-        default=False,
-        verbose_name=_("Is locked"),
     )
 
     fields_to_check = ["name", "version"]
@@ -4924,6 +4927,10 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     class Meta:
         verbose_name = _("Finding")
         verbose_name_plural = _("Findings")
+
+    @property
+    def is_locked(self) -> bool:
+        return self.findings_assessment.is_locked
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################

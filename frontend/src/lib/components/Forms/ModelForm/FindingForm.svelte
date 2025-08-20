@@ -28,6 +28,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context?: string;
+		object?: any;
 	}
 
 	let {
@@ -36,8 +37,11 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context = 'default'
+		context = 'default',
+		object
 	}: Props = $props();
+
+	let isParentLocked = $derived(object?.findings_assessment?.is_locked || false);
 
 	const modalStore = getModalStore();
 
@@ -79,6 +83,7 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+	disabled={isParentLocked}
 />
 <Select
 	{form}
@@ -87,6 +92,7 @@
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
+	disabled={isParentLocked}
 />
 <AutocompleteSelect
 	{form}
@@ -97,6 +103,7 @@
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
+	disabled={isParentLocked}
 />
 <Select
 	{form}
@@ -105,6 +112,7 @@
 	label={m.status()}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
+	disabled={isParentLocked}
 />
 <TextField
 	type="date"
@@ -114,6 +122,7 @@
 	helpText={m.etaHelpText()}
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
+	disabled={isParentLocked}
 />
 <AutocompleteSelect
 	{form}
@@ -123,6 +132,7 @@
 	bind:cachedValue={formDataCache['findings_assessment']}
 	label={m.findingsAssessment()}
 	hidden={initialData.findings_assessment}
+	disabled={isParentLocked}
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
@@ -134,6 +144,7 @@
 				optionsExtraFields={[['folder', 'str']]}
 				field="applied_controls"
 				label={m.appliedControls()}
+				disabled={isParentLocked}
 			/>
 		{/key}
 	</div>
@@ -155,6 +166,7 @@
 		optionsExtraFields={[['folder', 'str']]}
 		field="vulnerabilities"
 		label={m.vulnerabilities()}
+		disabled={isParentLocked}
 	/>
 	<AutocompleteSelect
 		multiple
@@ -166,6 +178,7 @@
 		label={m.evidences()}
 		cacheLock={cacheLocks['evidences']}
 		bind:cachedValue={formDataCache['evidences']}
+		disabled={isParentLocked}
 	/>
 	<TextField
 		type="date"
@@ -175,6 +188,7 @@
 		helpText={m.dueDateHelpText()}
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
+		disabled={isParentLocked}
 	/>
 	<AutocompleteSelect
 		multiple
@@ -187,6 +201,7 @@
 		helpText={m.labelsHelpText()}
 		label={m.labels()}
 		allowUserOptions="append"
+		disabled={isParentLocked}
 	/>
 	<MarkdownField
 		{form}
@@ -195,5 +210,6 @@
 		helpText={m.observationHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+		disabled={isParentLocked}
 	/>
 </Dropdown>

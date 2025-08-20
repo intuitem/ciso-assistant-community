@@ -121,6 +121,15 @@
 
 <main class="grow main">
 	<div>
+		{#if risk_assessment.is_locked}
+			<div class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mx-4 mt-4">
+				<div class="flex items-center">
+					<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+					<span class="font-medium">{m.lockedAssessment()}</span>
+					<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+				</div>
+			</div>
+		{/if}
 		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
