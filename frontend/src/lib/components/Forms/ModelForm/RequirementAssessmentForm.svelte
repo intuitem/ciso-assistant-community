@@ -17,7 +17,14 @@
 		object?: any;
 	}
 
-	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), context, object }: Props = $props();
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		context,
+		object
+	}: Props = $props();
 
 	let isParentLocked = $derived(object?.compliance_assessment?.is_locked || false);
 </script>

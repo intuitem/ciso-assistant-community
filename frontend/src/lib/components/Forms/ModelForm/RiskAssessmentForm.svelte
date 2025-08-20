@@ -183,14 +183,14 @@
 			bind:cachedValue={formDataCache['observation']}
 			disabled={isLocked}
 		/>
-	<Checkbox
-		{form}
-		field="is_locked"
-		label={m.isLocked()}
-		helpText={m.isLockedHelpText()}
-		cacheLock={cacheLocks['is_locked']}
-		bind:cachedValue={formDataCache['is_locked']}
-	/>
+		<Checkbox
+			{form}
+			field="is_locked"
+			label={m.isLocked()}
+			helpText={m.isLockedHelpText()}
+			cacheLock={cacheLocks['is_locked']}
+			bind:cachedValue={formDataCache['is_locked']}
+		/>
 	</Dropdown>
 	{#if initialData.ebios_rm_study}
 		<AutocompleteSelect

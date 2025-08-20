@@ -367,7 +367,9 @@
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	{#if data.compliance_assessment.is_locked}
-		<div class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm">
+		<div
+			class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm"
+		>
 			<div class="flex items-center">
 				<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
 				<span class="font-medium">{m.lockedAssessment()}</span>
