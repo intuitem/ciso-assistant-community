@@ -1733,5 +1733,18 @@
 	"riskToleranceHelpText": "Seuil du niveau de risque tolérable",
 	"withinTolerance": "Tolérable",
 	"markdownHelpText": "Markdown supporté : **gras**, *italique*, `code`, [lien](url), listes, etc.",
-	"markdownCTA": "Double-cliquez pour éditer ..."
+	"markdownCTA": "Double-cliquez pour éditer ...",
+	"organisationObjective": "Objectif",
+	"organisationObjectives": "Objectifs",
+	"addOrganisationObjective": "Ajouter un objectif",
+	"addOrganisationIssue": "Ajouter un enjeu",
+	"organisationIssue": "Enjeu",
+	"organisationIssues": "Enjeux",
+	"origin": "Origine",
+	"health": "Santé",
+	"achieved": "Atteint",
+	"degraded": "Degradé",
+	"onTrack": "Conforme",
+	"atRisk": "Sous risque",
+	"offTrack": "Non conforme"
 }
