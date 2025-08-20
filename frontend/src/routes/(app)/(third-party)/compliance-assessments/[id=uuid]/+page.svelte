@@ -366,6 +366,15 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
+	{#if data.compliance_assessment.is_locked}
+		<div class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm">
+			<div class="flex items-center">
+				<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+				<span class="font-medium">{m.lockedAssessment()}</span>
+				<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+			</div>
+		</div>
+	{/if}
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'].includes(key) ) as [key, value]}

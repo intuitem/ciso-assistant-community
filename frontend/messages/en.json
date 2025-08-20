@@ -1782,5 +1782,7 @@
 	"atRisk": "At risk",
 	"offTrack": "Off track",
 	"isLocked": "Locked",
-	"isLockedHelpText": "Lock this assessment to prevent changes on it or the associated requirements."
+	"isLockedHelpText": "Lock this assessment to prevent changes on it or the associated requirements.",
+	"lockedAssessment": "Assessment Locked",
+	"lockedAssessmentMessage": "This assessment is locked and cannot be modified except for unlocking it."
 }
