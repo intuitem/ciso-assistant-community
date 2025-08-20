@@ -2849,12 +2849,14 @@ class OrganisationIssue(
         choices=Category.choices,
         max_length=32,
         default=Category.UNDEFINED,
+        blank=True,
     )
     origin = models.CharField(
         verbose_name=_("Origin"),
         choices=Origin.choices,
         max_length=32,
         default=Origin.UNDEFINED,
+        blank=True,
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     assets = models.ManyToManyField(
@@ -2892,7 +2894,7 @@ class OrganisationObjective(
         OrganisationIssue,
         blank=True,
         verbose_name="issues",
-        related_name="issues",
+        related_name="objectives",
     )
     assets = models.ManyToManyField(
         Asset,
@@ -2903,7 +2905,7 @@ class OrganisationObjective(
         "TaskTemplate",
         blank=True,
         verbose_name="Issue",
-        related_name="tasks",
+        related_name="objectives",
     )
 
     assigned_to = models.ManyToManyField(
