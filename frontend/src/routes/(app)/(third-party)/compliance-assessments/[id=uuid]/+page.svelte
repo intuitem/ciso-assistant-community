@@ -55,7 +55,7 @@
 		domain: data.compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
-	const canEditRequirementAssessment: boolean = canPerformAction({
+	const canEditRequirementAssessment: boolean = !data.compliance_assessment.is_locked && canPerformAction({
 		user,
 		action: 'change',
 		model: requirementAssessmentModel.name,
