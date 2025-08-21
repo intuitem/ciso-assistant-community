@@ -2617,17 +2617,33 @@ class RoleViewSet(BaseModelViewSet):
         """
         Create the default user groups after role creation
         """
-        serializer.save()
-        role = Role.objects.get(id=serializer.data["id"])
-        for folder in Folder.objects.all():
-            if folder.content_type != "EN":
-                user_group = UserGroup.objects.create(
-                    folder=folder, name=f"{role.name}"
+        role = serializer.save()
+        role.permissions.add(Permission.objects.get(codename="view_folder"))
+        folders = Folder.objects.exclude(content_type="EN")
+        user_groups = [
+            UserGroup(folder=folder, name=f"{role.name}") for folder in folders
+        ]
+        UserGroup.objects.bulk_create(user_groups)
+        RoleAssignment.objects.bulk_create(
+            [
+                RoleAssignment(
+                    folder=Folder.get_root_folder(), role=role, user_group=ug
                 )
-                user_group.save()
-                RoleAssignment.objects.create(
-                    folder=Folder.get_root_folder(), role=role, user_group=user_group
-                )
+                for ug in user_groups
+            ]
+        )
+
+    def perform_update(self, serializer):
+        """
+        Update the user groups associated with the role
+        """
+        role = serializer.save()
+        role.permissions.add(Permission.objects.get(codename="view_folder"))
+        role_assignments = RoleAssignment.objects.filter(role=role)
+        user_groups = [ra.user_group for ra in role_assignments]
+        for ug in user_groups:
+            ug.name = f"{role.name}"
+        UserGroup.objects.bulk_update(user_groups, ["name"])
 
     def perform_destroy(self, instance):
         """

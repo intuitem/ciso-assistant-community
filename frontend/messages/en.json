@@ -1784,5 +1784,12 @@
 	"permission": "Permission",
 	"permissions": "Permissions",
 	"roles": "Roles",
-	"addRole": "Add role"
+	"addRole": "Add role",
+	"auditlog": "Audit log",
+	"global_settings": "Global settings",
+	"ebios_rm": "Ebios RM",
+	"tprm": "Third Party Risk Management",
+	"resilience": "Resilience",
+	"core": "Core",
+	"cal": "Calendar"
 }

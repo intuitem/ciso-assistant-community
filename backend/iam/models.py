@@ -842,7 +842,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_ids = [f.id]
             elif class_name == "permission":
                 # Permissions have no folder, so we don't filter them
-                objects_ids = Permission.objects.all().values_list("id", flat=True)
+                objects_ids = Permission.objects.filter(
+                    content_type__app_label__in=[
+                        "core",
+                        "ebios_rm",
+                        "tprm",
+                        "privacy",
+                        "resilience",
+                        "core",
+                        "cal",
+                    ]
+                ).values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")
             if permission_view in result_folders[f]:

@@ -913,12 +913,15 @@ class UserGroupWriteSerializer(BaseModelSerializer):
 
 class RoleReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
-    permissions = FieldsRelatedField(many=True, fields=["name"])
+    permissions = serializers.SerializerMethodField()
     folder = FieldsRelatedField()
 
     class Meta:
         model = Role
         fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.name} for perm in obj.permissions.all()]
 
 
 class RoleWriteSerializer(BaseModelSerializer):
@@ -928,6 +931,8 @@ class RoleWriteSerializer(BaseModelSerializer):
 
 
 class PermissionReadSerializer(BaseModelSerializer):
+    content_type = FieldsRelatedField(fields=["app_label"])
+
     class Meta:
         model = Permission
         fields = "__all__"

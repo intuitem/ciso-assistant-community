@@ -30,9 +30,13 @@
 	optionsInfoFields={{
 		fields: [
 			{
-				field: 'content_type'
+				field: 'content_type',
+				path: 'app_label',
+				translate: true
 			}
-		]
+		],
+		position: 'prefix',
+		classes: 'text-blue-500'
 	}}
 	field="permissions"
 	cacheLock={cacheLocks['permissions']}
