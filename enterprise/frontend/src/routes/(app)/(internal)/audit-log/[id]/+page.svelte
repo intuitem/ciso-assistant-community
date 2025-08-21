@@ -2,8 +2,8 @@
 	import RecursiveLogEntryChanges from './components/RecursiveLogEntryChanges.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 
-	export let data;
-	const detailData = { data: data.log, model: { name: 'auditlog' } };
+	let { data } = $props();
+	const detailData = { data: data.log, model: { name: 'auditlog', foreignKeyFields: [{field: "actor", urlModel: "users"}]}};
 </script>
 
 <main class="flex flex-col space-y-4">
