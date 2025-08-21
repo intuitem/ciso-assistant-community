@@ -64,10 +64,10 @@
 						// If values are identical after processing, skip this entry
 						return acc;
 					}
-          if (processedBefore === null || processedBefore === ""|| Array.isArray(processedBefore) && Object.keys(processedBefore).length === 0) {
+          if (processedBefore === null || processedBefore === "" || typeof processedBefore === "object" && Object.keys(processedBefore).length === 0) {
              processedBefore = "None";
           }
-          if (processedAfter === null || processedAfter === "" || Array.isArray(processedAfter) && Object.keys(processedAfter).length === 0) {
+          if (processedAfter === null || processedAfter === "" || typeof processedAfter === "object" && Object.keys(processedAfter).length === 0) {
             processedAfter = "None";
           }
 
@@ -88,7 +88,7 @@
 		);
 </script>
 
-<dl class="px-4 text-sm flex flex-col">
+<dl class="px-4 text-sm flex flex-col w-full">
 	{#each Object.entries(changes) as [field, change]}
 		<div class="w-full py-1">
 			{#if typeof change.before === 'object' && change.before !== null && typeof change.after === 'object' && change.after !== null && !Array.isArray(change.before) && !Array.isArray(change.after)}
