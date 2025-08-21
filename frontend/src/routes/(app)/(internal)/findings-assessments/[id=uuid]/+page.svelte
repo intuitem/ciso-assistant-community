@@ -25,7 +25,7 @@
 		</div>
 	</div>
 {/if}
-<DetailView {data}>
+<DetailView {data} disableCreate={data.data?.is_locked} disableDelete={data.data?.is_locked}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
 			<Anchor
