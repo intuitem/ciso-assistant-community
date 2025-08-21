@@ -55,12 +55,14 @@
 		domain: data.compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
-	const canEditRequirementAssessment: boolean = !data.compliance_assessment.is_locked && canPerformAction({
-		user,
-		action: 'change',
-		model: requirementAssessmentModel.name,
-		domain: data.compliance_assessment.folder.id
-	});
+	const canEditRequirementAssessment: boolean =
+		!data.compliance_assessment.is_locked &&
+		canPerformAction({
+			user,
+			action: 'change',
+			model: requirementAssessmentModel.name,
+			domain: data.compliance_assessment.folder.id
+		});
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
