@@ -2622,7 +2622,7 @@ class RoleViewSet(BaseModelViewSet):
         for folder in Folder.objects.all():
             if folder.content_type != "EN":
                 user_group = UserGroup.objects.create(
-                    folder=folder, name=f"{role.name} - {folder.name}", builtin=True
+                    folder=folder, name=f"{role.name}"
                 )
                 user_group.save()
                 RoleAssignment.objects.create(

@@ -293,7 +293,7 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def __str__(self) -> str:
         if self.builtin:
             return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
+        return f"{self.folder.name} - {self.name}"
 
     def get_name_display(self) -> str:
         return self.name
@@ -301,7 +301,9 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def get_localization_dict(self) -> dict:
         return {
             "folder": self.folder.name,
-            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
+            if self.builtin
+            else self.name,
         }
 
     @property
