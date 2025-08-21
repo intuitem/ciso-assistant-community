@@ -16,6 +16,7 @@ from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from global_settings.utils import ff_is_enabled
 from iam.models import *
+from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -911,6 +912,10 @@ class UserGroupWriteSerializer(BaseModelSerializer):
 
 
 class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = FieldsRelatedField(many=True, fields=["name"])
+    folder = FieldsRelatedField()
+
     class Meta:
         model = Role
         fields = "__all__"
@@ -919,6 +924,18 @@ class RoleReadSerializer(BaseModelSerializer):
 class RoleWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Role
+        fields = "__all__"
+
+
+class PermissionReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = Permission
+        fields = "__all__"
+
+
+class PermissionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Permission
         fields = "__all__"
 
 

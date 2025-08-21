@@ -795,6 +795,12 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_organisationissue",
     "change_organisationissue",
     "delete_organisationissue",
+    # roles,
+    "add_role",
+    "view_role",
+    "change_role",
+    "delete_role",
+    "view_permission",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

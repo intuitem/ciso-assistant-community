@@ -838,6 +838,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
                 objects_ids = [f.id]
+            elif class_name == "permission":
+                # Permissions have no folder, so we don't filter them
+                objects_ids = Permission.objects.all().values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")
             if permission_view in result_folders[f]:

@@ -1780,5 +1780,9 @@
 	"degraded": "Degraded",
 	"onTrack": "On track",
 	"atRisk": "At risk",
-	"offTrack": "Off track"
+	"offTrack": "Off track",
+	"permission": "Permission",
+	"permissions": "Permissions",
+	"roles": "Roles",
+	"addRole": "Add role"
 }

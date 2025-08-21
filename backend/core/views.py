@@ -2613,6 +2613,42 @@ class RoleViewSet(BaseModelViewSet):
     model = Role
     ordering = ["builtin", "name"]
 
+    def perform_create(self, serializer):
+        """
+        Create the default user groups after role creation
+        """
+        serializer.save()
+        role = Role.objects.get(id=serializer.data["id"])
+        for folder in Folder.objects.all():
+            if folder.content_type != "EN":
+                user_group = UserGroup.objects.create(
+                    folder=folder, name=f"{role.name} - {folder.name}", builtin=True
+                )
+                user_group.save()
+                RoleAssignment.objects.create(
+                    folder=Folder.get_root_folder(), role=role, user_group=user_group
+                )
+
+    def perform_destroy(self, instance):
+        """
+        Delete the user groups associated with the role
+        """
+        role_assignments = RoleAssignment.objects.filter(role=instance)
+        for ra in role_assignments:
+            ra.user_group.delete()
+        super().perform_destroy(instance)
+
+
+class PermissionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows permissions to be viewed or edited.
+    """
+
+    model = Permission
+    ordering = ["codename"]
+    filterset_fields = ["codename", "content_type"]
+    search_fields = ["codename", "name"]
+
 
 class RoleAssignmentViewSet(BaseModelViewSet):
     """
