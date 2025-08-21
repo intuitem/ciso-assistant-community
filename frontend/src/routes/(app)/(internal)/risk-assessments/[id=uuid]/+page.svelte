@@ -279,15 +279,19 @@
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
 				{fields}
+				disableCreate={risk_assessment.is_locked}
+				disableDelete={risk_assessment.is_locked}
 			>
 				{#snippet addButton()}
-					<button
-						class="btn preset-filled-primary-500 self-end my-auto"
-						onclick={(_) => modalCreateForm()}
-					>
-						<i class="fa-solid fa-plus mr-2 lowercase"></i>
-						{m.addRiskScenario()}
-					</button>
+					{#if !risk_assessment.is_locked}
+						<button
+							class="btn preset-filled-primary-500 self-end my-auto"
+							onclick={(_) => modalCreateForm()}
+						>
+							<i class="fa-solid fa-plus mr-2 lowercase"></i>
+							{m.addRiskScenario()}
+						</button>
+					{/if}
 				{/snippet}
 			</ModelTable>
 		</div>
