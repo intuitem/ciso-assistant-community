@@ -1746,5 +1746,6 @@
 	"degraded": "Degradé",
 	"onTrack": "Conforme",
 	"atRisk": "Sous risque",
-	"offTrack": "Non conforme"
+	"offTrack": "Non conforme",
+	"isAssigned": "Assigné"
 }

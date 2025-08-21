@@ -634,6 +634,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     state = serializers.SerializerMethodField()
     findings_count = serializers.IntegerField(source="findings.count")
+    is_assigned = serializers.BooleanField(read_only=True)
 
     def get_state(self, obj):
         if not obj.eta:

@@ -1780,5 +1780,6 @@
 	"degraded": "Degraded",
 	"onTrack": "On track",
 	"atRisk": "At risk",
-	"offTrack": "Off track"
+	"offTrack": "Off track",
+	"isAssigned": "Assigned"
 }
