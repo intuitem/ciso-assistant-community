@@ -123,6 +123,8 @@ class TestRequirementAssessmentsAuthenticated:
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
+                    "is_locked": False,
+                    "name": compliance_assessment.name,
                 },
                 "requirement": {
                     "id": str(RequirementNode.objects.all()[0].id),
