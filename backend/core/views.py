@@ -2030,8 +2030,10 @@ class AppliedControlViewSet(BaseModelViewSet):
             for req in RequirementAssessment.objects.filter(applied_controls__id=ac.id):
                 nodes.append(
                     {
-                        "name": req.requirement.ref_id,
-                        "value": req.requirement.description,
+                        "name": req.requirement.ref_id
+                        or req.requirement.safe_display_str,
+                        "value": req.requirement.description
+                        or req.requirement.safe_display_str,
                         "category": 7,
                         "symbol": "triangle",
                     }
