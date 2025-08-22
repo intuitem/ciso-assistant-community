@@ -43,6 +43,8 @@
 		dateFieldsToFormat?: string[];
 		widgets?: import('svelte').Snippet;
 		actions?: import('svelte').Snippet;
+		disableCreate?: boolean;
+		disableDelete?: boolean;
 	}
 
 	let {
@@ -66,7 +68,9 @@
 			'start_date'
 		],
 		widgets,
-		actions
+		actions,
+		disableCreate = false,
+		disableDelete = false
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
@@ -566,8 +570,8 @@
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
 									source={model.table}
-									disableCreate={model.disableCreate}
-									disableDelete={model.disableDelete}
+									disableCreate={disableCreate || model.disableCreate}
+									disableDelete={disableDelete || model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}

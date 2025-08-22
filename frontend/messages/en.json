@@ -1781,5 +1781,12 @@
 	"onTrack": "On track",
 	"atRisk": "At risk",
 	"offTrack": "Off track",
-	"isAssigned": "Is assigned"
+	"isAssigned": "Is assigned",
+	"isLocked": "Locked",
+	"isLockedHelpText": "Lock this assessment to prevent changes on it or the associated items.",
+	"lockedAssessment": "Assessment Locked",
+	"lockedAssessmentMessage": "This assessment is locked and cannot be modified except for unlocking it.",
+	"lockedRiskScenarioMessage": "This risk scenario cannot be modified because its parent risk assessment is locked.",
+	"lockedRequirementAssessmentMessage": "This requirement cannot be modified because its parent compliance assessment is locked.",
+	"lockedFindingMessage": "This finding cannot be modified because its parent findings assessment is locked."
 }

@@ -60,6 +60,17 @@
 </script>
 
 <div class="flex flex-col space-y-3">
+	{#if data.scenario.risk_assessment?.is_locked}
+		<div
+			class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm"
+		>
+			<div class="flex items-center">
+				<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+				<span class="font-medium">{m.lockedAssessment()}</span>
+				<span class="ml-2 text-sm">{m.lockedRiskScenarioMessage()}</span>
+			</div>
+		</div>
+	{/if}
 	<div class="flex flex-row card justify-between px-4 py-2 bg-white shadow-lg">
 		<div class="flex flex-col space-y-4">
 			<span class="flex flex-row space-x-8">
