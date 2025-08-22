@@ -47,6 +47,12 @@ const SOLUTION_CRITICALITY_OPTIONS = [
 	{ label: '4', value: '4' }
 ];
 
+const ENTITY_CRITICALITY_OPTIONS = [
+	{ label: '1', value: '1' },
+	{ label: '2', value: '2' },
+	{ label: '3', value: '3' },
+	{ label: '4', value: '4' }
+];
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' },
@@ -135,6 +141,17 @@ const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ENTITY_ASSESSMENT_CONCLUSION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'entity-assessments/conclusion',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'conclusion',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -437,6 +454,14 @@ const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'criticality',
+		options: ENTITY_CRITICALITY_OPTIONS,
+		multiple: true
+	}
+};
 const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1093,11 +1118,14 @@ export const listViewFields = {
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'description', 'perimeter', 'entity'],
-		body: ['name', 'description', 'perimeter', 'entity'],
+		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
+		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
 		filters: {
 			perimeter: PERIMETER_FILTER,
-			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER
+			entity: ENTITY_FILTER,
+			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			criticality: ENTITY_CRITICALITY_FILTER,
+			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER
 		}
 	},
 	solutions: {

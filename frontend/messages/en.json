@@ -469,7 +469,7 @@
 	"untreatedRiskScenarios": "{count} untreated risk scenario{s}",
 	"acceptedRiskScenarios": "{count} accepted risk scenario{s}",
 	"reviewNeeded": "Review needed",
-	"ok": "Ok",
+	"ok": "Approuved",
 	"inconsistenciesFoundComposer": "Found {count} inconsistenc{plural}. For more details, check",
 	"current": "Current",
 	"residual": "Residual",

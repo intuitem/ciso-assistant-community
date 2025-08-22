@@ -33,7 +33,14 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     """
 
     model = EntityAssessment
-    filterset_fields = ["status", "perimeter", "perimeter__folder", "authors", "entity"]
+    filterset_fields = [
+        "status",
+        "perimeter",
+        "perimeter__folder",
+        "authors",
+        "entity",
+        "conclusion",
+    ]
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
