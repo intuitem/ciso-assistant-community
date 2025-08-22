@@ -380,6 +380,25 @@
 
 	const tail_render = $derived(tail);
 
+	// Multi-value columns that should not be sortable
+	const MULTI_VALUE_COLUMNS = [
+		'owner',
+		'filtering_labels',
+		'threats',
+		'assets',
+		'applied_controls',
+		'existing_applied_controls',
+		'evidences',
+		'qualifications',
+		'user_groups'
+	];
+
+	// Function to check if a column is multi-value and should not be sortable
+	const isMultiValueColumn = (key: string): boolean => {
+		return MULTI_VALUE_COLUMNS.includes(key) ||
+			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]));
+	};
+
 	let openState = $state(false);
 </script>
 
@@ -455,7 +474,7 @@
 			<tr>
 				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
 					{/if}
 				{/each}
 				{#if displayActions}

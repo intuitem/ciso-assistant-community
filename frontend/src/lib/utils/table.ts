@@ -888,7 +888,8 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined,
-			is_assigned: IS_ASSIGNED_FILTER
+			is_assigned: IS_ASSIGNED_FILTER,
+			owner: OWNER_FILTER
 		}
 	},
 	policies: {
