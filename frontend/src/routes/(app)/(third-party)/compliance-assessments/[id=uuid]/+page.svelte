@@ -55,12 +55,14 @@
 		domain: data.compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
-	const canEditRequirementAssessment: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: requirementAssessmentModel.name,
-		domain: data.compliance_assessment.folder.id
-	});
+	const canEditRequirementAssessment: boolean =
+		!data.compliance_assessment.is_locked &&
+		canPerformAction({
+			user,
+			action: 'change',
+			model: requirementAssessmentModel.name,
+			domain: data.compliance_assessment.folder.id
+		});
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
@@ -366,6 +368,17 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
+	{#if data.compliance_assessment.is_locked}
+		<div
+			class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm"
+		>
+			<div class="flex items-center">
+				<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+				<span class="font-medium">{m.lockedAssessment()}</span>
+				<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+			</div>
+		</div>
+	{/if}
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'].includes(key) ) as [key, value]}
@@ -543,7 +556,7 @@
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>
-			{#if !page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 				<Anchor
 					breadcrumbAction="push"
 					href={`${page.url.pathname}/flash-mode`}
@@ -551,12 +564,14 @@
 					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 				>
 			{/if}
-			<Anchor
-				breadcrumbAction="push"
-				href={`${page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
-			>
+			{#if !data.compliance_assessment.is_locked}
+				<Anchor
+					breadcrumbAction="push"
+					href={`${page.url.pathname}/table-mode`}
+					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+					><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
+				>
+			{/if}
 			{#if !page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
@@ -565,30 +580,32 @@
 				</button>
 			{/if}
 
-			<button
-				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-				onclick={async () => {
-					await modalConfirmSyncToActions(
-						data.compliance_assessment.id,
-						data.compliance_assessment.name,
-						'?/syncToActions'
-					);
-				}}
-			>
-				<span class="mr-2">
-					{#if syncingToActionsIsLoading}
-						<ProgressRing
-							strokeWidth="16px"
-							meterStroke="stroke-white"
-							size="size-6"
-							classes="-ml-2"
-						/>
-					{:else}
-						<i class="fa-solid fa-arrows-rotate mr-2"></i>
-					{/if}
-				</span>
-				{m.syncToAppliedControls()}
-			</button>
+			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+					onclick={async () => {
+						await modalConfirmSyncToActions(
+							data.compliance_assessment.id,
+							data.compliance_assessment.name,
+							'?/syncToActions'
+						);
+					}}
+				>
+					<span class="mr-2">
+						{#if syncingToActionsIsLoading}
+							<ProgressRing
+								strokeWidth="16px"
+								meterStroke="stroke-white"
+								size="size-6"
+								classes="-ml-2"
+							/>
+						{:else}
+							<i class="fa-solid fa-arrows-rotate mr-2"></i>
+						{/if}
+					</span>
+					{m.syncToAppliedControls()}
+				</button>
+			{/if}
 
 			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
@@ -616,7 +633,7 @@
 					{m.suggestControls()}
 				</button>
 			{/if}
-			{#if has_threats}
+			{#if has_threats && !page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
 					onclick={openThreatsDialog}
