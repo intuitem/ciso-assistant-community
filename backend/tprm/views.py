@@ -39,6 +39,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "perimeter__folder",
         "authors",
         "entity",
+        "criticality",
         "conclusion",
     ]
 
