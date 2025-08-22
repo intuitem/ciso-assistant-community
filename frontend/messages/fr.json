@@ -441,7 +441,7 @@
 	"untreatedRiskScenarios": "{count} scénario{s} de risque non traité{s}",
 	"acceptedRiskScenarios": "{count} scénario{s} de risque accepté{s}",
 	"reviewNeeded": "Révision nécessaire",
-	"ok": "Ok",
+	"ok": "Approuvé",
 	"inconsistenciesFoundComposer": "Il y a {count} incohérence{s}. Pour plus de détail, vérifiez",
 	"current": "Actuel",
 	"residual": "Résiduel",
