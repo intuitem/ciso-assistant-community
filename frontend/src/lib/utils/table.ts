@@ -734,6 +734,15 @@ const LIBRARY_TYPE_FILTER = {
 	}
 };
 
+const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'isAssigned',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -856,8 +865,18 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'labels'],
-		body: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'folder', 'filtering_labels'],
+		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'owner', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'eta',
+			'folder',
+			'owner',
+			'filtering_labels'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -868,7 +887,9 @@ export const listViewFields = {
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reference_control: REFERENCE_CONTROL_FILTER,
-			eta__lte: undefined
+			eta__lte: undefined,
+			is_assigned: IS_ASSIGNED_FILTER,
+			owner: OWNER_FILTER
 		}
 	},
 	policies: {

@@ -1747,6 +1747,7 @@
 	"onTrack": "Conforme",
 	"atRisk": "Sous risque",
 	"offTrack": "Non conforme",
+	"isAssigned": "Est assigné",
 	"isLocked": "Verrouillé",
 	"isLockedHelpText": "Verrouiller cette évaluation pour empêcher les modifications sur celle-ci ou sur les éléments associés.",
 	"lockedAssessment": "Évaluation verrouillée",

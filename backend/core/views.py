@@ -1416,6 +1416,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
+    is_assigned = df.BooleanFilter(method="filter_is_assigned")
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -1474,6 +1475,12 @@ class AppliedControlFilterSet(GenericFilterSet):
                 expiry_date__lte=date.today() + timedelta(days=30)
             ).order_by("expiry_date")
         return queryset
+
+    def filter_is_assigned(self, queryset, name, value):
+        if value:
+            return queryset.filter(owner__isnull=False).distinct()
+        else:
+            return queryset.filter(owner__isnull=True)
 
     class Meta:
         model = AppliedControl
