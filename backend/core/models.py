@@ -2759,6 +2759,10 @@ class AppliedControl(
         return self.name
 
     @property
+    def is_assigned(self):
+        return self.owner.exists()
+
+    @property
     def mid(self):
         return f"M.{self.scoped_id(scope=AppliedControl.objects.filter(folder=self.folder))}"
 
