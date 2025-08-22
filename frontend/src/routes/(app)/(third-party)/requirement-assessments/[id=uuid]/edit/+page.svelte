@@ -249,7 +249,6 @@
 	$effect(() => {
 		if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 	});
-	$inspect(data);
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
