@@ -7,7 +7,10 @@
 		data: PageData;
 	}
 	let { data }: Props = $props();
-	const detailData = { data: data.log, model: { name: 'auditlog', foreignKeyFields: data.info.foreignKeyFields }};
+	const detailData = {
+		data: data.log,
+		model: { name: 'auditlog', foreignKeyFields: data.foreignKeyFields }
+	};
 </script>
 
 <main class="flex flex-col space-y-4">

@@ -12,11 +12,11 @@ export const load = (async ({ fetch, params }) => {
 			throw new Error(`Failed to fetch log entry: ${res.status}`);
 		}
 		const log = await res.json();
-    const info = getModelInfo('audit-logs');
+		const { foreignKeyFields } = getModelInfo('audit-logs');
 
 		return {
 			log,
-      info,
+			foreignKeyFields,
 			title: m.logEntryRepr({
 				actor: log.actor.str,
 				action: safeTranslate(log.action),
