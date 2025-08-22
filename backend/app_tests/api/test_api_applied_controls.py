@@ -115,6 +115,7 @@ class TestAppliedControlsAuthenticated:
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
+                "is_assigned": False,
             },
             user_group=test.user_group,
         )
@@ -146,6 +147,7 @@ class TestAppliedControlsAuthenticated:
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
+                "is_assigned": False,
             },
             user_group=test.user_group,
             scope=str(test.folder),
@@ -190,6 +192,7 @@ class TestAppliedControlsAuthenticated:
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
+                "is_assigned": False,
             },
             user_group=test.user_group,
         )
