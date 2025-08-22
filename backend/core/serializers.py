@@ -705,7 +705,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
         )
         return [
             {
-                "str": str(req.requirement.display_short or req.requirement.urn),
+                "str": str(req.requirement.safe_display_str),
                 "id": str(req.id),
             }
             for req in requirement_assessments
