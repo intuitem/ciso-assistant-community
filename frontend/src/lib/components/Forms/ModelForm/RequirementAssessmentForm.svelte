@@ -14,9 +14,19 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		context: string;
+		object?: any;
 	}
 
-	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), context }: Props = $props();
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		context,
+		object
+	}: Props = $props();
+
+	let isParentLocked = $derived(object?.compliance_assessment?.is_locked || false);
 </script>
 
 {#if context === 'selectEvidences'}

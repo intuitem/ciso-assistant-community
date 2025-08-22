@@ -28,6 +28,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context?: string;
+		object?: any;
 	}
 
 	let {
@@ -36,8 +37,11 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context = 'default'
+		context = 'default',
+		object
 	}: Props = $props();
+
+	let isParentLocked = $derived(object?.findings_assessment?.is_locked || false);
 
 	const modalStore = getModalStore();
 
