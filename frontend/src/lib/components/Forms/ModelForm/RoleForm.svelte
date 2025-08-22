@@ -2,6 +2,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import ListSelector from '../ListSelector.svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -11,6 +12,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		updated_fields?: Set<string>;
+		context?: 'create' | 'edit';
 	}
 
 	let {
@@ -19,27 +21,19 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		updated_fields = new Set()
+		updated_fields = new Set(),
+		context = 'edit'
 	}: Props = $props();
 </script>
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="permissions"
-	optionsInfoFields={{
-		fields: [
-			{
-				field: 'content_type',
-				path: 'app_label',
-				translate: true
-			}
-		],
-		position: 'prefix',
-		classes: 'text-blue-500'
-	}}
-	field="permissions"
-	cacheLock={cacheLocks['permissions']}
-	bind:cachedValue={formDataCache['permissions']}
-	label={m.permissions()}
-/>
+{#if context === 'edit'}
+	<ListSelector
+		{form}
+		field="permissions"
+		label={m.permissions()}
+		optionsEndpoint="permissions"
+		groupBy={[{"field": 'content_type', "path": ['app_label']}]}
+		cacheLock={cacheLocks["permissions"]}
+		bind:cachedValue={formDataCache["permissions"]}
+	/>
+{/if}
