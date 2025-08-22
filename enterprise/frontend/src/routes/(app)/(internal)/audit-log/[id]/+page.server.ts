@@ -15,7 +15,7 @@ export const load = (async ({ fetch, params }) => {
 		return {
 			log,
 			title: m.logEntryRepr({
-				actor: log.actor?.str,
+				actor: log.actor?.str || 'N/A',
 				action: safeTranslate(log.action),
 				timestamp: log.timestamp,
 				object: log.object_repr
