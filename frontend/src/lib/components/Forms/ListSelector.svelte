@@ -8,7 +8,12 @@
     label: string;
     value: string | number;
     group?: string;
+    groupsList?: string[];
     translatedLabel?: string;
+  }
+
+  interface GroupedOptions {
+    [groupName: string]: Option[];
   }
 
   interface Props {
@@ -18,12 +23,15 @@
     helpText?: string;
     optionsEndpoint: string;
     optionsLabelField?: string;
-    groupBy?: { field: string; path: string[]; }[] | string; // can be array of fields with path to add sub-groups or single field
+    groupBy?: { field: string; path: string[]; }[] | string; // Support multiple grouping fields for sub-grouping and path for nested fields
     cacheLock?: CacheLock;
     cachedValue?: (string | number)[] | undefined;
     translateOptions?: boolean;
     disabled?: boolean;
     mandatory?: boolean;
+    showGroupHeaders?: boolean; // Control group header visibility
+    collapsibleGroups?: boolean; // Make groups collapsible
+    defaultCollapsed?: boolean; // Control default collapse state
   }
 
   let {
@@ -41,14 +49,52 @@
     cachedValue = $bindable(),
     translateOptions = true,
     disabled = false,
-    mandatory = false
+    mandatory = false,
+    showGroupHeaders = true,
+    collapsibleGroups = true,
+    defaultCollapsed = true
   }: Props = $props();
 
   const { value, errors, constraints } = formFieldProxy(form, field);
 
   let options: Option[] = $state([]);
+  let groupedOptions: GroupedOptions = $state({});
+  let collapsedGroups: Set<string> = $state(new Set());
   let selected: (string | number)[] = $state([]);
   let isLoading = $state(false);
+
+  // Helper function to create group key from groupsList
+  function createGroupKey(groupsList: string[]): string {
+    return groupsList.filter(Boolean).join(" > ") || "Other";
+  }
+
+  // Helper function to initialize collapsed groups
+  function initializeCollapsedGroups(grouped: GroupedOptions): Set<string> {
+    if (!collapsibleGroups || !defaultCollapsed) {
+      return new Set();
+    }
+    return new Set(Object.keys(grouped));
+  }
+
+  // Group options by their group fields
+  function groupOptions(opts: Option[]): GroupedOptions {
+    if (!groupBy) {
+      return { "All": opts };
+    }
+
+    const grouped: GroupedOptions = {};
+    
+    opts.forEach(option => {
+      const groupKey = createGroupKey(option.groupsList || []);
+      
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = [];
+      }
+      grouped[groupKey].push(option);
+    });
+
+    return grouped;
+  }
 
   // fetch options
   async function fetchOptions() {
@@ -70,9 +116,11 @@
                     }
                     return grp;
                 })
+                .filter(Boolean)
             : groupBy
-              ? [option[groupBy]]
+              ? [option[groupBy]].filter(Boolean)
               : [];
+          
           return {
             label,
             value: option.id,
@@ -80,7 +128,16 @@
             translatedLabel: translateOptions ? safeTranslate(label) : label
           };
         });
+
+        // Group the options
+        groupedOptions = groupOptions(options);
+        
+        // Initialize collapsed state after grouping
+        if (collapsibleGroups && defaultCollapsed) {
+          collapsedGroups = initializeCollapsedGroups(groupedOptions);
+        }
       }
+      
       // init selection
       if ($value) {
         selected = Array.isArray($value) ? $value : [$value];
@@ -102,6 +159,52 @@
     cacheLock.resolve(selected);
   }
 
+  function toggleGroup(groupName: string) {
+    if (!collapsibleGroups) return;
+    
+    if (collapsedGroups.has(groupName)) {
+      collapsedGroups.delete(groupName);
+    } else {
+      collapsedGroups.add(groupName);
+    }
+    collapsedGroups = new Set(collapsedGroups);
+  }
+
+  function selectAllInGroup(groupName: string) {
+    const groupOptions = groupedOptions[groupName] || [];
+    const groupValues = groupOptions.map(opt => opt.value);
+    
+    // Check if all options in group are already selected
+    const allSelected = groupValues.every(val => selected.includes(val));
+    
+    if (allSelected) {
+      // Deselect all in group
+      selected = selected.filter(val => !groupValues.includes(val));
+    } else {
+      // Select all in group
+      const newSelected = [...selected];
+      groupValues.forEach(val => {
+        if (!newSelected.includes(val)) {
+          newSelected.push(val);
+        }
+      });
+      selected = newSelected;
+    }
+    
+    $value = selected;
+    cacheLock.resolve(selected);
+  }
+
+  function getGroupSelectionState(groupName: string) {
+    const groupOptions = groupedOptions[groupName] || [];
+    const groupValues = groupOptions.map(opt => opt.value);
+    const selectedInGroup = groupValues.filter(val => selected.includes(val));
+    
+    if (selectedInGroup.length === 0) return 'none';
+    if (selectedInGroup.length === groupValues.length) return 'all';
+    return 'partial';
+  }
+
   onMount(async () => {
     await fetchOptions();
     const cacheResult = await cacheLock.promise;
@@ -113,8 +216,6 @@
   onDestroy(() => {
     cacheLock.resolve(selected);
   });
-
-  $inspect(options)
 </script>
 
 <div class="space-y-4">
@@ -147,18 +248,68 @@
         ></path>
     </svg>
   {:else}
-        {#each options as opt}
-        <label class="flex items-center gap-2">
-            <input
-            type="checkbox"
-            value={opt.value}
-            checked={selected.includes(opt.value)}
-            on:change={() => toggle(opt.value)}
-            disabled={disabled}
-            />
-            <span>{opt.translatedLabel ?? opt.label}</span>
-        </label>
-        {/each}
+    <div class="space-y-3">
+      {#each Object.entries(groupedOptions) as [groupName, groupOpts]}
+        <div class="border border-gray-200 rounded-lg">
+          {#if showGroupHeaders && groupBy}
+            <div class="bg-gray-50 px-3 py-2 border-b border-gray-200 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                {#if collapsibleGroups}
+                  <button
+                    type="button"
+                    aria-label="Toggle Group"
+                    class="text-gray-500 hover:text-gray-700 transition-transform duration-200"
+                    class:rotate-90={!collapsedGroups.has(groupName)}
+                    onclick={() => toggleGroup(groupName)}
+                  >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </button>
+                {/if}
+                <h3 class="text-sm font-medium text-gray-700">{groupName}</h3>
+                <span class="text-xs text-gray-500">({groupOpts.length})</span>
+              </div>
+              
+              <button
+                type="button"
+                class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition-colors"
+                class:bg-blue-50={getGroupSelectionState(groupName) === 'all'}
+                class:border-blue-300={getGroupSelectionState(groupName) === 'all'}
+                class:bg-blue-25={getGroupSelectionState(groupName) === 'partial'}
+                class:border-blue-200={getGroupSelectionState(groupName) === 'partial'}
+                onclick={() => selectAllInGroup(groupName)}
+                disabled={disabled}
+              >
+                {#if getGroupSelectionState(groupName) === 'all'}
+                  Deselect All
+                {:else}
+                  Select All
+                {/if}
+              </button>
+            </div>
+          {/if}
+          
+          {#if !collapsibleGroups || !collapsedGroups.has(groupName)}
+            <div class="p-3 space-y-2">
+              {#each groupOpts as opt}
+                <label class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded transition-colors">
+                  <input
+                    type="checkbox"
+                    value={opt.value}
+                    checked={selected.includes(opt.value)}
+                    onchange={() => toggle(opt.value)}
+                    disabled={disabled}
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
+                </label>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/each}
+    </div>
   {/if}
 
   {#if helpText}
