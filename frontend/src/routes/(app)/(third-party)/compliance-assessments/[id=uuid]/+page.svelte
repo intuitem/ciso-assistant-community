@@ -556,7 +556,7 @@
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>
-			{#if !page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 				<Anchor
 					breadcrumbAction="push"
 					href={`${page.url.pathname}/flash-mode`}
@@ -564,12 +564,14 @@
 					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 				>
 			{/if}
-			<Anchor
-				breadcrumbAction="push"
-				href={`${page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
-			>
+			{#if !data.compliance_assessment.is_locked}
+				<Anchor
+					breadcrumbAction="push"
+					href={`${page.url.pathname}/table-mode`}
+					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+					><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
+				>
+			{/if}
 			{#if !page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
@@ -578,30 +580,32 @@
 				</button>
 			{/if}
 
-			<button
-				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-				onclick={async () => {
-					await modalConfirmSyncToActions(
-						data.compliance_assessment.id,
-						data.compliance_assessment.name,
-						'?/syncToActions'
-					);
-				}}
-			>
-				<span class="mr-2">
-					{#if syncingToActionsIsLoading}
-						<ProgressRing
-							strokeWidth="16px"
-							meterStroke="stroke-white"
-							size="size-6"
-							classes="-ml-2"
-						/>
-					{:else}
-						<i class="fa-solid fa-arrows-rotate mr-2"></i>
-					{/if}
-				</span>
-				{m.syncToAppliedControls()}
-			</button>
+			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+					onclick={async () => {
+						await modalConfirmSyncToActions(
+							data.compliance_assessment.id,
+							data.compliance_assessment.name,
+							'?/syncToActions'
+						);
+					}}
+				>
+					<span class="mr-2">
+						{#if syncingToActionsIsLoading}
+							<ProgressRing
+								strokeWidth="16px"
+								meterStroke="stroke-white"
+								size="size-6"
+								classes="-ml-2"
+							/>
+						{:else}
+							<i class="fa-solid fa-arrows-rotate mr-2"></i>
+						{/if}
+					</span>
+					{m.syncToAppliedControls()}
+				</button>
+			{/if}
 
 			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
@@ -629,7 +633,7 @@
 					{m.suggestControls()}
 				</button>
 			{/if}
-			{#if has_threats}
+			{#if has_threats && !page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
 					onclick={openThreatsDialog}
