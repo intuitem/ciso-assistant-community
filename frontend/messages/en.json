@@ -1781,6 +1781,7 @@
 	"onTrack": "On track",
 	"atRisk": "At risk",
 	"offTrack": "Off track",
+	"isAssigned": "Is assigned",
 	"isLocked": "Locked",
 	"isLockedHelpText": "Lock this assessment to prevent changes on it or the associated items.",
 	"lockedAssessment": "Assessment Locked",
