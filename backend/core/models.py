@@ -3079,6 +3079,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     is_locked = models.BooleanField(
         default=False,
+        null=True,
         verbose_name=_("Is locked"),
     )
     fields_to_check = ["name", "version"]
