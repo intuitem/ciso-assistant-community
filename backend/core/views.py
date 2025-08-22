@@ -2624,14 +2624,20 @@ class RoleViewSet(BaseModelViewSet):
             UserGroup(folder=folder, name=f"{role.name}") for folder in folders
         ]
         UserGroup.objects.bulk_create(user_groups)
-        RoleAssignment.objects.bulk_create(
+        role_assignments = RoleAssignment.objects.bulk_create(
             [
                 RoleAssignment(
-                    folder=Folder.get_root_folder(), role=role, user_group=ug
+                    folder=Folder.get_root_folder(),
+                    role=role,
+                    user_group=ug,
                 )
                 for ug in user_groups
             ]
         )
+
+        # Add the perimeter folders
+        for ra, ug in zip(role_assignments, user_groups):
+            ra.perimeter_folders.add(ug.folder)
 
     def perform_update(self, serializer):
         """
@@ -2652,6 +2658,10 @@ class RoleViewSet(BaseModelViewSet):
         role_assignments = RoleAssignment.objects.filter(role=instance)
         for ra in role_assignments:
             ra.user_group.delete()
+
+        # Just in case, delete any other user group with the same name
+        for ug in UserGroup.objects.filter(name=instance.name):
+            ug.delete()
         super().perform_destroy(instance)
 
 

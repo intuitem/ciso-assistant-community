@@ -238,6 +238,20 @@ class Folder(NameDescriptionMixin):
             ra4.perimeter_folders.add(folder)
             # Clear the cache after a new folder is created - purposely clearing everything
 
+            # Create a UG and RA for each non-builtin role
+            for role in Role.objects.filter(builtin=False):
+                ug = UserGroup.objects.create(
+                    name=role.name, folder=folder, builtin=False
+                )
+                ra = RoleAssignment.objects.create(
+                    user_group=ug,
+                    role=role,
+                    builtin=False,
+                    folder=Folder.get_root_folder(),
+                    is_recursive=True,
+                )
+                ra.perimeter_folders.add(folder)
+
 
 class FolderMixin(models.Model):
     """
@@ -672,6 +686,8 @@ class Role(NameDescriptionMixin, FolderMixin):
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
 
+    fields_to_check = ["name"]
+
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
@@ -850,7 +866,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                         "privacy",
                         "resilience",
                         "core",
-                        "cal",
                     ]
                 ).values_list("id", flat=True)
             else:
