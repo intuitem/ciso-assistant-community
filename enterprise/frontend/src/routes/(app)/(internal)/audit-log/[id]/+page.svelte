@@ -1,9 +1,13 @@
 <script lang="ts">
 	import RecursiveLogEntryChanges from './components/RecursiveLogEntryChanges.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import type { PageData } from './$types';
 
-	let { data } = $props();
-	const detailData = { data: data.log, model: { name: 'auditlog', foreignKeyFields: [{field: "actor", urlModel: "users"}]}};
+	interface Props {
+		data: PageData;
+	}
+	let { data }: Props = $props();
+	const detailData = { data: data.log, model: { name: 'auditlog', foreignKeyFields: data.info.foreignKeyFields }};
 </script>
 
 <main class="flex flex-col space-y-4">
