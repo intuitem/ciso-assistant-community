@@ -395,8 +395,10 @@
 
 	// Function to check if a column is multi-value and should not be sortable
 	const isMultiValueColumn = (key: string): boolean => {
-		return MULTI_VALUE_COLUMNS.includes(key) ||
-			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]));
+		return (
+			MULTI_VALUE_COLUMNS.includes(key) ||
+			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
+		);
 	};
 
 	let openState = $state(false);
@@ -474,7 +476,9 @@
 			<tr>
 				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+							>{safeTranslate(heading)}</Th
+						>
 					{/if}
 				{/each}
 				{#if displayActions}
