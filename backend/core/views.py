@@ -5164,7 +5164,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         self.check_object_permissions(request, compliance_assessment)
 
         threat_metrics = compliance_assessment.get_threats_metrics()
-        print(threat_metrics)
         if threat_metrics.get("total_unique_threats") == 0:
             return Response(threat_metrics, status=status.HTTP_200_OK)
         children = []
