@@ -1307,7 +1307,55 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
-        return super().create(validated_data)
+        authors_data = validated_data.get("authors", [])
+        assessment = super().create(validated_data)
+
+        # Send notification to newly assigned authors
+        if authors_data:
+            self._send_assignment_notifications(
+                assessment, [user.id for user in authors_data]
+            )
+
+        return assessment
+
+    def update(self, instance, validated_data):
+        # Track old authors before update
+        old_author_ids = set(instance.authors.values_list("id", flat=True))
+
+        updated_instance = super().update(instance, validated_data)
+
+        # Get new authors after update
+        new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned authors
+        newly_assigned_ids = new_author_ids - old_author_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, assessment, author_ids):
+        """Send assignment notifications to the specified authors"""
+        if not author_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_compliance_assessment_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=author_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                send_compliance_assessment_assignment_notification(
+                    assessment.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send ComplianceAssessment assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = ComplianceAssessment

@@ -239,3 +239,45 @@ def send_task_template_assignment_notification(task_template_id, assigned_user_e
             rendered = render_email_template("task_template_assignment", context)
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
+def send_compliance_assessment_assignment_notification(
+    assessment_id, assigned_user_emails
+):
+    """Send notification when ComplianceAssessment is assigned to users"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        from core.models import ComplianceAssessment
+
+        assessment = ComplianceAssessment.objects.get(id=assessment_id)
+    except ComplianceAssessment.DoesNotExist:
+        logger.error(f"ComplianceAssessment with id {assessment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "assessment_name": assessment.name,
+        "assessment_description": assessment.description or "No description provided",
+        "assessment_ref_id": assessment.ref_id or "N/A",
+        "framework_name": assessment.framework.name
+        if assessment.framework
+        else "No framework",
+        "assessment_status": assessment.get_status_display(),
+        "assessment_version": assessment.version or "1.0",
+        "assessment_due_date": assessment.due_date.strftime("%Y-%m-%d")
+        if assessment.due_date
+        else "Not set",
+        "folder_name": assessment.folder.name if assessment.folder else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [assessment]):
+            rendered = render_email_template(
+                "compliance_assessment_assignment", context
+            )
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
