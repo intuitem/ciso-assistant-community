@@ -121,6 +121,33 @@ def format_control_list(controls) -> str:
     return "\n".join(control_lines)
 
 
+def format_assessment_list(assessments) -> str:
+    """
+    Format a list of assessments for email templates
+
+    Args:
+        assessments: List of ComplianceAssessment objects
+
+    Returns:
+        Formatted string with assessment information
+    """
+    assessment_lines = []
+    for assessment in assessments:
+        framework_name = (
+            assessment.framework.name if assessment.framework else "No framework"
+        )
+        due_date = (
+            assessment.due_date.strftime("%Y-%m-%d")
+            if assessment.due_date
+            else "Not set"
+        )
+        assessment_lines.append(
+            f"- {assessment.name} (Framework: {framework_name}, Due: {due_date})"
+        )
+
+    return "\n".join(assessment_lines)
+
+
 def get_default_context() -> Dict[str, str]:
     """
     Get default context variables for email templates

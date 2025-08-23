@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl
+from core.models import AppliedControl, ComplianceAssessment
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
@@ -59,6 +59,58 @@ def check_deprecated_controls():
 
     for owner_email, controls in owner_controls.items():
         send_notification_email_deprecated_control(owner_email, controls)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="10"))
+def check_compliance_assessments_due_in_week():
+    """Check for ComplianceAssessments due in 7 days"""
+    target_date = date.today() + timedelta(days=7)
+    assessments_due_soon = (
+        ComplianceAssessment.objects.filter(due_date=target_date)
+        .exclude(status="done")
+        .prefetch_related("authors")
+    )
+
+    # Group by individual author
+    author_assessments = {}
+    for assessment in assessments_due_soon:
+        for author in assessment.authors.all():
+            if author.email not in author_assessments:
+                author_assessments[author.email] = []
+            author_assessments[author.email].append(assessment)
+
+    # Send personalized email to each author
+    for author_email, assessments in author_assessments.items():
+        send_compliance_assessment_due_soon_notification(
+            author_email, assessments, days=7
+        )
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="15"))
+def check_compliance_assessments_due_tomorrow():
+    """Check for ComplianceAssessments due in 1 day"""
+    target_date = date.today() + timedelta(days=1)
+    assessments_due_tomorrow = (
+        ComplianceAssessment.objects.filter(due_date=target_date)
+        .exclude(status="done")
+        .prefetch_related("authors")
+    )
+
+    # Group by individual author
+    author_assessments = {}
+    for assessment in assessments_due_tomorrow:
+        for author in assessment.authors.all():
+            if author.email not in author_assessments:
+                author_assessments[author.email] = []
+            author_assessments[author.email].append(assessment)
+
+    # Send personalized email to each author
+    for author_email, assessments in author_assessments.items():
+        send_compliance_assessment_due_soon_notification(
+            author_email, assessments, days=1
+        )
 
 
 @task()
@@ -281,3 +333,28 @@ def send_compliance_assessment_assignment_notification(
             )
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
+def send_compliance_assessment_due_soon_notification(author_email, assessments, days):
+    """Send notification when ComplianceAssessment is due soon"""
+    if not check_email_configuration(author_email, assessments):
+        return
+
+    from .email_utils import render_email_template, format_assessment_list
+
+    context = {
+        "assessment_count": len(assessments),
+        "assessment_list": format_assessment_list(assessments),
+        "days_remaining": days,
+        "days_text": "day" if days == 1 else "days",
+    }
+
+    template_name = "compliance_assessment_due_soon"
+    rendered = render_email_template(template_name, context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], author_email)
+    else:
+        logger.error(
+            f"Failed to render {template_name} email template for {author_email}"
+        )
