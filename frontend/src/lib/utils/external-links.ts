@@ -48,7 +48,8 @@ const handleLinkClick = async (anchor: HTMLAnchorElement, href: string, event: M
 	event.preventDefault();
 	const confirmed = await showConfirmation(href);
 	if (confirmed) {
-		window.open(href, anchor.target || '_blank');
+		const target = anchor.target || '_blank';
+		window.open(href, target, 'noopener,noreferrer');
 	}
 };
 
