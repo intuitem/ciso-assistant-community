@@ -66,15 +66,20 @@ def send_notification_email_expired_eta(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
         return
 
-    subject = f"CISO Assistant: You have {len(controls)} expired control(s)"
-    message = "Hello,\n\nThe following controls have expired:\n\n"
-    for control in controls:
-        message += f"- {control.name} (ETA: {control.eta})\n"
-    message += "\nThis reminder will stop once the control is marked as active or you update the ETA.\n"
-    message += "Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
-    message += "Thank you."
+    from .email_utils import render_email_template, format_control_list
 
-    send_notification_email(subject, message, owner_email)
+    context = {
+        "control_count": len(controls),
+        "control_list": format_control_list(controls),
+    }
+
+    rendered = render_email_template("expired_controls", context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+    else:
+        logger.error(
+            f"Failed to render expired_controls email template for {owner_email}"
+        )
 
 
 @task()
@@ -82,14 +87,20 @@ def send_notification_email_deprecated_control(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
         return
 
-    subject = f"CISO Assistant: You have {len(controls)} deprecated control(s)"
-    message = "Hello,\n\nThe following controls are identified as deprecated:\n\n"
-    for control in controls:
-        message += f"- {control.name}\n"
-    message += "\nLog in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
-    message += "Thank you."
+    from .email_utils import render_email_template, format_control_list
 
-    send_notification_email(subject, message, owner_email)
+    context = {
+        "control_count": len(controls),
+        "control_list": format_control_list(controls),
+    }
+
+    rendered = render_email_template("deprecated_controls", context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+    else:
+        logger.error(
+            f"Failed to render deprecated_controls email template for {owner_email}"
+        )
 
 
 @task()
@@ -158,3 +169,73 @@ def auditlog_prune():
         logger.info("Successfully pruned audit logs")
     except Exception as e:
         logger.error(f"Failed to prune the audit logs: {str(e)}")
+
+
+# Assignment notification functions
+
+
+@task()
+def send_applied_control_assignment_notification(control_id, assigned_user_emails):
+    """Send notification when AppliedControl is assigned to users"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        control = AppliedControl.objects.get(id=control_id)
+    except AppliedControl.DoesNotExist:
+        logger.error(f"AppliedControl with id {control_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "control_name": control.name,
+        "control_description": control.description or "No description provided",
+        "control_ref_id": control.ref_id or "N/A",
+        "control_status": control.get_status_display(),
+        "control_priority": control.get_priority_display()
+        if control.priority
+        else "Not set",
+        "control_eta": control.eta.strftime("%Y-%m-%d") if control.eta else "Not set",
+        "folder_name": control.folder.name if control.folder else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [control]):
+            rendered = render_email_template("applied_control_assignment", context)
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
+def send_task_template_assignment_notification(task_template_id, assigned_user_emails):
+    """Send notification when TaskTemplate is assigned to users"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        from core.models import TaskTemplate
+
+        task_template = TaskTemplate.objects.get(id=task_template_id)
+    except TaskTemplate.DoesNotExist:
+        logger.error(f"TaskTemplate with id {task_template_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "task_name": task_template.name,
+        "task_description": task_template.description or "No description provided",
+        "task_ref_id": task_template.ref_id or "N/A",
+        "task_date": task_template.task_date.strftime("%Y-%m-%d")
+        if task_template.task_date
+        else "Not set",
+        "is_recurrent": "Yes" if task_template.is_recurrent else "No",
+        "folder_name": task_template.folder.name if task_template.folder else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [task_template]):
+            rendered = render_email_template("task_template_assignment", context)
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
