@@ -1303,6 +1303,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             "description": parent_requirement.description,
         }
 
+    @property
+    def safe_display_str(self):
+        fallback_ref = ":".join(self.urn.split(":")[5:])
+        return self.display_short if self.display_short else fallback_ref
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -2759,6 +2764,10 @@ class AppliedControl(
         return self.name
 
     @property
+    def is_assigned(self):
+        return self.owner.exists()
+
+    @property
     def mid(self):
         return f"M.{self.scoped_id(scope=AppliedControl.objects.filter(folder=self.folder))}"
 
@@ -3077,6 +3086,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    is_locked = models.BooleanField(
+        default=False,
+        null=True,
+        verbose_name=_("Is locked"),
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -3619,6 +3633,10 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
+    @property
+    def is_locked(self) -> bool:
+        return self.risk_assessment.is_locked
+
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
@@ -4005,7 +4023,7 @@ class ComplianceAssessment(Assessment):
                 new_result = infer_result(ac)
                 if ra.result != new_result:
                     changes[str(ra.id)] = {
-                        "str": str(ra),
+                        "str": str(ra.requirement.safe_display_str),
                         "current": ra.result,
                         "new": new_result,
                     }
@@ -4665,6 +4683,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             "description",
         )
 
+    @property
+    def is_locked(self) -> bool:
+        return self.compliance_assessment.is_locked
+
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
     ) -> dict | None:
@@ -4915,6 +4937,10 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     class Meta:
         verbose_name = _("Finding")
         verbose_name_plural = _("Findings")
+
+    @property
+    def is_locked(self) -> bool:
+        return self.findings_assessment.is_locked
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################

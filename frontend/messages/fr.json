@@ -441,7 +441,7 @@
 	"untreatedRiskScenarios": "{count} scénario{s} de risque non traité{s}",
 	"acceptedRiskScenarios": "{count} scénario{s} de risque accepté{s}",
 	"reviewNeeded": "Révision nécessaire",
-	"ok": "Ok",
+	"ok": "Approuvé",
 	"inconsistenciesFoundComposer": "Il y a {count} incohérence{s}. Pour plus de détail, vérifiez",
 	"current": "Actuel",
 	"residual": "Résiduel",
@@ -1746,5 +1746,13 @@
 	"degraded": "Degradé",
 	"onTrack": "Conforme",
 	"atRisk": "Sous risque",
-	"offTrack": "Non conforme"
+	"offTrack": "Non conforme",
+	"isAssigned": "Est assigné",
+	"isLocked": "Verrouillé",
+	"isLockedHelpText": "Verrouiller cette évaluation pour empêcher les modifications sur celle-ci ou sur les éléments associés.",
+	"lockedAssessment": "Évaluation verrouillée",
+	"lockedAssessmentMessage": "Cette évaluation est verrouillée et ne peut être modifiée sauf pour la déverrouiller.",
+	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié car l'analyse de risque parente est verrouillée.",
+	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée car son audit parent est verrouillé.",
+	"lockedFindingMessage": "Ce constat ne peut pas être modifié car son plan de suivi parent est verrouillé."
 }
