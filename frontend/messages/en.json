@@ -1789,5 +1789,10 @@
 	"lockedAssessmentMessage": "This assessment is locked and cannot be modified except for unlocking it.",
 	"lockedRiskScenarioMessage": "This risk scenario cannot be modified because its parent risk assessment is locked.",
 	"lockedRequirementAssessmentMessage": "This requirement cannot be modified because its parent compliance assessment is locked.",
-	"lockedFindingMessage": "This finding cannot be modified because its parent findings assessment is locked."
+	"lockedFindingMessage": "This finding cannot be modified because its parent findings assessment is locked.",
+	"impactEffortMatrixHint": "Hint: refresh the page to redraw the matrix",
+	"resetFilter": "Reset filter",
+	"noActiveFilter": "No active filter",
+	"showingAllAppliedControls": "Showing all applied controls",
+	"showingItemsWith": "Showing items with"
 }

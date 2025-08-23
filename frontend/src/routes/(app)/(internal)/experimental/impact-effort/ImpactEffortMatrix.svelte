@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { tableHandlers } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 
 	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
 
@@ -10,11 +11,11 @@
 
 	let { data }: Props = $props();
 
-	let selectedCell: { impact: number; effort: number } | null = null;
-	let selectedItems: any[] = [];
+	let selectedCell: { impact: number; effort: number } | null = $state(null);
+	let selectedItems: any[] = $state([]);
 
-	let modelTableEndpoint = '/applied-controls';
-	let modelTableKey = 0; // Force re-render when incremented
+	let modelTableEndpoint = $state('/applied-controls');
+	let modelTableKey = $state(0); // Force re-render when incremented
 
 	function handleCellClick(rowIndex: number, colIndex: number) {
 		const impact = 5 - rowIndex; // Convert grid position to impact value
@@ -42,6 +43,14 @@
 		if (impact <= 2 && effort >= 4) return 'bg-red-200 hover:bg-red-300';
 		return 'bg-gray-100 hover:bg-gray-200';
 	}
+
+	function resetFilters() {
+		selectedCell = null;
+		selectedItems = [];
+		modelTableEndpoint = '/applied-controls';
+		$tableHandlers?.['/applied-controls'].invalidate();
+		modelTableKey++;
+	}
 </script>
 
 <main class="grid grid-cols-6">
@@ -65,7 +74,9 @@
 						>
 							{#if col.length > 0}
 								<div class="font-semibold text-lg">{col.length}</div>
-								<div class="text-xs text-gray-600">items</div>
+								<div class="text-xs text-gray-600">
+									{#if col.length > 1}items{:else}item{/if}
+								</div>
 							{:else}
 								<div class=""></div>
 							{/if}
@@ -113,9 +124,32 @@
 </main>
 
 <div class="px-4 text-xs text-slate-500">
-	Hint: refresh the page to redraw the matrix or reset the filter
+	{m.impactEffortMatrixHint()}
 </div>
 <div class="rounded-lg border shadow-xl p-2 m-4">
+	<div
+		class="mb-4 p-2 {selectedCell
+			? 'bg-blue-50 border-blue-200'
+			: 'bg-gray-50 border-gray-200'} border rounded flex items-center justify-between"
+	>
+		<span class="text-sm {selectedCell ? 'text-blue-800' : 'text-gray-600'}">
+			{#if selectedCell}
+				{m.showingItemsWith()}
+				{m.controlImpact()}: {selectedCell.impact}, {m.effort()}: {selectedCell.effort}
+			{:else}
+				{m.showingAllAppliedControls()}
+			{/if}
+		</span>
+		<button
+			class="px-3 py-1 text-sm {selectedCell
+				? 'bg-blue-600 hover:bg-blue-700'
+				: 'bg-gray-400 cursor-not-allowed'} text-white rounded transition-colors"
+			onclick={() => resetFilters()}
+			disabled={!selectedCell}
+		>
+			{selectedCell ? m.resetFilter() : m.noActiveFilter()}
+		</button>
+	</div>
 	{#key modelTableKey}
 		<ModelTable
 			source={{
