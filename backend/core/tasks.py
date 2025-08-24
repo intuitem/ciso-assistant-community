@@ -391,7 +391,7 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="30"))
+@db_periodic_task(crontab(hour="2", minute="30"))
 def lock_overdue_compliance_assessments():
     """Lock ComplianceAssessments that have exceeded their due_date and move status to in_review"""
     overdue_assessments = (
@@ -405,6 +405,7 @@ def lock_overdue_compliance_assessments():
                 entityassessment__isnull=False
             )  # Or associated with an entity assessment
         )
+        .distinct()
     )
 
     count = 0
