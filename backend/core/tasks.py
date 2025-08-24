@@ -38,30 +38,6 @@ def check_controls_with_expired_eta():
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="5"))
-def check_deprecated_controls():
-    deprecated_controls = AppliedControl.objects.filter(
-        status="deprecated"
-    ).prefetch_related("owner")
-
-    # Group by individual owner
-    owner_controls = {}
-    for control in deprecated_controls:
-        for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
-
-    # Update the status of each expired control
-    # deprecated_controls_list.update(status="deprecated")
-    # we should avoid this for now and have this as part of the model logic somehow.
-    # This will be done differently later and consistently.
-
-    for owner_email, controls in owner_controls.items():
-        send_notification_email_deprecated_control(owner_email, controls)
-
-
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="10"))
 def check_compliance_assessments_due_in_week():
     """Check for ComplianceAssessments due in 7 days"""
