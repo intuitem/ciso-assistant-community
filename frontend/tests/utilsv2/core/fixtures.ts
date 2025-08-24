@@ -2,8 +2,8 @@ import type { Page as _Page } from '@playwright/test';
 import { LoginPage } from '../derived/login-page';
 
 export interface Fixtures extends AllFixtures {
-	page: _Page;
 	/** Contain all fixtures as a dictionary */
+	page: _Page;
 	allFixtures: Fixtures;
 }
 
@@ -12,14 +12,9 @@ export interface AllFixtures {
 	loginPage: LoginPage;
 }
 
-type FixtureType = {
-	[key: string]: (fixtures: AllFixtures, use: (fixture: any) => void) => Promise<any>;
-};
-
-export const fixtures: FixtureType = {
+export const fixtures = {
 	loginPage: async ({ page }, use) => {
-		const fixture = new LoginPage(page);
-		await use(fixture);
+		await use(new LoginPage(page));
 	},
 
 	allFixtures: async ({ page, loginPage }, use) => {

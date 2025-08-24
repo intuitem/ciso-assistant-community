@@ -1,12 +1,39 @@
 import { Element } from '../core/element';
+import { ModelTableRow } from '../derived/model-table-row';
+import type { Locator, Expect } from '@playwright/test';
 
 export class ModelTable extends Element {
 	static DATA_TESTID = 'model-table';
-	_columnNames: string[] | null;
+	protected _searchInput: Locator;
+	protected _filterButton: Locator;
+	protected _columnNames: string[] | null;
 
 	constructor(...args: Element.Args) {
 		super(...args);
+		this._searchInput = this._self.getByTestId('search-input-elem');
+		this._filterButton = this._self.getByTestId('model-table-filter-button-elem');
 		this._columnNames = null;
+	}
+
+	async checkIfSearchBarVisible(expect: Expect) {
+		await expect(this._searchInput).toBeVisible();
+	}
+
+	/** Fills the search bar of the ModelTable with a string. */
+	async doSearch(searchString: string) {
+		await this._searchInput.fill(searchString);
+	}
+
+	/** Checks that the number of rows displayed in the ModelTable`. */
+	async checkDisplayedRowCount(expect: Expect, numberOfRows: number) {
+		await expect(this._self.getByTestId('model-table-row-elem')).toHaveCount(numberOfRows);
+	}
+
+	/** `[data-testid="model-table-row"]` Get the first row of the `<ModelTable/>`. */
+	getFirstRow(): ModelTableRow {
+		return this._getSubElement(ModelTableRow, {
+			first: true
+		});
 	}
 
 	/**
