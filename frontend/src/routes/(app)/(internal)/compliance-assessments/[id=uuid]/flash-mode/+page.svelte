@@ -137,7 +137,7 @@
 				<div class="relative">
 					<button
 						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-gray-300 transition-colors flex items-center space-x-1"
-						onclick={() => showNavigation = !showNavigation}
+						onclick={() => (showNavigation = !showNavigation)}
 						title="Click to jump to specific item (or press G)"
 					>
 						<span>{currentIndex + 1}/{requirementAssessments.length}</span>
@@ -146,7 +146,9 @@
 					</button>
 
 					{#if showNavigation}
-						<div class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64">
+						<div
+							class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64"
+						>
 							<div class="flex flex-col space-y-3">
 								<div class="text-sm font-medium">Jump to item:</div>
 								<div class="flex space-x-2">
@@ -192,7 +194,9 @@
 							</div>
 						{/if}
 						{#if requirement.annotation}
-							<div class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify">
+							<div
+								class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify"
+							>
 								{requirement.annotation}
 							</div>
 						{/if}
@@ -225,11 +229,17 @@
 				</div>
 
 				<div class="flex justify-between">
-					<button class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2" onclick={previousItem}>
+					<button
+						class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
+						onclick={previousItem}
+					>
 						<span>{m.previous()}</span>
 						<span class="text-xs opacity-75">(H)</span>
 					</button>
-					<button class="preset-filled-primary-500 px-4 py-2 rounded-sm flex items-center space-x-2" onclick={nextItem}>
+					<button
+						class="preset-filled-primary-500 px-4 py-2 rounded-sm flex items-center space-x-2"
+						onclick={nextItem}
+					>
 						<span>{m.next()}</span>
 						<span class="text-xs opacity-75">(L)</span>
 					</button>
