@@ -1,0 +1,18 @@
+subject: "CISO Assistant: Vous avez été affecté à '${assessment_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été désigné comme auteur sur l'audit suivant :
+
+  - Nom : ${assessment_name}
+  - Description : ${assessment_description}
+  - ID de référence : ${assessment_ref_id}
+  - Framework : ${framework_name}
+  - Statut : ${assessment_status}
+  - Date d'échéance : ${assessment_due_date}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cet audit :
+  ${ciso_assistant_url}
+
+  Merci.

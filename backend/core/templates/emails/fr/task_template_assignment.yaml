@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Vous avez été affecté à '${task_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été affecté à la tâche suivante :
+
+  - Nom : ${task_name}
+  - Description : ${task_description}
+  - ID de référence : ${task_ref_id}
+  - Date : ${task_date}
+  - Récurrente : ${is_recurrent}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cette tâche :
+  ${ciso_assistant_url}
+
+  Merci.
