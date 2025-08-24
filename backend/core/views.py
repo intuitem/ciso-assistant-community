@@ -5791,6 +5791,15 @@ class FindingViewSet(BaseModelViewSet):
     def severity(self, request):
         return Response(dict(Severity.choices))
 
+    @action(detail=False, name="Get all findings owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(findings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
+
 
 class IncidentViewSet(BaseModelViewSet):
     model = Incident

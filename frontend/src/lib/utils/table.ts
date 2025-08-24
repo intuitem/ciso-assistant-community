@@ -750,6 +750,16 @@ const OWNER_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'findings/owner',
+		multiple: true
+	}
+};
 
 const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -1402,7 +1412,8 @@ export const listViewFields = {
 		filters: {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
-			status: FINDINGS_STATUS_FILTER
+			status: FINDINGS_STATUS_FILTER,
+			owner: FINDINGS_OWNER_FILTER
 		}
 	},
 	incidents: {
