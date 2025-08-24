@@ -89,36 +89,46 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
-<div class="flex flex-col h-full justify-center items-center">
+<div class="flex flex-col min-h-screen justify-center items-center">
 	<div
 		style="border-color: {color}"
-		class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4"
+		class="flex flex-col bg-white w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4"
 	>
 		{#if currentRequirementAssessment}
-			<div class="flex flex-col w-full h-full space-y-4">
-				<div class="flex justify-between">
-					<div class="">
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}"
-							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-						>
-							<i class="fa-solid fa-arrow-left"></i>
-							<p class="">{m.goBackToAudit()}</p>
-						</a>
-					</div>
-					<div class="font-semibold">{currentIndex + 1}/{requirementAssessments.length}</div>
+			<!-- Header -->
+			<div class="flex justify-between items-center">
+				<div class="">
+					<a
+						href="/compliance-assessments/{data.compliance_assessment.id}"
+						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+					>
+						<i class="fa-solid fa-arrow-left"></i>
+						<p class="">{m.goBackToAudit()}</p>
+					</a>
 				</div>
-				<div class="flex flex-col items-center text-center justify-center">
-					<p class="font-semibold">{title}</p>
-				</div>
-				<div class="flex flex-col items-center justify-center whitespace-pre-wrap leading-relaxed">
+				<div class="font-semibold">{currentIndex + 1}/{requirementAssessments.length}</div>
+			</div>
+
+			<!-- Main content area -->
+			<div class="flex flex-col flex-1 justify-center">
+				<div class="flex flex-col items-center text-center space-y-6">
+					<p class="font-semibold text-xl">{title}</p>
 					{#if currentRequirementAssessment.description}
-						{currentRequirementAssessment.description}
+						<div class="whitespace-pre-wrap leading-relaxed max-w-4xl text-gray-700">
+							{currentRequirementAssessment.description}
+						</div>
+					{/if}
+					{#if requirement.annotation}
+						<div class="whitespace-pre-wrap leading-relaxed max-w-4xl text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify">
+							{requirement.annotation}
+						</div>
 					{/if}
 				</div>
 			</div>
-			<div class="items-center my-4">
-				<div>
+
+			<!-- Options and Navigation -->
+			<div class="flex flex-col space-y-6">
+				<div class="flex justify-center">
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						<ul
 							class="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -139,14 +149,15 @@
 						</ul>
 					</form>
 				</div>
-			</div>
-			<div class="flex justify-between">
-				<button class="bg-gray-400 text-white px-4 py-2 rounded-sm" onclick={previousItem}>
-					{m.previous()}
-				</button>
-				<button class="preset-filled-primary-500 px-4 py-2 rounded-sm" onclick={nextItem}>
-					{m.next()}
-				</button>
+
+				<div class="flex justify-between">
+					<button class="bg-gray-400 text-white px-4 py-2 rounded-sm" onclick={previousItem}>
+						{m.previous()}
+					</button>
+					<button class="preset-filled-primary-500 px-4 py-2 rounded-sm" onclick={nextItem}>
+						{m.next()}
+					</button>
+				</div>
 			</div>
 		{/if}
 	</div>
