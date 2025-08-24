@@ -153,11 +153,13 @@
 				</div>
 
 				<div class="flex justify-between">
-					<button class="bg-gray-400 text-white px-4 py-2 rounded-sm" onclick={previousItem}>
-						{m.previous()}
+					<button class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2" onclick={previousItem}>
+						<span>{m.previous()}</span>
+						<span class="text-xs opacity-75">(H)</span>
 					</button>
-					<button class="preset-filled-primary-500 px-4 py-2 rounded-sm" onclick={nextItem}>
-						{m.next()}
+					<button class="preset-filled-primary-500 px-4 py-2 rounded-sm flex items-center space-x-2" onclick={nextItem}>
+						<span>{m.next()}</span>
+						<span class="text-xs opacity-75">(L)</span>
 					</button>
 				</div>
 			</div>
