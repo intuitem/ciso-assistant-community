@@ -2,3 +2,5 @@
 config.yaml
 .config.yaml
 .clica_config.yaml
+__pycache__
+*.pyc
