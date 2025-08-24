@@ -5775,6 +5775,7 @@ class FindingViewSet(BaseModelViewSet):
         "owner",
         "folder",
         "status",
+        "severity",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
