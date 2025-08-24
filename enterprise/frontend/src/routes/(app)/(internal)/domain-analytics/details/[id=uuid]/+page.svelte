@@ -33,7 +33,7 @@
 				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
-					><i class="fa-solid fa-shield-halved m-2"></i>{m.appliedControls()}</legend
+					><i class="fa-solid fa-shield-halved m-2"></i><span class="font-sans">{m.appliedControls()}</span></legend
 				>
 				<Card count={metrics.controls.total} label={m.sumpageTotal()} />
 				<Card count={metrics.controls.active} label={m.sumpageActive()} />
@@ -52,7 +52,7 @@
 				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
-					><i class="fa-solid fa-list-check m-2"></i>{m.compliance()}</legend
+					><i class="fa-solid fa-list-check m-2"></i><span class="font-sans">{m.compliance()}</span></legend
 				>
 				<div class="col-span-5 row-span-3">
 					<StackedBarsNormalized
@@ -74,7 +74,7 @@
 				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-slate-50"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
-					><i class="fa-solid fa-biohazard m-2"></i>{m.risk()}</legend
+					><i class="fa-solid fa-biohazard m-2"></i><span class="font-sans">{m.risk()}</span></legend
 				>
 				<div class="col-span-2 row-span-2 bg-white shadow">
 					{#if data.threats_count.results.labels.length > 0}
@@ -85,9 +85,7 @@
 							values={data.threats_count.results.values}
 						/>
 					{:else}
-						<div class="py-4 flex items-center justify-center">
-							<p class="">{m.noThreatsMapped()}</p>
-						</div>
+						<p class="font-semibold p-4">{m.noThreatsMapped()}</p>
 					{/if}
 				</div>
 				<div class="col-span-2 row-span-2 h-80 bg-white shadow">
@@ -99,7 +97,7 @@
 							colors={data.risks_count_per_level.current.map((object) => object.color)}
 						/>
 					{:else}
-						<p>{m.noDataAvailable()}</p>
+						<p class="font-semibold p-4">{m.noDataAvailable()}</p>
 					{/if}
 				</div>
 				<div class="col-span-2 row-span-2 h-80 bg-white shadow">
@@ -111,7 +109,7 @@
 							colors={data.risks_count_per_level.residual.map((object) => object.color)}
 						/>
 					{:else}
-						<p>{m.noDataAvailable()}</p>
+						<p class="font-semibold p-4">{m.noDataAvailable()}</p>
 					{/if}
 				</div>
 				<div></div>
