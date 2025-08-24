@@ -136,11 +136,13 @@
 				</div>
 				<div class="relative">
 					<button
-						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer"
+						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-gray-300 transition-colors flex items-center space-x-1"
 						onclick={() => showNavigation = !showNavigation}
 						title="Click to jump to specific item (or press G)"
 					>
-						{currentIndex + 1}/{requirementAssessments.length}
+						<span>{currentIndex + 1}/{requirementAssessments.length}</span>
+						<i class="fa-solid fa-chevron-down text-xs opacity-60"></i>
+						<span class="text-xs opacity-60">(G)</span>
 					</button>
 
 					{#if showNavigation}
