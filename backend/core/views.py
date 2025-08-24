@@ -5775,6 +5775,7 @@ class FindingViewSet(BaseModelViewSet):
         "owner",
         "folder",
         "status",
+        "severity",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -5789,6 +5790,15 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @action(detail=False, name="Get all findings owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(findings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
 
 class IncidentViewSet(BaseModelViewSet):
