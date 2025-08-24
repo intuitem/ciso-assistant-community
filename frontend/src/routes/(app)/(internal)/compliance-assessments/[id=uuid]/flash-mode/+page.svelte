@@ -98,9 +98,21 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'n' || event.key === 'l') {
+		const key = event.key.toLowerCase();
+		const target = event.target as HTMLElement | null;
+		const tag = target?.tagName?.toLowerCase();
+		const isEditable = target?.isContentEditable;
+		if (
+			(tag === 'input' || tag === 'textarea' || tag === 'select' || isEditable) &&
+			target?.id !== 'jumpInput'
+		) {
+			return;
+		}
+		if (key === 'n' || key === 'l') {
+			event.preventDefault();
 			nextItem();
-		} else if (event.key === 'p' || event.key === 'h') {
+		} else if (key === 'p' || key === 'h') {
+			event.preventDefault();
 			previousItem();
 		} else if (event.key === 'g') {
 			showNavigation = !showNavigation;
@@ -109,7 +121,7 @@
 					document.getElementById('jumpInput')?.focus();
 				}, 0);
 			}
-		} else if (event.key === 'Escape') {
+		} else if (key === 'escape') {
 			showNavigation = false;
 			jumpToInput = '';
 		}
