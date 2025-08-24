@@ -21,7 +21,7 @@ logger = structlog.getLogger(__name__)
 @db_periodic_task(crontab(hour="6", minute="0"))
 def check_controls_with_expired_eta():
     expired_controls = (
-        AppliedControl.objects.exclude(status="active")
+        AppliedControl.objects.exclude(status__in=["active", "deprecated"])
         .filter(eta__lt=date.today(), eta__isnull=False)
         .prefetch_related("owner")
     )
@@ -44,7 +44,7 @@ def check_compliance_assessments_due_in_week():
     target_date = date.today() + timedelta(days=7)
     assessments_due_soon = (
         ComplianceAssessment.objects.filter(due_date=target_date)
-        .exclude(status="done")
+        .exclude(status__in=["done", "deprecated"])
         .prefetch_related("authors")
     )
 
@@ -70,7 +70,7 @@ def check_compliance_assessments_due_tomorrow():
     target_date = date.today() + timedelta(days=1)
     assessments_due_tomorrow = (
         ComplianceAssessment.objects.filter(due_date=target_date)
-        .exclude(status="done")
+        .exclude(status__in=["done", "deprecated"])
         .prefetch_related("authors")
     )
 
@@ -132,7 +132,6 @@ def check_applied_controls_expiring_tomorrow():
                 owner_controls[owner.email] = []
             owner_controls[owner.email].append(control)
 
-    print("::I should report on this: ", controls_due_tomorrow)
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_applied_control_expiring_soon_notification(owner_email, controls, days=1)
