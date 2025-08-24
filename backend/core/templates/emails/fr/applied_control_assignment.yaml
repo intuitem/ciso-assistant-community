@@ -1,0 +1,18 @@
+subject: "CISO Assistant: Vous avez été affecté à '${control_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été affecté à la mesure suivante :
+
+  - Nom : ${control_name}
+  - Description : ${control_description}
+  - ID : ${control_ref_id}
+  - Statut : ${control_status}
+  - Priorité : ${control_priority}
+  - ETA : ${control_eta}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour actualiser et gérer cette mesure :
+  ${ciso_assistant_url}
+
+  Merci.
