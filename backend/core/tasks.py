@@ -113,6 +113,55 @@ def check_compliance_assessments_due_tomorrow():
         )
 
 
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="20"))
+def check_applied_controls_expiring_in_week():
+    """Check for AppliedControls due in 7 days"""
+    target_date = date.today() + timedelta(days=7)
+    controls_due_soon = (
+        AppliedControl.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["deprecated"])
+        .prefetch_related("owner")
+    )
+
+    # Group by individual owner
+    owner_controls = {}
+    for control in controls_due_soon:
+        for owner in control.owner.all():
+            if owner.email not in owner_controls:
+                owner_controls[owner.email] = []
+            owner_controls[owner.email].append(control)
+
+    # Send personalized email to each owner
+    for owner_email, controls in owner_controls.items():
+        send_applied_control_expiring_soon_notification(owner_email, controls, days=7)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="25"))
+def check_applied_controls_expiring_tomorrow():
+    """Check for AppliedControls due in 1 day"""
+    target_date = date.today() + timedelta(days=1)
+    controls_due_tomorrow = (
+        AppliedControl.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["deprecated"])
+        .prefetch_related("owner")
+    )
+
+    # Group by individual owner
+    owner_controls = {}
+    for control in controls_due_tomorrow:
+        for owner in control.owner.all():
+            if owner.email not in owner_controls:
+                owner_controls[owner.email] = []
+            owner_controls[owner.email].append(control)
+
+    print("::I should report on this: ", controls_due_tomorrow)
+    # Send personalized email to each owner
+    for owner_email, controls in owner_controls.items():
+        send_applied_control_expiring_soon_notification(owner_email, controls, days=1)
+
+
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
@@ -357,4 +406,29 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
     else:
         logger.error(
             f"Failed to render {template_name} email template for {author_email}"
+        )
+
+
+@task()
+def send_applied_control_expiring_soon_notification(owner_email, controls, days):
+    """Send notification when AppliedControl is due soon"""
+    if not check_email_configuration(owner_email, controls):
+        return
+
+    from .email_utils import render_email_template, format_control_list
+
+    context = {
+        "control_count": len(controls),
+        "control_list": format_control_list(controls),
+        "days_remaining": days,
+        "days_text": "day" if days == 1 else "days",
+    }
+
+    template_name = "applied_control_expiring_soon"
+    rendered = render_email_template(template_name, context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+    else:
+        logger.error(
+            f"Failed to render {template_name} email template for {owner_email}"
         )
