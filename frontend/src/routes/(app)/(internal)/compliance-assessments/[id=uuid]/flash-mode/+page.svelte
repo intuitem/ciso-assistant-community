@@ -79,11 +79,39 @@
 			body: JSON.stringify(formData)
 		});
 	}
+
+	// Navigation state
+	let showNavigation = $state(false);
+	let jumpToInput = $state('');
+
+	function jumpToItem(index: number) {
+		if (index >= 0 && index < requirementAssessments.length) {
+			currentIndex = index;
+			showNavigation = false;
+			jumpToInput = '';
+		}
+	}
+
+	function handleJumpSubmit() {
+		const targetIndex = parseInt(jumpToInput) - 1; // Convert to 0-based index
+		jumpToItem(targetIndex);
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'n' || event.key === 'l') {
 			nextItem();
 		} else if (event.key === 'p' || event.key === 'h') {
 			previousItem();
+		} else if (event.key === 'g') {
+			showNavigation = !showNavigation;
+			if (showNavigation) {
+				setTimeout(() => {
+					document.getElementById('jumpInput')?.focus();
+				}, 0);
+			}
+		} else if (event.key === 'Escape') {
+			showNavigation = false;
+			jumpToInput = '';
 		}
 	}
 </script>
@@ -106,7 +134,49 @@
 						<p class="">{m.goBackToAudit()}</p>
 					</a>
 				</div>
-				<div class="font-semibold">{currentIndex + 1}/{requirementAssessments.length}</div>
+				<div class="relative">
+					<button
+						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer"
+						onclick={() => showNavigation = !showNavigation}
+						title="Click to jump to specific item (or press G)"
+					>
+						{currentIndex + 1}/{requirementAssessments.length}
+					</button>
+
+					{#if showNavigation}
+						<div class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64">
+							<div class="flex flex-col space-y-3">
+								<div class="text-sm font-medium">Jump to item:</div>
+								<div class="flex space-x-2">
+									<input
+										id="jumpInput"
+										bind:value={jumpToInput}
+										type="number"
+										min="1"
+										max={requirementAssessments.length}
+										placeholder="Item number"
+										class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+										onkeydown={(e) => {
+											if (e.key === 'Enter') {
+												e.preventDefault();
+												handleJumpSubmit();
+											}
+										}}
+									/>
+									<button
+										class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+										onclick={handleJumpSubmit}
+									>
+										Go
+									</button>
+								</div>
+								<div class="text-xs text-gray-500">
+									Press G to toggle, Enter to jump, Esc to close
+								</div>
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 
 			<!-- Main content area -->
