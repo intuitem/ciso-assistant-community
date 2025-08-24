@@ -160,27 +160,6 @@ def send_notification_email_expired_eta(owner_email, controls):
 
 
 @task()
-def send_notification_email_deprecated_control(owner_email, controls):
-    if not check_email_configuration(owner_email, controls):
-        return
-
-    from .email_utils import render_email_template, format_control_list
-
-    context = {
-        "control_count": len(controls),
-        "control_list": format_control_list(controls),
-    }
-
-    rendered = render_email_template("deprecated_controls", context)
-    if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
-    else:
-        logger.error(
-            f"Failed to render deprecated_controls email template for {owner_email}"
-        )
-
-
-@task()
 def send_notification_email(subject, message, owner_email):
     try:
         logger.debug("Sending notification email", subject=subject, message=message)
