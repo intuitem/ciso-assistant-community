@@ -1759,5 +1759,6 @@
 	"lockedAssessmentMessage": "Cette évaluation est verrouillée et ne peut être modifiée sauf pour la déverrouiller.",
 	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié car l'analyse de risque parente est verrouillée.",
 	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée car son audit parent est verrouillé.",
-	"lockedFindingMessage": "Ce constat ne peut pas être modifié car son plan de suivi parent est verrouillé."
+	"lockedFindingMessage": "Ce constat ne peut pas être modifié car son plan de suivi parent est verrouillé.",
+	"qualificationsChartTitle": "Qualifications des scenarios de risque"
 }
