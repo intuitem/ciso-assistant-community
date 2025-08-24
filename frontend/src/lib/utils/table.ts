@@ -270,6 +270,28 @@ const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -725,6 +747,16 @@ const OWNER_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'email',
 		optionsValueField: 'id',
 		optionsEndpoint: 'applied-controls/owner',
+		multiple: true
+	}
+};
+const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'findings/owner',
 		multiple: true
 	}
 };
@@ -1377,7 +1409,12 @@ export const listViewFields = {
 			'applied_controls',
 			'filtering_labels'
 		],
-		filters: { filtering_labels: LABELS_FILTER }
+		filters: {
+			filtering_labels: LABELS_FILTER,
+			severity: FINDINGS_SEVERITY_FILTER,
+			status: FINDINGS_STATUS_FILTER,
+			owner: FINDINGS_OWNER_FILTER
+		}
 	},
 	incidents: {
 		head: [
