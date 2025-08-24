@@ -110,19 +110,21 @@
 			</div>
 
 			<!-- Main content area -->
-			<div class="flex flex-col flex-1 justify-center">
-				<div class="flex flex-col items-center text-center space-y-6">
-					<p class="font-semibold text-xl">{title}</p>
-					{#if currentRequirementAssessment.description}
-						<div class="whitespace-pre-wrap leading-relaxed max-w-4xl text-gray-700">
-							{currentRequirementAssessment.description}
-						</div>
-					{/if}
-					{#if requirement.annotation}
-						<div class="whitespace-pre-wrap leading-relaxed max-w-4xl text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify">
-							{requirement.annotation}
-						</div>
-					{/if}
+			<div class="flex flex-col flex-1 justify-center overflow-hidden">
+				<div class="flex flex-col items-center text-center space-y-6 h-full">
+					<p class="font-semibold text-xl flex-shrink-0">{title}</p>
+					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
+						{#if currentRequirementAssessment.description}
+							<div class="whitespace-pre-wrap leading-relaxed text-gray-700">
+								{currentRequirementAssessment.description}
+							</div>
+						{/if}
+						{#if requirement.annotation}
+							<div class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify">
+								{requirement.annotation}
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
 
