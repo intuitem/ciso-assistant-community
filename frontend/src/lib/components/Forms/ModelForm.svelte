@@ -234,6 +234,7 @@
 	{invalidateAll}
 	validators={zod(schema)}
 	onUpdated={() => createModalCache.deleteCache(model.urlModel)}
+	data-testid="model-form"
 	{...rest}
 >
 	{#snippet children({ form, data, initialData })}
