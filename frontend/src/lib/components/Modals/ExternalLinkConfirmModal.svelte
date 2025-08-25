@@ -19,14 +19,17 @@
 
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
-		<header class={cHeader}>External Link Warning</header>
+		<header class={cHeader}>
+			<i class="fa-solid fa-circle-exclamation"></i>
+			{m.externalLinkWarning()}
+		</header>
 		<article class="space-y-3">
-			<p>You are about to leave this site and go to an external website:</p>
+			<p>{m.externalLinkConfirmMessage()}</p>
 			<div class="code-block bg-surface-100 p-3 rounded-lg text-sm break-all">
 				{url}
 			</div>
 			<p class="text-sm text-surface-600">
-				Please verify this is the correct destination before continuing.
+				{m.externalLinkVerifyMessage()}
 			</p>
 		</article>
 		<footer class="modal-footer {parent.regionFooter} flex justify-end space-x-2">
@@ -34,7 +37,7 @@
 				{m.cancel()}
 			</button>
 			<button class="btn variant-filled-primary" type="button" onclick={parent.onConfirm}>
-				Continue
+				{m.continue()}
 			</button>
 		</footer>
 	</div>

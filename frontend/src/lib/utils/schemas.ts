@@ -118,7 +118,8 @@ export const RiskAssessmentSchema = z.object({
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	ebios_rm_study: z.string().uuid().optional()
+	ebios_rm_study: z.string().uuid().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const ThreatSchema = z.object({
@@ -329,7 +330,8 @@ export const ComplianceAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
@@ -393,7 +395,9 @@ export const FeatureFlagsSchema = z.object({
 	ebiosrm: z.boolean().optional(),
 	privacy: z.boolean().optional(),
 	experimental: z.boolean().optional(),
-	inherent_risk: z.boolean().optional()
+	inherent_risk: z.boolean().optional(),
+	organisation_objectives: z.boolean().optional(),
+	organisation_issues: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -626,6 +630,27 @@ export const personalDataSchema = z.object({
 	assets: z.string().uuid().optional().array().optional()
 });
 
+export const organisationObjectiveSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	folder: z.string(),
+	status: z.string().optional().default('draft'),
+	health: z.string().optional(),
+	assigned_to: z.string().optional().array().optional(),
+	issues: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	tasks: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable()
+});
+export const organisationIssueSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	observation: z.string().optional().nullable(),
+	category: z.string().optional(),
+	origin: z.string().optional(),
+	assets: z.string().uuid().optional().array().optional()
+});
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -758,7 +783,8 @@ export const FindingsAssessmentSchema = z.object({
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const IncidentSchema = z.object({
@@ -943,7 +969,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,
 	'operating-modes': OperatingModeSchema,
-	'kill-chains': KillChainSchema
+	'kill-chains': KillChainSchema,
+	'organisation-objectives': organisationObjectiveSchema,
+	'organisation-issues': organisationIssueSchema
 };
 
 export const modelSchema = (model: string) => {
