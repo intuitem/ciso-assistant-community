@@ -6,7 +6,7 @@ from typing import Any, List, Self, Tuple, Generator
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -238,19 +238,20 @@ class Folder(NameDescriptionMixin):
             ra4.perimeter_folders.add(folder)
             # Clear the cache after a new folder is created - purposely clearing everything
 
-            # Create a UG and RA for each non-builtin role
-            for role in Role.objects.filter(builtin=False):
-                ug = UserGroup.objects.create(
-                    name=role.name, folder=folder, builtin=False
-                )
-                ra = RoleAssignment.objects.create(
-                    user_group=ug,
-                    role=role,
-                    builtin=False,
-                    folder=Folder.get_root_folder(),
-                    is_recursive=True,
-                )
-                ra.perimeter_folders.add(folder)
+            # Create a UG and RA for each non-builtin role (idempotent)
+            with transaction.atomic():
+                for role in Role.objects.filter(builtin=False):
+                    ug, _ = UserGroup.objects.get_or_create(
+                        name=role.name, folder=folder, defaults={"builtin": False}
+                    )
+                    ra, created = RoleAssignment.objects.get_or_create(
+                        user_group=ug,
+                        role=role,
+                        folder=Folder.get_root_folder(),
+                        defaults={"builtin": False, "is_recursive": True},
+                    )
+                    # Ensure perimeter folder link exists
+                    ra.perimeter_folders.add(folder)
 
 
 class FolderMixin(models.Model):

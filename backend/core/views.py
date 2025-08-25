@@ -2624,29 +2624,28 @@ class RoleViewSet(BaseModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Create the default user groups after role creation
+        Create per-folder UserGroups and RoleAssignments for the new role.
         """
         role = serializer.save()
-        role.permissions.add(Permission.objects.get(codename="view_folder"))
-        folders = Folder.objects.exclude(content_type="EN")
-        user_groups = [
-            UserGroup(folder=folder, name=f"{role.name}") for folder in folders
-        ]
-        UserGroup.objects.bulk_create(user_groups)
-        role_assignments = RoleAssignment.objects.bulk_create(
-            [
-                RoleAssignment(
+        role.permissions.add(
+            Permission.objects.get(
+                codename="view_folder",
+                content_type__app_label="iam",
+                content_type__model="folder",
+            )
+        )
+        with transaction.atomic():
+            for folder in Folder.objects.exclude(content_type="EN"):
+                ug, _ = UserGroup.objects.get_or_create(
+                    folder=folder, name=role.name, defaults={"builtin": False}
+                )
+                ra = RoleAssignment.objects.create(
                     folder=Folder.get_root_folder(),
                     role=role,
                     user_group=ug,
+                    is_recursive=True,
                 )
-                for ug in user_groups
-            ]
-        )
-
-        # Add the perimeter folders
-        for ra, ug in zip(role_assignments, user_groups):
-            ra.perimeter_folders.add(ug.folder)
+                ra.perimeter_folders.add(folder)
 
     def perform_update(self, serializer):
         """
@@ -2662,16 +2661,19 @@ class RoleViewSet(BaseModelViewSet):
 
     def perform_destroy(self, instance):
         """
-        Delete the user groups associated with the role
+        Delete only user groups tied to this role’s assignments, atomically.
         """
-        role_assignments = RoleAssignment.objects.filter(role=instance)
-        for ra in role_assignments:
-            ra.user_group.delete()
-
-        # Just in case, delete any other user group with the same name
-        for ug in UserGroup.objects.filter(name=instance.name):
-            ug.delete()
-        super().perform_destroy(instance)
+        with transaction.atomic():
+            ras = list(
+                RoleAssignment.objects.select_related("user_group").filter(
+                    role=instance
+                )
+            )
+            ug_ids = [ra.user_group_id for ra in ras if ra.user_group_id]
+            RoleAssignment.objects.filter(id__in=[ra.id for ra in ras]).delete()
+            if ug_ids:
+                UserGroup.objects.filter(id__in=ug_ids).delete()
+            super().perform_destroy(instance)
 
 
 class PermissionViewSet(BaseModelViewSet):

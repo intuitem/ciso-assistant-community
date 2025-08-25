@@ -101,11 +101,17 @@
 		isLoading = true;
 		try {
 			let endpoint = `/${optionsEndpoint}`;
-			const response = await fetch(endpoint);
-			if (response.ok) {
-				const data = await response.json().then((res) => res?.results ?? res);
-
-				options = data.map((option: any) => {
+			const collected: any[] = [];
+			while (endpoint) {
+				const response = await fetch(endpoint);
+				if (!response.ok) break;
+				const json = await response.json();
+				const page = json?.results ?? json;
+				collected.push(...page);
+				endpoint = json?.next ?? null; // follow DRF pagination if present
+			}
+			if (collected.length) {
+				options = collected.map((option: any) => {
 					const label = option[optionsLabelField] ?? '--';
 					const groupsList = Array.isArray(groupBy)
 						? groupBy
