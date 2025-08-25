@@ -496,7 +496,9 @@
 					zIndex="1000"
 				>
 					{#snippet trigger()}
-						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+						<span data-testid="export-button">
+							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+						</span>
 					{/snippet}
 					{#snippet content()}
 						<div>
