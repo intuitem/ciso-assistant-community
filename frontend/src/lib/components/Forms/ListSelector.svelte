@@ -163,6 +163,7 @@
 		}
 		$value = selected;
 		cacheLock.resolve(selected);
+		cachedValue = selected;
 	}
 
 	function toggleGroup(groupName: string) {
@@ -199,6 +200,7 @@
 
 		$value = selected;
 		cacheLock.resolve(selected);
+		cachedValue = selected;
 	}
 
 	function getGroupSelectionState(groupName: string) {
@@ -216,6 +218,11 @@
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult?.length) {
 			selected = cacheResult;
+			$value = selected;
+			cachedValue = selected;
+		} else if (cachedValue?.length) {
+			selected = cachedValue;
+			$value = selected;
 		}
 	});
 

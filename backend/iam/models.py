@@ -45,6 +45,14 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 
+ALLOWED_PERMISSION_APPS = (
+    "core",
+    "ebios_rm",
+    "tprm",
+    "privacy",
+    "resilience",
+)
+
 
 def _get_root_folder():
     """helper function outside of class to facilitate serialization
@@ -858,16 +866,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             elif hasattr(object_type, "parent_folder"):
                 objects_ids = [f.id]
             elif class_name == "permission":
-                # Permissions have no folder, so we don't filter them
+                # Permissions have no folder, so we don't filter them, we just rely on view_permission
                 objects_ids = Permission.objects.filter(
-                    content_type__app_label__in=[
-                        "core",
-                        "ebios_rm",
-                        "tprm",
-                        "privacy",
-                        "resilience",
-                        "core",
-                    ]
+                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
                 ).values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")

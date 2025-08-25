@@ -2652,27 +2652,48 @@ class RoleViewSet(BaseModelViewSet):
         Update the user groups associated with the role
         """
         role = serializer.save()
-        role.permissions.add(Permission.objects.get(codename="view_folder"))
-        role_assignments = RoleAssignment.objects.filter(role=role)
-        user_groups = [ra.user_group for ra in role_assignments]
-        for ug in user_groups:
-            ug.name = f"{role.name}"
-        UserGroup.objects.bulk_update(user_groups, ["name"])
+        role.permissions.add(
+            Permission.objects.get(
+                codename="view_folder",
+                content_type__app_label="iam",
+                content_type__model="folder",
+            )
+        )
+        ug_ids = (
+            RoleAssignment.objects.filter(
+                role=role, user_group__isnull=False, user_group__builtin=False
+            )
+            .values_list("user_group_id", flat=True)
+            .distinct()
+        )
+        if ug_ids:
+            UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
 
     def perform_destroy(self, instance):
         """
         Delete only user groups tied to this role’s assignments, atomically.
         """
         with transaction.atomic():
-            ras = list(
-                RoleAssignment.objects.select_related("user_group").filter(
-                    role=instance
+            ras_qs = RoleAssignment.objects.select_related("user_group").filter(
+                role=instance
+            )
+            ug_ids = list(
+                ras_qs.exclude(user_group__isnull=True).values_list(
+                    "user_group_id", flat=True
                 )
             )
-            ug_ids = [ra.user_group_id for ra in ras if ra.user_group_id]
-            RoleAssignment.objects.filter(id__in=[ra.id for ra in ras]).delete()
+            # Remove this role's assignments first
+            ras_qs.delete()
             if ug_ids:
-                UserGroup.objects.filter(id__in=ug_ids).delete()
+                # Delete only non-builtin groups that are now orphaned (no remaining RAs)
+                orphan_ug_ids = list(
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=False)
+                    .annotate(ra_count=models.Count("roleassignment"))
+                    .filter(ra_count=0)
+                    .values_list("id", flat=True)
+                )
+                if orphan_ug_ids:
+                    UserGroup.objects.filter(id__in=orphan_ug_ids).delete()
             super().perform_destroy(instance)
 
 
