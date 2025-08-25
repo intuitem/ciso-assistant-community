@@ -649,7 +649,7 @@
 						<button
 							class="btn preset-filled-secondary-500 font-semibold w-full"
 							data-testid="save-button"
-							type="submit">Save and continue</button
+							type="submit">{m.saveAndContinue()}</button
 						>
 					</div>
 				</div>

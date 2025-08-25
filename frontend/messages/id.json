@@ -1147,5 +1147,6 @@
 	],
 	"matchingScenarios": "Skenario yang cocok",
 	"select": "Pilih",
-	"deselect": "Batalkan Pilihan"
+	"deselect": "Batalkan Pilihan",
+	"saveAndContinue": "Simpan dan lanjutkan"
 }

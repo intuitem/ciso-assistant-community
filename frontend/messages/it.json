@@ -1337,5 +1337,6 @@
 	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
-	"deselect": "Deseleziona"
+	"deselect": "Deseleziona",
+	"saveAndContinue": "Salva e continua"
 }

@@ -1704,5 +1704,6 @@
 	"dataWizardTemplatesAndGuidelines": "Szablony i wytyczne",
 	"dataWizardLoadExcelData": "Załaduj dane Excel",
 	"associatedCampaigns": "Powiązane kampanie",
-	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty"
+	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
+	"saveAndContinue": "Zapisz i kontynuuj"
 }
