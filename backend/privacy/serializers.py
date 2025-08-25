@@ -40,6 +40,7 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 class PersonalDataReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assets = FieldsRelatedField(["name", "type", "folder"], many=True)
 
     class Meta:
         model = PersonalData

@@ -6,6 +6,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
@@ -55,6 +56,8 @@
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
+	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
+	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -152,10 +155,18 @@
 			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
-				createModalCache.data[model.urlModel] ??= {};
-				formDataCache = createModalCache.data[model.urlModel];
+				const currentCache = createModalCache.data[model.urlModel];
+				if (!currentCache) {
+					createModalCache.data[model.urlModel] = formDataCache;
+				} else {
+					formDataCache = currentCache;
+				}
 			}
 		}
+	});
+
+	$effect(() => {
+		createModalCache.data[model.urlModel] = formDataCache;
 	});
 
 	run(() => {
@@ -274,7 +285,7 @@
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
-			<TextArea
+			<MarkdownField
 				{form}
 				field="description"
 				label={m.description()}
@@ -349,6 +360,26 @@
 			/>
 		{:else if URLModel === 'campaigns'}
 			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
+		{:else if URLModel === 'organisation-objectives'}
+			<OrganisationObjectiveForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'organisation-issues'}
+			<OrganisationIssueForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'assets'}
 			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}

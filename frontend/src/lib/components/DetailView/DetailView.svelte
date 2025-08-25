@@ -20,6 +20,7 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
@@ -42,6 +43,8 @@
 		dateFieldsToFormat?: string[];
 		widgets?: import('svelte').Snippet;
 		actions?: import('svelte').Snippet;
+		disableCreate?: boolean;
+		disableDelete?: boolean;
 	}
 
 	let {
@@ -65,7 +68,9 @@
 			'start_date'
 		],
 		widgets,
-		actions
+		actions,
+		disableCreate = false,
+		disableDelete = false
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
@@ -411,6 +416,8 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
+											{:else if key === 'description' || key === 'observation'}
+												<MarkdownRenderer content={value} />
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
@@ -563,8 +570,8 @@
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
 									source={model.table}
-									disableCreate={model.disableCreate}
-									disableDelete={model.disableDelete}
+									disableCreate={disableCreate || model.disableCreate}
+									disableDelete={disableDelete || model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}

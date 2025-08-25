@@ -104,7 +104,10 @@ export const URL_MODEL = [
 	'asset-assessments',
 	'asset-class',
 	// campaigns,
-	'campaigns'
+	'campaigns',
+	// iso,
+	'organisation-issues',
+	'organisation-objectives'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
@@ -192,6 +195,12 @@ export interface AggregatedData {
 }
 
 export interface AppliedControlStatus {
+	localLables: string[];
+	labels: any[];
+	values: any[]; // Set these types later on
+}
+
+export interface AppliedControlImpact {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on
