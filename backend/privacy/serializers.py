@@ -1,3 +1,5 @@
+from rest_framework import serializers
+from core.constants import COUNTRY_CHOICES
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from core.serializer_fields import FieldsRelatedField
 from .models import (
@@ -88,6 +90,10 @@ class DataContractorReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()
+    country = serializers.SerializerMethodField()
+
+    def get_country(self, obj):
+        return dict(COUNTRY_CHOICES)[obj.country] if obj.country else None
 
     class Meta:
         model = DataContractor
@@ -105,6 +111,10 @@ class DataTransferReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()
+    country = serializers.SerializerMethodField()
+
+    def get_country(self, obj):
+        return dict(COUNTRY_CHOICES)[obj.country] if obj.country else None
 
     class Meta:
         model = DataTransfer
