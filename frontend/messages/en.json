@@ -202,6 +202,8 @@
 	"importMatrices": "Import matrices",
 	"importFrameworks": "Import frameworks",
 	"importMappings": "Import mappings",
+	"importThreats": "Import threats",
+	"importReferenceControls": "Import reference controls",
 	"summary": "Summary",
 	"composer": "Composer",
 	"statistics": "Statistics",
