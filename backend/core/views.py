@@ -380,8 +380,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         if not initial_objects:
             return {}
 
-        initial_ids = {obj.id for obj in initial_objects}
-
         path_results = {}
         folder_map = {}
 
@@ -704,15 +702,20 @@ class AssetViewSet(BaseModelViewSet):
         all_related_assets = Asset.objects.filter(id__in=all_ancestor_ids)
         asset_map = {asset.id: asset for asset in all_related_assets}
 
-        links = Asset.parent_assets.through.objects.filter(
+        _links = Asset.parent_assets.through.objects.filter(
             Q(from_asset_id__in=all_ancestor_ids) | Q(to_asset_id__in=all_ancestor_ids)
         ).values_list("from_asset_id", "to_asset_id")
+        links = [
+            (asset_map[child], asset_map[parent])
+            for child, parent in _links
+            if child in asset_map and parent in asset_map
+        ]
 
         child_to_parents = {}
         parent_to_children = {}
-        for child_id, parent_id in links:
-            child_to_parents.setdefault(child_id, set()).add(parent_id)
-            parent_to_children.setdefault(parent_id, set()).add(child_id)
+        for child_asset, parent_asset in links:
+            child_to_parents.setdefault(child_asset, set()).add(parent_asset)
+            parent_to_children.setdefault(parent_asset, set()).add(child_asset)
 
         # Cache settings and prepare result dictionaries.
         general_settings = GlobalSettings.objects.filter(name="general").first()
@@ -729,17 +732,20 @@ class AssetViewSet(BaseModelViewSet):
         for asset in initial_assets:
             # Calculate descendants
             descendants = set()
-            q = [asset.id]
+            q = [asset]
             visited_descendants = {asset.id}
             while q:
-                curr_id = q.pop(0)
-                if curr_id != asset.id:
-                    descendants.add(curr_id)
-                for child_id in parent_to_children.get(curr_id, []):
-                    if child_id not in visited_descendants:
-                        visited_descendants.add(child_id)
-                        q.append(child_id)
-            descendant_results[asset.id] = [{"id": str(id)} for id in descendants]
+                curr_asset = q.pop(0)
+                if curr_asset.id != asset.id:
+                    descendants.add(curr_asset)
+                for child_asset in parent_to_children.get(curr_asset, []):
+                    if child_asset.id not in visited_descendants:
+                        visited_descendants.add(child_asset.id)
+                        q.append(child_asset)
+            descendant_results[asset.id] = [
+                {"id": str(descendant.id), "str": str(descendant)}
+                for descendant in descendants
+            ]
 
             # Calculate objectives
             if asset.is_primary:
@@ -757,13 +763,13 @@ class AssetViewSet(BaseModelViewSet):
             q = [asset.id]
             visited_ancestors = {asset.id}
             while q:
-                curr_id = q.pop(0)
-                if curr_id in asset_map:
-                    ancestors.add(asset_map[curr_id])
-                for parent_id in child_to_parents.get(curr_id, []):
-                    if parent_id not in visited_ancestors:
-                        visited_ancestors.add(parent_id)
-                        q.append(parent_id)
+                curr_asset = q.pop(0)
+                if curr_asset in asset_map:
+                    ancestors.add(asset_map[curr_asset])
+                for parent_asset in child_to_parents.get(curr_asset, []):
+                    if parent_asset not in visited_ancestors:
+                        visited_ancestors.add(parent_asset)
+                        q.append(parent_asset)
 
             primary_ancestors = {anc for anc in ancestors if anc.is_primary}
 

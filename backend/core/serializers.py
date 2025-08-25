@@ -4,6 +4,7 @@ from typing import Any
 import structlog
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -417,7 +418,7 @@ class AssetReadSerializer(AssetWriteSerializer):
             return optimized_data.get("descendants", {}).get(obj.id, [])
 
         # Fallback for single object serialization (e.g., retrieve endpoint)
-        return obj.children_assets.values("id")
+        return obj.children_assets.annotate(str=F("name")).values("id", "str")
 
     def get_security_objectives(self, obj):
         """
