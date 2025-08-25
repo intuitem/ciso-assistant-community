@@ -189,6 +189,8 @@
 	"importMatrices": "استيراد المصفوفات",
 	"importFrameworks": "استيراد الأطر",
 	"importMappings": "استيراد المخططات",
+	"importThreats": "استيراد تهديدات",
+	"importReferenceControls": "استيراد تحكمات مرجعية",
 	"summary": "الملخص",
 	"composer": "الملحن",
 	"statistics": "الإحصائيات",
