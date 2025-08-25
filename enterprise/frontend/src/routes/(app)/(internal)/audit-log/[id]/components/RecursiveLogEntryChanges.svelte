@@ -5,15 +5,15 @@
 
 	type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
-	interface Props {
-		log: { action: string; changes: Record<string, any> };
-		level?: number; // Optional level for indentation or depth tracking
-	}
-
 	// Define the structure for a single processed change
 	interface ProcessedChange {
 		before: ProcessedValue;
 		after: ProcessedValue;
+	}
+
+	interface Props {
+		log: { action: string; changes: Record<string, any> };
+		level?: number; // Optional level for indentation or depth tracking
 	}
 
 	let { log, level = 0 }: Props = $props();
@@ -89,10 +89,26 @@
 			return false; // Assume not equal if stringify fails
 		}
 	};
+
+	/**
+	 * Determines whether two values are effectively equal or ignorable.
+	 * @returns True if values are deeply equal or ends with '.None' states (not to be confused with the string "None" which represents empty fields),
+	 * false otherwise.
+	 */
+	function isSkippableChange(before: any, after: any): boolean {
+		return (
+			deepCompare(before, after) ||
+			(typeof before === 'string' && before.endsWith('.None')) ||
+			(typeof after === 'string' && after.endsWith('.None'))
+		);
+	}
+
 	// Calculate the changes, filtering out non-changes
 	const changes: Record<string, ProcessedChange> = Object.entries(log.changes || {}) // Handle case where log.changes might be undefined
 		.reduce(
 			(acc, [key, value]) => {
+				key = key === 'id' ? 'UUID' : key;
+
 				// Ensure the value is structured as expected
 				if (Array.isArray(value) && value.length === 2) {
 					const beforeValue = value[0];
@@ -102,9 +118,7 @@
 					let processedBefore = tryParseJsonIfNeeded(beforeValue);
 					let processedAfter = tryParseJsonIfNeeded(afterValue);
 
-					// console.log(`[${key}]`, processedBefore, processedAfter);
-
-					if (deepCompare(processedBefore, processedAfter)) {
+					if (isSkippableChange(processedBefore, processedAfter)) {
 						// If values are identical after processing, skip this entry
 						return acc;
 					}
@@ -143,7 +157,6 @@
 					<span class="flex flex-row h-full border-l border-gray-50 border-dashed">
 						<div class="w-full">
 							{#each allKeys as subKey}
-								{console.log(subKey, change.before[subKey], change.after[subKey])}
 								{@const subLog = {
 									changes: { [subKey]: [change.before[subKey], change.after[subKey]] },
 									action: log.action
