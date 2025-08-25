@@ -477,7 +477,7 @@
 									<BarChart
 										name="qualificationsBar"
 										title={m.qualificationsChartTitle()}
-										labels={data.qualifications_count.results.labels}
+										labels={localizeChartLabels(data.qualifications_count.results.labels)}
 										values={data.qualifications_count.results.values}
 										horizontal={true}
 									/>
