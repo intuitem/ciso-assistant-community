@@ -132,6 +132,7 @@
 	"residualLevel": "Residual level",
 	"riskMatrix": "Risk matrix",
 	"riskMatrixColon": "Risk matrix:",
+	"riskOptionHelper": "You can review your levels definition by clicking on the matrix above (opens in a new tab)",
 	"perimeter": "Perimeter",
 	"folder": "Domain",
 	"riskAssessment": "Risk assessment",
@@ -285,6 +286,10 @@
 	"riskLevels": "Risk levels",
 	"riskLevel": "Risk level",
 	"cancel": "Cancel",
+	"externalLinkWarning": "External link warning",
+	"externalLinkConfirmMessage": "You are about to leave the app and access an external website:",
+	"externalLinkVerifyMessage": "Please verify this is the correct destination before continuing.",
+	"continue": "Continue",
 	"save": "Save",
 	"assetsImpactedByTheRiskScenario": "Assets impacted by the risk scenario",
 	"theExistingAppliedControlsToManageThisRisk": "The existing applied controls to manage this risk",
@@ -1799,5 +1804,10 @@
 	"lockedAssessmentMessage": "This assessment is locked and cannot be modified except for unlocking it.",
 	"lockedRiskScenarioMessage": "This risk scenario cannot be modified because its parent risk assessment is locked.",
 	"lockedRequirementAssessmentMessage": "This requirement cannot be modified because its parent compliance assessment is locked.",
-	"lockedFindingMessage": "This finding cannot be modified because its parent findings assessment is locked."
+	"lockedFindingMessage": "This finding cannot be modified because its parent findings assessment is locked.",
+	"impactEffortMatrixHint": "Hint: refresh the page to redraw the matrix",
+	"resetFilter": "Reset filter",
+	"noActiveFilter": "No active filter",
+	"showingAllAppliedControls": "Showing all applied controls",
+	"showingItemsWith": "Showing items with"
 }

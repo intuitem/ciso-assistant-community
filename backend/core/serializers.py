@@ -286,6 +286,17 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
                 )
         return super().validate(attrs)
 
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
@@ -626,11 +637,59 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        owner_data = validated_data.get("owner", [])
         applied_control = super().create(validated_data)
         findings = validated_data.pop("findings", [])
         if findings:
             applied_control.findings.set(findings)
+
+        # Send notification to newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                applied_control, [user.id for user in owner_data]
+            )
+
         return applied_control
+
+    def update(self, instance, validated_data):
+        # Track old owners before update
+        old_owner_ids = set(instance.owner.values_list("id", flat=True))
+
+        updated_instance = super().update(instance, validated_data)
+
+        # Get new owners after update
+        new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned owners
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, applied_control, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_applied_control_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=owner_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                # Queue the task for async execution
+                send_applied_control_assignment_notification(
+                    applied_control.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send AppliedControl assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = AppliedControl
@@ -1281,7 +1340,63 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
-        return super().create(validated_data)
+        authors_data = validated_data.get("authors", [])
+        assessment = super().create(validated_data)
+
+        # Send notification to newly assigned authors
+        if authors_data:
+            self._send_assignment_notifications(
+                assessment, [user.id for user in authors_data]
+            )
+
+        return assessment
+
+    def update(self, instance, validated_data):
+        # Track old authors before update
+        old_author_ids = set(instance.authors.values_list("id", flat=True))
+
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        updated_instance = super().update(instance, validated_data)
+
+        # Get new authors after update
+        new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned authors
+        newly_assigned_ids = new_author_ids - old_author_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, assessment, author_ids):
+        """Send assignment notifications to the specified authors"""
+        if not author_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_compliance_assessment_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=author_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                send_compliance_assessment_assignment_notification(
+                    assessment.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send ComplianceAssessment assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = ComplianceAssessment
@@ -1517,6 +1632,17 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
                     f"⚠️ Cannot modify the findings assessment attributes when it is locked. Only the 'Locked' field can be modified."
                 )
         return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
 
     class Meta:
         model = FindingsAssessment
@@ -1806,18 +1932,59 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
+        assigned_to_data = validated_data.get("assigned_to", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().create(validated_data)
         self._sync_task_node(instance, tasknode_data, False, False)
+
+        # Send notification to newly assigned users
+        if assigned_to_data:
+            self._send_assignment_notifications(
+                instance, [user.id for user in assigned_to_data]
+            )
+
         return instance
 
     def update(self, instance, validated_data):
+        # Track old assigned users before update
+        old_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
+
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().update(instance, validated_data)
         now_recurrent = instance.is_recurrent
         self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+
+        # Get new assigned users after update
+        new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned users
+        newly_assigned_ids = new_assigned_ids - old_assigned_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(instance, list(newly_assigned_ids))
+
         return instance
+
+    def _send_assignment_notifications(self, task_template, user_ids):
+        """Send assignment notifications to the specified users"""
+        if not user_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_task_template_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=user_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                send_task_template_assignment_notification(
+                    task_template.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send TaskTemplate assignment notification: {str(e)}"
+            )
 
     def _extract_tasknode_fields(self, validated_data):
         """
