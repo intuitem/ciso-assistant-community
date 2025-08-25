@@ -34,6 +34,7 @@ type Fixtures = {
 	findingsAssessmentsPage: PageContent;
 	findingsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
+	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
 	settingsPage: PageContent;
@@ -315,6 +316,19 @@ export const test = base.extend<Fixtures>({
 			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'due_date', type: type.DATE }
+		]);
+		await use(bPage);
+	},
+
+	ebiosRmStudyPage: async ({ page }, use) => {
+		const bPage = new PageContent(page, '/ebios-rm', /Ebios RM stud(ies|y)/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(bPage);
 	},
