@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0090_complianceassessment_is_locked_and_more'),
+        ("core", "0090_complianceassessment_is_locked_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='asset',
-            name='parent_assets',
-            field=models.ManyToManyField(blank=True, related_name='child_assets', to='core.asset', verbose_name='parent assets'),
+            model_name="asset",
+            name="parent_assets",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="child_assets",
+                to="core.asset",
+                verbose_name="parent assets",
+            ),
         ),
     ]
