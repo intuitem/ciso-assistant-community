@@ -190,6 +190,8 @@
 	"importMatrices": "Matrijzen importeren",
 	"importFrameworks": "Kaders importeren",
 	"importMappings": "Importeer toewijzingen",
+	"importThreats": "Importeer bedreigingen",
+	"importReferenceControls": "Importeer referentiecontroles",
 	"summary": "Samenvatting",
 	"composer": "Samensteller",
 	"statistics": "Statistieken",
