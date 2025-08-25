@@ -244,9 +244,7 @@ test('Feature Flags - Inherent Risk  reate folder, perimeter and risk assessment
 	});
 
 	await test.step('Create risk assessment', async () => {
-		await sideBar.click('Risk', pages.riskAssessmentsPage.url);
-		await pages.riskAssessmentsPage.hasUrl();
-		await pages.riskAssessmentsPage.hasTitle();
+		riskAssessmentsPage.goto();
 
 		await riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
@@ -323,25 +321,19 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 });
 
-test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ logedPage, page }) => {
+test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({
+	logedPage,
+	page,
+	ebiosRMPage
+}) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 
-	let risksPage = new PageContent(page, '/ebios-rm', 'Ebios RM');
-	await risksPage.goto();
+	await ebiosRMPage.createItem({
+		name: vars.ebiosRMName,
+		risk_matrix: '4x4 risk matrix from EBIOS-RM'
+	});
 
-	await page.getByTestId('add-button').click();
-	await page.getByTestId('form-input-name').fill('test-ebios-rm');
-	await page.getByTestId('form-input-folder').click();
-
-	const options = await page.getByRole('option').all();
-
-	if (options.length === 1) {
-		await expect(options[0]).toHaveText(vars.folderName);
-	} else {
-		await page.getByRole('option', { name: vars.folderName }).click();
-	}
-	await page.getByTestId('save-button').click();
-	await page.getByText('test-ebios-rm').click();
+	await page.getByText(vars.ebiosRMName).click();
 
 	await page.getByText('Generate the risk assessment').click();
 	await page.getByTestId('form-input-name').fill('test-risk-assessment-ebios-rm');
@@ -351,7 +343,7 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({ log
 
 	await toggleFeatureFlag(page, 'inherent-risk', false);
 
-	risksPage = new PageContent(page, '/risk-assessments', 'Risk Assessments');
+	let risksPage = new PageContent(page, '/risk-assessments', 'Risk Assessments');
 	await risksPage.goto();
 	await page.getByText('test-risk-assessment-ebios-rm').click();
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).not.toBeVisible();
