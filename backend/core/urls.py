@@ -54,6 +54,16 @@ router.register(
     CampaignViewSet,
     basename="campaigns",
 )
+router.register(
+    r"organisation-objectives",
+    OrganisationObjectiveViewSet,
+    basename="organisation-objectives",
+)
+router.register(
+    r"organisation-issues",
+    OrganisationIssueViewSet,
+    basename="organisation-issues",
+)
 router.register(r"requirement-nodes", RequirementViewSet, basename="requirement-nodes")
 router.register(
     r"requirement-assessments",
