@@ -1699,5 +1699,6 @@
 	"dataWizardParsingResults": "Ayrıştırma sonuçları:",
 	"dataWizardTemplatesAndGuidelines": "Şablonlar ve yönergeler",
 	"dataWizardLoadExcelData": "Excel verisini yükle",
-	"associatedCampaigns": "İlişkili kampanyalar"
+	"associatedCampaigns": "İlişkili kampanyalar",
+	"saveAndContinue": "Kaydet ve devam et"
 }

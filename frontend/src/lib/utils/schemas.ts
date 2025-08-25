@@ -277,7 +277,8 @@ export const RequirementAssessmentSchema = z.object({
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	security_exceptions: z.string().uuid().optional().array().optional()
+	security_exceptions: z.string().uuid().optional().array().optional(),
+	noRedirect: z.boolean().default(false)
 });
 
 export const UserEditSchema = z.object({

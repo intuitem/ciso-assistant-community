@@ -1663,5 +1663,6 @@
 	"dataWizardSelectFramework": "Επιλέξτε Πλαίσιο",
 	"dataWizardParsingResults": "Αποτελέσματα ανάλυσης:",
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
-	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel"
+	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
+	"saveAndContinue": "Αποθήκευση και συνέχιση"
 }

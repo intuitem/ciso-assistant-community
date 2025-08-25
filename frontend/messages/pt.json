@@ -959,5 +959,6 @@
 	"matchingScenarios": "Cenários correspondentes",
 	"select": "Selecionar",
 	"deselect": "Desmarcar",
-	"fearedEventAssetHelpText": "Os eventos temidos são geralmente vinculados a valores empresariais (ativos primários). Ativos de suporte são permitidos aqui para flexibilidade."
+	"fearedEventAssetHelpText": "Os eventos temidos são geralmente vinculados a valores empresariais (ativos primários). Ativos de suporte são permitidos aqui para flexibilidade.",
+	"saveAndContinue": "Salvar e continuar"
 }
