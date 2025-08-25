@@ -137,7 +137,7 @@
 									{@const title =
 										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
 									<Anchor
-										href={`/libraries?object_type=${URLModel}`}
+										href={`/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 										label={m.libraries()}
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										data-testid="import-button"
@@ -170,34 +170,22 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
-							{:else if URLModel === 'risk-matrices'}
+							{:else if ['risk-matrices', 'frameworks', 'requirement-mapping-sets'].includes(URLModel)}
+								{@const href = `/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
+								{@const title =
+									URLModel === 'risk-matrices'
+										? m.importMatrices()
+										: URLModel === 'frameworks'
+											? m.importFrameworks()
+											: m.importMappings()}
 								<Anchor
-									href="/libraries?object_type=risk_matrix"
+									{href}
 									onclick={handleClickForGT}
 									label={m.libraries()}
 									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									data-testid="import-button"
 									id="add-button"
-									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
-								>
-							{:else if URLModel === 'frameworks'}
-								<Anchor
-									href="/libraries?object_type=frameworks"
-									onclick={handleClickForGT}
-									label={m.libraries()}
-									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									data-testid="import-button"
-									id="add-button"
-									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
-								>
-							{:else if URLModel === 'requirement-mapping-sets'}
-								<Anchor
-									href="/libraries?object_type=requirement_mapping_set"
-									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									label={m.libraries()}
-									data-testid="import-button"
-									id="add-button"
-									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></Anchor
+									{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
 							{/if}
 						</span>
