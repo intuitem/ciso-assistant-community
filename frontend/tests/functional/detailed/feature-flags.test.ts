@@ -236,11 +236,7 @@ test('Feature Flags - Inherent Risk  reate folder, perimeter and risk assessment
 	await test.step('Import a risk matrix', async () => {
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
-
 		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
-
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
 
 	await test.step('Create risk assessment', async () => {
@@ -329,9 +325,11 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({
 	ebiosRMPage
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
-
+	await ebiosRMPage.goto();
+	await ebiosRMPage.hasUrl();
 	await ebiosRMPage.createItem({
 		name: vars.ebiosRMName,
+		folder: vars.folderName,
 		risk_matrix: '4x4 risk matrix from EBIOS-RM'
 	});
 

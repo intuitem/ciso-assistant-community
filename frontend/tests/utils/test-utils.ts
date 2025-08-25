@@ -590,9 +590,11 @@ export class TestContent {
 			ebiosRMPage: {
 				displayName: 'Ebios RM',
 				modelName: 'ebiosrm',
+				dependency: vars.matrix,
 				build: {
 					name: vars.ebiosRMName,
-					folder: vars.folderName
+					folder: vars.folderName,
+					risk_matrix: vars.matrix.displayName
 				},
 				editParams: {
 					name: ''
