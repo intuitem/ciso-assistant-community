@@ -592,7 +592,7 @@ export class TestContent {
 				modelName: 'ebiosrm',
 				build: {
 					name: vars.ebiosRMName,
-					folder: vars.folderName,
+					folder: vars.folderName
 				},
 				editParams: {
 					name: ''

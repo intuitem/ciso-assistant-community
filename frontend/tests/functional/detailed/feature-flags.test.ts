@@ -244,13 +244,15 @@ test('Feature Flags - Inherent Risk  reate folder, perimeter and risk assessment
 	});
 
 	await test.step('Create risk assessment', async () => {
-		riskAssessmentsPage.goto();
+		page.getByTestId('accordion-item-risk').click();
+		await expect(page.getByTestId('accordion-item-risk-assessments')).toBeVisible();
+		page.getByTestId('accordion-item-risk-assessments').click();
 
 		await riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
 			perimeter: `${vars.folderName}/${vars.perimeterName}`,
-			description: vars.description,
 			authors: ['admin@tests.com'],
+			risk_matrix: '4x4 risk matrix from EBIOS-RM',
 			version: vars.riskAssessmentVersion
 		});
 	});
