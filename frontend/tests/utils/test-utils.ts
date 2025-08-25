@@ -593,7 +593,6 @@ export class TestContent {
 				build: {
 					name: vars.ebiosRMName,
 					folder: vars.folderName,
-					risk_matrix: '4x4 risk matrix from EBIOS-RM'
 				},
 				editParams: {
 					name: ''
