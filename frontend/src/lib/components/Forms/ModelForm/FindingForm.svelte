@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -27,6 +28,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context?: string;
+		object?: any;
 	}
 
 	let {
@@ -35,8 +37,11 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context = 'default'
+		context = 'default',
+		object
 	}: Props = $props();
+
+	let isParentLocked = $derived(object?.findings_assessment?.is_locked || false);
 
 	const modalStore = getModalStore();
 
@@ -186,5 +191,13 @@
 		helpText={m.labelsHelpText()}
 		label={m.labels()}
 		allowUserOptions="append"
+	/>
+	<MarkdownField
+		{form}
+		field="observation"
+		label={m.observation()}
+		helpText={m.observationHelpText()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
 	/>
 </Dropdown>
