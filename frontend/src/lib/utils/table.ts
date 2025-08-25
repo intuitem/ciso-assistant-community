@@ -1471,6 +1471,11 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER
 		}
 	},
+	'audit-logs': {
+		head: ['actor', 'action', 'content_type', 'timestamp', 'domain'],
+		body: ['actor', 'action', 'content_type', 'timestamp', 'folder'],
+		meta: []
+	},
 	'task-templates': {
 		head: [
 			'name',
