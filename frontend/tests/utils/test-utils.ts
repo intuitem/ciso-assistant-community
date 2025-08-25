@@ -7,7 +7,6 @@ import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
-import { ebiosRM } from '$paraglide/messages.js';
 
 type Fixtures = {
 	data: { [key: string]: any };
@@ -594,7 +593,7 @@ export class TestContent {
 				build: {
 					name: vars.ebiosRMName,
 					folder: vars.folderName,
-					risk_matrix: vars.matrix.displayName
+					risk_matrix: '4x4 risk matrix from EBIOS-RM'
 				},
 				editParams: {
 					name: ''
