@@ -83,6 +83,14 @@
 	run(() => {
 		$value = codes.join('');
 	});
+
+	$effect(() => {
+		if (inputs[0]) {
+			setTimeout(() => {
+				inputs[0]?.focus();
+			}, 200);
+		}
+	});
 </script>
 
 {#if $errors}
