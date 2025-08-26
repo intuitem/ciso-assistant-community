@@ -9,7 +9,7 @@
 	let { data }: Props = $props();
 	const detailData = {
 		data: data.log,
-		model: { name: 'auditlog', foreignKeyFields: data.foreignKeyFields }
+		model: { name: 'auditlog', foreignKeyFields: [{ field: 'actor', urlModel: 'users' }] }
 	};
 </script>
 

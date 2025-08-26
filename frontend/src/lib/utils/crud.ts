@@ -1363,19 +1363,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeters' }
 		]
 	},
-	'audit-logs': {
-		name: 'auditlog',
-		localName: 'auditLog',
-		localNamePlural: 'auditLogs',
-		verboseName: 'Audit log',
-		verboseNamePlural: 'Audit logs',
-		foreignKeyFields: [
-			{
-				field: 'actor',
-				urlModel: 'users'
-			}
-		]
-	},
 	'organisation-objectives': {
 		name: 'organisationobjective',
 		localName: 'organisationObjective',

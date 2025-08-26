@@ -1,6 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { m } from '$paraglide/messages';
-import { getModelInfo } from '$lib/utils/crud';
 import { safeTranslate } from '$lib/utils/i18n';
 import type { PageServerLoad } from './$types';
 
@@ -12,11 +11,9 @@ export const load = (async ({ fetch, params }) => {
 			throw new Error(`Failed to fetch log entry: ${res.status}`);
 		}
 		const log = await res.json();
-		const { foreignKeyFields } = getModelInfo('audit-logs');
 
 		return {
 			log,
-			foreignKeyFields,
 			title: m.logEntryRepr({
 				actor: log.actor.str,
 				action: safeTranslate(log.action),
