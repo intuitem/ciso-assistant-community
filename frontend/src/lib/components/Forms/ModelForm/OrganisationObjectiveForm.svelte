@@ -52,6 +52,24 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
+<TextField
+	type="date"
+	{form}
+	field="eta"
+	label={m.eta()}
+	helpText={m.etaHelpText()}
+	cacheLock={cacheLocks['eta']}
+	bind:cachedValue={formDataCache['eta']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	helpText={m.dueDateHelpText()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
+/>
 <Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select
 		{form}

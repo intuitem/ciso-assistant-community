@@ -1769,5 +1769,14 @@
 	"showingItemsWith": "Showing items with",
 	"projectManagement": "Gestion de projet",
 	"relationships": "Relations",
-	"associatedOrganisationObjectives": "Objectifs associés"
+	"associatedOrganisationObjectives": "Objectifs associés",
+	"political": "Politique",
+	"economic": "Economique",
+	"social": "Social",
+	"technology": "Technologique",
+	"organisationStructure": "Structure organisationnelle",
+	"humanResources": "Ressources humaines",
+	"internalProcesses": "Processus interne",
+	"financialCapacity": "Capacité financière",
+	"companyCulture": "Culture d'entreprise / communication"
 }

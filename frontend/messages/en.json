@@ -1803,5 +1803,9 @@
 	"showingItemsWith": "Showing items with",
 	"projectManagement": "Project management",
 	"relationships": "Relationships",
-	"associatedOrganisationObjectives": "Associated objectives"
+	"associatedOrganisationObjectives": "Associated objectives",
+	"political": "Political",
+	"economic": "Economic",
+	"social": "Social",
+	"technology": "Technological"
 }

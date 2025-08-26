@@ -641,7 +641,9 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
