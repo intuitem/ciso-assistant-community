@@ -11,6 +11,10 @@ from .models import (
 
 from rest_framework.decorators import action
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "crq.serializers"
@@ -65,15 +69,18 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
 
         try:
             results = hypothesis.run_simulation(sim_size=sim_size, write=write)
-
             return Response(results, status=status.HTTP_200_OK)
 
         except ValueError as e:
-            # Catch validation errors from the model method
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.warning(
+                "Validation error during risk hypothesis simulation: %s",
+                e,
+                exc_info=True,
+            )
+            return Response(
+                {"error": "Invalid input provided."}, status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
-            # Catch any other unexpected errors during simulation
-            # In a real app, you would want to log this error
             return Response(
                 {"error": "An unexpected error occurred during the simulation."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
