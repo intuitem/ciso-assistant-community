@@ -1399,6 +1399,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'assets', urlModel: 'assets' }
 		],
+		reverseForeignKeyFields: [
+			{
+				field: 'issues',
+				urlModel: 'organisation-objectives',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
 		filters: [{ field: 'folder' }]
 	}
 };

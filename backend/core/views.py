@@ -4320,7 +4320,7 @@ class QualificationViewSet(BaseModelViewSet):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health"]
+    filterset_fields = ["folder", "status", "health", "issues"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

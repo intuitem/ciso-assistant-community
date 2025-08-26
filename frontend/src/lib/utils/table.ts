@@ -1458,8 +1458,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'domain', 'status', 'health'],
-		body: ['name', 'folder', 'status', 'health'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'assigned_to'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
