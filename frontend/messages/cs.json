@@ -190,6 +190,8 @@
 	"importMatrices": "Import matic",
 	"importFrameworks": "Import rámců",
 	"importMappings": "Import mapování",
+	"importThreats": "Import hrozeb",
+	"importReferenceControls": "Import referenčních kontrol",
 	"summary": "Souhrn",
 	"composer": "Správa závislostí",
 	"statistics": "Statistiky",
