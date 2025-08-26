@@ -141,7 +141,7 @@
 										label={m.libraries()}
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										data-testid="import-button"
-										id="add-button"
+										id="import-button"
 										{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 									>
 								{/if}
