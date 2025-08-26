@@ -1,4 +1,5 @@
 import numpy as np
+from crq.models import QuantitativeRiskHypothesis
 from scipy.stats import norm
 
 
@@ -33,13 +34,7 @@ def parse_probability(prob_input: dict, ref_period_in_seconds: int) -> float:
     given reference period.
     """
 
-    time_units_in_seconds = {
-        "hour": 3600,
-        "day": 86400,
-        "week": 604800,
-        "month": 2628000,
-        "year": 31536000,
-    }
+    time_units_in_seconds = QuantitativeRiskHypothesis.REFERENCE_PERIOD_SECONDS
 
     prob_type = prob_input.get("type")
 
