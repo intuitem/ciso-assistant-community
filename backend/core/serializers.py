@@ -1012,7 +1012,7 @@ class RoleReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def get_permissions(self, obj):
-        return [{"str": perm.name} for perm in obj.permissions.all()]
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
 
 
 class RoleWriteSerializer(BaseModelSerializer):
@@ -1022,7 +1022,7 @@ class RoleWriteSerializer(BaseModelSerializer):
 
 
 class PermissionReadSerializer(BaseModelSerializer):
-    content_type = FieldsRelatedField(fields=["app_label"])
+    content_type = FieldsRelatedField(fields=["app_label", "model"])
 
     class Meta:
         model = Permission

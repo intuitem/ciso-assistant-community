@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { onMount, getContext, onDestroy } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
+	import * as m from '$paraglide/messages';
 
 	interface Option {
 		label: string;
@@ -12,8 +13,11 @@
 		translatedLabel?: string;
 	}
 
-	interface GroupedOptions {
-		[groupName: string]: Option[];
+	interface NestedGroup {
+		[key: string]: {
+			options: Option[];
+			subGroups: NestedGroup;
+		};
 	}
 
 	interface Props {
@@ -23,15 +27,15 @@
 		helpText?: string;
 		optionsEndpoint: string;
 		optionsLabelField?: string;
-		groupBy?: { field: string; path: string[] }[] | string; // Support multiple grouping fields for sub-grouping and path for nested fields
+		groupBy?: { field: string; path: string[] }[] | string;
 		cacheLock?: CacheLock;
 		cachedValue?: (string | number)[] | undefined;
 		translateOptions?: boolean;
 		disabled?: boolean;
 		mandatory?: boolean;
-		showGroupHeaders?: boolean; // Control group header visibility
-		collapsibleGroups?: boolean; // Make groups collapsible
-		defaultCollapsed?: boolean; // Control default collapse state
+		showGroupHeaders?: boolean;
+		collapsibleGroups?: boolean;
+		defaultCollapsed?: boolean;
 	}
 
 	let {
@@ -58,42 +62,94 @@
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	let options: Option[] = $state([]);
-	let groupedOptions: GroupedOptions = $state({});
+	let nestedGroups: NestedGroup = $state({});
 	let collapsedGroups: Set<string> = $state(new Set());
 	let selected: (string | number)[] = $state([]);
 	let isLoading = $state(false);
 
-	// Helper function to create group key from groupsList
-	function createGroupKey(groupsList: string[]): string {
-		return groupsList.filter(Boolean).join(' > ') || 'Other';
+	// Helper function to create nested structure from groupsList
+	function createNestedGroups(opts: Option[]): NestedGroup {
+		if (!groupBy) {
+			return {
+				All: {
+					options: opts,
+					subGroups: {}
+				}
+			};
+		}
+
+		const nested: NestedGroup = {};
+
+		opts.forEach((option) => {
+			const groupsList = option.groupsList || [];
+			let currentLevel = nested;
+			let pathSoFar = '';
+
+			// Navigate/create the nested structure
+			groupsList.forEach((group, index) => {
+				pathSoFar = pathSoFar ? `${pathSoFar}>${group}` : group;
+
+				if (!currentLevel[group]) {
+					currentLevel[group] = {
+						options: [],
+						subGroups: {}
+					};
+				}
+
+				// If this is the last level, add the option
+				if (index === groupsList.length - 1) {
+					currentLevel[group].options.push(option);
+				}
+
+				// Move to next level
+				currentLevel = currentLevel[group].subGroups;
+			});
+
+			// If no groups, add to root
+			if (groupsList.length === 0) {
+				if (!nested['Other']) {
+					nested['Other'] = { options: [], subGroups: {} };
+				}
+				nested['Other'].options.push(option);
+			}
+		});
+
+		return nested;
 	}
 
-	// Helper function to initialize collapsed groups
-	function initializeCollapsedGroups(grouped: GroupedOptions): Set<string> {
+	// Initialize collapsed groups recursively
+	function initializeCollapsedGroups(nested: NestedGroup, prefix = ''): Set<string> {
 		if (!collapsibleGroups || !defaultCollapsed) {
 			return new Set();
 		}
-		return new Set(Object.keys(grouped));
-	}
 
-	// Group options by their group fields
-	function groupOptions(opts: Option[]): GroupedOptions {
-		if (!groupBy) {
-			return { All: opts };
+		const collapsed = new Set<string>();
+
+		function traverse(groups: NestedGroup, currentPrefix: string) {
+			Object.keys(groups).forEach((key) => {
+				const fullPath = currentPrefix ? `${currentPrefix}>${key}` : key;
+				collapsed.add(fullPath);
+
+				// Recursively traverse subgroups
+				if (groups[key].subGroups && Object.keys(groups[key].subGroups).length > 0) {
+					traverse(groups[key].subGroups, fullPath);
+				}
+			});
 		}
 
-		const grouped: GroupedOptions = {};
+		traverse(nested, prefix);
+		return collapsed;
+	}
 
-		opts.forEach((option) => {
-			const groupKey = createGroupKey(option.groupsList || []);
+	// Get all options from a nested group recursively
+	function getAllOptionsFromGroup(group: { options: Option[]; subGroups: NestedGroup }): Option[] {
+		let allOptions = [...group.options];
 
-			if (!grouped[groupKey]) {
-				grouped[groupKey] = [];
-			}
-			grouped[groupKey].push(option);
+		Object.values(group.subGroups).forEach((subGroup) => {
+			allOptions = [...allOptions, ...getAllOptionsFromGroup(subGroup)];
 		});
 
-		return grouped;
+		return allOptions;
 	}
 
 	// fetch options
@@ -108,7 +164,7 @@
 				const json = await response.json();
 				const page = json?.results ?? json;
 				collected.push(...page);
-				endpoint = json?.next ?? null; // follow DRF pagination if present
+				endpoint = json?.next ?? null;
 			}
 			if (collected.length) {
 				options = collected.map((option: any) => {
@@ -135,12 +191,12 @@
 					};
 				});
 
-				// Group the options
-				groupedOptions = groupOptions(options);
+				// Create nested structure
+				nestedGroups = createNestedGroups(options);
 
-				// Initialize collapsed state after grouping
+				// Initialize collapsed state
 				if (collapsibleGroups && defaultCollapsed) {
-					collapsedGroups = initializeCollapsedGroups(groupedOptions);
+					collapsedGroups = initializeCollapsedGroups(nestedGroups);
 				}
 			}
 
@@ -166,20 +222,20 @@
 		cachedValue = selected;
 	}
 
-	function toggleGroup(groupName: string) {
+	function toggleGroup(groupPath: string) {
 		if (!collapsibleGroups) return;
 
-		if (collapsedGroups.has(groupName)) {
-			collapsedGroups.delete(groupName);
+		if (collapsedGroups.has(groupPath)) {
+			collapsedGroups.delete(groupPath);
 		} else {
-			collapsedGroups.add(groupName);
+			collapsedGroups.add(groupPath);
 		}
 		collapsedGroups = new Set(collapsedGroups);
 	}
 
-	function selectAllInGroup(groupName: string) {
-		const groupOptions = groupedOptions[groupName] || [];
-		const groupValues = groupOptions.map((opt) => opt.value);
+	function selectAllInGroup(group: { options: Option[]; subGroups: NestedGroup }) {
+		const allOptions = getAllOptionsFromGroup(group);
+		const groupValues = allOptions.map((opt) => opt.value);
 
 		// Check if all options in group are already selected
 		const allSelected = groupValues.every((val) => selected.includes(val));
@@ -203,9 +259,9 @@
 		cachedValue = selected;
 	}
 
-	function getGroupSelectionState(groupName: string) {
-		const groupOptions = groupedOptions[groupName] || [];
-		const groupValues = groupOptions.map((opt) => opt.value);
+	function getGroupSelectionState(group: { options: Option[]; subGroups: NestedGroup }) {
+		const allOptions = getAllOptionsFromGroup(group);
+		const groupValues = allOptions.map((opt) => opt.value);
 		const selectedInGroup = groupValues.filter((val) => selected.includes(val));
 
 		if (selectedInGroup.length === 0) return 'none';
@@ -230,6 +286,96 @@
 		cacheLock.resolve(selected);
 	});
 </script>
+
+{#snippet renderNestedGroups(groups, depth, pathPrefix)}
+	{#each Object.entries(groups) as [groupName, group]}
+		{@const currentPath = pathPrefix ? `${pathPrefix}>${groupName}` : groupName}
+		{@const hasSubGroups = Object.keys(group.subGroups).length > 0}
+		{@const hasDirectOptions = group.options.length > 0}
+		{@const isCollapsed = collapsedGroups.has(currentPath)}
+		{@const totalOptions = getAllOptionsFromGroup(group).length}
+
+		<div class="border border-gray-200 rounded-lg" style="margin-left: {depth * 20}px;">
+			{#if showGroupHeaders && groupBy}
+				<div
+					class="px-3 py-2 border-b border-gray-200 flex items-center justify-between"
+					class:bg-gray-50={depth === 0}
+					class:bg-gray-100={depth === 1}
+					class:bg-gray-200={depth >= 2}
+				>
+					<div class="flex items-center gap-2">
+						{#if collapsibleGroups}
+							<button
+								type="button"
+								aria-label="Toggle Group"
+								class="text-gray-500 hover:text-gray-700 transition-transform duration-200"
+								class:rotate-90={!isCollapsed}
+								onclick={() => toggleGroup(currentPath)}
+							>
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</button>
+						{/if}
+						<h3 class="text-sm font-medium text-gray-700" class:font-bold={depth === 0}>
+							{safeTranslate(groupName)}
+						</h3>
+						<span class="text-xs text-gray-500">({totalOptions})</span>
+					</div>
+
+					<button
+						type="button"
+						class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition-colors"
+						class:bg-blue-50={getGroupSelectionState(group) === 'all'}
+						class:border-blue-300={getGroupSelectionState(group) === 'all'}
+						class:bg-blue-25={getGroupSelectionState(group) === 'partial'}
+						class:border-blue-200={getGroupSelectionState(group) === 'partial'}
+						onclick={() => selectAllInGroup(group)}
+						{disabled}
+					>
+						{#if getGroupSelectionState(group) === 'all'}
+							{m.deselectAll()}
+						{:else}
+							{m.selectAll()}
+						{/if}
+					</button>
+				</div>
+			{/if}
+
+			{#if !collapsibleGroups || !isCollapsed}
+				<!-- Direct options in this group -->
+				{#if hasDirectOptions}
+					<div class="p-3 space-y-2">
+						{#each group.options as opt}
+							<label class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded transition-colors">
+								<input
+									type="checkbox"
+									value={opt.value}
+									checked={selected.includes(opt.value)}
+									onchange={() => toggle(opt.value)}
+									{disabled}
+									class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
+							</label>
+						{/each}
+					</div>
+				{/if}
+
+				<!-- Nested subgroups -->
+				{#if hasSubGroups}
+					<div class="py-2 px-1 space-y-2">
+						{@render renderNestedGroups(group.subGroups, depth + 1, currentPath)}
+					</div>
+				{/if}
+			{/if}
+		</div>
+	{/each}
+{/snippet}
 
 <div class="space-y-4">
 	{#if label}
@@ -262,74 +408,7 @@
 		</svg>
 	{:else}
 		<div class="space-y-3">
-			{#each Object.entries(groupedOptions) as [groupName, groupOpts]}
-				<div class="border border-gray-200 rounded-lg">
-					{#if showGroupHeaders && groupBy}
-						<div
-							class="bg-gray-50 px-3 py-2 border-b border-gray-200 flex items-center justify-between"
-						>
-							<div class="flex items-center gap-2">
-								{#if collapsibleGroups}
-									<button
-										type="button"
-										aria-label="Toggle Group"
-										class="text-gray-500 hover:text-gray-700 transition-transform duration-200"
-										class:rotate-90={!collapsedGroups.has(groupName)}
-										onclick={() => toggleGroup(groupName)}
-									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-											<path
-												fill-rule="evenodd"
-												d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-												clip-rule="evenodd"
-											/>
-										</svg>
-									</button>
-								{/if}
-								<h3 class="text-sm font-medium text-gray-700">{safeTranslate(groupName)}</h3>
-								<span class="text-xs text-gray-500">({groupOpts.length})</span>
-							</div>
-
-							<button
-								type="button"
-								class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition-colors"
-								class:bg-blue-50={getGroupSelectionState(groupName) === 'all'}
-								class:border-blue-300={getGroupSelectionState(groupName) === 'all'}
-								class:bg-blue-25={getGroupSelectionState(groupName) === 'partial'}
-								class:border-blue-200={getGroupSelectionState(groupName) === 'partial'}
-								onclick={() => selectAllInGroup(groupName)}
-								{disabled}
-							>
-								{#if getGroupSelectionState(groupName) === 'all'}
-									Deselect All
-								{:else}
-									Select All
-								{/if}
-							</button>
-						</div>
-					{/if}
-
-					{#if !collapsibleGroups || !collapsedGroups.has(groupName)}
-						<div class="p-3 space-y-2">
-							{#each groupOpts as opt}
-								<label
-									class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded transition-colors"
-								>
-									<input
-										type="checkbox"
-										value={opt.value}
-										checked={selected.includes(opt.value)}
-										onchange={() => toggle(opt.value)}
-										{disabled}
-										class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-									/>
-									<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
-								</label>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			{/each}
+			{@render renderNestedGroups(nestedGroups, 0, '')}
 		</div>
 	{/if}
 
