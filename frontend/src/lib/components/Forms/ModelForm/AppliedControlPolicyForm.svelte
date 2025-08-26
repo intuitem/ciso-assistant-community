@@ -103,7 +103,12 @@
 		label={m.evidences()}
 	/>
 
-	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-tasks" header={m.projectManagement()}>
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-tasks"
+		header={m.projectManagement()}
+	>
 		<TextField
 			{form}
 			field="ref_id"
@@ -173,7 +178,12 @@
 		/>
 	</Dropdown>
 
-	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-project-diagram" header={m.relationships()}>
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-project-diagram"
+		header={m.relationships()}
+	>
 		{#if schema.shape.category}
 			<Select
 				{form}

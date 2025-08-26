@@ -1800,5 +1800,8 @@
 	"resetFilter": "Reset filter",
 	"noActiveFilter": "No active filter",
 	"showingAllAppliedControls": "Showing all applied controls",
-	"showingItemsWith": "Showing items with"
+	"showingItemsWith": "Showing items with",
+	"projectManagement": "Project management",
+	"relationships": "Relationships",
+	"associatedOrganisationObjectives": "Associated objectives"
 }
