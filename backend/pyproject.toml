@@ -7,7 +7,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11, <3.14"
 django = "5.1.10"
 weasyprint = "62.3"
 psycopg2-binary = "2.9.9"
@@ -46,6 +46,8 @@ django-storages = "^1.14.6"
 icecream = "^2.1.4"
 regex = "^2024.11.6"
 prometheus-client = "^0.22.1"
+scipy = "^1.16.1"
+pymc = "^5.25.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
