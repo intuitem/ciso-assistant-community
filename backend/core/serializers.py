@@ -1542,14 +1542,18 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class QualificationReadSerializer(ReferentialSerializer):
+class QualificationWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Qualification
         exclude = ["translations"]
 
 
-class QualificationWriteSerializer(QualificationReadSerializer):
-    pass
+class QualificationReadSerializer(ReferentialSerializer):
+    library = FieldsRelatedField(["name", "id"])
+
+    class Meta:
+        model = Qualification
+        exclude = ["translations"]
 
 
 class SecurityExceptionWriteSerializer(BaseModelSerializer):

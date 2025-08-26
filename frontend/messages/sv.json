@@ -950,5 +950,8 @@
 	"matchingScenarios": "Matchande scenarier",
 	"select": "Välj",
 	"deselect": "Avmarkera",
-	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet."
+	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet.",
+	"abbreviation": "Förkortning",
+	"qualificationOrdering": "Kvalifikationsordning",
+	"securityObjectiveOrdering": "Säkerhetsmålsordning"
 }

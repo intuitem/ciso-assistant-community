@@ -725,7 +725,23 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'qualification',
 		localNamePlural: 'qualifications',
 		verboseName: 'Qualification',
-		verboseNamePlural: 'Qualifications'
+		verboseNamePlural: 'Qualifications',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'annotation' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'urn' },
+			{ field: 'id' },
+			{ field: 'provider' },
+			{ field: 'locale' },
+			{ field: 'default_locale' },
+			{ field: 'abbreviation' },
+			{ field: 'qualification_ordering' },
+			{ field: 'security_objective_ordering' },
+			{ field: 'library' }
+		]
 	},
 	'business-impact-analysis': {
 		endpointUrl: 'resilience/business-impact-analysis',

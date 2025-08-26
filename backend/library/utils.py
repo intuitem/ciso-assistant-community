@@ -19,6 +19,7 @@ from core.models import (
     RiskMatrix,
     ReferenceControl,
     Threat,
+    Qualification,
 )
 from django.db import transaction
 from iam.models import Folder
@@ -341,7 +342,6 @@ class ThreatImporter:
 
     def __init__(self, threat_data: dict):
         self.threat_data = threat_data
-        self._object = None
 
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.threat_data.keys()):
@@ -360,7 +360,6 @@ class ThreatImporter:
             translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
-
 
 # The couple (URN, locale) is unique. ===> Check it in the future
 class ReferenceControlImporter:
@@ -410,6 +409,32 @@ class ReferenceControlImporter:
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
+class QualificationImporter:
+    REQUIRED_FIELDS = {"ref_id", "urn", "name"}
+
+    def __init__(self, qualification_data: dict):
+        self.qualification_data = qualification_data
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.qualification_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+    def import_qualification(self, library_object: LoadedLibrary):
+        Qualification.objects.create(
+            library=library_object,
+            urn=self.qualification_data["urn"].lower(),
+            ref_id=self.qualification_data["ref_id"],
+            name=self.qualification_data["name"],
+            description=self.qualification_data.get("description"),
+            abbreviation=self.qualification_data.get("abbreviation"),
+            qualification_ordering=self.qualification_data.get("qualification_ordering", 0),
+            security_objective_ordering=self.qualification_data.get("security_objective_ordering", 0),
+            provider=library_object.provider,
+            is_published=True,
+            locale=library_object.locale,
+            translations=self.qualification_data.get("translations", {}),
+            default_locale=library_object.default_locale,  # Change this in the future ?
+        )
 
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
@@ -463,6 +488,7 @@ class LibraryImporter:
     OBJECT_FIELDS = [
         "threats",
         "reference_controls",
+        "qualifications",
         "risk_matrix",  # This field name is deprecated
         "risk_matrices",
         "framework",  # This field name is deprecated
@@ -480,6 +506,7 @@ class LibraryImporter:
         self._library = library
         self._frameworks = []
         self._threats = []
+        self._qualifications = []
         self._reference_controls = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
@@ -536,6 +563,28 @@ class LibraryImporter:
                     invalid_reference_control_index + 1, "th"
                 ),
                 invalid_reference_control_error,
+            )
+
+    def init_qualifications(self, qualifications: List[dict]) -> Union[str, None]:
+        qualification_importers = []
+        import_errors = []
+        for index, qualification_data in enumerate(qualifications):
+            qualification_importer = QualificationImporter(qualification_data)
+            qualification_importers.append(qualification_importer)
+            if (qualification_error := qualification_importer.is_valid()) is not None:
+                import_errors.append((index, qualification_error))
+
+        self._qualifications = qualification_importers
+
+        if import_errors:
+            # We will have to think about error message internationalization later
+            invalid_qualification_index, invalid_qualification_error = import_errors[0]
+            return "[QUALIFICATION_ERROR] {} invalid qualification{} detected, the {}{} qualification has the following error : {}".format(
+                len(import_errors),
+                "s" if len(import_errors) > 1 else "",
+                invalid_qualification_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_qualification_index + 1, "th"),
+                invalid_qualification_error,
             )
 
     def init_risk_matrices(self, risk_matrices: List[dict]) -> Union[str, None]:
@@ -676,6 +725,12 @@ class LibraryImporter:
                 logger.error("Threat import error", error=threat_import_error)
                 return threat_import_error
 
+        if "qualifications" in library_objects:
+            qualification_data = library_objects["qualifications"]
+            if (qualification_import_error := self.init_qualifications(qualification_data)) is not None:
+                logger.error("Threat import error", error=qualification_import_error)
+                return qualification_import_error
+
         if "risk_matrix" in library_objects and "risk_matrices" in library_objects:
             return "A library can't have both 'risk_matrix' and 'risk_matrices' objects fields."
 
@@ -766,6 +821,9 @@ class LibraryImporter:
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        for qualification in self._qualifications:
+            qualification.import_qualification(library_object)
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)

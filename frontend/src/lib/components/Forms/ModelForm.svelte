@@ -72,6 +72,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
+	import QualificationForm from './ModelForm/QualificationForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
@@ -404,6 +405,8 @@
 			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'filtering-labels'}
 			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+		{:else if URLModel === 'qualifications'}
+			<QualificationForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'business-impact-analysis'}
 			<BusinessImpactAnalysisForm
 				{form}

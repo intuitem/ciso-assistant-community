@@ -1663,5 +1663,8 @@
 	"dataWizardSelectFramework": "Επιλέξτε Πλαίσιο",
 	"dataWizardParsingResults": "Αποτελέσματα ανάλυσης:",
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
-	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel"
+	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
+	"abbreviation": "Συντομογραφία",
+	"qualificationOrdering": "Σειρά κατάταξης προσόντων",
+	"securityObjectiveOrdering": "Σειρά στόχων ασφαλείας"
 }

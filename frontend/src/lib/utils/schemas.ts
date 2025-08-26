@@ -263,6 +263,14 @@ export const FilteringLabelSchema = z.object({
 	label: z.string()
 });
 
+export const QualificationSchema = z.object({
+	...NameDescriptionMixin,
+	abbreviation: z.string().max(20),
+	annotation: z.string().optional().nullable(),
+	qualification_ordering: z.number().min(0).max(32767),
+	security_objective_ordering: z.number().min(0).max(32767)
+});
+
 export const RequirementAssessmentSchema = z.object({
 	answers: jsonSchema,
 	status: z.string(),
@@ -943,6 +951,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
+	qualifications: QualificationSchema,
 	'business-impact-analysis': BusinessImpactAnalysisSchema,
 	'asset-assessments': AssetAssessmentSchema,
 	'escalation-thresholds': EscalationThresholdSchema,

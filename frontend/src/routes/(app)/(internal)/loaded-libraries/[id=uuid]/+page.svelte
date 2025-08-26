@@ -22,6 +22,7 @@
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
+	const qualifications = libraryObjects['qualifications'] ?? [];
 	const framework = libraryObjects['framework'];
 
 	function transformToTreeView(nodes) {
@@ -63,6 +64,12 @@
 		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description']),
 		meta: { count: threats.length }
+	};
+
+	const qualificationsTable: TableSource = {
+		head: { ref_id: 'ref', name: 'name', description: 'description', abbreviation: 'abbreviation' },
+		body: tableSourceMapper(qualifications, ['ref_id', 'name', 'description', 'abbreviation']),
+		meta: { count: qualifications.length }
 	};
 
 	function riskMatricesPreview(riskMatrices: []) {
@@ -169,6 +176,24 @@
 		>
 			<ModelTable
 				source={threatsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
+		</Dropdown>
+	{/if}
+
+	{#if qualifications.length > 0}
+		<Dropdown
+			style="hover:text-indigo-700"
+			icon="fa-solid fa-tag"
+			header="{qualifications.length} {m.qualifications()}"
+		>
+			<ModelTable
+				source={qualificationsTable}
 				displayActions={false}
 				pagination={false}
 				rowCount={false}

@@ -1699,5 +1699,8 @@
 	"dataWizardParsingResults": "Ayrıştırma sonuçları:",
 	"dataWizardTemplatesAndGuidelines": "Şablonlar ve yönergeler",
 	"dataWizardLoadExcelData": "Excel verisini yükle",
-	"associatedCampaigns": "İlişkili kampanyalar"
+	"associatedCampaigns": "İlişkili kampanyalar",
+	"abbreviation": "Kısaltma",
+	"qualificationOrdering": "Nitelik sıralaması",
+	"securityObjectiveOrdering": "Güvenlik hedefi sıralaması"
 }

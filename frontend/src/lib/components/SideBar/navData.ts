@@ -326,6 +326,12 @@ export const navData = {
 					permissions: ['view_filteringlabel']
 				},
 				{
+					name: 'qualifications',
+					fa_icon: 'fa-solid fa-tag',
+					href: '/qualifications',
+					permissions: ['view_qualification']
+				},
+				{
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',

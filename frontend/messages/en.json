@@ -1798,5 +1798,8 @@
 	"resetFilter": "Reset filter",
 	"noActiveFilter": "No active filter",
 	"showingAllAppliedControls": "Showing all applied controls",
-	"showingItemsWith": "Showing items with"
+	"showingItemsWith": "Showing items with",
+	"abbreviation": "Abbreviation",
+	"qualificationOrdering": "Qualification ordering",
+	"securityObjectiveOrdering": "Security objective ordering"
 }

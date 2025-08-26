@@ -1337,5 +1337,8 @@
 	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
-	"deselect": "Deseleziona"
+	"deselect": "Deseleziona",
+	"abbreviation": "Abbreviazione",
+	"qualificationOrdering": "Ordinamento delle qualifiche",
+	"securityObjectiveOrdering": "Ordinamento degli obiettivi di sicurezza"
 }

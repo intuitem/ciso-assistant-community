@@ -1704,5 +1704,8 @@
 	"dataWizardTemplatesAndGuidelines": "Szablony i wytyczne",
 	"dataWizardLoadExcelData": "Załaduj dane Excel",
 	"associatedCampaigns": "Powiązane kampanie",
-	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty"
+	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
+	"abbreviation": "Skrót",
+	"qualificationOrdering": "Kolejność kwalifikacji",
+	"securityObjectiveOrdering": "Kolejność celów bezpieczeństwa"
 }
