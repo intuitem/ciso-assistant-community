@@ -1382,7 +1382,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'objectives',
 				urlModel: 'applied-controls',
-				disableCreate: true,
+				disableCreate: false,
 				disableDelete: true
 			}
 		],
@@ -1403,7 +1403,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'issues',
 				urlModel: 'organisation-objectives',
-				disableCreate: true,
+				disableCreate: false,
 				disableDelete: true
 			}
 		],
