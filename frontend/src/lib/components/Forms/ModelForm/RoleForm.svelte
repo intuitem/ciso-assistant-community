@@ -32,6 +32,7 @@
 		field="permissions"
 		label={m.permissions()}
 		optionsEndpoint="permissions"
+		optionsLabelField="codename"
 		groupBy={[{ field: 'content_type', path: ['app_label'] }]}
 		cacheLock={cacheLocks['permissions']}
 		bind:cachedValue={formDataCache['permissions']}
