@@ -400,13 +400,13 @@
 		{:else if URLModel === 'sso-settings'}
 			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'general-settings'}
-			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} />
 		{:else if URLModel === 'feature-flags'}
-			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} />
+			<FeatureFlagsSettingForm {form} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'filtering-labels'}
-			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+			<FilteringLabelForm {form} {cacheLocks} {formDataCache} />
 		{:else if URLModel === 'qualifications'}
-			<QualificationForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+			<QualificationForm {form} {cacheLocks} {formDataCache} />
 		{:else if URLModel === 'business-impact-analysis'}
 			<BusinessImpactAnalysisForm
 				{form}
