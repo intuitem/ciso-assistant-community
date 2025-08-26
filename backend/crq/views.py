@@ -60,9 +60,11 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         Triggers a Monte Carlo simulation for a specific risk hypothesis.
         """
         hypothesis = self.get_object()  # Retrieves the instance based on pk
+        sim_size: int = request.data.get("sim_size", 20000)
+        write: bool = request.data.get("write", False)
 
         try:
-            results = hypothesis.run_simulation()
+            results = hypothesis.run_simulation(sim_size=sim_size, write=write)
 
             return Response(results, status=status.HTTP_200_OK)
 

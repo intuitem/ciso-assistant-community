@@ -163,10 +163,14 @@ class QuantitativeRiskHypothesis(
         verbose_name_plural = _("Quantitative Risk Hypotheses")
         ordering = ["created_at"]
 
-    def run_simulation(self, sim_size: int = 20000) -> dict:
+    def run_simulation(self, sim_size: int = 20000, write: bool = False) -> dict:
         """
         Runs a Monte Carlo simulation based on the data stored in the
         `estimated_parameters` field.
+
+        Arguments:
+            sim_size (int): Number of simulation iterations. Default is 20,000.
+            write (bool): If True, saves the simulation results to the hypothesis instance.
         """
         ref_period = self.estimated_parameters.get("reference_period", "year")
         prob_data = self.estimated_parameters.get("probability")
@@ -234,4 +238,9 @@ class QuantitativeRiskHypothesis(
                 "exceedance_probabilities": exceedance_probabilities.tolist(),
             },
         }
+
+        if write:
+            self.simulation_data = results
+            self.save(update_fields=["simulation_data"])
+
         return results
