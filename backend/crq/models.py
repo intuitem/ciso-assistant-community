@@ -204,6 +204,13 @@ class QuantitativeRiskHypothesis(
         loss_samples = idata.prior.total_loss.values.flatten()
         non_zero_losses = loss_samples[loss_samples > 0]
 
+        # compute loss exceedance
+        # sort loss samples in descending order
+        sorted_losses = np.sort(loss_samples)[::1]
+        exceedance_probabilities = np.arange(1, len(sorted_losses) + 1) / len(
+            sorted_losses
+        )
+
         results = {
             "simulation_size": sim_size,
             "reference_period": ref_period,
@@ -221,6 +228,10 @@ class QuantitativeRiskHypothesis(
                 "var_90": np.percentile(loss_samples, 90),
                 "var_95": np.percentile(loss_samples, 95),
                 "var_99": np.percentile(loss_samples, 99),
+            },
+            "loss_exceedance": {
+                "loss_amounts": sorted_losses.tolist(),
+                "exceedance_probabilities": exceedance_probabilities.tolist(),
             },
         }
         return results
