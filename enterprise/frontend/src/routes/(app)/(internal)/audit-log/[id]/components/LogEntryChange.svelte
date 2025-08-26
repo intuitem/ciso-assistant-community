@@ -24,8 +24,8 @@
 			</span>
 		{/if}
 
-		{#if ['update', 'create'].includes(action) || after !== 'None'}
-			<i class="fa-solid fa-arrow-right col-span-1 pt-1"></i>
+		{#if action === 'update' || (action === 'create' && after !== 'None')}
+			<i class="fa-solid fa-arrow-right col-span-1 pt-1" aria-hidden="true"></i>
 			<span class={action === 'update' ? 'col-span-2' : 'col-span-3'}>
 				{after}
 			</span>

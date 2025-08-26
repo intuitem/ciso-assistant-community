@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import LogEntryChange from './LogEntryChange.svelte';
-	import RecursiveLogEntryChanges from './RecursiveLogEntryChanges.svelte';
 
 	type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
@@ -119,11 +118,13 @@
 					let processedAfter = tryParseJsonIfNeeded(afterValue);
 
 					if (isSkippableChange(processedBefore, processedAfter)) {
-						// If values are identical after processing, skip this entry
 						return acc;
 					}
 
 					acc[key] = {
+          // Normalize empty values happens after trying to parse JSON so it won't skip created entries that have an empty value
+          // (on creation logs, the before will always be set to 'None'. If the after is 'None' too and you normalize first, it will skip)
+          // (same for deletion logs, where the after will always be 'None')
 						before: normalizeEmptyValue(processedBefore),
 						after: normalizeEmptyValue(processedAfter)
 					};
@@ -140,7 +141,7 @@
 		);
 </script>
 
-<dl class="px-4 text-sm flex flex-col w-full {level > 0 ? 'border-l-2' : ''}">
+<dl class="px-4 text-sm flex flex-col w-full" class:border-l-2={level > 0}>
 	{#each Object.entries(changes) as [field, change]}
 		<div class="w-full py-1">
 			{#if isNestedObjectChange(change)}
@@ -162,7 +163,7 @@
 									action: log.action
 								}}
 								<dd class="pl-4">
-									<RecursiveLogEntryChanges log={subLog} level={level + 1} />
+                  <svelte:self log={subLog} level={level + 1} />
 								</dd>
 							{/each}
 						</div>
