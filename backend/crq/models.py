@@ -50,7 +50,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
 
-class QuantitativeRiskAggregation(NameDescriptionMixin):
+class QuantitativeRiskAggregation(NameDescriptionMixin, FolderMixin):
     quantitative_risk_study = models.ForeignKey(
         QuantitativeRiskStudy, on_delete=models.CASCADE, related_name="aggregations"
     )
@@ -64,7 +64,7 @@ class QuantitativeRiskAggregation(NameDescriptionMixin):
         ordering = ["created_at"]
 
 
-class QuantitativeRiskScenario(NameDescriptionMixin):
+class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
     quantitative_risk_study = models.ForeignKey(
         QuantitativeRiskStudy, on_delete=models.CASCADE, related_name="risk_scenarios"
     )
@@ -98,14 +98,31 @@ class QuantitativeRiskScenario(NameDescriptionMixin):
     ref_id = models.CharField(max_length=100, blank=True)
 
 
-class QuantitativeRiskHypothesis(NameDescriptionMixin, FilteringLabelMixin):
+class QuantitativeRiskHypothesis(
+    NameDescriptionMixin, FilteringLabelMixin, FolderMixin
+):
+    class ReferencePeriod(models.TextChoices):
+        YEAR = "year", _("Year")
+        MONTH = "month", _("Month")
+        WEEK = "week", _("Week")
+        DAY = "day", _("Day")
+        HOUR = "hour", _("Hour")
+
+    REFERENCE_PERIOD_SECONDS = {
+        ReferencePeriod.YEAR: 31536000,
+        ReferencePeriod.MONTH: 2592000,
+        ReferencePeriod.WEEK: 604800,
+        ReferencePeriod.DAY: 86400,
+        ReferencePeriod.HOUR: 3600,
+    }
+
     quantitative_risk_study = models.ForeignKey(
         QuantitativeRiskStudy, on_delete=models.CASCADE, related_name="hypotheses"
     )
     quantitative_risk_scenario = models.ForeignKey(
         QuantitativeRiskScenario, on_delete=models.CASCADE, related_name="hypotheses"
     )
-    qantitative_risk_aggregations = models.ManyToManyField(
+    quantitative_risk_aggregations = models.ManyToManyField(
         QuantitativeRiskAggregation,
         verbose_name=_("Quantitative Risk Aggregations"),
         blank=True,
