@@ -457,20 +457,37 @@
 					<!-- Risk tab -->
 
 					<section>
-						{#if data.threats_count.results.labels.length > 0}
-							<div class=" h-96 my-2">
-								<RadarChart
-									name="threatRadar"
-									title={m.threatRadarChart()}
-									labels={data.threats_count.results.labels}
-									values={data.threats_count.results.values}
-								/>
-							</div>
-						{:else}
-							<div class="py-4 flex items-center justify-center">
-								<p class="">{m.noThreatsMapped()}</p>
-							</div>
-						{/if}
+						<div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-96 my-2">
+							{#if data.threats_count.results.labels.length > 0}
+								<div class="flex-1 card p-4 bg-white">
+									<RadarChart
+										name="threatRadar"
+										title={m.threatRadarChart()}
+										labels={data.threats_count.results.labels}
+										values={data.threats_count.results.values}
+									/>
+								</div>
+							{:else}
+								<div class="flex-1 card p-4 bg-white flex items-center justify-center">
+									<p class="">{m.noThreatsMapped()}</p>
+								</div>
+							{/if}
+							{#if data.qualifications_count.results.labels.length > 0}
+								<div class="flex-1 card p-4 bg-white">
+									<BarChart
+										name="qualificationsBar"
+										title={m.qualificationsChartTitle()}
+										labels={localizeChartLabels(data.qualifications_count.results.labels)}
+										values={data.qualifications_count.results.values}
+										horizontal={true}
+									/>
+								</div>
+							{:else}
+								<div class="flex-1 card p-4 bg-white flex items-center justify-center">
+									<p class="">No qualifications found on risk scenarios</p>
+								</div>
+							{/if}
+						</div>
 						<div class="flex flex-wrap lg:flex-nowrap">
 							{#if page.data?.featureflags?.inherent_risk}
 								<div class="h-96 flex-col grow lg:flex-1">
