@@ -93,7 +93,7 @@
 	});
 
 	$effect(() => {
-		if (codes.length === numOfInputs && codes.every(code => code !== '')) {
+		if (codes.length === numOfInputs && codes.every((code) => code !== '')) {
 			setTimeout(() => {
 				form.submit();
 			}, 100);
