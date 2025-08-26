@@ -1807,5 +1807,6 @@
 	"political": "Political",
 	"economic": "Economic",
 	"social": "Social",
-	"technology": "Technological"
+	"technology": "Technological",
+	"qualificationsChartTitle": "Risk scenarios qualifications"
 }

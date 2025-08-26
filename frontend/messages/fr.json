@@ -1778,5 +1778,6 @@
 	"humanResources": "Ressources humaines",
 	"internalProcesses": "Processus interne",
 	"financialCapacity": "Capacité financière",
-	"companyCulture": "Culture d'entreprise / communication"
+	"companyCulture": "Culture d'entreprise / communication",
+	"qualificationsChartTitle": "Qualifications des scenarios de risque"
 }
