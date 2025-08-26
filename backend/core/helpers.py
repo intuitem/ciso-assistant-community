@@ -1315,6 +1315,38 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     return {"labels": labels, "values": values}
 
 
+def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
+        scoped_folder, user, RiskScenario
+    )[0]
+
+    # Get all risk scenarios that user can view
+    risk_scenarios = RiskScenario.objects.filter(id__in=viewable_scenarios)
+
+    # Count occurrences of each qualification
+    qualification_counts = {}
+    for scenario in risk_scenarios:
+        if scenario.qualifications:  # Check if qualifications is not empty
+            for qualification in scenario.qualifications:
+                if qualification in qualification_counts:
+                    qualification_counts[qualification] += 1
+                else:
+                    qualification_counts[qualification] = 1
+
+    # Sort by qualification name and only include those with count > 0
+    sorted_qualifications = sorted(
+        [(qual, count) for qual, count in qualification_counts.items() if count > 0]
+    )
+
+    labels = [qualification for qualification, _ in sorted_qualifications]
+    values = [count for _, count in sorted_qualifications]
+
+    return {"labels": labels, "values": values}
+
+
 def get_folder_content(
     folder: Folder, include_perimeters, viewable_objects, needed_folders
 ):
