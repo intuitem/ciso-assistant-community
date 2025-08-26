@@ -102,6 +102,16 @@
 		bind:cachedValue={formDataCache['evidences']}
 		label={m.evidences()}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="organisation-objectives"
+		optionsExtraFields={[['folder', 'str']]}
+		field="objectives"
+		cacheLock={cacheLocks['objectives']}
+		bind:cachedValue={formDataCache['objectives']}
+		label={m.objectives()}
+	/>
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<TextField
 			{form}
