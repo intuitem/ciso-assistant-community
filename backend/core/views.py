@@ -2559,6 +2559,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
 
+    @action(detail=False, name="Get qualifications count")
+    def qualifications_count(self, request):
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": qualifications_count_per_name(request.user, folder_id)}
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
