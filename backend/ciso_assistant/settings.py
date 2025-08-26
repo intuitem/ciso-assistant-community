@@ -192,6 +192,7 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "core",
+    "crq",
     "cal",
     "django_filters",
     "library",
