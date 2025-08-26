@@ -1,15 +1,14 @@
+from core.serializer_fields import FieldsRelatedField
 from core.serializers import (
     BaseModelSerializer,
 )
-from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.models import RiskMatrix
+
 from .models import (
-    QuantitativeRiskStudy,
-    QuantitativeRiskScenario,
-    QuantitativeRiskHypothesis,
     QuantitativeRiskAggregation,
+    QuantitativeRiskHypothesis,
+    QuantitativeRiskScenario,
+    QuantitativeRiskStudy,
 )
-from rest_framework import serializers
 
 
 class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
