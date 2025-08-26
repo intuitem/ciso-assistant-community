@@ -91,6 +91,8 @@
 			: data.data
 	);
 
+	let hasWidgets = $derived(!!widgets);
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -287,11 +289,15 @@
 		</div>
 	{/if}
 
-	<!-- Main content area - modified to use flex layout -->
+	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
-		<div class="flex flex-row flex-wrap gap-4">
-			<!-- Left side - Details (now takes half width) -->
-			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
+		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
+			<!-- Left side - Details (conditional width) -->
+			<div
+				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+					? 'flex-1 min-w-[300px]'
+					: 'w-full'}"
+			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
 						<div
@@ -434,13 +440,15 @@
 				</dl>
 			</div>
 
-			<!-- Right side - New widgets and metrics area -->
-			<div class="flex-1 min-w-[300px] flex flex-col">
-				<!-- New slot for widgets and metrics -->
-				<div class="h-full">
-					{@render widgets?.()}
+			<!-- Right side - Widgets area (only if widgets exist) -->
+			{#if hasWidgets}
+				<div class="flex-1 min-w-[300px] flex flex-col">
+					<!-- Slot for widgets and metrics -->
+					<div class="h-full">
+						{@render widgets?.()}
+					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
 
 		<!-- Bottom row for action buttons -->
