@@ -4,22 +4,41 @@
 
 	$pageTitle = 'Loss Exceedance Curve';
 
-	// Sample data representing standard risk scenario - spans multiple orders of magnitude
-	const sampleData = [
-		[100, 0.5],
-		[1000, 0.4],
-		[10000, 0.25],
-		[100000, 0.15],
-		[500000, 0.1],
-		[1000000, 0.08],
-		[5000000, 0.05],
-		[10000000, 0.03],
-		[50000000, 0.02],
-		[100000000, 0.01],
-		[500000000, 0.005],
-		[1000000000, 0.002],
-		[10000000000, 0.001]
-	];
+	// Realistic Monte Carlo simulation results - Loss Exceedance data
+	// Simulates 10,000 scenarios of cybersecurity incident losses
+	const generateMonteCarloSampleData = () => {
+		// Define 25 samples organized as powers of 10
+		const percentiles = [
+			{ loss: 1, exceedance: 0.6 },      // 60% chance of exceeding $100 (10^2)
+			{ loss: 10, exceedance: 0.595 },      // 60% chance of exceeding $100 (10^2)
+			{ loss: 100, exceedance: 0.59 },      // 60% chance of exceeding $100 (10^2)
+			{ loss: 200, exceedance: 0.58 },      // 58% chance of exceeding $200
+			{ loss: 500, exceedance: 0.55 },      // 55% chance of exceeding $500
+			{ loss: 1000, exceedance: 0.52 },     // 52% chance of exceeding $1K (10^3)
+			{ loss: 2000, exceedance: 0.49 },     // 49% chance of exceeding $2K
+			{ loss: 5000, exceedance: 0.45 },     // 45% chance of exceeding $5K
+			{ loss: 10000, exceedance: 0.42 },    // 42% chance of exceeding $10K (10^4)
+			{ loss: 20000, exceedance: 0.38 },    // 38% chance of exceeding $20K
+			{ loss: 50000, exceedance: 0.34 },    // 34% chance of exceeding $50K
+			{ loss: 100000, exceedance: 0.30 },   // 30% chance of exceeding $100K (10^5)
+			{ loss: 200000, exceedance: 0.26 },   // 26% chance of exceeding $200K
+			{ loss: 500000, exceedance: 0.22 },   // 22% chance of exceeding $500K
+			{ loss: 1000000, exceedance: 0.18 },  // 18% chance of exceeding $1M (10^6)
+			{ loss: 2000000, exceedance: 0.15 },  // 15% chance of exceeding $2M
+			{ loss: 5000000, exceedance: 0.12 },  // 12% chance of exceeding $5M
+			{ loss: 10000000, exceedance: 0.09 }, // 9% chance of exceeding $10M (10^7)
+			{ loss: 20000000, exceedance: 0.07 }, // 7% chance of exceeding $20M
+			{ loss: 50000000, exceedance: 0.05 }, // 5% chance of exceeding $50M
+			{ loss: 100000000, exceedance: 0.035 }, // 3.5% chance of exceeding $100M (10^8)
+			{ loss: 200000000, exceedance: 0.025 }, // 2.5% chance of exceeding $200M
+			{ loss: 500000000, exceedance: 0.018 }, // 1.8% chance of exceeding $500M
+			{ loss: 1000000000, exceedance: 0.012 }, // 1.2% chance of exceeding $1B (10^9)
+		];
+
+		return percentiles.map(p => [p.loss, p.exceedance]);
+	};
+
+	const sampleData = generateMonteCarloSampleData();
 </script>
 
 <div class="space-y-8 p-6">
@@ -33,38 +52,58 @@
 	</div>
 
 	<div class="bg-white rounded-lg shadow-lg p-6">
-		<h2 class="text-xl font-semibold mb-4 text-center">Standard Risk Profile</h2>
-		<div class="flex justify-center">
-			<LossExceedanceCurve
-				data={sampleData}
-				name="standard-curve"
-				title="Standard Risk Profile"
-			/>
-		</div>
-		<div class="mt-4 text-sm text-gray-600 max-w-2xl mx-auto">
-			<p><strong>Key insights:</strong></p>
-			<ul class="list-disc list-inside mt-2 space-y-1">
-				<li>50% chance of losses exceeding $100</li>
-				<li>40% chance of losses exceeding $1K</li>
-				<li>15% chance of losses exceeding $100K</li>
-				<li>5% chance of losses exceeding $5M</li>
-				<li>0.2% chance of losses exceeding $1B</li>
-			</ul>
-		</div>
-	</div>
+		<h2 class="text-xl font-semibold mb-4 text-center">Chart Comparison: Full vs Light Rendering</h2>
 
-	<div class="bg-blue-50 rounded-lg p-6">
-		<h3 class="text-lg font-semibold mb-3 text-blue-900">Understanding Loss Exceedance Curves</h3>
-		<div class="text-sm text-blue-800 space-y-2">
-			<p><strong>What they show:</strong> The probability that actual losses will exceed a given amount over a specific time period (typically one year).</p>
-			<p><strong>How to read them:</strong> The x-axis shows potential loss amounts, while the y-axis shows the probability of exceeding that loss.</p>
-			<p><strong>Risk management use:</strong> These curves help in setting insurance coverage levels, determining risk appetite, and making informed decisions about risk mitigation investments.</p>
-			<p><strong>Key metrics:</strong></p>
-			<ul class="list-disc list-inside ml-4 mt-1 space-y-1">
-				<li><strong>Value at Risk (VaR):</strong> Loss amount at a specific confidence level</li>
-				<li><strong>Tail Value at Risk (TVaR):</strong> Expected loss given that VaR is exceeded</li>
-				<li><strong>Maximum Probable Loss (MPL):</strong> Worst-case scenario within reasonable probability</li>
-			</ul>
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+			<!-- Full featured chart -->
+			<div class="space-y-2">
+				<h3 class="font-medium text-center">Full Rendering (Log X, Linear Y, Grids On)</h3>
+				<LossExceedanceCurve
+					data={sampleData}
+					name="full-chart"
+					title="Full Feature Chart"
+					enableTooltip={true}
+					xAxisScale="log"
+					yAxisScale="linear"
+					showXGrid={true}
+					showYGrid={true}
+				/>
+			</div>
+
+			<!-- Light chart -->
+			<div class="space-y-2">
+				<h3 class="font-medium text-center">Light Rendering (No Grids, No Tooltip, No Labels)</h3>
+				<LossExceedanceCurve
+					data={sampleData}
+					name="light-chart"
+					title="Light Version"
+					enableTooltip={false}
+					xAxisScale="log"
+					yAxisScale="linear"
+					showXGrid={false}
+					showYGrid={false}
+					xAxisLabel=""
+					yAxisLabel=""
+				/>
+			</div>
+		</div>
+
+		<!-- Additional examples -->
+		<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+			<!-- Linear X scale -->
+			<div class="space-y-2">
+				<h3 class="font-medium text-center">Linear X-Axis Scale</h3>
+				<LossExceedanceCurve
+					data={sampleData}
+					name="linear-x-chart"
+					title="Linear X Scale"
+					enableTooltip={true}
+					xAxisScale="linear"
+					yAxisScale="linear"
+					showXGrid={true}
+					showYGrid={true}
+				/>
+			</div>
 		</div>
 	</div>
 </div>

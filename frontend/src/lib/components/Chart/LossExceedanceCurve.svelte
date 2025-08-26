@@ -7,9 +7,16 @@
 		classesContainer?: string;
 		name?: string;
 		data?: Array<[number, number]>;
+		toleranceData?: Array<[number, number]>;
 		title?: string;
 		xAxisLabel?: string;
 		yAxisLabel?: string;
+    minorSplitLine?:  boolean;
+    enableTooltip?: boolean;
+    xAxisScale?: 'linear' | 'log';
+    yAxisScale?: 'linear' | 'log';
+    showXGrid?: boolean;
+    showYGrid?: boolean;
 	}
 
 	let {
@@ -17,18 +24,17 @@
 		height = 'h-full',
 		classesContainer = '',
 		name = 'loss-exceedance',
-		data = [
-			[1000000, 0.1],
-			[5000000, 0.05],
-			[10000000, 0.02],
-			[25000000, 0.01],
-			[50000000, 0.005],
-			[100000000, 0.002],
-			[250000000, 0.001]
-		],
+		data = undefined,
+    toleranceData = undefined,
 		title = 'Loss Exceedance Curve',
 		xAxisLabel = 'Loss Amount ($)',
-		yAxisLabel = 'Exceedance Probability'
+		yAxisLabel = 'Exceedance Probability',
+    minorSplitLine = false,
+    enableTooltip = false,
+    xAxisScale = 'log',
+    yAxisScale = 'linear',
+    showXGrid = true,
+    showYGrid = true,
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
@@ -54,6 +60,7 @@
 				bottom: '15%'
 			},
 			tooltip: {
+        show: !!enableTooltip,
 				trigger: 'axis',
 				formatter: function (params: any) {
 					const point = params[0];
@@ -61,10 +68,16 @@
 				}
 			},
 			xAxis: {
-				type: 'log',
+				type: xAxisScale,
 				name: xAxisLabel,
 				nameLocation: 'middle',
+        splitNumber: 6,
+        min: 1000,
+        max: 10000000,
 				nameGap: 30,
+				minorSplitLine: {
+					show: minorSplitLine
+				},
 				axisLabel: {
 					formatter: function (value: number) {
 						if (value >= 1000000000) {
@@ -79,7 +92,7 @@
 					}
 				},
 				splitLine: {
-					show: true,
+					show: showXGrid,
 					lineStyle: {
 						color: '#e0e0e0',
 						type: 'dashed'
@@ -87,19 +100,19 @@
 				}
 			},
 			yAxis: {
-				type: 'value',
+				type: yAxisScale === 'log' ? 'log' : 'value',
 				name: yAxisLabel,
 				nameLocation: 'middle',
 				nameGap: 50,
-				min: 0,
-				max: 1,
+				min: yAxisScale === 'log' ? undefined : 0,
+				max: yAxisScale === 'log' ? undefined : 1,
 				axisLabel: {
 					formatter: function (value: number) {
 						return (value * 100).toFixed(0) + '%';
 					}
 				},
 				splitLine: {
-					show: true,
+					show: showYGrid,
 					lineStyle: {
 						color: '#e0e0e0',
 						type: 'dashed'
@@ -111,14 +124,11 @@
 					name: 'Loss Exceedance',
 					type: 'line',
 					smooth: true,
-					symbol: 'circle',
-					symbolSize: 6,
+					symbol: 'none',
+					showSymbol: false,
 					lineStyle: {
 						color: '#ff6b6b',
 						width: 3
-					},
-					itemStyle: {
-						color: '#ff6b6b'
 					},
 					areaStyle: {
 						opacity: 0.1,
@@ -134,7 +144,7 @@
 						])
 					},
 					data: data
-				}
+				},
 			]
 		};
 
