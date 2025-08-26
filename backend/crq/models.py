@@ -11,6 +11,10 @@ from core.models import (
     Vulnerability,
 )
 from iam.models import FolderMixin, User
+from .utils import get_lognormal_params, parse_probability
+
+import pymc as pm
+import numpy as np
 
 
 class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
@@ -110,7 +114,7 @@ class QuantitativeRiskHypothesis(
 
     REFERENCE_PERIOD_SECONDS = {
         ReferencePeriod.YEAR: 31536000,
-        ReferencePeriod.MONTH: 2592000,
+        ReferencePeriod.MONTH: 2628000,
         ReferencePeriod.WEEK: 604800,
         ReferencePeriod.DAY: 86400,
         ReferencePeriod.HOUR: 3600,
@@ -158,3 +162,65 @@ class QuantitativeRiskHypothesis(
         verbose_name = _("Quantitative Risk Hypothesis")
         verbose_name_plural = _("Quantitative Risk Hypotheses")
         ordering = ["created_at"]
+
+    def run_simulation(self, sim_size: int = 20000) -> dict:
+        """
+        Runs a Monte Carlo simulation based on the data stored in the
+        `estimated_parameters` field.
+        """
+        ref_period = self.estimated_parameters.get("reference_period", "year")
+        prob_data = self.estimated_parameters.get("probability")
+        impact_data = self.estimated_parameters.get("impact")
+
+        if not all([prob_data, impact_data]):
+            raise ValueError(
+                "Incomplete estimated parameters. Probability and impact are required."
+            )
+
+        time_units_in_seconds = {
+            "year": 31536000,
+            "month": 2628000,
+            "day": 86400,
+            "week": 604800,
+            "hour": 3600,
+        }
+        ref_period_seconds = time_units_in_seconds.get(ref_period, 31536000)
+
+        # Calculate probability, capping at 1.0 for a Bernoulli (single event) model
+        probability = min(1.0, parse_probability(prob_data, ref_period_seconds))
+
+        # Calculate log-normal parameters
+        mu, sigma = get_lognormal_params(
+            lb=impact_data.get("lb"), ub=impact_data.get("ub")
+        )
+
+        with pm.Model() as risk_model:
+            event_occurs = pm.Bernoulli("event_occurs", p=probability)
+            impact = pm.LogNormal("impact", mu=mu, sigma=sigma)
+            total_loss = pm.Deterministic("total_loss", event_occurs * impact)
+
+            idata = pm.sample_prior_predictive(samples=sim_size, random_seed=42)
+
+        loss_samples = idata.prior.total_loss.values.flatten()
+        non_zero_losses = loss_samples[loss_samples > 0]
+
+        results = {
+            "simulation_size": sim_size,
+            "reference_period": ref_period,
+            "probability_of_loss": len(non_zero_losses) / len(loss_samples)
+            if len(loss_samples) > 0
+            else 0,
+            "expected_loss": np.mean(loss_samples),
+            "statistics_if_loss_occurs": {
+                "average": np.mean(non_zero_losses) if len(non_zero_losses) > 0 else 0,
+                "median": np.median(non_zero_losses) if len(non_zero_losses) > 0 else 0,
+                "min": np.min(non_zero_losses) if len(non_zero_losses) > 0 else 0,
+                "max": np.max(non_zero_losses) if len(non_zero_losses) > 0 else 0,
+            },
+            "value_at_risk": {
+                "var_90": np.percentile(loss_samples, 90),
+                "var_95": np.percentile(loss_samples, 95),
+                "var_99": np.percentile(loss_samples, 99),
+            },
+        }
+        return results

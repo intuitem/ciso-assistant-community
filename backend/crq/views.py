@@ -1,3 +1,5 @@
+from rest_framework import status
+from rest_framework.views import Response
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 
 from .models import (
@@ -6,6 +8,8 @@ from .models import (
     QuantitativeRiskHypothesis,
     QuantitativeRiskAggregation,
 )
+
+from rest_framework.decorators import action
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -49,6 +53,29 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
+
+    @action(detail=True, methods=["post"], url_path="run-simulation")
+    def run_simulation(self, request, pk=None):
+        """
+        Triggers a Monte Carlo simulation for a specific risk hypothesis.
+        """
+        hypothesis = self.get_object()  # Retrieves the instance based on pk
+
+        try:
+            results = hypothesis.run_simulation()
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except ValueError as e:
+            # Catch validation errors from the model method
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Catch any other unexpected errors during simulation
+            # In a real app, you would want to log this error
+            return Response(
+                {"error": "An unexpected error occurred during the simulation."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class QuantitativeRiskAggregationViewSet(BaseModelViewSet):
