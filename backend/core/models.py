@@ -1578,11 +1578,13 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolder
         """
         Returns True if the qualification can be deleted
         """
-        return not any([
-            self.incidents.exists(),
-            self.feared_events.exists(),
-            self.escalation_threshold.exists()
-        ])
+        return not any(
+            [
+                self.incidents.exists(),
+                self.feared_events.exists(),
+                self.escalation_thresholds.exists(),
+            ]
+        )
 
     @classmethod
     def create_default_qualifications(cls):

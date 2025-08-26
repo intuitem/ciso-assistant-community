@@ -361,6 +361,7 @@ class ThreatImporter:
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
+
 # The couple (URN, locale) is unique. ===> Check it in the future
 class ReferenceControlImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
@@ -409,6 +410,7 @@ class ReferenceControlImporter:
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
+
 class QualificationImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "name"}
 
@@ -427,14 +429,19 @@ class QualificationImporter:
             name=self.qualification_data["name"],
             description=self.qualification_data.get("description"),
             abbreviation=self.qualification_data.get("abbreviation"),
-            qualification_ordering=self.qualification_data.get("qualification_ordering", 0),
-            security_objective_ordering=self.qualification_data.get("security_objective_ordering", 0),
+            qualification_ordering=self.qualification_data.get(
+                "qualification_ordering", 0
+            ),
+            security_objective_ordering=self.qualification_data.get(
+                "security_objective_ordering", 0
+            ),
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
             translations=self.qualification_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
+
 
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
@@ -727,7 +734,11 @@ class LibraryImporter:
 
         if "qualifications" in library_objects:
             qualification_data = library_objects["qualifications"]
-            if (qualification_import_error := self.init_qualifications(qualification_data)) is not None:
+            if (
+                qualification_import_error := self.init_qualifications(
+                    qualification_data
+                )
+            ) is not None:
                 logger.error("Threat import error", error=qualification_import_error)
                 return qualification_import_error
 

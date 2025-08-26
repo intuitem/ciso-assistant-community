@@ -187,7 +187,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     qualifications = models.ManyToManyField(
         Qualification,
         blank=True,
-        related_name="escalation_threshold",
+        related_name="escalation_thresholds",
     )
     quanti_impact = FloatField(default=0)
     quanti_impact_unit = CharField(

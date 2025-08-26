@@ -5,20 +5,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0090_complianceassessment_is_locked_and_more'),
+        ("core", "0090_complianceassessment_is_locked_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='qualification',
-            name='library',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='qualifications', to='core.loadedlibrary'),
+            model_name="qualification",
+            name="library",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="qualifications",
+                to="core.loadedlibrary",
+            ),
         ),
         migrations.AlterField(
-            model_name='qualification',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="qualification",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
     ]
