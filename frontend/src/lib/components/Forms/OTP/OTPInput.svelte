@@ -91,6 +91,14 @@
 			}, 200);
 		}
 	});
+
+	$effect(() => {
+		if (codes.length === numOfInputs && codes.every(code => code !== '')) {
+			setTimeout(() => {
+				form.submit();
+			}, 100);
+		}
+	});
 </script>
 
 {#if $errors}
