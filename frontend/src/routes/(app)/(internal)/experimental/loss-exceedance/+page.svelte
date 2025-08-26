@@ -67,6 +67,7 @@
 					yAxisScale="linear"
 					showXGrid={true}
 					showYGrid={true}
+          minorSplitLine={true}
 				/>
 			</div>
 
@@ -84,6 +85,8 @@
 					showYGrid={false}
 					xAxisLabel=""
 					yAxisLabel=""
+          autoYMax={true}
+          xMax={100_000}
 				/>
 			</div>
 		</div>

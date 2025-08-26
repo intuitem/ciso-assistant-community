@@ -17,6 +17,8 @@
     yAxisScale?: 'linear' | 'log';
     showXGrid?: boolean;
     showYGrid?: boolean;
+    xMax?: number;
+    autoYMax?: boolean;
 	}
 
 	let {
@@ -35,9 +37,14 @@
     yAxisScale = 'linear',
     showXGrid = true,
     showYGrid = true,
+    xMax = 1000000,
+    autoYMax = false,
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
+
+	// Calculate xMin as 5 decades lower than xMax
+	const xMin = xMax ? xMax / 100000 : undefined;
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -71,9 +78,8 @@
 				type: xAxisScale,
 				name: xAxisLabel,
 				nameLocation: 'middle',
-        splitNumber: 6,
-        min: 1000,
-        max: 10000000,
+        min: xMin,
+        max: xMax,
 				nameGap: 30,
 				minorSplitLine: {
 					show: minorSplitLine
@@ -104,8 +110,7 @@
 				name: yAxisLabel,
 				nameLocation: 'middle',
 				nameGap: 50,
-				min: yAxisScale === 'log' ? undefined : 0,
-				max: yAxisScale === 'log' ? undefined : 1,
+				max: yAxisScale === 'log' ? undefined : (autoYMax ? undefined : 1),
 				axisLabel: {
 					formatter: function (value: number) {
 						return (value * 100).toFixed(0) + '%';
