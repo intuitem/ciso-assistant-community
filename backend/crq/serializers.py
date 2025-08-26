@@ -1,0 +1,122 @@
+from rest_framework import serializers
+from core.serializer_fields import FieldsRelatedField
+from core.serializers import (
+    BaseModelSerializer,
+)
+
+from .models import (
+    QuantitativeRiskHypothesis,
+    QuantitativeRiskScenario,
+    QuantitativeRiskStudy,
+)
+import json
+
+
+class ImpactField(serializers.Field):
+    """
+    A custom field to serialize and deserialize the impact, which includes
+    the distribution type and confidence interval bounds.
+    """
+
+    def to_representation(self, value):
+        return value
+
+    def to_internal_value(self, data):
+        # Parse JSON string if needed
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError("Impact field must be valid JSON.")
+
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Impact must be a dictionary.")
+
+        # Extract required fields
+        distribution = data.get("distribution")
+        lb = data.get("lb")
+        ub = data.get("ub")
+
+        # Check for missing fields
+        if not all([distribution, lb is not None, ub is not None]):
+            raise serializers.ValidationError(
+                "Impact requires 'distribution', 'lb', and 'ub' keys."
+            )
+
+        # Validate distribution type
+        if distribution != "LOGNORMAL":
+            raise serializers.ValidationError(
+                "Only 'LOGNORMAL' distribution is supported."
+            )
+
+        # Validate numeric values
+        if not all(isinstance(val, (int, float)) for val in [lb, ub]):
+            raise serializers.ValidationError("'lb' and 'ub' must be numeric.")
+
+        # Validate bounds logic
+        if lb <= 0:
+            raise serializers.ValidationError("Lower bound 'lb' must be positive.")
+
+        if ub <= lb:
+            raise serializers.ValidationError(
+                "Upper bound 'ub' must be greater than 'lb'."
+            )
+
+        return data
+
+
+class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuantitativeRiskStudy
+        exclude = ["created_at", "updated_at"]
+
+
+class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    authors = FieldsRelatedField(many=True)
+    reviewers = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = QuantitativeRiskStudy
+        fields = "__all__"
+
+
+class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuantitativeRiskScenario
+        exclude = ["created_at", "updated_at"]
+
+
+class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
+    quantitative_risk_study = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    threats = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(many=True)
+
+
+class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
+    probability = serializers.FloatField()
+    impact = ImpactField(
+        source="parameters.impact",
+    )
+
+    class Meta:
+        model = QuantitativeRiskHypothesis
+        exclude = [
+            "created_at",
+            "updated_at",
+            "simulation_data",
+            "parameters",
+        ]
+
+
+class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
+    quantitative_risk_scenario = FieldsRelatedField()
+    existing_applied_controls = FieldsRelatedField(many=True)
+    added_applied_controls = FieldsRelatedField(many=True)
+    removed_applied_controls = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = QuantitativeRiskHypothesis
+        fields = "__all__"
