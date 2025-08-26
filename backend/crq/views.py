@@ -46,7 +46,6 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         "existing_applied_controls",
         "added_applied_controls",
         "removed_applied_controls",
-        "status",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]

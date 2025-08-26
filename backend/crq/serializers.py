@@ -1,7 +1,9 @@
+from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import (
     BaseModelSerializer,
 )
+from crq.serializer_fields import ImpactField, ProbabilityField
 
 from .models import (
     QuantitativeRiskAggregation,
@@ -42,9 +44,28 @@ class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
+    reference_period = serializers.ChoiceField(
+        choices=QuantitativeRiskHypothesis.ReferencePeriod.choices,
+        default="year",
+        source="estimated_parameters.reference_period",
+    )
+    probability = ProbabilityField(
+        source="estimated_parameters.probability",
+        help_text="Can be a decimal (0-1) or a dict with type 'frequency' or 'proportion'.",
+    )
+    impact = ImpactField(
+        source="estimated_parameters.impact",
+        help_text="A dict with 'distribution', 'lb', and 'ub'.",
+    )
+
     class Meta:
         model = QuantitativeRiskHypothesis
-        exclude = ["created_at", "updated_at"]
+        exclude = [
+            "created_at",
+            "updated_at",
+            "simulation_data",
+            "estimated_parameters",
+        ]
 
 
 class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
