@@ -285,6 +285,17 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
                 )
         return super().validate(attrs)
 
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
@@ -1322,6 +1333,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         # Track old authors before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
 
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
         updated_instance = super().update(instance, validated_data)
 
         # Get new authors after update
@@ -1595,6 +1614,17 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
                     f"⚠️ Cannot modify the findings assessment attributes when it is locked. Only the 'Locked' field can be modified."
                 )
         return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
 
     class Meta:
         model = FindingsAssessment

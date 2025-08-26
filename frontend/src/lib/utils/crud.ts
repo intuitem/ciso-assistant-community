@@ -954,10 +954,10 @@ export const URL_MODEL_MAP: ModelMap = {
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
-		localName: 'ebiosRMstudy',
+		localName: 'ebiosRmStudy',
 		localNamePlural: 'ebiosRmStudies',
-		verboseName: 'Ebios RMstudy',
-		verboseNamePlural: 'Ebios RMstudy',
+		verboseName: 'Ebios RM study',
+		verboseNamePlural: 'Ebios RM study',
 		foreignKeyFields: [
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'assets', urlModel: 'assets' },
