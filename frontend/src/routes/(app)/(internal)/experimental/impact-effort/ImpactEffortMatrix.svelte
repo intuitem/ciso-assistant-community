@@ -56,10 +56,10 @@
 <main class="grid grid-cols-6">
 	<div class="w-full max-w-screen-lg mx-auto p-4 col-span-4">
 		<div class="grid grid-cols-6 gap-1 mb-6">
-			<div class="flex justify-end items-center p-2 font-semibold">Impact</div>
+			<div class="flex justify-end items-center p-2 font-semibold">{m.pImpact()}</div>
 			<div class="col-span-5"></div>
 
-			<div class="flex justify-end items-center p-2 text-sm">5 (High)</div>
+			<div class="flex justify-end items-center p-2 text-sm">5 ({m.high()})</div>
 			<div class="col-span-5 row-span-5 border-2 border-gray-300 grid grid-cols-5 gap-1 p-1">
 				{#each data as row, rowIndex}
 					{#each row as col, colIndex}
@@ -75,7 +75,7 @@
 							{#if col.length > 0}
 								<div class="font-semibold text-lg">{col.length}</div>
 								<div class="text-xs text-gray-600">
-									{#if col.length > 1}items{:else}item{/if}
+									{#if col.length > 1}{m.items()}{:else}{m.item()}{/if}
 								</div>
 							{:else}
 								<div class=""></div>
@@ -88,36 +88,36 @@
 			<div class="flex justify-end items-center p-2 text-sm">4</div>
 			<div class="flex justify-end items-center p-2 text-sm">3</div>
 			<div class="flex justify-end items-center p-2 text-sm">2</div>
-			<div class="flex justify-end items-center p-2 text-sm">1 (Low)</div>
+			<div class="flex justify-end items-center p-2 text-sm">1 ({m.low()})</div>
 
 			<!-- Effort labels (bottom) -->
-			<div class="flex justify-end items-center p-2 font-semibold">Effort</div>
-			<div class="flex justify-center items-center p-2 text-sm">1 (Low)</div>
+			<div class="flex justify-end items-center p-2 font-semibold">{m.effort()}</div>
+			<div class="flex justify-center items-center p-2 text-sm">1 ({m.low()})</div>
 			<div class="flex justify-center items-center p-2 text-sm">2</div>
 			<div class="flex justify-center items-center p-2 text-sm">3</div>
 			<div class="flex justify-center items-center p-2 text-sm">4</div>
-			<div class="flex justify-center items-center p-2 text-sm">5 (High)</div>
+			<div class="flex justify-center items-center p-2 text-sm">5 ({m.high()})</div>
 		</div>
 	</div>
 	<!-- Legend -->
 	<div class="mb-4 p-4 rounded">
-		<h3 class="font-semibold mb-2">Priority Legend:</h3>
+		<h3 class="font-semibold mb-2">{m.priorityLegend()}</h3>
 		<div class="flex flex-wrap gap-4 text-sm">
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-green-200 border"></div>
-				<span>Quick Wins</span>
+				<span>{m.quickWins()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-yellow-200 border"></div>
-				<span>Major Projects</span>
+				<span>{m.majorProjects()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-gray-100 border"></div>
-				<span>Fill-ins</span>
+				<span>{m.fillIns()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-red-200 border"></div>
-				<span>Questionable</span>
+				<span>{m.questionable()}</span>
 			</div>
 		</div>
 	</div>
