@@ -162,6 +162,7 @@ export const AppliedControlSchema = z.object({
 	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
+	objectives: z.string().optional().array().optional(),
 	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -641,7 +642,9 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
