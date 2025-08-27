@@ -1498,6 +1498,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "objectives": ["exact"],
             "assets": ["exact"],
             "stakeholders": ["exact"],
             "progress_field": ["exact"],
@@ -2105,6 +2106,7 @@ class ActionPlanList(generics.ListAPIView):
         "risk_scenarios_e": ["exact"],
         "requirement_assessments": ["exact"],
         "evidences": ["exact"],
+        "objectives": ["exact"],
         "assets": ["exact"],
         "stakeholders": ["exact"],
         "progress_field": ["exact"],
@@ -2259,6 +2261,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
+
+    @action(detail=False, name="Get qualifications count")
+    def qualifications_count(self, request):
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": qualifications_count_per_name(request.user, folder_id)}
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
@@ -4403,7 +4412,7 @@ class QualificationViewSet(BaseModelViewSet):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health"]
+    filterset_fields = ["folder", "status", "health", "issues"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
