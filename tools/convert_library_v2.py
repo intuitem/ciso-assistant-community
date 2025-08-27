@@ -856,7 +856,7 @@ def create_library(
                         ).strip().lower() in ("1", "true", "yes", "x")
                         if skip_count:
                             counter_fix += 1
-                            ref_id_urn = f"node{counter - counter_fix}-{counter_fix}"
+                            ref_id_urn = f"node{counter - counter_fix}-{counter_fix+1}"
                         else:
                             # Adds the ability to use the "urn_id" column despite compatibility mode set to "1"
                             if data.get("urn_id") and data.get("urn_id").strip():
