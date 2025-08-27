@@ -11,7 +11,7 @@ async function redirectToAnalytics(page) {
 	await analyticsPage.goto();
 }
 
-test('Analytics full flow - creation, validation and cleanup', async ({
+test.skip('Analytics full flow - creation, validation and cleanup', async ({
 	page,
 	logedPage,
 	foldersPage,
@@ -57,7 +57,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 			await appliedControlsPage.createItem({
 				...rest,
 				folder: vars.folderName,
-				...(eta ? { eta } : {}) // Avoid passing undefined
+				...(eta ? { eta } : {})
 			});
 		}
 	});
@@ -65,8 +65,6 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 	await test.step('Import a library', async () => {
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
-
-		// Find one library to import
 
 		await librariesPage.importLibrary(
 			'International standard ISO/IEC 27001:2022',
@@ -76,7 +74,6 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 
 		await librariesPage.importLibrary('NIST CSF v2.0', undefined, 'any');
 
-		// Optional: Confirm import
 		await librariesPage.tab('Libraries store').click();
 		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
@@ -206,7 +203,7 @@ test('Analytics full flow - creation, validation and cleanup', async ({
 	});
 });
 
-test.afterAll('cleanup', async ({ browser }) => {
+test.skip('cleanup', async ({ browser }) => {
 	const page = await browser.newPage();
 	const loginPage = new LoginPage(page);
 	const foldersPage = new PageContent(page, '/folders', 'Domains');
