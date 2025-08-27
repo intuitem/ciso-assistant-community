@@ -1498,6 +1498,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "objectives": ["exact"],
             "assets": ["exact"],
             "stakeholders": ["exact"],
             "progress_field": ["exact"],
@@ -2105,6 +2106,7 @@ class ActionPlanList(generics.ListAPIView):
         "risk_scenarios_e": ["exact"],
         "requirement_assessments": ["exact"],
         "evidences": ["exact"],
+        "objectives": ["exact"],
         "assets": ["exact"],
         "stakeholders": ["exact"],
         "progress_field": ["exact"],
@@ -2259,6 +2261,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
+
+    @action(detail=False, name="Get qualifications count")
+    def qualifications_count(self, request):
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": qualifications_count_per_name(request.user, folder_id)}
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
@@ -4318,7 +4327,7 @@ class QualificationViewSet(BaseModelViewSet):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health"]
+    filterset_fields = ["folder", "status", "health", "issues"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -4791,6 +4800,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ref_id = request.data.get("ref_id")
             result = request.data.get("result")
             observation = request.data.get("observation")
+            score = request.data.get("score")
+            status_value = request.data.get("status")
 
             if not all([ref_id, result]):
                 return Response(
@@ -4807,6 +4818,44 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # validate if status value is valid choice
+            if status_value is not None:
+                valid_statuses = [
+                    choice[0] for choice in RequirementAssessment.Status.choices
+                ]
+                if status_value not in valid_statuses:
+                    return Response(
+                        {
+                            "error": f"invalid status value. Must be one of: {valid_statuses}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            # validate if score value is within allowed range
+            if score is not None:
+                try:
+                    score = int(score)
+                    # Only validate range if min_score and max_score are defined
+                    if (
+                        compliance_assessment.min_score is not None
+                        and compliance_assessment.max_score is not None
+                    ):
+                        if (
+                            score < compliance_assessment.min_score
+                            or score > compliance_assessment.max_score
+                        ):
+                            return Response(
+                                {
+                                    "error": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
+                                },
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
+                except (ValueError, TypeError):
+                    return Response(
+                        {"error": "Score must be a valid integer"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
             # Find the requirement assessment to update
             requirement_assessment = RequirementAssessment.objects.filter(
                 compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
@@ -4821,16 +4870,41 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             # Update the requirement assessment
             requirement_assessment.result = result
             requirement_assessment.observation = observation
+
+            # Update status if provided
+            if status_value is not None:
+                requirement_assessment.status = status_value
+
+            # Update score and toggle is_scored accordingly
+            if score is not None:
+                requirement_assessment.score = score
+                requirement_assessment.is_scored = True
+            elif score is None and "score" in request.data:
+                # Explicitly setting score to null/empty
+                requirement_assessment.score = None
+                requirement_assessment.is_scored = False
+
             requirement_assessment.save()
 
-            return Response(
-                {
-                    "message": "Requirement updated successfully",
-                    "ref_id": ref_id,
-                    "result": result,
-                },
-                status=status.HTTP_200_OK,
-            )
+            response_data = {
+                "message": "Requirement updated successfully",
+                "ref_id": ref_id,
+                "result": result,
+            }
+
+            # Include status in response if it was updated
+            if status_value is not None:
+                response_data["status"] = status_value
+
+            # Include score and is_scored in response if score was updated
+            if score is not None:
+                response_data["score"] = score
+                response_data["is_scored"] = True
+            elif score is None and "score" in request.data:
+                response_data["score"] = None
+                response_data["is_scored"] = False
+
+            return Response(response_data, status=status.HTTP_200_OK)
 
         except RequirementAssessment.DoesNotExist:
             return Response(
@@ -5775,6 +5849,7 @@ class FindingViewSet(BaseModelViewSet):
         "owner",
         "folder",
         "status",
+        "severity",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -5789,6 +5864,15 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @action(detail=False, name="Get all findings owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(findings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
 
 class IncidentViewSet(BaseModelViewSet):

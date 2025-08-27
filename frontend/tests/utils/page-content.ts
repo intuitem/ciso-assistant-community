@@ -7,6 +7,7 @@ export class PageContent extends BasePage {
 	readonly form: FormContent;
 	readonly itemDetail: PageDetail;
 	readonly addButton: Locator;
+	readonly importButton: Locator;
 	readonly editButton: Locator;
 	readonly searchInput: Locator;
 	readonly deleteModalTitle: Locator;
@@ -31,6 +32,7 @@ export class PageContent extends BasePage {
 				: new FormContent(page, new RegExp(/New /.source + name.source), fields);
 		this.itemDetail = new PageDetail(page, url, this.form, '');
 		this.addButton = this.page.getByTestId('add-button');
+		this.importButton = this.page.getByTestId('import-button');
 		this.editButton = this.page.getByTestId('edit-button');
 		this.searchInput = this.page.getByRole('searchbox').first();
 		this.deleteModalTitle = this.page.getByTestId('modal-title');

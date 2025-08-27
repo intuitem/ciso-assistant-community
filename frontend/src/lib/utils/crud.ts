@@ -285,6 +285,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -938,10 +939,10 @@ export const URL_MODEL_MAP: ModelMap = {
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
-		localName: 'ebiosRMstudy',
+		localName: 'ebiosRmStudy',
 		localNamePlural: 'ebiosRmStudies',
-		verboseName: 'Ebios RMstudy',
-		verboseNamePlural: 'Ebios RMstudy',
+		verboseName: 'Ebios RM study',
+		verboseNamePlural: 'Ebios RM study',
 		foreignKeyFields: [
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'assets', urlModel: 'assets' },
@@ -1377,6 +1378,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'tasks', urlModel: 'task-templates' },
 			{ field: 'assigned_to', urlModel: 'users' }
 		],
+		reverseForeignKeyFields: [
+			{
+				field: 'objectives',
+				urlModel: 'applied-controls',
+				disableCreate: false,
+				disableDelete: true
+			}
+		],
 		filters: [{ field: 'folder' }]
 	},
 	'organisation-issues': {
@@ -1389,6 +1398,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'assets', urlModel: 'assets' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'issues',
+				urlModel: 'organisation-objectives',
+				disableCreate: false,
+				disableDelete: true
+			}
 		],
 		filters: [{ field: 'folder' }]
 	}

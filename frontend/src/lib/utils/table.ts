@@ -270,6 +270,28 @@ const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -321,6 +343,28 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'nature',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/health',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'health',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -725,6 +769,16 @@ const OWNER_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'email',
 		optionsValueField: 'id',
 		optionsEndpoint: 'applied-controls/owner',
+		multiple: true
+	}
+};
+const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'findings/owner',
 		multiple: true
 	}
 };
@@ -1377,7 +1431,12 @@ export const listViewFields = {
 			'applied_controls',
 			'filtering_labels'
 		],
-		filters: { filtering_labels: LABELS_FILTER }
+		filters: {
+			filtering_labels: LABELS_FILTER,
+			severity: FINDINGS_SEVERITY_FILTER,
+			status: FINDINGS_STATUS_FILTER,
+			owner: FINDINGS_OWNER_FILTER
+		}
 	},
 	incidents: {
 		head: [
@@ -1421,10 +1480,12 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'domain', 'status', 'health'],
-		body: ['name', 'folder', 'status', 'health'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'assigned_to'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
 		}
 	},
 	'organisation-issues': {

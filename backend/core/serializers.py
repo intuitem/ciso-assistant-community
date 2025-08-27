@@ -285,6 +285,17 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
                 )
         return super().validate(attrs)
 
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
@@ -696,6 +707,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     cost = serializers.FloatField()
@@ -837,6 +849,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
     reference_control = HashSlugRelatedField(slug_field="pk", read_only=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    objectives = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = AppliedControl
@@ -860,6 +873,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
             "control_impact",
             "cost",
             "evidences",
+            "objectives",
         ]
 
 
@@ -1322,6 +1336,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         # Track old authors before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
 
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
         updated_instance = super().update(instance, validated_data)
 
         # Get new authors after update
@@ -1591,6 +1613,17 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
                     f"⚠️ Cannot modify the findings assessment attributes when it is locked. Only the 'Locked' field can be modified."
                 )
         return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
 
     class Meta:
         model = FindingsAssessment

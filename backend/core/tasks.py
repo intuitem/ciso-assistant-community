@@ -2,8 +2,10 @@ from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
 from core.models import AppliedControl, ComplianceAssessment
+from tprm.models import EntityAssessment
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import models
 import logging
 from global_settings.models import GlobalSettings
 
@@ -386,3 +388,37 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="2", minute="30"))
+def lock_overdue_compliance_assessments():
+    """Lock ComplianceAssessments that have exceeded their due_date and move status to in_review"""
+    overdue_assessments = (
+        ComplianceAssessment.objects.filter(
+            due_date__lt=date.today(), due_date__isnull=False, is_locked=False
+        )
+        .exclude(status__in=["done", "deprecated"])
+        .filter(
+            models.Q(campaign__isnull=False)  # Associated with a campaign
+            | models.Q(
+                entityassessment__isnull=False
+            )  # Or associated with an entity assessment
+        )
+        .distinct()
+    )
+
+    count = 0
+    for assessment in overdue_assessments:
+        assessment.is_locked = True
+        assessment.status = "in_review"
+        assessment.save()
+        count += 1
+        logger.info(
+            f"Locked overdue compliance assessment: {assessment.name} (ID: {assessment.id})"
+        )
+
+    if count > 0:
+        logger.info(f"Successfully locked {count} overdue compliance assessments")
+    else:
+        logger.debug("No overdue compliance assessments found to lock")
