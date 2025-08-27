@@ -94,12 +94,17 @@
 			<div class=" py-4">
 				{m.importBackupDescription()}
 			</div>
-			<form enctype="multipart/form-data" method="post" use:enhance={() => {
-				return async ({ update }) => {
-					await update();
-					isUploading = false;
-				};
-			}} bind:this={form}>
+			<form
+				enctype="multipart/form-data"
+				method="post"
+				use:enhance={() => {
+					return async ({ update }) => {
+						await update();
+						isUploading = false;
+					};
+				}}
+				bind:this={form}
+			>
 				<div class="flex flex-col sm:flex-row sm:items-end gap-3">
 					<div class="flex-1">
 						<input
@@ -116,9 +121,11 @@
 						class="btn preset-filled-secondary-500 {uploadButtonStyles}"
 						type="button"
 						disabled={isUploading}
-						onclick={modalConfirm}>
+						onclick={modalConfirm}
+					>
 						{#if isUploading}
-							<i class="fa-solid fa-spinner fa-spin"></i> {m.uploading ? m.uploading() : 'Uploading...'}
+							<i class="fa-solid fa-spinner fa-spin"></i>
+							{m.uploading ? m.uploading() : 'Uploading...'}
 						{:else}
 							{m.upload()}
 						{/if}
