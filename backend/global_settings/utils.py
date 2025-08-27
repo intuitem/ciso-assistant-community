@@ -23,7 +23,7 @@ def ff_is_enabled(feature_flag: str):
         )
         return False
 
-    flags: dict[str, bool] = FeatureFlagsSerializer(ff_settings.value).data
+    flags: dict[str, bool] = FeatureFlagsSerializer(instance=ff_settings.value).data
 
     if (flag := flags.get(feature_flag)) is None:
         logger.warning(
