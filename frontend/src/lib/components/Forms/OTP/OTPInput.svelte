@@ -83,6 +83,31 @@
 	run(() => {
 		$value = codes.join('');
 	});
+
+	$effect(() => {
+		if (!inputs[0]) return;
+		const id = setTimeout(() => {
+			if (document.activeElement !== inputs[0]) {
+				inputs[0]?.focus();
+			}
+		}, 200);
+		return () => clearTimeout(id);
+	});
+
+	let autoSubmitInFlight = false;
+	$effect(() => {
+		const complete = codes.length === numOfInputs && codes.every((code) => code !== '');
+		if (!complete || autoSubmitInFlight) return;
+
+		const id = setTimeout(() => {
+			autoSubmitInFlight = true;
+			form.submit().finally(() => {
+				autoSubmitInFlight = false;
+			});
+		}, 100);
+
+		return () => clearTimeout(id);
+	});
 </script>
 
 {#if $errors}
