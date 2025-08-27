@@ -178,7 +178,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 6
+      max-parallel: 12
       fail-fast: false
       matrix:
         python-version: ["3.12"]
@@ -203,11 +203,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pipx
+          python -m pipx install poetry
+
+      - name: Check Poetry version
+        run: poetry --version
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
@@ -337,7 +340,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 6
+      max-parallel: 12
       fail-fast: false
       matrix:
         python-version: ["3.12"]
@@ -362,11 +365,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pipx
+          python -m pipx install poetry
+
+      - name: Check Poetry version
+        run: poetry --version
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
