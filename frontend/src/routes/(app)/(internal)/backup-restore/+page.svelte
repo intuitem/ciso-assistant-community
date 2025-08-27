@@ -21,6 +21,7 @@
 
 	let form: HTMLFormElement = $state();
 	let file: HTMLInputElement = $state();
+	let isExporting = $state(false);
 
 	// Function to handle modal confirmation for any action
 	function modalConfirm(): void {
@@ -42,6 +43,7 @@
 	}
 
 	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
+	let exportButtonStyles = $derived(isExporting ? 'chip-disabled' : '');
 
 	const authorizedExtensions = ['.bak'];
 	const user = page.data.user;
@@ -55,8 +57,29 @@
 			<div class=" py-4">
 				{m.exportBackupDescription()}
 			</div>
-			<form action="/backup-restore/dump-db/">
-				<button type="submit" class="btn preset-filled-primary-500">{m.exportDatabase()}</button>
+			<form
+				action="/backup-restore/dump-db/"
+				onsubmit={() => {
+					if (!isExporting) {
+						isExporting = true;
+						setTimeout(() => {
+							isExporting = false;
+						}, 3000);
+					}
+				}}
+			>
+				<button
+					type="submit"
+					class="btn preset-filled-primary-500 {exportButtonStyles}"
+					disabled={isExporting}
+				>
+					{#if isExporting}
+						<i class="fa-solid fa-spinner fa-spin"></i>
+						{m.exporting ? m.exporting() : 'Exporting...'}
+					{:else}
+						{m.exportDatabase()}
+					{/if}
+				</button>
 			</form>
 		</div>
 
@@ -66,19 +89,24 @@
 				{m.importBackupDescription()}
 			</div>
 			<form enctype="multipart/form-data" method="post" use:enhance bind:this={form}>
-				<input
-					id="file"
-					type="file"
-					name="file"
-					accept={authorizedExtensions.join(',')}
-					required
-					bind:value={file}
-				/>
-				<button
-					class="btn preset-filled mt-2 lg:mt-0 {uploadButtonStyles}"
-					type="button"
-					onclick={modalConfirm}>{m.upload()}</button
-				>
+				<div class="flex flex-col sm:flex-row sm:items-end gap-3">
+					<div class="flex-1">
+						<input
+							id="file"
+							type="file"
+							name="file"
+							class="input"
+							accept={authorizedExtensions.join(',')}
+							required
+							bind:value={file}
+						/>
+					</div>
+					<button
+						class="btn preset-filled-secondary-500 {uploadButtonStyles}"
+						type="button"
+						onclick={modalConfirm}>{m.upload()}</button
+					>
+				</div>
 			</form>
 		</div>
 	</div>
