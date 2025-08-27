@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0090_complianceassessment_is_locked_and_more"),
+        ("core", "0091_appliedcontrol_objectives_and_more"),
     ]
 
     operations = [

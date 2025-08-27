@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0091_qualification_library_and_more"),
+        ("core", "0092_qualification_library_and_more"),
         ("resilience", "0002_businessimpactanalysis_is_locked"),
     ]
 
