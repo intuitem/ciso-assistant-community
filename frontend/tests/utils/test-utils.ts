@@ -7,7 +7,6 @@ import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
-import { author, owner } from '$paraglide/messages.js';
 
 type Fixtures = {
 	data: { [key: string]: any };
@@ -22,6 +21,7 @@ type Fixtures = {
 	foldersPage: PageContent;
 	frameworksPage: PageContent;
 	librariesPage: PageContent;
+	mappingsPage: PageContent;
 	perimetersPage: PageContent;
 	riskAcceptancesPage: PageContent;
 	riskAssessmentsPage: PageContent;
@@ -35,8 +35,10 @@ type Fixtures = {
 	findingsAssessmentsPage: PageContent;
 	findingsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
+	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	settingsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -66,6 +68,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
+			mappingsPage,
 			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
@@ -89,6 +92,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
+			mappingsPage,
 			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
@@ -161,6 +165,11 @@ export const test = base.extend<Fixtures>({
 		await use(lPage);
 	},
 
+	mappingsPage: async ({ page }, use) => {
+		const mPage = new PageContent(page, '/requirement-mapping-sets', 'Mappings');
+		await use(mPage);
+	},
+
 	perimetersPage: async ({ page }, use) => {
 		const pPage = new PageContent(page, '/perimeters', 'Perimeters', [
 			{ name: 'name', type: type.TEXT },
@@ -201,6 +210,11 @@ export const test = base.extend<Fixtures>({
 
 	riskMatricesPage: async ({ page }, use) => {
 		const rPage = new PageContent(page, '/risk-matrices', 'Risk matrices');
+		await use(rPage);
+	},
+
+	settingsPage: async ({ page }, use) => {
+		const rPage = new PageContent(page, '/settings', 'Settings');
 		await use(rPage);
 	},
 
@@ -310,6 +324,19 @@ export const test = base.extend<Fixtures>({
 			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'due_date', type: type.DATE }
+		]);
+		await use(bPage);
+	},
+
+	ebiosRmStudyPage: async ({ page }, use) => {
+		const bPage = new PageContent(page, '/ebios-rm', /Ebios RM stud(ies|y)/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'reviewers', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(bPage);
 	},
