@@ -406,7 +406,7 @@
 	"exportBackup": "Exporter une sauvegarde",
 	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes avec tous les utilisateurs et leur mot de passe",
 	"exportDatabase": "Exporter la base de données",
-	"upload": "Télécharger",
+	"upload": "Téléverser",
 	"add": "Ajouter",
 	"undefined": "--",
 	"production": "Production",

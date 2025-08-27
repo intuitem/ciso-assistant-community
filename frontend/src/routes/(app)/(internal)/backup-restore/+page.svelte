@@ -22,9 +22,12 @@
 	let form: HTMLFormElement = $state();
 	let file: HTMLInputElement = $state();
 	let isExporting = $state(false);
+	let isUploading = $state(false);
 
 	// Function to handle modal confirmation for any action
 	function modalConfirm(): void {
+		if (isUploading) return; // Prevent multiple clicks
+
 		const modalComponent: ModalComponent = {
 			ref: PromptConfirmModal
 		};
@@ -35,14 +38,17 @@
 			title: m.importBackup(),
 			body: m.confirmImportBackup(),
 			response: (r: boolean) => {
-				if (r) form.requestSubmit();
+				if (r) {
+					isUploading = true;
+					form.requestSubmit();
+				}
 			}
 		};
 
 		if (file) modalStore.trigger(modal);
 	}
 
-	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
+	let uploadButtonStyles = $derived(file && !isUploading ? '' : 'chip-disabled');
 	let exportButtonStyles = $derived(isExporting ? 'chip-disabled' : '');
 
 	const authorizedExtensions = ['.bak'];
@@ -88,7 +94,12 @@
 			<div class=" py-4">
 				{m.importBackupDescription()}
 			</div>
-			<form enctype="multipart/form-data" method="post" use:enhance bind:this={form}>
+			<form enctype="multipart/form-data" method="post" use:enhance={() => {
+				return async ({ update }) => {
+					await update();
+					isUploading = false;
+				};
+			}} bind:this={form}>
 				<div class="flex flex-col sm:flex-row sm:items-end gap-3">
 					<div class="flex-1">
 						<input
@@ -104,8 +115,14 @@
 					<button
 						class="btn preset-filled-secondary-500 {uploadButtonStyles}"
 						type="button"
-						onclick={modalConfirm}>{m.upload()}</button
-					>
+						disabled={isUploading}
+						onclick={modalConfirm}>
+						{#if isUploading}
+							<i class="fa-solid fa-spinner fa-spin"></i> {m.uploading ? m.uploading() : 'Uploading...'}
+						{:else}
+							{m.upload()}
+						{/if}
+					</button>
 				</div>
 			</form>
 		</div>
