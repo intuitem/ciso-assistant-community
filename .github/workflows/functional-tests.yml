@@ -173,7 +173,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 16
+      max-parallel: 12
       fail-fast: false
       matrix:
         python-version: ["3.12"]
@@ -289,8 +289,8 @@ jobs:
           include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
-            ${{ env.frontend-directory }}/build/tests/results/
-            ${{ env.frontend-directory }}/build/tests/reports/
+            ${{ env.frontend-directory }}/tests/results/
+            ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
 
   enterprise-functional-tests:
@@ -332,7 +332,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 16
+      max-parallel: 12
       fail-fast: false
       matrix:
         python-version: ["3.12"]

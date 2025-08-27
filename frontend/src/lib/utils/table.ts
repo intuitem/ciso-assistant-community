@@ -47,6 +47,12 @@ const SOLUTION_CRITICALITY_OPTIONS = [
 	{ label: '4', value: '4' }
 ];
 
+const ENTITY_CRITICALITY_OPTIONS = [
+	{ label: '1', value: '1' },
+	{ label: '2', value: '2' },
+	{ label: '3', value: '3' },
+	{ label: '4', value: '4' }
+];
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' },
@@ -135,6 +141,17 @@ const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ENTITY_ASSESSMENT_CONCLUSION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'entity-assessments/conclusion',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'conclusion',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -253,6 +270,28 @@ const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -304,6 +343,28 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'nature',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/health',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'health',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -437,6 +498,14 @@ const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'criticality',
+		options: ENTITY_CRITICALITY_OPTIONS,
+		multiple: true
+	}
+};
 const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -703,6 +772,16 @@ const OWNER_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'findings/owner',
+		multiple: true
+	}
+};
 
 const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -730,6 +809,15 @@ const LIBRARY_TYPE_FILTER = {
 		optionsLabelField: 'label',
 		optionsValueField: 'label',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'isAssigned',
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -856,8 +944,18 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'labels'],
-		body: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'folder', 'filtering_labels'],
+		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'owner', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'eta',
+			'folder',
+			'owner',
+			'filtering_labels'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -868,7 +966,9 @@ export const listViewFields = {
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reference_control: REFERENCE_CONTROL_FILTER,
-			eta__lte: undefined
+			eta__lte: undefined,
+			is_assigned: IS_ASSIGNED_FILTER,
+			owner: OWNER_FILTER
 		}
 	},
 	policies: {
@@ -1093,11 +1193,14 @@ export const listViewFields = {
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'description', 'perimeter', 'entity'],
-		body: ['name', 'description', 'perimeter', 'entity'],
+		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
+		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
 		filters: {
 			perimeter: PERIMETER_FILTER,
-			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER
+			entity: ENTITY_FILTER,
+			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
+			criticality: ENTITY_CRITICALITY_FILTER,
+			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER
 		}
 	},
 	solutions: {
@@ -1328,7 +1431,12 @@ export const listViewFields = {
 			'applied_controls',
 			'filtering_labels'
 		],
-		filters: { filtering_labels: LABELS_FILTER }
+		filters: {
+			filtering_labels: LABELS_FILTER,
+			severity: FINDINGS_SEVERITY_FILTER,
+			status: FINDINGS_STATUS_FILTER,
+			owner: FINDINGS_OWNER_FILTER
+		}
 	},
 	incidents: {
 		head: [
@@ -1372,10 +1480,12 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'domain', 'status', 'health'],
-		body: ['name', 'folder', 'status', 'health'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'assigned_to'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
 		}
 	},
 	'organisation-issues': {

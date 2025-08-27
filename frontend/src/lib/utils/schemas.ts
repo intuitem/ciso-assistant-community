@@ -118,7 +118,8 @@ export const RiskAssessmentSchema = z.object({
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	ebios_rm_study: z.string().uuid().optional()
+	ebios_rm_study: z.string().uuid().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const ThreatSchema = z.object({
@@ -161,6 +162,7 @@ export const AppliedControlSchema = z.object({
 	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
+	objectives: z.string().optional().array().optional(),
 	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -329,7 +331,8 @@ export const ComplianceAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
@@ -638,7 +641,9 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
@@ -781,7 +786,8 @@ export const FindingsAssessmentSchema = z.object({
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const IncidentSchema = z.object({

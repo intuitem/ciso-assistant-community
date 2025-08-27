@@ -141,6 +141,15 @@
 							>{data.scenario.risk_assessment.name} {data.scenario.version}</Anchor
 						>
 					</div>
+					<div>
+						<p class="text-sm font-semibold text-gray-400">{m.riskMatrix()}</p>
+						<Anchor
+							class="anchor text-sm font-semibold"
+							href="/risk-matrices/{data.scenario.risk_matrix.id}"
+							target="_blank"
+							rel="noopener noreferrer">{data.scenario.risk_matrix.str}</Anchor
+						>
+					</div>
 				</div>
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
@@ -309,37 +318,43 @@
 					</div>
 				</div>
 				<div class="flex w-1/2">
-					<div class="flex flex-row space-x-4 my-auto">
-						<div class="min-w-36">
-							<Select
-								form={_form}
-								options={data.probabilityChoices}
-								color_map={probabilityColorMap}
-								field="current_proba"
-								label={m.currentProba()}
-							/>
+					<div>
+						<div class="text-xs text-slate-500 mb-4">
+							<i class="fa-solid fa-circle-info"></i>
+							{m.riskOptionHelper()}
 						</div>
-						<i class="fa-solid fa-xmark mt-8"></i>
-						<div class="min-w-36">
-							<Select
-								form={_form}
-								options={data.impactChoices}
-								color_map={impactColorMap}
-								field="current_impact"
-								label={m.currentImpact()}
-							/>
-						</div>
-						<i class="fa-solid fa-equals mt-8"></i>
-						<div class="min-w-38">
-							<RiskLevel
-								form={_form}
-								field="current_risk_level"
-								label={m.currentRiskLevel()}
-								riskMatrix={data.riskMatrix}
-								probabilityField="current_proba"
-								impactField="current_impact"
-								helpText={m.currentRiskLevelHelpText()}
-							/>
+						<div class="flex flex-row space-x-4 my-auto">
+							<div class="min-w-36">
+								<Select
+									form={_form}
+									options={data.probabilityChoices}
+									color_map={probabilityColorMap}
+									field="current_proba"
+									label={m.currentProba()}
+								/>
+							</div>
+							<i class="fa-solid fa-xmark mt-8"></i>
+							<div class="min-w-36">
+								<Select
+									form={_form}
+									options={data.impactChoices}
+									color_map={impactColorMap}
+									field="current_impact"
+									label={m.currentImpact()}
+								/>
+							</div>
+							<i class="fa-solid fa-equals mt-8"></i>
+							<div class="min-w-38">
+								<RiskLevel
+									form={_form}
+									field="current_risk_level"
+									label={m.currentRiskLevel()}
+									riskMatrix={data.riskMatrix}
+									probabilityField="current_proba"
+									impactField="current_impact"
+									helpText={m.currentRiskLevelHelpText()}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
