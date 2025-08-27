@@ -14,6 +14,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { getModalStore } from './stores';
+	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
@@ -48,6 +49,15 @@
 		debug = false,
 		...rest
 	}: Props = $props();
+
+	// Focus the first field when modal opens
+	onMount(async () => {
+		await tick(); // Wait for DOM to render
+		const firstField = document.querySelector('input[data-focusindex="0"]');
+		if (firstField instanceof HTMLElement) {
+			firstField.focus();
+		}
+	});
 </script>
 
 {#if $modalStore[0]}

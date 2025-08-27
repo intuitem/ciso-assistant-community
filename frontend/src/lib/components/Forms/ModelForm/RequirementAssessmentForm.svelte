@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -13,9 +14,19 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		context: string;
+		object?: any;
 	}
 
-	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), context }: Props = $props();
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		context,
+		object
+	}: Props = $props();
+
+	let isParentLocked = $derived(object?.compliance_assessment?.is_locked || false);
 </script>
 
 {#if context === 'selectEvidences'}
@@ -44,7 +55,7 @@
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}

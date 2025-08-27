@@ -13,6 +13,7 @@
 		initialData?: Record<string, any>;
 		updated_fields?: Set<string>;
 		[key: string]: any;
+		object?: any;
 	}
 
 	let {
@@ -22,8 +23,11 @@
 		formDataCache = $bindable({}),
 		initialData = {},
 		updated_fields = new Set(),
+		object,
 		...rest
 	}: Props = $props();
+
+	let isParentLocked = $derived(object?.risk_assessment?.is_locked || false);
 
 	async function fetchDefaultRefId(riskAssessmentId: string) {
 		try {

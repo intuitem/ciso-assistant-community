@@ -335,6 +335,7 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
         )
@@ -451,6 +452,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "The user groups this user belongs to. A user will get all permissions "
             "granted to each of their user groups."
         ),
+    )
+    observation = models.TextField(
+        null=True, blank=True, verbose_name="Notes about a user"
     )
     objects = CaseInsensitiveUserManager()
 

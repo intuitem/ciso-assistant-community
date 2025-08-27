@@ -1,0 +1,14 @@
+subject: "CISO Assistant: You have ${control_count} expired control(s)"
+body: |
+  Hello,
+
+  The following controls have expired:
+
+  ${control_list}
+
+  This reminder will stop once the control is marked as active or you update the ETA.
+  Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.
+
+  ${ciso_assistant_url}
+
+  Thank you.

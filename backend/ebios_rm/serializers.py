@@ -144,7 +144,7 @@ class RoToReadSerializer(BaseModelSerializer):
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
     activity = serializers.CharField(source="get_activity_display")
-    pertinence = serializers.CharField(source="get_pertinence")
+    pertinence = serializers.CharField(source="get_pertinence_display")
 
     class Meta:
         model = RoTo
@@ -278,7 +278,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "ebios_rm_study"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
