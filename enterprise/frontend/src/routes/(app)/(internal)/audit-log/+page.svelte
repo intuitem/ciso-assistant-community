@@ -9,13 +9,14 @@
 				actor: 'actor',
 				action: 'action',
 				content_type: 'content_type',
-				timestamp: 'timestamp'
+				timestamp: 'timestamp',
+        folder: 'folder'
 			},
 			body: [],
 			meta: []
 		}}
 		URLModel="audit-log"
 		baseEndpoint="/audit-log"
-		fields={['actor', 'action', 'content_type', 'timestamp']}
+		fields={['actor', 'action', 'content_type', 'timestamp', 'folder']}
 	/>
 </main>

@@ -7,7 +7,7 @@
 </script>
 
 <main class="flex flex-col space-y-4">
-	<DetailView data={detailData} fields={['actor', 'action', 'object_repr', 'timestamp']} />
+	<DetailView data={detailData} fields={['actor', 'action', 'object_repr', 'timestamp', 'folder']} />
 
 	<div class="card shadow-lg bg-white p-4">
 		<div class="flex w-full">

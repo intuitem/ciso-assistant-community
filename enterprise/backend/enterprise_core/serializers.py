@@ -118,6 +118,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
     actor = FieldsRelatedField()
     action = serializers.CharField(source="get_action_display")
     content_type = serializers.SerializerMethodField(method_name="get_content_type")
+    folder = serializers.CharField(source="additional_data.folder", read_only=True)
 
     def get_content_type(self, obj):
         return obj.content_type.name
