@@ -534,15 +534,16 @@
 					type="submit"
 					onclick={(e) => {
 						if (URLModel !== 'folders-import') return;
+						if (isLoading) {
+							e.preventDefault();
+							e.stopPropagation();
+							return;
+						}
 
 						const schema = modelSchema(URLModel);
 						const result = schema.safeParse($formData);
 						if (!result.success) return;
 
-						if (isLoading) {
-							e.preventDefault();
-							e.stopPropagation();
-						}
 						isLoading = true;
 					}}
 					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
