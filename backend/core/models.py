@@ -2769,6 +2769,13 @@ class AppliedControl(
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    objectives = models.ManyToManyField(
+        "OrganisationObjective",
+        blank=True,
+        verbose_name=_("Objectives"),
+        related_name="applied_controls",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -2880,6 +2887,11 @@ class OrganisationIssue(
             "Legal",
         )
         ENVIRONMENTAL = "environmental", "Environmental"
+        ORGANISATION_STRUCTURE = "organisationStructure", "Organisation Structure"
+        HUMAN_RESOURCES = "humanResources", "Human resources"
+        INTERNAL_PROCESSES = "internalProcesses", "Internal processes"
+        FINANCIAL_CAPACITY = "financialCapacity", "Financial capacity"
+        COMPANY_CULTURE = "companyCulture", "Company culture / communication"
 
     class Origin(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -2973,6 +2985,8 @@ class OrganisationObjective(
         default=Health.UNDEFINED,
         verbose_name=_("Health"),
     )
+    eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
     fields_to_check = ["name"]
 
     class Meta:
