@@ -9,9 +9,9 @@ on:
       - "backend/**"
       - ".github/workflows/backend-api-tests.yml"
   workflow_dispatch:
-# If two events are triggered within a short time in the same PR, cancel the run of the oldest event
+# Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
