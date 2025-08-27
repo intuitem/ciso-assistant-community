@@ -347,6 +347,28 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/health',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'health',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1458,10 +1480,12 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'domain', 'status', 'health'],
-		body: ['name', 'folder', 'status', 'health'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'assigned_to'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
 		}
 	},
 	'organisation-issues': {
