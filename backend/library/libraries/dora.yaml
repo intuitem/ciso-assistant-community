@@ -13209,7 +13209,7 @@ objects:
         fr:
           description: "l\u2019efficacit\xE9 de la remont\xE9e des incidents au sein\
             \ de l\u2019entit\xE9 financi\xE8re;"
-    - urn: urn:intuitem:risk:req_node:dora:node310-0
+    - urn: urn:intuitem:risk:req_node:dora:node310-1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:dora:node307
@@ -15497,7 +15497,7 @@ objects:
             \ de cette notification, les autorit\xE9s comp\xE9tentes prennent, le\
             \ cas \xE9ch\xE9ant, toutes les mesures n\xE9cessaires afin de prot\xE9\
             ger la stabilit\xE9 imm\xE9diate du syst\xE8me financier."
-    - urn: urn:intuitem:risk:req_node:dora:node375-1
+    - urn: urn:intuitem:risk:req_node:dora:node375-2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:dora:node357
