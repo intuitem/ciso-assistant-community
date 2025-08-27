@@ -7,6 +7,10 @@ on:
     tags:
       - "canary-*"
   workflow_dispatch:
+# If two events are triggered within a short time in the same PR, cancel the run of the oldest event
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 env:
   UBUNTU_VERSION: "ubuntu-24.04"
 jobs:
