@@ -10,6 +10,7 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
@@ -250,6 +251,17 @@
 	});
 </script>
 
+{#if data.requirementAssessment.compliance_assessment.is_locked}
+	<div
+		class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mb-4"
+	>
+		<div class="flex items-center">
+			<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+			<span class="font-medium">{m.lockedAssessment()}</span>
+			<span class="ml-2 text-sm">{m.lockedRequirementAssessmentMessage()}</span>
+		</div>
+	</div>
+{/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
 		<span class="code left h-min">{data.requirement.urn}</span>
@@ -618,7 +630,7 @@
 						/>
 					{/if}
 
-					<TextArea {form} field="observation" label="Observation" />
+					<MarkdownField {form} field="observation" label="Observation" />
 					<div class="flex flex-row justify-between space-x-4">
 						<button
 							class="btn bg-gray-400 text-white font-semibold w-full"
