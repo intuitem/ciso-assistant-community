@@ -178,7 +178,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 8
+      max-parallel: 7
       fail-fast: false
       matrix:
         python-version: ["3.12"]
@@ -337,7 +337,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 8
+      max-parallel: 7
       fail-fast: false
       matrix:
         python-version: ["3.12"]
