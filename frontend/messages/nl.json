@@ -965,5 +965,6 @@
 	"fearedEventAssetHelpText": "Gevreesde gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit.",
 	"abbreviation": "Afkorting",
 	"qualificationOrdering": "Kwalificatievolgorde",
-	"securityObjectiveOrdering": "Volgorde van beveiligingsdoelen"
+	"securityObjectiveOrdering": "Volgorde van beveiligingsdoelen",
+	"addQualification": "Kwalificatie toevoegen"
 }

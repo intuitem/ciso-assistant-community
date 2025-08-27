@@ -1709,5 +1709,6 @@
 	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
 	"abbreviation": "Skrót",
 	"qualificationOrdering": "Kolejność kwalifikacji",
-	"securityObjectiveOrdering": "Kolejność celów bezpieczeństwa"
+	"securityObjectiveOrdering": "Kolejność celów bezpieczeństwa",
+	"addQualification": "Dodaj kwalifikację"
 }

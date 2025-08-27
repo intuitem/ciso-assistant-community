@@ -955,5 +955,6 @@
 	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet.",
 	"abbreviation": "Förkortning",
 	"qualificationOrdering": "Kvalifikationsordning",
-	"securityObjectiveOrdering": "Säkerhetsmålsordning"
+	"securityObjectiveOrdering": "Säkerhetsmålsordning",
+	"addQualification": "Lägg till kvalifikation"
 }

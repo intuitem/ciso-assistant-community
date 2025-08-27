@@ -1702,5 +1702,6 @@
 	"associatedCampaigns": "İlişkili kampanyalar",
 	"abbreviation": "Kısaltma",
 	"qualificationOrdering": "Nitelik sıralaması",
-	"securityObjectiveOrdering": "Güvenlik hedefi sıralaması"
+	"securityObjectiveOrdering": "Güvenlik hedefi sıralaması",
+	"addQualification": "Nitelik ekle"
 }

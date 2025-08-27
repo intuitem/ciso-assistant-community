@@ -1247,5 +1247,6 @@
 	"deselect": "Fravælg",
 	"abbreviation": "Forkortelse",
 	"qualificationOrdering": "Kvalifikationsrækkefølge",
-	"securityObjectiveOrdering": "Sikkerhedsmålsrækkefølge"
+	"securityObjectiveOrdering": "Sikkerhedsmålsrækkefølge",
+	"addQualification": "Tilføj kvalifikation"
 }

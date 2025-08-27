@@ -1666,5 +1666,6 @@
 	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
 	"abbreviation": "Συντομογραφία",
 	"qualificationOrdering": "Σειρά κατάταξης προσόντων",
-	"securityObjectiveOrdering": "Σειρά στόχων ασφαλείας"
+	"securityObjectiveOrdering": "Σειρά στόχων ασφαλείας",
+	"addQualification": "Προσθήκη προσόντος"
 }

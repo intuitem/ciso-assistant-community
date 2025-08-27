@@ -1765,5 +1765,6 @@
 	"qualificationsChartTitle": "Qualifications des scenarios de risque",
 	"abbreviation": "Abréviation",
 	"qualificationOrdering": "Ordre de qualification",
-	"securityObjectiveOrdering": "Ordre des objectifs de sécurité"
+	"securityObjectiveOrdering": "Ordre des objectifs de sécurité",
+	"addQualification": "Ajouter une qualification"
 }

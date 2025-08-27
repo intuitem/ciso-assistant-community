@@ -962,5 +962,6 @@
 	"fearedEventAssetHelpText": "Os eventos temidos são geralmente vinculados a valores empresariais (ativos primários). Ativos de suporte são permitidos aqui para flexibilidade.",
 	"abbreviation": "Abreviação",
 	"qualificationOrdering": "Ordenação de qualificações",
-	"securityObjectiveOrdering": "Ordenação dos objetivos de segurança"
+	"securityObjectiveOrdering": "Ordenação dos objetivos de segurança",
+	"addQualification": "Adicionar qualificação"
 }

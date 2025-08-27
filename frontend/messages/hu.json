@@ -964,5 +964,6 @@
 	"fearedEventAssetHelpText": "A félelemkeltő események általában üzleti értékekkel (elsődleges eszközökkel) vannak összekapcsolva. A támogatási eszközök itt is engedélyezettek a rugalmasság érdekében.",
 	"abbreviation": "Rövidítés",
 	"qualificationOrdering": "Kvalifikációs sorrend",
-	"securityObjectiveOrdering": "Biztonsági cél sorrend"
+	"securityObjectiveOrdering": "Biztonsági cél sorrend",
+	"addQualification": "Képzettség hozzáadása"
 }

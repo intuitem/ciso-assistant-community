@@ -932,5 +932,6 @@
 	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة",
 	"abbreviation": "اختصار",
 	"qualificationOrdering": "ترتيب المؤهلات",
-	"securityObjectiveOrdering": "ترتيب الأهداف الأمنية"
+	"securityObjectiveOrdering": "ترتيب الأهداف الأمنية",
+	"addQualification": "إضافة تأهيل"
 }

@@ -932,5 +932,6 @@
 	"fearedEventAssetHelpText": "خوفناک واقعات عام طور پر کاروباری قیمتیں (پہلی جائیدادیں) سے منسلک ہوتے ہیں۔ ان کے لیے اندرونی جائیدادیں بھی ان کے لچکدار ہونے کی وجہ سے اجازت دی جاتی ہیں۔",
 	"abbreviation": "اختصار",
 	"qualificationOrdering": "اہلیت کی ترتیب",
-	"securityObjectiveOrdering": "سیکورٹی مقاصد کی ترتیب"
+	"securityObjectiveOrdering": "سیکورٹی مقاصد کی ترتیب",
+	"addQualification": "اہلیت شامل کریں"
 }

@@ -1481,5 +1481,6 @@
 	"keepLocalLoginHelpText": "Коли глобальне SSO обов'язкове, це дозволяє користувачу обійти це налаштування та використовувати локальний пароль за потреби.",
 	"abbreviation": "Скорочення",
 	"qualificationOrdering": "Порядок кваліфікацій",
-	"securityObjectiveOrdering": "Порядок цілей безпеки"
+	"securityObjectiveOrdering": "Порядок цілей безпеки",
+	"addQualification": "Додати кваліфікацію"
 }

@@ -1342,5 +1342,6 @@
 	"deselect": "Deseleziona",
 	"abbreviation": "Abbreviazione",
 	"qualificationOrdering": "Ordinamento delle qualifiche",
-	"securityObjectiveOrdering": "Ordinamento degli obiettivi di sicurezza"
+	"securityObjectiveOrdering": "Ordinamento degli obiettivi di sicurezza",
+	"addQualification": "Aggiungi qualificazione"
 }

@@ -1152,5 +1152,6 @@
 	"deselect": "Batalkan Pilihan",
 	"abbreviation": "Singkatan",
 	"qualificationOrdering": "Urutan kualifikasi",
-	"securityObjectiveOrdering": "Urutan tujuan keamanan"
+	"securityObjectiveOrdering": "Urutan tujuan keamanan",
+	"addQualification": "Tambahkan kualifikasi"
 }

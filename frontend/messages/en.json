@@ -1804,5 +1804,6 @@
 	"qualificationsChartTitle": "Risk scenarios qualifications",
 	"abbreviation": "Abbreviation",
 	"qualificationOrdering": "Qualification ordering",
-	"securityObjectiveOrdering": "Security objective ordering"
+	"securityObjectiveOrdering": "Security objective ordering",
+	"addQualification": "Add qualification"
 }
