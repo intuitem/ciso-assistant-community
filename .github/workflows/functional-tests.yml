@@ -178,7 +178,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 12
+      max-parallel: 8
       fail-fast: false
       matrix:
         python-version: ["3.12"]
@@ -346,7 +346,7 @@ jobs:
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
-      max-parallel: 12
+      max-parallel: 8
       fail-fast: false
       matrix:
         python-version: ["3.12"]
@@ -371,20 +371,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Cache poetry
-        uses: actions/cache@v4
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
         with:
-          path: ~/.local/pipx/venvs/poetry
-          key: ${{ runner.os }}-poetry-${{ matrix.python-version }}
-
-      - name: Install Poetry (with retry)
-        run: |
-          for i in 1 2 3; do
-            pipx install poetry && break || sleep 15
-          done
-
-      - name: Verify Poetry
-        run: poetry --version
+          virtualenvs-create: false
+          installer-parallel: true
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
