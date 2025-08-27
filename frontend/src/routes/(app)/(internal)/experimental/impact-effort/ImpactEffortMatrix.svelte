@@ -153,7 +153,16 @@
 	{#key modelTableKey}
 		<ModelTable
 			source={{
-				head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder', 'effort', 'control_impact'],
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					status: 'status',
+					priority: 'priority',
+					eta: 'eta',
+					folder: 'folder',
+					effort: 'effort',
+					control_impact: 'control_impact'
+				},
 				body: []
 			}}
 			hideFilters={true}
