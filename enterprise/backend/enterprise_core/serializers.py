@@ -120,7 +120,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
     content_type = serializers.SerializerMethodField(method_name="get_content_type")
 
     def get_actor(self, obj):
-        return obj.actor.email if obj.actor else None
+        return obj.additional_data["user_email"] if obj.additional_data else None
 
     def get_content_type(self, obj):
         return obj.content_type.name
