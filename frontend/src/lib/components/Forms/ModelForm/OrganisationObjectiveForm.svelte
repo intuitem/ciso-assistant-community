@@ -52,6 +52,16 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="organisation-issues"
+		field="issues"
+		optionsExtraFields={[['folder', 'str']]}
+		cacheLock={cacheLocks['issues']}
+		bind:cachedValue={formDataCache['issues']}
+		label={m.organisationIssues()}
+	/>
 <TextField
 	type="date"
 	{form}
@@ -61,6 +71,17 @@
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
 />
+<Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<Select
+		{form}
+		options={model.selectOptions['health']}
+		field="health"
+		label={m.health()}
+    helpText={m.healthFieldHelpText()}
+		cacheLock={cacheLocks['health']}
+		bind:cachedValue={formDataCache['health']}
+	/>
+
 <TextField
 	type="date"
 	{form}
@@ -70,16 +91,6 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
-<Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<Select
-		{form}
-		options={model.selectOptions['health']}
-		field="health"
-		label={m.health()}
-		cacheLock={cacheLocks['health']}
-		bind:cachedValue={formDataCache['health']}
-	/>
-
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -98,6 +109,16 @@
 		bind:cachedValue={formDataCache['assets']}
 		label={m.assets()}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="task-templates"
+		field="tasks"
+		optionsExtraFields={[['folder', 'str']]}
+		cacheLock={cacheLocks['tasks']}
+		bind:cachedValue={formDataCache['tasks']}
+		label={m.taskTemplates()}
+	/>
 	<MarkdownField
 		{form}
 		field="observation"
@@ -105,24 +126,6 @@
 		helpText={m.observationHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="organisation-issues"
-		field="issues"
-		cacheLock={cacheLocks['issues']}
-		bind:cachedValue={formDataCache['issues']}
-		label={m.organisationIssues()}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="task-templates"
-		field="tasks"
-		cacheLock={cacheLocks['tasks']}
-		bind:cachedValue={formDataCache['tasks']}
-		label={m.taskTemplates()}
 	/>
 </Dropdown>
 <AutocompleteSelect
