@@ -202,6 +202,8 @@
 	"importMatrices": "Importer des matrices",
 	"importFrameworks": "Importer des référentiels",
 	"importMappings": "Importer des mappings",
+	"importThreats": "Importer des menaces",
+	"importReferenceControls": "Importer des mesures de référence",
 	"summary": "Synthèse",
 	"composer": "Compositeur",
 	"statistics": "Statistiques",
@@ -1760,5 +1762,6 @@
 	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié car l'analyse de risque parente est verrouillée.",
 	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée car son audit parent est verrouillé.",
 	"lockedFindingMessage": "Ce constat ne peut pas être modifié car son plan de suivi parent est verrouillé.",
+	"qualificationsChartTitle": "Qualifications des scenarios de risque",
 	"saveAndContinue": "Enregistrer et continuer"
 }

@@ -289,8 +289,8 @@ jobs:
           include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
-            ${{ env.frontend-directory }}/build/tests/results/
-            ${{ env.frontend-directory }}/build/tests/reports/
+            ${{ env.frontend-directory }}/tests/results/
+            ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
 
   enterprise-functional-tests:

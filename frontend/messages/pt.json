@@ -190,6 +190,8 @@
 	"importMatrices": "Importar matrizes",
 	"importFrameworks": "Importar frameworks",
 	"importMappings": "Mapeamentos de importação",
+	"importThreats": "Importar ameaças",
+	"importReferenceControls": "Importar controles de referência",
 	"summary": "Resumo",
 	"composer": "Compositor",
 	"statistics": "Estatísticas",
