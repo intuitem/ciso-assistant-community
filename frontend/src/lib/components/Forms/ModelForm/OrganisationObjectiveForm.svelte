@@ -52,16 +52,16 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="organisation-issues"
-		field="issues"
-		optionsExtraFields={[['folder', 'str']]}
-		cacheLock={cacheLocks['issues']}
-		bind:cachedValue={formDataCache['issues']}
-		label={m.organisationIssues()}
-	/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="organisation-issues"
+	field="issues"
+	optionsExtraFields={[['folder', 'str']]}
+	cacheLock={cacheLocks['issues']}
+	bind:cachedValue={formDataCache['issues']}
+	label={m.organisationIssues()}
+/>
 <TextField
 	type="date"
 	{form}
@@ -77,20 +77,20 @@
 		options={model.selectOptions['health']}
 		field="health"
 		label={m.health()}
-    helpText={m.healthFieldHelpText()}
+		helpText={m.healthFieldHelpText()}
 		cacheLock={cacheLocks['health']}
 		bind:cachedValue={formDataCache['health']}
 	/>
 
-<TextField
-	type="date"
-	{form}
-	field="due_date"
-	label={m.dueDate()}
-	helpText={m.dueDateHelpText()}
-	cacheLock={cacheLocks['due_date']}
-	bind:cachedValue={formDataCache['due_date']}
-/>
+	<TextField
+		type="date"
+		{form}
+		field="due_date"
+		label={m.dueDate()}
+		helpText={m.dueDateHelpText()}
+		cacheLock={cacheLocks['due_date']}
+		bind:cachedValue={formDataCache['due_date']}
+	/>
 	<AutocompleteSelect
 		{form}
 		multiple
