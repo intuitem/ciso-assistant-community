@@ -60,7 +60,7 @@ def check_deprecated_controls_and_expired_evidence_and_expired_controls():
     for exp_control in expired_controls:
         for owner in exp_control.owner.all():
             add_to_owner(owner.email, "expired_controls", exp_control)
-    
+
     # Update the status of each expired control
     # deprecated_controls_list.update(status="deprecated")
     # we should avoid this for now and have this as part of the model logic somehow.
@@ -143,8 +143,6 @@ def check_applied_controls_expiring_in_week():
     for control in controls_due_soon:
         for owner in control.owner.all():
             owner_controls.setdefault(owner.email, []).append(control)
-
-       
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():

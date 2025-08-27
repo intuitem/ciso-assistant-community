@@ -5,21 +5,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0091_appliedcontrol_objectives_and_more'),
+        ("core", "0091_appliedcontrol_objectives_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='evidence',
-            name='expiry_date',
-            field=models.DateField(blank=True, help_text='Date after which the applied control is no longer valid', null=True, verbose_name='Expiry date'),
+            model_name="evidence",
+            name="expiry_date",
+            field=models.DateField(
+                blank=True,
+                help_text="Date after which the applied control is no longer valid",
+                null=True,
+                verbose_name="Expiry date",
+            ),
         ),
         migrations.AddField(
-            model_name='evidence',
-            name='owner',
-            field=models.ManyToManyField(blank=True, related_name='evidences', to=settings.AUTH_USER_MODEL, verbose_name='Owner'),
+            model_name="evidence",
+            name="owner",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="evidences",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Owner",
+            ),
         ),
     ]
