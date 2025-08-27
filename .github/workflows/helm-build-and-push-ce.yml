@@ -10,6 +10,11 @@ on:
       - "charts/ciso-assistant-next/**" # Only when changes to the chart
   workflow_dispatch:
 
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
