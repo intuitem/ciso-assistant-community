@@ -115,9 +115,12 @@ class LogEntrySerializer(serializers.ModelSerializer):
     Serializer for the LogEntry model.
     """
 
-    actor = FieldsRelatedField()
+    actor = serializers.SerializerMethodField(method_name="get_actor")
     action = serializers.CharField(source="get_action_display")
     content_type = serializers.SerializerMethodField(method_name="get_content_type")
+
+    def get_actor(self, obj):
+        return obj.actor.email if obj.actor else None
 
     def get_content_type(self, obj):
         return obj.content_type.name
