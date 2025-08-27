@@ -1,4 +1,5 @@
 from global_settings.models import GlobalSettings
+from global_settings.serializers import FeatureFlagsSerializer
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -22,8 +23,9 @@ def ff_is_enabled(feature_flag: str):
         )
         return False
 
-    flag = ff_settings.value.get(feature_flag)
-    if flag is None:
+    flags: dict[str, bool] = FeatureFlagsSerializer(instance=ff_settings.value).data
+
+    if (flag := flags.get(feature_flag)) is None:
         logger.warning(
             "Feature flag not found, returning False", feature_flag=feature_flag
         )
