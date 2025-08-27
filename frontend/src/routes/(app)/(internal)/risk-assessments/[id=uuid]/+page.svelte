@@ -19,6 +19,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	let { data } = $props();
 
@@ -104,10 +105,33 @@
 		risk_assessment.risk_matrix,
 		'residual'
 	);
+
+	let fields = [
+		'ref_id',
+		'name',
+		'threats',
+		...(page.data?.featureflags?.inherent_risk ? ['inherent_level'] : []),
+		'existing_applied_controls',
+		'current_level',
+		'within_tolerance',
+		'applied_controls',
+		'residual_level'
+	];
 </script>
 
 <main class="grow main">
 	<div>
+		{#if risk_assessment.is_locked}
+			<div
+				class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mx-4 mt-4"
+			>
+				<div class="flex items-center">
+					<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+					<span class="font-medium">{m.lockedAssessment()}</span>
+					<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+				</div>
+			</div>
+		{/if}
 		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
@@ -170,7 +194,7 @@
 					>
 				</div>
 				<div class="text-sm" data-testid="description-field-value">
-					{risk_assessment.description ?? '--'}
+					<MarkdownRenderer content={risk_assessment.description} />
 				</div>
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
@@ -181,7 +205,9 @@
 						triggerClasses="btn preset-filled-primary-500 w-full"
 					>
 						{#snippet trigger()}
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							<span data-testid="export-button">
+								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							</span>
 						{/snippet}
 						{#snippet content()}
 							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
@@ -201,9 +227,9 @@
 									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 								>
 								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/csv"
+									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asCSV()}</a
+									>... {m.asXLSX()}</a
 								>
 							</div>
 						{/snippet}
@@ -254,24 +280,20 @@
 				search={false}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
-				fields={[
-					'ref_id',
-					'name',
-					'threats',
-					'inherent_level',
-					'existing_applied_controls',
-					'current_level',
-					'applied_controls',
-					'residual_level'
-				]}
+				{fields}
+				disableCreate={risk_assessment.is_locked}
+				disableDelete={risk_assessment.is_locked}
 			>
 				{#snippet addButton()}
-					<button
-						class="btn preset-filled-primary-500 self-end my-auto"
-						onclick={(_) => modalCreateForm()}
-						><i class="fa-solid fa-plus mr-2 lowercase"></i>
-						{m.addRiskScenario()}
-					</button>
+					{#if !risk_assessment.is_locked}
+						<button
+							class="btn preset-filled-primary-500 self-end my-auto"
+							onclick={(_) => modalCreateForm()}
+						>
+							<i class="fa-solid fa-plus mr-2 lowercase"></i>
+							{m.addRiskScenario()}
+						</button>
+					{/if}
 				{/snippet}
 			</ModelTable>
 		</div>

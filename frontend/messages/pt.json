@@ -190,6 +190,8 @@
 	"importMatrices": "Importar matrizes",
 	"importFrameworks": "Importar frameworks",
 	"importMappings": "Mapeamentos de importação",
+	"importThreats": "Importar ameaças",
+	"importReferenceControls": "Importar controles de referência",
 	"summary": "Resumo",
 	"composer": "Compositor",
 	"statistics": "Estatísticas",
@@ -955,5 +957,7 @@
 		}
 	],
 	"matchingScenarios": "Cenários correspondentes",
+	"select": "Selecionar",
+	"deselect": "Desmarcar",
 	"fearedEventAssetHelpText": "Os eventos temidos são geralmente vinculados a valores empresariais (ativos primários). Ativos de suporte são permitidos aqui para flexibilidade."
 }

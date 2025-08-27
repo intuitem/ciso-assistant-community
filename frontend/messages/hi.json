@@ -190,6 +190,8 @@
 	"importMatrices": "मैट्रिक्स आयात करें",
 	"importFrameworks": "फ्रेमवर्क आयात करें",
 	"importMappings": "मैपिंग आयात करें",
+	"importThreats": "खतरों को आयात करें",
+	"importReferenceControls": "संदर्भ नियंत्रण आयात करें",
 	"summary": "सारांश",
 	"composer": "रचनाकार",
 	"statistics": "आँकड़े",
@@ -926,5 +928,7 @@
 		}
 	],
 	"matchingScenarios": "मैचिंग परिदृश्य",
+	"select": "चुनें",
+	"deselect": "चयन रद्द करें",
 	"fearedEventAssetHelpText": "डरने वाले घटनाएँ आमतौर पर व्यवसाय मूल्यों (प्राथमिक संपत्तियों) से जुड़ी होती हैं। लचीलापन के लिए यहाँ सहायक संपत्तियों की अनुमति है।"
 }

@@ -1,3 +1,6 @@
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment
 import csv
 import json
 import mimetypes
@@ -360,7 +363,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
-class PerimeterFilter(df.FilterSet):
+class PerimeterFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(
         queryset=Folder.objects.all(),
     )
@@ -528,7 +531,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(df.FilterSet):
+class AssetFilter(GenericFilterSet):
     exclude_childrens = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
         method="filter_exclude_childrens",
@@ -553,6 +556,7 @@ class AssetFilter(df.FilterSet):
             "applied_controls",
             "filtering_labels",
             "asset_class",
+            "personal_data",
         ]
 
 
@@ -953,6 +957,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "risk_matrix",
         "status",
         "ebios_rm_study",
+        "authors",
+        "reviewers",
     ]
 
     def perform_create(self, serializer):
@@ -1041,8 +1047,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-    @action(detail=True, name="Get action plan CSV")
-    def action_plan_csv(self, request, pk):
+    @action(detail=True, name="Get action plan Excel")
+    def action_plan_excel(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
@@ -1050,56 +1056,89 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
         risk_assessment = RiskAssessment.objects.get(id=pk)
         risk_scenarios = risk_assessment.risk_scenarios.all()
         queryset = AppliedControl.objects.filter(
             risk_scenarios__in=risk_scenarios
         ).distinct()
 
-        # Use the same serializer to maintain consistency - to review
         serializer = RiskAssessmentActionPlanSerializer(
             queryset, many=True, context={"pk": pk}
         )
 
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="action_plan_{pk}.csv"'
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Action Plan"
 
-        writer = csv.writer(response)
-
-        writer.writerow(
-            [
-                "Name",
-                "Description",
-                "Category",
-                "CSF Function",
-                "Priority",
-                "Status",
-                "ETA",
-                "Expiry date",
-                "Effort",
-                "Impact",
-                "Cost",
-                "Covered scenarios",
-            ]
-        )
+        headers = [
+            "Name",
+            "Description",
+            "Domain",
+            "Category",
+            "CSF Function",
+            "Priority",
+            "Status",
+            "ETA",
+            "Expiry date",
+            "Effort",
+            "Impact",
+            "Cost",
+            "Assigned to",
+            "Covered scenarios",
+        ]
+        ws.append(headers)
 
         for item in serializer.data:
-            writer.writerow(
-                [
-                    item.get("name"),
-                    item.get("description"),
-                    item.get("category"),
-                    item.get("csf_function"),
-                    item.get("priority"),
-                    item.get("status"),
-                    item.get("eta"),
-                    item.get("expiry_date"),
-                    item.get("effort"),
-                    item.get("impact"),
-                    item.get("cost"),
-                    "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
-                ]
-            )
+            row = [
+                item.get("name"),
+                item.get("description"),
+                item.get("folder").get("str"),
+                item.get("category"),
+                item.get("csf_function"),
+                item.get("priority"),
+                item.get("status"),
+                item.get("eta"),
+                item.get("expiry_date"),
+                item.get("effort"),
+                item.get("impact"),
+                item.get("cost"),
+                "\n".join([ra.get("str") for ra in item.get("owner")]),
+                "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
+            ]
+            ws.append(row)
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
+            max_lines = 1
+            for cell in row:
+                if cell.value and isinstance(cell.value, str):
+                    line_count = cell.value.count("\n") + 1
+                    max_lines = max(max_lines, line_count)
+            ws.row_dimensions[row_idx].height = max(15, max_lines * 15)
+
+        for col in ws.columns:
+            max_length = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                try:
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                except Exception as e:
+                    logger.error(f"Error processing cell value: {e}")
+                    pass
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        last_col_letter = get_column_letter(len(headers))
+        for cell in ws[last_col_letter]:
+            cell.alignment = Alignment(wrap_text=True)
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="action_plan_{pk}.xlsx"'
+        )
+        wb.save(response)
 
         return response
 
@@ -1359,7 +1398,7 @@ def convert_date_to_timestamp(date):
     return None
 
 
-class AppliedControlFilterSet(df.FilterSet):
+class AppliedControlFilterSet(GenericFilterSet):
     todo = df.BooleanFilter(method="filter_todo")
     to_review = df.BooleanFilter(method="filter_to_review")
     compliance_assessments = df.ModelMultipleChoiceFilter(
@@ -1377,6 +1416,7 @@ class AppliedControlFilterSet(df.FilterSet):
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
+    is_assigned = df.BooleanFilter(method="filter_is_assigned")
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -1436,6 +1476,12 @@ class AppliedControlFilterSet(df.FilterSet):
             ).order_by("expiry_date")
         return queryset
 
+    def filter_is_assigned(self, queryset, name, value):
+        if value:
+            return queryset.filter(owner__isnull=False).distinct()
+        else:
+            return queryset.filter(owner__isnull=True)
+
     class Meta:
         model = AppliedControl
         fields = {
@@ -1443,7 +1489,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "category": ["exact"],
             "csf_function": ["exact"],
             "priority": ["exact"],
-            "reference_control": ["exact"],
+            "reference_control": ["exact", "isnull"],
             "effort": ["exact"],
             "control_impact": ["exact"],
             "cost": ["exact"],
@@ -1452,6 +1498,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "objectives": ["exact"],
             "assets": ["exact"],
             "stakeholders": ["exact"],
             "progress_field": ["exact"],
@@ -1460,6 +1507,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "findings": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
+            "processings": ["exact"],
         }
 
 
@@ -1783,6 +1831,63 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response(entries)
 
     @action(detail=False, methods=["get"])
+    def impact_effort(self, request):
+        # TODO consider the case of passing the domain as a filter
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        viewable_controls_set = set(viewable_controls_ids)
+
+        output = [
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+            [[], [], [], [], []],
+        ]
+
+        assessed_controls = AppliedControl.objects.filter(
+            id__in=viewable_controls_set,
+            control_impact__isnull=False,
+            effort__isnull=False,
+        ).values_list(
+            "id",
+            "name",
+            "control_impact",
+            "effort",
+        )
+
+        # MAP_EFFORT for converting effort strings to integers
+        MAP_EFFORT = {None: -1, "XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
+
+        for control_id, name, impact, effort_str in assessed_controls:
+            # Convert effort string to integer
+            effort_int = MAP_EFFORT.get(effort_str, -1)
+
+            # Convert to 0-based indices
+            impact_idx = 5 - impact
+            effort_idx = effort_int - 1
+
+            # Add to matrix if both values are valid (1-5)
+            if 0 <= impact_idx < 5 and 0 <= effort_idx < 5:
+                output[impact_idx][effort_idx].append(
+                    {
+                        "id": control_id,
+                        "impact": impact,
+                        "effort": effort_int,
+                        "name": name,
+                    }
+                )
+
+        # Get viewable but not assessed controls
+        all_assessed_ids = set(control_id for control_id, _, _, _ in assessed_controls)
+        viewable_not_assessed = viewable_controls_set - all_assessed_ids
+
+        print(f"Matrix populated with assessed controls")
+        print(f"Viewable but not assessed: {len(viewable_not_assessed)} controls")
+        return Response(output)
+
+    @action(detail=False, methods=["get"])
     def get_timeline_info(self, request):
         entries = []
         COLORS_PALETTE = [
@@ -1926,8 +2031,10 @@ class AppliedControlViewSet(BaseModelViewSet):
             for req in RequirementAssessment.objects.filter(applied_controls__id=ac.id):
                 nodes.append(
                     {
-                        "name": req.requirement.ref_id,
-                        "value": req.requirement.description,
+                        "name": req.requirement.ref_id
+                        or req.requirement.safe_display_str,
+                        "value": req.requirement.description
+                        or req.requirement.safe_display_str,
                         "category": 7,
                         "symbol": "triangle",
                     }
@@ -1999,6 +2106,7 @@ class ActionPlanList(generics.ListAPIView):
         "risk_scenarios_e": ["exact"],
         "requirement_assessments": ["exact"],
         "evidences": ["exact"],
+        "objectives": ["exact"],
         "assets": ["exact"],
         "stakeholders": ["exact"],
         "progress_field": ["exact"],
@@ -2071,7 +2179,7 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
-class RiskScenarioFilter(df.FilterSet):
+class RiskScenarioFilter(GenericFilterSet):
     # Aliased filters for user-friendly query params
     folder = df.UUIDFilter(
         field_name="risk_assessment__perimeter__folder", label="Folder ID"
@@ -2079,6 +2187,25 @@ class RiskScenarioFilter(df.FilterSet):
     perimeter = df.UUIDFilter(
         field_name="risk_assessment__perimeter", label="Perimeter ID"
     )
+    within_tolerance = df.ChoiceFilter(
+        choices=[("YES", "YES"), ("NO", "NO"), ("--", "--")],
+        method="filter_within_tolerance",
+    )
+
+    def filter_within_tolerance(self, queryset, name, value):
+        if value == "YES":
+            return queryset.filter(
+                risk_assessment__risk_tolerance__gte=0,
+                current_level__lte=models.F("risk_assessment__risk_tolerance"),
+            )
+        elif value == "NO":
+            return queryset.filter(
+                risk_assessment__risk_tolerance__gte=0,
+                current_level__gt=models.F("risk_assessment__risk_tolerance"),
+            )
+        elif value == "--":
+            return queryset.filter(risk_assessment__risk_tolerance__lt=0)
+        return queryset
 
     class Meta:
         model = RiskScenario
@@ -2096,6 +2223,7 @@ class RiskScenarioFilter(df.FilterSet):
             "assets": ["exact"],
             "applied_controls": ["exact"],
             "security_exceptions": ["exact"],
+            "owner": ["exact"],
         }
 
 
@@ -2133,6 +2261,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
+
+    @action(detail=False, name="Get qualifications count")
+    def qualifications_count(self, request):
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": qualifications_count_per_name(request.user, folder_id)}
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
@@ -2221,7 +2356,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
             )
 
 
-class RiskAcceptanceFilterSet(df.FilterSet):
+class RiskAcceptanceFilterSet(GenericFilterSet):
     to_review = df.BooleanFilter(method="filter_to_review")
 
     def filter_to_review(self, queryset, name, value):
@@ -2374,7 +2509,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         return Response(dict(RiskAcceptance.ACCEPTANCE_STATE))
 
 
-class UserFilter(df.FilterSet):
+class UserFilter(GenericFilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
     is_applied_control_owner = df.BooleanFilter(
         method="filter_applied_control_owner", label="Applied control owner"
@@ -2507,7 +2642,7 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
 
-class FolderFilter(df.FilterSet):
+class FolderFilter(GenericFilterSet):
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
@@ -2556,35 +2691,47 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the tree of domains and perimeters
         """
-        # Get include_perimeters parameter from query params, default to True if not provided
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
         ).lower() in ["true", "1", "yes"]
 
-        tree = {"name": "Global", "children": []}
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
             object_type=Folder,
         )
-        folders_list = list()
+
+        # Add ancestors so viewable folders aren't orphaned
+        needed_folders = set(viewable_objects)
+
+        for folder_id in viewable_objects:
+            current = Folder.objects.get(pk=folder_id)
+            while current and current.parent_folder_id:
+                needed_folders.add(current.parent_folder_id)
+                current = Folder.objects.get(pk=current.parent_folder_id)
+
+        folders_list = []
         for folder in (
             Folder.objects.exclude(content_type="GL")
-            .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
+            .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
             entry = {
                 "name": folder.name,
                 "uuid": folder.id,
+                "viewable": folder.id in viewable_objects,
             }
             folder_content = get_folder_content(
-                folder, include_perimeters=include_perimeters
+                folder,
+                include_perimeters=include_perimeters,
+                viewable_objects=viewable_objects,
+                needed_folders=needed_folders,
             )
             if len(folder_content) > 0:
                 entry.update({"children": folder_content})
             folders_list.append(entry)
-        tree.update({"children": folders_list})
-        return Response(tree)
+
+        return Response({"name": "Global", "children": folders_list})
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -3716,7 +3863,7 @@ def get_composer_data(request):
 # Compliance Assessment
 
 
-class FrameworkFilter(df.FilterSet):
+class FrameworkFilter(GenericFilterSet):
     baseline = df.ModelChoiceFilter(
         queryset=ComplianceAssessment.objects.all(),
         method="filter_framework",
@@ -3828,8 +3975,8 @@ class FrameworkViewSet(BaseModelViewSet):
                 "urn": rn.urn,
                 "assessable": rn.assessable,
                 "ref_id": rn.ref_id,
-                "name": rn.name,
-                "description": rn.description,
+                "name": rn.get_name_translated,
+                "description": rn.get_description_translated,
                 "compliance_result": "",
                 "requirement_progress": "",
                 "score": "",
@@ -4188,10 +4335,44 @@ class QualificationViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
+class OrganisationObjectiveViewSet(BaseModelViewSet):
+    model = OrganisationObjective
+
+    filterset_fields = ["folder", "status", "health", "issues"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(OrganisationObjective.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get health choices")
+    def health(self, request):
+        return Response(dict(OrganisationObjective.Health.choices))
+
+
+class OrganisationIssueViewSet(BaseModelViewSet):
+    model = OrganisationIssue
+
+    filterset_fields = ["folder", "category", "origin"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(OrganisationIssue.Category.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get origin choices")
+    def origin(self, request):
+        return Response(dict(OrganisationIssue.Origin.choices))
+
+
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = ["folder", "frameworks", "perimeters"]
+    filterset_fields = ["folder", "frameworks", "perimeters", "status"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -4252,8 +4433,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "ebios_rm_studies",
         "assets",
         "evidences",
+        "authors",
+        "reviewers",
     ]
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -4361,8 +4544,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "urn": req_node.urn,
                 "assessable": req_node.assessable,
                 "ref_id": req_node.ref_id,
-                "name": req_node.name,
-                "description": req_node.description,
+                "name": req_node.get_name_translated,
+                "description": req_node.get_description_translated,
                 "compliance_result": req.result,
                 "requirement_progress": req.status,
                 "observations": req.observation,
@@ -5010,7 +5193,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         self.check_object_permissions(request, compliance_assessment)
 
         threat_metrics = compliance_assessment.get_threats_metrics()
-        print(threat_metrics)
         if threat_metrics.get("total_unique_threats") == 0:
             return Response(threat_metrics, status=status.HTTP_200_OK)
         children = []
@@ -5056,10 +5238,18 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "applied_controls",
         "security_exceptions",
         "requirement__ref_id",
+        "result",
         "compliance_assessment__ref_id",
+        "compliance_assessment__perimeter",
+        "compliance_assessment__perimeter__name",
         "compliance_assessment__assets__ref_id",
+        "requirement__assessable",
     ]
-    search_fields = ["requirement__name", "requirement__description"]
+    search_fields = [
+        "requirement__name",
+        "requirement__description",
+        "requirement__ref_id",
+    ]
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
@@ -5474,7 +5664,15 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     """
 
     model = SecurityException
-    filterset_fields = ["requirement_assessments", "risk_scenarios"]
+    filterset_fields = [
+        "requirement_assessments",
+        "risk_scenarios",
+        "owners",
+        "approver",
+        "folder",
+        "severity",
+        "status",
+    ]
     search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get severity choices")
@@ -5597,6 +5795,7 @@ class FindingViewSet(BaseModelViewSet):
         "owner",
         "folder",
         "status",
+        "severity",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -5612,11 +5811,27 @@ class FindingViewSet(BaseModelViewSet):
     def severity(self, request):
         return Response(dict(Severity.choices))
 
+    @action(detail=False, name="Get all findings owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(findings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
+
 
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = ["folder", "status", "severity", "qualifications", "detection"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "severity",
+        "qualifications",
+        "detection",
+        "owners",
+    ]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5686,6 +5901,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
+    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""

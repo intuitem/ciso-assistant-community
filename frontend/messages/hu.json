@@ -190,6 +190,8 @@
 	"importMatrices": "Mátrixok importálása",
 	"importFrameworks": "Keretek importálása",
 	"importMappings": "Mappastruktúra importálása",
+	"importThreats": "Fenyegetések importálása",
+	"importReferenceControls": "Referencia kontrollok importálása",
 	"summary": "Összefoglaló",
 	"composer": "Összeállító",
 	"statistics": "Statisztika",
@@ -957,5 +959,7 @@
 		}
 	],
 	"matchingScenarios": "Egyező forgatókönyvek",
+	"select": "Kiválasztás",
+	"deselect": "Kijelölés megszüntetése",
 	"fearedEventAssetHelpText": "A félelemkeltő események általában üzleti értékekkel (elsődleges eszközökkel) vannak összekapcsolva. A támogatási eszközök itt is engedélyezettek a rugalmasság érdekében."
 }

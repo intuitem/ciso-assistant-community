@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
    libyaml-cpp-dev \
    libffi-dev \
    libglib2.0-0 \
-   pango1.0-0 \
+   pango-1.0 \
    libcairo2 \
    locales \
    tzdata \

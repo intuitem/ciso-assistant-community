@@ -38,6 +38,7 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 class PersonalDataReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assets = FieldsRelatedField(["name", "type", "folder"], many=True)
 
     class Meta:
         model = PersonalData
@@ -121,6 +122,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
     nature = FieldsRelatedField(["name"], many=True)
+    associated_controls = FieldsRelatedField(["name"], many=True)
 
     class Meta:
         model = Processing
