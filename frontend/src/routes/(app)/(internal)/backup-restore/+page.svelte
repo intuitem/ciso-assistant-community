@@ -24,6 +24,48 @@
 	let isExporting = $state(false);
 	let isUploading = $state(false);
 
+	function downloadBlob(blob: Blob, filename: string) {
+		// Create a temporary URL for the blob
+		const url = window.URL.createObjectURL(blob);
+
+		// Create and trigger download link
+		const downloadLink = document.createElement('a');
+		downloadLink.href = url;
+		downloadLink.download = filename;
+		downloadLink.style.display = 'none'; // Keep it hidden
+
+		// Temporarily add to DOM, click, then remove
+		document.body.appendChild(downloadLink);
+		downloadLink.click();
+		document.body.removeChild(downloadLink);
+
+		// Clean up the temporary URL
+		window.URL.revokeObjectURL(url);
+	}
+
+	async function handleExport() {
+		if (isExporting) return;
+
+		isExporting = true;
+		try {
+			const response = await fetch('/backup-restore/dump-db/');
+
+			if (!response.ok) {
+				throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+			}
+
+			const blob = await response.blob();
+			const filename = `backup-${new Date().toISOString().split('T')[0]}.bak`;
+
+			downloadBlob(blob, filename);
+		} catch (error) {
+			console.error('Export error:', error);
+			// TODO: Show user-friendly error message
+		} finally {
+			isExporting = false;
+		}
+	}
+
 	// Function to handle modal confirmation for any action
 	function modalConfirm(): void {
 		if (isUploading) return; // Prevent multiple clicks
@@ -63,21 +105,12 @@
 			<div class=" py-4">
 				{m.exportBackupDescription()}
 			</div>
-			<form
-				action="/backup-restore/dump-db/"
-				onsubmit={() => {
-					if (!isExporting) {
-						isExporting = true;
-						setTimeout(() => {
-							isExporting = false;
-						}, 3000);
-					}
-				}}
-			>
+			<div>
 				<button
-					type="submit"
+					type="button"
 					class="btn preset-filled-primary-500 {exportButtonStyles}"
 					disabled={isExporting}
+					onclick={handleExport}
 				>
 					{#if isExporting}
 						<i class="fa-solid fa-spinner fa-spin"></i>
@@ -86,7 +119,7 @@
 						{m.exportDatabase()}
 					{/if}
 				</button>
-			</form>
+			</div>
 		</div>
 
 		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
