@@ -690,11 +690,13 @@ export const quantitativeRiskHypothesisSchema = z.object({
 	risk_stage: z.string().optional().default('current'),
 	ref_id: z.string().optional(),
 	probability: z.coerce.number().min(0).max(1).optional(),
-	impact: z.object({
-		distribution: z.string().default("LOGNORMAL"),
-		lb: z.coerce.number().min(0).optional(),
-		ub: z.coerce.number().min(0).optional()
-	}).optional(),
+	impact: z
+		.object({
+			distribution: z.string().default('LOGNORMAL'),
+			lb: z.coerce.number().min(0).optional(),
+			ub: z.coerce.number().min(0).optional()
+		})
+		.optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional()
 });

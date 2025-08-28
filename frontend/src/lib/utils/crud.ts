@@ -1422,7 +1422,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'quantitative_risk_study', urlModel: 'quantitative-risk-scenarios', endpointUrl: 'crq/quantitative-risk-scenarios' }
+			{
+				field: 'quantitative_risk_study',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios'
+			}
 		],
 		selectFields: [{ field: 'status', endpointUrl: 'crq/quantitative-risk-studies' }],
 		filters: [{ field: 'folder' }, { field: 'status' }]
@@ -1435,7 +1439,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Quantitative Risk Scenarios',
 		endpointUrl: 'crq/quantitative-risk-scenarios',
 		foreignKeyFields: [
-			{ field: 'quantitative_risk_study', urlModel: 'quantitative-risk-studies', endpointUrl: 'crq/quantitative-risk-studies' },
+			{
+				field: 'quantitative_risk_study',
+				urlModel: 'quantitative-risk-studies',
+				endpointUrl: 'crq/quantitative-risk-studies'
+			},
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
@@ -1443,7 +1451,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'quantitative_risk_scenario', urlModel: 'quantitative-risk-hypotheses', endpointUrl: 'crq/quantitative-risk-hypotheses' }
+			{
+				field: 'quantitative_risk_scenario',
+				urlModel: 'quantitative-risk-hypotheses',
+				endpointUrl: 'crq/quantitative-risk-hypotheses'
+			}
 		],
 		selectFields: [{ field: 'status', endpointUrl: 'crq/quantitative-risk-scenarios' }],
 		filters: [{ field: 'quantitative_risk_study' }, { field: 'status' }]
@@ -1456,7 +1468,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Quantitative Risk Hypotheses',
 		endpointUrl: 'crq/quantitative-risk-hypotheses',
 		foreignKeyFields: [
-			{ field: 'quantitative_risk_scenario', urlModel: 'quantitative-risk-scenarios', endpointUrl: 'crq/quantitative-risk-scenarios' },
+			{
+				field: 'quantitative_risk_scenario',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios'
+			},
 			{ field: 'existing_applied_controls', urlModel: 'applied-controls' },
 			{ field: 'added_applied_controls', urlModel: 'applied-controls' },
 			{ field: 'removed_applied_controls', urlModel: 'applied-controls' },
