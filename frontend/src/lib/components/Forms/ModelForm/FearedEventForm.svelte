@@ -37,6 +37,7 @@
 <AutocompleteSelect
 	{form}
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.folder()}

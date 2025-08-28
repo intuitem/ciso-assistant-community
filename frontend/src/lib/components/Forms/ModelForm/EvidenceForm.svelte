@@ -60,6 +60,7 @@
 		{form}
 		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
+		pathField="path"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
