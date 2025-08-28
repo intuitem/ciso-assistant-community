@@ -1837,5 +1837,17 @@
 	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
 	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
 	"associatedQuantitativeRiskHypotheses": "Associated hypohteses",
-	"associatedQuantitativeRiskScenarios": "Associated scenarios"
+	"associatedQuantitativeRiskScenarios": "Associated scenarios",
+	"quantitativeRiskScenario": "Quantitative Risk Scenario",
+	"hypothesisStage": "Hypothesis stage",
+	"existingControls": "Existing Controls",
+	"addedControls": "Added Controls",
+	"removedControls": "Removed Controls",
+	"expectedLossLowerBound": "Expected Loss Lower Bound (LB)",
+	"expectedLossUpperBound": "Expected Loss Upper Bound (UB)",
+	"probabilityHelpText": "Estimated probability value between 0 and 1, based on the knowledge you have",
+	"lowerBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be LOWER than this.",
+	"upperBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be HIGHER than this.",
+	"treatment": "Treatment",
+	"simulationParameters": "Simulation Parameters"
 }

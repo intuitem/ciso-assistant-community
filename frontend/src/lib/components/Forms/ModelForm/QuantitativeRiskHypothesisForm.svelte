@@ -46,7 +46,7 @@
 	field="quantitative_risk_scenario"
 	cacheLock={cacheLocks['quantitative_risk_scenario']}
 	bind:cachedValue={formDataCache['quantitative_risk_scenario']}
-	label="Quantitative Risk Scenario"
+	label={m.quantitativeRiskScenario()}
 	hidden={initialData.quantitative_risk_scenario}
 />
 
@@ -54,82 +54,83 @@
 	{form}
 	options={model.selectOptions['risk_stage']}
 	translateOptions={true}
-  disableDoubleDash
+	disableDoubleDash
 	field="risk_stage"
-	label="Hypothesis stage"
+	label={m.hypothesisStage()}
 	cacheLock={cacheLocks['risk_stage']}
 	bind:cachedValue={formDataCache['risk_stage']}
 />
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="applied-controls"
-	optionsExtraFields={[['folder', 'str']]}
-	field="existing_applied_controls"
-	cacheLock={cacheLocks['existing_applied_controls']}
-	bind:cachedValue={formDataCache['existing_applied_controls']}
-	label="Existing Controls"
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-shield-halved" header={m.treatment()}>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="applied-controls"
+		optionsExtraFields={[['folder', 'str']]}
+		field="existing_applied_controls"
+		cacheLock={cacheLocks['existing_applied_controls']}
+		bind:cachedValue={formDataCache['existing_applied_controls']}
+		label={m.existingControls()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="applied-controls"
+		optionsExtraFields={[['folder', 'str']]}
+		field="added_applied_controls"
+		cacheLock={cacheLocks['added_applied_controls']}
+		bind:cachedValue={formDataCache['added_applied_controls']}
+		label={m.addedControls()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="applied-controls"
+		optionsExtraFields={[['folder', 'str']]}
+		field="removed_applied_controls"
+		cacheLock={cacheLocks['removed_applied_controls']}
+		bind:cachedValue={formDataCache['removed_applied_controls']}
+		label={m.removedControls()}
+	/>
+</Dropdown>
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="applied-controls"
-	optionsExtraFields={[['folder', 'str']]}
-	field="added_applied_controls"
-	cacheLock={cacheLocks['added_applied_controls']}
-	bind:cachedValue={formDataCache['added_applied_controls']}
-	label="Added Controls"
-/>
-
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="applied-controls"
-	optionsExtraFields={[['folder', 'str']]}
-	field="removed_applied_controls"
-	cacheLock={cacheLocks['removed_applied_controls']}
-	bind:cachedValue={formDataCache['removed_applied_controls']}
-	label="Removed Controls"
-/>
-<input type="hidden" name="impact.distribution" value="LOGNORMAL-CI90" />
-<TextField
-	{form}
-	field="probability"
-	label="Probability (P)"
-	type="number"
-	step="0.01"
-	min="0"
-	max="1"
-	cacheLock={cacheLocks['probability']}
-	bind:cachedValue={formDataCache['probability']}
-	helpText="Estimated probability value between 0 and 1, based on the knowledge you have"
-/>
-
-<TextField
-	{form}
-	field="impact.lb"
-	label="Expected Loss Lower Bound (LB)"
-	type="number"
-	step="10"
-	min="10"
-	cacheLock={cacheLocks['impact.lb']}
-	bind:cachedValue={formDataCache['impact.lb']}
-	helpText="Remember that, given the current distribution, 5% of the time it will be LOWER than this."
-/>
-
-<TextField
-	{form}
-	field="impact.ub"
-	label="Expected Loss Upper Bound (UB)"
-	type="number"
-	step="10"
-	min="20"
-	cacheLock={cacheLocks['impact.ub']}
-	bind:cachedValue={formDataCache['impact.ub']}
-	helpText="Remember that, given the current distribution, 5% of the time it will be HIGHER than this."
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-calculator" header={m.simulationParameters()}>
+	<input type="hidden" name="impact.distribution" value="LOGNORMAL-CI90" />
+	<TextField
+		{form}
+		field="probability"
+		label="Probability (P)"
+		type="number"
+		step="0.01"
+		min="0"
+		max="1"
+		cacheLock={cacheLocks['probability']}
+		bind:cachedValue={formDataCache['probability']}
+		helpText={m.probabilityHelpText()}
+	/>
+	<TextField
+		{form}
+		field="impact.lb"
+		label={m.expectedLossLowerBound()}
+		type="number"
+		step="10"
+		min="10"
+		cacheLock={cacheLocks['impact.lb']}
+		bind:cachedValue={formDataCache['impact.lb']}
+		helpText={m.lowerBoundHelpText()}
+	/>
+	<TextField
+		{form}
+		field="impact.ub"
+		label={m.expectedLossUpperBound()}
+		type="number"
+		step="10"
+		min="20"
+		cacheLock={cacheLocks['impact.ub']}
+		bind:cachedValue={formDataCache['impact.ub']}
+		helpText={m.upperBoundHelpText()}
+	/>
+</Dropdown>
 
 
 <MarkdownField

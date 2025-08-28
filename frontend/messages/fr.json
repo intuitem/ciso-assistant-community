@@ -1803,5 +1803,17 @@
 	"daysOfWeekErrorMessage": "Vous devez spécifier au moins un jour de la semaine",
 	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)",
 	"associatedQuantitativeRiskHypotheses": "Hypothèses associées",
-	"associatedQuantitativeRiskScenarios": "Scénarios associés"
+	"associatedQuantitativeRiskScenarios": "Scénarios associés",
+	"quantitativeRiskScenario": "Scénario de Risque Quantitatif",
+	"hypothesisStage": "Stade d'hypothèse",
+	"existingControls": "Contrôles Existants",
+	"addedControls": "Contrôles Ajoutés",
+	"removedControls": "Contrôles Supprimés",
+	"expectedLossLowerBound": "Borne Inférieure de Perte Attendue (LB)",
+	"expectedLossUpperBound": "Borne Supérieure de Perte Attendue (UB)",
+	"probabilityHelpText": "Valeur de probabilité estimée entre 0 et 1, basée sur les connaissances que vous avez",
+	"lowerBoundHelpText": "Rappelez-vous que, étant donné la distribution actuelle, 5% du temps ce sera INFÉRIEUR à cela.",
+	"upperBoundHelpText": "Rappelez-vous que, étant donné la distribution actuelle, 5% du temps ce sera SUPÉRIEUR à cela.",
+	"treatment": "Traitement",
+	"simulationParameters": "Paramètres de Simulation"
 }
