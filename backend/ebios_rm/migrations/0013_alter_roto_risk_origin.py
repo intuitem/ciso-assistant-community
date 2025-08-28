@@ -44,7 +44,11 @@ class Migration(migrations.Migration):
                 risk_origin_temp=models.F('risk_origin')
             ),
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name="roto",
+            name="risk_origin",
+        ),
+        migrations.AddField(
             model_name="roto",
             name="risk_origin",
             field=models.ForeignKey(
