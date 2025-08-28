@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { ModelMapEntry } from './crud';
 import type { RiskScenarioSchema } from './schemas';
+import { IS_ENTERPRISE } from './is_enterprise';
 
 export interface User {
 	id: string;
@@ -77,7 +78,6 @@ export const URL_MODEL = [
 	'elementary-actions',
 	'operating-modes',
 	'kill-chains',
-	'qualifications',
 	'processings',
 	'processing-natures',
 	'security-exceptions',
@@ -104,7 +104,8 @@ export const URL_MODEL = [
 	'campaigns',
 	// iso,
 	'organisation-issues',
-	'organisation-objectives'
+	'organisation-objectives',
+	...(IS_ENTERPRISE ? ['qualifications'] : [])
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
