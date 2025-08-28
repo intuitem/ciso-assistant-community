@@ -7,11 +7,72 @@ from django.db import migrations, models
 def migrate_risk_origin(apps, schema_editor):
     Roto = apps.get_model('ebios_rm', 'Roto')
     Terminology = apps.get_model('core', 'Terminology')
+    DEFAULT_ROTO_RISK_ORIGINS = [
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+    ]
 
     for roto in Roto.objects.all():
         if roto.risk_origin:
             try:
-                Terminology.create_default_roto_risk_origins()
+                for risk_origin in DEFAULT_ROTO_RISK_ORIGINS:
+                    Terminology.objects.update_or_create(
+                        name=risk_origin["name"],
+                        field_path=risk_origin["field_path"],
+                        defaults=risk_origin,
+                    )
                 term = Terminology.objects.get(name=roto.risk_origin)
                 roto.risk_origin_fk = term
                 roto.save()
@@ -20,6 +81,7 @@ def migrate_risk_origin(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    atomic=False
 
     dependencies = [
         ('core', '0092_terminology'),
