@@ -581,6 +581,7 @@ Qualifications that have so_order defined can be used to set security objectives
 
 The role of urn is to enable updates with a library, and to facilitate export/import between instances (not in MVP).
 
+Note: As of now the 2 ordering fields (`qualification_ordering` and `security_objective_ordering`) don't have any effect yet, they should either be deleted or implemented later on.
 Note: the order can be changed in a translation. This makes easy to transform CIAP (English) in DICP (French) (not in MVP).
 
 ## Assets, security and disaster recovery objectives
