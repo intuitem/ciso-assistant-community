@@ -1802,6 +1802,8 @@
 	"noActiveFilter": "No active filter",
 	"showingAllAppliedControls": "Showing all applied controls",
 	"showingItemsWith": "Showing items with",
+	"qualificationsChartTitle": "Risk scenarios qualifications",
+	"saveAndContinue": "Save and continue",
 	"pImpact": "Impact",
 	"item": "item",
 	"items": "items",
@@ -2099,5 +2101,7 @@
 	"escalationthreshold": "Escalation threshold",
 	"entityassessment": "Entity assessment",
 	"selectAll": "Select all",
-	"deselectAll": "Deselect all"
+	"deselectAll": "Deselect all",
+	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
+	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)"
 }

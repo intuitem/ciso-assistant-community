@@ -406,7 +406,7 @@
 	"exportBackup": "Exporter une sauvegarde",
 	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes avec tous les utilisateurs et leur mot de passe",
 	"exportDatabase": "Exporter la base de données",
-	"upload": "Télécharger",
+	"upload": "Téléverser",
 	"add": "Ajouter",
 	"undefined": "--",
 	"production": "Production",
@@ -1763,6 +1763,8 @@
 	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié car l'analyse de risque parente est verrouillée.",
 	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée car son audit parent est verrouillé.",
 	"lockedFindingMessage": "Ce constat ne peut pas être modifié car son plan de suivi parent est verrouillé.",
+	"qualificationsChartTitle": "Qualifications des scenarios de risque",
+	"saveAndContinue": "Enregistrer et continuer",
 	"impactEffortMatrixHint": "Astuce : utilisez le click droit pour changer rapidement l'impact et l'effort de la mesure. Vous pouvez rafraichir la page pour actualiser la matrice",
 	"resetFilter": "Réinitialiser le filtre",
 	"noActiveFilter": "Aucun filtre",
@@ -2065,5 +2067,7 @@
 	"escalationthreshold": "Seuil d'escalade",
 	"entityassessment": "Évaluation d'entité",
 	"selectAll": "Tout sélectionner",
-	"deselectAll": "Tout désélectionner"
+	"deselectAll": "Tout désélectionner",
+	"daysOfWeekErrorMessage": "Vous devez spécifier au moins un jour de la semaine",
+	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)"
 }
