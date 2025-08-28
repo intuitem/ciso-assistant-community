@@ -51,16 +51,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="roto",
             name="risk_origin",
-            field=models.ForeignKey(
-                limit_choices_to={
-                    "field_path": "ro_to.risk_origin",
-                    "is_visible": True,
-                },
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name="roto_risk_origins",
-                to="core.terminology",
-                verbose_name="Risk origin",
-            ),
+            field=models.ForeignKey(limit_choices_to={'field_path': 'ro_to.risk_origin', 'is_visible': True}, on_delete=django.db.models.deletion.PROTECT, related_name='roto_risk_origins', to='core.terminology', verbose_name='Risk origin'),
         ),
         migrations.RunPython(migrate_risk_origin),
         migrations.RemoveField(
