@@ -111,6 +111,16 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
     ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=True)
 
+    @classmethod
+    def get_default_ref_id(cls, quantitative_risk_study):
+        """Return a unique reference ID for a given quantitative risk study."""
+        scenarios_ref_ids = [
+            x.ref_id for x in quantitative_risk_study.risk_scenarios.all()
+        ]
+        nb_scenarios = len(scenarios_ref_ids) + 1
+        candidates = [f"QRS.{i:02d}" for i in range(1, nb_scenarios + 1)]
+        return next(x for x in candidates if x not in scenarios_ref_ids)
+
 
 class QuantitativeRiskHypothesis(
     NameDescriptionMixin, FilteringLabelMixin, FolderMixin

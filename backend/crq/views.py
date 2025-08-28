@@ -53,6 +53,48 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
 
+    def _perform_write(self, serializer):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("quantitative_risk_study"):
+            quantitative_risk_study = serializer.validated_data[
+                "quantitative_risk_study"
+            ]
+            ref_id = QuantitativeRiskScenario.get_default_ref_id(
+                quantitative_risk_study
+            )
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
+
+    def perform_create(self, serializer):
+        return self._perform_write(serializer)
+
+    def perform_update(self, serializer):
+        return self._perform_write(serializer)
+
+    @action(detail=False, methods=["get"])
+    def default_ref_id(self, request):
+        quantitative_risk_study_id = request.query_params.get("quantitative_risk_study")
+        if not quantitative_risk_study_id:
+            return Response(
+                {"error": "Missing 'quantitative_risk_study' parameter."}, status=400
+            )
+        try:
+            quantitative_risk_study = QuantitativeRiskStudy.objects.get(
+                pk=quantitative_risk_study_id
+            )
+
+            # Use the class method to compute the default ref_id
+            default_ref_id = QuantitativeRiskScenario.get_default_ref_id(
+                quantitative_risk_study
+            )
+            return Response({"results": default_ref_id})
+        except Exception as e:
+            logger.error("Error in default_ref_id: %s", str(e))
+            return Response(
+                {"error": "Error in default_ref_id has occurred."}, status=400
+            )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):

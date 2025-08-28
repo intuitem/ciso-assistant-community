@@ -101,20 +101,11 @@
 		{form}
 		multiple
 		optionsEndpoint="qualifications"
-		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="qualifications"
 		cacheLock={cacheLocks['qualifications']}
 		bind:cachedValue={formDataCache['qualifications']}
 		label={m.qualifications()}
-	/>
-	<Select
-		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -125,5 +116,13 @@
 		cacheLock={cacheLocks['owner']}
 		bind:cachedValue={formDataCache['owner']}
 		label={m.owner()}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
 	/>
 </Dropdown>

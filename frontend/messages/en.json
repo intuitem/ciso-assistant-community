@@ -1836,5 +1836,6 @@
 	"companyCulture": "Company culture / communication",
 	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
 	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
-	"associatedQuantitativeRiskHypotheses": "Associated hypohteses"
+	"associatedQuantitativeRiskHypotheses": "Associated hypohteses",
+	"associatedQuantitativeRiskScenarios": "Associated scenarios"
 }

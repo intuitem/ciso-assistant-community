@@ -1504,8 +1504,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-scenarios': {
-		head: ['ref_id', 'name', 'description', 'quantitativeRiskStudy', 'status', 'assets', 'owner'],
-		body: ['ref_id', 'name', 'description', 'quantitative_risk_study', 'status', 'assets', 'owner'],
+		head: ['ref_id', 'name', 'quantitativeRiskStudy', 'status', 'assets', 'threats', 'owner'],
+		body: ['ref_id', 'name', 'quantitative_risk_study', 'status', 'assets', 'threats', 'owner'],
 		filters: {
 			status: RISK_ASSESSMENT_STATUS_FILTER,
 			assets: ASSET_FILTER,

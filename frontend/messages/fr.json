@@ -1802,5 +1802,6 @@
 	"companyCulture": "Culture d'entreprise / communication",
 	"daysOfWeekErrorMessage": "Vous devez spécifier au moins un jour de la semaine",
 	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)",
-	"associatedQuantitativeRiskHypotheses": "Hypothèses associées"
+	"associatedQuantitativeRiskHypotheses": "Hypothèses associées",
+	"associatedQuantitativeRiskScenarios": "Scénarios associés"
 }
