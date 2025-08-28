@@ -1763,6 +1763,8 @@
 	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié car l'analyse de risque parente est verrouillée.",
 	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée car son audit parent est verrouillé.",
 	"lockedFindingMessage": "Ce constat ne peut pas être modifié car son plan de suivi parent est verrouillé.",
+	"qualificationsChartTitle": "Qualifications des scenarios de risque",
+	"saveAndContinue": "Enregistrer et continuer",
 	"impactEffortMatrixHint": "Astuce : utilisez le click droit pour changer rapidement l'impact et l'effort de la mesure. Vous pouvez rafraichir la page pour actualiser la matrice",
 	"resetFilter": "Réinitialiser le filtre",
 	"noActiveFilter": "Aucun filtre",
