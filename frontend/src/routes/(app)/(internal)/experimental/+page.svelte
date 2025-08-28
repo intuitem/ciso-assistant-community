@@ -30,4 +30,10 @@
 		link="/experimental/impact-effort"
 		tags={['priority', 'controls', 'PRO']}
 	/>
+	<Article
+		title="Loss Exceedance Curve"
+		desc="Visualize risk quantification through loss exceedance curves"
+		link="/experimental/loss-exceedance"
+		tags={['risk', 'quantification', 'analysis']}
+	/>
 </div>
