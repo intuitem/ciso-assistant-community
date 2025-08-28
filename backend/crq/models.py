@@ -116,8 +116,8 @@ class QuantitativeRiskHypothesis(
 ):
     RISK_STAGE_OPTIONS = [
         ("inherent", _("Inherent")),
-        ("current", _("Inherent")),
-        ("residual", _("Inherent")),
+        ("current", _("Current")),
+        ("residual", _("Residual")),
     ]
     quantitative_risk_scenario = models.ForeignKey(
         QuantitativeRiskScenario, on_delete=models.CASCADE, related_name="hypotheses"
