@@ -61,7 +61,12 @@
 	bind:cachedValue={formDataCache['risk_stage']}
 />
 
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-shield-halved" header={m.treatment()}>
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-shield-halved"
+	header={m.treatment()}
+>
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -94,7 +99,12 @@
 	/>
 </Dropdown>
 
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-calculator" header={m.simulationParameters()}>
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-calculator"
+	header={m.simulationParameters()}
+>
 	<input type="hidden" name="impact.distribution" value="LOGNORMAL-CI90" />
 	<TextField
 		{form}
@@ -132,7 +142,6 @@
 	/>
 </Dropdown>
 
-
 <MarkdownField
 	{form}
 	field="observation"
@@ -141,8 +150,4 @@
 	bind:cachedValue={formDataCache['observation']}
 />
 
-	<Checkbox
-		{form}
-		field="is_selected"
-		label={m.isSelected()}
-	/>
+<Checkbox {form} field="is_selected" label={m.isSelected()} />

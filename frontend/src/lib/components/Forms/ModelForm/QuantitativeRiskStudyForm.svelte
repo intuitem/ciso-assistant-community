@@ -49,16 +49,16 @@
 	bind:cachedValue={formDataCache['ref_id']}
 />
 
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
-		field="authors"
-		cacheLock={cacheLocks['authors']}
-		bind:cachedValue={formDataCache['authors']}
-		label={m.authors()}
-	/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="authors"
+	cacheLock={cacheLocks['authors']}
+	bind:cachedValue={formDataCache['authors']}
+	label={m.authors()}
+/>
 {#if !duplicate}
 	<Select
 		{form}
@@ -73,15 +73,14 @@
 	<Select
 		{form}
 		options={model.selectOptions['distribution_model']}
-	disableDoubleDash
+		disableDoubleDash
 		translateOptions={false}
 		field="distribution_model"
 		label="Distribution Model"
-    disabled
+		disabled
 		cacheLock={cacheLocks['distribution_model']}
 		bind:cachedValue={formDataCache['distribution_model']}
 	/>
-
 
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<AutocompleteSelect

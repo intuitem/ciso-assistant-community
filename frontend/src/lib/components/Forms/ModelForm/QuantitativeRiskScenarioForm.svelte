@@ -47,12 +47,7 @@
 	bind:cachedValue={formDataCache['ref_id']}
 />
 
-	<Checkbox
-		{form}
-		field="is_selected"
-		label={m.isSelected()}
-		helpText={m.roToIsSelectedHelpText()}
-	/>
+<Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.roToIsSelectedHelpText()} />
 <AutocompleteSelect
 	{form}
 	multiple
