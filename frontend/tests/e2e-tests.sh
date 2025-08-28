@@ -249,10 +249,12 @@ export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
 export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 
 cd "$APP_DIR"/backend/ || exit 1
+
 if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
-elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]] || ! poetry run python3 manage.py migrate --check; then
+elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]] || ! SQLITE_FILE="$DB_DIR/$DB_INIT_NAME" poetry run python3 manage.py migrate --check; then
+  echo "$DB_DIR/$DB_INIT_NAME"
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
