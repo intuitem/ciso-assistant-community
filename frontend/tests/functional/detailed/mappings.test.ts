@@ -17,7 +17,7 @@ test('user can import mappings', async ({
 	mappingsPage,
 	librariesPage
 }) => {
-	const importMappingBtn = page.getByTestId('add-button');
+	const importMappingBtn = page.getByTestId('import-button');
 
 	await test.step('create required folder', async () => {
 		await foldersPage.goto();
