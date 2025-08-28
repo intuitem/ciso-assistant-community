@@ -268,8 +268,8 @@ export const QualificationSchema = z.object({
 	...NameDescriptionMixin,
 	abbreviation: z.string().max(20),
 	annotation: z.string().optional().nullable(),
-	qualification_ordering: z.number().min(0).max(32767),
-	security_objective_ordering: z.number().min(0).max(32767)
+	qualification_ordering: z.number().int().min(0).max(32767),
+	security_objective_ordering: z.number().int().min(0).max(32767)
 });
 
 export const RequirementAssessmentSchema = z.object({
