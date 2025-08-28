@@ -129,6 +129,14 @@ export class Element {
 		return this._self;
 	}
 
+	/**
+	 * Returns a `pageClass` Page using the `endpoint` endpoint
+	 * The variadic arguments `...pageArgs` will be added to the `pageClass` constructor internal call.
+	 * */
+	protected _goto<T extends Page.Class<any>>(pageClass: T, endpoint: string): InstanceType<T> {
+		return new pageClass(this._getPage().getSelf(), endpoint);
+	}
+
 	async checkIfVisible(expect: Expect): Promise<void> {
 		await expect(this._self).toBeVisible();
 	}
@@ -165,7 +173,7 @@ export class Element {
 			);
 		}
 		let locator = this._self.getByTestId(dataTestId);
-		if (['has', 'hasNot', 'hasNotText', 'hasText'].some((key) => filters[key])) {
+		if (['visible', 'has', 'hasNot', 'hasNotText', 'hasText'].some((key) => filters[key])) {
 			locator = locator.filter(filters); // I guess invalid filters will be ignored.
 		}
 
@@ -256,6 +264,7 @@ export namespace Element {
 	export interface LocatorFilters {
 		// The dataTestId parameter may be usefull if we ever want to use the same Element class for 2 different Test IDs.
 		dataTestId?: string;
+		visible?: boolean;
 		nth?: number;
 		first?: boolean;
 		last?: boolean;
