@@ -50,59 +50,15 @@
 	hidden={initialData.quantitative_risk_scenario}
 />
 
-	<Checkbox
-		{form}
-		field="is_selected"
-		label={m.isSelected()}
-		helpText={m.roToIsSelectedHelpText()}
-	/>
 <Select
 	{form}
 	options={model.selectOptions['risk_stage']}
-	translateOptions={false}
+	translateOptions={true}
+  disableDoubleDash
 	field="risk_stage"
-	label="Risk Stage"
+	label="Hypothesis stage"
 	cacheLock={cacheLocks['risk_stage']}
 	bind:cachedValue={formDataCache['risk_stage']}
-/>
-
-<TextField
-	{form}
-	field="probability"
-	label="Probability (P)"
-	type="number"
-	step="0.01"
-	min="0"
-	max="1"
-	cacheLock={cacheLocks['probability']}
-	bind:cachedValue={formDataCache['probability']}
-	helpText="Probability value between 0 and 1"
-/>
-
-<input type="hidden" name="impact.distribution" value="LOGNORMAL" />
-
-<TextField
-	{form}
-	field="impact.lb"
-	label="Impact Lower Bound (LB)"
-	type="number"
-	step="0.01"
-	min="0"
-	cacheLock={cacheLocks['impact.lb']}
-	bind:cachedValue={formDataCache['impact.lb']}
-	helpText="Lower bound for impact distribution"
-/>
-
-<TextField
-	{form}
-	field="impact.ub"
-	label="Impact Upper Bound (UB)"
-	type="number"
-	step="0.01"
-	min="0"
-	cacheLock={cacheLocks['impact.ub']}
-	bind:cachedValue={formDataCache['impact.ub']}
-	helpText="Upper bound for impact distribution"
 />
 
 <AutocompleteSelect
@@ -113,7 +69,7 @@
 	field="existing_applied_controls"
 	cacheLock={cacheLocks['existing_applied_controls']}
 	bind:cachedValue={formDataCache['existing_applied_controls']}
-	label="Existing Applied Controls"
+	label="Existing Controls"
 />
 
 <AutocompleteSelect
@@ -124,7 +80,7 @@
 	field="added_applied_controls"
 	cacheLock={cacheLocks['added_applied_controls']}
 	bind:cachedValue={formDataCache['added_applied_controls']}
-	label="Added Applied Controls"
+	label="Added Controls"
 />
 
 <AutocompleteSelect
@@ -135,8 +91,48 @@
 	field="removed_applied_controls"
 	cacheLock={cacheLocks['removed_applied_controls']}
 	bind:cachedValue={formDataCache['removed_applied_controls']}
-	label="Removed Applied Controls"
+	label="Removed Controls"
 />
+<div class="font-black text-xl">Simulation params</div>
+<div class="text-sm text-slate-500">Current distribution: Lognormal - Confidence Interval 90%</div>
+<input type="hidden" name="impact.distribution" value="LOGNORMAL-CI90" />
+<TextField
+	{form}
+	field="probability"
+	label="Probability (P)"
+	type="number"
+	step="0.01"
+	min="0"
+	max="1"
+	cacheLock={cacheLocks['probability']}
+	bind:cachedValue={formDataCache['probability']}
+	helpText="Estimated probability value between 0 and 1, based on the knowledge you have"
+/>
+
+<TextField
+	{form}
+	field="impact.lb"
+	label="Expected Loss Lower Bound (LB)"
+	type="number"
+	step="10"
+	min="10"
+	cacheLock={cacheLocks['impact.lb']}
+	bind:cachedValue={formDataCache['impact.lb']}
+	helpText="Remember that, given the current distribution, 5% of the time it will be LOWER than this."
+/>
+
+<TextField
+	{form}
+	field="impact.ub"
+	label="Expected Loss Upper Bound (UB)"
+	type="number"
+	step="10"
+	min="20"
+	cacheLock={cacheLocks['impact.ub']}
+	bind:cachedValue={formDataCache['impact.ub']}
+	helpText="Remember that, given the current distribution, 5% of the time it will be HIGHER than this."
+/>
+
 
 <MarkdownField
 	{form}
@@ -146,6 +142,12 @@
 	bind:cachedValue={formDataCache['observation']}
 />
 
+	<Checkbox
+		{form}
+		field="is_selected"
+		label={m.isSelected()}
+		helpText={m.roToIsSelectedHelpText()}
+	/>
 <AutocompleteSelect
 	multiple
 	{form}

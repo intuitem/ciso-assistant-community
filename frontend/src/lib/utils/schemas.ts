@@ -694,7 +694,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 	probability: z.coerce.number().min(0).max(1).optional(),
 	impact: z
 		.object({
-			distribution: z.string().default('LOGNORMAL'),
+			distribution: z.string().default('LOGNORMAL-CI90'),
 			lb: z.coerce.number().min(0).optional(),
 			ub: z.coerce.number().min(0).optional()
 		})

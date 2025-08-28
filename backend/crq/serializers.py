@@ -52,7 +52,7 @@ class ImpactField(serializers.Field):
             )
 
         # Validate distribution type
-        if distribution != "LOGNORMAL":
+        if distribution != "LOGNORMAL-CI90":
             raise serializers.ValidationError(
                 "Only 'LOGNORMAL' distribution is supported."
             )
