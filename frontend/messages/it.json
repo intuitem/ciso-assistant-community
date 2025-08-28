@@ -1344,5 +1344,6 @@
 	"abbreviation": "Abbreviazione",
 	"qualificationOrdering": "Ordinamento delle qualifiche",
 	"securityObjectiveOrdering": "Ordinamento degli obiettivi di sicurezza",
-	"addQualification": "Aggiungi qualificazione"
+	"addQualification": "Aggiungi qualificazione",
+	"proVersionFeatureWarning": "Questa funzione è disponibile solo nella versione pro"
 }

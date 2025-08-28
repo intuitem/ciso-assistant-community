@@ -957,5 +957,7 @@
 	"abbreviation": "Förkortning",
 	"qualificationOrdering": "Kvalifikationsordning",
 	"securityObjectiveOrdering": "Säkerhetsmålsordning",
-	"addQualification": "Lägg till kvalifikation"
+	"qualifications": "kvalifikationer",
+	"addQualification": "Lägg till kvalifikation",
+	"proVersionFeatureWarning": "Denna funktion är endast tillgänglig i pro-versionen"
 }

@@ -934,5 +934,7 @@
 	"abbreviation": "اختصار",
 	"qualificationOrdering": "اہلیت کی ترتیب",
 	"securityObjectiveOrdering": "سیکورٹی مقاصد کی ترتیب",
-	"addQualification": "اہلیت شامل کریں"
+	"qualifications": "اہلیتیں",
+	"addQualification": "اہلیت شامل کریں",
+	"proVersionFeatureWarning": "یہ خصوصیت صرف پرو ورژن میں دستیاب ہے"
 }

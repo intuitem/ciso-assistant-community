@@ -1704,5 +1704,6 @@
 	"abbreviation": "Kısaltma",
 	"qualificationOrdering": "Nitelik sıralaması",
 	"securityObjectiveOrdering": "Güvenlik hedefi sıralaması",
-	"addQualification": "Nitelik ekle"
+	"addQualification": "Nitelik ekle",
+	"proVersionFeatureWarning": "Bu özellik yalnızca pro sürümde mevcuttur"
 }

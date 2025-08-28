@@ -971,5 +971,7 @@
 	"abbreviation": "Abkürzung",
 	"qualificationOrdering": "Qualifikationsreihenfolge",
 	"securityObjectiveOrdering": "Reihenfolge der Sicherheitsziele",
-	"addQualification": "Qualifikation hinzufügen"
+	"qualifications": "Qualifikationen",
+	"addQualification": "Qualifikation hinzufügen",
+	"proVersionFeatureWarning": "Diese Funktion ist nur in der Pro-Version verfügbar"
 }

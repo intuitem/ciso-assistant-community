@@ -967,5 +967,7 @@
 	"abbreviation": "Afkorting",
 	"qualificationOrdering": "Kwalificatievolgorde",
 	"securityObjectiveOrdering": "Volgorde van beveiligingsdoelen",
-	"addQualification": "Kwalificatie toevoegen"
+	"qualifications": "kwalificaties",
+	"addQualification": "Kwalificatie toevoegen",
+	"proVersionFeatureWarning": "Deze functie is alleen beschikbaar in de pro-versie"
 }

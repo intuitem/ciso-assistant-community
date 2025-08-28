@@ -966,5 +966,7 @@
 	"abbreviation": "Rövidítés",
 	"qualificationOrdering": "Kvalifikációs sorrend",
 	"securityObjectiveOrdering": "Biztonsági cél sorrend",
-	"addQualification": "Képzettség hozzáadása"
+	"qualifications": "képesítések",
+	"addQualification": "Képzettség hozzáadása",
+	"proVersionFeatureWarning": "Ez a funkció csak a pro verzióban érhető el"
 }

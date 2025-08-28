@@ -1711,5 +1711,6 @@
 	"abbreviation": "Skrót",
 	"qualificationOrdering": "Kolejność kwalifikacji",
 	"securityObjectiveOrdering": "Kolejność celów bezpieczeństwa",
-	"addQualification": "Dodaj kwalifikację"
+	"addQualification": "Dodaj kwalifikację",
+	"proVersionFeatureWarning": "Ta funkcja jest dostępna tylko w wersji pro"
 }

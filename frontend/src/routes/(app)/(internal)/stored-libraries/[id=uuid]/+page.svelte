@@ -14,6 +14,7 @@
 	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
+	import { IS_ENTERPRISE } from '$lib/utils/is_enterprise';
 
 	let { data } = $props();
 
@@ -238,23 +239,31 @@
 		</Dropdown>
 	{/if}
 
-	{#if qualifications.length > 0}
-		<Dropdown
-			style="hover:text-indigo-700"
-			icon="fa-solid fa-tag"
-			header="{qualifications.length} {m.qualifications()}"
-		>
-			<ModelTable
-				source={qualificationsTable}
-				displayActions={false}
-				pagination={false}
-				rowCount={false}
-				rowsPerPage={false}
-				search={false}
-				interactive={false}
-			/>
-		</Dropdown>
-	{/if}
+	<div>
+		{#if qualifications.length > 0}
+			<Dropdown
+				style="hover:text-indigo-700"
+				icon="fa-solid fa-tag"
+				header="{qualifications.length} {m.qualifications()}"
+			>
+				{#if !IS_ENTERPRISE}
+					<div class="preset-tonal-warning rounded-base px-4 py-1 font-bold">
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+						{m.proVersionFeatureWarning()}
+					</div>
+				{/if}
+				<ModelTable
+					source={qualificationsTable}
+					displayActions={false}
+					pagination={false}
+					rowCount={false}
+					rowsPerPage={false}
+					search={false}
+					interactive={false}
+				/>
+			</Dropdown>
+		{/if}
+	</div>
 
 	{#if framework}
 		<h4 class="h4 font-medium">{m.framework()}</h4>

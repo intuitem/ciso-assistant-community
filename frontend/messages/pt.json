@@ -964,5 +964,7 @@
 	"abbreviation": "Abreviação",
 	"qualificationOrdering": "Ordenação de qualificações",
 	"securityObjectiveOrdering": "Ordenação dos objetivos de segurança",
-	"addQualification": "Adicionar qualificação"
+	"qualifications": "qualificações",
+	"addQualification": "Adicionar qualificação",
+	"proVersionFeatureWarning": "Este recurso está disponível apenas na versão pro"
 }

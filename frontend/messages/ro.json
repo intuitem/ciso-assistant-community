@@ -963,5 +963,7 @@
 	"abbreviation": "Abreviere",
 	"qualificationOrdering": "Ordonarea calificărilor",
 	"securityObjectiveOrdering": "Ordonarea obiectivelor de securitate",
-	"addQualification": "Adăugați calificare"
+	"qualifications": "calificări",
+	"addQualification": "Adăugați calificare",
+	"proVersionFeatureWarning": "Această funcție este disponibilă numai în versiunea pro"
 }

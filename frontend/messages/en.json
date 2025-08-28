@@ -1829,5 +1829,6 @@
 	"abbreviation": "Abbreviation",
 	"qualificationOrdering": "Qualification ordering",
 	"securityObjectiveOrdering": "Security objective ordering",
-	"addQualification": "Add qualification"
+	"addQualification": "Add qualification",
+	"proVersionFeatureWarning": "This feature is only available in the pro version"
 }
