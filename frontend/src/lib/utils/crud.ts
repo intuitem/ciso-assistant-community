@@ -135,6 +135,7 @@ export interface ModelMapEntry {
 	filters?: SelectField[];
 	path?: string;
 	endpointUrl?: string;
+	customNameDescription?: boolean;
 }
 
 type ModelMap = {
@@ -1415,7 +1416,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'terminologies',
 		verboseName: 'Terminology',
 		verboseNamePlural: 'Terminologies',
-		selectFields: [{ field: 'field_path' }]
+		selectFields: [{ field: 'field_path' }],
+		customNameDescription: true
 	}
 };
 

@@ -212,6 +212,7 @@ const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+
 const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -818,6 +819,17 @@ const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'isAssigned',
 		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const FIELD_PATH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'field_path',
+		optionsEndpoint: 'terminologies/field_path',
+		optionsLabelField: 'label',
+		optionsValueField: 'label',
 		multiple: true
 	}
 };
@@ -1529,8 +1541,11 @@ export const listViewFields = {
 		body: ['name', 'abbreviation']
 	},
 	terminologies: {
-		head: ['name', 'description', 'field_path'],
-		body: ['name', 'description', 'field_path']
+		head: ['field_path', 'name', 'description'],
+		body: ['field_path', 'name', 'description'],
+		filters: {
+			field_path: FIELD_PATH_FILTER
+		}
 	},
 	extra: {
 		filters: {

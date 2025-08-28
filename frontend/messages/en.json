@@ -1830,5 +1830,9 @@
 	"isVisible": "Visible",
 	"isVisibleHelpText": "If not visible, this item will not appear in the lists or be selectable, but will still be part of the terminologies",
 	"fieldPath": "Field",
-	"fieldPathHelpText": "The field where you need to add the terminology"
+	"fieldPathHelpText": "The field where you need to add the terminology",
+	"field": "Field",
+	"terminology": "Terminology",
+	"terminologies": "Terminologies",
+	"addTerminology": "Add terminology"
 }
