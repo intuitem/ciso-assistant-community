@@ -4,6 +4,27 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def migrate_risk_origin(apps, schema_editor):
+    RoTo = apps.get_model("ebios_rm", "RoTo")
+    Terminology = apps.get_model("core", "Terminology")
+
+    values = [
+        "state",
+        "organized_crime",
+        "terrorist",
+        "activist",
+        "competitor",
+        "amateur",
+        "avenger",
+        "pathological",
+        "other",
+    ]
+
+    for key in values:
+        term, _ = Terminology.objects.get(field_path="ro_to.risk_origin", name=key)
+        RoTo.objects.filter(risk_origin=key).update(risk_origin=term.id)
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0092_terminology"),
@@ -28,4 +49,5 @@ class Migration(migrations.Migration):
                 verbose_name="Risk origin",
             ),
         ),
+        migrations.RunPython(migrate_risk_origin),
     ]
