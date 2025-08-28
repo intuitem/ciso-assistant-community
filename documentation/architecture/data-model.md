@@ -637,7 +637,7 @@ There is a correspondance between the 0-3, 1-4, 0,4, 1-5 and FIPS-199 scales (ca
 | 1-5      | 3              | 4           |
 | 1-5      | 4              | 5           |
 
-THe scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
+The scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
 
 ## Frameworks
 

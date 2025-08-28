@@ -22,24 +22,3 @@
 	cacheLock={cacheLocks['abbreviation']}
 	bind:cachedValue={formDataCache['abbreviation']}
 />
-<TextArea
-	{form}
-	field="annotation"
-	label={m.annotation()}
-	cacheLock={cacheLocks['annotation']}
-	bind:cachedValue={formDataCache['annotation']}
-/>
-<NumberField
-	{form}
-	field="qualification_ordering"
-	label={m.qualificationOrdering()}
-	cacheLock={cacheLocks['qualification_ordering']}
-	bind:cachedValue={formDataCache['qualification_ordering']}
-/>
-<NumberField
-	{form}
-	field="security_objective_ordering"
-	label={m.securityObjectiveOrdering()}
-	cacheLock={cacheLocks['security_objective_ordering']}
-	bind:cachedValue={formDataCache['security_objective_ordering']}
-/>

@@ -1,11 +1,8 @@
 import time
-from icecream import ic
 
 from .helpers import get_referential_translation
-from pathlib import Path
 from typing import List, Union
-from django.core.exceptions import SuspiciousFileOperation, ValidationError
-from django.http import Http404
+from django.apps import apps
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from ciso_assistant import settings
@@ -676,6 +673,7 @@ class LibraryImporter:
             )"""
 
         library_objects = self._library.content
+        is_enterprise = apps.is_installed("enterprise_core")
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
@@ -732,16 +730,6 @@ class LibraryImporter:
                 logger.error("Threat import error", error=threat_import_error)
                 return threat_import_error
 
-        if "qualifications" in library_objects:
-            qualification_data = library_objects["qualifications"]
-            if (
-                qualification_import_error := self.init_qualifications(
-                    qualification_data
-                )
-            ) is not None:
-                logger.error("Threat import error", error=qualification_import_error)
-                return qualification_import_error
-
         if "risk_matrix" in library_objects and "risk_matrices" in library_objects:
             return "A library can't have both 'risk_matrix' and 'risk_matrices' objects fields."
 
@@ -765,6 +753,19 @@ class LibraryImporter:
                 )
             ) is not None:
                 return reference_control_import_error
+
+        if not is_enterprise:
+            return
+
+        if "qualifications" in library_objects:
+            qualification_data = library_objects["qualifications"]
+            if (
+                qualification_import_error := self.init_qualifications(
+                    qualification_data
+                )
+            ) is not None:
+                logger.error("Threat import error", error=qualification_import_error)
+                return qualification_import_error
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
@@ -827,14 +828,13 @@ class LibraryImporter:
     def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
+        is_enterprise = apps.is_installed("enterprise_core")
+
         for threat in self._threats:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
-
-        for qualification in self._qualifications:
-            qualification.import_qualification(library_object)
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
@@ -844,6 +844,12 @@ class LibraryImporter:
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
+
+        if not is_enterprise:
+            return
+
+        for qualification in self._qualifications:
+            qualification.import_qualification(library_object)
 
     @transaction.atomic
     def _import_library(self):

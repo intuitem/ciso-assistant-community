@@ -17,5 +17,5 @@ poetry install
 3. Start the development server with the enterprise settings file
 
 ```bash
-poetry run manage.sh runserver
+./manage.sh runserver
 ```
