@@ -93,8 +93,6 @@
 	bind:cachedValue={formDataCache['removed_applied_controls']}
 	label="Removed Controls"
 />
-<div class="font-black text-xl">Simulation params</div>
-<div class="text-sm text-slate-500">Current distribution: Lognormal - Confidence Interval 90%</div>
 <input type="hidden" name="impact.distribution" value="LOGNORMAL-CI90" />
 <TextField
 	{form}
