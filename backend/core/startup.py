@@ -961,7 +961,7 @@ def startup(sender: AppConfig, **kwargs):
         AssetClass.create_default_values()
     except Exception as e:
         logger.error("Error creating default AssetClass", exc_info=e)
-    
+
     # Create default Terminologies
     try:
         Terminology.create_default_roto_risk_origins()

@@ -5370,66 +5370,65 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
     Model to store custom terminology for the application
     """
-    
+
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
-    
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
             "name": "state",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "organized_crime",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "terrorist",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "activist",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "competitor",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "amateur",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "avenger",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "pathological",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
+            "is_visible": True,
         },
         {
             "name": "other",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
-        }
+            "is_visible": True,
+        },
     ]
 
     field_path = models.CharField(
@@ -5454,7 +5453,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name=_("Translations"),
         help_text=_("JSON field to store translations for different languages"),
     )
-    
+
     @classmethod
     def create_default_roto_risk_origins(cls):
         for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
@@ -5463,4 +5462,4 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 field_path=risk_origin["field_path"],
                 defaults=risk_origin,
                 create_defaults=risk_origin,
-                )
+            )

@@ -16,7 +16,7 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     Threat,
-    Terminology
+    Terminology,
 )
 from core.validators import (
     JSONSchemaInstanceValidator,
@@ -414,8 +414,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
         related_name="roto_risk_origins",
         limit_choices_to={
             "field_path": Terminology.FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True
-        }
+            "is_visible": True,
+        },
     )
     target_objective = models.TextField(verbose_name=_("Target objective"))
     motivation = models.PositiveSmallIntegerField(

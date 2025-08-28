@@ -1023,7 +1023,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
 	'organisation-issues': organisationIssueSchema,
-	'terminologies': TerminologySchema
+	terminologies: TerminologySchema
 };
 
 export const modelSchema = (model: string) => {
