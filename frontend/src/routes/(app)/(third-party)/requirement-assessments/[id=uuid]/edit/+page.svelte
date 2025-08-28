@@ -644,12 +644,12 @@
 							onclick={() =>
 								form.form.update((data) => {
 									return { ...data, noRedirect: true };
-								})}>{m.save()}</button
+								})}>{m.saveAndContinue()}</button
 						>
 						<button
 							class="btn preset-filled-secondary-500 font-semibold w-full"
 							data-testid="save-button"
-							type="submit">{m.saveAndContinue()}</button
+							type="submit">{m.save()}</button
 						>
 					</div>
 				</div>
