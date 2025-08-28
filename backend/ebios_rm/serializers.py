@@ -140,7 +140,10 @@ class RoToReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     feared_events = FieldsRelatedField(["folder", "id"], many=True)
-    risk_origin = FieldsRelatedField()
+    risk_origin = serializers.SerializerMethodField()
+
+    def get_risk_origin(self, obj):
+        return obj.risk_origin.name
 
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
