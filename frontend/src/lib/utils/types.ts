@@ -107,7 +107,9 @@ export const URL_MODEL = [
 	'campaigns',
 	// iso,
 	'organisation-issues',
-	'organisation-objectives'
+	'organisation-objectives',
+	// terminologies
+	'terminologies',
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

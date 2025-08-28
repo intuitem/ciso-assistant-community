@@ -1528,6 +1528,10 @@ export const listViewFields = {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
 	},
+	terminologies: {
+		head: ['name', 'description', 'field_path'],
+		body: ['name', 'description', 'field_path']
+	},
 	extra: {
 		filters: {
 			risk: undefined,

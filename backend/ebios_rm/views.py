@@ -190,7 +190,7 @@ class RoToViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
     def risk_origin(self, request):
-        return Response(dict(RoTo.RiskOrigin.choices))
+        return Response(dict(self.risk_origin))
 
     @action(detail=False, name="Get motivation choices")
     def motivation(self, request):

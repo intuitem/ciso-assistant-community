@@ -1826,5 +1826,9 @@
 	"companyCulture": "Company culture / communication",
 	"qualificationsChartTitle": "Risk scenarios qualifications",
 	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
-	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)"
+	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
+	"isVisible": "Visible",
+	"isVisibleHelpText": "If not visible, this item will not appear in the lists or be selectable, but will still be part of the terminologies",
+	"fieldPath": "Field",
+	"fieldPathHelpText": "The field where you need to add the terminology"
 }

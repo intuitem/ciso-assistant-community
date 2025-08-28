@@ -795,6 +795,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_organisationissue",
     "change_organisationissue",
     "delete_organisationissue",
+    # terminologies
+    "add_terminology",
+    "view_terminology",
+    "change_terminology",
+    "delete_terminology",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

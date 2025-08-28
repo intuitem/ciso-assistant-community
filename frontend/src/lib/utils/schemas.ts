@@ -960,6 +960,12 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
+export const TerminologySchema = z.object({
+	...NameDescriptionMixin,
+	field_path: z.string().min(1),
+	is_visible: z.boolean().default(true)
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1016,7 +1022,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'operating-modes': OperatingModeSchema,
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
-	'organisation-issues': organisationIssueSchema
+	'organisation-issues': organisationIssueSchema,
+	'terminologies': TerminologySchema
 };
 
 export const modelSchema = (model: string) => {

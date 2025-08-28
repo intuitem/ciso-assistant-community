@@ -1408,6 +1408,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		filters: [{ field: 'folder' }]
+	},
+	terminologies: {
+		name: 'terminology',
+		localName: 'terminology',
+		localNamePlural: 'terminologies',
+		verboseName: 'Terminology',
+		verboseNamePlural: 'Terminologies',
+		selectFields: [{ field: 'field_path' }]
 	}
 };
 

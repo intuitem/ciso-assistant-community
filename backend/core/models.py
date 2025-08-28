@@ -5364,3 +5364,36 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
+
+
+class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    """
+    Model to store custom terminology for the application
+    """
+    
+    class FieldPath(models.TextChoices):
+        ROTO_RISK_ORIGIN = "ro_to/risk_origin", _("Roto Risk Origin")
+
+    field_path = models.CharField(
+        max_length=100,
+        verbose_name=_("Field path"),
+        choices=FieldPath.choices,
+    )
+    builtin = models.BooleanField(
+        default=False,
+        verbose_name=_("Built-in"),
+        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Visible"),
+        help_text=_("Indicates if the terminology is visible in the UI"),
+    )
+    translations = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name=_("Translations"),
+        help_text=_("JSON field to store translations for different languages"),
+    )
+    
