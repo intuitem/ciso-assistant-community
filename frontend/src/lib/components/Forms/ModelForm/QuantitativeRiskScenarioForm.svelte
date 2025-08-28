@@ -1,11 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -82,3 +84,46 @@
 	bind:cachedValue={formDataCache['threats']}
 	label={m.threats()}
 />
+
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="vulnerabilities"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="vulnerabilities"
+		cacheLock={cacheLocks['vulnerabilities']}
+		bind:cachedValue={formDataCache['vulnerabilities']}
+		label={m.vulnerabilities()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="qualifications"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="qualifications"
+		cacheLock={cacheLocks['qualifications']}
+		bind:cachedValue={formDataCache['qualifications']}
+		label={m.qualifications()}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
+		field="owner"
+		cacheLock={cacheLocks['owner']}
+		bind:cachedValue={formDataCache['owner']}
+		label={m.owner()}
+	/>
+</Dropdown>

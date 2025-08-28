@@ -102,6 +102,7 @@ class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
 
     class Meta:
         model = QuantitativeRiskScenario
@@ -128,6 +129,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
         source="parameters.probability", read_only=True
     )
     impact = serializers.JSONField(source="parameters.impact", read_only=True)
+    folder = FieldsRelatedField()
 
     class Meta:
         model = QuantitativeRiskHypothesis
