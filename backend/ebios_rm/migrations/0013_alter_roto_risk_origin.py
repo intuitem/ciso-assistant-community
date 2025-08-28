@@ -11,6 +11,7 @@ def migrate_risk_origin(apps, schema_editor):
     for roto in Roto.objects.all():
         if roto.risk_origin:
             try:
+                Terminology.create_default_roto_risk_origins()
                 term = Terminology.objects.get(name=roto.risk_origin)
                 roto.risk_origin_fk = term
                 roto.save()
