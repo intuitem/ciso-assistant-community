@@ -1244,5 +1244,6 @@
 	],
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
-	"deselect": "Fravælg"
+	"deselect": "Fravælg",
+	"saveAndContinue": "Gem og fortsæt"
 }
