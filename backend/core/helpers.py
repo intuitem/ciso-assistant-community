@@ -293,6 +293,7 @@ def get_sorted_requirement_nodes(
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
                 "questions": node.questions,
+                "answers": req_as.answers if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -334,6 +335,7 @@ def get_sorted_requirement_nodes(
                     else None,
                     "max_score": max_score if child_req_as else None,
                     "questions": child.questions,
+                    "answers": child_req_as.answers if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,
@@ -1311,6 +1313,38 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     max_offset = max(values, default=0)
     for label in labels:
         label["max"] = max_offset
+
+    return {"labels": labels, "values": values}
+
+
+def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
+        scoped_folder, user, RiskScenario
+    )[0]
+
+    # Get all risk scenarios that user can view
+    risk_scenarios = RiskScenario.objects.filter(id__in=viewable_scenarios)
+
+    # Count occurrences of each qualification
+    qualification_counts = {}
+    for scenario in risk_scenarios:
+        if scenario.qualifications:  # Check if qualifications is not empty
+            for qualification in scenario.qualifications:
+                if qualification in qualification_counts:
+                    qualification_counts[qualification] += 1
+                else:
+                    qualification_counts[qualification] = 1
+
+    # Sort by qualification name and only include those with count > 0
+    sorted_qualifications = sorted(
+        [(qual, count) for qual, count in qualification_counts.items() if count > 0]
+    )
+
+    labels = [qualification for qualification, _ in sorted_qualifications]
+    values = [count for _, count in sorted_qualifications]
 
     return {"labels": labels, "values": values}
 

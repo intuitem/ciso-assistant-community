@@ -16,7 +16,17 @@
 			<i class="fa-solid fa-fire-extinguisher mr-2" />{m.appliedControls()}
 		</div>
 		<ModelTable
-			source={{ head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder'], body: [] }}
+			source={{
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					status: 'status',
+					priority: 'priority',
+					eta: 'eta',
+					folder: 'folder'
+				},
+				body: []
+			}}
 			hideFilters={true}
 			URLModel="applied-controls"
 			baseEndpoint="/applied-controls?owner={data.user.id}"
@@ -31,7 +41,12 @@
 		</div>
 		<ModelTable
 			source={{
-				head: ['name', 'status', 'is_recurrent', 'next_occurrence'],
+				head: {
+					name: 'name',
+					status: 'status',
+					is_recurrent: 'is_recurrent',
+					next_occurrence: 'next_occurrence'
+				},
 				body: []
 			}}
 			hideFilters={true}
@@ -44,7 +59,16 @@
 			<i class="fa-solid fa-certificate mr-2" />{m.complianceAssessments()}
 		</div>
 		<ModelTable
-			source={{ head: ['name', 'status', 'eta', 'progress', 'perimeter'], body: [] }}
+			source={{
+				head: {
+					name: 'name',
+					status: 'status',
+					eta: 'eta',
+					progress: 'progress',
+					perimeter: 'perimeter'
+				},
+				body: []
+			}}
 			hideFilters={true}
 			URLModel="compliance-assessments"
 			baseEndpoint="/compliance-assessments?authors={data.user.id}"
@@ -55,7 +79,15 @@
 			<i class="fa-solid fa-magnifying-glass-chart mr-2" />{m.riskAssessments()}
 		</div>
 		<ModelTable
-			source={{ head: ['name', 'status', 'eta', 'perimeter'], body: [] }}
+			source={{
+				head: {
+					name: 'name',
+					status: 'status',
+					eta: 'eta',
+					perimeter: 'perimeter'
+				},
+				body: []
+			}}
 			hideFilters={true}
 			URLModel="risk-assessments"
 			baseEndpoint="/risk-assessments?authors={data.user.id}"
@@ -67,7 +99,13 @@
 		</div>
 		<ModelTable
 			source={{
-				head: ['ref_id', 'name', 'current_level', 'residual_level', 'risk_assessment'],
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					current_level: 'current_level',
+					residual_level: 'residual_level',
+					risk_assessment: 'risk_assessment'
+				},
 				body: []
 			}}
 			hideFilters={true}
@@ -81,7 +119,13 @@
 		</div>
 		<ModelTable
 			source={{
-				head: ['ref_id', 'name', 'status', 'severity', 'folder'],
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					status: 'status',
+					severity: 'severity',
+					folder: 'folder'
+				},
 				body: []
 			}}
 			hideFilters={true}
@@ -95,7 +139,13 @@
 		</div>
 		<ModelTable
 			source={{
-				head: ['name', 'status', 'severity', 'expiration_date', 'folder'],
+				head: {
+					name: 'name',
+					status: 'status',
+					severity: 'severity',
+					expiration_date: 'expiration_date',
+					folder: 'folder'
+				},
 				body: []
 			}}
 			hideFilters={true}
@@ -108,7 +158,15 @@
 			<i class="fa-solid fa-clipboard-list mr-2" />{m.findingsAssessments()}
 		</div>
 		<ModelTable
-			source={{ head: ['name', 'status', 'category', 'perimeter'], body: [] }}
+			source={{
+				head: {
+					name: 'name',
+					status: 'status',
+					category: 'category',
+					perimeter: 'perimeter'
+				},
+				body: []
+			}}
 			hideFilters={true}
 			URLModel="findings-assessments"
 			baseEndpoint="/findings-assessments?authors={data.user.id}"
@@ -120,7 +178,12 @@
 		</div>
 		<ModelTable
 			source={{
-				head: ['ref_id', 'name', 'severity', 'status'],
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					severity: 'severity',
+					status: 'status'
+				},
 				body: []
 			}}
 			hideFilters={true}

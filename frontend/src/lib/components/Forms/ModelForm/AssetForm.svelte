@@ -88,14 +88,16 @@
 	optionsEndpoint="asset-class"
 	optionsLabelField="full_path"
 	field="asset_class"
+	cacheLock={cacheLocks['asset_class']}
+	bind:cachedValue={formDataCache['asset_class']}
 	label={m.assetClass()}
 />
 <TextField
 	{form}
 	field="ref_id"
-	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+	label={m.refId()}
 />
 
 <AutocompleteSelect

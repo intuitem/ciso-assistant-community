@@ -43,7 +43,7 @@
 	<div class="flex flex-row items-end h-full content-end">
 		<span class="flex flex-row items-center">
 			<div class="text-2xl {iconColor} mr-2"><i class={faIcon}></i></div>
-			<div class="text-3xl font-semibold">{count}</div>
+			<div class="text-3xl font-semibold" data-testid="card-{label}">{count}</div>
 		</span>
 		{@render children?.()}
 	</div>
