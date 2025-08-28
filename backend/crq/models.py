@@ -69,6 +69,25 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         help_text=_("Assets impacted by the risk scenario"),
         related_name="quantitative_risk_scenarios",
     )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="quantitative_risk_scenarios",
+    )
+    STATUS_OPTIONS = [
+        ("draft", _("Draft")),
+        ("open", _("Open")),
+        ("mitigate", _("Mitigate")),
+        ("accept", _("Accept")),
+        ("transfer", _("Transfer")),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_OPTIONS,
+        default="draft",
+        verbose_name=_("status"),
+    )
     vulnerabilities = models.ManyToManyField(
         Vulnerability,
         verbose_name=_("Vulnerabilities"),
@@ -95,6 +114,11 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
 class QuantitativeRiskHypothesis(
     NameDescriptionMixin, FilteringLabelMixin, FolderMixin
 ):
+    RISK_STAGE_OPTIONS = [
+        ("inherent", _("Inherent")),
+        ("current", _("Inherent")),
+        ("residual", _("Inherent")),
+    ]
     quantitative_risk_scenario = models.ForeignKey(
         QuantitativeRiskScenario, on_delete=models.CASCADE, related_name="hypotheses"
     )
@@ -115,6 +139,12 @@ class QuantitativeRiskHypothesis(
         verbose_name=_("Removed Applied controls"),
         blank=True,
         related_name="quantitative_risk_hypotheses_removed",
+    )
+    risk_stage = models.CharField(
+        max_length=20,
+        choices=RISK_STAGE_OPTIONS,
+        default="current",
+        verbose_name=_("risk stage"),
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
