@@ -78,9 +78,9 @@ export async function handleErrorResponse({
 		setFlash({ type: 'warning', message: safeTranslate(res.warning) }, event);
 		return message(form, { warning: res.warning });
 	}
-	if (res.error) {
-		setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
-		return message(form, { error: res.error });
+	if (res.error || res.detail) {
+		setFlash({ type: 'error', message: safeTranslate(res.error || res.detail) }, event);
+		return message(form, { error: res.error || res.detail });
 	}
 	Object.entries(res).forEach(([key, value]) => {
 		setError(form, key, safeTranslate(value));
