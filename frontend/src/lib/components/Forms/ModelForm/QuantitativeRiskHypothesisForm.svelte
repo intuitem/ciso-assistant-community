@@ -8,6 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -49,6 +50,12 @@
 	hidden={initialData.quantitative_risk_scenario}
 />
 
+	<Checkbox
+		{form}
+		field="is_selected"
+		label={m.isSelected()}
+		helpText={m.roToIsSelectedHelpText()}
+	/>
 <Select
 	{form}
 	options={model.selectOptions['risk_stage']}

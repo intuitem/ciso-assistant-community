@@ -678,6 +678,7 @@ export const quantitativeRiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	threats: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
+	is_selected: z.boolean().default(true),
 	ref_id: z.string().optional()
 });
 
@@ -689,6 +690,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 	removed_applied_controls: z.string().uuid().optional().array().optional(),
 	risk_stage: z.string().optional().default('current'),
 	ref_id: z.string().optional(),
+	is_selected: z.boolean().default(true),
 	probability: z.coerce.number().min(0).max(1).optional(),
 	impact: z
 		.object({

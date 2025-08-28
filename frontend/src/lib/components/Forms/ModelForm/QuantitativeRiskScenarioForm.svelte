@@ -5,6 +5,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -44,6 +45,12 @@
 	bind:cachedValue={formDataCache['ref_id']}
 />
 
+	<Checkbox
+		{form}
+		field="is_selected"
+		label={m.isSelected()}
+		helpText={m.roToIsSelectedHelpText()}
+	/>
 <AutocompleteSelect
 	{form}
 	multiple
