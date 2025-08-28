@@ -1824,7 +1824,6 @@
 	"internalProcesses": "Internal processes",
 	"financialCapacity": "Financial capacity",
 	"companyCulture": "Company culture / communication",
-	"qualificationsChartTitle": "Risk scenarios qualifications",
 	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
 	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
 	"isVisible": "Visible",
@@ -1834,5 +1833,6 @@
 	"field": "Field",
 	"terminology": "Terminology",
 	"terminologies": "Terminologies",
-	"addTerminology": "Add terminology"
+	"addTerminology": "Add terminology",
+	"other": "Other"
 }
