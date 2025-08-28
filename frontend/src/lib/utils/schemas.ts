@@ -870,7 +870,48 @@ export const TaskTemplateSchema = z.object({
 			interval: 1,
 			frequency: 'DAILY'
 		})
-		.optional(),
+		.optional()
+		// Add cross-field validation for weeks_of_month and days_of_week (only for MONTHLY/YEARLY)
+		.refine(
+			(schedule) => {
+				if (!schedule) return true;
+
+				// Only apply this validation for MONTHLY and YEARLY frequencies
+				if (schedule.frequency !== 'MONTHLY' && schedule.frequency !== 'YEARLY') {
+					return true;
+				}
+
+				const hasWeeksOfMonth = schedule.weeks_of_month && schedule.weeks_of_month.length > 0;
+				const hasDaysOfWeek = schedule.days_of_week && schedule.days_of_week.length > 0;
+
+				// If weeks_of_month is provided, days_of_week must also be provided
+				return !hasWeeksOfMonth || hasDaysOfWeek;
+			},
+			{
+				message: m.daysOfWeekErrorMessage(),
+				path: ['days_of_week']
+			}
+		)
+		.refine(
+			(schedule) => {
+				if (!schedule) return true;
+
+				// Only apply this validation for MONTHLY and YEARLY frequencies
+				if (schedule.frequency !== 'MONTHLY' && schedule.frequency !== 'YEARLY') {
+					return true;
+				}
+
+				const hasWeeksOfMonth = schedule.weeks_of_month && schedule.weeks_of_month.length > 0;
+				const hasDaysOfWeek = schedule.days_of_week && schedule.days_of_week.length > 0;
+
+				// If days_of_week is provided, weeks_of_month must also be provided
+				return !hasDaysOfWeek || hasWeeksOfMonth;
+			},
+			{
+				message: m.weeksOfMonthErrorMessage(),
+				path: ['weeks_of_month']
+			}
+		),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
