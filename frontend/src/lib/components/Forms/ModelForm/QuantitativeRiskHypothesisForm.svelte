@@ -145,17 +145,4 @@
 		{form}
 		field="is_selected"
 		label={m.isSelected()}
-		helpText={m.roToIsSelectedHelpText()}
 	/>
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	translateOptions={false}
-	allowUserOptions="append"
-/>

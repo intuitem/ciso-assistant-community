@@ -1496,8 +1496,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'domain'],
-		body: ['name', 'description', 'folder'],
+		head: ['name', 'description', 'status', 'domain'],
+		body: ['name', 'description', 'status', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
@@ -1511,8 +1511,7 @@ export const listViewFields = {
 			'quantitativeRiskStudy',
 			'assets',
 			'threats',
-			'status',
-			'owner'
+			'qualifications'
 		],
 		body: [
 			'is_selected',
@@ -1521,8 +1520,7 @@ export const listViewFields = {
 			'quantitative_risk_study',
 			'assets',
 			'threats',
-			'status',
-			'owner'
+			'qualifications'
 		],
 		filters: {
 			status: RISK_ASSESSMENT_STATUS_FILTER,
