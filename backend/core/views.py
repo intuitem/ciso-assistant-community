@@ -6132,8 +6132,9 @@ class TaskNodeViewSet(BaseModelViewSet):
 
 class TerminologyViewSet(BaseModelViewSet):
     model = Terminology
-    filterset_fields = ["field_path", "folder"]
+    filterset_fields = ["field_path", "folder", "is_visible"]
     search_fields = ["name", "description"]
+    ordering = ["field_path", "name"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get class name choices")

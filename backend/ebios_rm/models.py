@@ -442,7 +442,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     objects = RoToManager()
 
     def __str__(self) -> str:
-        return f"{self.get_risk_origin_display()} - {self.target_objective}"
+        return f"{self.risk_origin} - {self.target_objective}"
 
     class Meta:
         verbose_name = _("RO/TO couple")

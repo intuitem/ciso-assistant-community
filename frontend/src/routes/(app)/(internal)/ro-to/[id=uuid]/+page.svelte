@@ -86,11 +86,12 @@
 			>
 				{m.ebiosWs2_1()}
 			</h1>
-			<div class="flex flex-row space-x-1">
+			<div class="flex flex-row space-x-1 items-center">
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.riskOrigin()}</span>
-					<span class="font-bold">{safeTranslate(roto.risk_origin)} /</span>
+					<span class="font-bold">{safeTranslate(roto.risk_origin.str)}</span>
 				</p>
+				<span class="text-gray-500 font-bold text-lg">/</span>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.targetObjective()}</span>
 					<span class="font-bold">{roto.target_objective}</span>
