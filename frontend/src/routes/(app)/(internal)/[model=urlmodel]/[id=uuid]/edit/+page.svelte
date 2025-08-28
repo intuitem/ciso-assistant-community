@@ -8,7 +8,9 @@
 
 	let { data }: Props = $props();
 
-	const customNameDescription = ['operational-scenarios', 'terminologies'].includes(data.model.urlModel);
+	const customNameDescription = ['operational-scenarios', 'terminologies'].includes(
+		data.model.urlModel
+	);
 </script>
 
 <ModelForm

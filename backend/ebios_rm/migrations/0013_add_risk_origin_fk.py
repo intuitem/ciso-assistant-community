@@ -3,22 +3,28 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0092_terminology'),
-        ('ebios_rm', '0012_ebiosrmstudy_quotation_method_alter_roto_risk_origin_and_more'),
+        ("core", "0092_terminology"),
+        (
+            "ebios_rm",
+            "0012_ebiosrmstudy_quotation_method_alter_roto_risk_origin_and_more",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='roto',
-            name='risk_origin_fk',
+            model_name="roto",
+            name="risk_origin_fk",
             field=models.ForeignKey(
-                to='core.Terminology',
+                to="core.Terminology",
                 on_delete=django.db.models.deletion.PROTECT,
-                related_name='roto_risk_origins',
-                limit_choices_to={'field_path': 'ro_to.risk_origin', 'is_visible': True},
+                related_name="roto_risk_origins",
+                limit_choices_to={
+                    "field_path": "ro_to.risk_origin",
+                    "is_visible": True,
+                },
                 null=True,
             ),
         ),

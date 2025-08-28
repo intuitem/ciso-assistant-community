@@ -3,23 +3,69 @@
 from django.db import migrations
 import iam.models
 
+
 def migrate_risk_origin(apps, schema_editor):
-    Roto = apps.get_model('ebios_rm', 'Roto')
-    Terminology = apps.get_model('core', 'Terminology')
-    Folder = apps.get_model('iam', 'Folder')
+    Roto = apps.get_model("ebios_rm", "Roto")
+    Terminology = apps.get_model("core", "Terminology")
+    Folder = apps.get_model("iam", "Folder")
 
     DEFAULT_ROTO_RISK_ORIGINS = [
-        {"name": "state", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "organized_crime", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "terrorist", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "activist", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "competitor", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "amateur", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "avenger", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "pathological", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
-        {"name": "other", "builtin": True, "field_path": "ro_to.risk_origin", "is_visible": True},
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": "ro_to.risk_origin",
+            "is_visible": True,
+        },
     ]
-    
+
     root_folder, _ = Folder.objects.get_or_create(
         content_type="GL",
         defaults={"name": "Global", "builtin": True},
@@ -40,10 +86,10 @@ def migrate_risk_origin(apps, schema_editor):
             except Terminology.DoesNotExist:
                 pass
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('ebios_rm', '0013_add_risk_origin_fk'),
+        ("ebios_rm", "0013_add_risk_origin_fk"),
     ]
 
     operations = [
