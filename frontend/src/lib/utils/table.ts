@@ -1495,6 +1495,44 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER
 		}
 	},
+	'quantitative-risk-studies': {
+		head: ['name', 'description', 'domain'],
+		body: ['name', 'description', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: RISK_ASSESSMENT_STATUS_FILTER
+		}
+	},
+	'quantitative-risk-scenarios': {
+		head: ['ref_id', 'name', 'description', 'quantitativeRiskStudy', 'status', 'assets', 'owner'],
+		body: ['ref_id', 'name', 'description', 'quantitative_risk_study', 'status', 'assets', 'owner'],
+		filters: {
+			status: RISK_ASSESSMENT_STATUS_FILTER,
+			assets: ASSET_FILTER,
+			owner: OWNER_FILTER
+		}
+	},
+	'quantitative-risk-hypotheses': {
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'quantitativeRiskScenario',
+			'riskStage',
+			'existingControls'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'quantitative_risk_scenario',
+			'risk_stage',
+			'existing_applied_controls'
+		],
+		filters: {
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	'task-templates': {
 		head: [
 			'name',

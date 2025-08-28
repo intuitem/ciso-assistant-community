@@ -9,17 +9,19 @@ from .views import (
 
 router = DefaultRouter()
 router.register(
-    "studies", QuantitativeRiskStudyViewSet, basename="quantitative-risk-study"
+    "quantitative-risk-studies",
+    QuantitativeRiskStudyViewSet,
+    basename="quantitative-risk-studies",
 )
 router.register(
-    "risk-scenarios",
+    "quantitative-risk-scenarios",
     QuantitativeRiskScenarioViewSet,
-    basename="quantitative-risk-scenario",
+    basename="quantitative-risk-scenarios",
 )
 router.register(
-    "hypotheses",
+    "quantitative-risk-hypotheses",
     QuantitativeRiskHypothesisViewSet,
-    basename="quantitative-risk-hypothesis",
+    basename="quantitative-risk-hypotheses",
 )
 
 urlpatterns = [

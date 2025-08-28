@@ -655,6 +655,49 @@ export const organisationIssueSchema = z.object({
 	origin: z.string().optional(),
 	assets: z.string().uuid().optional().array().optional()
 });
+
+export const quantitativeRiskStudySchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	status: z.string().optional().nullable(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	risk_appetite: jsonSchema.optional(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
+});
+
+export const quantitativeRiskScenarioSchema = z.object({
+	...NameDescriptionMixin,
+	quantitative_risk_study: z.string().uuid(),
+	assets: z.string().uuid().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional(),
+	status: z.string().optional().default('draft'),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
+	threats: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
+	ref_id: z.string().optional()
+});
+
+export const quantitativeRiskHypothesisSchema = z.object({
+	...NameDescriptionMixin,
+	quantitative_risk_scenario: z.string().uuid(),
+	existing_applied_controls: z.string().uuid().optional().array().optional(),
+	added_applied_controls: z.string().uuid().optional().array().optional(),
+	removed_applied_controls: z.string().uuid().optional().array().optional(),
+	risk_stage: z.string().optional().default('current'),
+	ref_id: z.string().optional(),
+	probability: z.coerce.number().min(0).max(1).optional(),
+	impact: z.object({
+		distribution: z.string().default("LOGNORMAL"),
+		lb: z.coerce.number().min(0).optional(),
+		ub: z.coerce.number().min(0).optional()
+	}).optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -975,7 +1018,10 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'operating-modes': OperatingModeSchema,
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
-	'organisation-issues': organisationIssueSchema
+	'organisation-issues': organisationIssueSchema,
+	'quantitative-risk-studies': quantitativeRiskStudySchema,
+	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
+	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema
 };
 
 export const modelSchema = (model: string) => {

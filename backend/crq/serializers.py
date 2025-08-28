@@ -22,6 +22,10 @@ class ImpactField(serializers.Field):
         return value
 
     def to_internal_value(self, data):
+        # Handle null/empty data
+        if data is None or data == "":
+            return None
+
         # Parse JSON string if needed
         if isinstance(data, str):
             try:
@@ -37,7 +41,11 @@ class ImpactField(serializers.Field):
         lb = data.get("lb")
         ub = data.get("ub")
 
-        # Check for missing fields
+        # Check for missing fields - allow empty if all are missing (optional field)
+        if distribution is None and lb is None and ub is None:
+            return None
+
+        # If any field is provided, all are required
         if not all([distribution, lb is not None, ub is not None]):
             raise serializers.ValidationError(
                 "Impact requires 'distribution', 'lb', and 'ub' keys."
@@ -90,25 +98,25 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
     quantitative_risk_study = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
+    owner = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
 
+    class Meta:
+        model = QuantitativeRiskScenario
+        fields = "__all__"
+
 
 class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
-    probability = serializers.FloatField()
-    impact = ImpactField(
-        source="parameters.impact",
+    probability = serializers.FloatField(
+        source="parameters.probability", required=False, allow_null=True
     )
+    impact = ImpactField(source="parameters.impact", required=False, allow_null=True)
 
     class Meta:
         model = QuantitativeRiskHypothesis
-        exclude = [
-            "created_at",
-            "updated_at",
-            "simulation_data",
-            "parameters",
-        ]
+        fields = "__all__"
 
 
 class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
@@ -116,6 +124,10 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     existing_applied_controls = FieldsRelatedField(many=True)
     added_applied_controls = FieldsRelatedField(many=True)
     removed_applied_controls = FieldsRelatedField(many=True)
+    probability = serializers.FloatField(
+        source="parameters.probability", read_only=True
+    )
+    impact = serializers.JSONField(source="parameters.impact", read_only=True)
 
     class Meta:
         model = QuantitativeRiskHypothesis

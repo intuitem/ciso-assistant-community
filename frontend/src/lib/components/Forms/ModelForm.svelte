@@ -58,6 +58,9 @@
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
 	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
+	import QuantitativeRiskStudyForm from './ModelForm/QuantitativeRiskStudyForm.svelte';
+	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
+	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -509,6 +512,39 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{context}
+			/>
+		{:else if URLModel === 'quantitative-risk-studies'}
+			<QuantitativeRiskStudyForm
+				{form}
+				{model}
+				{duplicate}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'quantitative-risk-scenarios'}
+			<QuantitativeRiskScenarioForm
+				{form}
+				{model}
+				{duplicate}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'quantitative-risk-hypotheses'}
+			<QuantitativeRiskHypothesisForm
+				{form}
+				{model}
+				{duplicate}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
 				{context}
 			/>
 		{/if}

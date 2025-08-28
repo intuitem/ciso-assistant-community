@@ -73,6 +73,10 @@ READER_PERMISSIONS_LIST = [
     "view_elementaryaction",
     "view_operatingmode",
     "view_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -135,6 +139,10 @@ APPROVER_PERMISSIONS_LIST = [
     "view_elementaryaction",
     "view_operatingmode",
     "view_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -329,6 +337,19 @@ ANALYST_PERMISSIONS_LIST = [
     "add_killchain",
     "change_killchain",
     "delete_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "add_quantitativeriskstudy",
+    "change_quantitativeriskstudy",
+    "delete_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "add_quantitativeriskscenario",
+    "change_quantitativeriskscenario",
+    "delete_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
+    "add_quantitativeriskhypothesis",
+    "change_quantitativeriskhypothesis",
+    "delete_quantitativeriskhypothesis",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -544,6 +565,19 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_killchain",
     "change_killchain",
     "delete_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "add_quantitativeriskstudy",
+    "change_quantitativeriskstudy",
+    "delete_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "add_quantitativeriskscenario",
+    "change_quantitativeriskscenario",
+    "delete_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
+    "add_quantitativeriskhypothesis",
+    "change_quantitativeriskhypothesis",
+    "delete_quantitativeriskhypothesis",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
