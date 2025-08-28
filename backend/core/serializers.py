@@ -1005,25 +1005,6 @@ class UserGroupWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class RoleReadSerializer(BaseModelSerializer):
-    name = serializers.CharField(source="__str__")
-    permissions = serializers.SerializerMethodField()
-    folder = FieldsRelatedField()
-
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-    def get_permissions(self, obj):
-        return [{"str": perm.codename} for perm in obj.permissions.all()]
-
-
-class RoleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-
 class PermissionReadSerializer(BaseModelSerializer):
     content_type = FieldsRelatedField(fields=["app_label", "model"])
 

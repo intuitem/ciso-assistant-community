@@ -40,8 +40,6 @@ router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
-router.register(r"roles", RoleViewSet, basename="roles")
-router.register(r"permissions", PermissionViewSet, basename="permissions")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
 router.register(r"frameworks", FrameworkViewSet, basename="frameworks")
 router.register(r"evidences", EvidenceViewSet, basename="evidences")
