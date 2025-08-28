@@ -5372,7 +5372,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
     
     class FieldPath(models.TextChoices):
-        ROTO_RISK_ORIGIN = "ro_to/risk_origin", _("Roto Risk Origin")
+        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
 
     field_path = models.CharField(
         max_length=100,

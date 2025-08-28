@@ -68,9 +68,9 @@
 	>
 		{m.activityOne()}
 	</p>
-	<Select
+	<AutocompleteSelect
 		{form}
-		options={model.selectOptions['risk-origin']}
+		optionsEndpoint="terminologies?field_path=ro_to.risk_origin"
 		field="risk_origin"
 		label={m.riskOrigin()}
 		cacheLock={cacheLocks['risk_origin']}
