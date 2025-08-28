@@ -1504,8 +1504,26 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-scenarios': {
-		head: ['ref_id', 'name', 'quantitativeRiskStudy', 'status', 'assets', 'threats', 'owner'],
-		body: ['ref_id', 'name', 'quantitative_risk_study', 'status', 'assets', 'threats', 'owner'],
+		head: [
+			'isSelected',
+			'ref_id',
+			'name',
+			'quantitativeRiskStudy',
+			'assets',
+			'threats',
+			'status',
+			'owner'
+		],
+		body: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'quantitative_risk_study',
+			'assets',
+			'threats',
+			'status',
+			'owner'
+		],
 		filters: {
 			status: RISK_ASSESSMENT_STATUS_FILTER,
 			assets: ASSET_FILTER,
@@ -1513,22 +1531,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-hypotheses': {
-		head: [
-			'ref_id',
-			'name',
-			'description',
-			'quantitativeRiskScenario',
-			'riskStage',
-			'existingControls'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'description',
-			'quantitative_risk_scenario',
-			'risk_stage',
-			'existing_applied_controls'
-		],
+		head: ['ref_id', 'name', 'riskStage', 'isSelected'],
+		body: ['ref_id', 'name', 'risk_stage', 'is_selected'],
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}

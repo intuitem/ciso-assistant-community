@@ -39,6 +39,11 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(QuantitativeRiskStudy.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get distribution model choices")
+    def distribution_model(self, request):
+        return Response(dict(QuantitativeRiskStudy.Distribution_model.choices))
+
 
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario
@@ -109,6 +114,50 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
+
+    def _perform_write(self, serializer):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("quantitative_risk_scenario"):
+            quantitative_risk_scenario = serializer.validated_data[
+                "quantitative_risk_scenario"
+            ]
+            ref_id = QuantitativeRiskHypothesis.get_default_ref_id(
+                quantitative_risk_scenario
+            )
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
+
+    def perform_create(self, serializer):
+        return self._perform_write(serializer)
+
+    def perform_update(self, serializer):
+        return self._perform_write(serializer)
+
+    @action(detail=False, methods=["get"])
+    def default_ref_id(self, request):
+        quantitative_risk_scenario_id = request.query_params.get(
+            "quantitative_risk_scenario"
+        )
+        if not quantitative_risk_scenario_id:
+            return Response(
+                {"error": "Missing 'quantitative_risk_scenario' parameter."}, status=400
+            )
+        try:
+            quantitative_risk_scenario = QuantitativeRiskScenario.objects.get(
+                pk=quantitative_risk_scenario_id
+            )
+
+            # Use the class method to compute the default ref_id
+            default_ref_id = QuantitativeRiskHypothesis.get_default_ref_id(
+                quantitative_risk_scenario
+            )
+            return Response({"results": default_ref_id})
+        except Exception as e:
+            logger.error("Error in default_ref_id: %s", str(e))
+            return Response(
+                {"error": "Error in default_ref_id has occurred."}, status=400
+            )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get risk stage choices")

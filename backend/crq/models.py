@@ -28,6 +28,9 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    class Distribution_model(models.TextChoices):
+        LOGNORMAL_CI90 = "lognormal_ci90", _("Lognormal - CI 90")
+
     ref_id = models.CharField(max_length=100, blank=True)
     status = models.CharField(
         max_length=100,
@@ -51,6 +54,12 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     risk_appetite = models.JSONField(null=True, blank=True, default=dict)
+    distribution_model = models.CharField(
+        max_length=100,
+        choices=Distribution_model.choices,
+        default=Distribution_model.LOGNORMAL_CI90,
+        verbose_name=_("Distribution model"),
+    )
 
     class Meta:
         verbose_name = _("Quantitative Risk Study")
@@ -164,6 +173,16 @@ class QuantitativeRiskHypothesis(
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+
+    @classmethod
+    def get_default_ref_id(cls, quantitative_risk_scenario):
+        """Return a unique reference ID for a given quantitative risk scenario."""
+        hypotheses_ref_ids = [
+            x.ref_id for x in quantitative_risk_scenario.hypotheses.all()
+        ]
+        nb_hypotheses = len(hypotheses_ref_ids) + 1
+        candidates = [f"H.{i:02d}" for i in range(1, nb_hypotheses + 1)]
+        return next(x for x in candidates if x not in hypotheses_ref_ids)
 
     class Meta:
         verbose_name = _("Quantitative Risk Hypothesis")

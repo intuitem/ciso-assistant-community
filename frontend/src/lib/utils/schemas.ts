@@ -660,6 +660,7 @@ export const quantitativeRiskStudySchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
 	status: z.string().optional().nullable(),
+	distribution_model: z.string().optional().default('lognormal_ci90'),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),

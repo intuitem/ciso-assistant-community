@@ -1428,7 +1428,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'crq/quantitative-risk-scenarios'
 			}
 		],
-		selectFields: [{ field: 'status', endpointUrl: 'crq/quantitative-risk-studies' }],
+		selectFields: [
+			{ field: 'status', endpointUrl: 'crq/quantitative-risk-studies' },
+			{ field: 'distribution_model', endpointUrl: 'crq/quantitative-risk-studies' }
+		],
 		filters: [{ field: 'folder' }, { field: 'status' }]
 	},
 	'quantitative-risk-scenarios': {
