@@ -513,7 +513,7 @@
 				{context}
 			/>
 		{:else if URLModel === 'terminologies'}
-			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}
