@@ -2,14 +2,12 @@
 
 import django.db.models.deletion
 from django.db import migrations, models
-import iam.models
-
 
 def migrate_risk_origin(apps, schema_editor):
     RoTo = apps.get_model("ebios_rm", "RoTo")
     Terminology = apps.get_model("core", "Terminology")
 
-    values = [
+    mapping = [
         "state",
         "organized_crime",
         "terrorist",
@@ -21,25 +19,31 @@ def migrate_risk_origin(apps, schema_editor):
         "other",
     ]
 
-    if RoTo.objects.exists():
-        for key in values:
-            term, _ = Terminology.objects.get(
-                field_path="ro_to.risk_origin",
-                name=key
-            )
-            RoTo.objects.filter(risk_origin=key).update(risk_origin=term.id)
+    for key in mapping:
+        try:
+            term = Terminology.objects.get(field_path="ro_to.risk_origin", name=key)
+            RoTo.objects.filter(risk_origin_temp=key).update(risk_origin=term.id)
+        except Terminology.DoesNotExist:
+            pass
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0092_terminology"),
-        (
-            "ebios_rm",
-            "0012_ebiosrmstudy_quotation_method_alter_roto_risk_origin_and_more",
-        ),
+        ("ebios_rm", "0012_ebiosrmstudy_quotation_method_alter_roto_risk_origin_and_more"),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name="roto",
+            name="risk_origin_temp",
+            field=models.CharField(max_length=200, null=True),
+        ),
+        migrations.RunPython(
+            code=lambda apps, schema_editor: apps.get_model("ebios_rm", "RoTo").objects.update(
+                risk_origin_temp=models.F('risk_origin')
+            ),
+        ),
         migrations.AlterField(
             model_name="roto",
             name="risk_origin",
@@ -55,4 +59,8 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(migrate_risk_origin),
+        migrations.RemoveField(
+            model_name="roto",
+            name="risk_origin_temp",
+        ),
     ]
