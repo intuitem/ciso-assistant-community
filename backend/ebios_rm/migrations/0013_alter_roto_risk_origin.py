@@ -2,6 +2,7 @@
 
 import django.db.models.deletion
 from django.db import migrations, models
+import iam.models
 
 
 def migrate_risk_origin(apps, schema_editor):
@@ -20,9 +21,13 @@ def migrate_risk_origin(apps, schema_editor):
         "other",
     ]
 
-    for key in values:
-        term, _ = Terminology.objects.get(field_path="ro_to.risk_origin", name=key)
-        RoTo.objects.filter(risk_origin=key).update(risk_origin=term.id)
+    if RoTo.objects.exists():
+        for key in values:
+            term, _ = Terminology.objects.get(
+                field_path="ro_to.risk_origin",
+                name=key
+            )
+            RoTo.objects.filter(risk_origin=key).update(risk_origin=term.id)
 
 
 class Migration(migrations.Migration):
