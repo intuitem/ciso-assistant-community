@@ -610,7 +610,7 @@
 				</button>
 			{/if}
 
-			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
 					onclick={() => {
