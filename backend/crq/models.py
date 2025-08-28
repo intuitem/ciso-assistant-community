@@ -109,6 +109,7 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=True)
 
 
 class QuantitativeRiskHypothesis(
@@ -151,6 +152,8 @@ class QuantitativeRiskHypothesis(
     parameters = models.JSONField(blank=True, null=True, default=dict)
     simulation_data = models.JSONField(blank=True, null=True, default=dict)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
 
     class Meta:
         verbose_name = _("Quantitative Risk Hypothesis")
