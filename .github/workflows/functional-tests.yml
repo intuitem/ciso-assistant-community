@@ -9,6 +9,11 @@ on:
     types: [opened, synchronize]
   workflow_dispatch:
 
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
@@ -158,7 +163,7 @@ jobs:
       EMAIL_PORT: 1025
       CISO_ASSISTANT_VERSION: v4.2.0
       CISO_ASSISTANT_BUILD: ${{ github.sha }}
-      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
+      PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
         image: postgres:16
@@ -183,6 +188,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Start Keycloak
+        uses: ./.github/actions/start-keycloak
+
       - name: Download Community Frontend Build Artifact
         uses: actions/download-artifact@v4
         with:
@@ -195,11 +203,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
@@ -254,7 +270,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           poetry run python manage.py createsuperuser --noinput
-          nohup poetry run python manage.py runserver &
+          nohup poetry run python manage.py runserver localhost:8173 &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}/
@@ -286,8 +302,8 @@ jobs:
           include-hidden-files: true
           path: |
             ${{ env.backend-directory }}/*.log
-            ${{ env.frontend-directory }}/build/tests/results/
-            ${{ env.frontend-directory }}/build/tests/reports/
+            ${{ env.frontend-directory }}/tests/results/
+            ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
 
   enterprise-functional-tests:
@@ -314,7 +330,7 @@ jobs:
       CISO_ASSISTANT_BUILD: ${{ github.sha }}
       DJANGO_SETTINGS_MODULE: enterprise_core.settings
       LICENSE_SEATS: 999
-      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
+      PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
         image: postgres:16
@@ -339,6 +355,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Start Keycloak
+        uses: ./.github/actions/start-keycloak
+
       - name: Download Enterprise Frontend Build Artifact
         uses: actions/download-artifact@v4
         with:
@@ -351,11 +370,22 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
@@ -419,7 +449,7 @@ jobs:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
           poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
-          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
+          nohup poetry run python manage.py runserver localhost:8173 --settings="$SETTINGS_MODULE" &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}/
