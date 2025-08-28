@@ -950,6 +950,7 @@
 	"select": "Vybrat",
 	"deselect": "Zrušit výběr",
 	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu.",
+	"saveAndContinue": "Uložit a pokračovat",
 	"abbreviation": "Zkratka",
 	"qualificationOrdering": "Pořadí kvalifikace",
 	"securityObjectiveOrdering": "Pořadí bezpečnostního cíle",

@@ -1150,6 +1150,7 @@
 	"matchingScenarios": "Skenario yang cocok",
 	"select": "Pilih",
 	"deselect": "Batalkan Pilihan",
+	"saveAndContinue": "Simpan dan lanjutkan",
 	"abbreviation": "Singkatan",
 	"qualificationOrdering": "Urutan kualifikasi",
 	"securityObjectiveOrdering": "Urutan tujuan keamanan",

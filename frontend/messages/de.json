@@ -967,6 +967,7 @@
 	"select": "Auswählen",
 	"deselect": "Abwählen",
 	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt.",
+	"saveAndContinue": "Speichern und fortfahren",
 	"abbreviation": "Abkürzung",
 	"qualificationOrdering": "Qualifikationsreihenfolge",
 	"securityObjectiveOrdering": "Reihenfolge der Sicherheitsziele",

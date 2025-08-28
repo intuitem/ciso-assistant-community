@@ -967,6 +967,7 @@
 	"select": "Seleccionar",
 	"deselect": "Deseleccionar",
 	"fearedEventAssetHelpText": "Los eventos temidos suelen estar vinculados a valores comerciales (activos primarios). Los activos de soporte se permiten aquí por flexibilidad.",
+	"saveAndContinue": "Guardar y continuar",
 	"abbreviation": "Abreviatura",
 	"qualificationOrdering": "Orden de calificación",
 	"securityObjectiveOrdering": "Orden de objetivos de seguridad",

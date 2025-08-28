@@ -930,6 +930,7 @@
 	"select": "تحديد",
 	"deselect": "إلغاء التحديد",
 	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة",
+	"saveAndContinue": "حفظ ومتابعة",
 	"abbreviation": "اختصار",
 	"qualificationOrdering": "ترتيب المؤهلات",
 	"securityObjectiveOrdering": "ترتيب الأهداف الأمنية",
