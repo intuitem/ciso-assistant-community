@@ -58,6 +58,7 @@
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
 	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
+	import RoleForm from './ModelForm/RoleForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -511,6 +512,8 @@
 				initialData={model.initialData}
 				{context}
 			/>
+		{:else if URLModel === 'roles'}
+			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

@@ -247,7 +247,7 @@ export const navData = {
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
-					permissions: ['view_appliedcontrol'] //this is temporary workaround to manage 3rd parties
+					permissions: ['view_perimeter'] //this is temporary workaround to manage 3rd parties
 				}
 			]
 		},
@@ -258,12 +258,7 @@ export const navData = {
 					name: 'tprmOverview',
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
-					permissions: [
-						'view_entity',
-						'view_solution',
-						'view_entityassessment',
-						'view_appliedcontrol'
-					]
+					permissions: ['view_entity', 'view_solution', 'view_entityassessment']
 				},
 				{
 					name: 'entities',

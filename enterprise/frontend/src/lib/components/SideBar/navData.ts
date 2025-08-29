@@ -107,6 +107,11 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'roles',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/roles'
+				},
+				{
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'

@@ -16,6 +16,7 @@ from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from global_settings.utils import ff_is_enabled
 from iam.models import *
+from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -87,7 +88,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
         can_create_in_folder = RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
-                codename=f"add_{self.Meta.model._meta.model_name}"
+                codename=f"add_{self.Meta.model._meta.model_name}",
+                content_type__app_label=self.Meta.model._meta.app_label,
+                content_type__model=self.Meta.model._meta.model_name,
             ),
             folder=folder,
         )
@@ -937,7 +940,11 @@ class UserWriteSerializer(BaseModelSerializer):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
-            perm=Permission.objects.get(codename="add_user"),
+            perm=Permission.objects.get(
+                codename="add_user",
+                content_type__app_label=User._meta.app_label,
+                content_type__model=User._meta.model_name,
+            ),
             folder=Folder.get_root_folder(),
         ):
             raise PermissionDenied(
@@ -998,16 +1005,23 @@ class UserGroupWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class RoleReadSerializer(BaseModelSerializer):
+class PermissionReadSerializer(BaseModelSerializer):
+    content_type = FieldsRelatedField(fields=["app_label", "model"])
+
     class Meta:
-        model = Role
+        model = Permission
         fields = "__all__"
 
 
-class RoleWriteSerializer(BaseModelSerializer):
+class PermissionWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Role
+        model = Permission
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.read_only = True
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
