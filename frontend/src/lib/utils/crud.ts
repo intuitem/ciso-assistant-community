@@ -1408,6 +1408,103 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		filters: [{ field: 'folder' }]
+	},
+	'quantitative-risk-studies': {
+		name: 'quantitativeriskstudy',
+		localName: 'quantitativeRiskStudy',
+		localNamePlural: 'quantitativeRiskStudies',
+		verboseName: 'Quantitative Risk Study',
+		verboseNamePlural: 'Quantitative Risk Studies',
+		endpointUrl: 'crq/quantitative-risk-studies',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'quantitative_risk_study',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios'
+			}
+		],
+		selectFields: [
+			{ field: 'status', endpointUrl: 'crq/quantitative-risk-studies' },
+			{ field: 'distribution_model', endpointUrl: 'crq/quantitative-risk-studies' }
+		],
+		filters: [{ field: 'folder' }, { field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'authors' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'status' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'observation' }
+		]
+	},
+	'quantitative-risk-scenarios': {
+		name: 'quantitativeriskscenario',
+		localName: 'quantitativeRiskScenario',
+		localNamePlural: 'quantitativeRiskScenarios',
+		verboseName: 'Quantitative Risk Scenario',
+		verboseNamePlural: 'Quantitative Risk Scenarios',
+		endpointUrl: 'crq/quantitative-risk-scenarios',
+		foreignKeyFields: [
+			{
+				field: 'quantitative_risk_study',
+				urlModel: 'quantitative-risk-studies',
+				endpointUrl: 'crq/quantitative-risk-studies'
+			},
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
+			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'qualifications', urlModel: 'qualifications' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'quantitative_risk_scenario',
+				urlModel: 'quantitative-risk-hypotheses',
+				endpointUrl: 'crq/quantitative-risk-hypotheses'
+			}
+		],
+		selectFields: [{ field: 'status', endpointUrl: 'crq/quantitative-risk-scenarios' }],
+		filters: [{ field: 'quantitative_risk_study' }, { field: 'status' }]
+	},
+	'quantitative-risk-hypotheses': {
+		name: 'quantitativeriskhypothesis',
+		localName: 'quantitativeRiskHypothesis',
+		localNamePlural: 'quantitativeRiskHypotheses',
+		verboseName: 'Quantitative Risk Hypothesis',
+		verboseNamePlural: 'Quantitative Risk Hypotheses',
+		endpointUrl: 'crq/quantitative-risk-hypotheses',
+		foreignKeyFields: [
+			{
+				field: 'quantitative_risk_scenario',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios'
+			},
+			{ field: 'existing_applied_controls', urlModel: 'applied-controls' },
+			{ field: 'added_applied_controls', urlModel: 'applied-controls' },
+			{ field: 'removed_applied_controls', urlModel: 'applied-controls' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'risk_stage', endpointUrl: 'crq/quantitative-risk-hypotheses' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'simulation_parameters_display' },
+			{ field: 'risk_stage' },
+			{ field: 'observation' },
+			{ filed: 'is_selected' }
+		]
 	}
 };
 
