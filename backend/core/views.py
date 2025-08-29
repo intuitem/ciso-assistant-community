@@ -2018,6 +2018,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         indexes = dict()
         idx_cnt = 0
         for ac in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+            ac_key = f"ac-{ac.id}"
             nodes.append(
                 {
                     "name": ac.name,
@@ -2025,11 +2026,12 @@ class AppliedControlViewSet(BaseModelViewSet):
                     "category": csf_functions_map.get(ac.csf_function, 0),
                 }
             )
-            indexes[ac.id] = idx_cnt
+            indexes[ac_key] = idx_cnt
             idx_cnt += 1
             # attached requirement_assessments
             for req in RequirementAssessment.objects.filter(applied_controls__id=ac.id):
-                if req.id not in indexes:
+                req_key = f"req-{req.id}"
+                if req_key not in indexes:
                     # Add RequirementAssessment node only if it doesn't exist
                     nodes.append(
                         {
@@ -2041,13 +2043,12 @@ class AppliedControlViewSet(BaseModelViewSet):
                             "symbol": "triangle",
                         }
                     )
-                    indexes[req.id] = (
-                        idx_cnt  # not good - even if the probability of collision is low
-                    )
+                    indexes[req_key] = idx_cnt
                     idx_cnt += 1
 
                 audit = req.compliance_assessment
-                if audit.id not in indexes:
+                audit_key = f"audit-{audit.id}"
+                if audit_key not in indexes:
                     nodes.append(
                         {
                             "name": audit.name,
@@ -2056,13 +2057,14 @@ class AppliedControlViewSet(BaseModelViewSet):
                             "symbol": "rect",
                         }
                     )
-                    indexes[audit.id] = idx_cnt
+                    indexes[audit_key] = idx_cnt
                     idx_cnt += 1
-                links.append({"source": indexes[audit.id], "target": indexes[req.id]})
-                links.append({"source": indexes[ac.id], "target": indexes[req.id]})
+                links.append({"source": indexes[audit_key], "target": indexes[req_key]})
+                links.append({"source": indexes[ac_key], "target": indexes[req_key]})
 
             for sc in RiskScenario.objects.filter(applied_controls__id=ac.id):
-                if sc.id not in indexes:
+                sc_key = f"sc-{sc.id}"
+                if sc_key not in indexes:
                     nodes.append(
                         {
                             "name": sc.ref_id,
@@ -2071,11 +2073,12 @@ class AppliedControlViewSet(BaseModelViewSet):
                             "symbol": "diamond",
                         }
                     )
-                    indexes[sc.id] = idx_cnt
+                    indexes[sc_key] = idx_cnt
                     idx_cnt += 1
 
                 ra = sc.risk_assessment
-                if ra.id not in indexes:
+                ra_key = f"ra-{ra.id}"
+                if ra_key not in indexes:
                     nodes.append(
                         {
                             "name": ra.name,
@@ -2084,10 +2087,10 @@ class AppliedControlViewSet(BaseModelViewSet):
                             "symbol": "rect",
                         }
                     )
-                    indexes[ra.id] = idx_cnt
+                    indexes[ra_key] = idx_cnt
                     idx_cnt += 1
-                links.append({"source": indexes[ra.id], "target": indexes[sc.id]})
-                links.append({"source": indexes[ac.id], "target": indexes[sc.id]})
+                links.append({"source": indexes[ra_key], "target": indexes[sc_key]})
+                links.append({"source": indexes[ac_key], "target": indexes[sc_key]})
 
         return Response({"nodes": nodes, "categories": categories, "links": links})
 
