@@ -100,7 +100,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 				.then((res) => res.json())
 				.then((data) =>
 					data.results && Array.isArray(data.results)
-						? data.results.map((obj) => ({ label: obj.name, value: obj.name }))
+						? data.results.map((obj) => ({ label: obj.name, value: obj.id }))
 						: Object.entries(data).map(([key, value]) => ({ label: value, value: key }))
 				)
 		)

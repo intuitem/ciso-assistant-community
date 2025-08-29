@@ -286,6 +286,7 @@
 	onMount(async () => {
 		await fetchOptions();
 		mount($value);
+		console.log(field, options);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);

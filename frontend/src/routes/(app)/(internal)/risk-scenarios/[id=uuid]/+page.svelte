@@ -335,7 +335,7 @@
 				<span class="font-semibold">
 					{#each data.scenario.qualifications as qualification, i}
 						{#if i > 0},{/if}
-						{safeTranslate(qualification) || m.undefined()}
+						{qualification.name || m.undefined()}
 					{/each}
 				</span>
 			</p>

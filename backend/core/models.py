@@ -3656,7 +3656,13 @@ class RiskScenario(NameDescriptionMixin):
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
 
-    qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
+    qualifications = models.ManyToManyField(
+        Qualification,
+        blank=True,
+        verbose_name=_("Qualifications"),
+        related_name="risk_scenarios",
+        help_text=_("Qualifications carried by the risk scenario"),
+    )
 
     strength_of_knowledge = models.IntegerField(
         default=-1,
