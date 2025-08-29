@@ -2059,4 +2059,4 @@ class TerminologyReadSerializer(BaseModelSerializer):
 class TerminologyWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published"]
+        exclude = ["folder", "is_published", "builtin"]

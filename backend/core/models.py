@@ -5461,7 +5461,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 name=risk_origin["name"],
                 field_path=risk_origin["field_path"],
                 defaults=risk_origin,
-                create_defaults=risk_origin,
             )
 
     @property
