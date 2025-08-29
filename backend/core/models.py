@@ -5463,3 +5463,9 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 defaults=risk_origin,
                 create_defaults=risk_origin,
             )
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations or self.name

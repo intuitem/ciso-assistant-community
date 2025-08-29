@@ -188,10 +188,6 @@ class RoToViewSet(BaseModelViewSet):
         queryset = super().get_queryset()
         return queryset.with_pertinence()
 
-    @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
-    def risk_origin(self, request):
-        return Response(dict(self.risk_origin))
-
     @action(detail=False, name="Get motivation choices")
     def motivation(self, request):
         return Response(dict(RoTo.Motivation.choices))

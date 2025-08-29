@@ -71,6 +71,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+		optionsLabelField="translated_name"
 		field="risk_origin"
 		label={m.riskOrigin()}
 		cacheLock={cacheLocks['risk_origin']}

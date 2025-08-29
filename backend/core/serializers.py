@@ -2049,6 +2049,7 @@ class TaskNodeWriteSerializer(BaseModelSerializer):
 
 class TerminologyReadSerializer(BaseModelSerializer):
     field_path = serializers.CharField(source="get_field_path_display", read_only=True)
+    translated_name = serializers.CharField(source="get_name_translated")
 
     class Meta:
         model = Terminology

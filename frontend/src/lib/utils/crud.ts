@@ -1417,7 +1417,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Terminology',
 		verboseNamePlural: 'Terminologies',
 		selectFields: [{ field: 'field_path' }],
-		customNameDescription: true
+		customNameDescription: true,
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'field_path' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' },
+			{ field: 'translations' }
+		]
 	}
 };
 

@@ -143,7 +143,7 @@ class RoToReadSerializer(BaseModelSerializer):
     risk_origin = serializers.SerializerMethodField()
 
     def get_risk_origin(self, obj):
-        return obj.risk_origin.name
+        return obj.risk_origin.get_name_translated
 
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
