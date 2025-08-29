@@ -967,6 +967,11 @@ export const TerminologySchema = z.object({
 	translations: z.record(z.string().min(1), z.string().min(1))
 });
 
+export const RoleSchema = z.object({
+	...NameDescriptionMixin,
+	permissions: z.array(z.number()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1024,7 +1029,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
 	'organisation-issues': organisationIssueSchema,
-	terminologies: TerminologySchema
+	terminologies: TerminologySchema,
+	roles: RoleSchema
 };
 
 export const modelSchema = (model: string) => {
