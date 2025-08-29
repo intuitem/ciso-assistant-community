@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { getLocale, locales } from '$paraglide/runtime';
+	import { locales } from '$paraglide/runtime';
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 
 	interface Props {
@@ -127,7 +127,7 @@
 					>
 						<option value="">{m.selectLanguagePlaceholder()}</option>
 						{#each locales as lang}
-							<option value={lang} selected={lang === getLocale()}>
+							<option value={lang}>
 								{defaultLangLabels[lang]} ({language[LOCALE_MAP[lang].name]})
 							</option>
 						{/each}
@@ -170,7 +170,6 @@
 </div>
 
 <style>
-	/* Additional styles if needed */
 	.space-y-2 > * + * {
 		margin-top: 0.5rem;
 	}
