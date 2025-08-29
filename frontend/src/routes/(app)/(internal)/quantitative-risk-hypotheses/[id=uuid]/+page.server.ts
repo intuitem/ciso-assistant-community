@@ -25,5 +25,26 @@ export const actions: Actions = {
 	delete: async (event) => {
 		console.log('delete');
 		return nestedDeleteFormAction({ event });
+	},
+	runSimulation: async (event) => {
+		const endpoint = `${BASE_API_URL}/crq/quantitative-risk-hypotheses/${event.params.id}/run-simulation/`;
+		const res = await event.fetch(endpoint, {
+			method: 'GET'
+		});
+
+		if (!res.ok) {
+			const response = await res.json();
+			console.error(response);
+			return {
+				error: true,
+				message: response
+			};
+		}
+
+		const result = await res.json();
+		return {
+			success: true,
+			message: { simulationComplete: true }
+		};
 	}
 };
