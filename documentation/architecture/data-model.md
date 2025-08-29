@@ -1047,7 +1047,7 @@ The general approach is to translate everything in the frontend. We use paraglid
 
 One notable exception is that referential objects are translated by the backend. The ACCEPT_LANGUAGE header in the request is used to indicate which language is used on the frontend side. The backend selects the most appropriate language to use (either the requested language, or the default language of the library).
 
-Other user-defined, non-referential objects can also be localized in the same way, by supporting the "translation" field. A dedicated mixin "CustomTranslation" will be used. The UX shall be non-intrusive, and propose localization only as an option (and depending on a Feature Flag).
+Other user-defined, non-referential objects can also be localized in the same way, by supporting the "translations" field. A dedicated mixin "CustomTranslations" will be used. The UX shall be non-intrusive, and propose localization only as an option.
 
 Note: generated documents (pdf, excel, word) are currently translated in the backend, but this should be migrated in the frontend.
 
