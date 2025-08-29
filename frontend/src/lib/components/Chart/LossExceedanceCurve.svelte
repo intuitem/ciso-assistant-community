@@ -168,5 +168,5 @@
 <div
 	id={chart_id}
 	class="{height} {width} {classesContainer}"
-	style="width: 600px; height: 400px;"
+	style="height: 400px; min-width: 600px;"
 ></div>

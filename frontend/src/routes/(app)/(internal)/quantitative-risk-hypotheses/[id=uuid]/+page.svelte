@@ -80,15 +80,18 @@
 		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
 			{#if data.lec?.data && Array.isArray(data.lec.data) && data.lec.data.length > 0}
 				<!-- LEC Chart -->
-				<div class="bg-white rounded-lg p-4 shadow-sm">
-					<LossExceedanceCurve
-						data={data.lec.data}
-						xMax={lecMaxValue()}
-						height="h-96"
-						width="w-full"
-						enableTooltip={true}
-						autoYMax={true}
-					/>
+				<div class="bg-white rounded-lg p-4 shadow-sm w-full">
+					{#key data.lec.simulation_timestamp}
+						<LossExceedanceCurve
+							data={data.lec.data}
+							xMax={lecMaxValue()}
+							height="h-96"
+							width="w-full"
+							classesContainer="min-w-0"
+							enableTooltip={true}
+							autoYMax={true}
+						/>
+					{/key}
 				</div>
 
 				<!-- Risk Metrics -->
