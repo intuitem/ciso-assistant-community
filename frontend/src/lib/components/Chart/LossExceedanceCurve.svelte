@@ -11,14 +11,14 @@
 		title?: string;
 		xAxisLabel?: string;
 		yAxisLabel?: string;
-    minorSplitLine?:  boolean;
-    enableTooltip?: boolean;
-    xAxisScale?: 'linear' | 'log';
-    yAxisScale?: 'linear' | 'log';
-    showXGrid?: boolean;
-    showYGrid?: boolean;
-    xMax?: number;
-    autoYMax?: boolean;
+		minorSplitLine?: boolean;
+		enableTooltip?: boolean;
+		xAxisScale?: 'linear' | 'log';
+		yAxisScale?: 'linear' | 'log';
+		showXGrid?: boolean;
+		showYGrid?: boolean;
+		xMax?: number;
+		autoYMax?: boolean;
 	}
 
 	let {
@@ -27,18 +27,18 @@
 		classesContainer = '',
 		name = 'loss-exceedance',
 		data = undefined,
-    toleranceData = undefined,
+		toleranceData = undefined,
 		title = 'Loss Exceedance Curve',
 		xAxisLabel = 'Loss Amount ($)',
 		yAxisLabel = 'Exceedance Probability',
-    minorSplitLine = false,
-    enableTooltip = false,
-    xAxisScale = 'log',
-    yAxisScale = 'linear',
-    showXGrid = true,
-    showYGrid = true,
-    xMax = 1000000,
-    autoYMax = false,
+		minorSplitLine = false,
+		enableTooltip = false,
+		xAxisScale = 'log',
+		yAxisScale = 'linear',
+		showXGrid = true,
+		showYGrid = true,
+		xMax = 1000000,
+		autoYMax = false
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
@@ -67,7 +67,7 @@
 				bottom: '15%'
 			},
 			tooltip: {
-        show: !!enableTooltip,
+				show: !!enableTooltip,
 				trigger: 'axis',
 				formatter: function (params: any) {
 					const point = params[0];
@@ -78,8 +78,8 @@
 				type: xAxisScale,
 				name: xAxisLabel,
 				nameLocation: 'middle',
-        min: xMin,
-        max: xMax,
+				min: xMin,
+				max: xMax,
 				nameGap: 30,
 				minorSplitLine: {
 					show: minorSplitLine
@@ -110,7 +110,7 @@
 				name: yAxisLabel,
 				nameLocation: 'middle',
 				nameGap: 50,
-				max: yAxisScale === 'log' ? undefined : (autoYMax ? undefined : 1),
+				max: yAxisScale === 'log' ? undefined : autoYMax ? undefined : 1,
 				axisLabel: {
 					formatter: function (value: number) {
 						return (value * 100).toFixed(0) + '%';
@@ -149,7 +149,7 @@
 						])
 					},
 					data: data
-				},
+				}
 			]
 		};
 
