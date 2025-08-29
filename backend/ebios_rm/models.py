@@ -395,18 +395,6 @@ class RoTo(AbstractBaseModel, FolderMixin):
         blank=True,
     )
 
-    ebios_rm_study = models.ForeignKey(
-        EbiosRMStudy,
-        verbose_name=_("EBIOS RM study"),
-        on_delete=models.CASCADE,
-    )
-    feared_events = models.ManyToManyField(
-        FearedEvent,
-        verbose_name=_("Feared events"),
-        related_name="ro_to_couples",
-        blank=True,
-    )
-
     risk_origin = models.ForeignKey(
         Terminology,
         on_delete=models.PROTECT,
