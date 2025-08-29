@@ -236,8 +236,6 @@ test('ebios rm study', async ({
 		await page.getByTestId('add-button').click();
 		await page.getByTestId('form-input-risk-origin').getByRole('textbox').click();
 		await page.getByRole('option', { name: 'Amateur' }).click();
-		await page.getByRole('option', { name: 'State' }).click();
-		await page.getByRole('option', { name: 'Amateur' }).click();
 		await page.getByTestId('form-input-target-objective').click();
 		await page
 			.getByTestId('form-input-target-objective')
