@@ -572,7 +572,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     assets = FieldsRelatedField(many=True)
 
     treatment = serializers.CharField()
-    qualifications = FieldsRelatedField(["id", "name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
 
     inherent_proba = serializers.JSONField(source="get_inherent_proba")
     inherent_impact = serializers.JSONField(source="get_inherent_impact")
