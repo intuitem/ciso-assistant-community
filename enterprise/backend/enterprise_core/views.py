@@ -5,6 +5,8 @@ import magic
 import structlog
 from core.views import BaseModelViewSet
 from core.permissions import IsAdministrator
+from django.db import models, transaction
+from django.contrib.auth.models import Permission
 from django.conf import settings
 from iam.models import User
 from rest_framework import status
@@ -25,7 +27,7 @@ from django.conf import settings
 
 from core.views import BaseModelViewSet
 from core.utils import MAIN_ENTITY_DEFAULT_NAME
-from iam.models import User
+from iam.models import User, Role, UserGroup
 from tprm.models import Entity
 
 from iam.models import RoleAssignment
@@ -250,6 +252,100 @@ class LicenseStatusView(APIView):
         else:
             days_expired = (now - expiration_date).days
             return Response({"status": "expired", "days_expired": days_expired})
+
+
+class RoleViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows roles to be viewed or edited
+    """
+
+    model = Role
+    ordering = ["builtin", "name"]
+
+    def perform_create(self, serializer):
+        """
+        Create per-folder UserGroups and RoleAssignments for the new role.
+        """
+        role = serializer.save()
+        role.permissions.add(
+            Permission.objects.get(
+                codename="view_folder",
+                content_type__app_label="iam",
+                content_type__model="folder",
+            )
+        )
+        with transaction.atomic():
+            for folder in Folder.objects.exclude(content_type="EN"):
+                ug, _ = UserGroup.objects.get_or_create(
+                    folder=folder, name=role.name, defaults={"builtin": False}
+                )
+                ra = RoleAssignment.objects.create(
+                    folder=Folder.get_root_folder(),
+                    role=role,
+                    user_group=ug,
+                    is_recursive=True,
+                )
+                ra.perimeter_folders.add(folder)
+
+    def perform_update(self, serializer):
+        """
+        Update the user groups associated with the role
+        """
+        role = serializer.save()
+        role.permissions.add(
+            Permission.objects.get(
+                codename="view_folder",
+                content_type__app_label="iam",
+                content_type__model="folder",
+            )
+        )
+        ug_ids = (
+            RoleAssignment.objects.filter(
+                role=role, user_group__isnull=False, user_group__builtin=False
+            )
+            .values_list("user_group_id", flat=True)
+            .distinct()
+        )
+        if ug_ids:
+            UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
+
+    def perform_destroy(self, instance):
+        """
+        Delete only user groups tied to this role’s assignments, atomically.
+        """
+        with transaction.atomic():
+            ras_qs = RoleAssignment.objects.select_related("user_group").filter(
+                role=instance
+            )
+            ug_ids = list(
+                ras_qs.exclude(user_group__isnull=True).values_list(
+                    "user_group_id", flat=True
+                )
+            )
+            # Remove this role's assignments first
+            ras_qs.delete()
+            if ug_ids:
+                # Delete only non-builtin groups that are now orphaned (no remaining RAs)
+                orphan_ug_ids = list(
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=False)
+                    .annotate(ra_count=models.Count("roleassignment"))
+                    .filter(ra_count=0)
+                    .values_list("id", flat=True)
+                )
+                if orphan_ug_ids:
+                    UserGroup.objects.filter(id__in=orphan_ug_ids).delete()
+            super().perform_destroy(instance)
+
+
+class PermissionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows permissions to be viewed or edited.
+    """
+
+    model = Permission
+    ordering = ["codename"]
+    filterset_fields = ["codename", "content_type"]
+    search_fields = ["codename", "name"]
 
 
 def get_disk_usage():
