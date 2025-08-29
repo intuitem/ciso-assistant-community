@@ -638,7 +638,7 @@
 							onclick={cancel}>{m.cancel()}</button
 						>
 						<button
-							class="btn preset-filled-primary-500 font-semibold w-full"
+							class="btn preset-filled-secondary-500 font-semibold w-full"
 							data-testid="save-no-continue-button"
 							type="submit"
 							onclick={() =>
@@ -647,7 +647,7 @@
 								})}>{m.saveAndContinue()}</button
 						>
 						<button
-							class="btn preset-filled-secondary-500 font-semibold w-full"
+							class="btn preset-filled-primary-500 font-semibold w-full"
 							data-testid="save-button"
 							type="submit">{m.save()}</button
 						>
