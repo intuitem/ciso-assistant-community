@@ -10,7 +10,7 @@
 				action: 'action',
 				content_type: 'content_type',
 				timestamp: 'timestamp',
-        folder: 'folder'
+				folder: 'folder'
 			},
 			body: [],
 			meta: []
