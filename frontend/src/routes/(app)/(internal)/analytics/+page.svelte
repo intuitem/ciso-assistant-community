@@ -497,7 +497,7 @@
 										s_label={m.inherentRisk()}
 										name="inherent_risk_level"
 										values={data.risks_count_per_level.inherent}
-										colors={data.risks_count_per_level.inherent.map((object) => object.color)}
+										colors={data.risks_count_per_level.inherent?.map((object) => object.color)}
 									/>
 								</div>
 							{/if}
@@ -508,7 +508,7 @@
 									s_label={cur_rsk_label}
 									name="current_risk_level"
 									values={data.risks_count_per_level.current}
-									colors={data.risks_count_per_level.current.map((object) => object.color)}
+									colors={data.risks_count_per_level.current?.map((object) => object.color)}
 								/>
 							</div>
 							<div class="h-96 flex-col grow lg:flex-1">
@@ -518,7 +518,7 @@
 									s_label={rsd_rsk_label}
 									name="residual_risk_level"
 									values={data.risks_count_per_level.residual}
-									colors={data.risks_count_per_level.residual.map((object) => object.color)}
+									colors={data.risks_count_per_level.residual?.map((object) => object.color)}
 								/>
 							</div>
 						</div>
