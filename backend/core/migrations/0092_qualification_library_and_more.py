@@ -5,29 +5,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0091_appliedcontrol_objectives_and_more'),
+        ("core", "0091_appliedcontrol_objectives_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='qualification',
-            name='library',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='qualifications', to='core.loadedlibrary'),
+            model_name="qualification",
+            name="library",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="qualifications",
+                to="core.loadedlibrary",
+            ),
         ),
         migrations.AlterField(
-            model_name='qualification',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="qualification",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.RemoveField(
-            model_name='riskscenario',
-            name='qualifications',
+            model_name="riskscenario",
+            name="qualifications",
         ),
         migrations.AddField(
-            model_name='riskscenario',
-            name='qualifications',
-            field=models.ManyToManyField(blank=True, help_text='Qualifications carried by the risk scenario', related_name='risk_scenarios', to='core.qualification', verbose_name='Qualifications'),
+            model_name="riskscenario",
+            name="qualifications",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Qualifications carried by the risk scenario",
+                related_name="risk_scenarios",
+                to="core.qualification",
+                verbose_name="Qualifications",
+            ),
         ),
     ]
