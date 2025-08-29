@@ -1792,5 +1792,20 @@
 	"companyCulture": "Culture d'entreprise / communication",
 	"qualificationsChartTitle": "Qualifications des scenarios de risque",
 	"daysOfWeekErrorMessage": "Vous devez spécifier au moins un jour de la semaine",
-	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)"
+	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)",
+	"isVisible": "Visible",
+	"isVisibleHelpText": "Si non visible, cet élément ne s'affichera pas dans les listes ou ne sera pas sélectionnable, mais fera toujours partie des terminologies",
+	"fieldPath": "Champ",
+	"fieldPathHelpText": "Le champ où vous devez ajouter la terminologie",
+	"field": "Champ",
+	"terminology": "Terminologie",
+	"terminologies": "Terminologies",
+	"addTerminology": "Ajouter une terminologie",
+	"other": "Autre",
+	"translations": "Traductions",
+	"translation": "Traduction",
+	"addTranslation": "Ajouter une traduction",
+	"noTranslationAdded": "Aucune traduction ajoutée pour le moment. Cliquez sur 'Ajouter une traduction' pour commencer",
+	"translationErrorMessage": "La langue et la traduction sont requises",
+	"selectLanguagePlaceholder": "Sélectionner une langue..."
 }

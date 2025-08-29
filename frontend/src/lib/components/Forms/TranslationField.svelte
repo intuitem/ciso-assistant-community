@@ -100,7 +100,7 @@
 			onclick={() => addTranslation()}
 			disabled={Object.keys(translations).length >= locales.length}
 		>
-			+ Add translation
+			<i class="fa-solid fa-plus mr-1"></i>{m.addTranslation()}
 		</button>
 	</div>
 
@@ -108,7 +108,7 @@
 		<div
 			class="text-gray-500 text-sm italic text-center py-4 border-2 border-dashed border-gray-200 rounded"
 		>
-			No translations added yet. Click "Add translation" to start.
+			{m.noTranslationAdded()}
 		</div>
 	{/if}
 
@@ -117,15 +117,15 @@
 			<div class="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
 				<div class="flex-1">
 					{#if $errors && $errors[lang]}
-						<div class="text-xs text-red-500 mb-1">tranlsationsErrorMessage</div>
+						<div class="text-xs text-red-500 mb-1">{m.translationErrorMessage()}</div>
 					{/if}
-					<label class="block text-xs font-medium text-gray-600 mb-1">Language</label>
+					<label class="block text-xs font-medium text-gray-600 mb-1">{m.language()}</label>
 					<select
 						value={lang}
 						onchange={(e) => updateLanguageKey(lang, e.target.value)}
 						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					>
-						<option value="">Select language...</option>
+						<option value="">{m.selectLanguagePlaceholder()}</option>
 						{#each locales as lang}
 							<option value={lang} selected={lang === getLocale()}>
 								{defaultLangLabels[lang]} ({language[LOCALE_MAP[lang].name]})
@@ -136,9 +136,9 @@
 
 				<div class="flex-[2]">
 					{#if $errors && $errors[lang]}
-						<div class="text-xs text-red-500 mb-1 invisible">tranlsationsErrorMessage</div>
+						<div class="text-xs text-red-500 mb-1 invisible">{m.translationErrorMessage()}</div>
 					{/if}
-					<label class="block text-xs font-medium text-gray-600 mb-1">Translation</label>
+					<label class="block text-xs font-medium text-gray-600 mb-1">{m.translations()}</label>
 					<input
 						type="text"
 						value={text}

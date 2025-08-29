@@ -1835,5 +1835,10 @@
 	"terminologies": "Terminologies",
 	"addTerminology": "Add terminology",
 	"other": "Other",
-	"translations": "Translations"
+	"translations": "Translations",
+	"translation": "Translation",
+	"addTranslation": "Add translation",
+	"noTranslationAdded": "No translations added yet. Click 'Add translation' to startn",
+	"translationErrorMessage": "Both language and translation are required",
+	"selectLanguagePlaceholder": "Select language..."
 }
