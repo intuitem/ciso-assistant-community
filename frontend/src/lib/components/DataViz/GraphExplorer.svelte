@@ -308,8 +308,17 @@
 				dataIndex: newNodeIds
 			});
 		}
-
-		currentEmphasisNodeIds = newNodeIds;
+		if (
+			currentEmphasisNodeIds.length > 0 && // avoid infinite loop when both are empty, which shouldn't happen
+			JSON.stringify(currentEmphasisNodeIds) === JSON.stringify(newNodeIds)
+		) {
+			// Same nodes, clear emphasis
+			handleNodesEmphasis(null);
+			currentEmphasisNodeIds = []; // this goes after to avoid
+		} else if (newNodeIds.length !== 0) {
+			// Not same nodes and not empty, set new emphasis
+			currentEmphasisNodeIds = newNodeIds;
+		}
 	};
 
 	/**
