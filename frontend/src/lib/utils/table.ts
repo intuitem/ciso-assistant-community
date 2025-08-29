@@ -1541,8 +1541,8 @@ export const listViewFields = {
 		body: ['name', 'abbreviation']
 	},
 	terminologies: {
-		head: ['field_path', 'name', 'description'],
-		body: ['field_path', 'name', 'description'],
+		head: ['field_path', 'name', 'description', 'translations'],
+		body: ['field_path', 'name', 'description', 'translations'],
 		filters: {
 			field_path: FIELD_PATH_FILTER
 		}
