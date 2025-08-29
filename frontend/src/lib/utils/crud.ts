@@ -1502,6 +1502,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'simulation_parameters_display' },
 			{ field: 'risk_stage' },
+			{ field: 'existing_applied_controls' },
+			{ field: 'added_applied_controls' },
+			{ field: 'removed_applied_controls' },
 			{ field: 'observation' },
 			{ filed: 'is_selected' }
 		]
