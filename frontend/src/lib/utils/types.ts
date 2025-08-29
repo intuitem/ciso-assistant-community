@@ -104,7 +104,8 @@ export const URL_MODEL = [
 	// iso,
 	'organisation-issues',
 	'organisation-objectives',
-	// Remove 'qualifications' for community after debug !
+	'roles',
+	'permissions',
 	'qualifications'
 ] as const;
 

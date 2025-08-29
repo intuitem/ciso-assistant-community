@@ -965,6 +965,12 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
+export const RoleSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().optional(),
+	permissions: z.array(z.number()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1022,7 +1028,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'operating-modes': OperatingModeSchema,
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
-	'organisation-issues': organisationIssueSchema
+	'organisation-issues': organisationIssueSchema,
+	roles: RoleSchema
 };
 
 export const modelSchema = (model: string) => {

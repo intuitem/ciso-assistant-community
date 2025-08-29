@@ -2618,15 +2618,6 @@ class UserGroupViewSet(BaseModelViewSet):
     ]
 
 
-class RoleViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows roles to be viewed or edited
-    """
-
-    model = Role
-    ordering = ["builtin", "name"]
-
-
 class RoleAssignmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows role assignments to be viewed or edited.
