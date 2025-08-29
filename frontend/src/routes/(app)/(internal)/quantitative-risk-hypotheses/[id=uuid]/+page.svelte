@@ -84,6 +84,7 @@
 					xMax={lecMaxValue()}
 					height="h-96"
 					width="w-full"
+					enableTooltip={true}
 				/>
 			{:else}
 				<div class="text-center text-gray-500 py-8">

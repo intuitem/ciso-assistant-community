@@ -186,10 +186,13 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         probability_data = simulation_data.get("probability", [])
 
         # Transform data into chart-ready format: array of [loss, probability] tuples
+        # Filter out zero loss values to start with meaningful data
         chart_data = []
         if loss_data and probability_data:
             chart_data = [
-                [loss, prob] for loss, prob in zip(loss_data, probability_data)
+                [loss, prob]
+                for loss, prob in zip(loss_data, probability_data)
+                if loss > 0
             ]
 
         return Response(
