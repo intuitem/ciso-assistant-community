@@ -437,7 +437,6 @@
 			duplicates={false}
 			key={JSON.stringify}
 			filterFunc={fastFilter}
-			data-testid="form-input-{field.replaceAll('_', '-')}"
 		>
 			{#snippet option({ option })}
 				{#if option.infoString?.position === 'prefix'}
