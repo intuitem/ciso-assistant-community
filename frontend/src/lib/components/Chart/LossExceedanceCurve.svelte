@@ -18,6 +18,7 @@
     showXGrid?: boolean;
     showYGrid?: boolean;
     xMax?: number;
+    xMin?: number;
     autoYMax?: boolean;
 	}
 
@@ -38,13 +39,14 @@
     showXGrid = true,
     showYGrid = true,
     xMax = 1000000,
+    xMin = undefined,
     autoYMax = false,
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
 
-	// Calculate xMin as 5 decades lower than xMax
-	const xMin = xMax ? xMax / 100000 : undefined;
+	// Use provided xMin or calculate from data, fallback to xMax/100000
+	const calculatedXMin = xMin ?? (xMax ? xMax / 100000 : undefined);
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -78,7 +80,7 @@
 				type: xAxisScale,
 				name: xAxisLabel,
 				nameLocation: 'middle',
-        min: xMin,
+        min: calculatedXMin,
         max: xMax,
 				nameGap: 30,
 				minorSplitLine: {

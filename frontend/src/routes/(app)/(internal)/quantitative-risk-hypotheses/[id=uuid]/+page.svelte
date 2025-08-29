@@ -20,7 +20,15 @@
 	let { data, form }: Props = $props();
 	let simulationIsLoading = $state(false);
 
-	// Calculate max value for the LEC chart from the data
+	// Calculate min and max values for the LEC chart from the data
+	const lecMinValue = $derived(() => {
+		if (!data.lec?.data || !Array.isArray(data.lec.data) || data.lec.data.length === 0) {
+			return undefined;
+		}
+		const minFromData = Math.min(...data.lec.data.map(([x, _]: [number, number]) => x));
+		return Math.max(minFromData * 0.8, 1); // Reduce by 20% but minimum of $1
+	});
+
 	const lecMaxValue = $derived(() => {
 		if (!data.lec?.data || !Array.isArray(data.lec.data) || data.lec.data.length === 0) {
 			return 1000000; // Default max value
@@ -84,6 +92,7 @@
 					{#key data.lec.simulation_timestamp}
 						<LossExceedanceCurve
 							data={data.lec.data}
+							xMin={lecMinValue()}
 							xMax={lecMaxValue()}
 							height="h-96"
 							width="w-full"
