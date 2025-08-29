@@ -6,6 +6,7 @@
 	import { m } from '$paraglide/messages';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
 	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -19,7 +20,17 @@
 	let { data, form }: Props = $props();
 	let simulationIsLoading = $state(false);
 
+	// Calculate max value for the LEC chart from the data
+	const lecMaxValue = $derived(() => {
+		if (!data.lec?.data || !Array.isArray(data.lec.data) || data.lec.data.length === 0) {
+			return 1000000; // Default max value
+		}
+		const maxFromData = Math.max(...data.lec.data.map(([x, _]: [number, number]) => x));
+		return Math.ceil(maxFromData * 1.2); // Add 20% padding
+	});
+
 	$inspect(data);
+	$inspect('LEC data:', data.lec);
 
 	run(() => {
 		if (form?.message?.simulationComplete) {
@@ -66,8 +77,19 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl">
-			{JSON.stringify(data.lec, null, 4)}
+		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
+			{#if data.lec?.data && Array.isArray(data.lec.data) && data.lec.data.length > 0}
+				<LossExceedanceCurve
+					data={data.lec.data}
+					xMax={lecMaxValue()}
+					height="h-96"
+					width="w-full"
+				/>
+			{:else}
+				<div class="text-center text-gray-500 py-8">
+					No LEC data available. Run a simulation to generate the chart.
+				</div>
+			{/if}
 		</div>
 	{/snippet}
 </DetailView>

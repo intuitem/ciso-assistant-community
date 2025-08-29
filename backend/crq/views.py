@@ -175,18 +175,26 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         if not hypothesis.simulation_data:
             return Response(
                 {
-                    "loss": [],
-                    "probability": [],
+                    "data": [],
                     "message": "No simulation data available. Please run a simulation first.",
                 }
             )
 
         # Extract LEC data from stored simulation
         simulation_data = hypothesis.simulation_data
+        loss_data = simulation_data.get("loss", [])
+        probability_data = simulation_data.get("probability", [])
+
+        # Transform data into chart-ready format: array of [loss, probability] tuples
+        chart_data = []
+        if loss_data and probability_data:
+            chart_data = [
+                [loss, prob] for loss, prob in zip(loss_data, probability_data)
+            ]
+
         return Response(
             {
-                "loss": simulation_data.get("loss", []),
-                "probability": simulation_data.get("probability", []),
+                "data": chart_data,
                 "metrics": simulation_data.get("metrics", {}),
                 "parameters_used": simulation_data.get("parameters_used", {}),
                 "simulation_timestamp": simulation_data.get("simulation_timestamp", ""),
