@@ -1,7 +1,6 @@
 import type { z } from 'zod';
 import type { ModelMapEntry } from './crud';
 import type { RiskScenarioSchema } from './schemas';
-import { IS_ENTERPRISE } from './is_enterprise';
 
 export interface User {
 	id: string;
@@ -106,7 +105,7 @@ export const URL_MODEL = [
 	'organisation-issues',
 	'organisation-objectives',
 	// Remove 'qualifications' for community after debug !
-	...(IS_ENTERPRISE ? ['qualifications'] : [])
+	'qualifications'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
