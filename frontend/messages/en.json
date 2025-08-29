@@ -1838,7 +1838,7 @@
 	"translations": "Translations",
 	"translation": "Translation",
 	"addTranslation": "Add translation",
-	"noTranslationAdded": "No translations added yet. Click 'Add translation' to startn",
+	"noTranslationAdded": "No translations added yet. Click 'Add translation' to start",
 	"translationErrorMessage": "Both language and translation are required",
 	"selectLanguagePlaceholder": "Select language..."
 }
