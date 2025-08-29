@@ -2760,6 +2760,14 @@ class FolderViewSet(BaseModelViewSet):
             .distinct()
         )
 
+        evidences = (
+            Evidence.objects.filter(
+                Q(owner=request.user) | Q(applied_controls__owner=request.user)
+            )
+            .order_by(F("created_at").asc(nulls_last=True))
+            .distinct()
+        )
+
         sum = 0
         avg_progress = 0
         audits_count = audits.count()
@@ -2794,6 +2802,7 @@ class FolderViewSet(BaseModelViewSet):
             non_active_controls[:10], many=True
         )
         RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
+        EV_serializer = EvidenceReadSerializer(evidences[:10], many=True)
 
         return Response(
             {
@@ -2808,6 +2817,7 @@ class FolderViewSet(BaseModelViewSet):
                         "evidences": evidences_progress,
                     }
                 },
+                "evidences": EV_serializer.data,
             }
         )
 
@@ -4226,6 +4236,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "owner",
     ]
 
     @action(methods=["get"], detail=True)

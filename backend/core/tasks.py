@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl, ComplianceAssessment
+from core.models import AppliedControl, Evidence
+from core.models import ComplianceAssessment
 from tprm.models import EntityAssessment
 from django.core.mail import send_mail
 from django.conf import settings
@@ -19,24 +20,59 @@ logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
 
 
-# @db_periodic_task(crontab(minute="*/1"))  # for testing
-@db_periodic_task(crontab(hour="6", minute="0"))
-def check_controls_with_expired_eta():
+@db_periodic_task(crontab(minute="*/1"))
+# @db_periodic_task(crontab(hour="6", minute="0"))
+def check_deprecated_controls_and_expired_evidence_and_expired_controls():
+    deprecated_controls = AppliedControl.objects.filter(
+        status="deprecated"
+    ).prefetch_related("owner")
+
+    expired_evidences = Evidence.objects.filter(
+        expiry_date__lt=date.today(), expiry_date__isnull=False
+    ).prefetch_related("owner")
+
     expired_controls = (
         AppliedControl.objects.exclude(status__in=["active", "deprecated"])
         .filter(eta__lt=date.today(), eta__isnull=False)
         .prefetch_related("owner")
     )
+
     # Group by individual owner
     owner_controls = {}
-    for control in expired_controls:
+
+    def add_to_owner(email, category, item):
+        if email not in owner_controls:
+            owner_controls[email] = {
+                "deprecated_controls": [],
+                "expired_evidences": [],
+                "expired_controls": [],
+            }
+        owner_controls[email][category].append(item)
+
+    for control in deprecated_controls:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
-    # Send personalized email to each owner
-    for owner_email, controls in owner_controls.items():
-        send_notification_email_expired_eta(owner_email, controls)
+            add_to_owner(owner.email, "deprecated_controls", control)
+
+    for evidence in expired_evidences:
+        for owner in evidence.owner.all():
+            add_to_owner(owner.email, "expired_evidences", evidence)
+
+    for exp_control in expired_controls:
+        for owner in exp_control.owner.all():
+            add_to_owner(owner.email, "expired_controls", exp_control)
+
+    # Update the status of each expired control
+    # deprecated_controls_list.update(status="deprecated")
+    # we should avoid this for now and have this as part of the model logic somehow.
+    # This will be done differently later and consistently.
+
+    for owner_email, data in owner_controls.items():
+        send_notification_email_combined(
+            owner_email,
+            expired_controls=data["expired_controls"],
+            deprecated_controls=data["deprecated_controls"],
+            expired_evidences=data["expired_evidences"],
+        )
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -106,9 +142,7 @@ def check_applied_controls_expiring_in_week():
     owner_controls = {}
     for control in controls_due_soon:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            owner_controls.setdefault(owner.email, []).append(control)
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
@@ -140,24 +174,55 @@ def check_applied_controls_expiring_tomorrow():
 
 
 @task()
-def send_notification_email_expired_eta(owner_email, controls):
-    if not check_email_configuration(owner_email, controls):
+def send_notification_email_combined(
+    owner_email, expired_controls=None, deprecated_controls=None, expired_evidences=None
+):
+    expired_controls = expired_controls or []
+    deprecated_controls = deprecated_controls or []
+    expired_evidences = expired_evidences or []
+
+    all_items = expired_controls + deprecated_controls + expired_evidences
+    if not check_email_configuration(owner_email, all_items):
         return
 
-    from .email_utils import render_email_template, format_control_list
+    subject_parts = []
+    if expired_controls:
+        subject_parts.append(f"{len(expired_controls)} expired control(s)")
+    if deprecated_controls:
+        subject_parts.append(f"{len(deprecated_controls)} deprecated control(s)")
+    if expired_evidences:
+        subject_parts.append(f"{len(expired_evidences)} expired evidence(s)")
 
-    context = {
-        "control_count": len(controls),
-        "control_list": format_control_list(controls),
-    }
+    subject = f"CISO Assistant: You have {' / '.join(subject_parts)}"
+    message = "Hello,\n\n"
 
-    rendered = render_email_template("expired_controls", context)
-    if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
-    else:
-        logger.error(
-            f"Failed to render expired_controls email template for {owner_email}"
-        )
+    if expired_controls:
+        message += "The following controls have expired:\n"
+        for control in expired_controls:
+            message += f"- {control.name} (ETA: {control.eta})\n"
+        message += "\nThis reminder will stop once the control is marked as active or you update the ETA.\n"
+        message += "Log in to your CISO Assistant portal and check 'my assignments' section.\n\n"
+
+    if deprecated_controls or expired_evidences:
+        message += "The following objects are identified as deprecated:\n\n"
+
+    if deprecated_controls:
+        message += "Controls:\n\n"
+        for control in deprecated_controls:
+            message += f"- {control.name} (expiry date: {control.expiry_date})\n"
+        message += "\n"
+    if expired_evidences:
+        message += "Evidences:\n\n"
+        for evidence in expired_evidences:
+            message += f"- {evidence.name} (expiry date: {evidence.expiry_date})\n"
+        message += "\n"
+
+    if deprecated_controls or expired_evidences:
+        message += "This reminder will stop once the objects is not expired.\n"
+        message += "Log in to your CISO Assistant portal and check 'my assignments' section.\n\n"
+
+    message += "Thank you."
+    send_notification_email(subject, message, owner_email)
 
 
 @task()
