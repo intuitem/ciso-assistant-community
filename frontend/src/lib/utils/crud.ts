@@ -1432,7 +1432,20 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status', endpointUrl: 'crq/quantitative-risk-studies' },
 			{ field: 'distribution_model', endpointUrl: 'crq/quantitative-risk-studies' }
 		],
-		filters: [{ field: 'folder' }, { field: 'status' }]
+		filters: [{ field: 'folder' }, { field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'authors' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'status' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'observation' }
+		]
 	},
 	'quantitative-risk-scenarios': {
 		name: 'quantitativeriskscenario',

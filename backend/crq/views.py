@@ -3,7 +3,7 @@ from rest_framework.views import Response
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-
+import time
 from .models import (
     QuantitativeRiskStudy,
     QuantitativeRiskScenario,
@@ -164,10 +164,16 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     def risk_stage(self, request):
         return Response(dict(QuantitativeRiskHypothesis.RISK_STAGE_OPTIONS))
 
-    @action(detail=True, methods=["post"], url_path="run-simulation")
+    @action(detail=True, name="Loss Exceedance Curve", url_path="lec")
+    def lec(self, request, pk=None):
+        return Response({"loss": [], "probability": []})
+
+    @action(detail=True, methods=["get"], url_path="run-simulation")
     def run_simulation(self, request, pk=None):
         """
         Triggers a Monte Carlo simulation for a specific risk hypothesis.
         """
         hypothesis = self.get_object()
+        # emulate a slow simulation
+        time.sleep(2)
         return Response({})

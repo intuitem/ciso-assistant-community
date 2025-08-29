@@ -1846,5 +1846,7 @@
 	"probabilityHelpText": "Estimated probability value between 0 and 1, based on the knowledge you have",
 	"lowerBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be LOWER than this.",
 	"upperBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be HIGHER than this.",
-	"simulationParameters": "Simulation Parameters"
+	"simulationParameters": "Simulation Parameters",
+	"addedAppliedControls": "Added controls",
+	"removedAppliedControls": "Removed controls"
 }
