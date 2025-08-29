@@ -963,7 +963,8 @@ export const KillChainSchema = z.object({
 export const TerminologySchema = z.object({
 	...NameDescriptionMixin,
 	field_path: z.string().min(1),
-	is_visible: z.boolean().default(true)
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1))
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

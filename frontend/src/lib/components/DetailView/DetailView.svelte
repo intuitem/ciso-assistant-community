@@ -361,6 +361,19 @@
 												{:else}
 													--
 												{/if}
+											{:else if key === 'translations'}
+												{#if Object.keys(value).length > 0}
+													<div class="flex flex-col gap-2">
+														{#each Object.entries(value) as [lang, translation]}
+															<div class="flex flex-row gap-2">
+																<strong>{lang}:</strong>
+																<span>{safeTranslate(translation)}</span>
+															</div>
+														{/each}
+													</div>
+												{:else}
+													--
+												{/if}
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>

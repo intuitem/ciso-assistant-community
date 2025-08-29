@@ -3,6 +3,7 @@
 	import Select from '../Select.svelte';
 	import TextField from '../TextField.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
+	import TranslationField from '../TranslationField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -50,6 +51,12 @@
 		cacheLock={cacheLocks['description']}
 		bind:cachedValue={formDataCache['description']}
 		data-focusindex="1"
+	/>
+	<TranslationField
+		{form}
+		field="translations"
+		cacheLock={cacheLocks['translations']}
+		bind:cachedValue={formDataCache['translations']}
 	/>
 {/if}
 <Checkbox {form} field="is_visible" label={m.isVisible()} helpText={m.isVisibleHelpText()} />
