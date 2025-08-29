@@ -18,13 +18,14 @@ class Migration(migrations.Migration):
             model_name="roto",
             name="risk_origin_fk",
             field=models.ForeignKey(
-                to="core.Terminology",
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name="roto_risk_origins",
                 limit_choices_to={
                     "field_path": "ro_to.risk_origin",
                     "is_visible": True,
                 },
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="roto_risk_origins",
+                to="core.terminology",
+                verbose_name="Risk origin",
             ),
         ),
         migrations.RenameField(
