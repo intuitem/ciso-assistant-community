@@ -278,7 +278,7 @@ jobs:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           TEST_FILE: ${{ matrix.test_file }}
           CI: true
-        run: IS_ENTERPRISE=1 pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
 
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
@@ -457,7 +457,7 @@ jobs:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           TEST_FILE: ${{ matrix.test_file }}
           CI: true
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
+        run: IS_ENTERPRISE=1 pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
 
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
