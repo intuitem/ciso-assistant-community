@@ -31,6 +31,7 @@ export class Page {
 	/** Goto the page (by using the endpoint given to its constructor). */
 	async gotoSelf() {
 		await this._self.goto(this._endpoint);
+		await this._self.waitForURL(this._endpoint);
 	}
 
 	/**

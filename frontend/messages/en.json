@@ -1824,7 +1824,6 @@
 	"internalProcesses": "Internal processes",
 	"financialCapacity": "Financial capacity",
 	"companyCulture": "Company culture / communication",
-	"qualificationsChartTitle": "Risk scenarios qualifications",
 	"permission": "Permission",
 	"permissions": "Permissions",
 	"roles": "Roles",
@@ -2103,5 +2102,9 @@
 	"selectAll": "Select all",
 	"deselectAll": "Deselect all",
 	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
-	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)"
+	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
+	"abbreviation": "Abbreviation",
+	"qualificationOrdering": "Qualification ordering",
+	"securityObjectiveOrdering": "Security objective ordering",
+	"proVersionFeatureWarning": "This feature is only available in the pro version"
 }

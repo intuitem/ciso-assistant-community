@@ -1340,5 +1340,10 @@
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
-	"saveAndContinue": "Salva e continua"
+	"saveAndContinue": "Salva e continua",
+	"abbreviation": "Abbreviazione",
+	"qualificationOrdering": "Ordinamento delle qualifiche",
+	"securityObjectiveOrdering": "Ordinamento degli obiettivi di sicurezza",
+	"addQualification": "Aggiungi qualificazione",
+	"proVersionFeatureWarning": "Questa funzione è disponibile solo nella versione pro"
 }

@@ -1525,8 +1525,8 @@ export const listViewFields = {
 		}
 	},
 	qualifications: {
-		head: ['name', 'abbreviation'],
-		body: ['name', 'abbreviation']
+		head: ['ref_id', 'name', 'description', 'abbreviation'],
+		body: ['ref_id', 'name', 'description', 'abbreviation']
 	},
 	extra: {
 		filters: {

@@ -14,8 +14,13 @@ export class LoginPage extends Page {
 	 * Note that this function will always return an `AnalyticsPage` object, no matter how the login operation goes.
 	 */
 	async doLoginP(email: string, password: string) {
+		await this._self.waitForLoadState('networkidle');
 		const usernameInput = this._self.getByTestId('form-input-username');
 		const passwordInput = this._self.getByTestId('form-input-password');
+		const loginButton = this._self.getByTestId('login-btn');
+
+		await usernameInput.fill(email);
+		await passwordInput.fill(password);
 		if (
 			(await usernameInput.inputValue()) !== email ||
 			(await passwordInput.inputValue()) !== password
@@ -23,10 +28,9 @@ export class LoginPage extends Page {
 			await usernameInput.fill(email);
 			await passwordInput.fill(password);
 		}
-		const loginButton = this._self.getByTestId('login-btn');
-		await usernameInput.fill(email);
-		await passwordInput.fill(password);
 		await loginButton.click();
+		// Wait until we're not in the /login page anymore.
+		await this._self.waitForURL(/^.*\/((?!login).)*$/, { timeout: 10000 });
 		return this._getGoto(AnalyticsPage);
 	}
 

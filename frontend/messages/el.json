@@ -1664,5 +1664,10 @@
 	"dataWizardParsingResults": "Αποτελέσματα ανάλυσης:",
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
 	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
-	"saveAndContinue": "Αποθήκευση και συνέχιση"
+	"saveAndContinue": "Αποθήκευση και συνέχιση",
+	"abbreviation": "Συντομογραφία",
+	"qualificationOrdering": "Σειρά κατάταξης προσόντων",
+	"securityObjectiveOrdering": "Σειρά στόχων ασφαλείας",
+	"addQualification": "Προσθήκη προσόντος",
+	"proVersionFeatureWarning": "Αυτή η δυνατότητα είναι διαθέσιμη μόνο στην έκδοση Pro"
 }

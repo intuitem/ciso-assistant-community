@@ -953,5 +953,11 @@
 	"select": "Välj",
 	"deselect": "Avmarkera",
 	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet.",
-	"saveAndContinue": "Spara och fortsätt"
+	"saveAndContinue": "Spara och fortsätt",
+	"abbreviation": "Förkortning",
+	"qualificationOrdering": "Kvalifikationsordning",
+	"securityObjectiveOrdering": "Säkerhetsmålsordning",
+	"qualifications": "kvalifikationer",
+	"addQualification": "Lägg till kvalifikation",
+	"proVersionFeatureWarning": "Denna funktion är endast tillgänglig i pro-versionen"
 }

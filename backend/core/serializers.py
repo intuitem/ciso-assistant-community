@@ -572,6 +572,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     assets = FieldsRelatedField(many=True)
 
     treatment = serializers.CharField()
+    qualifications = FieldsRelatedField(many=True)
 
     inherent_proba = serializers.JSONField(source="get_inherent_proba")
     inherent_impact = serializers.JSONField(source="get_inherent_impact")
@@ -1578,14 +1579,18 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class QualificationReadSerializer(ReferentialSerializer):
+class QualificationWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Qualification
         exclude = ["translations"]
 
 
-class QualificationWriteSerializer(QualificationReadSerializer):
-    pass
+class QualificationReadSerializer(ReferentialSerializer):
+    library = FieldsRelatedField(["name", "id"])
+
+    class Meta:
+        model = Qualification
+        exclude = ["translations"]
 
 
 class SecurityExceptionWriteSerializer(BaseModelSerializer):

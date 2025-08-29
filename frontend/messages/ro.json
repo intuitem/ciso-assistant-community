@@ -959,5 +959,11 @@
 	"select": "Selectează",
 	"deselect": "Deselectează",
 	"fearedEventAssetHelpText": "Evenimentele temute sunt în general legate de valori de afaceri (active principale). Activele de sprijin sunt permise aici pentru flexibilitate.",
-	"saveAndContinue": "Salvați și continuați"
+	"saveAndContinue": "Salvați și continuați",
+	"abbreviation": "Abreviere",
+	"qualificationOrdering": "Ordonarea calificărilor",
+	"securityObjectiveOrdering": "Ordonarea obiectivelor de securitate",
+	"qualifications": "calificări",
+	"addQualification": "Adăugați calificare",
+	"proVersionFeatureWarning": "Această funcție este disponibilă numai în versiunea pro"
 }
