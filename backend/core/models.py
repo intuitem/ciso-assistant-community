@@ -5468,3 +5468,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
         return locale_translations or self.name
+
+    def __str__(self) -> str:
+        return self.get_name_translated or self.name
