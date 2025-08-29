@@ -234,9 +234,10 @@ test('ebios rm study', async ({
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-risk-origin').selectOption('amateur');
-		await page.getByTestId('form-input-risk-origin').selectOption('state');
-		await page.getByTestId('form-input-risk-origin').selectOption('amateur');
+		await page.getByTestId('form-input-risk-origin').getByRole('textbox').click();
+		await page.getByRole('option', { name: 'Amateur' }).click();
+		await page.getByRole('option', { name: 'State' }).click();
+		await page.getByRole('option', { name: 'Amateur' }).click();
 		await page.getByTestId('form-input-target-objective').click();
 		await page
 			.getByTestId('form-input-target-objective')
