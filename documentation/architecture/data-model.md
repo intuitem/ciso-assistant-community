@@ -123,7 +123,7 @@ erDiagram
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
     VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
-    ACTOR.                       }o--o{ PERIMETER             : owns
+    ACTOR                        }o--o{ PERIMETER             : owns
     ACTOR                        }o--o{ RISK_SCENARIO         : owns
     ACTOR                        }o--o{ APPLIED_CONTROL       : owns
     ACTOR                        }o--o{ ASSET                 : owns
@@ -1596,7 +1596,7 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        actor[].    author
+        actor[]     author
         actor[]     reviewer
         string      observation
     }
@@ -1705,7 +1705,7 @@ erDiagram
 ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
 ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
 TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
-ACTOR.                }o--o{ TASK_TEMPLATE         : owns
+ACTOR                 }o--o{ TASK_TEMPLATE         : owns
 TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
 TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
 TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
@@ -1835,7 +1835,7 @@ CAMPAIGN {
     date        due_date
     string      status
     actor[]     author
-    actor[].    reviewer
+    actor[]     reviewer
     string      observation
 }
 
