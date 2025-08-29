@@ -1877,8 +1877,7 @@ QUANT_AGGREGATION {
 The json field `estimated_parameters` contains:
 - the reference period as a drop-down value (hour/day/week/month/year)
 - the reference period in seconds (for calculations)
-- the probability expressed either as:
-  - a decimal number between 0 and 1
+- the probability if a real that can be entered directly as percentage, or cacluated from:
   - a frequency in the form X per Y, with X a decimal number and Y = hour/day/week/month/year
   - a proportion in the form X in Y, with X and Y integers
 - the impact expressed as:
@@ -1886,7 +1885,11 @@ The json field `estimated_parameters` contains:
   - the LB value for the 90% CI
   - the UB value for the 90% CI
 
-The json field `simulation_data` contains the MC simulation parameters, and the LEC points.
+The json field `simulation_data` contains the MC simulation parameters (or a sampling, tbd), and the LEC points.
 
 An aggregation can only be simulated if it contains compatible hypotheses. Two hypotheses are compatible if and only if the don't contain any control that is added in one and removed from the other.
 
+Notes for MVP:
+- the proability is entered as a percentage
+- the reference period is hardcoded to year
+- aggregations are not available
