@@ -32,6 +32,7 @@ def add_user_info_to_log_entry(sender, instance, created, **kwargs):
         try:
             obj = model_class.objects.get(pk=instance.object_pk)
         except model_class.DoesNotExist:
+            logger.debug("audit log enrichment failed: no model_class.")
             pass
 
     # Only update if this is a new log entry and it has an actor
