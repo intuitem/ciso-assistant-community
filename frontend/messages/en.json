@@ -1848,6 +1848,12 @@
 	"upperBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be HIGHER than this.",
 	"simulationParameters": "Simulation Parameters",
 	"simulationParametersDisplay": "Simulation Parameters",
+	"lossAtPDiv2": "Loss at P/2",
+	"lossAtPDiv4": "Loss at P/4",
+	"lossAtPDiv8": "Loss at P/8",
+	"loss_at_p_div_2": "Loss at P/2",
+	"loss_at_p_div_4": "Loss at P/4",
+	"loss_at_p_div_8": "Loss at P/8",
 	"addedAppliedControls": "Added controls",
 	"removedAppliedControls": "Removed controls"
 }

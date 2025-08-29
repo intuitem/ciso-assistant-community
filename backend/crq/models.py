@@ -247,7 +247,7 @@ class QuantitativeRiskHypothesis(
         loss_values, exceedance_probs = create_loss_exceedance_curve(losses)
 
         # 3. Calculate risk metrics
-        metrics = calculate_risk_insights(losses)
+        metrics = calculate_risk_insights(losses, probability)
 
         # 4. Downsample for visualization (take every nth point to reduce data size)
         downsample_factor = max(1, len(loss_values) // 1000)  # Max 1000 points

@@ -73,12 +73,15 @@ def create_loss_exceedance_curve(losses: np.ndarray) -> Tuple[np.ndarray, np.nda
     return sorted_losses, exceedance_probs
 
 
-def calculate_risk_insights(losses: np.ndarray) -> Dict[str, float]:
+def calculate_risk_insights(
+    losses: np.ndarray, probability: float = None
+) -> Dict[str, float]:
     """
     Calculate standard risk metrics from loss distribution.
 
     Args:
         losses: Array of annual loss values
+        probability: Original probability of the risk event (optional)
 
     Returns:
         Dictionary of risk metrics
@@ -86,7 +89,7 @@ def calculate_risk_insights(losses: np.ndarray) -> Dict[str, float]:
     if len(losses) == 0 or np.max(losses) == 0:
         return {}
 
-    return {
+    metrics = {
         "mean_annual_loss": np.mean(losses),
         "var_95": np.percentile(losses, 95),  # 1-in-20 year loss
         "var_99": np.percentile(losses, 99),  # 1-in-100 year loss
@@ -98,6 +101,38 @@ def calculate_risk_insights(losses: np.ndarray) -> Dict[str, float]:
         "prob_above_10M": np.mean(losses > 10_000_000),
         "prob_above_100M": np.mean(losses > 100_000_000),
     }
+
+    # Add probability-based loss metrics if probability is provided
+    if probability is not None and probability > 0:
+        # Create loss exceedance curve
+        sorted_losses, exceedance_probs = create_loss_exceedance_curve(losses)
+
+        # Find losses at P/2, P/4, P/8 probability levels
+        target_probs = [probability / 2, probability / 4, probability / 8]
+
+        for target_prob in target_probs:
+            # Find the loss value where exceedance probability is closest to target
+            if len(sorted_losses) > 0 and np.max(exceedance_probs) >= target_prob:
+                # Interpolate to find loss at exact probability level
+                loss_at_prob = np.interp(
+                    target_prob, exceedance_probs[::-1], sorted_losses[::-1]
+                )
+                # Create key with actual percentage (e.g., "loss_with_5_percent", "loss_with_2_5_percent")
+                percentage = target_prob * 100
+                if percentage == int(percentage):
+                    key = f"loss_with_{int(percentage)}_percent"
+                else:
+                    key = f"loss_with_{percentage:.1f}_percent".replace(".", "_")
+                metrics[key] = loss_at_prob
+            else:
+                percentage = target_prob * 100
+                if percentage == int(percentage):
+                    key = f"loss_with_{int(percentage)}_percent"
+                else:
+                    key = f"loss_with_{percentage:.1f}_percent".replace(".", "_")
+                metrics[key] = 0
+
+    return metrics
 
 
 def run_agg_simulation(

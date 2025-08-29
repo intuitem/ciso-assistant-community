@@ -103,7 +103,7 @@
 								<div class="text-center">
 									<div class="text-2xl font-bold text-blue-600 mb-2">
 										{#if typeof value === 'number'}
-											{#if key.toLowerCase().includes('prob') || key.toLowerCase().includes('percent')}
+											{#if key.toLowerCase().includes('prob') && !key.startsWith('loss_with_')}
 												{(value * 100).toFixed(2)}%
 											{:else}
 												{value >= 1000000 ? `$${Math.round(value / 1000000)}M` :
@@ -115,7 +115,12 @@
 										{/if}
 									</div>
 									<div class="text-sm text-gray-600 capitalize leading-tight">
-										{key.replace(/_/g, ' ')}
+										{#if key.startsWith('loss_with_') && key.endsWith('_percent')}
+											{@const percentage = key.replace('loss_with_', '').replace('_percent', '').replace('_', '.')}
+											Loss with {percentage}% chance
+										{:else}
+											{key.replace(/_/g, ' ')}
+										{/if}
 									</div>
 								</div>
 							{/each}
