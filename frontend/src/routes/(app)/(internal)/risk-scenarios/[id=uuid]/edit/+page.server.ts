@@ -92,17 +92,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		);
 
 	const treatmentChoicesEndpoint = `${BASE_API_URL}/${URLModel}/treatment/`;
-	const qualificationChoicesEndpoint = `${BASE_API_URL}/${URLModel}/qualifications/`;
+	const qualificationChoicesEndpoint = `${BASE_API_URL}/qualifications/`;
 
 	const [treatmentChoices, qualificationChoices] = await Promise.all(
 		[treatmentChoicesEndpoint, qualificationChoicesEndpoint].map((endpoint) =>
 			fetch(endpoint)
 				.then((res) => res.json())
 				.then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: key
-					}))
+					data.results && Array.isArray(data.results)
+						? data.results.map((obj) => ({ label: obj.name, value: obj.name }))
+						: Object.entries(data).map(([key, value]) => ({ label: value, value: key }))
 				)
 		)
 	);

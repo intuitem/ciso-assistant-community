@@ -2257,16 +2257,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
-    @action(detail=False, name="Get qualification choices")
-    def qualifications(self, request):
-        return Response(
-            {
-                qualification.name: qualification.name
-                for qualification in Qualification.objects.all()
-            }
-        )
-
     @action(detail=False, name="Get qualifications count")
     def qualifications_count(self, request):
         folder_id = request.query_params.get("folder", None)
