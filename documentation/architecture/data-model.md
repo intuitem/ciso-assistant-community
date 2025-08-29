@@ -1869,10 +1869,11 @@ QUANT_AGGREGATION {
 
 1. Define a study to establish the context, selecting the relevant assets.
 2. Identify risk scenarios relevant for the context, e.g. by decomposing by asset and by qualfification (CIA).
-3. For each risk scenario, explore one or several hypotheses corresponding to various applied control setups (removing, highlighting, adding applied controls), and provide estimation of probability and 90% confidence interval for impact.
-4. For each hypothesis, a Loss Exceedence Curve is calculated dynamically (Monte Carlo).
-5. Define relavant aggregations of compatible hypotheses, and simulate them (Monte Carlo) to get the corresponding LEC.
-6. All the LEC generated for the study are available in a reporting section.
+3. For each risk scenario, explore one or several hypotheses corresponding to various applied control setups (removing, highlighting, adding applied controls).
+4. For each hypothesis, provide estimation of probability and 90% confidence interval for impact.
+5. For each hypothesis, press "Simulate" button to generate a Loss Exceedence Curve (Monte Carlo).
+6. Define relavant aggregations of compatible hypotheses, and simulate them (Monte Carlo) to get the corresponding LEC.
+7. All the LEC generated for the study are available in a reporting section.
 
 The json field `estimated_parameters` contains:
 - the reference period as a drop-down value (hour/day/week/month/year)
@@ -1892,4 +1893,4 @@ An aggregation can only be simulated if it contains compatible hypotheses. Two h
 Notes for MVP:
 - the proability is entered as a percentage
 - the reference period is hardcoded to year
-- aggregations are not available
+- aggregations are not implemented
