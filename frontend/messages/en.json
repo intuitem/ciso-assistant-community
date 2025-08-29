@@ -1847,6 +1847,7 @@
 	"lowerBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be LOWER than this.",
 	"upperBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be HIGHER than this.",
 	"simulationParameters": "Simulation Parameters",
+	"simulationParametersDisplay": "Simulation Parameters",
 	"addedAppliedControls": "Added controls",
 	"removedAppliedControls": "Removed controls"
 }

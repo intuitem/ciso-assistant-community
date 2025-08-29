@@ -274,3 +274,47 @@ class QuantitativeRiskHypothesis(
             self.save(update_fields=["simulation_data"])
 
         return simulation_results
+
+    def get_simulation_parameters_display(self):
+        """
+        Returns a human-readable format of the simulation parameters.
+        """
+        params = self.parameters or {}
+        if not params:
+            return "No parameters configured"
+
+        display_parts = []
+
+        # Probability
+        probability = params.get("probability")
+        if probability is not None:
+            display_parts.append(f"Probability: {probability * 100:.1f}%")
+
+        # Impact parameters
+        impact = params.get("impact", {})
+        if impact:
+            distribution = impact.get("distribution", "")
+            lower_bound = impact.get("lb")
+            upper_bound = impact.get("ub")
+
+            if all([distribution, lower_bound is not None, upper_bound is not None]):
+                # Format monetary values
+                lb_formatted = self._format_currency(lower_bound)
+                ub_formatted = self._format_currency(upper_bound)
+                display_parts.append(
+                    f"Impact: {lb_formatted} - {ub_formatted} ({distribution})"
+                )
+
+        if not display_parts:
+            return "Parameters configured but not displayable"
+
+        return "\n".join(display_parts)
+
+    def _format_currency(self, value):
+        """Helper method to format currency values."""
+        if value >= 1_000_000:
+            return f"${value / 1_000_000:.1f}M"
+        elif value >= 1_000:
+            return f"${value / 1_000:.0f}K"
+        else:
+            return f"${value:,.0f}"

@@ -1495,7 +1495,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'risk_stage', endpointUrl: 'crq/quantitative-risk-hypotheses' }],
-		filters: [{ field: 'quantitative_risk_scenario' }, { field: 'risk_stage' }]
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'simulation_parameters_display' },
+			{ field: 'risk_stage' },
+			{ field: 'observation' },
+			{ filed: 'is_selected' }
+		]
 	}
 };
 

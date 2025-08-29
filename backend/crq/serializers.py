@@ -129,6 +129,9 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
         source="parameters.probability", read_only=True
     )
     impact = serializers.JSONField(source="parameters.impact", read_only=True)
+    simulation_parameters_display = serializers.CharField(
+        source="get_simulation_parameters_display", read_only=True
+    )
     folder = FieldsRelatedField()
 
     class Meta:
