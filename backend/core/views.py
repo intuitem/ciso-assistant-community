@@ -2260,7 +2260,12 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
-        return Response(dict(RiskScenario.QUALIFICATIONS))
+        return Response(
+            {
+                qualification.name: qualification.name
+                for qualification in Qualification.objects.all()
+            }
+        )
 
     @action(detail=False, name="Get qualifications count")
     def qualifications_count(self, request):
