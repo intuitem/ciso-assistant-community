@@ -7,6 +7,7 @@
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
+	import LognormalDistribution from '$lib/components/Chart/LognormalDistribution.svelte';
 	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -19,6 +20,9 @@
 
 	let { data, form }: Props = $props();
 	let simulationIsLoading = $state(false);
+	let showDistributionModal = $state(false);
+	let calculatedMu = $state<number | undefined>();
+	let calculatedSigma = $state<number | undefined>();
 
 	// Calculate min and max values for the LEC chart from the data
 	const lecMinValue = $derived(() => {
@@ -105,7 +109,17 @@
 
 				<!-- Risk Metrics -->
 				<div class="bg-white rounded-lg p-6 shadow-sm">
-					<h3 class="text-lg font-semibold mb-4">Risk Insights</h3>
+					<div class="flex justify-between items-center mb-4">
+						<h3 class="text-lg font-semibold">Risk Insights</h3>
+						{#if data.data.impact?.lb && data.data.impact?.ub}
+							<button
+								onclick={() => showDistributionModal = true}
+								class="text-sm text-blue-600 hover:text-blue-800 underline"
+							>
+								View Distribution
+							</button>
+						{/if}
+					</div>
 					{#if data.lec.metrics}
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 							{#each Object.entries(data.lec.metrics) as [key, value]}
@@ -146,3 +160,46 @@
 		</div>
 	{/snippet}
 </DetailView>
+
+<!-- Distribution Modal -->
+{#if showDistributionModal}
+	<div
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+		onclick={(e) => { if (e.target === e.currentTarget) showDistributionModal = false; }}
+	>
+		<div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
+			<div class="flex justify-between items-center mb-4">
+				<h2 class="text-xl font-semibold">Impact Distribution</h2>
+				<button
+					onclick={() => showDistributionModal = false}
+					class="text-gray-500 hover:text-gray-700 text-2xl"
+				>
+					×
+				</button>
+			</div>
+			<div class="mb-4">
+				<LognormalDistribution
+					lowerBound={data.data.impact?.lb}
+					upperBound={data.data.impact?.ub}
+					height="h-96"
+					width="w-full"
+					onParametersCalculated={(mu, sigma) => {
+						calculatedMu = mu;
+						calculatedSigma = sigma;
+					}}
+				/>
+			</div>
+			<div class="text-sm text-gray-600 space-y-2">
+				<p class="text-center">
+					Lognormal distribution with 90% confidence interval:
+					${data.data.impact?.lb?.toLocaleString()} - ${data.data.impact?.ub?.toLocaleString()}
+				</p>
+				{#if calculatedMu !== undefined && calculatedSigma !== undefined}
+					<p class="text-center font-mono">
+						Estimated parameters: μ = {calculatedMu.toFixed(4)}, σ = {calculatedSigma.toFixed(4)}
+					</p>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}
