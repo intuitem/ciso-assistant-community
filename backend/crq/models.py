@@ -189,19 +189,88 @@ class QuantitativeRiskHypothesis(
         verbose_name_plural = _("Quantitative Risk Hypotheses")
         ordering = ["created_at"]
 
-    def run_simulation(self, dry_run: bool = True):
+    def run_simulation(self, dry_run: bool = False):
         """
+        Run Monte Carlo simulation for this risk hypothesis.
+        Uses the actual probability and impact parameters stored in the hypothesis.
         - get lognormal params from UB and LB -> mu and sigma
         - bernouli trial based on P, to get a list of true, false
         - run simulation on how bad was it for events when it happened
         - generate downsampled dataset for LEC
         """
-        # 1. Define scenario
-        losses = simulate_scenario_annual_loss(0.25, 1_000_000, 20_000_000)
+        # Get parameters from the hypothesis
+        params = self.parameters or {}
 
-        # 2. Get LEC
-        x, p = create_loss_exceedance_curve(losses)
+        # Extract probability
+        probability = params.get("probability")
+        if probability is None:
+            raise ValueError("Probability parameter is required for simulation")
 
-        # 3. Get metrics
+        # Extract impact parameters
+        impact = params.get("impact", {})
+        if not impact:
+            raise ValueError("Impact parameter is required for simulation")
+
+        distribution = impact.get("distribution")
+        lower_bound = impact.get("lb")
+        upper_bound = impact.get("ub")
+
+        # Validate required impact parameters
+        if not all([distribution, lower_bound is not None, upper_bound is not None]):
+            raise ValueError(
+                "Impact must include distribution, lb (lower bound), and ub (upper bound)"
+            )
+
+        if distribution != "LOGNORMAL-CI90":
+            raise ValueError("Only LOGNORMAL-CI90 distribution is currently supported")
+
+        if lower_bound <= 0:
+            raise ValueError("Lower bound must be positive")
+
+        if upper_bound <= lower_bound:
+            raise ValueError("Upper bound must be greater than lower bound")
+
+        # Simulation configuration (can be made configurable later)
+        n_simulations = 50_000
+        random_seed = 42
+
+        # 1. Run the simulation using actual parameters
+        losses = simulate_scenario_annual_loss(
+            probability=probability,
+            lower_bound=lower_bound,
+            upper_bound=upper_bound,
+            n_simulations=n_simulations,
+            random_seed=random_seed,
+        )
+
+        # 2. Generate Loss Exceedance Curve
+        loss_values, exceedance_probs = create_loss_exceedance_curve(losses)
+
+        # 3. Calculate risk metrics
         metrics = calculate_risk_insights(losses)
-        pass
+
+        # 4. Downsample for visualization (take every nth point to reduce data size)
+        downsample_factor = max(1, len(loss_values) // 1000)  # Max 1000 points
+        downsampled_losses = loss_values[::downsample_factor].tolist()
+        downsampled_probs = exceedance_probs[::downsample_factor].tolist()
+
+        # 5. Store simulation results
+        simulation_results = {
+            "loss": downsampled_losses,
+            "probability": downsampled_probs,
+            "metrics": metrics,
+            "parameters_used": {
+                "probability": probability,
+                "lower_bound": lower_bound,
+                "upper_bound": upper_bound,
+                "distribution": distribution,
+                "n_simulations": n_simulations,
+            },
+            "simulation_timestamp": str(self.updated_at),
+        }
+
+        if not dry_run:
+            self.simulation_data = simulation_results
+            self.save(update_fields=["simulation_data"])
+
+        return simulation_results

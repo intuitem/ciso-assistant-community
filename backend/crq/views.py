@@ -166,14 +166,83 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Loss Exceedance Curve", url_path="lec")
     def lec(self, request, pk=None):
-        return Response({"loss": [], "probability": []})
+        """
+        Returns the Loss Exceedance Curve data from stored simulation results.
+        """
+        hypothesis = self.get_object()
+
+        # Check if we have simulation data
+        if not hypothesis.simulation_data:
+            return Response(
+                {
+                    "loss": [],
+                    "probability": [],
+                    "message": "No simulation data available. Please run a simulation first.",
+                }
+            )
+
+        # Extract LEC data from stored simulation
+        simulation_data = hypothesis.simulation_data
+        return Response(
+            {
+                "loss": simulation_data.get("loss", []),
+                "probability": simulation_data.get("probability", []),
+                "metrics": simulation_data.get("metrics", {}),
+                "parameters_used": simulation_data.get("parameters_used", {}),
+                "simulation_timestamp": simulation_data.get("simulation_timestamp", ""),
+            }
+        )
 
     @action(detail=True, methods=["get"], url_path="run-simulation")
     def run_simulation(self, request, pk=None):
         """
         Triggers a Monte Carlo simulation for a specific risk hypothesis.
+        Requires probability and impact parameters to be set on the hypothesis.
         """
         hypothesis = self.get_object()
-        # emulate a slow simulation
-        time.sleep(2)
-        return Response({})
+
+        try:
+            # Run the simulation (this will save the results to the database)
+            simulation_results = hypothesis.run_simulation(dry_run=False)
+
+            # Add a small delay to simulate processing time
+            time.sleep(2)
+
+            return Response(
+                {
+                    "success": True,
+                    "message": "Simulation completed successfully",
+                    "results_preview": {
+                        "total_data_points": len(simulation_results["loss"]),
+                        "metrics": simulation_results.get("metrics", {}),
+                        "parameters_used": simulation_results.get(
+                            "parameters_used", {}
+                        ),
+                    },
+                }
+            )
+        except ValueError as e:
+            # Handle parameter validation errors specifically
+            logger.warning(
+                "Parameter validation error for hypothesis %s: %s", pk, str(e)
+            )
+            return Response(
+                {
+                    "success": False,
+                    "error": "Invalid parameters",
+                    "details": str(e),
+                    "hint": "Please ensure the hypothesis has valid probability and impact parameters (probability, impact.distribution='LOGNORMAL-CI90', impact.lb, impact.ub)",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            # Handle other errors
+            logger.error("Error running simulation for hypothesis %s: %s", pk, str(e))
+            return Response(
+                {
+                    "success": False,
+                    "error": "Failed to run simulation",
+                    "details": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
