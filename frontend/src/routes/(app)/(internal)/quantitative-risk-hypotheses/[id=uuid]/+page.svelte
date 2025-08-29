@@ -23,6 +23,7 @@
 	let showDistributionModal = $state(false);
 	let calculatedMu = $state<number | undefined>();
 	let calculatedSigma = $state<number | undefined>();
+	let xAxisScale = $state<'linear' | 'log'>('linear');
 
 	// Calculate min and max values for the LEC chart from the data
 	const lecMinValue = $derived(() => {
@@ -170,24 +171,44 @@
 		<div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
 			<div class="flex justify-between items-center mb-4">
 				<h2 class="text-xl font-semibold">Impact Distribution</h2>
-				<button
-					onclick={() => showDistributionModal = false}
-					class="text-gray-500 hover:text-gray-700 text-2xl"
-				>
-					×
-				</button>
+				<div class="flex items-center space-x-4">
+					<div class="flex items-center space-x-2">
+						<label class="text-sm font-medium">X-axis:</label>
+						<button
+							onclick={() => xAxisScale = xAxisScale === 'linear' ? 'log' : 'linear'}
+							class="px-3 py-1 text-sm rounded border {xAxisScale === 'linear' ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-100 border-gray-300'}"
+						>
+							Linear
+						</button>
+						<button
+							onclick={() => xAxisScale = xAxisScale === 'log' ? 'linear' : 'log'}
+							class="px-3 py-1 text-sm rounded border {xAxisScale === 'log' ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-100 border-gray-300'}"
+						>
+							Log
+						</button>
+					</div>
+					<button
+						onclick={() => showDistributionModal = false}
+						class="text-gray-500 hover:text-gray-700 text-2xl"
+					>
+						×
+					</button>
+				</div>
 			</div>
 			<div class="mb-4">
-				<LognormalDistribution
-					lowerBound={data.data.impact?.lb}
-					upperBound={data.data.impact?.ub}
-					height="h-96"
-					width="w-full"
-					onParametersCalculated={(mu, sigma) => {
-						calculatedMu = mu;
-						calculatedSigma = sigma;
-					}}
-				/>
+				{#key xAxisScale}
+					<LognormalDistribution
+						lowerBound={data.data.impact?.lb}
+						upperBound={data.data.impact?.ub}
+						height="h-96"
+						width="w-full"
+						xAxisScale={xAxisScale}
+						onParametersCalculated={(mu, sigma) => {
+							calculatedMu = mu;
+							calculatedSigma = sigma;
+						}}
+					/>
+				{/key}
 			</div>
 			<div class="text-sm text-gray-600 space-y-2">
 				<p class="text-center">

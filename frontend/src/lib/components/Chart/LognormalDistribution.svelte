@@ -12,6 +12,7 @@
 		xAxisLabel?: string;
 		yAxisLabel?: string;
 		enableTooltip?: boolean;
+		xAxisScale?: 'linear' | 'log';
 		onParametersCalculated?: (mu: number, sigma: number) => void;
 	}
 
@@ -26,6 +27,7 @@
 		xAxisLabel = 'Loss Amount ($)',
 		yAxisLabel = 'Probability Density',
 		enableTooltip = true,
+		xAxisScale = 'linear',
 		onParametersCalculated = undefined,
 	}: Props = $props();
 
@@ -43,20 +45,39 @@
 	}
 
 	// Generate lognormal probability density values
-	function generateLognormalPDF(mu: number, sigma: number, xMin: number, xMax: number, points: number = 500) {
+	function generateLognormalPDF(mu: number, sigma: number, xMin: number, xMax: number, scale: 'linear' | 'log' = 'linear', points: number = 500) {
 		const data = [];
 
-		for (let i = 0; i <= points; i++) {
-			const x = xMin + (i / points) * (xMax - xMin);
+		if (scale === 'log') {
+			// For log scale, use log-spaced points for better visualization
+			const logXMin = Math.log(Math.max(xMin, 1));
+			const logXMax = Math.log(xMax);
 
-			if (x <= 0) continue; // Lognormal only defined for x > 0
+			for (let i = 0; i <= points; i++) {
+				const logX = logXMin + (i / points) * (logXMax - logXMin);
+				const x = Math.exp(logX);
 
-			// Lognormal PDF: (1/(x*sigma*sqrt(2*pi))) * exp(-((ln(x) - mu)^2) / (2*sigma^2))
-			const lnX = Math.log(x);
-			const pdf = (1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
-						Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
+				// Lognormal PDF
+				const lnX = Math.log(x);
+				const pdf = (1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
+							Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
 
-			data.push([x, pdf]);
+				data.push([x, pdf]);
+			}
+		} else {
+			// For linear scale, use linear-spaced points
+			for (let i = 0; i <= points; i++) {
+				const x = xMin + (i / points) * (xMax - xMin);
+
+				if (x <= 0) continue; // Lognormal only defined for x > 0
+
+				// Lognormal PDF
+				const lnX = Math.log(x);
+				const pdf = (1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
+							Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
+
+				data.push([x, pdf]);
+			}
 		}
 		return data;
 	}
@@ -84,7 +105,7 @@
 		// Use a more reasonable range: from 10% of lower bound to 10x upper bound
 		const chartMin = Math.max(lowerBound * 0.1, 1);
 		const chartMax = upperBound * 5;
-		const distributionData = generateLognormalPDF(mu, sigma, chartMin, chartMax);
+		const distributionData = generateLognormalPDF(mu, sigma, chartMin, chartMax, xAxisScale);
 
 		const option = {
 			title: {
@@ -121,7 +142,7 @@
 				}
 			},
 			xAxis: {
-				type: 'value',
+				type: xAxisScale === 'log' ? 'log' : 'value',
 				name: xAxisLabel,
 				nameLocation: 'middle',
 				nameGap: 30,
