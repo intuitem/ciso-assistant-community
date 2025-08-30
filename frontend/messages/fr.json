@@ -2084,5 +2084,9 @@
 	"addTranslation": "Ajouter une traduction",
 	"noTranslationAdded": "Aucune traduction ajoutée pour le moment. Cliquez sur 'Ajouter une traduction' pour commencer",
 	"translationErrorMessage": "La langue et la traduction sont requises",
-	"selectLanguagePlaceholder": "Sélectionner une langue..."
+	"selectLanguagePlaceholder": "Sélectionner une langue...",
+	"dataWizardSelectRiskMatrix": "Sélectionner une matrice de risque",
+	"dataWizardRiskAssessment": "Analyse de risque",
+	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
+	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)"
 }

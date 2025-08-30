@@ -100,6 +100,7 @@ from core.models import (
     ComplianceAssessment,
     RequirementMappingSet,
     RiskAssessment,
+    RiskMatrix,
     AssetClass,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
@@ -3698,6 +3699,9 @@ class FolderViewSet(BaseModelViewSet):
         (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Framework
         )
+        (viewable_risk_matrices_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )
         res = {
             "folders": [
                 {"name": str(f), "id": f.id}
@@ -3715,6 +3719,12 @@ class FolderViewSet(BaseModelViewSet):
                 {"name": f.name, "id": f.id}
                 for f in Framework.objects.filter(
                     id__in=viewable_frameworks_ids
+                ).order_by(Lower("name"))
+            ],
+            "risk_matrices": [
+                {"name": rm.name, "id": rm.id}
+                for rm in RiskMatrix.objects.filter(
+                    id__in=viewable_risk_matrices_ids
                 ).order_by(Lower("name"))
             ],
         }

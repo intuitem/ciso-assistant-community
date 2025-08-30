@@ -2118,5 +2118,8 @@
 	"addTranslation": "Add translation",
 	"noTranslationAdded": "No translations added yet. Click 'Add translation' to start",
 	"translationErrorMessage": "Both language and translation are required",
-	"selectLanguagePlaceholder": "Select language..."
+	"selectLanguagePlaceholder": "Select language...",
+	"dataWizardSelectRiskMatrix": "Select a Risk Matrix",
+	"dataWizardRiskAssessmentDescription": "Import risk scenarios with the associated controls",
+	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)"
 }
