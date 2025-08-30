@@ -535,11 +535,9 @@ class ThreatImportExportSerializer(BaseModelSerializer):
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
-    FLAGGED_FIELDS = {
-        "inherent_proba": "inherent_risk",
-        "inherent_impact": "inherent_risk",
-        "inherent_level": "inherent_risk",
-    }
+    # Note: Inherent risk fields are always accepted for writing,
+    # but only displayed when inherent_risk feature flag is enabled
+    FLAGGED_FIELDS = {}
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
