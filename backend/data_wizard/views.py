@@ -750,46 +750,60 @@ class LoadFileView(APIView):
 
             # Build probability mapping
             if "probability" in matrix_definition:
-                for i, prob in enumerate(matrix_definition["probability"]):
-                    label = prob.get("name", "").lower()
-                    if label:
-                        mappings["probability"][label] = i
-                        # Also check translations
-                        if "translations" in prob:
-                            for lang, translation in prob["translations"].items():
-                                if translation and isinstance(translation, str):
-                                    mappings["probability"][translation.lower()] = i
+                for prob_def in matrix_definition["probability"]:
+                    prob_id = prob_def.get("id")
+                    name = prob_def.get("name", "")
+
+                    # Add base name
+                    if name and prob_id is not None:
+                        mappings["probability"][name.lower()] = prob_id
+
+                    # Add translated names
+                    if "translations" in prob_def:
+                        for lang, translation in prob_def["translations"].items():
+                            translated_name = translation.get("name", "")
+                            if translated_name and prob_id is not None:
+                                mappings["probability"][translated_name.lower()] = (
+                                    prob_id
+                                )
 
             # Build impact mapping
             if "impact" in matrix_definition:
-                for i, imp in enumerate(matrix_definition["impact"]):
-                    label = imp.get("name", "").lower()
-                    if label:
-                        mappings["impact"][label] = i
-                        # Also check translations
-                        if "translations" in imp:
-                            for lang, translation in imp["translations"].items():
-                                if translation and isinstance(translation, str):
-                                    mappings["impact"][translation.lower()] = i
+                for impact_def in matrix_definition["impact"]:
+                    impact_id = impact_def.get("id")
+                    name = impact_def.get("name", "")
 
-            # Build level mapping from risk matrix grid
-            if "risk" in matrix_definition and isinstance(
-                matrix_definition["risk"], list
-            ):
-                level_names = set()
-                for row in matrix_definition["risk"]:
-                    if isinstance(row, list):
-                        for cell in row:
-                            if isinstance(cell, dict):
-                                level_names.add(cell.get("name", ""))
+                    # Add base name
+                    if name and impact_id is not None:
+                        mappings["impact"][name.lower()] = impact_id
 
-                # Create mapping for unique level names
-                for i, level_name in enumerate(sorted(level_names)):
-                    if level_name:
-                        mappings["level"][level_name.lower()] = i
+                    # Add translated names
+                    if "translations" in impact_def:
+                        for lang, translation in impact_def["translations"].items():
+                            translated_name = translation.get("name", "")
+                            if translated_name and impact_id is not None:
+                                mappings["impact"][translated_name.lower()] = impact_id
+
+            # Build level mapping from risk definitions
+            if "risk" in matrix_definition:
+                for risk_def in matrix_definition["risk"]:
+                    risk_id = risk_def.get("id")
+                    name = risk_def.get("name", "")
+
+                    # Add base name
+                    if name and risk_id is not None:
+                        mappings["level"][name.lower()] = risk_id
+
+                    # Add translated names
+                    if "translations" in risk_def:
+                        for lang, translation in risk_def["translations"].items():
+                            translated_name = translation.get("name", "")
+                            if translated_name and risk_id is not None:
+                                mappings["level"][translated_name.lower()] = risk_id
 
         except Exception as e:
             logger.warning(f"Error building matrix mappings: {str(e)}")
+            logger.debug(f"Matrix definition structure: {matrix_definition}")
 
         return mappings
 
