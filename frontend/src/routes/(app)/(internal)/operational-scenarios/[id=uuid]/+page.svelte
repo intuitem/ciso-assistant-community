@@ -151,7 +151,7 @@
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
 						<p class="badge text-white bg-red-500 capitalize">
-							{safeTranslate(operationalScenario.ro_to.risk_origin)}
+							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
 					<div
