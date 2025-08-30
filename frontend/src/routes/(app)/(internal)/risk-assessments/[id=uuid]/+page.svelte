@@ -88,8 +88,10 @@
 			Array.from({ length: parsedRiskMatrix.impact.length }, () => [])
 		);
 		scenarios.forEach((scenario: RiskScenario) => {
-			const probability = scenario[`${risk}_proba`].value;
-			const impact = scenario[`${risk}_impact`].value;
+			const probabilityData = scenario[`${risk}_proba`];
+			const impactData = scenario[`${risk}_impact`];
+			const probability = probabilityData?.value ?? -1;
+			const impact = impactData?.value ?? -1;
 			probability >= 0 && impact >= 0 ? grid[probability][impact].push(scenario) : undefined;
 		});
 		return grid;
