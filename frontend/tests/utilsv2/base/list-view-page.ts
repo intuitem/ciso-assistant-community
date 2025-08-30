@@ -20,7 +20,9 @@ export class ListViewPage extends Page {
 	}
 
 	getModelTable() {
-		return this._getSubElement(ModelTable);
+		return this._getSubElement(ModelTable, {
+			visible: true
+		});
 	}
 
 	protected async _getOpenCreateModal<T = CreateModal>(
