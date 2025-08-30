@@ -31,8 +31,20 @@
 	});
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
+
+	// Map colors for risk levels
 	data.riskMatrix.risk.forEach((risk, i) => {
 		color_map[risk.name] = risk.hexcolor;
+	});
+
+	// Map colors for probability levels
+	data.riskMatrix.probability.forEach((prob, i) => {
+		color_map[prob.name] = prob.hexcolor;
+	});
+
+	// Map colors for impact levels
+	data.riskMatrix.impact.forEach((impact, i) => {
+		color_map[impact.name] = impact.hexcolor;
 	});
 
 	let classesCellText = $derived((backgroundHexColor: string) => {
@@ -200,20 +212,26 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 					<span
-						class="text-sm text-center font-semibold p-2 rounded-md w-20"
-						style="background-color: {color_map[data.scenario.inherent_proba]}"
+						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+						style="background-color: {data.scenario.inherent_proba?.name
+							? color_map[data.scenario.inherent_proba.name]
+							: color_map['--']}"
 					>
-						{safeTranslate(data.scenario.inherent_proba.name)}
+						{data.scenario.inherent_proba ? safeTranslate(data.scenario.inherent_proba.name) : '--'}
 					</span>
 				</p>
 				<i class="fa-solid fa-xmark mt-5"></i>
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 					<span
-						class="text-sm text-center font-semibold p-2 rounded-md w-20"
-						style="background-color: {color_map[data.scenario.inherent_impact]}"
+						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+						style="background-color: {data.scenario.inherent_impact?.name
+							? color_map[data.scenario.inherent_impact.name]
+							: color_map['--']}"
 					>
-						{safeTranslate(data.scenario.inherent_impact.name)}
+						{data.scenario.inherent_impact
+							? safeTranslate(data.scenario.inherent_impact.name)
+							: '--'}
 					</span>
 				</p>
 				<i class="fa-solid fa-equals mt-5"></i>
@@ -222,12 +240,13 @@
 						>{m.inherentRiskLevel()}</span
 					>
 					<span
-						class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
-							data.scenario.inherent_level.hexcolor
-						)}"
-						style="background-color: {data.scenario.inherent_level.hexcolor}"
+						class="text-sm text-center font-semibold p-2 rounded-md w-20 {data.scenario
+							.inherent_level
+							? classesCellText(data.scenario.inherent_level.hexcolor)
+							: ''}"
+						style="background-color: {data.scenario.inherent_level?.hexcolor || color_map['--']}"
 					>
-						{safeTranslate(data.scenario.inherent_level.name)}
+						{data.scenario.inherent_level ? safeTranslate(data.scenario.inherent_level.name) : '--'}
 					</span>
 				</p>
 			</div>
@@ -249,20 +268,24 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
-					style="background-color: {color_map[data.scenario.current_proba]}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					style="background-color: {data.scenario.current_proba?.name
+						? color_map[data.scenario.current_proba.name]
+						: color_map['--']}"
 				>
-					{safeTranslate(data.scenario.current_proba.name)}
+					{data.scenario.current_proba ? safeTranslate(data.scenario.current_proba.name) : '--'}
 				</span>
 			</p>
 			<i class="fa-solid fa-xmark mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
-					style="background-color: {color_map[data.scenario.current_impact]}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					style="background-color: {data.scenario.current_impact?.name
+						? color_map[data.scenario.current_impact.name]
+						: color_map['--']}"
 				>
-					{safeTranslate(data.scenario.current_impact.name)}
+					{data.scenario.current_impact ? safeTranslate(data.scenario.current_impact.name) : '--'}
 				</span>
 			</p>
 			<i class="fa-solid fa-equals mt-5"></i>
@@ -296,20 +319,24 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
-					style="background-color: {color_map[data.scenario.residual_proba]}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					style="background-color: {data.scenario.residual_proba?.name
+						? color_map[data.scenario.residual_proba.name]
+						: color_map['--']}"
 				>
-					{safeTranslate(data.scenario.residual_proba.name)}
+					{data.scenario.residual_proba ? safeTranslate(data.scenario.residual_proba.name) : '--'}
 				</span>
 			</p>
 			<i class="fa-solid fa-xmark mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
-					style="background-color: {color_map[data.scenario.residual_impact]}"
+					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					style="background-color: {data.scenario.residual_impact?.name
+						? color_map[data.scenario.residual_impact.name]
+						: color_map['--']}"
 				>
-					{safeTranslate(data.scenario.residual_impact.name)}
+					{data.scenario.residual_impact ? safeTranslate(data.scenario.residual_impact.name) : '--'}
 				</span>
 			</p>
 			<i class="fa-solid fa-equals mt-5"></i>
