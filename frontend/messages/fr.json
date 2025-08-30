@@ -2069,5 +2069,9 @@
 	"selectAll": "Tout sélectionner",
 	"deselectAll": "Tout désélectionner",
 	"daysOfWeekErrorMessage": "Vous devez spécifier au moins un jour de la semaine",
-	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)"
+	"weeksOfMonthErrorMessage": "Vous devez spécifier au moins une semaine pour le(s) jour(s) sélectionné(s)",
+	"dataWizardSelectRiskMatrix": "Sélectionner une matrice de risque",
+	"dataWizardRiskAssessment": "Analyse de risque",
+	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
+	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)"
 }

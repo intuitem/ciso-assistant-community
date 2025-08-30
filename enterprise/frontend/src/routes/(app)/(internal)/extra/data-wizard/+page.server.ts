@@ -23,6 +23,7 @@ export const actions: Actions = {
 		const folder = formData.get('folder') as string;
 		const perimeter = formData.get('perimeter') as string;
 		const framework = formData.get('framework') as string;
+		const matrix = formData.get('matrix') as string;
 
 		if (!file?.name || file?.name === 'undefined') {
 			// Using the fail function from SvelteKit
@@ -44,7 +45,8 @@ export const actions: Actions = {
 					'X-Model-Type': model,
 					'X-Folder-Id': folder,
 					'X-Perimeter-Id': perimeter,
-					'X-Framework-Id': framework
+					'X-Framework-Id': framework,
+					'X-Matrix-Id': matrix
 				},
 				body: file
 			});
