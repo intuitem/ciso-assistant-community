@@ -6129,3 +6129,15 @@ class TaskNodeViewSet(BaseModelViewSet):
         instance: TaskNode = serializer.save()
         instance.save()
         return super().perform_create(serializer)
+
+
+class TerminologyViewSet(BaseModelViewSet):
+    model = Terminology
+    filterset_fields = ["field_path", "folder", "is_visible", "builtin"]
+    search_fields = ["name", "description"]
+    ordering = ["field_path", "name"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get class name choices")
+    def field_path(self, request):
+        return Response(dict(Terminology.FieldPath.choices))

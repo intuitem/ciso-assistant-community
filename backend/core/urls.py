@@ -99,6 +99,7 @@ router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
+router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

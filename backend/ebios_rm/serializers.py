@@ -140,6 +140,10 @@ class RoToReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     feared_events = FieldsRelatedField(["folder", "id"], many=True)
+    risk_origin = serializers.SerializerMethodField()
+
+    def get_risk_origin(self, obj):
+        return obj.risk_origin.get_name_translated
 
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
@@ -286,7 +290,9 @@ class AttackPathReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
     stakeholders = FieldsRelatedField(many=True)
-    risk_origin = serializers.CharField(source="ro_to_couple.get_risk_origin_display")
+    risk_origin = serializers.CharField(
+        source="ro_to_couple.risk_origin.get_name_translated"
+    )
     target_objective = serializers.CharField(source="ro_to_couple.target_objective")
 
     strategic_scenario = FieldsRelatedField()
