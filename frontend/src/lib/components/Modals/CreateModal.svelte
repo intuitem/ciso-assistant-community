@@ -36,9 +36,9 @@
 	let {
 		parent,
 		form,
-		customNameDescription = false,
 		importFolder = false,
 		model,
+		customNameDescription = model.customNameDescription ?? false,
 		duplicate = false,
 		invalidateAll = true,
 		formAction = '?/create',

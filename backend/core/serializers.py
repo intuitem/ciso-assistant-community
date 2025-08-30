@@ -2059,3 +2059,18 @@ class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
         exclude = ["task_template"]
+
+
+class TerminologyReadSerializer(BaseModelSerializer):
+    field_path = serializers.CharField(source="get_field_path_display", read_only=True)
+    translated_name = serializers.CharField(source="get_name_translated")
+
+    class Meta:
+        model = Terminology
+        exclude = ["folder"]
+
+
+class TerminologyWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Terminology
+        exclude = ["folder", "is_published", "builtin"]

@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/public';
+import { m } from '$paraglide/messages';
 
 export const BASE_API_URL = `${
 	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
