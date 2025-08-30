@@ -246,6 +246,7 @@
 						>
 							<div>
 								<p class="text-gray-700">{m.findingsAssessment()}</p>
+								<p class="text-gray-500 text-xs">{m.dataWizardFindingsAssessmentDescription()}</p>
 							</div>
 
 							<input
@@ -265,8 +266,8 @@
 							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
-								<p class="text-gray-700">Risk Assessment</p>
-								<p class="text-gray-500 text-xs">Import risk scenarios with controls</p>
+								<p class="text-gray-700">{m.riskAssessment()}</p>
+								<p class="text-gray-500 text-xs">{m.dataWizardRiskAssessmentDescription()}</p>
 							</div>
 
 							<input
@@ -326,7 +327,7 @@
 				</select>
 
 				<label for="matrix" class="block text-sm font-medium text-gray-900"
-					>Risk Matrix</label
+					>{m.dataWizardSelectRiskMatrix()}</label
 				>
 				<select
 					id="matrix"

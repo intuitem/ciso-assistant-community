@@ -2103,5 +2103,8 @@
 	"selectAll": "Select all",
 	"deselectAll": "Deselect all",
 	"daysOfWeekErrorMessage": "You need to specify at least one day of the week",
-	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)"
+	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
+	"dataWizardSelectRiskMatrix": "Select a Risk Matrix",
+	"dataWizardRiskAssessmentDescription": "Import risk scenarios with the associated controls",
+	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)"
 }

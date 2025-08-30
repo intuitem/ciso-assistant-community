@@ -742,8 +742,8 @@ class LoadFileView(APIView):
             }
 
     def _build_matrix_mappings(self, risk_matrix):
-        """Build label-to-value mapping dictionaries for probability, impact, and level"""
-        mappings = {"probability": {}, "impact": {}, "level": {}}
+        """Build label-to-value mapping dictionaries for probability and impact"""
+        mappings = {"probability": {}, "impact": {}}
 
         try:
             matrix_definition = risk_matrix.json_definition
@@ -784,22 +784,8 @@ class LoadFileView(APIView):
                             if translated_name and impact_id is not None:
                                 mappings["impact"][translated_name.lower()] = impact_id
 
-            # Build level mapping from risk definitions
-            if "risk" in matrix_definition:
-                for risk_def in matrix_definition["risk"]:
-                    risk_id = risk_def.get("id")
-                    name = risk_def.get("name", "")
-
-                    # Add base name
-                    if name and risk_id is not None:
-                        mappings["level"][name.lower()] = risk_id
-
-                    # Add translated names
-                    if "translations" in risk_def:
-                        for lang, translation in risk_def["translations"].items():
-                            translated_name = translation.get("name", "")
-                            if translated_name and risk_id is not None:
-                                mappings["level"][translated_name.lower()] = risk_id
+            # Note: Risk levels are automatically computed by the system
+            # based on probability and impact values, so no need to map them
 
         except Exception as e:
             logger.warning(f"Error building matrix mappings: {str(e)}")
@@ -870,18 +856,12 @@ class LoadFileView(APIView):
             inherent_proba = self._map_risk_value(
                 record.get("inherent_proba", ""), matrix_mappings["probability"]
             )
-            inherent_level = self._map_risk_value(
-                record.get("inherent_level", ""), matrix_mappings["level"]
-            )
 
             current_impact = self._map_risk_value(
                 record.get("current_impact", ""), matrix_mappings["impact"]
             )
             current_proba = self._map_risk_value(
                 record.get("current_proba", ""), matrix_mappings["probability"]
-            )
-            current_level = self._map_risk_value(
-                record.get("current_level", ""), matrix_mappings["level"]
             )
 
             residual_impact = self._map_risk_value(
@@ -890,11 +870,9 @@ class LoadFileView(APIView):
             residual_proba = self._map_risk_value(
                 record.get("residual_proba", ""), matrix_mappings["probability"]
             )
-            residual_level = self._map_risk_value(
-                record.get("residual_level", ""), matrix_mappings["level"]
-            )
 
             # Prepare risk scenario data
+            # Note: inherent_level, current_level, and residual_level will be computed automatically
             scenario_data = {
                 "ref_id": ref_id,
                 "name": name,
@@ -902,13 +880,10 @@ class LoadFileView(APIView):
                 "risk_assessment": risk_assessment.id,
                 "inherent_impact": inherent_impact,
                 "inherent_proba": inherent_proba,
-                "inherent_level": inherent_level,
                 "current_impact": current_impact,
                 "current_proba": current_proba,
-                "current_level": current_level,
                 "residual_impact": residual_impact,
                 "residual_proba": residual_proba,
-                "residual_level": residual_level,
                 "existing_controls": record.get("existing_controls", ""),
             }
 
