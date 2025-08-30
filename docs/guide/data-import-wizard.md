@@ -156,7 +156,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * name and description columns are not used but serve as an anchor point for reference.
 * Unassessable rows are skipped.
 
-## Findings followup (eg. pentest)
+## 🐞 Findings followup (eg. pentest)
 
 
 
@@ -190,7 +190,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
-### Users
+### 👥 Users
 
 
 
@@ -206,5 +206,33 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
+### ☣️ Risk assessment&#x20;
 
+
+
+The risk assessment is an advanced object that needs special considerations. Make sure to pick the matrix that will be used to map your labels to the values on CISO Assistant. If you have a specific matrix, you should start by including it as a custom library.
+
+inherent\_level, current\_level and residual\_level are kept on the excel sample just for visual aid. The application computes them based on impact and probability  to ensure consistency with the matrix definition.
+
+Controls are created on picked based on the perimeter's domain. Line breaks are used as seperator.
+
+
+
+Supported fields:
+
+
+
+* ref\_id
+* name\*
+* description&#x20;
+* inherent\_impact
+* inherent\_proba
+* _existing\_controls_
+* current\_impact
+* current\_proba
+* _additional\_controls_
+* residual\_impact
+* residual\_proba
+
+{% file src="../.gitbook/assets/sample06.xlsx" %}
 
