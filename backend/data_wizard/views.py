@@ -93,7 +93,7 @@ class LoadFileView(APIView):
             )
 
         return Response(
-            {"message": "File loaded successfully", "results": res},
+            {"message": "File loaded successfully", "results": []},
             status=status.HTTP_200_OK,
         )
 
