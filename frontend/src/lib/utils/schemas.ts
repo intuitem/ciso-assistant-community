@@ -960,9 +960,15 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
+export const TerminologySchema = z.object({
+	...NameDescriptionMixin,
+	field_path: z.string().min(1),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1))
+});
+
 export const RoleSchema = z.object({
-	name: z.string().min(1),
-	description: z.string().optional(),
+	...NameDescriptionMixin,
 	permissions: z.array(z.number()).optional()
 });
 
@@ -1023,6 +1029,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
 	'organisation-issues': organisationIssueSchema,
+	terminologies: TerminologySchema,
 	roles: RoleSchema
 };
 
