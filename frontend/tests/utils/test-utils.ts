@@ -38,6 +38,13 @@ type Fixtures = {
 	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	processingsPage: PageContent;
+	purposesPage: PageContent;
+	personalDataPage: PageContent;
+	dataSubjectsPage: PageContent;
+	dataRecipientsPage: PageContent;
+	dataContractorsPage: PageContent;
+	dataTransfersPage: PageContent;
 	settingsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
@@ -79,6 +86,13 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
+			processingsPage,
+			purposesPage,
+			personalDataPage,
+			dataSubjectsPage,
+			dataRecipientsPage,
+			dataContractorsPage,
+			dataTransfersPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -103,6 +117,13 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
+			processingsPage,
+			purposesPage,
+			personalDataPage,
+			dataSubjectsPage,
+			dataRecipientsPage,
+			dataContractorsPage,
+			dataTransfersPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -344,7 +365,6 @@ export const test = base.extend<Fixtures>({
 	assetAssessmentsPage: async ({ page }, use) => {
 		const aPage = new PageContent(page, '/asset-assessments', 'BIA Assessments', [
 			{ name: 'asset', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'name', type: type.TEXT },
 			{ name: 'bia', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(aPage);
@@ -359,6 +379,93 @@ export const test = base.extend<Fixtures>({
 			{ name: 'justification', type: type.TEXT }
 		]);
 		await use(ePage);
+	},
+
+	processingsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/processings', 'Processings', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'legal_basis', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'dpia_required', type: type.CHECKBOX },
+			{ name: 'associated_controls', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	purposesPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/purposes', 'Purposes', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT }
+		]);
+		await use(pPage);
+	},
+
+	personalDataPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/personal-data', /Personal data?/, [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'category', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'retention', type: type.TEXT },
+			{ name: 'deletion_policy', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'is_sensitive', type: type.CHECKBOX }
+		]);
+		await use(pPage);
+	},
+
+	dataSubjectsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-subjects', 'Data subjects', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'category', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	dataRecipientsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-recipients', 'Data recipients', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'category', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	dataContractorsPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-contractors', 'Data contractors', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'relationship_type', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'country', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'documentation_link', type: type.TEXT },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
+	},
+
+	dataTransfersPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/data-transfers', 'Data transfers', [
+			{ name: 'processing', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'country', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'legal_basis', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'guarantees', type: type.TEXT },
+			{ name: 'documentation_link', type: type.TEXT },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(pPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -764,6 +871,107 @@ export class TestContent {
 					due_date: '2025-12-31'
 				}
 			},
+			processingsPage: {
+				displayName: 'Processings',
+				modelName: 'processing',
+				build: {
+					name: vars.processingName,
+					description: 'Test description',
+					legal_basis: 'Consent',
+					folder: vars.folderName
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			personalDataPage: {
+				displayName: 'Personal data',
+				modelName: 'personaldata',
+				build: {
+					processing: vars.processingName,
+					name: vars.personalDataName,
+					description: 'Test description',
+					category: 'Basic Identity Information',
+					retention: '1 year',
+					deletion_policy: 'Automatic Deletion'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataSubjectsPage: {
+				displayName: 'Data subjects',
+				modelName: 'datasubject',
+				build: {
+					processing: vars.processingName,
+					name: vars.dataSubjectName,
+					description: 'Test description',
+					category: 'Employee'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataRecipientsPage: {
+				displayName: 'Data recipients',
+				modelName: 'datarecipient',
+				build: {
+					processing: vars.processingName,
+					name: vars.dataRecipientName,
+					description: 'Test description',
+					category: 'Employee'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataContractorsPage: {
+				displayName: 'Data contractors',
+				modelName: 'datacontractor',
+				build: {
+					processing: vars.processingName,
+					name: vars.dataContractorName,
+					description: 'Test description',
+					relationship_type: 'Data Processor',
+					country: 'France'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			dataTransfersPage: {
+				displayName: 'Data transfers',
+				modelName: 'datatransfer',
+				build: {
+					processing: vars.processingName,
+					name: vars.dataTransferName,
+					description: 'Test description',
+					country: 'France',
+					legal_basis: 'Consent'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
+			purposesPage: {
+				displayName: 'Purposes',
+				modelName: 'purpose',
+				build: {
+					processing: vars.processingName,
+					name: vars.purposeName,
+					description: 'Test description'
+				},
+				editParams: {
+					name: '',
+					description: ''
+				}
+			},
 			assetAssessmentsPage: {
 				displayName: 'BIA Assessments',
 				modelName: 'assetassessment',
@@ -771,6 +979,10 @@ export class TestContent {
 					str: vars.assetName,
 					asset: vars.folderName + '/' + vars.assetName,
 					bia: vars.biaName
+				},
+				editParams: {
+					name: '',
+					description: ''
 				}
 			}
 		};
