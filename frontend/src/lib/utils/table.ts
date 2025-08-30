@@ -834,6 +834,24 @@ const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -1544,7 +1562,9 @@ export const listViewFields = {
 		head: ['field_path', 'name', 'description', 'translations'],
 		body: ['field_path', 'name', 'description', 'translations'],
 		filters: {
-			field_path: FIELD_PATH_FILTER
+			field_path: FIELD_PATH_FILTER,
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
 		}
 	},
 	extra: {

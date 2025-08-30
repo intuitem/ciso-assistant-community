@@ -6123,7 +6123,7 @@ class TaskNodeViewSet(BaseModelViewSet):
 
 class TerminologyViewSet(BaseModelViewSet):
     model = Terminology
-    filterset_fields = ["field_path", "folder", "is_visible"]
+    filterset_fields = ["field_path", "folder", "is_visible", "builtin"]
     search_fields = ["name", "description"]
     ordering = ["field_path", "name"]
 

@@ -7,6 +7,8 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { onMount } from 'svelte';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -25,6 +27,16 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	const { value: fieldPathValue } = formFieldProxy(form, 'field_path');
+
+	onMount(() => {
+		// Auto-select first field_path option if no value is set and options are available
+		const fieldPathOptions = model.selectOptions?.['field_path'];
+		if (!$fieldPathValue && fieldPathOptions && fieldPathOptions.length > 0 && !object.builtin) {
+			fieldPathValue.set(fieldPathOptions[0].value);
+		}
+	});
 </script>
 
 {#if !object.builtin}
