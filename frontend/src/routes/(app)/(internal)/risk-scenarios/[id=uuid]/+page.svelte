@@ -213,7 +213,9 @@
 					<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 					<span
 						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
-						style="background-color: {data.scenario.inherent_proba?.name ? color_map[data.scenario.inherent_proba.name] : color_map['--']}"
+						style="background-color: {data.scenario.inherent_proba?.name
+							? color_map[data.scenario.inherent_proba.name]
+							: color_map['--']}"
 					>
 						{data.scenario.inherent_proba ? safeTranslate(data.scenario.inherent_proba.name) : '--'}
 					</span>
@@ -223,9 +225,13 @@
 					<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 					<span
 						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
-						style="background-color: {data.scenario.inherent_impact?.name ? color_map[data.scenario.inherent_impact.name] : color_map['--']}"
+						style="background-color: {data.scenario.inherent_impact?.name
+							? color_map[data.scenario.inherent_impact.name]
+							: color_map['--']}"
 					>
-						{data.scenario.inherent_impact ? safeTranslate(data.scenario.inherent_impact.name) : '--'}
+						{data.scenario.inherent_impact
+							? safeTranslate(data.scenario.inherent_impact.name)
+							: '--'}
 					</span>
 				</p>
 				<i class="fa-solid fa-equals mt-5"></i>
@@ -234,9 +240,10 @@
 						>{m.inherentRiskLevel()}</span
 					>
 					<span
-						class="text-sm text-center font-semibold p-2 rounded-md w-20 {data.scenario.inherent_level ? classesCellText(
-							data.scenario.inherent_level.hexcolor
-						) : ''}"
+						class="text-sm text-center font-semibold p-2 rounded-md w-20 {data.scenario
+							.inherent_level
+							? classesCellText(data.scenario.inherent_level.hexcolor)
+							: ''}"
 						style="background-color: {data.scenario.inherent_level?.hexcolor || color_map['--']}"
 					>
 						{data.scenario.inherent_level ? safeTranslate(data.scenario.inherent_level.name) : '--'}
@@ -262,7 +269,9 @@
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
 					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
-					style="background-color: {data.scenario.current_proba?.name ? color_map[data.scenario.current_proba.name] : color_map['--']}"
+					style="background-color: {data.scenario.current_proba?.name
+						? color_map[data.scenario.current_proba.name]
+						: color_map['--']}"
 				>
 					{data.scenario.current_proba ? safeTranslate(data.scenario.current_proba.name) : '--'}
 				</span>
@@ -272,7 +281,9 @@
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
 					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
-					style="background-color: {data.scenario.current_impact?.name ? color_map[data.scenario.current_impact.name] : color_map['--']}"
+					style="background-color: {data.scenario.current_impact?.name
+						? color_map[data.scenario.current_impact.name]
+						: color_map['--']}"
 				>
 					{data.scenario.current_impact ? safeTranslate(data.scenario.current_impact.name) : '--'}
 				</span>
@@ -309,7 +320,9 @@
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
 					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
-					style="background-color: {data.scenario.residual_proba?.name ? color_map[data.scenario.residual_proba.name] : color_map['--']}"
+					style="background-color: {data.scenario.residual_proba?.name
+						? color_map[data.scenario.residual_proba.name]
+						: color_map['--']}"
 				>
 					{data.scenario.residual_proba ? safeTranslate(data.scenario.residual_proba.name) : '--'}
 				</span>
@@ -319,7 +332,9 @@
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
 					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
-					style="background-color: {data.scenario.residual_impact?.name ? color_map[data.scenario.residual_impact.name] : color_map['--']}"
+					style="background-color: {data.scenario.residual_impact?.name
+						? color_map[data.scenario.residual_impact.name]
+						: color_map['--']}"
 				>
 					{data.scenario.residual_impact ? safeTranslate(data.scenario.residual_impact.name) : '--'}
 				</span>
