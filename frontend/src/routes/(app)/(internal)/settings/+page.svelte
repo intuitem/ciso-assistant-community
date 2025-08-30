@@ -19,7 +19,7 @@
 	{#snippet list()}
 		<Tabs.Control value="instance"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Control>
 		<Tabs.Control value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Control>
-		<Tabs.Control value="featureFlags"
+		<Tabs.Control value="featureFlags" data-testid="feature-flags-btn"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
 		>
 	{/snippet}
