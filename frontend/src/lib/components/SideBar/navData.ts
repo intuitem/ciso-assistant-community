@@ -206,27 +206,15 @@ export const navData = {
 					href: '/risk-assessments'
 				},
 				{
+					name: 'ebiosRM',
+					fa_icon: 'fa-solid fa-gopuram',
+					href: '/ebios-rm'
+				},
+				{
 					name: 'quantitativeRiskStudies',
 					fa_icon: 'fa-solid fa-calculator',
 					href: '/quantitative-risk-studies',
 					permissions: ['view_quantitativeriskstudy']
-				},
-				{
-					name: 'quantitativeRiskScenarios',
-					fa_icon: 'fa-solid fa-diagram-project',
-					href: '/quantitative-risk-scenarios',
-					permissions: ['view_quantitativeriskscenario']
-				},
-				{
-					name: 'quantitativeRiskHypotheses',
-					fa_icon: 'fa-solid fa-lightbulb',
-					href: '/quantitative-risk-hypotheses',
-					permissions: ['view_quantitativeriskhypothesis']
-				},
-				{
-					name: 'ebiosRM',
-					fa_icon: 'fa-solid fa-gopuram',
-					href: '/ebios-rm'
 				},
 				{
 					name: 'riskScenarios',
