@@ -108,10 +108,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
 
 class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     model = QuantitativeRiskHypothesis
-    filterset_fields = [
-        "quantitative_risk_scenario",
-        "risk_stage",
-    ]
+    filterset_fields = ["quantitative_risk_scenario", "risk_stage", "is_selected"]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
 
