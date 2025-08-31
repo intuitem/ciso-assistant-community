@@ -475,12 +475,15 @@ Note: For now, labels are attached to the following objects: vulnerabilities, as
 
 ### Actors
 
-Actors are representing users, groups, entities, stakeholders, that can play a role in a workflow or model.  Actors can refer to:
-- internal users
-- internal groups
+Actors are representing users, groups, entities (stakeholders), that can play a role in a workflow or model.  Actors can refer to:
+- internal IAM users
+- internal IAM groups
 - entities
 - a team
 - any other stakeholder
+
+Current "entities" shall be moved to organization section and displayed as "stakeholders (entities)".
+Current "representatives" shall be moved to organization section and displayed as "stakeholders (human)".
 
 The "category" attribute can be: user/group/entity/team/other.
 
