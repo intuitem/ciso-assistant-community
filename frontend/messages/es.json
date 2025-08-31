@@ -972,6 +972,5 @@
 	"qualificationOrdering": "Orden de calificación",
 	"securityObjectiveOrdering": "Orden de objetivos de seguridad",
 	"qualifications": "cualificaciones",
-	"addQualification": "Añadir cualificación",
-	"proVersionFeatureWarning": "Esta función solo está disponible en la versión pro"
+	"addQualification": "Añadir cualificación"
 }

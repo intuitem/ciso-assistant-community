@@ -955,6 +955,5 @@
 	"qualificationOrdering": "Pořadí kvalifikace",
 	"securityObjectiveOrdering": "Pořadí bezpečnostního cíle",
 	"qualifications": "kvalifikace",
-	"addQualification": "Přidat kvalifikaci",
-	"proVersionFeatureWarning": "Tato funkce je k dispozici pouze v profesionální verzi"
+	"addQualification": "Přidat kvalifikaci"
 }

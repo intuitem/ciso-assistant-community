@@ -958,6 +958,5 @@
 	"qualificationOrdering": "Kvalifikationsordning",
 	"securityObjectiveOrdering": "Säkerhetsmålsordning",
 	"qualifications": "kvalifikationer",
-	"addQualification": "Lägg till kvalifikation",
-	"proVersionFeatureWarning": "Denna funktion är endast tillgänglig i pro-versionen"
+	"addQualification": "Lägg till kvalifikation"
 }

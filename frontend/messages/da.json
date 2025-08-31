@@ -1249,6 +1249,5 @@
 	"abbreviation": "Forkortelse",
 	"qualificationOrdering": "Kvalifikationsrækkefølge",
 	"securityObjectiveOrdering": "Sikkerhedsmålsrækkefølge",
-	"addQualification": "Tilføj kvalifikation",
-	"proVersionFeatureWarning": "Denne funktion er kun tilgængelig i pro-versionen"
+	"addQualification": "Tilføj kvalifikation"
 }

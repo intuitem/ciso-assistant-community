@@ -2105,6 +2105,5 @@
 	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
 	"abbreviation": "Abbreviation",
 	"qualificationOrdering": "Qualification ordering",
-	"securityObjectiveOrdering": "Security objective ordering",
-	"proVersionFeatureWarning": "This feature is only available in the pro version"
+	"securityObjectiveOrdering": "Security objective ordering"
 }

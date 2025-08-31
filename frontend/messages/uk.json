@@ -1483,6 +1483,5 @@
 	"abbreviation": "Скорочення",
 	"qualificationOrdering": "Порядок кваліфікацій",
 	"securityObjectiveOrdering": "Порядок цілей безпеки",
-	"addQualification": "Додати кваліфікацію",
-	"proVersionFeatureWarning": "Ця функція доступна лише у версії pro"
+	"addQualification": "Додати кваліфікацію"
 }

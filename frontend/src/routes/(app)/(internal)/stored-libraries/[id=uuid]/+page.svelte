@@ -246,12 +246,6 @@
 				icon="fa-solid fa-tag"
 				header="{qualifications.length} {m.qualifications()}"
 			>
-				{#if !IS_ENTERPRISE}
-					<div class="preset-tonal-warning rounded-base px-4 py-1 font-bold">
-						<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-						{m.proVersionFeatureWarning()}
-					</div>
-				{/if}
 				<ModelTable
 					source={qualificationsTable}
 					displayActions={false}

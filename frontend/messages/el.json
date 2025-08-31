@@ -1668,6 +1668,5 @@
 	"abbreviation": "Συντομογραφία",
 	"qualificationOrdering": "Σειρά κατάταξης προσόντων",
 	"securityObjectiveOrdering": "Σειρά στόχων ασφαλείας",
-	"addQualification": "Προσθήκη προσόντος",
-	"proVersionFeatureWarning": "Αυτή η δυνατότητα είναι διαθέσιμη μόνο στην έκδοση Pro"
+	"addQualification": "Προσθήκη προσόντος"
 }
