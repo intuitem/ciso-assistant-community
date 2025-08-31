@@ -92,19 +92,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		);
 
 	const treatmentChoicesEndpoint = `${BASE_API_URL}/${URLModel}/treatment/`;
-	const qualificationChoicesEndpoint = `${BASE_API_URL}/qualifications/`;
-
-	const [treatmentChoices, qualificationChoices] = await Promise.all(
-		[treatmentChoicesEndpoint, qualificationChoicesEndpoint].map((endpoint) =>
-			fetch(endpoint)
-				.then((res) => res.json())
-				.then((data) =>
-					data.results && Array.isArray(data.results)
-						? data.results.map((obj) => ({ label: obj.name, value: obj.id }))
-						: Object.entries(data).map(([key, value]) => ({ label: value, value: key }))
-				)
-		)
-	);
+	const treatmentChoices = await fetch(treatmentChoicesEndpoint)
+		.then((res) => res.json())
+		.then((data) =>
+		data.results && Array.isArray(data.results)
+			? data.results.map((obj: any) => ({ label: obj.name, value: obj.id }))
+			: Object.entries(data).map(([key, value]) => ({ label: value as string, value: key }))
+		);
 
 	const strengthOfKnowledgeChoicesEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/strength_of_knowledge/`;
 	const strengthOfKnowledgeChoices: Record<string, StrengthOfKnowledgeEntry> = await fetch(
