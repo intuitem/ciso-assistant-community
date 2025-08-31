@@ -20,14 +20,6 @@
 		xMax?: number;
 		xMin?: number;
 		autoYMax?: boolean;
-		minorSplitLine?: boolean;
-		enableTooltip?: boolean;
-		xAxisScale?: 'linear' | 'log';
-		yAxisScale?: 'linear' | 'log';
-		showXGrid?: boolean;
-		showYGrid?: boolean;
-		xMax?: number;
-		autoYMax?: boolean;
 	}
 
 	let {
@@ -42,21 +34,13 @@
 		yAxisLabel = 'Exceedance Probability',
 		minorSplitLine = false,
 		enableTooltip = false,
-		xAxisScale = 'log',
-		yAxisScale = 'linear',
 		showXGrid = true,
 		showYGrid = true,
 		xMax = 1000000,
 		xMin = undefined,
 		autoYMax = false,
-		minorSplitLine = false,
-		enableTooltip = false,
 		xAxisScale = 'log',
 		yAxisScale = 'linear',
-		showXGrid = true,
-		showYGrid = true,
-		xMax = 1000000,
-		autoYMax = false
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
