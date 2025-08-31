@@ -11,11 +11,19 @@
 	let chartContainer: HTMLDivElement;
 	let chart: any;
 	let hasValidData = $state(false);
+	let currentMetaId = $state(null);
 
 	const initializeChart = async () => {
 		// cell contains the lec_data: [[x, y], [x, y], ...]
 		if (!cell || !Array.isArray(cell) || cell.length === 0) {
+			hasValidData = false;
 			return;
+		}
+
+		// Check if this is a different row/hypothesis
+		if (currentMetaId !== meta?.id) {
+			currentMetaId = meta?.id;
+			hasValidData = false; // Reset state for new row
 		}
 
 		hasValidData = true;
@@ -129,6 +137,14 @@
 
 	onMount(async () => {
 		await initializeChart();
+	});
+
+	// React to data changes (when table is sorted/filtered)
+	$effect(() => {
+		// This will run whenever cell or meta changes
+		if (cell && meta) {
+			initializeChart();
+		}
 	});
 
 	// Cleanup on unmount
