@@ -35,33 +35,42 @@
 
 		chart = echarts.init(chartContainer, null, { renderer: 'svg' });
 
-		// Calculate min and max values from the data
-		const minValue = Math.min(...chartData.map(([x, _]: [number, number]) => x));
-		const maxValue = Math.max(...chartData.map(([x, _]: [number, number]) => x));
-		const calculatedXMin = Math.max(minValue * 0.8, 1);
-		const calculatedXMax = Math.ceil(maxValue * 1.2);
+		// Filter out zero values for logarithmic x-axis (can't display x=0 on log scale)
+		const nonZeroData = chartData.filter(([x, _]: [number, number]) => x > 0);
+
+		if (nonZeroData.length === 0) {
+			console.log('No non-zero data points for logarithmic chart');
+			return;
+		}
+
+		// Calculate min and max values from non-zero data
+		const minFromData = Math.min(...nonZeroData.map(([x, _]: [number, number]) => x));
+		const maxFromData = Math.max(...nonZeroData.map(([x, _]: [number, number]) => x));
+
+		// Same calculation as the detail page
+		const calculatedXMin = Math.max(minFromData * 0.8, 1); // Reduce by 20% but minimum of $1
+		const calculatedXMax = Math.ceil(maxFromData * 1.2); // Add 20% padding
 
 		const option = {
 			grid: {
-				left: '15%',
+				show: false,
+				left: '10%',
 				right: '10%',
-				top: '10%',
+				top: '5%',
 				bottom: '15%'
 			},
 			tooltip: {
-				trigger: 'axis',
-				formatter: function (params: any) {
-					const point = params[0];
-					return `Loss: $${point.value[0].toLocaleString()}<br/>Probability: ${(point.value[1] * 100).toFixed(2)}%`;
-				}
+				show: false // Disable tooltip for small preview
 			},
 			xAxis: {
-				type: 'log',
+				type: 'log', // Same as LossExceedanceCurve default
 				min: calculatedXMin,
 				max: calculatedXMax,
 				axisLabel: {
 					formatter: function (value: number) {
-						if (value >= 1000000) {
+						if (value >= 1000000000) {
+							return '$' + (value / 1000000000).toFixed(0) + 'B';
+						} else if (value >= 1000000) {
 							return '$' + (value / 1000000).toFixed(0) + 'M';
 						} else if (value >= 1000) {
 							return '$' + (value / 1000).toFixed(0) + 'K';
@@ -69,20 +78,20 @@
 							return '$' + value.toFixed(0);
 						}
 					},
-					fontSize: 10
+					fontSize: 8
 				},
 				splitLine: {
 					show: false
 				}
 			},
 			yAxis: {
-				type: 'value',
-				max: 1,
+				type: 'value', // Same as LossExceedanceCurve (linear scale)
+				max: undefined, // Auto-adjust like LossExceedanceCurve with autoYMax
 				axisLabel: {
 					formatter: function (value: number) {
 						return (value * 100).toFixed(0) + '%';
 					},
-					fontSize: 10
+					fontSize: 8
 				},
 				splitLine: {
 					show: false
@@ -110,7 +119,7 @@
 							}
 						])
 					},
-					data: chartData
+					data: nonZeroData
 				}
 			]
 		};
