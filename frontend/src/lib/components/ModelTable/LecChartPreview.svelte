@@ -54,10 +54,10 @@
 		const option = {
 			grid: {
 				show: false,
-				left: '10%',
-				right: '10%',
+				left: '25%', // More space for Y-axis labels
+				right: '5%',
 				top: '5%',
-				bottom: '15%'
+				bottom: '20%' // More space for X-axis labels
 			},
 			tooltip: {
 				show: false // Disable tooltip for small preview
