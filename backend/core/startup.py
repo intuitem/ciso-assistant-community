@@ -491,6 +491,16 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_campaign",
     "change_campaign",
     "delete_campaign",
+    # objectives,
+    "add_organisationobjective",
+    "view_organisationobjective",
+    "change_organisationobjective",
+    "delete_organisationobjective",
+    # issues,
+    "add_organisationissue",
+    "view_organisationissue",
+    "change_organisationissue",
+    "delete_organisationissue",
     # privacy,
     "add_processing",
     "change_processing",
@@ -541,10 +551,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_user",
     "change_user",
     "delete_user",
-    "add_usergroup",
     "view_usergroup",
-    "change_usergroup",
-    "delete_usergroup",
     "add_event",
     "view_event",
     "change_event",
@@ -775,6 +782,27 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_campaign",
     "change_campaign",
     "delete_campaign",
+    # objectives,
+    "add_organisationobjective",
+    "view_organisationobjective",
+    "change_organisationobjective",
+    "delete_organisationobjective",
+    # issues,
+    "add_organisationissue",
+    "view_organisationissue",
+    "change_organisationissue",
+    "delete_organisationissue",
+    # terminologies
+    "add_terminology",
+    "view_terminology",
+    "change_terminology",
+    "delete_terminology",
+    # roles,
+    "add_role",
+    "view_role",
+    "change_role",
+    "delete_role",
+    "view_permission",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -797,7 +825,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import Qualification, AssetClass
+    from core.models import Qualification, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -936,6 +964,12 @@ def startup(sender: AppConfig, **kwargs):
         AssetClass.create_default_values()
     except Exception as e:
         logger.error("Error creating default AssetClass", exc_info=e)
+
+    # Create default Terminologies
+    try:
+        Terminology.create_default_roto_risk_origins()
+    except Exception as e:
+        logger.error("Error creating default ROTO Risk Origins", exc_info=e)
 
     call_command("storelibraries")
 

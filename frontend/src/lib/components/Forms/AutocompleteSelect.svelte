@@ -14,6 +14,13 @@
 		value: string | number;
 		suggested?: boolean;
 		translatedLabel?: string;
+		path?: string[];
+		infoString?: {
+			string: string;
+			position: 'suffix' | 'prefix';
+			classes?: string;
+		};
+		contentType?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -59,7 +66,6 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
-		disabled?: boolean;
 		mount?: (value: any) => void;
 	}
 
@@ -217,6 +223,7 @@
 								return obj.str;
 							})
 						: [];
+				path.pop(); // remove duplicate last part if it exists
 
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
@@ -247,7 +254,8 @@
 					),
 					translatedLabel: safeTranslate(fullLabel),
 					path,
-					infoString
+					infoString,
+					contentType: object?.content_type || ''
 				};
 			})
 			.filter(
@@ -258,6 +266,14 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
+				// Sort folder by path
+				if (a.contentType && b.contentType) {
+					const aPath = a.path.join('') + a.label;
+					const bPath = b.path.join('') + b.label;
+					const alphaCompare = aPath.localeCompare(bPath);
+					return alphaCompare !== 0 ? alphaCompare : aPath.length - bPath.length;
+				}
+
 				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
@@ -410,6 +426,7 @@
 		{:else if $value}
 			<input type="hidden" name={field} value={$value} />
 		{/if}
+
 		<MultiSelect
 			bind:selected
 			{options}
@@ -491,10 +508,11 @@
 		</MultiSelect>
 		{#if isLoading}
 			<svg
-				class="animate-spin h-5 w-5 text-primary-500"
+				class="animate-spin h-5 w-5 text-primary-500 loading-spinner"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
+				data-testid="loading-spinner"
 			>
 				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 				></circle>

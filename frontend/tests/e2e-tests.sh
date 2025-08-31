@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-APP_DIR=$(realpath "$(dirname $0)/../..")
+APP_DIR=$(realpath "$(dirname "$0")/../..")
 DB_DIR=$APP_DIR/backend/db
 DB_NAME=test-database.sqlite3
 DB_INIT_NAME=test-database-initial.sqlite3
@@ -11,6 +11,17 @@ TEST_PATHS=()
 BACKEND_PORT=8173
 MAILER_WEB_SERVER_PORT=8073
 MAILER_SMTP_SERVER_PORT=1073
+
+KEYCLOAK_PORT=8080
+KEYCLOAK_ADMIN="admin"
+KEYCLOAK_ADMIN_PASSWORD="admin"
+QUICK_MODE_ACTIVATED=1
+KEEP_DATABASE_SNAPSHOT=1
+
+# Check if user can run docker without sudo
+if docker info >/dev/null 2>&1; then
+  DO_NOT_USE_SUDO=1
+fi
 
 for arg in "$@"; do
   if [[ $arg == --port* ]]; then
@@ -33,10 +44,14 @@ for arg in "$@"; do
     fi
   elif [[ $arg == -q ]]; then
     QUICK_MODE_ACTIVATED=1
+  elif [[ $arg == --no-quick ]]; then
+    QUICK_MODE_ACTIVATED=0
   elif [[ $arg == -v ]]; then
     STORE_BACKEND_OUTPUT=1
   elif [[ $arg == -k ]]; then
     KEEP_DATABASE_SNAPSHOT=1
+  elif [[ $arg == --no-snapshot ]]; then
+    KEEP_DATABASE_SNAPSHOT=0
   elif [[ $arg == --no-sudo ]]; then
     DO_NOT_USE_SUDO=1
   elif [[ $arg == --* ]]; then
@@ -53,9 +68,11 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
   echo "Run the end-to-end tests for the CISO Assistant application."
   echo "Options:"
   echo "  -q                      Quick mode: execute only the tests 1 time with no retries and only 1 project"
+  echo "  --no-quick              Disable quick mode: execute the tests with retries and all projects"
   echo "  -k                      Keep a saved snapshot of the initial database and use it to avoid executing useless migrations."
   echo "                          If the initial database hasn't been created running the tests with this option will create it."
   echo "                          Running the tests without this option will delete the saved initial database."
+  echo "  --no-snapshot           Do not keep a saved snapshot of the initial database, the database will be created from scratch."
   echo "  --no-sudo               Run docker commands without using sudo as a prefix."
   echo "  --port=PORT             Run the backend server on the specified port (default: $BACKEND_PORT)"
   echo "  -m, --mailer=PORT/PORT  Use an existing mailer service on the optionally defined ports (default: $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT)"
@@ -89,7 +106,7 @@ try :
 	# But it increase the execution time of the script with the timeout
 	# A local TCP connection should never reach a 1s delay
 	s.settimeout(1)
-	s.connect(('127.0.0.1', $BACKEND_PORT))
+	s.connect(('localhost', $BACKEND_PORT))
 	port_already_in_used = True
 except :
 	port_already_in_used = False
@@ -129,19 +146,29 @@ cleanup() {
     rm "$DB_DIR/$DB_NAME"
     echo "| test database deleted"
   fi
-  if [[ -z "$KEEP_DATABASE_SNAPSHOT" && -f "$DB_DIR/$DB_INIT_NAME" ]]; then
+  if [[ "$KEEP_DATABASE_SNAPSHOT" -ne 1 && -f "$DB_DIR/$DB_INIT_NAME" ]]; then
     rm "$DB_DIR/$DB_INIT_NAME"
     echo "| test initial database snapshot deleted"
   fi
   if [[ -n "$MAILER_PID" ]]; then
     if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-      sudo docker stop $MAILER_PID &>/dev/null
-      sudo docker rm $MAILER_PID &>/dev/null
+      sudo docker stop "$MAILER_PID" &>/dev/null
+      sudo docker rm "$MAILER_PID" &>/dev/null
     else
-      docker stop $MAILER_PID &>/dev/null
-      docker rm $MAILER_PID &>/dev/null
+      docker stop "$MAILER_PID" &>/dev/null
+      docker rm "$MAILER_PID" &>/dev/null
     fi
     echo "| mailer service stopped"
+  fi
+  if [[ -n "$KEYCLOAK_PID" ]]; then
+    if [[ -z "$DO_NOT_USE_SUDO" ]]; then
+      sudo docker stop "$KEYCLOAK_PID" &>/dev/null
+      sudo docker rm "$KEYCLOAK_PID" &>/dev/null
+    else
+      docker stop "$KEYCLOAK_PID" &>/dev/null
+      docker rm "$KEYCLOAK_PID" &>/dev/null
+    fi
+    echo "| keycloak service stopped"
   fi
   if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
     rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
@@ -165,9 +192,9 @@ if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   if command -v docker &>/dev/null; then
     echo "Starting mailer service..."
     if [[ -z "$DO_NOT_USE_SUDO" ]]; then
-      MAILER_PID=$(sudo docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+      MAILER_PID=$(sudo docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
     else
-      MAILER_PID=$(docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+      MAILER_PID=$(docker run -d -p "$MAILER_SMTP_SERVER_PORT":1025 -p "$MAILER_WEB_SERVER_PORT":8025 mailhog/mailhog)
     fi
     echo "Mailer service started on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT (Container ID: ${MAILER_PID:0:6})"
   else
@@ -177,6 +204,30 @@ if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   fi
 else
   echo "Using an existing mailer service on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT"
+fi
+
+if command -v docker &>/dev/null; then
+  echo "Starting keycloak with admin user $KEYCLOAK_ADMIN:$KEYCLOAK_ADMIN_PASSWORD on port $KEYCLOAK_PORT..."
+  if [[ -z "$DO_NOT_USE_SUDO" ]]; then
+    KEYCLOAK_PID=$(sudo docker run -d -p "$KEYCLOAK_PORT":8080 \
+      -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
+      -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
+      -v "$APP_DIR"/frontend/tests/keycloak:/opt/keycloak/data/import \
+      quay.io/keycloak/keycloak:26.3.0 \
+      start-dev --import-realm)
+  else
+    KEYCLOAK_PID=$(docker run -d -p "$KEYCLOAK_PORT":8080 \
+      -e KEYCLOAK_ADMIN="$KEYCLOAK_ADMIN" \
+      -e KEYCLOAK_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
+      -v "$APP_DIR"/frontend/tests/keycloak:/opt/keycloak/data/import \
+      quay.io/keycloak/keycloak:26.3.0 \
+      start-dev --import-realm)
+  fi
+  echo "Keycloak started on ports $KEYCLOAK_PORT (Container ID: ${KEYCLOAK_PID:0:6})"
+else
+  echo "Docker is not installed!"
+  echo "Please install Docker to use the isolated test mailer service or use -m to tell the tests to use an existing one."
+  exit 1
 fi
 
 echo "Starting backend server..."
@@ -197,11 +248,11 @@ export EMAIL_PORT=$MAILER_SMTP_SERVER_PORT
 export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
 export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 
-cd $APP_DIR/backend/ || exit 1
-if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
+cd "$APP_DIR"/backend/ || exit 1
+if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
-elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
+elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]] || ! poetry run python3 manage.py migrate --check; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
@@ -212,20 +263,20 @@ fi
 
 poetry run python3 manage.py createsuperuser --noinput
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup poetry run python3 manage.py runserver $BACKEND_PORT >$APP_DIR/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup poetry run python3 manage.py runserver localhost:$BACKEND_PORT >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup poetry run python3 manage.py runserver $BACKEND_PORT >/dev/null 2>&1 &
+  nohup poetry run python3 manage.py runserver localhost:$BACKEND_PORT >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"
 
 echo "Starting playwright tests"
 export ORIGIN=http://localhost:4173
-export PUBLIC_BACKEND_API_URL=http://127.0.0.1:$BACKEND_PORT/api
+export PUBLIC_BACKEND_API_URL=http://localhost:$BACKEND_PORT/api
 export MAILER_WEB_SERVER_PORT=$MAILER_WEB_SERVER_PORT
 
-cd $APP_DIR/frontend/
+cd "$APP_DIR"/frontend/ || exit
 
 if ((${#TEST_PATHS[@]} == 0)); then
   echo "| running every functional test"
@@ -240,14 +291,14 @@ fi
 echo "=========================================================================================="
 
 FRONTEND_HASH_FILE="$APP_DIR/frontend/tests/.frontend_hash"
-FRONTEND_HASH=$(find "$APP_DIR/frontend/src" -type f \( -name "*.ts" -o -name "*.svelte" \) -print0 | xargs -0 md5sum | md5sum)
+FRONTEND_HASH=$(find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum)
 
 if [ "$(cat "$FRONTEND_HASH_FILE")" != "$FRONTEND_HASH" ]; then
   pnpm run build # Required for the "pnpm run preview" command of playwright.config.ts
   echo "$FRONTEND_HASH" >"$FRONTEND_HASH_FILE"
 fi
 
-if [[ -n "$QUICK_MODE_ACTIVATED" ]]; then
+if [[ "$QUICK_MODE_ACTIVATED" -eq 1 ]]; then
   pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" --project=chromium "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
 else
   pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"

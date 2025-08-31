@@ -196,6 +196,8 @@
 	"importMatrices": "Importuj macierze",
 	"importFrameworks": "Importuj struktury",
 	"importMappings": "Importuj mapowania",
+	"importThreats": "Importuj zagrożenia",
+	"importReferenceControls": "Importuj kontrole referencyjne",
 	"summary": "Podsumowanie",
 	"composer": "Kompozytor",
 	"statistics": "Statystyki",
@@ -1678,6 +1680,8 @@
 		}
 	],
 	"matchingScenarios": "Dopasowane scenariusze",
+	"select": "Wybierz",
+	"deselect": "Odznacz",
 	"serverURL": "URL serwera",
 	"oidcConfiguration": "Openid-Configuration",
 	"tokenAuthMethod": "Metoda tokenu",
@@ -1702,5 +1706,6 @@
 	"dataWizardTemplatesAndGuidelines": "Szablony i wytyczne",
 	"dataWizardLoadExcelData": "Załaduj dane Excel",
 	"associatedCampaigns": "Powiązane kampanie",
-	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty"
+	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
+	"saveAndContinue": "Zapisz i kontynuuj"
 }

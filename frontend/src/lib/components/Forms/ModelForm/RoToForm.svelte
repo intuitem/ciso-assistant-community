@@ -48,6 +48,14 @@
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
 />
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 		? 'border-2 border-primary-500'
@@ -60,9 +68,10 @@
 	>
 		{m.activityOne()}
 	</p>
-	<Select
+	<AutocompleteSelect
 		{form}
-		options={model.selectOptions['risk-origin']}
+		optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+		optionsLabelField="translated_name"
 		field="risk_origin"
 		label={m.riskOrigin()}
 		cacheLock={cacheLocks['risk_origin']}

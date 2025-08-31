@@ -20,6 +20,8 @@
 		reference_controls?: z.infer<typeof ReferenceControlSchema>[] | undefined;
 		children?: Record<string, Record<string, unknown>> | undefined;
 		canEditRequirementAssessment: boolean;
+		hasParentNode: boolean;
+		showDocumentationScore: boolean;
 		selectedStatus: string[];
 		resultCounts: Record<string, number> | undefined;
 		assessable: boolean;
@@ -36,6 +38,8 @@
 		reference_controls = undefined,
 		children = undefined,
 		canEditRequirementAssessment,
+		hasParentNode,
+		showDocumentationScore,
 		selectedStatus,
 		resultCounts,
 		assessable,
@@ -130,11 +134,36 @@
 		return Math.floor(mean * 10) / 10;
 	}
 
+	function nodeDocumentationScore(): number | null {
+		if (
+			!resultCounts ||
+			!resultCounts.hasOwnProperty('total_documentation_score') ||
+			!resultCounts.hasOwnProperty('scored')
+		) {
+			return null;
+		}
+		let mean = resultCounts['total_documentation_score'] / resultCounts['scored'];
+		return Math.floor(mean * 10) / 10;
+	}
+
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
 	let classesPercentText = $derived((resultColor: string) =>
 		resultColor === '#000000' ? 'text-white' : ''
 	);
+
+	const getBadgeStyles = (answers: any, questions: any) => {
+		const answeredCount = Object.values(answers || {}).filter((answer) => answer !== null).length;
+		const totalCount = Object.keys(questions || {}).length;
+		const backgroundColor =
+			answeredCount === 0 ? '#fca5a5' : answeredCount === totalCount ? '#bbf7d0' : '#fef08a';
+		return {
+			backgroundColor,
+			color: darkenColor(backgroundColor, 0.6),
+			answeredCount,
+			totalCount
+		};
+	};
 </script>
 
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
@@ -201,19 +230,14 @@
 						{/each}
 					{/if}
 					{#if node.questions}
-						{#if Object.keys(node.questions).length > 1}
-							<span
-								class="badge"
-								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{Object.keys(node.questions).length} {m.questionPlural()}</span
-							>
-						{:else}
-							<span
-								class="badge"
-								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{Object.keys(node.questions).length} {m.questionSingular()}</span
-							>
-						{/if}
+						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}
+						<span
+							class="badge"
+							style="background-color: {badgeStyles.backgroundColor}; color: {badgeStyles.color}"
+						>
+							{badgeStyles.answeredCount}/{badgeStyles.totalCount}
+							{Object.keys(node.questions).length > 1 ? m.questionPlural() : m.questionSingular()}
+						</span>
 					{/if}
 				</div>
 			</div>
@@ -307,15 +331,41 @@
 						</div>
 					{/each}
 				</div>
-				{#if nodeScore() !== null}
-					<span>
+				<div class="flex flex-row space-x-2 items-center">
+					{#if hasParentNode}
+						{#if nodeScore() !== null}
+							<ProgressRing
+								strokeWidth="20px"
+								value={formatScoreValue(nodeScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+								size="size-12">{nodeScore()}</ProgressRing
+							>
+							{#if showDocumentationScore}
+								<ProgressRing
+									strokeWidth="20px"
+									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+									size="size-12">{nodeDocumentationScore()}</ProgressRing
+								>
+							{/if}
+						{/if}
+					{:else if nodeScore() !== null}
 						<ProgressRing
+							strokeWidth="20px"
 							value={formatScoreValue(nodeScore(), node.max_score)}
 							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
-							size="size-12"><p class="font-semibold text-xs">{nodeScore()}</p></ProgressRing
+							size="size-12">{nodeScore()}</ProgressRing
 						>
-					</span>
-				{/if}
+						{#if showDocumentationScore}
+							<ProgressRing
+								strokeWidth="20px"
+								value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+								size="size-12">{nodeDocumentationScore()}</ProgressRing
+							>
+						{/if}
+					{/if}
+				</div>
 			</div>
 		{/if}
 	</div>

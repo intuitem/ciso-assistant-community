@@ -13,7 +13,18 @@
 	let { data }: Props = $props();
 </script>
 
-<DetailView {data}>
+{#if data.data?.is_locked}
+	<div
+		class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mx-4 mt-4 mb-4"
+	>
+		<div class="flex items-center">
+			<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+			<span class="font-medium">{m.lockedAssessment()}</span>
+			<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+		</div>
+	</div>
+{/if}
+<DetailView {data} disableCreate={data.data?.is_locked} disableDelete={data.data?.is_locked}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
 			<Anchor
@@ -31,13 +42,14 @@
 				<div class="grid grid-cols-2 gap-2">
 					<div class="rounded-lg bg-primary-100 p-3 text-center">
 						<p class="text-xs font-medium text-primary-800">Total</p>
-						<p class="text-xl font-bold text-primary-900">
+						<p class="text-xl font-bold text-primary-900" data-testid="summary-total">
 							{data.findings_metrics.raw_metrics.total_count || 'N/A'}
 						</p>
 					</div>
 					<div class="rounded-lg bg-primary-100 p-3 text-center">
 						<p class="text-xs font-medium text-primary-800">{m.followUpUnresolvedHigh()}</p>
-						<p class="text-xl font-bold text-primary-900">
+						<!--                                                                          hoc = high or critical -->
+						<p class="text-xl font-bold text-primary-900" data-testid="summary-unresolved-hoc">
 							{data.findings_metrics.raw_metrics.unresolved_important_count || 'N/A'}
 						</p>
 					</div>

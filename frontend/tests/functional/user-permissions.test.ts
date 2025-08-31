@@ -112,22 +112,22 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 					const userCanView = userFromUserGroupHasPermission(
 						userGroup,
 						'view',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 					const userCanCreate = userFromUserGroupHasPermission(
 						userGroup,
 						'add',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 					const userCanUpdate = userFromUserGroupHasPermission(
 						userGroup,
 						'change',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 					const userCanDelete = userFromUserGroupHasPermission(
 						userGroup,
 						'delete',
-						objectData.permName ?? objectData.displayName
+						objectData.modelName ?? objectData.displayName
 					);
 
 					test.beforeAll(async ({ pages }) => {
@@ -140,21 +140,25 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 					} view ${objectData.displayName.toLowerCase()}`, async ({ pages }) => {
 						if (
 							await pages[objectPage]
-								.getRow(objectData.build.name || objectData.build.email)
+								.getRow(objectData.build.name || objectData.build.email || objectData.build.str)
 								.isHidden()
 						) {
 							await pages[objectPage].searchInput.fill(
-								objectData.build.name || objectData.build.email
+								objectData.build.name || objectData.build.email || objectData.build.str
 							);
 						}
 
 						if (userCanView) {
 							await expect(
-								pages[objectPage].getRow(objectData.build.name || objectData.build.email)
+								pages[objectPage].getRow(
+									objectData.build.name || objectData.build.email || objectData.build.str
+								)
 							).toBeVisible();
 						} else {
 							await expect(
-								pages[objectPage].getRow(objectData.build.name || objectData.build.email)
+								pages[objectPage].getRow(
+									objectData.build.name || objectData.build.email || objectData.build.str
+								)
 							).toBeHidden();
 						}
 					});
@@ -174,21 +178,25 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 					} update ${objectData.displayName.toLowerCase()}`, async ({ pages }) => {
 						if (
 							await pages[objectPage]
-								.getRow(objectData.build.name || objectData.build.email)
+								.getRow(objectData.build.name || objectData.build.email || objectData.build.str)
 								.isHidden()
 						) {
 							await pages[objectPage].searchInput.fill(
-								objectData.build.name || objectData.build.email
+								objectData.build.name || objectData.build.email || objectData.build.str
 							);
 						}
 
 						if (userCanUpdate) {
 							await expect(
-								pages[objectPage].editItemButton(objectData.build.name || objectData.build.email)
+								pages[objectPage].editItemButton(
+									objectData.build.name || objectData.build.email || objectData.build.str
+								)
 							).toBeVisible();
 						} else {
 							await expect(
-								pages[objectPage].editItemButton(objectData.build.name || objectData.build.email)
+								pages[objectPage].editItemButton(
+									objectData.build.name || objectData.build.email || objectData.build.str
+								)
 							).toBeHidden();
 						}
 					});
@@ -198,21 +206,25 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 					} delete ${objectData.displayName.toLowerCase()}`, async ({ pages }) => {
 						if (
 							await pages[objectPage]
-								.getRow(objectData.build.name || objectData.build.email)
+								.getRow(objectData.build.name || objectData.build.email || objectData.build.str)
 								.isHidden()
 						) {
 							await pages[objectPage].searchInput.fill(
-								objectData.build.name || objectData.build.email
+								objectData.build.name || objectData.build.email || objectData.build.str
 							);
 						}
 
 						if (userCanDelete) {
 							await expect(
-								pages[objectPage].deleteItemButton(objectData.build.name || objectData.build.email)
+								pages[objectPage].deleteItemButton(
+									objectData.build.name || objectData.build.email || objectData.build.str
+								)
 							).toBeVisible();
 						} else {
 							await expect(
-								pages[objectPage].deleteItemButton(objectData.build.name || objectData.build.email)
+								pages[objectPage].deleteItemButton(
+									objectData.build.name || objectData.build.email || objectData.build.str
+								)
 							).toBeHidden();
 						}
 					});

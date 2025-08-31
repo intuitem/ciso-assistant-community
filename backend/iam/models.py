@@ -6,7 +6,7 @@ from typing import Any, List, Self, Tuple, Generator
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -44,6 +44,14 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
+
+ALLOWED_PERMISSION_APPS = (
+    "core",
+    "ebios_rm",
+    "tprm",
+    "privacy",
+    "resilience",
+)
 
 
 def _get_root_folder():
@@ -238,6 +246,21 @@ class Folder(NameDescriptionMixin):
             ra4.perimeter_folders.add(folder)
             # Clear the cache after a new folder is created - purposely clearing everything
 
+            # Create a UG and RA for each non-builtin role (idempotent)
+            with transaction.atomic():
+                for role in Role.objects.filter(builtin=False):
+                    ug, _ = UserGroup.objects.get_or_create(
+                        name=role.name, folder=folder, defaults={"builtin": False}
+                    )
+                    ra, created = RoleAssignment.objects.get_or_create(
+                        user_group=ug,
+                        role=role,
+                        folder=Folder.get_root_folder(),
+                        defaults={"builtin": False, "is_recursive": True},
+                    )
+                    # Ensure perimeter folder link exists
+                    ra.perimeter_folders.add(folder)
+
 
 class FolderMixin(models.Model):
     """
@@ -293,7 +316,7 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def __str__(self) -> str:
         if self.builtin:
             return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
+        return f"{self.folder.name} - {self.name}"
 
     def get_name_display(self) -> str:
         return self.name
@@ -301,7 +324,9 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def get_localization_dict(self) -> dict:
         return {
             "folder": self.folder.name,
-            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
+            if self.builtin
+            else self.name,
         }
 
     @property
@@ -335,6 +360,7 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
         )
@@ -451,6 +477,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "The user groups this user belongs to. A user will get all permissions "
             "granted to each of their user groups."
         ),
+    )
+    observation = models.TextField(
+        null=True, blank=True, verbose_name="Notes about a user"
     )
     objects = CaseInsensitiveUserManager()
 
@@ -666,6 +695,8 @@ class Role(NameDescriptionMixin, FolderMixin):
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
 
+    fields_to_check = ["name"]
+
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
@@ -834,6 +865,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
                 objects_ids = [f.id]
+            elif class_name == "permission":
+                # Permissions have no folder, so we don't filter them, we just rely on view_permission
+                objects_ids = Permission.objects.filter(
+                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                ).values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")
             if permission_view in result_folders[f]:

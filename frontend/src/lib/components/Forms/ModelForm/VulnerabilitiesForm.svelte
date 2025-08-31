@@ -27,6 +27,7 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -96,6 +97,7 @@
 	{form}
 	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
+	translateOptions={false}
 	optionsLabelField="label"
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}

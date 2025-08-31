@@ -14,6 +14,7 @@
 	import Duration from '../Duration.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -87,14 +88,16 @@
 	optionsEndpoint="asset-class"
 	optionsLabelField="full_path"
 	field="asset_class"
+	cacheLock={cacheLocks['asset_class']}
+	bind:cachedValue={formDataCache['asset_class']}
 	label={m.assetClass()}
 />
 <TextField
 	{form}
 	field="ref_id"
-	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+	label={m.refId()}
 />
 
 <AutocompleteSelect
@@ -110,6 +113,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	pathField="path"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -222,7 +226,16 @@
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
+	translateOptions={false}
 	allowUserOptions="append"
+/>
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
 />
 {#if initialData.ebios_rm_studies}
 	<AutocompleteSelect

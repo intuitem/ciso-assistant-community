@@ -1,11 +1,11 @@
+from auditlog.registry import auditlog
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import post_save, post_delete
+from django.db.models import Case, When, IntegerField, Q
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-
-from auditlog.registry import auditlog
-
+from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
@@ -13,17 +13,16 @@ from core.models import (
     Asset,
     ComplianceAssessment,
     Qualification,
+    RiskAssessment,
     RiskMatrix,
     Threat,
-    RiskAssessment,
+    Terminology,
 )
 from core.validators import (
     JSONSchemaInstanceValidator,
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
-
-from django.core.exceptions import ValidationError
 
 INITIAL_META = {
     "workshops": [
@@ -315,18 +314,47 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         return FearedEvent.format_gravity(self.gravity, self.parsed_matrix)
 
 
-class RoTo(AbstractBaseModel, FolderMixin):
-    class RiskOrigin(models.TextChoices):
-        STATE = "state", _("State")
-        ORGANIZED_CRIME = "organized_crime", _("Organized crime")
-        TERRORIST = "terrorist", _("Terrorist")
-        ACTIVIST = "activist", _("Activist")
-        COMPETITOR = "competitor", _("Competitor")
-        AMATEUR = "amateur", _("Amateur")
-        AVENGER = "avenger", _("Avenger")
-        PATHOLOGICAL = "pathological", _("Pathological")
-        OTHER = "other", _("Other")
+class RoToQuerySet(models.QuerySet):
+    def with_pertinence(self):
+        """Annotate queryset with pertinence for ordering"""
+        pertinence_annotation = Case(
+            # Handle undefined cases (motivation = 0 or resources = 0)
+            models.When(Q(motivation=0) | models.Q(resources=0), then=0),  # UNDEFINED
+            # Matrix[0][0-3] - motivation=1
+            When(motivation=1, resources=1, then=1),
+            When(motivation=1, resources=2, then=1),
+            When(motivation=1, resources=3, then=2),
+            When(motivation=1, resources=4, then=2),
+            # Matrix[1][0-3] - motivation=2
+            When(motivation=2, resources=1, then=1),
+            When(motivation=2, resources=2, then=2),
+            When(motivation=2, resources=3, then=3),
+            When(motivation=2, resources=4, then=3),
+            # Matrix[2][0-3] - motivation=3
+            When(motivation=3, resources=1, then=2),
+            When(motivation=3, resources=2, then=3),
+            When(motivation=3, resources=3, then=3),
+            When(motivation=3, resources=4, then=4),
+            # Matrix[3][0-3] - motivation=4
+            When(motivation=4, resources=1, then=2),
+            When(motivation=4, resources=2, then=3),
+            When(motivation=4, resources=3, then=4),
+            When(motivation=4, resources=4, then=4),
+            default=0,
+            output_field=IntegerField(),
+        )
+        return self.annotate(pertinence=pertinence_annotation)
 
+
+class RoToManager(models.Manager):
+    def get_queryset(self):
+        return RoToQuerySet(self.model, using=self._db)
+
+    def with_pertinence(self):
+        return self.get_queryset().with_pertinence()
+
+
+class RoTo(AbstractBaseModel, FolderMixin):
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
         VERY_LOW = 1, "very_low"
@@ -367,8 +395,15 @@ class RoTo(AbstractBaseModel, FolderMixin):
         blank=True,
     )
 
-    risk_origin = models.CharField(
-        max_length=32, verbose_name=_("Risk origin"), choices=RiskOrigin.choices
+    risk_origin = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        verbose_name=_("Risk origin"),
+        related_name="roto_risk_origins",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
     )
     target_objective = models.TextField(verbose_name=_("Target objective"))
     motivation = models.PositiveSmallIntegerField(
@@ -392,8 +427,10 @@ class RoTo(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["ebios_rm_study", "target_objective", "risk_origin"]
 
+    objects = RoToManager()
+
     def __str__(self) -> str:
-        return f"{self.get_risk_origin_display()} - {self.target_objective}"
+        return f"{self.risk_origin.get_name_translated} - {self.target_objective}"
 
     class Meta:
         verbose_name = _("RO/TO couple")
@@ -404,8 +441,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
-    @property
-    def get_pertinence(self):
+    def get_pertinence_display(self):
         PERTINENCE_MATRIX = [
             [1, 1, 2, 2],
             [1, 2, 3, 3],

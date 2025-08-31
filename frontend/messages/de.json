@@ -190,6 +190,8 @@
 	"importMatrices": "Matrizen importieren",
 	"importFrameworks": "Frameworks importieren",
 	"importMappings": "Zuordnungen importieren",
+	"importThreats": "Bedrohungen importieren",
+	"importReferenceControls": "Referenzkontrollen importieren",
 	"summary": "Zusammenfassung",
 	"composer": "Komponist",
 	"statistics": "Statistiken",
@@ -962,5 +964,8 @@
 		}
 	],
 	"matchingScenarios": "Übereinstimmende Szenarien",
-	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt."
+	"select": "Auswählen",
+	"deselect": "Abwählen",
+	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt.",
+	"saveAndContinue": "Speichern und fortfahren"
 }

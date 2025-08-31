@@ -9,6 +9,10 @@ on:
       - "backend/**"
       - ".github/workflows/backend-api-tests.yml"
   workflow_dispatch:
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
@@ -19,14 +23,14 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DB_HOST: localhost
       EMAIL_HOST: localhost
       EMAIL_PORT: 1025
-      EMAIL_HOST_USER: ''
-      EMAIL_HOST_PASSWORD: ''
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@alsigo.net'
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     strategy:
       max-parallel: 4
@@ -35,15 +39,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install

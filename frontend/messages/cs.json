@@ -190,6 +190,8 @@
 	"importMatrices": "Import matic",
 	"importFrameworks": "Import rámců",
 	"importMappings": "Import mapování",
+	"importThreats": "Import hrozeb",
+	"importReferenceControls": "Import referenčních kontrol",
 	"summary": "Souhrn",
 	"composer": "Správa závislostí",
 	"statistics": "Statistiky",
@@ -945,5 +947,8 @@
 		}
 	],
 	"matchingScenarios": "Shodné scénáře",
-	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu."
+	"select": "Vybrat",
+	"deselect": "Zrušit výběr",
+	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu.",
+	"saveAndContinue": "Uložit a pokračovat"
 }

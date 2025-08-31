@@ -8,6 +8,11 @@ on:
     types: [opened, synchronize]
   workflow_dispatch:
 
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
@@ -20,13 +25,13 @@ jobs:
   migrations-check:
     runs-on: ubuntu-24.04
     env:
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -40,15 +45,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -59,13 +71,13 @@ jobs:
   enterprise-migrations-check:
     runs-on: ubuntu-24.04
     env:
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
-      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
       EMAIL_HOST: localhost
       EMAIL_HOST_USER: user@tests.com
       EMAIL_HOST_PASSWORD: password
@@ -85,11 +97,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install

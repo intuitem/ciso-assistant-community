@@ -48,7 +48,7 @@
 		rowCount?: boolean;
 		pagination?: boolean;
 		numberRowsPerPage?: number;
-		orderBy?: { identifier: string; direction: 'asc' | 'desc' } | undefined;
+		orderBy?: { identifier: string; direction: 'asc' | 'desc' };
 		// Props (styles)
 		element?: string;
 		text?: string;
@@ -66,10 +66,10 @@
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
-		deleteForm?: SuperValidated<AnyZodObject> | undefined;
-		URLModel?: urlModel | undefined;
+		deleteForm?: SuperValidated<AnyZodObject>;
+		URLModel?: urlModel;
 		baseEndpoint?: string;
-		detailQueryParameter?: string | undefined;
+		detailQueryParameter?: string;
 		fields?: string[];
 		canSelectObject?: boolean;
 		hideFilters?: boolean;
@@ -380,6 +380,27 @@
 
 	const tail_render = $derived(tail);
 
+	// Multi-value columns that should not be sortable
+	const MULTI_VALUE_COLUMNS = [
+		'owner',
+		'filtering_labels',
+		'threats',
+		'assets',
+		'applied_controls',
+		'existing_applied_controls',
+		'evidences',
+		'qualifications',
+		'user_groups'
+	];
+
+	// Function to check if a column is multi-value and should not be sortable
+	const isMultiValueColumn = (key: string): boolean => {
+		return (
+			MULTI_VALUE_COLUMNS.includes(key) ||
+			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
+		);
+	};
+
 	let openState = $state(false);
 </script>
 
@@ -455,7 +476,9 @@
 			<tr>
 				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
+						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+							>{safeTranslate(heading)}</Th
+						>
 					{/if}
 				{/each}
 				{#if displayActions}
@@ -547,6 +570,19 @@
 														<span class="ml-9"
 															>{safeTranslate('percentageDisplay', { number: value })}</span
 														>
+													{:else if key === 'translations'}
+														{#if Object.keys(value).length > 0}
+															<div class="flex flex-col gap-2">
+																{#each Object.entries(value) as [lang, translation]}
+																	<div class="flex flex-row gap-2">
+																		<strong>{lang}:</strong>
+																		<span>{safeTranslate(translation)}</span>
+																	</div>
+																{/each}
+															</div>
+														{:else}
+															--
+														{/if}
 													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
@@ -584,7 +620,7 @@
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn)
+												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
@@ -626,7 +662,7 @@
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
-							<action.component row={contextMenuOpenRow} {handler} {action} />
+							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
@@ -638,6 +674,15 @@
 								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
 								>{m.edit()}</Anchor
+							>
+						</ContextMenu.Item>
+						<ContextMenu.Item
+							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+						>
+							<Anchor
+								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
+								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
+								>{m.view()}</Anchor
 							>
 						</ContextMenu.Item>
 					{/if}
