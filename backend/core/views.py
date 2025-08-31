@@ -3268,7 +3268,7 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
     def _create_model_objects(self, model, objects, link_dump_database_ids):
-        """Create all objects for a model after validation."""
+        """Create all objects for a model after validation during domain import."""
         logger.debug("Creating objects for model", model=model)
 
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
@@ -3302,7 +3302,7 @@ class FolderViewSet(BaseModelViewSet):
             )
 
     def _create_batch(self, model, batch, link_dump_database_ids):
-        """Create a batch of objects with proper relationship handling."""
+        """Create a batch of objects with proper relationship handling during domain import."""
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
             for obj in batch:
@@ -3363,7 +3363,7 @@ class FolderViewSet(BaseModelViewSet):
         link_dump_database_ids,
         many_to_many_map_ids,
     ):
-        """Process model-specific relationships."""
+        """Process model-specific relationships during domain import."""
 
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
@@ -3409,6 +3409,9 @@ class FolderViewSet(BaseModelViewSet):
             case "appliedcontrol":
                 many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                     _fields.pop("evidences", []), link_dump_database_ids
+                )
+                many_to_many_map_ids["objective_ids"] = get_mapped_ids(
+                    _fields.pop("objectives", []), link_dump_database_ids
                 )
                 ref_control_id = link_dump_database_ids.get(
                     _fields["reference_control"]
@@ -3465,6 +3468,9 @@ class FolderViewSet(BaseModelViewSet):
                     )
                     many_to_many_map_ids[map_key] = get_mapped_ids(
                         _fields.pop(field, []), link_dump_database_ids
+                    )
+                    many_to_many_map_ids["qualification_ids"] = get_mapped_ids(
+                        _fields.pop("qualifications", []), link_dump_database_ids
                     )
 
             case "entity":
@@ -3576,7 +3582,7 @@ class FolderViewSet(BaseModelViewSet):
         return _fields
 
     def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
-        """Set many-to-many relationships after object creation."""
+        """Set many-to-many relationships after object creation during domain import."""
         model_name = model._meta.model_name
 
         match model_name:
@@ -3590,7 +3596,8 @@ class FolderViewSet(BaseModelViewSet):
             case "appliedcontrol":
                 if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                     obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
-
+                if "objective_ids" in many_to_many_map_ids:
+                    obj.objectives.set(many_to_many_map_ids["objective_ids"])
             case "requirementassessment":
                 if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
                     obj.applied_controls.set(
@@ -3620,6 +3627,7 @@ class FolderViewSet(BaseModelViewSet):
                         AppliedControl,
                         "existing_applied_controls",
                     ),
+                    "qualification_ids": (Qualification, "qualifications"),
                 }.items():
                     if ids := many_to_many_map_ids.get(field):
                         getattr(obj, model_class[1]).set(
