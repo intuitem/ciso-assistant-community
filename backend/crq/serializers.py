@@ -132,7 +132,26 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     simulation_parameters_display = serializers.CharField(
         source="get_simulation_parameters_display", read_only=True
     )
+    lec_data = serializers.SerializerMethodField()
     folder = FieldsRelatedField()
+
+    def get_lec_data(self, obj):
+        """Return LEC data for the table preview"""
+        if not obj.simulation_data or not isinstance(obj.simulation_data, dict):
+            return None
+
+        loss_data = obj.simulation_data.get("loss", [])
+        probability_data = obj.simulation_data.get("probability", [])
+
+        if (
+            not loss_data
+            or not probability_data
+            or len(loss_data) != len(probability_data)
+        ):
+            return None
+
+        # Convert to [x, y] pairs for ECharts, same format as the LEC endpoint
+        return [[loss, prob] for loss, prob in zip(loss_data, probability_data)]
 
     class Meta:
         model = QuantitativeRiskHypothesis

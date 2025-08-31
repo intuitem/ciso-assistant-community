@@ -4,6 +4,7 @@ import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
+import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
 import { type urlModel } from './types';
 
 type GetOptionsParams = {
@@ -1564,6 +1565,9 @@ export const FIELD_COMPONENT_MAP = {
 	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
+	},
+	'quantitative-risk-hypotheses': {
+		lec_data: LecChartPreview
 	}
 };
 
