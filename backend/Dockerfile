@@ -39,13 +39,10 @@ RUN apt-get update && apt-get install -y \
     && locale-gen sv_SE.UTF-8 \
     && locale-gen id_ID.UTF-8 \
     && pip install --no-cache-dir --upgrade pip poetry==2.0.1
-
+    
 COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
 
-RUN poetry install --no-root \
-    && rm -rf $POETRY_CACHE_DIR
-
-#watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
 EXPOSE 8000
