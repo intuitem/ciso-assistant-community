@@ -5,7 +5,8 @@ from pathlib import Path
 import click
 import pandas as pd
 import requests
-import yaml
+import os
+from dotenv import load_dotenv
 import json
 from rich import print as rprint
 
@@ -14,118 +15,32 @@ from icecream import ic
 cli_cfg = dict()
 auth_data = dict()
 
-API_URL = ""
 GLOBAL_FOLDER_ID = None
-TOKEN = ""
-EMAIL = ""
-PASSWORD = ""
 
 CLICA_CONFG_PATH = ".clica_config.yaml"
 
+load_dotenv(".clica.env")
 
 @click.group()
 def cli():
     """CLICA is the CLI tool to interact with CISO Assistant REST API."""
     pass
 
-
-@click.command()
-def init_config():
-    """Create/Reset the config file."""
-    template_data = {
-        "rest": {
-            "url": "https://localhost:8443/api",
-            "verify_certificate": True,
-        },
-        "credentials": {"email": "user@company.org", "password": ""},
-    }
-    if click.confirm(
-        f"This will create {CLICA_CONFG_PATH} for you to fill and will RESET any exisiting one. Do you wish to continue?"
-    ):
-        with open(CLICA_CONFG_PATH, "w") as yfile:
-            yaml.safe_dump(
-                template_data, yfile, default_flow_style=False, sort_keys=False
-            )
-            print(
-                f"Config file is available at {CLICA_CONFG_PATH}. Please update it with your credentials."
-            )
-
-
-try:
-    with open(CLICA_CONFG_PATH, "r") as yfile:
-        cli_cfg = yaml.safe_load(yfile)
-except FileNotFoundError:
-    print(
-        "Config file not found. Running the init command to create it but you need to fill it.",
-        file=sys.stderr,
-    )
-    init_config()
-
-try:
-    API_URL = cli_cfg["rest"]["url"]
-except KeyError:
-    print(
-        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one.",
-        file=sys.stderr,
-    )
-    sys.exit(1)
-
-try:
-    EMAIL = cli_cfg["credentials"]["email"]
-    PASSWORD = cli_cfg["credentials"]["password"]
-except KeyError:
-    print(
-        "Missing credentials in the config file. You need to pass them to the CLI in this case.",
-        file=sys.stderr,
-    )
-
-VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
-
-
-def check_auth():
-    if Path(".tmp.yaml").exists():
-        with open(".tmp.yaml", "r") as yfile:
-            auth_data = yaml.safe_load(yfile)
-            return auth_data["token"]
-    else:
-        click.echo("Could not find authentication data.", err=True)
-
-
-TOKEN = check_auth()
-
-
-@click.command()
-@click.option("--email", required=False)
-@click.option("--password", required=False)
-def auth(email, password):
-    """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
-    url = f"{API_URL}/iam/login/"
-    if email and password:
-        data = {"username": email, "password": password}
-    else:
-        print("trying credentials from the config file", file=sys.stderr)
-        if EMAIL and PASSWORD:
-            data = {"username": EMAIL, "password": PASSWORD}
-        else:
-            print("Could not find any usable credentials.", file=sys.stderr)
-            sys.exit(1)
-    headers = {"accept": "application/json", "Content-Type": "application/json"}
-
-    res = requests.post(url, data, headers, verify=VERIFY_CERTIFICATE)
-    print(res.status_code)
-    if res.status_code == 200:
-        with open(".tmp.yaml", "w") as yfile:
-            yaml.safe_dump(res.json(), yfile)
-            print("Looks good, you can move to other commands.", file=sys.stderr)
-    else:
-        print(
-            "Check your credentials again. You can set them on the config file or on the command line.",
-            file=sys.stderr,
-        )
-        print(res.json())
-
+# Read TOKEN, API_URL and VERIFY_CERTIFICATE from environment variables
+API_URL = os.getenv("API_URL", "")
+TOKEN = os.getenv("TOKEN", "")
+VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+    "on",
+)
 
 def ids_map(model, folder=None):
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     my_map = dict()
     url = f"{API_URL}/{model}/ids/"
     headers = {"Authorization": f"Token {TOKEN}"}
@@ -141,6 +56,10 @@ def ids_map(model, folder=None):
 
 
 def _get_folders():
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -183,6 +102,10 @@ def get_unique_parsed_values(df, column_name):
 
 
 def batch_create(model, items, folder_id):
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
@@ -212,11 +135,15 @@ def batch_create(model, items, folder_id):
     "--create_all",
     required=False,
     is_flag=True,
-    default=True,
+    default=False,
     help="Create all associated objects (threats, assets)",
 )
 def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
     """crawl a risk assessment (see template) and create the assoicated objects"""
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     df = pd.read_csv(file, delimiter=";")
     headers = {
         "Authorization": f"Token {TOKEN}",
@@ -290,6 +217,8 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
         data = {
             "ref_id": scenario.ref_id,
             "name": scenario.name,
+            "description": scenario.description,
+            "justification": scenario.justification,
             "risk_assessment": ra_id,
             "treatment": str(scenario.treatment).lower(),
         }
@@ -339,6 +268,10 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
 @click.option("--file", required=True, help="Path of the csv file with assets")
 def import_assets(file):
     """import assets from a csv. Check the samples for format."""
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     GLOBAL_FOLDER_ID, _ = _get_folders()
     df = pd.read_csv(file)
     url = f"{API_URL}/assets/"
@@ -375,6 +308,10 @@ def import_assets(file):
 )
 def import_controls(file):
     """import applied controls. Check the samples for format."""
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
     url = f"{API_URL}/applied-controls/"
@@ -411,6 +348,10 @@ def import_controls(file):
 )
 def import_evidences(file):
     """Import evidences. Check the samples for format."""
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
+        
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
 
@@ -442,6 +383,9 @@ def import_evidences(file):
 @click.option("--name", required=True, help="Name of the evidence")
 def upload_attachment(file, name):
     """Upload attachment as evidence"""
+    if not TOKEN:
+        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        sys.exit(1)
 
     headers = {
         "Authorization": f"Token {TOKEN}",
@@ -478,11 +422,9 @@ def upload_attachment(file, name):
 
 cli.add_command(get_folders)
 cli.add_command(get_perimeters)
-cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
 cli.add_command(import_evidences)
-cli.add_command(init_config)
 cli.add_command(upload_attachment)
 cli.add_command(import_risk_assessment)
 cli.add_command(get_matrices)

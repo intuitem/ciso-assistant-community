@@ -61,6 +61,8 @@
 	import QuantitativeRiskStudyForm from './ModelForm/QuantitativeRiskStudyForm.svelte';
 	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
+	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
+	import RoleForm from './ModelForm/RoleForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -547,6 +549,10 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'terminologies'}
+			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'roles'}
+			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

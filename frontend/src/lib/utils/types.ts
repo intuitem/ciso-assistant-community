@@ -112,6 +112,11 @@ export const URL_MODEL = [
 	'quantitative-risk-studies',
 	'quantitative-risk-scenarios',
 	'quantitative-risk-hypotheses'
+	// terminologies
+	'terminologies',
+	// roles,
+	'roles',
+	'permissions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
