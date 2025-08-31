@@ -571,6 +571,19 @@
 														<span class="ml-9"
 															>{safeTranslate('percentageDisplay', { number: value })}</span
 														>
+													{:else if key === 'translations'}
+														{#if Object.keys(value).length > 0}
+															<div class="flex flex-col gap-2">
+																{#each Object.entries(value) as [lang, translation]}
+																	<div class="flex flex-row gap-2">
+																		<strong>{lang}:</strong>
+																		<span>{safeTranslate(translation)}</span>
+																	</div>
+																{/each}
+															</div>
+														{:else}
+															--
+														{/if}
 													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
@@ -608,7 +621,7 @@
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn)
+												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}

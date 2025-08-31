@@ -104,6 +104,9 @@ export const URL_MODEL = [
 	// iso,
 	'organisation-issues',
 	'organisation-objectives',
+	// terminologies
+	'terminologies',
+	// roles,
 	'roles',
 	'permissions',
 	'qualifications'
