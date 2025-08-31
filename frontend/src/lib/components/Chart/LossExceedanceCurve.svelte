@@ -40,7 +40,7 @@
 		xMin = undefined,
 		autoYMax = false,
 		xAxisScale = 'log',
-		yAxisScale = 'linear',
+		yAxisScale = 'linear'
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
