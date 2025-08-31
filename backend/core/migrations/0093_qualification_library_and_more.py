@@ -10,14 +10,14 @@ def migrate_qualifications(apps, schema_editor):
     Deterministic: assumes RiskScenario.qualifications (old field) was always
     a list of strings corresponding exactly to Qualification.name values.
     """
-    RiskScenario = apps.get_model('core', 'RiskScenario')
-    Qualification = apps.get_model('core', 'Qualification')
+    RiskScenario = apps.get_model("core", "RiskScenario")
+    Qualification = apps.get_model("core", "Qualification")
 
     # Build strict mapping name -> id
-    name_to_id = dict(Qualification.objects.values_list('name', 'id'))
+    name_to_id = dict(Qualification.objects.values_list("name", "id"))
 
     for rs in RiskScenario.objects.all():
-        old_names = getattr(rs, 'qualifications', None)
+        old_names = getattr(rs, "qualifications", None)
         if not old_names:
             continue
         ids = []
@@ -30,70 +30,64 @@ def migrate_qualifications(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0092_terminology'),
+        ("core", "0092_terminology"),
     ]
 
     operations = [
         # ---- Qualification model updates ----
         migrations.AddField(
-            model_name='qualification',
-            name='library',
+            model_name="qualification",
+            name="library",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='qualifications',
-                to='core.loadedlibrary',
+                related_name="qualifications",
+                to="core.loadedlibrary",
             ),
         ),
         migrations.AlterField(
-            model_name='qualification',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="qualification",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
-
         # ---- RiskScenario.qualifications migration ----
         # 1) Add temporary ManyToMany field
         migrations.AddField(
-            model_name='riskscenario',
-            name='qualifications_tmp',
+            model_name="riskscenario",
+            name="qualifications_tmp",
             field=models.ManyToManyField(
                 blank=True,
-                to='core.qualification',
-                related_name='risk_scenarios_tmp',
-                help_text='(temporary during migration)',
-                verbose_name='Qualifications (tmp)',
+                to="core.qualification",
+                related_name="risk_scenarios_tmp",
+                help_text="(temporary during migration)",
+                verbose_name="Qualifications (tmp)",
             ),
         ),
-
         # 2) Copy old data into the new M2M
         migrations.RunPython(migrate_qualifications, migrations.RunPython.noop),
-
         # 3) Remove the old field (list of names)
         migrations.RemoveField(
-            model_name='riskscenario',
-            name='qualifications',
+            model_name="riskscenario",
+            name="qualifications",
         ),
-
         # 4) Rename temporary field to final name
         migrations.RenameField(
-            model_name='riskscenario',
-            old_name='qualifications_tmp',
-            new_name='qualifications',
+            model_name="riskscenario",
+            old_name="qualifications_tmp",
+            new_name="qualifications",
         ),
-
         # 5) Adjust final definition
         migrations.AlterField(
-            model_name='riskscenario',
-            name='qualifications',
+            model_name="riskscenario",
+            name="qualifications",
             field=models.ManyToManyField(
                 blank=True,
-                to='core.qualification',
-                related_name='risk_scenarios',
-                help_text='Qualifications carried by the risk scenario',
-                verbose_name='Qualifications',
+                to="core.qualification",
+                related_name="risk_scenarios",
+                help_text="Qualifications carried by the risk scenario",
+                verbose_name="Qualifications",
             ),
         ),
     ]
