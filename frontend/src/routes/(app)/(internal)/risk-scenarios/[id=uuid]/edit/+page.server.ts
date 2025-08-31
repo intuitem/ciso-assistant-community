@@ -145,7 +145,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		probabilityChoices,
 		impactChoices,
 		treatmentChoices,
-		qualificationChoices,
 		strengthOfKnowledgeChoices: strengthOfKnowledgeChoices,
 		tables,
 		measureModel,
