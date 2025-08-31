@@ -111,7 +111,7 @@ export const URL_MODEL = [
 	// crq,
 	'quantitative-risk-studies',
 	'quantitative-risk-scenarios',
-	'quantitative-risk-hypotheses'
+	'quantitative-risk-hypotheses',
 	// terminologies
 	'terminologies',
 	// roles,

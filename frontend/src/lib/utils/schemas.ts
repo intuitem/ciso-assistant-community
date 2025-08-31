@@ -1079,7 +1079,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'organisation-issues': organisationIssueSchema,
 	'quantitative-risk-studies': quantitativeRiskStudySchema,
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
-	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema
+	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
 	roles: RoleSchema
 };

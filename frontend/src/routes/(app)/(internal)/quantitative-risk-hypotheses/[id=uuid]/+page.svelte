@@ -114,7 +114,7 @@
 						<h3 class="text-lg font-semibold">Risk Insights</h3>
 						{#if data.data.impact?.lb && data.data.impact?.ub}
 							<button
-								onclick={() => showDistributionModal = true}
+								onclick={() => (showDistributionModal = true)}
 								class="text-sm text-blue-600 hover:text-blue-800 underline"
 							>
 								View Distribution
@@ -130,9 +130,11 @@
 											{#if key.toLowerCase().includes('prob') && !key.startsWith('loss_with_')}
 												{(value * 100).toFixed(2)}%
 											{:else}
-												{value >= 1000000 ? `$${Math.round(value / 1000000)}M` :
-												 value >= 1000 ? `$${Math.round(value / 1000)}K` :
-												 `$${Math.round(value).toLocaleString()}`}
+												{value >= 1000000
+													? `$${Math.round(value / 1000000)}M`
+													: value >= 1000
+														? `$${Math.round(value / 1000)}K`
+														: `$${Math.round(value).toLocaleString()}`}
 											{/if}
 										{:else}
 											{value}
@@ -140,7 +142,10 @@
 									</div>
 									<div class="text-sm text-gray-600 capitalize leading-tight">
 										{#if key.startsWith('loss_with_') && key.endsWith('_percent')}
-											{@const percentage = key.replace('loss_with_', '').replace('_percent', '').replace('_', '.')}
+											{@const percentage = key
+												.replace('loss_with_', '')
+												.replace('_percent', '')
+												.replace('_', '.')}
 											Loss with {percentage}% chance
 										{:else}
 											{key.replace(/_/g, ' ')}
@@ -166,7 +171,9 @@
 {#if showDistributionModal}
 	<div
 		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-		onclick={(e) => { if (e.target === e.currentTarget) showDistributionModal = false; }}
+		onclick={(e) => {
+			if (e.target === e.currentTarget) showDistributionModal = false;
+		}}
 	>
 		<div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
 			<div class="flex justify-between items-center mb-4">
@@ -175,20 +182,24 @@
 					<div class="flex items-center space-x-2">
 						<label class="text-sm font-medium">X-axis:</label>
 						<button
-							onclick={() => xAxisScale = xAxisScale === 'linear' ? 'log' : 'linear'}
-							class="px-3 py-1 text-sm rounded border {xAxisScale === 'linear' ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-100 border-gray-300'}"
+							onclick={() => (xAxisScale = xAxisScale === 'linear' ? 'log' : 'linear')}
+							class="px-3 py-1 text-sm rounded border {xAxisScale === 'linear'
+								? 'bg-blue-100 border-blue-300 text-blue-700'
+								: 'bg-gray-100 border-gray-300'}"
 						>
 							Linear
 						</button>
 						<button
-							onclick={() => xAxisScale = xAxisScale === 'log' ? 'linear' : 'log'}
-							class="px-3 py-1 text-sm rounded border {xAxisScale === 'log' ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-100 border-gray-300'}"
+							onclick={() => (xAxisScale = xAxisScale === 'log' ? 'linear' : 'log')}
+							class="px-3 py-1 text-sm rounded border {xAxisScale === 'log'
+								? 'bg-blue-100 border-blue-300 text-blue-700'
+								: 'bg-gray-100 border-gray-300'}"
 						>
 							Log
 						</button>
 					</div>
 					<button
-						onclick={() => showDistributionModal = false}
+						onclick={() => (showDistributionModal = false)}
 						class="text-gray-500 hover:text-gray-700 text-2xl"
 					>
 						×
@@ -202,7 +213,7 @@
 						upperBound={data.data.impact?.ub}
 						height="h-96"
 						width="w-full"
-						xAxisScale={xAxisScale}
+						{xAxisScale}
 						onParametersCalculated={(mu, sigma) => {
 							calculatedMu = mu;
 							calculatedSigma = sigma;
@@ -212,8 +223,8 @@
 			</div>
 			<div class="text-sm text-gray-600 space-y-2">
 				<p class="text-center">
-					Lognormal distribution with 90% confidence interval:
-					${data.data.impact?.lb?.toLocaleString()} - ${data.data.impact?.ub?.toLocaleString()}
+					Lognormal distribution with 90% confidence interval: ${data.data.impact?.lb?.toLocaleString()}
+					- ${data.data.impact?.ub?.toLocaleString()}
 				</p>
 				{#if calculatedMu !== undefined && calculatedSigma !== undefined}
 					<p class="text-center font-mono">

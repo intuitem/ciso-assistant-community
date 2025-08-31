@@ -14,7 +14,9 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	const lecData = await event
-		.fetch(`${BASE_API_URL}/crq/quantitative-risk-hypotheses/${event.params.id}/lec/?t=${Date.now()}`)
+		.fetch(
+			`${BASE_API_URL}/crq/quantitative-risk-hypotheses/${event.params.id}/lec/?t=${Date.now()}`
+		)
 		.then((res) => res.json());
 
 	return {

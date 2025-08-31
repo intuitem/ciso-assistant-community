@@ -11,15 +11,15 @@
 		title?: string;
 		xAxisLabel?: string;
 		yAxisLabel?: string;
-    minorSplitLine?:  boolean;
-    enableTooltip?: boolean;
-    xAxisScale?: 'linear' | 'log';
-    yAxisScale?: 'linear' | 'log';
-    showXGrid?: boolean;
-    showYGrid?: boolean;
-    xMax?: number;
-    xMin?: number;
-    autoYMax?: boolean;
+		minorSplitLine?: boolean;
+		enableTooltip?: boolean;
+		xAxisScale?: 'linear' | 'log';
+		yAxisScale?: 'linear' | 'log';
+		showXGrid?: boolean;
+		showYGrid?: boolean;
+		xMax?: number;
+		xMin?: number;
+		autoYMax?: boolean;
 		minorSplitLine?: boolean;
 		enableTooltip?: boolean;
 		xAxisScale?: 'linear' | 'log';
@@ -40,15 +40,15 @@
 		title = 'Loss Exceedance Curve',
 		xAxisLabel = 'Loss Amount ($)',
 		yAxisLabel = 'Exceedance Probability',
-    minorSplitLine = false,
-    enableTooltip = false,
-    xAxisScale = 'log',
-    yAxisScale = 'linear',
-    showXGrid = true,
-    showYGrid = true,
-    xMax = 1000000,
-    xMin = undefined,
-    autoYMax = false,
+		minorSplitLine = false,
+		enableTooltip = false,
+		xAxisScale = 'log',
+		yAxisScale = 'linear',
+		showXGrid = true,
+		showYGrid = true,
+		xMax = 1000000,
+		xMin = undefined,
+		autoYMax = false,
 		minorSplitLine = false,
 		enableTooltip = false,
 		xAxisScale = 'log',
@@ -96,8 +96,8 @@
 				type: xAxisScale,
 				name: xAxisLabel,
 				nameLocation: 'middle',
-        min: calculatedXMin,
-        max: xMax,
+				min: calculatedXMin,
+				max: xMax,
 				nameGap: 30,
 				minorSplitLine: {
 					show: minorSplitLine

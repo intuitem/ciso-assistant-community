@@ -28,7 +28,7 @@
 		yAxisLabel = 'Probability Density',
 		enableTooltip = true,
 		xAxisScale = 'linear',
-		onParametersCalculated = undefined,
+		onParametersCalculated = undefined
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
@@ -36,7 +36,7 @@
 	// Calculate lognormal parameters from 90% CI bounds
 	function calculateLognormalParams(lb: number, ub: number) {
 		const z05 = -1.64485362695147; // 5th percentile
-		const z95 = 1.64485362695147;  // 95th percentile
+		const z95 = 1.64485362695147; // 95th percentile
 		const ln_lb = Math.log(lb);
 		const ln_ub = Math.log(ub);
 		const sigma = (ln_ub - ln_lb) / (z95 - z05);
@@ -45,7 +45,14 @@
 	}
 
 	// Generate lognormal probability density values
-	function generateLognormalPDF(mu: number, sigma: number, xMin: number, xMax: number, scale: 'linear' | 'log' = 'linear', points: number = 500) {
+	function generateLognormalPDF(
+		mu: number,
+		sigma: number,
+		xMin: number,
+		xMax: number,
+		scale: 'linear' | 'log' = 'linear',
+		points: number = 500
+	) {
 		const data = [];
 
 		if (scale === 'log') {
@@ -59,8 +66,9 @@
 
 				// Lognormal PDF
 				const lnX = Math.log(x);
-				const pdf = (1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
-							Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
+				const pdf =
+					(1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
+					Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
 
 				data.push([x, pdf]);
 			}
@@ -73,8 +81,9 @@
 
 				// Lognormal PDF
 				const lnX = Math.log(x);
-				const pdf = (1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
-							Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
+				const pdf =
+					(1 / (x * sigma * Math.sqrt(2 * Math.PI))) *
+					Math.exp(-Math.pow(lnX - mu, 2) / (2 * sigma * sigma));
 
 				data.push([x, pdf]);
 			}
@@ -93,9 +102,11 @@
 		const { mu, sigma } = calculateLognormalParams(lowerBound, upperBound);
 
 		// Verify our calculation by checking if the percentiles match
-		const calculated5th = Math.exp(mu + sigma * (-1.64485362695147));
+		const calculated5th = Math.exp(mu + sigma * -1.64485362695147);
 		const calculated95th = Math.exp(mu + sigma * 1.64485362695147);
-		console.log(`Verification - Input: ${lowerBound}-${upperBound}, Calculated: ${calculated5th.toFixed(0)}-${calculated95th.toFixed(0)}`);
+		console.log(
+			`Verification - Input: ${lowerBound}-${upperBound}, Calculated: ${calculated5th.toFixed(0)}-${calculated95th.toFixed(0)}`
+		);
 
 		// Call the callback with calculated parameters
 		if (onParametersCalculated) {
@@ -224,7 +235,7 @@
 						label: {
 							show: true,
 							position: 'end',
-							formatter: function(params: any) {
+							formatter: function (params: any) {
 								const value = params.value;
 								if (value >= 1000000) {
 									return `$${(value / 1000000).toFixed(1)}M`;
