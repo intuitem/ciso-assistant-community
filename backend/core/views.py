@@ -22,6 +22,13 @@ from django.db.models import (
     ExpressionWrapper,
     FloatField,
     Value,
+    Min,
+    Max,
+    Case,
+    When,
+    CharField,
+    Subquery,
+    OuterRef,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -5957,6 +5964,134 @@ class TimelineEntryViewSet(BaseModelViewSet):
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+    ordering_fields = [
+        "name",
+        "description",
+        "is_recurrent",
+        "task_date",
+        "assigned_to",
+        "folder",
+        "created_at",
+        "updated_at",
+        "next_occurrence_computed",
+        "last_occurrence_status_computed",
+        "next_occurrence",
+        "last_occurrence_status",
+    ]
+
+    def get_queryset(self):
+        from django.utils import timezone
+
+        queryset = super().get_queryset()
+        today = timezone.now().date()
+
+        # Annotate with next_occurrence_computed (earliest due date >= today)
+        # Using different name to avoid conflict with @property
+        queryset = queryset.annotate(
+            next_occurrence_computed=Min(
+                "tasknode__due_date", filter=Q(tasknode__due_date__gte=today)
+            )
+        )
+
+        # Subquery to get the status of the most recent task node <= today
+        latest_task_status = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lte=today)
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+
+        # Annotate with last_occurrence_status_computed
+        # Using different name to avoid conflict with @property
+        queryset = queryset.annotate(
+            last_occurrence_status_computed=Subquery(latest_task_status)
+        )
+
+        return queryset
+
+    def get_ordering(self):
+        """Override ordering to map frontend field names to backend annotation names"""
+        # DRF uses 'ordering' as the default parameter name
+        # Use getattr to handle both Django request and DRF request objects
+        query_params = getattr(self.request, "query_params", self.request.GET)
+        ordering = query_params.get("ordering")
+        if ordering:
+            # Temporary debug logging
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.info(f"TaskTemplate ordering received: {ordering}")
+            # Handle multiple ordering fields separated by comma
+            orderings = [field.strip() for field in ordering.split(",")]
+            mapped_orderings = []
+
+            for field in orderings:
+                # Handle negative ordering (descending)
+                desc = field.startswith("-")
+                field_name = field[1:] if desc else field
+
+                # Map frontend field names to backend annotation names
+                # Handle both camelCase (from head) and snake_case (from body) field names
+                if field_name in ["next_occurrence", "nextOccurrence"]:
+                    mapped_field = "next_occurrence_computed"
+                elif field_name in ["last_occurrence_status", "lastOccurrenceStatus"]:
+                    mapped_field = "last_occurrence_status_computed"
+                else:
+                    mapped_field = field_name
+
+                mapped_orderings.append(f"{'-' if desc else ''}{mapped_field}")
+
+            # Debug logging for final result
+            logger.info(f"TaskTemplate ordering mapped to: {mapped_orderings}")
+            return mapped_orderings
+
+        return super().get_ordering()
+
+    def filter_queryset(self, queryset):
+        """Override to handle ordering field mapping before applying filters"""
+        # Handle ordering parameter mapping before applying filters
+        query_params = getattr(self.request, "query_params", self.request.GET)
+        ordering = query_params.get("ordering")
+
+        if ordering and ordering in [
+            "next_occurrence",
+            "last_occurrence_status",
+            "-next_occurrence",
+            "-last_occurrence_status",
+        ]:
+            # Temporary debug logging
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.info(f"TaskTemplate filter_queryset ordering received: {ordering}")
+
+            # Handle negative ordering (descending)
+            desc = ordering.startswith("-")
+            field_name = ordering[1:] if desc else ordering
+
+            # Map frontend field names to backend annotation names
+            if field_name == "next_occurrence":
+                mapped_field = "next_occurrence_computed"
+            elif field_name == "last_occurrence_status":
+                mapped_field = "last_occurrence_status_computed"
+            else:
+                mapped_field = field_name
+
+            mapped_ordering = f"{'-' if desc else ''}{mapped_field}"
+            logger.info(f"TaskTemplate applying direct ordering: {mapped_ordering}")
+
+            # Apply ordering directly to queryset
+            queryset = queryset.order_by(mapped_ordering)
+
+            # Apply other filters (search, etc.) but skip ordering filter
+            from rest_framework.filters import OrderingFilter
+
+            for backend in self.filter_backends:
+                if not isinstance(backend(), OrderingFilter):
+                    queryset = backend().filter_queryset(self.request, queryset, self)
+
+            return queryset
+
+        return super().filter_queryset(queryset)
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""

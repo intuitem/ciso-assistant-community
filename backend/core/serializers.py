@@ -1858,8 +1858,8 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
 
-    next_occurrence = serializers.DateField(read_only=True)
-    last_occurrence_status = serializers.CharField(read_only=True)
+    next_occurrence = serializers.SerializerMethodField()
+    last_occurrence_status = serializers.SerializerMethodField()
 
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()
@@ -1891,6 +1891,16 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
         if task_node:
             return [{"id": e.id, "str": e.name} for e in task_node.evidences.all()]
         return []
+
+    def get_next_occurrence(self, obj):
+        # Use computed annotation if available, otherwise fall back to property
+        return getattr(obj, "next_occurrence_computed", obj.next_occurrence)
+
+    def get_last_occurrence_status(self, obj):
+        # Use computed annotation if available, otherwise fall back to property
+        return getattr(
+            obj, "last_occurrence_status_computed", obj.last_occurrence_status
+        )
 
 
 class TaskTemplateWriteSerializer(BaseModelSerializer):
