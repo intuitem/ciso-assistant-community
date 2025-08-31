@@ -1401,6 +1401,7 @@
 	"addQuantitativeRiskScenario": "Ajouter un scénario",
 	"addQuantitativeRiskHypothesis": "Ajouter une hypothèse",
 	"riskStage": "Phase de Risque",
+	"lecChart": "Courbe LEC",
 	"followUp": "Suivi des constats",
 	"pentest": "Test d'intrusion",
 	"audit": "Audit",

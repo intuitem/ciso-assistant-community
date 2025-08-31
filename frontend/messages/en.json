@@ -1838,6 +1838,7 @@
 	"associatedQuantitativeRiskScenarios": "Associated scenarios",
 	"riskStage": "Profile",
 	"hypothesisStage": "Profile",
+	"lecChart": "LEC Chart",
 	"addedControls": "Added Controls",
 	"removedControls": "Removed Controls",
 	"expectedLossLowerBound": "Expected Loss Lower Bound (LB)",

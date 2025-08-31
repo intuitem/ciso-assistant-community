@@ -1559,8 +1559,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-hypotheses': {
-		head: ['ref_id', 'name', 'riskStage', 'isSelected'],
-		body: ['ref_id', 'name', 'risk_stage', 'is_selected'],
+		head: ['ref_id', 'name', 'riskStage', 'isSelected', 'lecChart'],
+		body: ['ref_id', 'name', 'risk_stage', 'is_selected', 'simulation_data'],
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}
