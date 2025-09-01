@@ -135,6 +135,7 @@ export interface ModelMapEntry {
 	filters?: SelectField[];
 	path?: string;
 	endpointUrl?: string;
+	customNameDescription?: boolean;
 }
 
 type ModelMap = {
@@ -285,6 +286,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -1377,6 +1379,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'tasks', urlModel: 'task-templates' },
 			{ field: 'assigned_to', urlModel: 'users' }
 		],
+		reverseForeignKeyFields: [
+			{
+				field: 'objectives',
+				urlModel: 'applied-controls',
+				disableCreate: false,
+				disableDelete: true
+			}
+		],
 		filters: [{ field: 'folder' }]
 	},
 	'organisation-issues': {
@@ -1390,7 +1400,51 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'assets', urlModel: 'assets' }
 		],
+		reverseForeignKeyFields: [
+			{
+				field: 'issues',
+				urlModel: 'organisation-objectives',
+				disableCreate: false,
+				disableDelete: true
+			}
+		],
 		filters: [{ field: 'folder' }]
+	},
+	terminologies: {
+		name: 'terminology',
+		localName: 'terminology',
+		localNamePlural: 'terminologies',
+		verboseName: 'Terminology',
+		verboseNamePlural: 'Terminologies',
+		selectFields: [{ field: 'field_path' }],
+		customNameDescription: true,
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'field_path' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' },
+			{ field: 'translations' }
+		]
+	},
+	roles: {
+		endpointUrl: 'roles',
+		name: 'role',
+		localName: 'role',
+		localNamePlural: 'roles',
+		verboseName: 'Role',
+		verboseNamePlural: 'Roles'
+	},
+	permissions: {
+		endpointUrl: 'permissions',
+		name: 'permission',
+		localName: 'permission',
+		localNamePlural: 'permissions',
+		verboseName: 'Permission',
+		verboseNamePlural: 'Permissions'
 	}
 };
 

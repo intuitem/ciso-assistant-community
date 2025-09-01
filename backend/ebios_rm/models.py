@@ -16,6 +16,7 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     Threat,
+    Terminology,
 )
 from core.validators import (
     JSONSchemaInstanceValidator,
@@ -354,17 +355,6 @@ class RoToManager(models.Manager):
 
 
 class RoTo(AbstractBaseModel, FolderMixin):
-    class RiskOrigin(models.TextChoices):
-        STATE = "state", _("State")
-        ORGANIZED_CRIME = "organized_crime", _("Organized crime")
-        TERRORIST = "terrorist", _("Terrorist")
-        ACTIVIST = "activist", _("Activist")
-        COMPETITOR = "competitor", _("Competitor")
-        AMATEUR = "amateur", _("Amateur")
-        AVENGER = "avenger", _("Avenger")
-        PATHOLOGICAL = "pathological", _("Pathological")
-        OTHER = "other", _("Other")
-
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
         VERY_LOW = 1, "very_low"
@@ -405,8 +395,15 @@ class RoTo(AbstractBaseModel, FolderMixin):
         blank=True,
     )
 
-    risk_origin = models.CharField(
-        max_length=32, verbose_name=_("Risk origin"), choices=RiskOrigin.choices
+    risk_origin = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        verbose_name=_("Risk origin"),
+        related_name="roto_risk_origins",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
     )
     target_objective = models.TextField(verbose_name=_("Target objective"))
     motivation = models.PositiveSmallIntegerField(
@@ -433,7 +430,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     objects = RoToManager()
 
     def __str__(self) -> str:
-        return f"{self.get_risk_origin_display()} - {self.target_objective}"
+        return f"{self.risk_origin.get_name_translated} - {self.target_objective}"
 
     class Meta:
         verbose_name = _("RO/TO couple")

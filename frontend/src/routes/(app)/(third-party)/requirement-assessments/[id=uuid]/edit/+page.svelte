@@ -638,6 +638,15 @@
 							onclick={cancel}>{m.cancel()}</button
 						>
 						<button
+							class="btn preset-filled-secondary-500 font-semibold w-full"
+							data-testid="save-no-continue-button"
+							type="submit"
+							onclick={() =>
+								form.form.update((data) => {
+									return { ...data, noRedirect: true };
+								})}>{m.saveAndContinue()}</button
+						>
+						<button
 							class="btn preset-filled-primary-500 font-semibold w-full"
 							data-testid="save-button"
 							type="submit">{m.save()}</button

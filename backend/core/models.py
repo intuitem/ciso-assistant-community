@@ -2747,6 +2747,13 @@ class AppliedControl(
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    objectives = models.ManyToManyField(
+        "OrganisationObjective",
+        blank=True,
+        verbose_name=_("Objectives"),
+        related_name="applied_controls",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -2858,6 +2865,11 @@ class OrganisationIssue(
             "Legal",
         )
         ENVIRONMENTAL = "environmental", "Environmental"
+        ORGANISATION_STRUCTURE = "organisationStructure", "Organisation Structure"
+        HUMAN_RESOURCES = "humanResources", "Human resources"
+        INTERNAL_PROCESSES = "internalProcesses", "Internal processes"
+        FINANCIAL_CAPACITY = "financialCapacity", "Financial capacity"
+        COMPANY_CULTURE = "companyCulture", "Company culture / communication"
 
     class Origin(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -2951,6 +2963,8 @@ class OrganisationObjective(
         default=Health.UNDEFINED,
         verbose_name=_("Health"),
     )
+    eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
     fields_to_check = ["name"]
 
     class Meta:
@@ -5364,3 +5378,110 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
+
+
+class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    """
+    Model to store custom terminology for the application
+    """
+
+    class FieldPath(models.TextChoices):
+        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+
+    DEFAULT_ROTO_RISK_ORIGINS = [
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    field_path = models.CharField(
+        max_length=100,
+        verbose_name=_("Field path"),
+        choices=FieldPath.choices,
+    )
+    builtin = models.BooleanField(
+        default=False,
+        verbose_name=_("Built-in"),
+        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Visible"),
+        help_text=_("Indicates if the terminology is visible in the UI"),
+    )
+    translations = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name=_("Translations"),
+        help_text=_("JSON field to store translations for different languages"),
+    )
+
+    @classmethod
+    def create_default_roto_risk_origins(cls):
+        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
+            Terminology.objects.update_or_create(
+                name=risk_origin["name"],
+                field_path=risk_origin["field_path"],
+                defaults=risk_origin,
+            )
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations or self.name
+
+    def __str__(self) -> str:
+        return self.get_name_translated or self.name

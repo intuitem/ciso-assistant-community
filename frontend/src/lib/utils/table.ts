@@ -212,6 +212,7 @@ const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+
 const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -343,6 +344,28 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'nature',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/health',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'health',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -795,6 +818,35 @@ const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'isAssigned',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const FIELD_PATH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'field_path',
+		optionsEndpoint: 'terminologies/field_path',
+		optionsLabelField: 'label',
+		optionsValueField: 'label',
+		multiple: true
+	}
+};
+
+const BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
 		options: YES_NO_OPTIONS,
 		multiple: true
 	}
@@ -1458,10 +1510,12 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'domain', 'status', 'health'],
-		body: ['name', 'folder', 'status', 'health'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'assigned_to'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
 		}
 	},
 	'organisation-issues': {
@@ -1503,6 +1557,15 @@ export const listViewFields = {
 	qualifications: {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
+	},
+	terminologies: {
+		head: ['field_path', 'name', 'description', 'translations'],
+		body: ['field_path', 'name', 'description', 'translations'],
+		filters: {
+			field_path: FIELD_PATH_FILTER,
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
+		}
 	},
 	extra: {
 		filters: {
