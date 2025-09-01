@@ -760,15 +760,14 @@ class AssetViewSet(BaseModelViewSet):
 
             # For support assets, find all ancestors using the pre-fetched map.
             ancestors = set()
-            q = [asset.id]
-            visited_ancestors = {asset.id}
+            q = [asset]
+            visited_ancestors = {asset}
             while q:
                 curr_asset = q.pop(0)
-                if curr_asset in asset_map:
-                    ancestors.add(asset_map[curr_asset])
                 for parent_asset in child_to_parents.get(curr_asset, []):
                     if parent_asset not in visited_ancestors:
                         visited_ancestors.add(parent_asset)
+                        ancestors.add(parent_asset)
                         q.append(parent_asset)
 
             primary_ancestors = {anc for anc in ancestors if anc.is_primary}

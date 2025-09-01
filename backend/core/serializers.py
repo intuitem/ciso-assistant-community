@@ -403,7 +403,6 @@ class AssetReadSerializer(AssetWriteSerializer):
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["name"])
 
-    # --- MODIFIED FIELDS ---
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
     disaster_recovery_objectives = serializers.SerializerMethodField()
@@ -417,7 +416,7 @@ class AssetReadSerializer(AssetWriteSerializer):
             # Use pre-calculated data if available
             return optimized_data.get("descendants", {}).get(obj.id, [])
 
-        # Fallback for single object serialization (e.g., retrieve endpoint)
+        # Fallback for single object serialization
         return obj.children_assets.annotate(str=F("name")).values("id", "str")
 
     def get_security_objectives(self, obj):
