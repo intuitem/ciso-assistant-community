@@ -152,7 +152,7 @@ def ebios_rm_visual_analysis(study):
     for ro_to in rotos:
         nodes.append(
             {
-                "name": ro_to.risk_origin,
+                "name": ro_to.risk_origin.get_name_translated,
                 "category": 2,
                 "symbolSize": 25,
             }
@@ -176,7 +176,7 @@ def ebios_rm_visual_analysis(study):
             }
         )
         entry = {
-            "ro": ro_to.risk_origin,
+            "ro": ro_to.risk_origin.get_name_translated,
             "to": ro_to.target_objective,
             "feared_events": [
                 {"name": fe.name, "assets": [a.name for a in fe.assets.all()]}
