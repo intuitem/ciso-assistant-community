@@ -16,7 +16,7 @@ You have basically two ways to do it:
 ```yaml
 caddy:
     container_name: caddy
-    image: caddy:2.8.4
+    image: caddy:2.10.0
     ...
     volumes:
       - ./caddy_data:/data
@@ -33,7 +33,7 @@ caddy:
 ```yaml
 caddy:
     container_name: caddy
-    image: caddy:2.8.4
+    image: caddy:2.10.0
     ...
     volumes:
       - ./caddy_data:/data
