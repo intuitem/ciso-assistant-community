@@ -332,19 +332,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         Override the list method to inject optimized data into the serializer context.
         """
         queryset = self.filter_queryset(self.get_queryset())
-
-        # 1. Perform the bulk calculation for the entire queryset
-        optimized_data = self._get_optimized_object_data(queryset)
-
+        page = self.paginate_queryset(queryset)
+        objects = page if page is not None else queryset
+        # 1. Perform the bulk calculation for the current page (or entire set if not paginated)
+        optimized_data = self._get_optimized_object_data(objects)
         # 2. Pass the data to the serializer via context
         context = self.get_serializer_context()
         context["optimized_data"] = optimized_data
-
-        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context=context)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
 
