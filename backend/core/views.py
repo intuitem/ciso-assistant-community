@@ -1521,6 +1521,27 @@ class AppliedControlViewSet(BaseModelViewSet):
     filterset_class = AppliedControlFilterSet
     search_fields = ["name", "description", "ref_id"]
 
+    def get_queryset(self):
+        """Optimize queries by prefetching related objects used in the table view and serializer"""
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "reference_control",
+            )
+            .prefetch_related(
+                "owner",
+                "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "findings",  # Used for findings_count
+                "evidences",  # Serialized as FieldsRelatedField
+                "objectives",  # ManyToManyField to OrganisationObjective
+                "assets",  # ManyToManyField used in table
+                "security_exceptions",  # Serialized as FieldsRelatedField
+            )
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -4429,7 +4450,26 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        """Optimize queries for table view and serializer, with conditional annotations for sorting"""
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "framework",  # Displayed in table
+                "perimeter",  # Displayed in table
+                "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
+                "campaign",  # Serialized as FieldsRelatedField
+            )
+            .prefetch_related(
+                "assets",  # ManyToManyField serialized as FieldsRelatedField
+                "evidences",  # ManyToManyField serialized as FieldsRelatedField
+                "authors",  # ManyToManyField from Assessment parent class
+                "reviewers",  # ManyToManyField from Assessment parent class
+            )
+        )
+
         ordering = self.request.query_params.get("ordering", "")
 
         if any(
@@ -5305,6 +5345,26 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "requirement__description",
         "requirement__ref_id",
     ]
+
+    def get_queryset(self):
+        """Optimize queries for table view and serializer - high-impact due to many nested relationships"""
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "compliance_assessment",  # Displayed in table and serialized
+                "compliance_assessment__perimeter",  # perimeter field uses compliance_assessment.perimeter
+                "compliance_assessment__perimeter__folder",  # Nested FieldsRelatedField optimization
+                "requirement",  # Used for name (__str__), description, assessable in table
+            )
+            .prefetch_related(
+                "evidences",  # ManyToManyField serialized as FieldsRelatedField
+                "applied_controls",  # ManyToManyField to AppliedControl
+                "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+            )
+        )
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
