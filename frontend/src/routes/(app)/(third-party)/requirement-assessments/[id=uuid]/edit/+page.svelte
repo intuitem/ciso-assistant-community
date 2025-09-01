@@ -32,6 +32,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -273,7 +274,7 @@
 	</div>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line p-2 font-light text-lg">
-			👉 {data.requirement.description}
+			👉 <MarkdownRenderer content={data.requirement.description} />
 		</p>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
