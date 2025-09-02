@@ -379,7 +379,7 @@ jobs:
           python -m pipx ensurepath
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           python -m pipx install poetry
-      
+
       - name: Configure Poetry to not use virtualenvs
         run: poetry config virtualenvs.create false
 
@@ -457,7 +457,7 @@ jobs:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           TEST_FILE: ${{ matrix.test_file }}
           CI: true
-        run: IS_ENTERPRISE=1 pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER" "$TEST_FILE"
 
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
