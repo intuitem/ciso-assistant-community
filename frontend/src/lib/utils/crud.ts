@@ -136,6 +136,7 @@ export interface ModelMapEntry {
 	path?: string;
 	endpointUrl?: string;
 	customNameDescription?: boolean;
+	actions?: Array<'add' | 'view' | 'change' | 'delete'>;
 }
 
 type ModelMap = {
@@ -743,7 +744,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'qualification_ordering' },
 			{ field: 'security_objective_ordering' },
 			{ field: 'library' }
-		]
+		],
+		actions: ['view']
 	},
 	'business-impact-analysis': {
 		endpointUrl: 'resilience/business-impact-analysis',
