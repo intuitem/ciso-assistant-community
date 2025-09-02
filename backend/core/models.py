@@ -2711,9 +2711,11 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
-    cost = models.FloatField(
+    cost = models.JSONField(
         null=True,
-        help_text=_("Cost of the measure (using globally-chosen currency)"),
+        blank=True,
+        default=dict,
+        help_text=_("Detailed cost structure including build and run costs"),
         verbose_name=_("Cost"),
     )
     progress_field = models.IntegerField(

@@ -175,7 +175,17 @@ export const AppliedControlSchema = z.object({
 		.optional(),
 	effort: z.string().optional().nullable(),
 	control_impact: z.number().optional().nullable(),
-	cost: z.number().multipleOf(0.000001).optional().nullable(),
+	cost: z.object({
+		currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+		build: z.object({
+			fixed_cost: z.number().min(0).default(0),
+			people_days: z.number().min(0).default(0)
+		}).default({ fixed_cost: 0, people_days: 0 }),
+		run: z.object({
+			fixed_cost: z.number().min(0).default(0),
+			people_days: z.number().min(0).default(0)
+		}).default({ fixed_cost: 0, people_days: 0 })
+	}).optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),

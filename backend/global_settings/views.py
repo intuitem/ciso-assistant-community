@@ -75,10 +75,38 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        # Check if currency is being changed
+        old_currency = instance.value.get("currency") if instance.value else None
+
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        # If currency was changed, update all AppliedControl records
+        new_currency = instance.value.get("currency")
+        if old_currency != new_currency and new_currency:
+            self._update_applied_control_currencies(old_currency, new_currency)
+
         return Response(serializer.data)
+
+    def _update_applied_control_currencies(self, old_currency, new_currency):
+        """Update currency in all AppliedControl cost structures"""
+        from core.models import AppliedControl
+
+        updated_count = 0
+        for control in AppliedControl.objects.all():
+            if control.cost and isinstance(control.cost, dict):
+                if control.cost.get("currency") == old_currency or (
+                    old_currency is None and "currency" not in control.cost
+                ):
+                    control.cost["currency"] = new_currency
+                    control.save(update_fields=["cost"])
+                    updated_count += 1
+
+        print(
+            f"Updated currency from '{old_currency}' to '{new_currency}' in {updated_count} AppliedControl records"
+        )
 
     def get_object(self):
         obj = self.model.objects.get(name="general")

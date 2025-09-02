@@ -13,6 +13,8 @@
 	import { onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
 
+	let displayCurrency = $state('€'); // Default to Euro
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -32,6 +34,17 @@
 		schema = {},
 		initialData = {}
 	}: Props = $props();
+
+	// Declare form store at top level
+	const formStore = form.form;
+
+	// Update currency when form data changes
+	$effect(() => {
+		const costData = $formStore.cost;
+		if (costData?.currency) {
+			displayCurrency = costData.currency;
+		}
+	});
 
 	onMount(async () => {
 		if (!model.selectOptions) {
@@ -160,14 +173,56 @@
 			cacheLock={cacheLocks['control_impact']}
 			bind:cachedValue={formDataCache['control_impact']}
 		/>
-		<NumberField
-			{form}
-			field="cost"
-			label={m.cost()}
-			helpText={m.costHelpText()}
-			cacheLock={cacheLocks['cost']}
-			bind:cachedValue={formDataCache['cost']}
-		/>
+		<!-- Cost Structure -->
+		<div class="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+			<h4 class="text-sm font-medium text-gray-700">{m.cost()}</h4>
+
+			<!-- Build Costs -->
+			<div class="space-y-2">
+				<h5 class="text-xs font-medium text-gray-600">Build Costs</h5>
+				<div class="grid grid-cols-2 gap-4">
+					<NumberField
+						{form}
+						field="cost.build.fixed_cost"
+						label="Fixed Cost ({displayCurrency})"
+						helpText="One-time implementation cost"
+						min={0}
+						step={10}
+					/>
+					<NumberField
+						{form}
+						field="cost.build.people_days"
+						label="People Days"
+						helpText="Man/days needed for implementation"
+						min={0}
+						step={0.5}
+					/>
+				</div>
+			</div>
+
+			<!-- Run Costs -->
+			<div class="space-y-2">
+				<h5 class="text-xs font-medium text-gray-600">Run Costs (Annual)</h5>
+				<div class="grid grid-cols-2 gap-4">
+					<NumberField
+						{form}
+						field="cost.run.fixed_cost"
+						label="Fixed Cost ({displayCurrency})"
+						helpText="Annual operational cost"
+						min={0}
+						step={10}
+					/>
+					<NumberField
+						{form}
+						field="cost.run.people_days"
+						label="People Days"
+						helpText="Man/days needed annually"
+						min={0}
+						step={0.5}
+					/>
+				</div>
+			</div>
+		</div>
 		<MarkdownField
 			{form}
 			field="observation"
