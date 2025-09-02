@@ -24,7 +24,7 @@ caddy:
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
-      tls data/<path>/cert_file data/<path>/key_file
+      tls /data/<path>/cert_file /data/<path>/key_file
       }" > Caddyfile && caddy run'
 ```
 
@@ -42,6 +42,6 @@ caddy:
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
-      tls certs/cert_file certs/key_file
+      tls /certs/cert_file /certs/key_file
       }" > Caddyfile && caddy run'
 ```
