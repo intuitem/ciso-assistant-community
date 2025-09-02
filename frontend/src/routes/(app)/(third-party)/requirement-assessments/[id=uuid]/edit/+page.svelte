@@ -273,7 +273,7 @@
 		>
 	</div>
 	{#if data.requirement.description}
-		<div class="whitespace-pre-line p-2 font-light text-lg">
+		<div class="p-2 font-light text-lg">
 			👇 <MarkdownRenderer content={data.requirement.description} />
 		</div>
 	{/if}
@@ -344,7 +344,7 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
-						<div class="whitespace-pre-line py-1">
+						<div class="py-1">
 							<MarkdownRenderer content={annotation} />
 						</div>
 					</div>
@@ -355,7 +355,7 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
-						<div class="whitespace-pre-line py-1">
+						<div class="py-1">
 							<MarkdownRenderer content={typical_evidence} />
 						</div>
 					</div>

@@ -367,7 +367,7 @@
 											<i class="fa-solid fa-pencil"></i>
 											{m.annotation()}
 										</p>
-										<div class="whitespace-pre-line py-1">
+										<div class="py-1">
 											<MarkdownRenderer content={data.requirements[i].annotation} />
 										</div>
 									</div>
@@ -378,7 +378,7 @@
 											<i class="fa-solid fa-pencil"></i>
 											{m.typicalEvidence()}
 										</p>
-										<div class="whitespace-pre-line py-1">
+										<div class="py-1">
 											<MarkdownRenderer content={data.requirements[i].typical_evidence} />
 										</div>
 									</div>
