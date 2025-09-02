@@ -15,6 +15,7 @@
 	import { m } from '$paraglide/messages';
 	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -112,9 +113,9 @@
 		{/if}
 	</div>
 	{#if data.requirement.description}
-		<p class="whitespace-pre-line p-2 font-light text-lg">
-			👉 {data.requirement.description}
-		</p>
+		<div class="whitespace-pre-line p-2 font-light text-lg">
+			👇 <MarkdownRenderer content={data.requirement.description} />
+		</div>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
 		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
@@ -183,9 +184,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{annotation}
-						</p>
+						<div class="whitespace-pre-line py-1">
+							<MarkdownRenderer content={annotation} />
+						</div>
 					</div>
 				{/if}
 				{#if typical_evidence}
@@ -194,9 +195,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{typical_evidence}
-						</p>
+						<div class="whitespace-pre-line py-1">
+							<MarkdownRenderer content={typical_evidence} />
+						</div>
 					</div>
 				{/if}
 				{#if mappingInference.result}
@@ -308,7 +309,9 @@
 	{#if data.requirementAssessment.observation}
 		<div class="card p-4 space-y-2 preset-tonal-primary">
 			<h1 class="font-semibold text-sm">{m.observation()}</h1>
-			<span class="text-sm">{data.requirementAssessment.observation}</span>
+			<span class="text-sm"
+				><MarkdownRenderer content={data.requirementAssessment.observation} /></span
+			>
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">

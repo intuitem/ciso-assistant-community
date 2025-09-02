@@ -340,7 +340,7 @@
 			>
 				{#if requirementAssessment.description}
 					<div class="flex w-full font-semibold">
-						{requirementAssessment.description}
+						<MarkdownRenderer content={requirementAssessment.description} />
 					</div>
 				{/if}
 				{#if requirementAssessment.assessable}
@@ -367,9 +367,9 @@
 											<i class="fa-solid fa-pencil"></i>
 											{m.annotation()}
 										</p>
-										<p class="whitespace-pre-line py-1">
-											{data.requirements[i].annotation}
-										</p>
+										<div class="whitespace-pre-line py-1">
+											<MarkdownRenderer content={data.requirements[i].annotation} />
+										</div>
 									</div>
 								{/if}
 								{#if data.requirements[i].typical_evidence}
@@ -378,9 +378,9 @@
 											<i class="fa-solid fa-pencil"></i>
 											{m.typicalEvidence()}
 										</p>
-										<p class="whitespace-pre-line py-1">
-											{data.requirements[i].typical_evidence}
-										</p>
+										<div class="whitespace-pre-line py-1">
+											<MarkdownRenderer content={data.requirements[i].typical_evidence} />
+										</div>
 									</div>
 								{/if}
 								{#if requirementAssessment.mapping_inference.result}

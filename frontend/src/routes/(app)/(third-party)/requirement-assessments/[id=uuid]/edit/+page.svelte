@@ -273,9 +273,9 @@
 		>
 	</div>
 	{#if data.requirement.description}
-		<p class="whitespace-pre-line p-2 font-light text-lg">
-			👉 <MarkdownRenderer content={data.requirement.description} />
-		</p>
+		<div class="whitespace-pre-line p-2 font-light text-lg">
+			👇 <MarkdownRenderer content={data.requirement.description} />
+		</div>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
 		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
@@ -344,9 +344,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{annotation}
-						</p>
+						<div class="whitespace-pre-line py-1">
+							<MarkdownRenderer content={annotation} />
+						</div>
 					</div>
 				{/if}
 				{#if typical_evidence}
@@ -355,9 +355,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{typical_evidence}
-						</p>
+						<div class="whitespace-pre-line py-1">
+							<MarkdownRenderer content={typical_evidence} />
+						</div>
 					</div>
 				{/if}
 				{#if mappingInference.result}
