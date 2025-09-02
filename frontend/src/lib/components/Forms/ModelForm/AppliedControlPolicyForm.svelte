@@ -187,7 +187,7 @@
 						label="Fixed Cost ({displayCurrency})"
 						helpText="One-time implementation cost"
 						min={0}
-						step={10}
+						step={1}
 					/>
 					<NumberField
 						{form}
@@ -210,7 +210,7 @@
 						label="Fixed Cost ({displayCurrency})"
 						helpText="Annual operational cost"
 						min={0}
-						step={10}
+						step={1}
 					/>
 					<NumberField
 						{form}

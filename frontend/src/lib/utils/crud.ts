@@ -267,7 +267,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'priority' },
 			{ field: 'effort' },
 			{ field: 'control_impact' },
-			{ field: 'cost' },
+			{ field: 'display_cost' },
 			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },

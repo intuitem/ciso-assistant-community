@@ -2717,6 +2717,33 @@ class AppliedControl(
         default=dict,
         help_text=_("Detailed cost structure including build and run costs"),
         verbose_name=_("Cost"),
+        validators=[
+            JSONSchemaInstanceValidator(
+                {
+                    "type": "object",
+                    "properties": {
+                        "currency": {"type": "string"},
+                        "build": {
+                            "type": "object",
+                            "properties": {
+                                "fixed_cost": {"type": "number", "minimum": 0},
+                                "people_days": {"type": "number", "minimum": 0},
+                            },
+                            "additionalProperties": False,
+                        },
+                        "run": {
+                            "type": "object",
+                            "properties": {
+                                "fixed_cost": {"type": "number", "minimum": 0},
+                                "people_days": {"type": "number", "minimum": 0},
+                            },
+                            "additionalProperties": False,
+                        },
+                    },
+                    "additionalProperties": False,
+                }
+            )
+        ],
     )
     progress_field = models.IntegerField(
         default=0,
@@ -2783,6 +2810,42 @@ class AppliedControl(
     @property
     def csv_value(self):
         return f"[{self.status}] {self.name}" if self.status else self.name
+
+    @property
+    def display_cost(self):
+        """Returns a human-readable cost display string"""
+        if not self.cost:
+            return ""
+
+        currency = self.cost.get("currency", "")
+        parts = []
+
+        build_cost = self.cost.get("build", {})
+        run_cost = self.cost.get("run", {})
+
+        if build_cost:
+            build_fixed = build_cost.get("fixed_cost", 0)
+            build_people = build_cost.get("people_days", 0)
+            if build_fixed > 0 or build_people > 0:
+                build_parts = []
+                if build_fixed > 0:
+                    build_parts.append(f"{build_fixed}{currency}")
+                if build_people > 0:
+                    build_parts.append(f"{build_people} people days")
+                parts.append(f"Build: {', '.join(build_parts)}")
+
+        if run_cost:
+            run_fixed = run_cost.get("fixed_cost", 0)
+            run_people = run_cost.get("people_days", 0)
+            if run_fixed > 0 or run_people > 0:
+                run_parts = []
+                if run_fixed > 0:
+                    run_parts.append(f"{run_fixed}{currency}")
+                if run_people > 0:
+                    run_parts.append(f"{run_people} people days")
+                parts.append(f"Run: {', '.join(run_parts)}")
+
+        return " | ".join(parts) if parts else ""
 
     def get_ranking_score(self):
         value = 0
