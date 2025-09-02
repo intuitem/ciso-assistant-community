@@ -163,9 +163,9 @@
 	let displayEdit = $derived(
 		canEditObject &&
 			!disableEdit &&
-			URLModel &&
+			Boolean(URLModel) &&
 			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
-			editURL
+			Boolean(editURL)
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
 </script>

@@ -6,7 +6,12 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
+	import {
+		CUSTOM_ACTIONS_COMPONENT,
+		FIELD_COMPONENT_MAP,
+		getModelInfo,
+		URL_MODEL_MAP
+	} from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount } from 'svelte';
@@ -131,7 +136,7 @@
 		tail
 	}: Props = $props();
 
-	let model = $derived(URL_MODEL_MAP[URLModel]);
+	let model = $derived(getModelInfo(URLModel));
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
 			.filter(

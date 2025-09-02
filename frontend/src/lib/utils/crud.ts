@@ -4,6 +4,7 @@ import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
+import { routeToModelInfo } from './modelinfo-router';
 import { type urlModel } from './types';
 
 type GetOptionsParams = {
@@ -1615,12 +1616,9 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	}
 };
 
-export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
-	const baseModel = model.split('_')[0];
-	const map = URL_MODEL_MAP[model] || URL_MODEL_MAP[baseModel] || {};
-	// The urlmodel of {model}_duplicate must be {model}
-	map['urlModel'] = baseModel;
-	return map;
+export const getModelInfo = (model: urlModel | string | undefined): ModelMapEntry | undefined => {
+	if (!model) return undefined;
+	return routeToModelInfo(model);
 };
 
 export const urlParamModelVerboseName = (model: string): string => {
