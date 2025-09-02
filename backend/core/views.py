@@ -2678,6 +2678,32 @@ class FolderViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    def destroy(self, request: Request, *args, **kwargs) -> Response:
+        """
+        Override destroy to clear ManyToMany relationships before deletion.
+        SQLite constraints are NO ACTION, preventing normal CASCADE behavior.
+        """
+        from django.db import transaction
+        from iam.models import RoleAssignment
+        from tprm.models import Entity
+
+        folder = self.get_object()
+
+        with transaction.atomic():
+            # Clear ManyToMany relationships that prevent deletion
+            for ra in RoleAssignment.objects.filter(perimeter_folders=folder):
+                ra.perimeter_folders.remove(folder)
+
+            for entity in Entity.objects.filter(owned_folders=folder):
+                entity.owned_folders.remove(folder)
+
+            # Clear ManyToMany relationships for objects that will be cascade deleted
+            for ra in RoleAssignment.objects.filter(folder=folder):
+                ra.perimeter_folders.clear()
+
+            # Now let Django handle the cascade deletion normally
+            return super().destroy(request, *args, **kwargs)
+
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
