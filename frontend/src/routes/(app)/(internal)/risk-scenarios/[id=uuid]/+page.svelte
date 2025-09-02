@@ -26,7 +26,7 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: model.name,
+		model: model,
 		domain: data.scenario.perimeter.folder.id
 	});
 	let color_map = $state({});

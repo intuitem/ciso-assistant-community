@@ -36,7 +36,7 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: model.name,
+		model: model,
 		domain: risk_assessment.folder.id
 	});
 	function modalCreateForm(): void {

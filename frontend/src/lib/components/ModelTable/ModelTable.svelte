@@ -336,7 +336,7 @@
 				? canPerformAction({
 						user,
 						action: 'add',
-						model: model.name,
+						model: model,
 						domain:
 							folderId ||
 							page.data?.data?.folder?.id ||
@@ -353,7 +353,7 @@
 				? canPerformAction({
 						user,
 						action: 'change',
-						model: model.name,
+						model: model,
 						domain:
 							model.name === 'folder'
 								? contextMenuOpenRow?.meta.id

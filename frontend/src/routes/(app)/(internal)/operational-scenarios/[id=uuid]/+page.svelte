@@ -50,7 +50,7 @@
 		canPerformAction({
 			user,
 			action: 'change',
-			model: model.name,
+			model: model,
 			domain: operational_scenarios.folder?.id
 		});
 

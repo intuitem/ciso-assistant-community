@@ -43,7 +43,7 @@
 		canPerformAction({
 			user,
 			action: 'change',
-			model: model.name,
+			model: model,
 			domain: roto.folder?.id
 		});
 </script>
