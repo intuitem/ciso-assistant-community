@@ -12,8 +12,8 @@ def convert_cost_to_json(apps, schema_editor):
             # Store the current numeric cost
             old_cost = float(control.cost)
 
-            # Convert to new JSON structure
-            control.cost = {
+            # Convert to new JSON structure and save in temp field
+            control.cost_temp = {
                 "currency": "€",
                 "build": {
                     "fixed_cost": old_cost,
@@ -21,27 +21,31 @@ def convert_cost_to_json(apps, schema_editor):
                 },
                 "run": {"fixed_cost": 0.0, "people_days": 0.0},
             }
-            control.save(update_fields=["cost"])
+            control.save(update_fields=["cost_temp"])
 
         except (ValueError, TypeError):
-            # Skip invalid cost values
-            control.cost = {}
-            control.save(update_fields=["cost"])
+            # Set to empty dict for invalid values
+            control.cost_temp = {}
+            control.save(update_fields=["cost_temp"])
 
 
 def reverse_cost_conversion(apps, schema_editor):
-    """Convert JSON cost back to build.fixed_cost numeric value"""
+    """Convert JSON cost_temp back to numeric cost value"""
     AppliedControl = apps.get_model("core", "AppliedControl")
 
-    for control in AppliedControl.objects.filter(cost__isnull=False):
+    for control in AppliedControl.objects.filter(cost_temp__isnull=False):
         try:
-            if isinstance(control.cost, dict) and "build" in control.cost:
-                control.cost = control.cost["build"].get("fixed_cost", 0.0)
+            if isinstance(control.cost_temp, dict) and "build" in control.cost_temp:
+                # Extract fixed_cost from build section
+                fixed_cost = control.cost_temp["build"].get("fixed_cost", 0.0)
+                # Update original cost field with numeric value
+                control.cost = float(fixed_cost) if fixed_cost is not None else 0.0
             else:
+                # Invalid data, set to 0
                 control.cost = 0.0
             control.save(update_fields=["cost"])
         except (ValueError, TypeError, KeyError):
-            control.cost = None
+            control.cost = 0.0
             control.save(update_fields=["cost"])
 
 
@@ -51,12 +55,29 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Convert the field type and migrate data
+        # Step 1: Add temporary JSONField
+        migrations.AddField(
+            model_name="appliedcontrol",
+            name="cost_temp",
+            field=models.JSONField(blank=True, null=True),
+        ),
+        # Step 2: Convert data from old cost to new cost_temp
         migrations.RunPython(
             convert_cost_to_json,
             reverse_cost_conversion,
         ),
-        # Change field type to JSONField
+        # Step 3: Remove old cost field
+        migrations.RemoveField(
+            model_name="appliedcontrol",
+            name="cost",
+        ),
+        # Step 4: Rename cost_temp to cost
+        migrations.RenameField(
+            model_name="appliedcontrol",
+            old_name="cost_temp",
+            new_name="cost",
+        ),
+        # Step 5: Update field properties
         migrations.AlterField(
             model_name="appliedcontrol",
             name="cost",
