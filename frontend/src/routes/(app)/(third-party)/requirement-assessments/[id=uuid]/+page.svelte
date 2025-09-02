@@ -309,9 +309,9 @@
 	{#if data.requirementAssessment.observation}
 		<div class="card p-4 space-y-2 preset-tonal-primary">
 			<h1 class="font-semibold text-sm">{m.observation()}</h1>
-			<span class="text-sm"
-				><MarkdownRenderer content={data.requirementAssessment.observation} /></span
-			>
+			<div class="text-sm">
+				<MarkdownRenderer content={data.requirementAssessment.observation} />
+			</div>
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">

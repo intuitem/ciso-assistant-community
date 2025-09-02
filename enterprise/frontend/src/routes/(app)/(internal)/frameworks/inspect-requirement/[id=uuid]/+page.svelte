@@ -64,7 +64,9 @@
 				<span class="text-2xl font-black text-gray-800">{firstAssessment.name}</span>
 			{/if}
 			{#if firstAssessment?.description}
-				<span class="text-gray-600 blockquote"><MarkdownRenderer content={firstAssessment.description} /></span>
+				<div class="text-gray-600 blockquote">
+          <MarkdownRenderer content={firstAssessment.description}/>
+        </div>
 			{/if}
 		</div>
 
