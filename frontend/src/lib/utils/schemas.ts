@@ -380,7 +380,9 @@ export const GeneralSettingsSchema = z.object({
 	interface_agg_scenario_matrix: z.boolean().optional(),
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
-	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional()
+	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+	daily_rate: z.number().default(500).optional()
 });
 
 export const FeatureFlagsSchema = z.object({

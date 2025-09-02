@@ -13,6 +13,8 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_swap_axes",
     "risk_matrix_flip_vertical",
     "risk_matrix_labels",
+    "currency",
+    "daily_rate",
 ]
 
 

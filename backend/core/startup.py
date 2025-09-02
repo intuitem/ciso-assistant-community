@@ -1048,6 +1048,8 @@ def startup(sender: AppConfig, **kwargs):
         "ebios_radar_red_zone_radius": 2.5,
         "notifications_enable_mailing": False,
         "interface_agg_scenario_matrix": False,
+        "currency": "€",
+        "daily_rate": 500,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(name="general")
