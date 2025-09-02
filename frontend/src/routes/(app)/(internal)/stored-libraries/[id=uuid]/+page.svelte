@@ -14,7 +14,6 @@
 	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
-	import { IS_ENTERPRISE } from '$lib/utils/is_enterprise';
 
 	let { data } = $props();
 

@@ -5,7 +5,6 @@ from typing import List, Union
 from django.apps import apps
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
-from ciso_assistant import settings
 from core.models import (
     Framework,
     RequirementMapping,
@@ -673,7 +672,6 @@ class LibraryImporter:
             )"""
 
         library_objects = self._library.content
-        is_enterprise = apps.is_installed("enterprise_core")
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
@@ -754,9 +752,6 @@ class LibraryImporter:
             ) is not None:
                 return reference_control_import_error
 
-        if not is_enterprise:
-            return
-
         if "qualifications" in library_objects:
             qualification_data = library_objects["qualifications"]
             if (
@@ -828,8 +823,6 @@ class LibraryImporter:
     def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
-        is_enterprise = apps.is_installed("enterprise_core")
-
         for threat in self._threats:
             threat.import_threat(library_object)
 
@@ -844,9 +837,6 @@ class LibraryImporter:
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
-
-        if not is_enterprise:
-            return
 
         for qualification in self._qualifications:
             qualification.import_qualification(library_object)
