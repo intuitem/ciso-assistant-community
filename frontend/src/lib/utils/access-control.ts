@@ -11,6 +11,6 @@ interface CanPerformActionParams {
 export function canPerformAction({ user, action, model, domain }: CanPerformActionParams): boolean {
 	return (
 		(user.domain_permissions[domain] || []).includes(`${action}_${model.name}`) &&
-		(!model?.actions || model.actions.includes(action))
+		!(model?.actions && !model.actions.includes(action))
 	);
 }
