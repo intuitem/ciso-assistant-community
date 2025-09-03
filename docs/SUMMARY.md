@@ -80,7 +80,7 @@
 ## Integration
 
 * [Generating a PAT](integration/generating-a-pat.md)
-* [API usage](integration/api-usage.md)
+* [API usage](integration/api-documentation.md)
 
 ## Presentations
 
