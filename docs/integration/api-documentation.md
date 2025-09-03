@@ -66,6 +66,12 @@ curl --request GET \
 
 
 
+#### Notes
+
+* make sure to add the trailing slash '/'
+* your endpoint is your instance URL. If the proxy settings are the default ones, it will be the same url but with /api/ (in which case you don't need to add it)
+* Pro SaaS users need to open a support request to expose the API on their instance. It's disabled by default.
+
 
 
 
