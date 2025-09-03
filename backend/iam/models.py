@@ -852,12 +852,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         for ra in role_assignments:
             # Check if role has view_folder permission (skip if not)
-            ra_permissions = set(ra.role.permissions.all())  # Convert to set for proper 'in' checking
+            ra_permissions = set(
+                ra.role.permissions.all()
+            )  # Convert to set for proper 'in' checking
             if ref_permission not in ra_permissions:
                 continue
 
             # Get perimeter folders for this role assignment
-            ra_folders = set(ra.perimeter_folders.all()) # Already prefetched
+            ra_folders = set(ra.perimeter_folders.all())  # Already prefetched
             if ra.is_recursive:
                 # Add subfolders for recursive assignments
                 for ra_folder in set(ra_folders):
@@ -908,9 +910,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                         content_type__app_label__in=ALLOWED_PERMISSION_APPS
                     ).values_list("id", flat=True)
                 )
-                can_view = any(permission_view in perms for perms in folder_permissions.values())
-                can_change = any(permission_change in perms for perms in folder_permissions.values())
-                can_delete = any(permission_delete in perms for perms in folder_permissions.values())
+                can_view = any(
+                    permission_view in perms for perms in folder_permissions.values()
+                )
+                can_change = any(
+                    permission_change in perms for perms in folder_permissions.values()
+                )
+                can_delete = any(
+                    permission_delete in perms for perms in folder_permissions.values()
+                )
                 if can_view:
                     result_view.update(permission_ids)
                 if can_change:
