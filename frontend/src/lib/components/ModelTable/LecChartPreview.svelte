@@ -30,7 +30,7 @@
 		const chartData = cell;
 
 		// Wait for the DOM to update before initializing chart
-		await new Promise(resolve => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const echarts = await import('echarts');
 		if (chart) {
@@ -160,7 +160,9 @@
 {#if hasValidData}
 	<div bind:this={chartContainer} class="h-24 w-32 min-w-[128px]"></div>
 {:else}
-	<div class="h-24 w-32 min-w-[128px] flex items-center justify-center text-gray-500 text-xs bg-gray-50 rounded">
+	<div
+		class="h-24 w-32 min-w-[128px] flex items-center justify-center text-gray-500 text-xs bg-gray-50 rounded"
+	>
 		No simulation
 	</div>
 {/if}

@@ -175,18 +175,25 @@ export const AppliedControlSchema = z.object({
 		.optional(),
 	effort: z.string().optional().nullable(),
 	control_impact: z.number().optional().nullable(),
-	cost: z.object({
-		currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
-		amortization_period: z.number().min(1).max(50).default(3),
-		build: z.object({
-			fixed_cost: z.number().min(0).default(0),
-			people_days: z.number().min(0).default(0)
-		}).default({ fixed_cost: 0, people_days: 0 }),
-		run: z.object({
-			fixed_cost: z.number().min(0).default(0),
-			people_days: z.number().min(0).default(0)
-		}).default({ fixed_cost: 0, people_days: 0 })
-	}).optional().nullable(),
+	cost: z
+		.object({
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+			amortization_period: z.number().min(1).max(50).default(3),
+			build: z
+				.object({
+					fixed_cost: z.number().min(0).default(0),
+					people_days: z.number().min(0).default(0)
+				})
+				.default({ fixed_cost: 0, people_days: 0 }),
+			run: z
+				.object({
+					fixed_cost: z.number().min(0).default(0),
+					people_days: z.number().min(0).default(0)
+				})
+				.default({ fixed_cost: 0, people_days: 0 })
+		})
+		.optional()
+		.nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),

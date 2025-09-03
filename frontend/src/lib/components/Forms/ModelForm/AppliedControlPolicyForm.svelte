@@ -189,58 +189,57 @@
 		icon="fa-solid fa-money-bill-1"
 		header={m.cost()}
 	>
-		<!-- Amortization Period -->
-		<NumberField
-			{form}
-			field="cost.amortization_period"
-			label="Amortization Period (years)"
-			helpText="Period over which to amortize the cost"
-			min={1}
-			max={50}
-			step={1}
-			value={3}
-		/>
-
 		<!-- Build Costs -->
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">Build Costs</h5>
+			<h5 class="font-medium text-gray-600 my-2 py-2">{m.buildCosts()}</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<NumberField
 					{form}
 					field="cost.build.fixed_cost"
-					label="Fixed Cost ({displayCurrency})"
-					helpText="One-time implementation cost"
+					label="{m.fixedCost()} ({displayCurrency})"
+					helpText={m.oneTimeImplementationCost()}
 					min={0}
 					step={1}
 				/>
 				<NumberField
 					{form}
 					field="cost.build.people_days"
-					label="People Days"
-					helpText="Man/days needed for implementation"
+					label={m.peopleDays()}
+					helpText={m.implementationHelpText()}
 					min={0}
 					step={0.5}
+				/>
+				<!-- Amortization Period -->
+				<NumberField
+					{form}
+					field="cost.amortization_period"
+					label={m.amortizationPeriod()}
+					helpText={m.amortizationPeriodHelpText()}
+					min={1}
+					max={50}
+					step={1}
+					value={3}
 				/>
 			</div>
 		</div>
 
 		<!-- Run Costs -->
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">Run Costs (Annual)</h5>
+			<h5 class="font-medium text-gray-600 my-2 py-2">{m.runCosts()}</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<NumberField
 					{form}
 					field="cost.run.fixed_cost"
-					label="Fixed Cost ({displayCurrency})"
-					helpText="Annual operational cost"
+					label="{m.fixedCost()} ({displayCurrency})"
+					helpText={m.annualOperationalCost()}
 					min={0}
 					step={1}
 				/>
 				<NumberField
 					{form}
 					field="cost.run.people_days"
-					label="People Days"
-					helpText="Man/days needed annually"
+					label={m.peopleDays()}
+					helpText={m.annualManDaysHelpText()}
 					min={0}
 					step={0.5}
 				/>

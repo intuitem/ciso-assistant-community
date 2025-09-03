@@ -2110,5 +2110,15 @@
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
-	"annualCostDisplay": "Coût annuel"
+	"annualCostDisplay": "Coût annuel",
+	"amortizationPeriod": "Durée d'amortissement (années)",
+	"amortizationPeriodHelpText": "Période sur laquelle on amortit le coût de build",
+	"buildCosts": "Coût de build",
+	"runCosts": "Coût de run (annuels)",
+	"fixedCost": "Coût fixe",
+	"peopleDays": "Jours/homme",
+	"implementationHelpText": "Jours-homme nécessaires pour la mise en œuvre",
+	"oneTimeImplementationCost": "Coût de mise en œuvre",
+	"annualOperationalCost": "Coût opérationnel annuel",
+	"annualManDaysHelpText": "Jours-homme nécessaires annuellement"
 }
