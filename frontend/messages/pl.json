@@ -196,6 +196,8 @@
 	"importMatrices": "Importuj macierze",
 	"importFrameworks": "Importuj struktury",
 	"importMappings": "Importuj mapowania",
+	"importThreats": "Importuj zagrożenia",
+	"importReferenceControls": "Importuj kontrole referencyjne",
 	"summary": "Podsumowanie",
 	"composer": "Kompozytor",
 	"statistics": "Statystyki",
@@ -1704,5 +1706,6 @@
 	"dataWizardTemplatesAndGuidelines": "Szablony i wytyczne",
 	"dataWizardLoadExcelData": "Załaduj dane Excel",
 	"associatedCampaigns": "Powiązane kampanie",
-	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty"
+	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
+	"saveAndContinue": "Zapisz i kontynuuj"
 }

@@ -135,6 +135,7 @@ export interface ModelMapEntry {
 	filters?: SelectField[];
 	path?: string;
 	endpointUrl?: string;
+	customNameDescription?: boolean;
 }
 
 type ModelMap = {
@@ -285,6 +286,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -294,6 +296,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
+			{ field: 'applied_controls', urlModel: 'task-templates' },
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
@@ -450,7 +453,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'assets', urlModel: 'vulnerabilities' },
-			{ field: 'assets', urlModel: 'solutions' }
+			{ field: 'assets', urlModel: 'solutions' },
+			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -864,9 +868,28 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'personal data',
 		verboseNamePlural: 'personal data',
 		foreignKeyFields: [
-			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }
+			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
+			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
 		],
-		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }]
+		reverseForeignKeyFields: [
+			{ field: 'personal_data', urlModel: 'assets', disableCreate: true, disableDelete: true }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'category' },
+			{ field: 'retention' },
+			{ field: 'deletion_policy' },
+			{ field: 'is_sensitive' },
+			{ field: 'processing' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
+		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }],
+		filters: [{ field: 'processing' }, { field: 'category' }, { field: 'assets' }]
 	},
 	'data-subjects': {
 		endpointUrl: 'privacy/data-subjects',
@@ -917,10 +940,10 @@ export const URL_MODEL_MAP: ModelMap = {
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
-		localName: 'ebiosRMstudy',
+		localName: 'ebiosRmStudy',
 		localNamePlural: 'ebiosRmStudies',
-		verboseName: 'Ebios RMstudy',
-		verboseNamePlural: 'Ebios RMstudy',
+		verboseName: 'Ebios RM study',
+		verboseNamePlural: 'Ebios RM study',
 		foreignKeyFields: [
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'assets', urlModel: 'assets' },
@@ -1341,6 +1364,87 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'perimeters' }
 		]
+	},
+	'organisation-objectives': {
+		name: 'organisationobjective',
+		localName: 'organisationObjective',
+		localNamePlural: 'organisationObjectives',
+		verboseName: 'Organisation objective',
+		verboseNamePlural: 'Organisation objectives',
+		selectFields: [{ field: 'status' }, { field: 'health' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'issues', urlModel: 'organisation-issues' },
+			{ field: 'tasks', urlModel: 'task-templates' },
+			{ field: 'assigned_to', urlModel: 'users' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'objectives',
+				urlModel: 'applied-controls',
+				disableCreate: false,
+				disableDelete: true
+			}
+		],
+		filters: [{ field: 'folder' }]
+	},
+	'organisation-issues': {
+		name: 'organisationissue',
+		localName: 'organisationIssue',
+		localNamePlural: 'organisationIssues',
+		verboseName: 'Organisation issue',
+		verboseNamePlural: 'Organisation issues',
+		selectFields: [{ field: 'category' }, { field: 'origin' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'assets', urlModel: 'assets' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'issues',
+				urlModel: 'organisation-objectives',
+				disableCreate: false,
+				disableDelete: true
+			}
+		],
+		filters: [{ field: 'folder' }]
+	},
+	terminologies: {
+		name: 'terminology',
+		localName: 'terminology',
+		localNamePlural: 'terminologies',
+		verboseName: 'Terminology',
+		verboseNamePlural: 'Terminologies',
+		selectFields: [{ field: 'field_path' }],
+		customNameDescription: true,
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'field_path' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' },
+			{ field: 'translations' }
+		]
+	},
+	roles: {
+		endpointUrl: 'roles',
+		name: 'role',
+		localName: 'role',
+		localNamePlural: 'roles',
+		verboseName: 'Role',
+		verboseNamePlural: 'Roles'
+	},
+	permissions: {
+		endpointUrl: 'permissions',
+		name: 'permission',
+		localName: 'permission',
+		localNamePlural: 'permissions',
+		verboseName: 'Permission',
+		verboseNamePlural: 'Permissions'
 	}
 };
 

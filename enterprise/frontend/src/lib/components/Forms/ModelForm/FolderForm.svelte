@@ -48,6 +48,7 @@
 		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		optionsSelf={object}
 		field="parent_folder"
+		pathField="path"
 		cacheLock={cacheLocks['parent_folder']}
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}

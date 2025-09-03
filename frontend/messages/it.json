@@ -190,6 +190,8 @@
 	"importMatrices": "Importa matrici",
 	"importFrameworks": "Importa framework",
 	"importMappings": "Importa mappature",
+	"importThreats": "Importa minacce",
+	"importReferenceControls": "Importa controlli di riferimento",
 	"summary": "Riepilogo",
 	"composer": "Compositore",
 	"statistics": "Statistiche",
@@ -1337,5 +1339,6 @@
 	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
-	"deselect": "Deseleziona"
+	"deselect": "Deseleziona",
+	"saveAndContinue": "Salva e continua"
 }

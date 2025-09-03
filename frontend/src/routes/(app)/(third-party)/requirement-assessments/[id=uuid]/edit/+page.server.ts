@@ -192,9 +192,10 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
+		const formData = form.data;
 		const requestInitOptions: RequestInit = {
 			method: 'PUT',
-			body: JSON.stringify(form.data)
+			body: JSON.stringify(formData)
 		};
 
 		const response = await event.fetch(endpoint, requestInitOptions);
@@ -204,6 +205,7 @@ export const actions: Actions = {
 		const object = await response.json();
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
+		if (formData.noRedirect) return;
 		redirect(
 			302,
 			getSecureRedirect(event.url.searchParams.get('next')) ||

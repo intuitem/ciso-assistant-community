@@ -190,6 +190,8 @@
 	"importMatrices": "Importera matriser",
 	"importFrameworks": "Importera ramverk",
 	"importMappings": "Importera kartläggningar",
+	"importThreats": "Importera hot",
+	"importReferenceControls": "Importera referenskontroller",
 	"summary": "Sammanfattning",
 	"composer": "Kompositör",
 	"statistics": "Statistik",
@@ -950,5 +952,6 @@
 	"matchingScenarios": "Matchande scenarier",
 	"select": "Välj",
 	"deselect": "Avmarkera",
-	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet."
+	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet.",
+	"saveAndContinue": "Spara och fortsätt"
 }

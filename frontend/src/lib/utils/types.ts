@@ -104,7 +104,15 @@ export const URL_MODEL = [
 	'asset-assessments',
 	'asset-class',
 	// campaigns,
-	'campaigns'
+	'campaigns',
+	// iso,
+	'organisation-issues',
+	'organisation-objectives',
+	// terminologies
+	'terminologies',
+	// roles,
+	'roles',
+	'permissions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

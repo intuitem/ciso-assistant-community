@@ -10,9 +10,8 @@
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
-		csf_function: 'csfFunction',
 		eta: 'eta',
-		expiry_date: 'expiryDate',
+		control_impact: 'controlImpact',
 		effort: 'effort',
 		cost: 'cost',
 		requirement_assessments: 'matchingRequirements'
@@ -73,9 +72,8 @@
 				'status',
 				'priority',
 				'category',
-				'csf_function',
 				'eta',
-				'expiry_date',
+				'control_impact',
 				'effort',
 				'cost',
 				'requirement_assessments'

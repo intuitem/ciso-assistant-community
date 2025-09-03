@@ -1,0 +1,17 @@
+subject: "CISO Assistant: You have been assigned to '${task_name}'"
+body: |
+  Hello,
+
+  You have been assigned to the following task:
+
+  - Name: ${task_name}
+  - Description: ${task_description}
+  - Reference ID: ${task_ref_id}
+  - Task Date: ${task_date}
+  - Recurrent: ${is_recurrent}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view and manage this task:
+  ${ciso_assistant_url}
+
+  Thank you.

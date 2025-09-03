@@ -107,6 +107,11 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'roles',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/roles'
+				},
+				{
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
@@ -204,6 +209,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-book',
 					href: '/policies',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'organisationIssues',
+					fa_icon: 'fa-solid fa-briefcase',
+					href: '/organisation-issues',
+					permissions: ['view_organisationissue']
+				},
+				{
+					name: 'organisationObjectives',
+					fa_icon: 'fa-solid fa-bullseye',
+					href: '/organisation-objectives',
+					permissions: ['view_organisationobjective']
 				},
 				{
 					name: 'riskAcceptances',

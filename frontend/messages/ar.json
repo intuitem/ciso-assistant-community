@@ -189,6 +189,8 @@
 	"importMatrices": "استيراد المصفوفات",
 	"importFrameworks": "استيراد الأطر",
 	"importMappings": "استيراد المخططات",
+	"importThreats": "استيراد تهديدات",
+	"importReferenceControls": "استيراد تحكمات مرجعية",
 	"summary": "الملخص",
 	"composer": "الملحن",
 	"statistics": "الإحصائيات",
@@ -927,5 +929,6 @@
 	"matchingScenarios": "السيناريوهات المطابقة",
 	"select": "تحديد",
 	"deselect": "إلغاء التحديد",
-	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة"
+	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة",
+	"saveAndContinue": "حفظ ومتابعة"
 }

@@ -16,6 +16,7 @@ from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from global_settings.utils import ff_is_enabled
 from iam.models import *
+from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -87,7 +88,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
         can_create_in_folder = RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
-                codename=f"add_{self.Meta.model._meta.model_name}"
+                codename=f"add_{self.Meta.model._meta.model_name}",
+                content_type__app_label=self.Meta.model._meta.app_label,
+                content_type__model=self.Meta.model._meta.model_name,
             ),
             folder=folder,
         )
@@ -271,6 +274,31 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
+            # If we're unlocking (setting is_locked to False), allow the operation
+            if "is_locked" in attrs and attrs["is_locked"] is False:
+                return super().validate(attrs)
+
+            # Otherwise, only allow modifying the is_locked field
+            locked_fields = [field for field in attrs.keys() if field != "is_locked"]
+            if locked_fields:
+                raise serializers.ValidationError(
+                    f"⚠️ Cannot modify the risk assessment attributes when it is locked. Only the 'Locked' field can be modified."
+                )
+        return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
@@ -367,6 +395,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
+    personal_data = FieldsRelatedField(many=True)
 
     asset_class = FieldsRelatedField(["name"])
 
@@ -506,15 +535,24 @@ class ThreatImportExportSerializer(BaseModelSerializer):
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
-    FLAGGED_FIELDS = {
-        "inherent_proba": "inherent_risk",
-        "inherent_impact": "inherent_risk",
-        "inherent_level": "inherent_risk",
-    }
+    # Note: Inherent risk fields are always accepted for writing,
+    # but only displayed when inherent_risk feature flag is enabled
+    FLAGGED_FIELDS = {}
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
     )
+
+    def validate(self, attrs):
+        if (
+            hasattr(self, "instance")
+            and self.instance
+            and self.instance.risk_assessment.is_locked
+        ):
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the risk scenario when the risk assessment is locked."
+            )
+        return super().validate(attrs)
 
     class Meta:
         model = RiskScenario
@@ -522,7 +560,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
-    risk_assessment = FieldsRelatedField(["id", "name"])
+    risk_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
     perimeter = FieldsRelatedField(
         source="risk_assessment.perimeter", fields=["id", "name", "folder"]
@@ -599,11 +637,59 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        owner_data = validated_data.get("owner", [])
         applied_control = super().create(validated_data)
         findings = validated_data.pop("findings", [])
         if findings:
             applied_control.findings.set(findings)
+
+        # Send notification to newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                applied_control, [user.id for user in owner_data]
+            )
+
         return applied_control
+
+    def update(self, instance, validated_data):
+        # Track old owners before update
+        old_owner_ids = set(instance.owner.values_list("id", flat=True))
+
+        updated_instance = super().update(instance, validated_data)
+
+        # Get new owners after update
+        new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned owners
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, applied_control, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_applied_control_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=owner_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                # Queue the task for async execution
+                send_applied_control_assignment_notification(
+                    applied_control.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send AppliedControl assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = AppliedControl
@@ -622,6 +708,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     cost = serializers.FloatField()
@@ -633,6 +720,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     state = serializers.SerializerMethodField()
     findings_count = serializers.IntegerField(source="findings.count")
+    is_assigned = serializers.BooleanField(read_only=True)
 
     def get_state(self, obj):
         if not obj.eta:
@@ -678,7 +766,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
         )
         return [
             {
-                "str": str(req.requirement.display_short or req.requirement.urn),
+                "str": str(req.requirement.safe_display_str),
                 "id": str(req.id),
             }
             for req in requirement_assessments
@@ -762,6 +850,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
     reference_control = HashSlugRelatedField(slug_field="pk", read_only=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    objectives = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = AppliedControl
@@ -785,6 +874,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
             "control_impact",
             "cost",
             "evidences",
+            "objectives",
         ]
 
 
@@ -848,7 +938,11 @@ class UserWriteSerializer(BaseModelSerializer):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
-            perm=Permission.objects.get(codename="add_user"),
+            perm=Permission.objects.get(
+                codename="add_user",
+                content_type__app_label=User._meta.app_label,
+                content_type__model=User._meta.model_name,
+            ),
             folder=Folder.get_root_folder(),
         ):
             raise PermissionDenied(
@@ -909,16 +1003,23 @@ class UserGroupWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class RoleReadSerializer(BaseModelSerializer):
+class PermissionReadSerializer(BaseModelSerializer):
+    content_type = FieldsRelatedField(fields=["app_label", "model"])
+
     class Meta:
-        model = Role
+        model = Permission
         fields = "__all__"
 
 
-class RoleWriteSerializer(BaseModelSerializer):
+class PermissionWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Role
+        model = Permission
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.read_only = True
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
@@ -1097,6 +1198,49 @@ class AttachmentUploadSerializer(serializers.Serializer):
         fields = ["attachment"]
 
 
+class OrganisationObjectiveReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    issues = FieldsRelatedField(many=True)
+    tasks = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
+    health = serializers.CharField(source="get_health_display")
+    assigned_to = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = OrganisationObjective
+        fields = "__all__"
+
+
+class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = OrganisationObjective
+        fields = "__all__"
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
+
+
+class OrganisationIssueReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    category = serializers.CharField(source="get_category_display")
+    origin = serializers.CharField(source="get_origin_display")
+
+    class Meta:
+        model = OrganisationIssue
+        fields = "__all__"
+
+
+class OrganisationIssueWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = OrganisationIssue
+        fields = "__all__"
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
+
+
 class CampaignReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
@@ -1173,9 +1317,79 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         write_only=True, required=False, default=False
     )
 
+    def validate(self, attrs):
+        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
+            # If we're unlocking (setting is_locked to False), allow the operation
+            if "is_locked" in attrs and attrs["is_locked"] is False:
+                return super().validate(attrs)
+
+            # Otherwise, only allow modifying the is_locked field
+            locked_fields = [field for field in attrs.keys() if field != "is_locked"]
+            if locked_fields:
+                raise serializers.ValidationError(
+                    f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
+                )
+        return super().validate(attrs)
+
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
-        return super().create(validated_data)
+        authors_data = validated_data.get("authors", [])
+        assessment = super().create(validated_data)
+
+        # Send notification to newly assigned authors
+        if authors_data:
+            self._send_assignment_notifications(
+                assessment, [user.id for user in authors_data]
+            )
+
+        return assessment
+
+    def update(self, instance, validated_data):
+        # Track old authors before update
+        old_author_ids = set(instance.authors.values_list("id", flat=True))
+
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        updated_instance = super().update(instance, validated_data)
+
+        # Get new authors after update
+        new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned authors
+        newly_assigned_ids = new_author_ids - old_author_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, assessment, author_ids):
+        """Send assignment notifications to the specified authors"""
+        if not author_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_compliance_assessment_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=author_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                send_compliance_assessment_assignment_notification(
+                    assessment.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send ComplianceAssessment assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = ComplianceAssessment
@@ -1232,12 +1446,13 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
-    compliance_assessment = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     folder = FieldsRelatedField()
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)
+    is_locked = serializers.BooleanField()
 
     class Meta:
         model = RequirementAssessment
@@ -1245,6 +1460,16 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        compliance_assessment = self.get_compliance_assessment()
+
+        if compliance_assessment and compliance_assessment.is_locked:
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the requirement when the audit is locked."
+            )
+
+        return super().validate(attrs)
+
     def validate_score(self, value):
         compliance_assessment = self.get_compliance_assessment()
 
@@ -1387,6 +1612,31 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
+            # If we're unlocking (setting is_locked to False), allow the operation
+            if "is_locked" in attrs and attrs["is_locked"] is False:
+                return super().validate(attrs)
+
+            # Otherwise, only allow modifying the is_locked field
+            locked_fields = [field for field in attrs.keys() if field != "is_locked"]
+            if locked_fields:
+                raise serializers.ValidationError(
+                    f"⚠️ Cannot modify the findings assessment attributes when it is locked. Only the 'Locked' field can be modified."
+                )
+        return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        # Check if status is changing to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
+
+        # Auto-lock when status changes to deprecated
+        if old_status != "deprecated" and new_status == "deprecated":
+            validated_data["is_locked"] = True
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = FindingsAssessment
         exclude = ["created_at", "updated_at"]
@@ -1404,6 +1654,17 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class FindingWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        if (
+            hasattr(self, "instance")
+            and self.instance
+            and self.instance.findings_assessment.is_locked
+        ):
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the finding when the findings assessment is locked."
+            )
+        return super().validate(attrs)
+
     class Meta:
         model = Finding
         exclude = ["created_at", "updated_at", "folder"]
@@ -1420,7 +1681,7 @@ class FindingWriteSerializer(BaseModelSerializer):
 class FindingReadSerializer(FindingWriteSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     owner = FieldsRelatedField(many=True)
-    findings_assessment = FieldsRelatedField()
+    findings_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -1664,18 +1925,59 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
+        assigned_to_data = validated_data.get("assigned_to", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().create(validated_data)
         self._sync_task_node(instance, tasknode_data, False, False)
+
+        # Send notification to newly assigned users
+        if assigned_to_data:
+            self._send_assignment_notifications(
+                instance, [user.id for user in assigned_to_data]
+            )
+
         return instance
 
     def update(self, instance, validated_data):
+        # Track old assigned users before update
+        old_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
+
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().update(instance, validated_data)
         now_recurrent = instance.is_recurrent
         self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+
+        # Get new assigned users after update
+        new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned users
+        newly_assigned_ids = new_assigned_ids - old_assigned_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(instance, list(newly_assigned_ids))
+
         return instance
+
+    def _send_assignment_notifications(self, task_template, user_ids):
+        """Send assignment notifications to the specified users"""
+        if not user_ids:
+            return
+
+        try:
+            from iam.models import User
+            from .tasks import send_task_template_assignment_notification
+
+            assigned_users = User.objects.filter(id__in=user_ids)
+            assigned_emails = [user.email for user in assigned_users if user.email]
+
+            if assigned_emails:
+                send_task_template_assignment_notification(
+                    task_template.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send TaskTemplate assignment notification: {str(e)}"
+            )
 
     def _extract_tasknode_fields(self, validated_data):
         """
@@ -1755,3 +2057,18 @@ class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
         exclude = ["task_template"]
+
+
+class TerminologyReadSerializer(BaseModelSerializer):
+    field_path = serializers.CharField(source="get_field_path_display", read_only=True)
+    translated_name = serializers.CharField(source="get_name_translated")
+
+    class Meta:
+        model = Terminology
+        exclude = ["folder"]
+
+
+class TerminologyWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Terminology
+        exclude = ["folder", "is_published", "builtin"]

@@ -1303,6 +1303,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             "description": parent_requirement.description,
         }
 
+    @property
+    def safe_display_str(self):
+        fallback_ref = ":".join(self.urn.split(":")[5:])
+        return self.display_short if self.display_short else fallback_ref
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -2728,6 +2733,13 @@ class AppliedControl(
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    objectives = models.ManyToManyField(
+        "OrganisationObjective",
+        blank=True,
+        verbose_name=_("Objectives"),
+        related_name="applied_controls",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -2757,6 +2769,10 @@ class AppliedControl(
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_assigned(self):
+        return self.owner.exists()
 
     @property
     def mid(self):
@@ -2817,6 +2833,129 @@ class AppliedControl(
         days_remaining = (self.eta - date.today()).days
 
         return max(-1, days_remaining)
+
+
+class OrganisationIssue(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Category(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        POLITICAL = "political", "Political"
+        ECONOMIC = "economic", "Economic"
+        SOCIAL = "social", "Social"
+        TECHNOLOGY = "technology", "Technology"
+        LEGAL = (
+            "legal",
+            "Legal",
+        )
+        ENVIRONMENTAL = "environmental", "Environmental"
+        ORGANISATION_STRUCTURE = "organisationStructure", "Organisation Structure"
+        HUMAN_RESOURCES = "humanResources", "Human resources"
+        INTERNAL_PROCESSES = "internalProcesses", "Internal processes"
+        FINANCIAL_CAPACITY = "financialCapacity", "Financial capacity"
+        COMPANY_CULTURE = "companyCulture", "Company culture / communication"
+
+    class Origin(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        INTERNAL = "internal", "Internal"
+        EXTERNAL = "external", "External"
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=Category.choices,
+        max_length=32,
+        default=Category.UNDEFINED,
+        blank=True,
+    )
+    origin = models.CharField(
+        verbose_name=_("Origin"),
+        choices=Origin.choices,
+        max_length=32,
+        default=Origin.UNDEFINED,
+        blank=True,
+    )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Issue")
+        verbose_name_plural = _("Issues")
+
+
+class OrganisationObjective(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        IN_PROGRESS = "in_progress", "In progress"
+        ACHIEVED = "achieved", "Achieved"
+        DEGRADED = "degraded", "Degraded"
+        DEPRECATED = "deprecated", "Deprecated"
+
+    class Health(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        ON_TRACK = "on_track", "On track"
+        AT_RISK = "at_risk", "At risk"
+        OFF_TRACK = "off_track", "Off track"
+
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    issues = models.ManyToManyField(
+        OrganisationIssue,
+        blank=True,
+        verbose_name="issues",
+        related_name="objectives",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    tasks = models.ManyToManyField(
+        "TaskTemplate",
+        blank=True,
+        verbose_name="Issue",
+        related_name="objectives",
+    )
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    health = models.CharField(
+        max_length=100,
+        choices=Health.choices,
+        default=Health.UNDEFINED,
+        verbose_name=_("Health"),
+    )
+    eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Objective")
+        verbose_name_plural = _("Objectives")
 
 
 class PolicyManager(models.Manager):
@@ -2961,6 +3100,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    is_locked = models.BooleanField(
+        default=False,
+        null=True,
+        verbose_name=_("Is locked"),
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -3503,6 +3647,10 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
+    @property
+    def is_locked(self) -> bool:
+        return self.risk_assessment.is_locked
+
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
@@ -3889,7 +4037,7 @@ class ComplianceAssessment(Assessment):
                 new_result = infer_result(ac)
                 if ra.result != new_result:
                     changes[str(ra.id)] = {
-                        "str": str(ra),
+                        "str": str(ra.requirement.safe_display_str),
                         "current": ra.result,
                         "new": new_result,
                     }
@@ -4549,6 +4697,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             "description",
         )
 
+    @property
+    def is_locked(self) -> bool:
+        return self.compliance_assessment.is_locked
+
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
     ) -> dict | None:
@@ -4800,6 +4952,10 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         verbose_name = _("Finding")
         verbose_name_plural = _("Findings")
 
+    @property
+    def is_locked(self) -> bool:
+        return self.findings_assessment.is_locked
+
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
@@ -5020,6 +5176,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         related_name="task_templates",
     )
 
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
+        verbose_name=_("Link"),
+    )
+
     @property
     def next_occurrence(self):
         today = datetime.today().date()
@@ -5200,3 +5364,110 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
+
+
+class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    """
+    Model to store custom terminology for the application
+    """
+
+    class FieldPath(models.TextChoices):
+        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+
+    DEFAULT_ROTO_RISK_ORIGINS = [
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    field_path = models.CharField(
+        max_length=100,
+        verbose_name=_("Field path"),
+        choices=FieldPath.choices,
+    )
+    builtin = models.BooleanField(
+        default=False,
+        verbose_name=_("Built-in"),
+        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Visible"),
+        help_text=_("Indicates if the terminology is visible in the UI"),
+    )
+    translations = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name=_("Translations"),
+        help_text=_("JSON field to store translations for different languages"),
+    )
+
+    @classmethod
+    def create_default_roto_risk_origins(cls):
+        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
+            Terminology.objects.update_or_create(
+                name=risk_origin["name"],
+                field_path=risk_origin["field_path"],
+                defaults=risk_origin,
+            )
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations or self.name
+
+    def __str__(self) -> str:
+        return self.get_name_translated or self.name

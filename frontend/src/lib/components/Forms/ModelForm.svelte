@@ -56,6 +56,10 @@
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
+	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
+	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
+	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
+	import RoleForm from './ModelForm/RoleForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -153,10 +157,18 @@
 			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
-				createModalCache.data[model.urlModel] ??= {};
-				formDataCache = createModalCache.data[model.urlModel];
+				const currentCache = createModalCache.data[model.urlModel];
+				if (!currentCache) {
+					createModalCache.data[model.urlModel] = formDataCache;
+				} else {
+					formDataCache = currentCache;
+				}
 			}
 		}
+	});
+
+	$effect(() => {
+		createModalCache.data[model.urlModel] = formDataCache;
 	});
 
 	run(() => {
@@ -350,6 +362,26 @@
 			/>
 		{:else if URLModel === 'campaigns'}
 			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
+		{:else if URLModel === 'organisation-objectives'}
+			<OrganisationObjectiveForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'organisation-issues'}
+			<OrganisationIssueForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'assets'}
 			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}
@@ -481,6 +513,10 @@
 				initialData={model.initialData}
 				{context}
 			/>
+		{:else if URLModel === 'terminologies'}
+			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'roles'}
+			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

@@ -100,6 +100,7 @@ from core.models import (
     ComplianceAssessment,
     RequirementMappingSet,
     RiskAssessment,
+    RiskMatrix,
     AssetClass,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
@@ -556,6 +557,7 @@ class AssetFilter(GenericFilterSet):
             "applied_controls",
             "filtering_labels",
             "asset_class",
+            "personal_data",
         ]
 
 
@@ -1415,6 +1417,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
+    is_assigned = df.BooleanFilter(method="filter_is_assigned")
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -1474,6 +1477,12 @@ class AppliedControlFilterSet(GenericFilterSet):
             ).order_by("expiry_date")
         return queryset
 
+    def filter_is_assigned(self, queryset, name, value):
+        if value:
+            return queryset.filter(owner__isnull=False).distinct()
+        else:
+            return queryset.filter(owner__isnull=True)
+
     class Meta:
         model = AppliedControl
         fields = {
@@ -1490,6 +1499,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "objectives": ["exact"],
             "assets": ["exact"],
             "stakeholders": ["exact"],
             "progress_field": ["exact"],
@@ -2022,8 +2032,10 @@ class AppliedControlViewSet(BaseModelViewSet):
             for req in RequirementAssessment.objects.filter(applied_controls__id=ac.id):
                 nodes.append(
                     {
-                        "name": req.requirement.ref_id,
-                        "value": req.requirement.description,
+                        "name": req.requirement.ref_id
+                        or req.requirement.safe_display_str,
+                        "value": req.requirement.description
+                        or req.requirement.safe_display_str,
                         "category": 7,
                         "symbol": "triangle",
                     }
@@ -2095,6 +2107,7 @@ class ActionPlanList(generics.ListAPIView):
         "risk_scenarios_e": ["exact"],
         "requirement_assessments": ["exact"],
         "evidences": ["exact"],
+        "objectives": ["exact"],
         "assets": ["exact"],
         "stakeholders": ["exact"],
         "progress_field": ["exact"],
@@ -2249,6 +2262,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
+
+    @action(detail=False, name="Get qualifications count")
+    def qualifications_count(self, request):
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": qualifications_count_per_name(request.user, folder_id)}
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
@@ -2602,15 +2622,6 @@ class UserGroupViewSet(BaseModelViewSet):
         UserGroupOrderingFilter,
         filters.SearchFilter,
     ]
-
-
-class RoleViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows roles to be viewed or edited
-    """
-
-    model = Role
-    ordering = ["builtin", "name"]
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):
@@ -3688,6 +3699,9 @@ class FolderViewSet(BaseModelViewSet):
         (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Framework
         )
+        (viewable_risk_matrices_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )
         res = {
             "folders": [
                 {"name": str(f), "id": f.id}
@@ -3705,6 +3719,12 @@ class FolderViewSet(BaseModelViewSet):
                 {"name": f.name, "id": f.id}
                 for f in Framework.objects.filter(
                     id__in=viewable_frameworks_ids
+                ).order_by(Lower("name"))
+            ],
+            "risk_matrices": [
+                {"name": rm.name, "id": rm.id}
+                for rm in RiskMatrix.objects.filter(
+                    id__in=viewable_risk_matrices_ids
                 ).order_by(Lower("name"))
             ],
         }
@@ -4305,6 +4325,40 @@ class QualificationViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
+class OrganisationObjectiveViewSet(BaseModelViewSet):
+    model = OrganisationObjective
+
+    filterset_fields = ["folder", "status", "health", "issues"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(OrganisationObjective.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get health choices")
+    def health(self, request):
+        return Response(dict(OrganisationObjective.Health.choices))
+
+
+class OrganisationIssueViewSet(BaseModelViewSet):
+    model = OrganisationIssue
+
+    filterset_fields = ["folder", "category", "origin"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(OrganisationIssue.Category.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get origin choices")
+    def origin(self, request):
+        return Response(dict(OrganisationIssue.Origin.choices))
+
+
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
@@ -4372,7 +4426,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
     ]
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -4747,6 +4801,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ref_id = request.data.get("ref_id")
             result = request.data.get("result")
             observation = request.data.get("observation")
+            score = request.data.get("score")
+            status_value = request.data.get("status")
 
             if not all([ref_id, result]):
                 return Response(
@@ -4763,6 +4819,44 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # validate if status value is valid choice
+            if status_value is not None:
+                valid_statuses = [
+                    choice[0] for choice in RequirementAssessment.Status.choices
+                ]
+                if status_value not in valid_statuses:
+                    return Response(
+                        {
+                            "error": f"invalid status value. Must be one of: {valid_statuses}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            # validate if score value is within allowed range
+            if score is not None:
+                try:
+                    score = int(score)
+                    # Only validate range if min_score and max_score are defined
+                    if (
+                        compliance_assessment.min_score is not None
+                        and compliance_assessment.max_score is not None
+                    ):
+                        if (
+                            score < compliance_assessment.min_score
+                            or score > compliance_assessment.max_score
+                        ):
+                            return Response(
+                                {
+                                    "error": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
+                                },
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
+                except (ValueError, TypeError):
+                    return Response(
+                        {"error": "Score must be a valid integer"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
             # Find the requirement assessment to update
             requirement_assessment = RequirementAssessment.objects.filter(
                 compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
@@ -4777,16 +4871,41 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             # Update the requirement assessment
             requirement_assessment.result = result
             requirement_assessment.observation = observation
+
+            # Update status if provided
+            if status_value is not None:
+                requirement_assessment.status = status_value
+
+            # Update score and toggle is_scored accordingly
+            if score is not None:
+                requirement_assessment.score = score
+                requirement_assessment.is_scored = True
+            elif score is None and "score" in request.data:
+                # Explicitly setting score to null/empty
+                requirement_assessment.score = None
+                requirement_assessment.is_scored = False
+
             requirement_assessment.save()
 
-            return Response(
-                {
-                    "message": "Requirement updated successfully",
-                    "ref_id": ref_id,
-                    "result": result,
-                },
-                status=status.HTTP_200_OK,
-            )
+            response_data = {
+                "message": "Requirement updated successfully",
+                "ref_id": ref_id,
+                "result": result,
+            }
+
+            # Include status in response if it was updated
+            if status_value is not None:
+                response_data["status"] = status_value
+
+            # Include score and is_scored in response if score was updated
+            if score is not None:
+                response_data["score"] = score
+                response_data["is_scored"] = True
+            elif score is None and "score" in request.data:
+                response_data["score"] = None
+                response_data["is_scored"] = False
+
+            return Response(response_data, status=status.HTTP_200_OK)
 
         except RequirementAssessment.DoesNotExist:
             return Response(
@@ -5129,7 +5248,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         self.check_object_permissions(request, compliance_assessment)
 
         threat_metrics = compliance_assessment.get_threats_metrics()
-        print(threat_metrics)
         if threat_metrics.get("total_unique_threats") == 0:
             return Response(threat_metrics, status=status.HTTP_200_OK)
         children = []
@@ -5732,6 +5850,7 @@ class FindingViewSet(BaseModelViewSet):
         "owner",
         "folder",
         "status",
+        "severity",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -5746,6 +5865,15 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @action(detail=False, name="Get all findings owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(findings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
 
 class IncidentViewSet(BaseModelViewSet):
@@ -5828,7 +5956,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to", "is_recurrent", "folder"]
+    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
@@ -6001,3 +6129,15 @@ class TaskNodeViewSet(BaseModelViewSet):
         instance: TaskNode = serializer.save()
         instance.save()
         return super().perform_create(serializer)
+
+
+class TerminologyViewSet(BaseModelViewSet):
+    model = Terminology
+    filterset_fields = ["field_path", "folder", "is_visible", "builtin"]
+    search_fields = ["name", "description"]
+    ordering = ["field_path", "name"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get class name choices")
+    def field_path(self, request):
+        return Response(dict(Terminology.FieldPath.choices))

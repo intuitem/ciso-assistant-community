@@ -24,10 +24,4 @@
 		link="/requirement-assessments"
 		tags={['analysis', 'assets']}
 	/>
-	<Article
-		title="Priority assistant"
-		desc="Review your controls impact vs effort"
-		link="/experimental/impact-effort"
-		tags={['priority', 'controls']}
-	/>
 </div>

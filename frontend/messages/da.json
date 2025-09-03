@@ -190,6 +190,8 @@
 	"importMatrices": "Importér matricer",
 	"importFrameworks": "Importér rammeværk",
 	"importMappings": "Importér kortlægninger",
+	"importThreats": "Importer trusler",
+	"importReferenceControls": "Importer referenskontroller",
 	"summary": "Resumé",
 	"composer": "Sammensætning",
 	"statistics": "Statistik",
@@ -1242,5 +1244,6 @@
 	],
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
-	"deselect": "Fravælg"
+	"deselect": "Fravælg",
+	"saveAndContinue": "Gem og fortsæt"
 }
