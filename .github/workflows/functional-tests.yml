@@ -379,7 +379,7 @@ jobs:
           python -m pipx ensurepath
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           python -m pipx install poetry
-      
+
       - name: Configure Poetry to not use virtualenvs
         run: poetry config virtualenvs.create false
 

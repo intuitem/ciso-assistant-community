@@ -4,6 +4,7 @@ import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
+import { routeToModelInfo } from './modelinfo-router';
 import { type urlModel } from './types';
 
 type GetOptionsParams = {
@@ -136,6 +137,7 @@ export interface ModelMapEntry {
 	path?: string;
 	endpointUrl?: string;
 	customNameDescription?: boolean;
+	actions?: Array<'add' | 'view' | 'change' | 'delete'>;
 }
 
 type ModelMap = {
@@ -727,7 +729,24 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'qualification',
 		localNamePlural: 'qualifications',
 		verboseName: 'Qualification',
-		verboseNamePlural: 'Qualifications'
+		verboseNamePlural: 'Qualifications',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'annotation' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'urn' },
+			{ field: 'id' },
+			{ field: 'provider' },
+			{ field: 'locale' },
+			{ field: 'default_locale' },
+			{ field: 'abbreviation' },
+			{ field: 'qualification_ordering' },
+			{ field: 'security_objective_ordering' },
+			{ field: 'library' }
+		],
+		actions: ['view']
 	},
 	'business-impact-analysis': {
 		endpointUrl: 'resilience/business-impact-analysis',
@@ -1597,12 +1616,9 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	}
 };
 
-export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
-	const baseModel = model.split('_')[0];
-	const map = URL_MODEL_MAP[model] || URL_MODEL_MAP[baseModel] || {};
-	// The urlmodel of {model}_duplicate must be {model}
-	map['urlModel'] = baseModel;
-	return map;
+export const getModelInfo = (model: urlModel | string | undefined): ModelMapEntry | undefined => {
+	if (!model) return undefined;
+	return routeToModelInfo(model);
 };
 
 export const urlParamModelVerboseName = (model: string): string => {

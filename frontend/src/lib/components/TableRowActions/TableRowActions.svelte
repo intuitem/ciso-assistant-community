@@ -133,7 +133,7 @@
 					? canPerformAction({
 							user,
 							action: 'delete',
-							model: model.name,
+							model: model,
 							domain:
 								model.name === 'folder'
 									? row.meta.id
@@ -149,7 +149,7 @@
 					? canPerformAction({
 							user,
 							action: 'change',
-							model: model.name,
+							model: model,
 							domain:
 								model.name === 'folder'
 									? row.meta.id
@@ -163,9 +163,9 @@
 	let displayEdit = $derived(
 		canEditObject &&
 			!disableEdit &&
-			URLModel &&
+			Boolean(URLModel) &&
 			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
-			editURL
+			Boolean(editURL)
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
 </script>

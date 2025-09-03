@@ -20,7 +20,6 @@ from serdes.serializers import LoadBackupSerializer
 from auditlog.models import LogEntry
 from django.db.models.signals import post_save
 from core.custom_middleware import add_user_info_to_log_entry
-from django.apps import apps
 
 from auditlog.context import disable_auditlog
 
@@ -209,20 +208,6 @@ class LoadBackupView(APIView):
                 {"error": "InvalidSchemaVersion"}, status=status.HTTP_400_BAD_REQUEST
             )
         compare_schema_versions(schema_version_int, backup_version)
-
-        is_enterprise = apps.is_installed("enterprise_core")
-        if not is_enterprise:
-            for obj in decompressed_data:
-                if obj["model"] != "iam.role":
-                    continue
-                permissions = obj["fields"]["permissions"]
-                enterprise_perms_indices = [
-                    i
-                    for i, perm in enumerate(permissions)
-                    if perm[1] == "enterprise_core"
-                ]
-                for perm_index in reversed(enterprise_perms_indices):
-                    permissions.pop(perm_index)
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(

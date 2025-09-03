@@ -6,7 +6,12 @@
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
+	import {
+		CUSTOM_ACTIONS_COMPONENT,
+		FIELD_COMPONENT_MAP,
+		getModelInfo,
+		URL_MODEL_MAP
+	} from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount } from 'svelte';
@@ -131,7 +136,7 @@
 		tail
 	}: Props = $props();
 
-	let model = $derived(URL_MODEL_MAP[URLModel]);
+	let model = $derived(getModelInfo(URLModel));
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
 			.filter(
@@ -336,7 +341,7 @@
 				? canPerformAction({
 						user,
 						action: 'add',
-						model: model.name,
+						model: model,
 						domain:
 							folderId ||
 							page.data?.data?.folder?.id ||
@@ -353,7 +358,7 @@
 				? canPerformAction({
 						user,
 						action: 'change',
-						model: model.name,
+						model: model,
 						domain:
 							model.name === 'folder'
 								? contextMenuOpenRow?.meta.id
@@ -404,7 +409,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap {classesBase}">
+<div class="table-wrap {classesBase}" data-testid="model-table">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -502,6 +507,7 @@
 									onRowKeydown(e, rowIndex);
 								}}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
+								data-testid="model-table-row-elem"
 								aria-rowindex={rowIndex + 1}
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
 							>

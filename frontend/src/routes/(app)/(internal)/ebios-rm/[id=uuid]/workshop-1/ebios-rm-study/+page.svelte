@@ -87,7 +87,7 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: data.model.name,
+		model: data.model,
 		domain:
 			data.model.name === 'folder'
 				? data.data.id

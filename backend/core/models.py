@@ -884,6 +884,11 @@ class LoadedLibrary(LibraryMixin):
                 update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
+        if self.qualifications.exists():
+            res["qualifications"] = [
+                update_translations_in_object(model_to_dict(qualification))
+                for qualification in self.qualifications.all()
+            ]
         if self.risk_matrices.exists():
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
@@ -900,6 +905,10 @@ class LoadedLibrary(LibraryMixin):
         """
         Returns the number of distinct dependent libraries and risk and compliance assessments that reference objects from this library
         """
+
+        from ebios_rm.models import FearedEvent
+        from resilience.models import EscalationThreshold
+
         return (
             RiskAssessment.objects.filter(
                 Q(risk_scenarios__threats__library=self)
@@ -916,6 +925,9 @@ class LoadedLibrary(LibraryMixin):
             )
             .distinct()
             .count()
+            + Incident.objects.filter(qualifications__library=self).count()
+            + FearedEvent.objects.filter(qualifications__library=self).count()
+            + EscalationThreshold.objects.filter(qualifications__library=self).count()
             + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
         )
 
@@ -983,7 +995,7 @@ class Threat(
 
     def is_deletable(self) -> bool:
         """
-        Returns True if the framework can be deleted
+        Returns True if the threat can be deleted
         """
         if self.requirements.exists():
             return False
@@ -1049,7 +1061,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
 
     def is_deletable(self) -> bool:
         """
-        Returns True if the framework can be deleted
+        Returns True if the refence control can be deleted
         """
         if self.requirements.exists() or self.appliedcontrol_set.exists():
             return False
@@ -1535,6 +1547,16 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolder
         },
     ]
 
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="qualifications",
+    )
+
+    is_published = models.BooleanField(_("published"), default=True)
+
     abbreviation = models.CharField(
         max_length=20, null=True, blank=True, verbose_name=_("Abbreviation")
     )
@@ -1549,6 +1571,20 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolder
         verbose_name = _("Qualification")
         verbose_name_plural = _("Qualifications")
         ordering = ["qualification_ordering"]
+
+    fields_to_check = ["ref_id", "name"]
+
+    def is_deletable(self) -> bool:
+        """
+        Returns True if the qualification can be deleted
+        """
+        return not any(
+            [
+                self.incidents.exists(),
+                self.feared_events.exists(),
+                self.escalation_thresholds.exists(),
+            ]
+        )
 
     @classmethod
     def create_default_qualifications(cls):
@@ -3620,7 +3656,13 @@ class RiskScenario(NameDescriptionMixin):
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
 
-    qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
+    qualifications = models.ManyToManyField(
+        Qualification,
+        blank=True,
+        verbose_name=_("Qualifications"),
+        related_name="risk_scenarios",
+        help_text=_("Qualifications carried by the risk scenario"),
+    )
 
     strength_of_knowledge = models.IntegerField(
         default=-1,

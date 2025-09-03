@@ -1,0 +1,36 @@
+urn: urn:intuitem_test:risk:library:qualifications_test
+locale: en
+ref_id: qualification_test
+name: Qualification test library
+description: Library to test qualifications
+copyright: Loi-05-20
+version: 2
+publication_date: 2025-08-28
+provider: intuitem
+packager: intuitem
+
+objects:
+  qualifications:
+    - urn: urn:intuitem_test:risk:qualification:A1
+      name: Qualification 1
+      ref_id: Q1
+      abbreviation: Q1
+    - urn: urn:intuitem_test:risk:qualification:A2
+      name: Qualification 2
+      ref_id: Q2
+      abbreviation: Q2
+    - urn: urn:intuitem_test:risk:qualification:A3
+      name: Qualification 3
+      ref_id: Q3
+      abbreviation: Q3
+
+  threats:
+    - urn: urn:intuitem_test:risk:threat:T1
+      ref_id: T1
+      name: Threat 1
+    - urn: urn:intuitem_test:risk:threat:T2
+      ref_id: T2
+      name: Threat 2
+    - urn: urn:intuitem_test:risk:threat:T3
+      ref_id: T3
+      name: Threat 3

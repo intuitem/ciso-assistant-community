@@ -26,7 +26,7 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: model.name,
+		model: model,
 		domain: data.scenario.perimeter.folder.id
 	});
 	let color_map = $state({});
@@ -362,7 +362,7 @@
 				<span class="font-semibold">
 					{#each data.scenario.qualifications as qualification, i}
 						{#if i > 0},{/if}
-						{safeTranslate(qualification) || m.undefined()}
+						{qualification.str || m.undefined()}
 					{/each}
 				</span>
 			</p>

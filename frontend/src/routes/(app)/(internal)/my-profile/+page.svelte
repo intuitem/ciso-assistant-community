@@ -6,6 +6,7 @@
 	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { getModelInfo } from '$lib/utils/crud';
 
 	function filterUserData() {
 		const filtered = {};
@@ -28,7 +29,7 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: 'user',
+		model: getModelInfo('users'),
 		domain: user.root_folder_id
 	});
 </script>

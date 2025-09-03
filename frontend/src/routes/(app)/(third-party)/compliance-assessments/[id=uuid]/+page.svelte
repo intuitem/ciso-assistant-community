@@ -51,7 +51,7 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: model.name,
+		model: model,
 		domain: data.compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
@@ -60,7 +60,7 @@
 		canPerformAction({
 			user,
 			action: 'change',
-			model: requirementAssessmentModel.name,
+			model: requirementAssessmentModel,
 			domain: data.compliance_assessment.folder.id
 		});
 
