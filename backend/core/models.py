@@ -3170,6 +3170,10 @@ class RiskAssessment(Assessment):
             )
         return output
 
+    def sync_to_applied_controls(self, dry_run: bool = False):
+        for scenario in self.risk_scenarios.all():
+            scenario.sync_to_applied_controls(dry_run=dry_run)
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
@@ -3745,6 +3749,24 @@ class RiskScenario(NameDescriptionMixin):
         if self.strength_of_knowledge < 0:
             return self.DEFAULT_SOK_OPTIONS[-1]
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
+
+    def sync_to_applied_controls(self, dry_run=True):
+        """
+        If all extra controls are active, move them to existing controls
+
+        Params:
+            dry_run (bool): if True, do not actually perform the operation, just return the list of controls that would be moved.
+        """
+        extra_controls = list(self.applied_controls.all())
+        if not all(
+            [ac.status == AppliedControl.Status.ACTIVE for ac in extra_controls]
+        ):
+            return []
+        if not dry_run:
+            with transaction.atomic():
+                self.existing_applied_controls.add(*extra_controls, bulk=True)
+                self.applied_controls.clear()
+        return extra_controls
 
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
