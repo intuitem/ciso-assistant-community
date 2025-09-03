@@ -852,15 +852,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         for ra in role_assignments:
             # Check if role has view_folder permission (skip if not)
-            ra_permissions = ra.role.permissions.all()  # Already prefetched
+            ra_permissions = set(ra.role.permissions.all())  # Convert to set for proper 'in' checking
             if ref_permission not in ra_permissions:
                 continue
 
             # Get perimeter folders for this role assignment
-            ra_folders = set(ra.perimeter_folders.all())  # Already prefetched
+            ra_folders = set(ra.perimeter_folders.all()) # Already prefetched
             if ra.is_recursive:
                 # Add subfolders for recursive assignments
-                for ra_folder in list(ra_folders):
+                for ra_folder in set(ra_folders):
                     ra_folders.update(ra_folder.get_sub_folders())
 
             # Only process folders that intersect with our perimeter
@@ -882,62 +882,55 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if folder_permissions:
             # Get all objects in one query for folders that have permissions
-            folder_objects = {}  # folder_id -> list of object_ids
+            objects_data = []
 
             if hasattr(object_type, "folder"):
-                objects_query = object_type.objects.filter(
+                objects_data = object_type.objects.filter(
                     folder_id__in=folder_permissions.keys()
                 ).values_list("id", "folder_id")
             elif hasattr(object_type, "risk_assessment"):
-                objects_query = object_type.objects.filter(
+                objects_data = object_type.objects.filter(
                     risk_assessment__folder_id__in=folder_permissions.keys()
                 ).values_list("id", "risk_assessment__folder_id")
             elif hasattr(object_type, "entity"):
-                objects_query = object_type.objects.filter(
+                objects_data = object_type.objects.filter(
                     entity__folder_id__in=folder_permissions.keys()
                 ).values_list("id", "entity__folder_id")
             elif hasattr(object_type, "provider_entity"):
-                objects_query = object_type.objects.filter(
+                objects_data = object_type.objects.filter(
                     provider_entity__folder_id__in=folder_permissions.keys()
                 ).values_list("id", "provider_entity__folder_id")
             elif hasattr(object_type, "parent_folder"):
-                objects_query = [(fid, fid) for fid in folder_permissions.keys()]
+                objects_data = [(fid, fid) for fid in folder_permissions.keys()]
             elif class_name == "permission":
-                permission_ids = Permission.objects.filter(
-                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
-                ).values_list("id", flat=True)
-                objects_query = [(pid, None) for pid in permission_ids]
+                permission_ids = list(
+                    Permission.objects.filter(
+                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                    ).values_list("id", flat=True)
+                )
+                can_view = any(permission_view in perms for perms in folder_permissions.values())
+                can_change = any(permission_change in perms for perms in folder_permissions.values())
+                can_delete = any(permission_delete in perms for perms in folder_permissions.values())
+                if can_view:
+                    result_view.update(permission_ids)
+                if can_change:
+                    result_change.update(permission_ids)
+                if can_delete:
+                    result_delete.update(permission_ids)
+                # Skip the rest of processing for permission objects
+                return (list(result_view), list(result_change), list(result_delete))
             else:
                 raise NotImplementedError(f"Object type {object_type} not supported")
 
             # Group objects by folder
-            for obj_id, folder_id in objects_query:
-                if class_name == "permission":
-                    # Special case: permissions apply to all folders with any view permission
-                    if any(
-                        permission_view in perms
-                        for perms in folder_permissions.values()
-                    ):
-                        result_view.add(obj_id)
-                    if any(
-                        permission_change in perms
-                        for perms in folder_permissions.values()
-                    ):
-                        result_change.add(obj_id)
-                    if any(
-                        permission_delete in perms
-                        for perms in folder_permissions.values()
-                    ):
-                        result_delete.add(obj_id)
-                    break
-                else:
-                    folder_perms = folder_permissions.get(folder_id, set())
-                    if permission_view in folder_perms:
-                        result_view.add(obj_id)
-                    if permission_change in folder_perms:
-                        result_change.add(obj_id)
-                    if permission_delete in folder_perms:
-                        result_delete.add(obj_id)
+            for obj_id, folder_id in objects_data:
+                folder_perms = folder_permissions.get(folder_id, set())
+                if permission_view in folder_perms:
+                    result_view.add(obj_id)
+                if permission_change in folder_perms:
+                    result_change.add(obj_id)
+                if permission_delete in folder_perms:
+                    result_delete.add(obj_id)
 
         if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
             # Handle published objects - collect parent folders efficiently
@@ -950,11 +943,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 # Get folder objects for parent traversal
                 view_folders = {f for f in perimeter if f.id in view_folder_ids}
                 parent_folders = set()
+                visited = set()  # Add cycle detection
 
                 for my_folder in view_folders:
                     if my_folder.content_type != Folder.ContentType.ENCLAVE:
                         parent = my_folder.parent_folder
-                        while parent:
+                        # Cycle detection prevents infinite loops
+                        while parent and parent.id not in visited:
+                            visited.add(parent.id)
                             parent_folders.add(parent)
                             parent = parent.parent_folder
 
@@ -977,13 +973,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
         # Get user's direct role assignments
-        direct_assignments = (
-            principal.roleassignment_set.select_related("role")
-            .prefetch_related("role__permissions", "perimeter_folders")
-            .all()
-        )
-
-        assignments = list(direct_assignments)
+        if hasattr(principal, "roleassignment_set"):
+            direct_assignments = (
+                principal.roleassignment_set.select_related("role")
+                .prefetch_related("role__permissions", "perimeter_folders")
+                .all()
+            )
+            assignments = list(direct_assignments)
+        else:
+            assignments = []
 
         if hasattr(principal, "user_groups"):
             # Get all user group role assignments in a single query
