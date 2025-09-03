@@ -717,6 +717,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         max_digits=12, decimal_places=2, read_only=True
     )
     currency = serializers.SerializerMethodField()
+    annual_cost_display = serializers.SerializerMethodField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     assets = FieldsRelatedField(many=True)
 
@@ -736,6 +737,13 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if not obj.cost:
             return "€"  # Default currency
         return obj.cost.get("currency", "€")
+
+    def get_annual_cost_display(self, obj):
+        annual_cost = obj.annual_cost
+        if annual_cost == 0:
+            return ""
+        currency = self.get_currency(obj)
+        return f"{annual_cost:,.2f} {currency}"
 
 
 class ActionPlanSerializer(BaseModelSerializer):

@@ -2152,5 +2152,5 @@
 	"dataWizardSelectRiskMatrix": "Select a Risk Matrix",
 	"dataWizardRiskAssessmentDescription": "Import risk scenarios with the associated controls",
 	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)",
-	"annualCost": "Annual cost"
+	"annualCostDisplay": "Annual cost"
 }
