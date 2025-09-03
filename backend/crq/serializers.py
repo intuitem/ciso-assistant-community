@@ -133,6 +133,9 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
         source="get_simulation_parameters_display", read_only=True
     )
     lec_data = serializers.SerializerMethodField()
+    treatment_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
     folder = FieldsRelatedField()
 
     def get_lec_data(self, obj):

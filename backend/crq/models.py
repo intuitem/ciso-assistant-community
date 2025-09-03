@@ -318,3 +318,22 @@ class QuantitativeRiskHypothesis(
             return f"${value / 1_000:.0f}K"
         else:
             return f"${value:,.0f}"
+
+    @property
+    def treatment_cost(self):
+        """Calculate the total treatment cost based on applied controls."""
+        total_cost = 0
+
+        # Add cost of existing controls
+        for control in self.existing_applied_controls.all():
+            total_cost += control.annual_cost
+
+        # Add cost of added controls
+        for control in self.added_applied_controls.all():
+            total_cost += control.annual_cost
+
+        # Subtract cost of removed controls (cost savings)
+        for control in self.removed_applied_controls.all():
+            total_cost -= control.annual_cost
+
+        return total_cost

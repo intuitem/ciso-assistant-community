@@ -2711,10 +2711,18 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
+    def _get_default_cost():
+        return {
+            "currency": "€",
+            "amortization_period": 3,
+            "build": {"fixed_cost": 0, "people_days": 0},
+            "run": {"fixed_cost": 0, "people_days": 0},
+        }
+
     cost = models.JSONField(
         null=True,
         blank=True,
-        default=dict,
+        default=_get_default_cost,
         help_text=_("Detailed cost structure including build and run costs"),
         verbose_name=_("Cost"),
         validators=[

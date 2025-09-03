@@ -2162,5 +2162,6 @@
 	"implementationHelpText": "Man/days needed for the implementation",
 	"oneTimeImplementationCost": "One-time implementation cost",
 	"annualOperationalCost": "Annual operational cost",
-	"annualManDaysHelpText": "Man/days needed annually"
+	"annualManDaysHelpText": "Man/days needed annually",
+	"treatmentCost": "Treatment cost"
 }

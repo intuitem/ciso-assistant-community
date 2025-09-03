@@ -1503,6 +1503,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'simulation_parameters_display' },
+			{ field: 'treatment_cost' },
 			{ field: 'risk_stage' },
 			{ field: 'existing_applied_controls' },
 			{ field: 'added_applied_controls' },
