@@ -340,24 +340,20 @@
 			>
 				{#if requirementAssessment.description}
 					<div class="card w-full font-light text-lg p-4 preset-tonal-primary">
-						<h2 class="font-semibold text-lg flex flex-row justify-between">
+						<h2 class="font-semibold text-base flex flex-row justify-between">
 							<div>
 								<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
 							</div>
 						</h2>
 						<MarkdownRenderer content={requirementAssessment.description} />
 					</div>
-
-					<!-- <div class="flex w-full font-semibold"> -->
-					<!-- 	<MarkdownRenderer content={requirementAssessment.description} /> -->
-					<!-- </div> -->
 				{/if}
 				{#if requirementAssessment.assessable}
 					{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference.result}
 						<div
 							class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
 						>
-							<h2 class="font-semibold text-lg flex flex-row justify-between">
+							<h2 class="font-semibold text-base flex flex-row justify-between">
 								<div>
 									<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 								</div>

@@ -274,7 +274,7 @@
 	</div>
 	{#if data.requirement.description}
 		<div class="font-light text-lg card p-4 preset-tonal-primary">
-			<h2 class="font-semibold text-lg flex flex-row justify-between">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
 				</div>
@@ -284,7 +284,7 @@
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
 		<div class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto">
-			<h2 class="font-semibold text-lg flex flex-row justify-between">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 				</div>
