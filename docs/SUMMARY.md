@@ -38,6 +38,7 @@
 * [📁 Organization](model/organization/README.md)
   * [Add and manage users](model/organization/add-and-manage-users.md)
   * [User Groups](model/organization/user-groups.md)
+  * [Custom roles](model/organization/custom-roles.md)
 * [⚙️ Context](model/context.md)
 * [🏛️ Governance](model/governance.md)
 * [💣 Risk](model/risk.md)
