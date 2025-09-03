@@ -2110,5 +2110,5 @@
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
-	"displayCost": "Cost"
+	"annualCost": "Coût annuel"
 }

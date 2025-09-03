@@ -713,7 +713,9 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     cost = serializers.JSONField()
-    display_cost = serializers.CharField(read_only=True)
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     assets = FieldsRelatedField(many=True)
 

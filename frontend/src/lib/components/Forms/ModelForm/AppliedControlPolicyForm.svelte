@@ -173,56 +173,6 @@
 			cacheLock={cacheLocks['control_impact']}
 			bind:cachedValue={formDataCache['control_impact']}
 		/>
-		<!-- Cost Structure -->
-		<div class="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-			<h4 class="text-sm font-medium text-gray-700">{m.cost()}</h4>
-
-			<!-- Build Costs -->
-			<div class="space-y-2">
-				<h5 class="text-xs font-medium text-gray-600">Build Costs</h5>
-				<div class="grid grid-cols-2 gap-4">
-					<NumberField
-						{form}
-						field="cost.build.fixed_cost"
-						label="Fixed Cost ({displayCurrency})"
-						helpText="One-time implementation cost"
-						min={0}
-						step={1}
-					/>
-					<NumberField
-						{form}
-						field="cost.build.people_days"
-						label="People Days"
-						helpText="Man/days needed for implementation"
-						min={0}
-						step={0.5}
-					/>
-				</div>
-			</div>
-
-			<!-- Run Costs -->
-			<div class="space-y-2">
-				<h5 class="text-xs font-medium text-gray-600">Run Costs (Annual)</h5>
-				<div class="grid grid-cols-2 gap-4">
-					<NumberField
-						{form}
-						field="cost.run.fixed_cost"
-						label="Fixed Cost ({displayCurrency})"
-						helpText="Annual operational cost"
-						min={0}
-						step={1}
-					/>
-					<NumberField
-						{form}
-						field="cost.run.people_days"
-						label="People Days"
-						helpText="Man/days needed annually"
-						min={0}
-						step={0.5}
-					/>
-				</div>
-			</div>
-		</div>
 		<MarkdownField
 			{form}
 			field="observation"
@@ -231,6 +181,71 @@
 			cacheLock={cacheLocks['observation']}
 			bind:cachedValue={formDataCache['observation']}
 		/>
+	</Dropdown>
+
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-money-bill-1"
+		header={m.cost()}
+	>
+		<!-- Amortization Period -->
+		<NumberField
+			{form}
+			field="cost.amortization_period"
+			label="Amortization Period (years)"
+			helpText="Period over which to amortize the cost"
+			min={1}
+			max={50}
+			step={1}
+			value={3}
+		/>
+
+		<!-- Build Costs -->
+		<div class="space-y-2">
+			<h5 class="font-medium text-gray-600 my-2 py-2">Build Costs</h5>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="cost.build.fixed_cost"
+					label="Fixed Cost ({displayCurrency})"
+					helpText="One-time implementation cost"
+					min={0}
+					step={1}
+				/>
+				<NumberField
+					{form}
+					field="cost.build.people_days"
+					label="People Days"
+					helpText="Man/days needed for implementation"
+					min={0}
+					step={0.5}
+				/>
+			</div>
+		</div>
+
+		<!-- Run Costs -->
+		<div class="space-y-2">
+			<h5 class="font-medium text-gray-600 my-2 py-2">Run Costs (Annual)</h5>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="cost.run.fixed_cost"
+					label="Fixed Cost ({displayCurrency})"
+					helpText="Annual operational cost"
+					min={0}
+					step={1}
+				/>
+				<NumberField
+					{form}
+					field="cost.run.people_days"
+					label="People Days"
+					helpText="Man/days needed annually"
+					min={0}
+					step={0.5}
+				/>
+			</div>
+		</div>
 	</Dropdown>
 
 	<Dropdown

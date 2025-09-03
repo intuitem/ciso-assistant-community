@@ -2723,6 +2723,12 @@ class AppliedControl(
                     "type": "object",
                     "properties": {
                         "currency": {"type": "string"},
+                        "amortization_period": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 3,
+                        },
                         "build": {
                             "type": "object",
                             "properties": {
@@ -2810,6 +2816,43 @@ class AppliedControl(
     @property
     def csv_value(self):
         return f"[{self.status}] {self.name}" if self.status else self.name
+
+    @property
+    def annual_cost(self):
+        """Returns the annualized cost as a numeric value"""
+        if not self.cost:
+            return 0
+
+        build_cost = self.cost.get("build", {})
+        run_cost = self.cost.get("run", {})
+        amortization_period = self.cost.get("amortization_period", 3)
+
+        # Get daily rate from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = (
+            general_settings.value.get("daily_rate", 500) if general_settings else 500
+        )
+
+        # Calculate annual cost
+        annual_cost = 0
+
+        # Amortized build costs
+        build_fixed = build_cost.get("fixed_cost", 0)
+        build_people = build_cost.get("people_days", 0)
+        if build_fixed > 0:
+            annual_cost += build_fixed / amortization_period
+        if build_people > 0:
+            annual_cost += (build_people * daily_rate) / amortization_period
+
+        # Annual run costs
+        run_fixed = run_cost.get("fixed_cost", 0)
+        run_people = run_cost.get("people_days", 0)
+        if run_fixed > 0:
+            annual_cost += run_fixed
+        if run_people > 0:
+            annual_cost += run_people * daily_rate
+
+        return annual_cost
 
     @property
     def display_cost(self):
