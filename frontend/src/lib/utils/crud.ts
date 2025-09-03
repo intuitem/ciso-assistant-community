@@ -1502,6 +1502,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'quantitative_risk_scenario' },
 			{ field: 'simulation_parameters_display' },
 			{ field: 'treatment_cost' },
 			{ field: 'risk_stage' },

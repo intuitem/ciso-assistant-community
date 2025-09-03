@@ -10,6 +10,7 @@ from core.models import (
     Threat,
     Vulnerability,
 )
+from global_settings.models import GlobalSettings
 from iam.models import FolderMixin, User
 from .utils import (
     simulate_scenario_annual_loss,
@@ -312,12 +313,18 @@ class QuantitativeRiskHypothesis(
 
     def _format_currency(self, value):
         """Helper method to format currency values."""
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
         if value >= 1_000_000:
-            return f"${value / 1_000_000:.1f}M"
+            return f"{value / 1_000_000:.1f}M {currency}"
         elif value >= 1_000:
-            return f"${value / 1_000:.0f}K"
+            return f"{value / 1_000:.0f}K {currency}"
         else:
-            return f"${value:,.0f}"
+            return f"{value:,.0f} {currency}"
 
     @property
     def treatment_cost(self):
@@ -337,3 +344,11 @@ class QuantitativeRiskHypothesis(
             total_cost -= control.annual_cost
 
         return total_cost
+
+    @property
+    def treatment_cost_display(self):
+        """Returns a human-readable format of the treatment cost."""
+        cost = self.treatment_cost
+        if cost == 0:
+            return "No cost"
+        return self._format_currency(cost)
