@@ -15,11 +15,21 @@
 
 	import { onMount } from 'svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import List from '$lib/components/List/List.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
@@ -60,6 +70,48 @@
 			goto(`${page.url.pathname}/edit?next=${page.url.pathname}`);
 		}
 	}
+
+	let syncingToActionsIsLoading = $state(false);
+	async function modalConfirmSyncToActions(id: string, action: string): Promise<void> {
+		const appliedControlsSync = await fetch(`/risk-scenarios/${page.params.id}/sync-to-actions`, {
+			method: 'POST'
+		}).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Failed to fetch applied controls sync data');
+			}
+		});
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: data.scenario.id },
+				id: id,
+				debug: false,
+				URLModel: 'risk-scenarios',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: appliedControlsSync.changes.map((ac) => ac.str),
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsMessage({
+				count: data.compliance_assessment.framework.reference_controls.length //change this
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeydown);
@@ -105,6 +157,26 @@
 			</div>
 		</div>
 		{#if canEditObject}
+			<button
+				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+				onclick={async () => {
+					await modalConfirmSyncToActions(data.scenario.id, data.scenario.name, '?/syncToActions');
+				}}
+			>
+				<span class="mr-2">
+					{#if syncingToActionsIsLoading}
+						<ProgressRing
+							strokeWidth="16px"
+							meterStroke="stroke-white"
+							size="size-6"
+							classes="-ml-2"
+						/>
+					{:else}
+						<i class="fa-solid fa-arrows-rotate mr-2"></i>
+					{/if}
+				</span>
+				{m.syncToAppliedControls()}
+			</button>
 			<Anchor
 				href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 				class="btn preset-filled-primary-500 h-fit mt-1"
