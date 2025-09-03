@@ -192,8 +192,7 @@ export const AppliedControlSchema = z.object({
 				})
 				.default({ fixed_cost: 0, people_days: 0 })
 		})
-		.optional()
-		.nullable(),
+		.optional(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
