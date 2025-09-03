@@ -218,7 +218,6 @@
 					min={1}
 					max={50}
 					step={1}
-					value={3}
 				/>
 			</div>
 		</div>
