@@ -1776,7 +1776,7 @@
 	"markdownHelpText": "Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.",
 	"markdownCTA": "Double-click to add content...",
 	"organisationObjective": "Objective",
-	"organisationObjectives": "Objectives",
+	"organisationObjectives": "Objectives (ISO)",
 	"addOrganisationObjective": "Add an objective",
 	"addOrganisationIssue": "Add an issue",
 	"organisationIssue": "Issue",
