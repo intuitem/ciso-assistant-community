@@ -79,7 +79,8 @@
 
 ## Integration
 
-* [API documentation](integration/api-documentation.md)
+* [Generating a PAT](integration/generating-a-pat.md)
+* [API usage](integration/api-usage.md)
 
 ## Presentations
 
