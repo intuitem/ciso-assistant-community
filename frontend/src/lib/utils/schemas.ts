@@ -178,7 +178,7 @@ export const AppliedControlSchema = z.object({
 	cost: z
 		.object({
 			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
-			amortization_period: z.number().min(1).max(50).default(3),
+			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
 					fixed_cost: z.number().min(0).default(0),

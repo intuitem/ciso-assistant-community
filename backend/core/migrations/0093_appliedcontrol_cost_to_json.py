@@ -17,7 +17,7 @@ def convert_cost_to_json(apps, schema_editor):
             # Convert to new JSON structure and save in temp field
             control.cost_temp = {
                 "currency": "€",
-                "amortization_period": 3,
+                "amortization_period": 1,
                 "build": {
                     "fixed_cost": old_cost,
                     "people_days": 0.0,
@@ -30,7 +30,7 @@ def convert_cost_to_json(apps, schema_editor):
             # Set to default structure for invalid values
             control.cost_temp = {
                 "currency": "€",
-                "amortization_period": 3,
+                "amortization_period": 1,
                 "build": {"fixed_cost": 0.0, "people_days": 0.0},
                 "run": {"fixed_cost": 0.0, "people_days": 0.0},
             }
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                             "additionalProperties": False,
                             "properties": {
                                 "amortization_period": {
-                                    "default": 3,
+                                    "default": 1,
                                     "maximum": 50,
                                     "minimum": 1,
                                     "type": "number",

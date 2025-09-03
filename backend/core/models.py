@@ -2711,10 +2711,10 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
-    def _get_default_cost():
+    def _get_default_cost(self):
         return {
             "currency": "€",
-            "amortization_period": 3,
+            "amortization_period": 1,
             "build": {"fixed_cost": 0, "people_days": 0},
             "run": {"fixed_cost": 0, "people_days": 0},
         }
@@ -2735,7 +2735,7 @@ class AppliedControl(
                             "type": "number",
                             "minimum": 1,
                             "maximum": 50,
-                            "default": 3,
+                            "default": 1,
                         },
                         "build": {
                             "type": "object",
@@ -2833,7 +2833,7 @@ class AppliedControl(
 
         build_cost = self.cost.get("build", {})
         run_cost = self.cost.get("run", {})
-        amortization_period = self.cost.get("amortization_period", 3)
+        amortization_period = self.cost.get("amortization_period", 1)
 
         # Get daily rate from global settings
         general_settings = GlobalSettings.objects.filter(name="general").first()
