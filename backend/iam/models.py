@@ -1069,7 +1069,9 @@ class PersonalAccessToken(models.Model):
         return self.auth_token.digest
 
     def __str__(self):
-        return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
+        d = self.auth_token.digest or ""
+        masked = (d[:8] + "…") if d else "n/a"
+        return f"{self.auth_token.user.email} : {self.name} : {masked}"
 
 
 auditlog.register(
