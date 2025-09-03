@@ -268,6 +268,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'effort' },
 			{ field: 'control_impact' },
 			{ field: 'annual_cost' },
+			{ field: 'currency' },
 			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
