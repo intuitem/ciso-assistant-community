@@ -3171,8 +3171,10 @@ class RiskAssessment(Assessment):
         return output
 
     def sync_to_applied_controls(self, dry_run: bool = False):
-        for scenario in self.risk_scenarios.all():
+        scenarios = list(self.risk_scenarios.all())
+        for scenario in scenarios:
             scenario.sync_to_applied_controls(dry_run=dry_run)
+        return scenarios
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

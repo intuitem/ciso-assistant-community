@@ -1406,7 +1406,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
         changes = risk_assessment.sync_to_applied_controls(dry_run=dry_run)
         return Response(
-            {"changes": AppliedControlReadSerializer(changes, many=True).data}
+            {"changes": RiskScenarioReadSerializer(changes, many=True).data}
         )
 
 
