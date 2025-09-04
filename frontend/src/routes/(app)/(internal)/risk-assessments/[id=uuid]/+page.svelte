@@ -11,17 +11,18 @@
 	import { m } from '$paraglide/messages';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { getLocale } from '$paraglide/runtime';
-	import { listViewFields } from '$lib/utils/table';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import List from '$lib/components/List/List.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 
-	let { data } = $props();
+	let { data, form } = $props();
 
 	let exportPopupOpen = $state(false);
 
@@ -77,6 +78,53 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	let syncingToActionsIsLoading = $state(false);
+
+	async function modalConfirmSyncToActions(id: string, action: string): Promise<void> {
+		const riskScenariosSync = await fetch(`/risk-assessments/${page.params.id}/sync-to-actions`, {
+			method: 'POST'
+		}).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Failed to fetch applied controls sync data');
+			}
+		});
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: risk_assessment.id },
+				id: id,
+				debug: false,
+				URLModel: 'risk-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: riskScenariosSync.changes.map((scenario) => scenario.name),
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsRiskScenarioMessage({
+				count: risk_assessment.risk_scenarios.length //change this
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
+	$effect(() => {
+		if (syncingToActionsIsLoading === true && (form || form?.error))
+			syncingToActionsIsLoading = false;
+	});
 
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
@@ -263,6 +311,28 @@
 					<i class="fa-solid fa-copy mr-2"></i>
 					{m.duplicate()}</button
 				>
+				{#if !risk_assessment?.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						onclick={async () => {
+							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
+						}}
+					>
+						<span class="mr-2">
+							{#if syncingToActionsIsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									size="size-6"
+									classes="-ml-2"
+								/>
+							{:else}
+								<i class="fa-solid fa-arrows-rotate mr-2"></i>
+							{/if}
+						</span>
+						{m.syncToAppliedControls()}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
