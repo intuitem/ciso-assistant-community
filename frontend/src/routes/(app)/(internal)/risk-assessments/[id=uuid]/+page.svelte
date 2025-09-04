@@ -21,6 +21,10 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import z from 'zod';
 
 	let { data, form } = $props();
 
@@ -91,17 +95,25 @@
 				throw new Error('Failed to fetch applied controls sync data');
 			}
 		});
+		const schema = z.object({ update_assessment: z.boolean().default(false) });
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: SyncToActionsRiskModal,
 			props: {
-				_form: { id: risk_assessment.id },
-				id: id,
+				_form: defaults({ update_assessment: false }, zod(schema)),
+				id,
+				schema,
 				debug: false,
 				URLModel: 'risk-assessments',
 				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
-					items: riskScenariosSync.changes.map((scenario) => scenario.name),
+				listProps: {
+					items: riskScenariosSync.changes.map((scenario) =>
+						m.riskScenarioSyncWithChanges({
+							ref_id: scenario.ref_id,
+							name: scenario.name,
+							current_level: scenario.current_level.name,
+							residual_level: scenario.residual_level.name
+						})
+					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}

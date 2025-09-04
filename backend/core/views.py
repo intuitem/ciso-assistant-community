@@ -1395,6 +1395,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         dry_run = request.query_params.get("dry_run", True)
         if dry_run == "false":
             dry_run = False
+        update_assessment = request.data.get("update_assessment", False)
         risk_assessment = RiskAssessment.objects.get(id=pk)
 
         if not RoleAssignment.is_access_allowed(
@@ -1404,7 +1405,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        changes = risk_assessment.sync_to_applied_controls(dry_run=dry_run)
+        changes = risk_assessment.sync_to_applied_controls(
+            update_assessment=update_assessment, dry_run=dry_run
+        )
         return Response(
             {"changes": RiskScenarioReadSerializer(changes, many=True).data}
         )
@@ -2388,9 +2391,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         dry_run = request.query_params.get("dry_run", True)
         if dry_run == "false":
             dry_run = False
-        update_assessment = (
-            request.query_params.get("update_assessment", False) == "true"
-        )
+        update_assessment = request.data.get("update_assessment", False)
         risk_scenario = RiskScenario.objects.get(id=pk)
 
         if not RoleAssignment.is_access_allowed(
@@ -5254,9 +5255,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         dry_run = request.query_params.get("dry_run", True)
         if dry_run == "false":
             dry_run = False
-        update_assessment = (
-            request.query_params.get("update_assessment", False) == "true"
-        )
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
 
         if not RoleAssignment.is_access_allowed(
@@ -5266,9 +5264,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        changes = compliance_assessment.sync_to_applied_controls(
-            update_assessment=update_assessment, dry_run=dry_run
-        )
+        changes = compliance_assessment.sync_to_applied_controls(dry_run=dry_run)
         return Response({"changes": changes})
 
     @action(detail=True, methods=["get"], url_path="progress_ts")

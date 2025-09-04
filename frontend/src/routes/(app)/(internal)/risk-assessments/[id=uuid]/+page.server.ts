@@ -68,7 +68,9 @@ export const actions: Actions = {
 			return fail(400, { form: null });
 		}
 
-		const schema = z.object({ id: z.string().uuid() });
+		console.log(formData);
+
+		const schema = z.object({ update_assessment: z.boolean().optional() });
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(
@@ -77,7 +79,8 @@ export const actions: Actions = {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
-				}
+				},
+				body: JSON.stringify(form.data)
 			}
 		);
 		if (response.ok) {
@@ -97,6 +100,9 @@ export const actions: Actions = {
 				event
 			);
 		}
+		const r = response.clone();
+		console.log(await r.text());
+		console.log(form.data);
 		return { form, message: { riskScenarios: await response.json() } };
 	}
 };
