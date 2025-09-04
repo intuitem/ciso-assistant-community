@@ -108,6 +108,10 @@ export const URL_MODEL = [
 	// iso,
 	'organisation-issues',
 	'organisation-objectives',
+	// crq,
+	'quantitative-risk-studies',
+	'quantitative-risk-scenarios',
+	'quantitative-risk-hypotheses',
 	// terminologies
 	'terminologies',
 	// roles,

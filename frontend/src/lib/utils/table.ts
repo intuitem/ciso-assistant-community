@@ -58,6 +58,12 @@ const YES_NO_UNSET_OPTIONS = [
 	{ label: 'NO', value: 'NO' },
 	{ label: '--', value: '--' }
 ];
+
+const RISK_STAGE_OPTIONS = [
+	{ label: 'Inherent', value: 'inherent' },
+	{ label: 'Current', value: 'current' },
+	{ label: 'Residual', value: 'residual' }
+];
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -130,6 +136,15 @@ const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const RISK_STAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'risk_stage',
+		options: RISK_STAGE_OPTIONS,
 		multiple: true
 	}
 };
@@ -1523,6 +1538,71 @@ export const listViewFields = {
 		body: ['name', 'category', 'origin', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
+		}
+	},
+	'quantitative-risk-studies': {
+		head: ['name', 'description', 'status', 'domain'],
+		body: ['name', 'description', 'status', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: RISK_ASSESSMENT_STATUS_FILTER
+		}
+	},
+	'quantitative-risk-scenarios': {
+		head: [
+			'isSelected',
+			'ref_id',
+			'name',
+			'quantitativeRiskStudy',
+			'assets',
+			'threats',
+			'qualifications'
+		],
+		body: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'quantitative_risk_study',
+			'assets',
+			'threats',
+			'qualifications'
+		],
+		filters: {
+			status: RISK_ASSESSMENT_STATUS_FILTER,
+			assets: ASSET_FILTER,
+			threats: THREAT_FILTER,
+			qualifications: QUALIFICATION_FILTER
+		}
+	},
+	'quantitative-risk-hypotheses': {
+		head: [
+			'ref_id',
+			'name',
+			'riskStage',
+			'simulationParameters',
+			'lecChart',
+			'treatmentCost',
+			'isSelected'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'risk_stage',
+			'simulation_parameters_display',
+			'lec_data',
+			'treatment_cost',
+			'is_selected'
+		],
+		filters: {
+			is_selected: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'is_selected',
+					options: YES_NO_OPTIONS,
+					multiple: true
+				}
+			},
+			risk_stage: RISK_STAGE_FILTER
 		}
 	},
 	'task-templates': {

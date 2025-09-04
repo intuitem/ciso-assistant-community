@@ -1493,7 +1493,6 @@ class AppliedControlFilterSet(GenericFilterSet):
             "reference_control": ["exact", "isnull"],
             "effort": ["exact"],
             "control_impact": ["exact"],
-            "cost": ["exact"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
