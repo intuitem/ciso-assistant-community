@@ -354,6 +354,7 @@
 				folderId={data.risk_assessment.folder.id}
 				{fields}
 				disableCreate={risk_assessment.is_locked}
+				disableEdit={risk_assessment.is_locked}
 				disableDelete={risk_assessment.is_locked}
 			>
 				{#snippet addButton()}
