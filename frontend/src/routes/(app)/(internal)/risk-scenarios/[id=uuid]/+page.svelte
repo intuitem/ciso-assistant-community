@@ -106,7 +106,7 @@
 			component: modalComponent,
 			// Data
 			title: m.syncToAppliedControls(),
-			body: m.syncToAppliedControlsRiskAssessmentMessage({
+			body: m.syncToAppliedControlsRiskScenarioMessage({
 				count: data.scenario.applied_controls.length //change this
 			}),
 			response: (r: boolean) => {
