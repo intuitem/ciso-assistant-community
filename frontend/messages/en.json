@@ -2158,10 +2158,10 @@
 	"buildCosts": "Build cost",
 	"runCosts": "Run cost (annual)",
 	"fixedCost": "Fixed cost",
-	"peopleDays": "Man-days",
-	"implementationHelpText": "Man/days needed for the implementation",
+	"peopleDays": "People-days",
+	"implementationHelpText": "People/days needed for the implementation",
 	"oneTimeImplementationCost": "One-time implementation cost",
 	"annualOperationalCost": "Annual operational cost",
-	"annualManDaysHelpText": "Man/days needed annually",
+	"annualManDaysHelpText": "People/days needed annually",
 	"treatmentCost": "Treatment cost"
 }

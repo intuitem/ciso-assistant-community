@@ -2116,10 +2116,10 @@
 	"buildCosts": "Coût de build",
 	"runCosts": "Coût de run (annuels)",
 	"fixedCost": "Coût fixe",
-	"peopleDays": "Jours/homme",
-	"implementationHelpText": "Jours-homme nécessaires pour la mise en œuvre",
+	"peopleDays": "Jours/personne",
+	"implementationHelpText": "Jours-personne nécessaires pour la mise en œuvre",
 	"oneTimeImplementationCost": "Coût de mise en œuvre",
 	"annualOperationalCost": "Coût opérationnel annuel",
-	"annualManDaysHelpText": "Jours-homme nécessaires annuellement",
+	"annualManDaysHelpText": "Jours-personne nécessaires annuellement",
 	"treatmentCost": "Coût de traitement"
 }

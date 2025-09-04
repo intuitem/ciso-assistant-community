@@ -189,6 +189,13 @@ class QuantitativeRiskHypothesis(
         verbose_name = _("Quantitative Risk Hypothesis")
         verbose_name_plural = _("Quantitative Risk Hypotheses")
         ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["quantitative_risk_scenario", "risk_stage"],
+                condition=models.Q(risk_stage__in=["current", "inherent"]),
+                name="unique_current_inherent_per_scenario",
+            )
+        ]
 
     def run_simulation(self, dry_run: bool = False):
         """
@@ -330,10 +337,6 @@ class QuantitativeRiskHypothesis(
     def treatment_cost(self):
         """Calculate the total treatment cost based on applied controls."""
         total_cost = 0
-
-        # Add cost of existing controls
-        for control in self.existing_applied_controls.all():
-            total_cost += control.annual_cost
 
         # Add cost of added controls
         for control in self.added_applied_controls.all():
