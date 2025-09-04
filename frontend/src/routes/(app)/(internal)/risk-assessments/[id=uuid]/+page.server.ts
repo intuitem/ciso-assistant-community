@@ -14,6 +14,7 @@ import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import z from 'zod';
 
 export const actions: Actions = {
 	create: async (event) => {
@@ -71,7 +72,7 @@ export const actions: Actions = {
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(
-			`${BASE_API_URL}/risk-assessment/${event.params.id}/sync-to-actions/?dry_run=false`,
+			`${BASE_API_URL}/risk-assessments/${event.params.id}/sync-to-actions/?dry_run=false`,
 			{
 				method: 'POST',
 				headers: {
