@@ -3764,6 +3764,8 @@ class RiskScenario(NameDescriptionMixin):
             dry_run (bool): if True, do not actually perform the operation, just return the list of controls that would be moved.
         """
         extra_controls = list(self.applied_controls.all())
+        if not extra_controls:
+            return []
         if not all(
             [ac.status == AppliedControl.Status.ACTIVE for ac in extra_controls]
         ):
