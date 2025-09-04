@@ -7,6 +7,7 @@
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -106,6 +107,8 @@
 											)?.urlModel
 										}/${value.id}`}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
+									{:else if key === 'description'}
+										<MarkdownRenderer content={value} />
 									{:else}
 										{value.str ?? value}
 									{/if}
