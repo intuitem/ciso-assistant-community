@@ -3,6 +3,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -202,14 +203,14 @@
 					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
 						{#if currentRequirementAssessment.description}
 							<div class="whitespace-pre-wrap leading-relaxed text-gray-700">
-								{currentRequirementAssessment.description}
+								<MarkdownRenderer content={currentRequirementAssessment.description} />
 							</div>
 						{/if}
 						{#if requirement.annotation}
 							<div
 								class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify"
 							>
-								{requirement.annotation}
+								<MarkdownRenderer content={requirement.annotation} />
 							</div>
 						{/if}
 					</div>
