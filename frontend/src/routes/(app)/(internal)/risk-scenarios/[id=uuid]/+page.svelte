@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -23,11 +23,14 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+
 	interface Props {
 		data: PageData;
+		form: ActionData;
 	}
 
-	let { data }: Props = $props();
+	let { data, form }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -72,6 +75,7 @@
 	}
 
 	let syncingToActionsIsLoading = $state(false);
+
 	async function modalConfirmSyncToActions(id: string, action: string): Promise<void> {
 		const appliedControlsSync = await fetch(`/risk-scenarios/${page.params.id}/sync-to-actions`, {
 			method: 'POST'
@@ -92,7 +96,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: appliedControlsSync.changes.map((ac) => ac.str),
+					items: appliedControlsSync.changes.map((ac) => ac.name),
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
@@ -102,8 +106,8 @@
 			component: modalComponent,
 			// Data
 			title: m.syncToAppliedControls(),
-			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.framework.reference_controls.length //change this
+			body: m.syncToAppliedControlsRiskAssessmentMessage({
+				count: data.scenario.applied_controls.length //change this
 			}),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
@@ -111,6 +115,11 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	$effect(() => {
+		if (syncingToActionsIsLoading === true && (form || form?.error))
+			syncingToActionsIsLoading = false;
+	});
 
 	onMount(() => {
 		// Add event listener when component mounts
@@ -157,31 +166,36 @@
 			</div>
 		</div>
 		{#if canEditObject}
-			<button
-				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-				onclick={async () => {
-					await modalConfirmSyncToActions(data.scenario.id, data.scenario.name, '?/syncToActions');
-				}}
-			>
-				<span class="mr-2">
-					{#if syncingToActionsIsLoading}
-						<ProgressRing
-							strokeWidth="16px"
-							meterStroke="stroke-white"
-							size="size-6"
-							classes="-ml-2"
-						/>
-					{:else}
-						<i class="fa-solid fa-arrows-rotate mr-2"></i>
-					{/if}
-				</span>
-				{m.syncToAppliedControls()}
-			</button>
-			<Anchor
-				href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
-				class="btn preset-filled-primary-500 h-fit mt-1"
-				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
-			>
+			<div class="flex flex-col space-y-2 my-auto">
+				<Anchor
+					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
+					class="btn preset-filled-primary-500 h-fit mt-1"
+					data-testid="edit-button"
+					><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
+				>
+				{#if !data.scenario.risk_assessment?.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						onclick={async () => {
+							await modalConfirmSyncToActions(data.scenario.id, '?/syncToActions');
+						}}
+					>
+						<span class="mr-2">
+							{#if syncingToActionsIsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									size="size-6"
+									classes="-ml-2"
+								/>
+							{:else}
+								<i class="fa-solid fa-arrows-rotate mr-2"></i>
+							{/if}
+						</span>
+						{m.syncToAppliedControls()}
+					</button>
+				{/if}
+			</div>
 		{/if}
 	</div>
 
