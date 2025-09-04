@@ -3171,10 +3171,14 @@ class RiskAssessment(Assessment):
         return output
 
     def sync_to_applied_controls(self, dry_run: bool = False):
-        scenarios = list(self.risk_scenarios.all())
+        scenarios: list[RiskScenario] = list(self.risk_scenarios.all())
+        changed_scenarios = list()
         for scenario in scenarios:
-            scenario.sync_to_applied_controls(dry_run=dry_run)
-        return scenarios
+            cur = scenario.sync_to_applied_controls(dry_run=dry_run)
+            if len(cur) > 0:
+                print(cur)
+                changed_scenarios.append(scenario)
+        return changed_scenarios
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
@@ -3754,7 +3758,7 @@ class RiskScenario(NameDescriptionMixin):
 
     def sync_to_applied_controls(self, dry_run=True):
         """
-        If all extra controls are active, move them to existing controls
+        If all extra controls are active, move them to existing controls and reset the residual assessment.
 
         Params:
             dry_run (bool): if True, do not actually perform the operation, just return the list of controls that would be moved.
@@ -3766,8 +3770,11 @@ class RiskScenario(NameDescriptionMixin):
             return []
         if not dry_run:
             with transaction.atomic():
-                self.existing_applied_controls.add(*extra_controls, bulk=True)
+                self.existing_applied_controls.add(*extra_controls)
                 self.applied_controls.clear()
+                self.residual_impact = -1
+                self.residual_proba = -1
+                self.save()
         return extra_controls
 
     def __str__(self):
