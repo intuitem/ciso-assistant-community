@@ -1399,7 +1399,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(codename="change_risksassessment"),
+            perm=Permission.objects.get(codename="change_riskassessment"),
             folder=Folder.get_folder(risk_assessment),
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
