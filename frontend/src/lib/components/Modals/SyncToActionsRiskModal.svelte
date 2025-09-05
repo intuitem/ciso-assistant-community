@@ -62,7 +62,9 @@
 		>
 			{#snippet children({ form })}
 				<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
-				<article class="text-red-800 whitespace-pre-line">{$modalStore[0].body ?? '(body missing)'}</article>
+				<article class="text-red-800 whitespace-pre-line">
+					{$modalStore[0].body ?? '(body missing)'}
+				</article>
 				<Checkbox
 					{form}
 					field="reset_residual"
