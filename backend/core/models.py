@@ -5184,19 +5184,17 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Link"),
     )
 
-    @property
-    def next_occurrence(self):
+    def get_next_occurrence(self):
         today = datetime.today().date()
         task_nodes = TaskNode.objects.filter(
             task_template=self, due_date__gte=today
         ).order_by("due_date")
         return task_nodes.first().due_date if task_nodes.exists() else None
 
-    @property
-    def last_occurrence_status(self):
+    def get_last_occurrence_status(self):
         today = datetime.today().date()
         task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__lte=today
+            task_template=self, due_date__lt=today
         ).order_by("-due_date")
         return task_nodes[0].status if task_nodes.exists() else None
 

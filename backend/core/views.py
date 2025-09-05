@@ -15,14 +15,7 @@ import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from django.db.models import (
-    F,
-    Count,
-    Q,
-    ExpressionWrapper,
-    FloatField,
-    Value,
-)
+from django.db.models import F, Count, Q, ExpressionWrapper, FloatField, Value, Min
 from django.db.models.functions import Greatest, Coalesce
 
 
@@ -5957,6 +5950,33 @@ class TimelineEntryViewSet(BaseModelViewSet):
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        ordering = self.request.query_params.get("ordering", "")
+
+        if any(
+            field in ordering
+            for field in (
+                "next_occurrence",
+                "last_occurrence_status",
+            )
+        ):
+            qs = qs.annotate(
+                next_occurrence=Min(
+                    "tasknode__due_date",
+                    filter=Q(tasknode__due_date__gte=timezone.now()),
+                ),
+                last_occurrence_status=Subquery(
+                    TaskNode.objects.filter(
+                        task_template=OuterRef("pk"), due_date__lt=timezone.now()
+                    )
+                    .order_by("-due_date")
+                    .values("status")[:1]
+                ),
+            )
+
+        return qs
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
