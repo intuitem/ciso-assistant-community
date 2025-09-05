@@ -6,6 +6,8 @@ import structlog
 from core.views import BaseModelViewSet, GenericFilterSet
 from core.permissions import IsAdministrator
 from django.db import models, transaction
+from django.db.models import CharField, Value, BooleanField, Case, When
+from django.db.models.functions import Lower, Cast, Coalesce
 import django_filters as df
 from django.contrib.auth.models import Permission
 from django.conf import settings
@@ -426,7 +428,11 @@ class LogEntryFilterSet(GenericFilterSet):
 
     class Meta:
         model = LogEntry
-        fields = ["actor", "content_type", "action", "folder"]
+        fields = {
+            "actor": ["exact"],
+            "content_type": ["exact"],
+            "action": ["exact"],
+        }
 
     def filter_content_type_model(self, queryset, name, value):
         normalized = value.replace(" ", "").lower()
@@ -449,9 +455,22 @@ class LogEntryViewSet(
         "actor__email",
         "actor__first_name",
         "actor__last_name",
+        "changes",  # allows to search for last_login (for example)
+        "additional_data__folder",
     ]
     filterset_class = LogEntryFilterSet
 
     permission_classes = (IsAdministrator,)
     serializer_class = LogEntrySerializer
-    queryset = LogEntry.objects.all()
+
+    def get_queryset(self):
+        return LogEntry.objects.all().annotate(
+            folder=Lower(
+                Coalesce(Cast("additional_data__folder", CharField()), Value(""))
+            ),
+            folder_isnull=Case(
+                When(additional_data__folder=None, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            ),
+        )

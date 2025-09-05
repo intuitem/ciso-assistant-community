@@ -361,6 +361,19 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return Response(serializer_class(super().get_object()).data)
 
 
+# Content types
+
+
+class ContentTypeListView(APIView):
+    def get(self, request, format=None):
+        content_types = []
+        for model in apps.get_models():
+            content_types.append(
+                {"label": model.__name__, "value": model._meta.model_name}
+            )
+        return Response(content_types)
+
+
 # Risk Assessment
 
 

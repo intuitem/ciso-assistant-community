@@ -3647,6 +3647,9 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
+    def get_folder_full_path(self):
+        return self.risk_assessment.get_folder_full_path()
+
     @property
     def is_locked(self) -> bool:
         return self.risk_assessment.is_locked

@@ -15,6 +15,16 @@
       multiple: true
     }
   }
+  const CONTENT_TYPE_FILTER = {
+    component: AutocompleteSelect,
+    props: {
+      label: 'content_type',
+      optionsEndpoint: "content-types",
+      optionsLabelField: "label",
+      optionsValueField: "value",
+      multiple: true
+    }
+  }
 </script>
 
 <main class="bg-white card p-4">
@@ -31,12 +41,13 @@
 			meta: [],
       filters: {
         "action": ACTION_FILTER,
+        "content_type": CONTENT_TYPE_FILTER
       },
 		}}
 		URLModel="audit-log"
 		baseEndpoint="/audit-log"
 		fields={['actor', 'action', 'content_type', 'timestamp', 'folder']}
     thFilter={true}
-    thFilterFields={['actor', 'content_type', 'folder']}
+    thFilterFields={['actor',  'folder']}
 	/>
 </main>
