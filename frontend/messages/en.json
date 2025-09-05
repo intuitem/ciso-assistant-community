@@ -1555,6 +1555,7 @@
 	"syncToAppliedControlsRiskScenarioMessage": "If all of this risk scenario's additional applied controls are active, this will transfer them to the existing controls and reset the residual assessment.",
 	"syncToAppliedControlsRiskAssessmentMessage": "The scenarios will be synchronized to the residual level based on the progress of their additional controls.\nFor each scenario, if all of its additional controls are active, they will be moved the existing ones and align the current level to the expected residual target.",
 	"riskScenarioSyncWithChanges": "{ref_id} {name} - Current level: {current_level} ➡️ {residual_level}",
+	"theFollowingControlsWillBeMovedToExisting": "The following controls will be moved to this scenario's existing controls:",
 	"resetResidual": "Reset residual risk",
 	"resetResidualHelpText": "Enabling this will reset the residual risk level, which could help preparing a new assessment",
 	"settingsRiskMatrixSwapAxes": "Swap axes",
