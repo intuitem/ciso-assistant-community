@@ -5965,7 +5965,14 @@ class TaskTemplateViewSet(BaseModelViewSet):
         qs = super().get_queryset()
         ordering = self.request.query_params.get("ordering", "")
 
-        if any(f in ordering for f in ("next_occurrence", "last_occurrence_status", "next_occurrence_status")):
+        if any(
+            f in ordering
+            for f in (
+                "next_occurrence",
+                "last_occurrence_status",
+                "next_occurrence_status",
+            )
+        ):
             today = timezone.localdate()
             qs = qs.annotate(
                 next_occurrence=Min(
