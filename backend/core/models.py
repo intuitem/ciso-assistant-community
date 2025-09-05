@@ -3773,14 +3773,14 @@ class RiskScenario(NameDescriptionMixin):
             return []
         if not dry_run:
             with transaction.atomic():
+                self.current_impact = self.residual_impact
+                self.current_proba = self.residual_proba
                 self.existing_applied_controls.add(*extra_controls)
                 self.applied_controls.clear()
                 if reset_residual:
-                    self.current_impact = self.residual_impact
-                    self.current_proba = self.residual_proba
                     self.residual_impact = -1
                     self.residual_proba = -1
-                    self.save()
+                self.save()
         return extra_controls
 
     def __str__(self):
