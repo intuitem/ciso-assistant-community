@@ -818,156 +818,82 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Also retrieve published objects in view
         """
         class_name = object_type.__name__.lower()
-
-        # Bulk fetch all needed permissions in one query
-        permission_codenames = [
-            f"view_{class_name}",
-            f"change_{class_name}",
-            f"delete_{class_name}",
-            "view_folder",
-        ]
-        permissions_dict = {
-            p.codename: p
-            for p in Permission.objects.filter(codename__in=permission_codenames)
-        }
-        permission_view = permissions_dict.get(f"view_{class_name}")
-        permission_change = permissions_dict.get(f"change_{class_name}")
-        permission_delete = permissions_dict.get(f"delete_{class_name}")
-        ref_permission = permissions_dict.get("view_folder")
-
-        if not all(
-            [permission_view, permission_change, permission_delete, ref_permission]
-        ):
-            return [], [], []
-
-        # Pre-calculate folder perimeter once
-        perimeter = {folder} | set(folder.get_sub_folders())
-        perimeter_ids = {f.id for f in perimeter}
-
-        # Get role assignments with all related data prefetched
-        role_assignments = RoleAssignment.get_role_assignments(user)
-
-        # Build folder permission mapping more efficiently
-        folder_permissions = {}  # folder_id -> set of permissions
-
-        for ra in role_assignments:
-            # Check if role has view_folder permission (skip if not)
-            ra_permissions = set(
-                ra.role.permissions.all()
-            )  # Convert to set for proper 'in' checking
-            if ref_permission not in ra_permissions:
-                continue
-
-            # Get perimeter folders for this role assignment
-            ra_folders = set(ra.perimeter_folders.all())  # Already prefetched
-            if ra.is_recursive:
-                # Add subfolders for recursive assignments
-                for ra_folder in set(ra_folders):
-                    ra_folders.update(ra_folder.get_sub_folders())
-
-            # Only process folders that intersect with our perimeter
-            relevant_folders = {f for f in ra_folders if f.id in perimeter_ids}
-
-            # Map permissions to folders more efficiently
-            for ra_folder in relevant_folders:
-                if ra_folder.id not in folder_permissions:
-                    folder_permissions[ra_folder.id] = set()
-
-                # Add permissions that intersect with what we need
-                for perm in ra_permissions:
-                    if perm in [permission_view, permission_change, permission_delete]:
-                        folder_permissions[ra_folder.id].add(perm)
-
+        permission_view = Permission.objects.get(codename="view_" + class_name)
+        permission_change = Permission.objects.get(codename="change_" + class_name)
+        permission_delete = Permission.objects.get(codename="delete_" + class_name)
+        permissions = set([permission_view, permission_change, permission_delete])
         result_view = set()
         result_change = set()
         result_delete = set()
 
-        if folder_permissions:
-            # Get all objects in one query for folders that have permissions
-            objects_data = []
-
+        ref_permission = Permission.objects.get(codename="view_folder")
+        perimeter = {folder} | set(folder.get_sub_folders())
+        # Process role assignments
+        role_assignments = [
+            ra
+            for ra in RoleAssignment.get_role_assignments(user)
+            if ref_permission in ra.role.permissions.all()
+        ]
+        result_folders = defaultdict(set)
+        for ra in role_assignments:
+            ra_permissions = set(ra.role.permissions.all())
+            ra_perimeter = set(ra.perimeter_folders.all())
+            if ra.is_recursive:
+                ra_perimeter.update(
+                    *[folder.get_sub_folders() for folder in ra_perimeter]
+                )
+            target_folders = perimeter & ra_perimeter
+            for p in permissions & ra_permissions:
+                for f in target_folders:
+                    result_folders[f].add(p)
+        for f in result_folders:
             if hasattr(object_type, "folder"):
-                objects_data = object_type.objects.filter(
-                    folder_id__in=folder_permissions.keys()
-                ).values_list("id", "folder_id")
+                objects_ids = object_type.objects.filter(folder=f).values_list(
+                    "id", flat=True
+                )
             elif hasattr(object_type, "risk_assessment"):
-                objects_data = object_type.objects.filter(
-                    risk_assessment__folder_id__in=folder_permissions.keys()
-                ).values_list("id", "risk_assessment__folder_id")
+                objects_ids = object_type.objects.filter(
+                    risk_assessment__folder=f
+                ).values_list("id", flat=True)
             elif hasattr(object_type, "entity"):
-                objects_data = object_type.objects.filter(
-                    entity__folder_id__in=folder_permissions.keys()
-                ).values_list("id", "entity__folder_id")
+                objects_ids = object_type.objects.filter(entity__folder=f).values_list(
+                    "id", flat=True
+                )
             elif hasattr(object_type, "provider_entity"):
-                objects_data = object_type.objects.filter(
-                    provider_entity__folder_id__in=folder_permissions.keys()
-                ).values_list("id", "provider_entity__folder_id")
+                objects_ids = object_type.objects.filter(
+                    provider_entity__folder=f
+                ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
-                objects_data = [(fid, fid) for fid in folder_permissions.keys()]
+                objects_ids = [f.id]
             elif class_name == "permission":
-                permission_ids = list(
-                    Permission.objects.filter(
-                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
-                    ).values_list("id", flat=True)
-                )
-                can_view = any(
-                    permission_view in perms for perms in folder_permissions.values()
-                )
-                can_change = any(
-                    permission_change in perms for perms in folder_permissions.values()
-                )
-                can_delete = any(
-                    permission_delete in perms for perms in folder_permissions.values()
-                )
-                if can_view:
-                    result_view.update(permission_ids)
-                if can_change:
-                    result_change.update(permission_ids)
-                if can_delete:
-                    result_delete.update(permission_ids)
-                # Skip the rest of processing for permission objects
-                return (list(result_view), list(result_change), list(result_delete))
+                # Permissions have no folder, so we don't filter them, we just rely on view_permission
+                objects_ids = Permission.objects.filter(
+                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                ).values_list("id", flat=True)
             else:
-                raise NotImplementedError(f"Object type {object_type} not supported")
-
-            # Group objects by folder
-            for obj_id, folder_id in objects_data:
-                folder_perms = folder_permissions.get(folder_id, set())
-                if permission_view in folder_perms:
-                    result_view.add(obj_id)
-                if permission_change in folder_perms:
-                    result_change.add(obj_id)
-                if permission_delete in folder_perms:
-                    result_delete.add(obj_id)
+                raise NotImplementedError("type not supported")
+            if permission_view in result_folders[f]:
+                result_view.update(objects_ids)
+            if permission_change in result_folders[f]:
+                result_change.update(objects_ids)
+            if permission_delete in result_folders[f]:
+                result_delete.update(objects_ids)
 
         if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
-            # Handle published objects - collect parent folders efficiently
-            view_folder_ids = [
-                fid
-                for fid, perms in folder_permissions.items()
-                if permission_view in perms
+            # we assume only objects with a folder attribute are worth publishing
+            folders_with_local_view = [
+                f for f in result_folders if permission_view in result_folders[f]
             ]
-            if view_folder_ids:
-                # Get folder objects for parent traversal
-                view_folders = {f for f in perimeter if f.id in view_folder_ids}
-                parent_folders = set()
-                visited = set()  # Add cycle detection
-
-                for my_folder in view_folders:
-                    if my_folder.content_type != Folder.ContentType.ENCLAVE:
-                        parent = my_folder.parent_folder
-                        # Cycle detection prevents infinite loops
-                        while parent and parent.id not in visited:
-                            visited.add(parent.id)
-                            parent_folders.add(parent)
-                            parent = parent.parent_folder
-
-                if parent_folders:
-                    # Single query for all published objects in parent folders
-                    published_ids = object_type.objects.filter(
-                        folder__in=parent_folders, is_published=True
-                    ).values_list("id", flat=True)
-                    result_view.update(published_ids)
+            for my_folder in folders_with_local_view:
+                if my_folder.content_type != Folder.ContentType.ENCLAVE:
+                    my_folder2 = my_folder.parent_folder
+                    while my_folder2:
+                        result_view.update(
+                            object_type.objects.filter(
+                                folder=my_folder2, is_published=True
+                            ).values_list("id", flat=True)
+                        )
+                        my_folder2 = my_folder2.parent_folder
 
         return (list(result_view), list(result_change), list(result_delete))
 
@@ -980,35 +906,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
-        # Get user's direct role assignments
-        if hasattr(principal, "roleassignment_set"):
-            direct_assignments = (
-                principal.roleassignment_set.select_related("role")
-                .prefetch_related("role__permissions", "perimeter_folders")
-                .all()
-            )
-            assignments = list(direct_assignments)
-        else:
-            assignments = []
-
+        assignments = list(principal.roleassignment_set.all())
         if hasattr(principal, "user_groups"):
-            # Get all user group role assignments in a single query
-            user_group_ids = list(principal.user_groups.values_list("id", flat=True))
-            if user_group_ids:
-                group_assignments = (
-                    RoleAssignment.objects.filter(user_group_id__in=user_group_ids)
-                    .select_related("role")
-                    .prefetch_related("role__permissions", "perimeter_folders")
-                )
-                assignments.extend(group_assignments)
-
+            for user_group in principal.user_groups.all():
+                assignments += list(user_group.roleassignment_set.all())
+        assignments += list(principal.roleassignment_set.all())
         return assignments
 
     @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        # Now role.permissions.all() is prefetched, so this won't cause additional queries
         for ra in RoleAssignment.get_role_assignments(principal):
             for p in ra.role.permissions.all():
                 permission_dict = {p.codename: {"str": str(p)}}
@@ -1069,9 +977,7 @@ class PersonalAccessToken(models.Model):
         return self.auth_token.digest
 
     def __str__(self):
-        d = self.auth_token.digest or ""
-        masked = (d[:8] + "…") if d else "n/a"
-        return f"{self.auth_token.user.email} : {self.name} : {masked}"
+        return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
 auditlog.register(
