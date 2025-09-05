@@ -1245,5 +1245,6 @@
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
 	"deselect": "Fravælg",
-	"saveAndContinue": "Gem og fortsæt"
+	"saveAndContinue": "Gem og fortsæt",
+	"nextOccurrenceStatus": "Næste forekomststatus"
 }
