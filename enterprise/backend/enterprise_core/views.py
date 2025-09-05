@@ -3,9 +3,12 @@ from django.utils.formats import date_format
 
 import magic
 import structlog
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from core.permissions import IsAdministrator
 from django.db import models, transaction
+from django.db.models import CharField, Value, BooleanField, Case, When
+from django.db.models.functions import Lower, Cast, Coalesce
+import django_filters as df
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from iam.models import User
@@ -416,6 +419,26 @@ def get_build(request):
     )
 
 
+class LogEntryFilterSet(GenericFilterSet):
+    actor = df.CharFilter(field_name="actor__email", lookup_expr="icontains")
+    folder = df.CharFilter(
+        field_name="additional_data__folder", lookup_expr="icontains"
+    )
+    content_type = df.CharFilter(method="filter_content_type_model")
+
+    class Meta:
+        model = LogEntry
+        fields = {
+            "actor": ["exact"],
+            "content_type": ["exact"],
+            "action": ["exact"],
+        }
+
+    def filter_content_type_model(self, queryset, name, value):
+        normalized = value.replace(" ", "").lower()
+        return queryset.filter(content_type__model__icontains=normalized)
+
+
 class LogEntryViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
@@ -432,9 +455,22 @@ class LogEntryViewSet(
         "actor__email",
         "actor__first_name",
         "actor__last_name",
+        "changes",  # allows to search for last_login (for example)
+        "additional_data__folder",
     ]
-    filterset_fields = ["action", "actor", "content_type__model"]
+    filterset_class = LogEntryFilterSet
 
     permission_classes = (IsAdministrator,)
     serializer_class = LogEntrySerializer
-    queryset = LogEntry.objects.all()
+
+    def get_queryset(self):
+        return LogEntry.objects.all().annotate(
+            folder=Lower(
+                Coalesce(Cast("additional_data__folder", CharField()), Value(""))
+            ),
+            folder_isnull=Case(
+                When(additional_data__folder=None, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            ),
+        )
