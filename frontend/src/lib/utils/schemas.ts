@@ -399,7 +399,8 @@ export const FeatureFlagsSchema = z.object({
 	experimental: z.boolean().optional(),
 	inherent_risk: z.boolean().optional(),
 	organisation_objectives: z.boolean().optional(),
-	organisation_issues: z.boolean().optional()
+	organisation_issues: z.boolean().optional(),
+	terminologies: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
