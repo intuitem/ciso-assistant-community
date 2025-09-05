@@ -26,7 +26,8 @@
 		{ field: 'experimental', label: m.experimental() },
 		{ field: 'inherent_risk', label: m.inherentRisk() },
 		{ field: 'organisation_objectives', label: m.organisationObjectives() },
-		{ field: 'organisation_issues', label: m.organisationIssues() }
+		{ field: 'organisation_issues', label: m.organisationIssues() },
+		{ field: 'terminologies', label: m.terminologies() }
 	];
 </script>
 
