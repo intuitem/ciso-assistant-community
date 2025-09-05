@@ -1838,9 +1838,6 @@ class Asset(
         return self.type == Asset.Type.SUPPORT
 
     def ancestors_plus_self(self) -> set[Self]:
-        result = {self}
-        # load whole m2m table in memory to avoid multiple queries
-        m2m_entries = set(Asset.parent_assets.through.objects.all())
         parent_assets = {
             a.id: a for a in Asset.objects.filter(child_assets__isnull=False)
         }
