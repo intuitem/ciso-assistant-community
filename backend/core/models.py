@@ -1844,10 +1844,33 @@ class Asset(
         parent_assets = {
             a.id: a for a in Asset.objects.filter(child_assets__isnull=False)
         }
-        for x in m2m_entries:
-            if x.from_asset_id == self.id and parent_assets.get(x.to_asset_id):
-                result.add(parent_assets[x.to_asset_id])
-        return result
+        all_ancestor_ids = parent_assets.keys()
+        _links = Asset.parent_assets.through.objects.filter(
+            Q(from_asset_id__in=all_ancestor_ids) | Q(to_asset_id__in=all_ancestor_ids)
+        ).values_list("from_asset_id", "to_asset_id")
+        initial_links = [(self, parent) for parent in self.parent_assets.all()]
+        links = initial_links + [
+            (parent_assets[child], parent_assets[parent])
+            for child, parent in _links
+            if child in parent_assets and parent in parent_assets
+        ]
+
+        child_to_parents = {}
+        parent_to_children = {}
+        for child_asset, parent_asset in links:
+            child_to_parents.setdefault(child_asset, set()).add(parent_asset)
+            parent_to_children.setdefault(parent_asset, set()).add(child_asset)
+        ancestors = set()
+        q = [self]
+        visited_ancestors = {self}
+        while q:
+            curr_asset = q.pop(0)
+            for parent_asset in child_to_parents.get(curr_asset, []):
+                if parent_asset not in visited_ancestors:
+                    visited_ancestors.add(parent_asset)
+                    ancestors.add(parent_asset)
+                    q.append(parent_asset)
+        return ancestors
 
     def get_children(self):
         return self.child_assets.all()
