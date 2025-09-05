@@ -1,10 +1,13 @@
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { listViewFields } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
-import { table } from 'console';
+import { fail, superValidate } from 'sveltekit-superforms';
+import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { m } from '$paraglide/messages';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'risk-scenarios';
@@ -49,3 +52,45 @@ export const load = (async ({ fetch, params }) => {
 
 	return { scenario, tables, riskMatrix, title: scenario.name };
 }) satisfies PageServerLoad;
+
+export const actions: Actions = {
+	syncToActions: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = z.object({ reset_residual: z.boolean().optional() });
+		const form = await superValidate(formData, zod(schema));
+
+		const response = await event.fetch(
+			`${BASE_API_URL}/risk-scenarios/${event.params.id}/sync-to-actions/?dry_run=false`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(form.data)
+			}
+		);
+		if (response.ok) {
+			setFlash(
+				{
+					type: 'success',
+					message: m.syncToAppliedControlsSuccess()
+				},
+				event
+			);
+		} else {
+			setFlash(
+				{
+					type: 'error',
+					message: m.syncToAppliedControlsError()
+				},
+				event
+			);
+		}
+		return { form, message: { appliedControls: await response.json() } };
+	}
+};
