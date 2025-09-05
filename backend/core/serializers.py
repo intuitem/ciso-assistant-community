@@ -4,6 +4,7 @@ from typing import Any
 import structlog
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -106,6 +107,20 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except ValidationError as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
+
+    def get_path(self, obj):
+        """
+        Gets the pre-calculated folder path for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use the pre-calculated path data if available
+            return optimized_data.get("paths", {}).get(obj.id, [])
+
+        # Fallback for single object serialization (e.g., retrieve endpoint)
+        # We manually serialize the folder objects to match the new optimized output
+        folders = obj.get_folder_full_path()
+        return [{"id": f.id, "name": f.name} for f in folders]
 
     class Meta:
         model: models.Model
@@ -381,23 +396,55 @@ class AssetWriteSerializer(BaseModelSerializer):
 
 
 class AssetReadSerializer(AssetWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = serializers.SerializerMethodField()
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
-    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
-    security_objectives = serializers.JSONField(
-        source="get_security_objectives_display"
-    )
-    disaster_recovery_objectives = serializers.JSONField(
-        source="get_disaster_recovery_objectives_display"
-    )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
-
     asset_class = FieldsRelatedField(["name"])
+
+    children_assets = serializers.SerializerMethodField()
+    security_objectives = serializers.SerializerMethodField()
+    disaster_recovery_objectives = serializers.SerializerMethodField()
+
+    def get_children_assets(self, obj):
+        """
+        Gets pre-calculated descendant IDs for list views, with a fallback for detail views.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use pre-calculated data if available
+            return optimized_data.get("descendants", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.children_assets.annotate(str=F("name")).values("id", "str")
+
+    def get_security_objectives(self, obj):
+        """
+        Gets pre-calculated security objectives for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("security_objectives", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_security_objectives_display()
+
+    def get_disaster_recovery_objectives(self, obj):
+        """
+        Gets pre-calculated disaster recovery objectives for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("disaster_recovery_objectives", {}).get(
+                obj.id, []
+            )
+
+        # Fallback for single object serialization
+        return obj.get_disaster_recovery_objectives_display()
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
