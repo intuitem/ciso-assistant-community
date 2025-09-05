@@ -65,9 +65,9 @@
 				<article>{$modalStore[0].body ?? '(body missing)'}</article>
 				<Checkbox
 					{form}
-					field="update_assessment"
-					label={m.updateAssessment()}
-					helpText={m.updateAssessmentHelpText()}
+					field="reset_residual"
+					label={m.resetResidual()}
+					helpText={m.resetResidualHelpText()}
 				/>
 				<div class="max-h-96 overflow-y-scroll scroll card">
 					<List {...listProps} />

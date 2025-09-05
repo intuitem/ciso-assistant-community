@@ -1395,7 +1395,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         dry_run = request.query_params.get("dry_run", True)
         if dry_run == "false":
             dry_run = False
-        update_assessment = request.data.get("update_assessment", False)
+        reset_residual = request.data.get("reset_residual", False)
         risk_assessment = RiskAssessment.objects.get(id=pk)
 
         if not RoleAssignment.is_access_allowed(
@@ -1406,7 +1406,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         changes = risk_assessment.sync_to_applied_controls(
-            update_assessment=update_assessment, dry_run=dry_run
+            reset_residual=reset_residual, dry_run=dry_run
         )
         return Response(
             {"changes": RiskScenarioReadSerializer(changes, many=True).data}
@@ -2391,7 +2391,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         dry_run = request.query_params.get("dry_run", True)
         if dry_run == "false":
             dry_run = False
-        update_assessment = request.data.get("update_assessment", False)
+        reset_residual = request.data.get("reset_residual", False)
         risk_scenario = RiskScenario.objects.get(id=pk)
 
         if not RoleAssignment.is_access_allowed(
@@ -2402,7 +2402,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         changes = risk_scenario.sync_to_applied_controls(
-            update_assessment=update_assessment, dry_run=dry_run
+            reset_residual=reset_residual, dry_run=dry_run
         )
         return Response(
             {"changes": AppliedControlReadSerializer(changes, many=True).data}

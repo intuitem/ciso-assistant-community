@@ -70,7 +70,7 @@ export const actions: Actions = {
 
 		console.log(formData);
 
-		const schema = z.object({ update_assessment: z.boolean().optional() });
+		const schema = z.object({ reset_residual: z.boolean().optional() });
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(

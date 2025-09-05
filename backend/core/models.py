@@ -3170,12 +3170,12 @@ class RiskAssessment(Assessment):
             )
         return output
 
-    def sync_to_applied_controls(self, update_assessment=False, dry_run: bool = False):
+    def sync_to_applied_controls(self, reset_residual=False, dry_run: bool = False):
         scenarios: list[RiskScenario] = list(self.risk_scenarios.all())
         changed_scenarios = list()
         for scenario in scenarios:
             cur = scenario.sync_to_applied_controls(
-                update_assessment=update_assessment, dry_run=dry_run
+                reset_residual=reset_residual, dry_run=dry_run
             )
             if len(cur) > 0:
                 changed_scenarios.append(scenario)
@@ -3757,7 +3757,7 @@ class RiskScenario(NameDescriptionMixin):
             return self.DEFAULT_SOK_OPTIONS[-1]
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
-    def sync_to_applied_controls(self, update_assessment=False, dry_run=True):
+    def sync_to_applied_controls(self, reset_residual=False, dry_run=True):
         """
         If all extra controls are active, move them to existing controls and reset the residual assessment.
 
@@ -3775,7 +3775,7 @@ class RiskScenario(NameDescriptionMixin):
             with transaction.atomic():
                 self.existing_applied_controls.add(*extra_controls)
                 self.applied_controls.clear()
-                if update_assessment:
+                if reset_residual:
                     self.current_impact = self.residual_impact
                     self.current_proba = self.residual_proba
                     self.residual_impact = -1

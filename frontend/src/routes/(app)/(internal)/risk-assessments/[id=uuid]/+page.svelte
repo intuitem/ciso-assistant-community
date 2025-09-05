@@ -95,11 +95,11 @@
 				throw new Error('Failed to fetch applied controls sync data');
 			}
 		});
-		const schema = z.object({ update_assessment: z.boolean().default(false) });
+		const schema = z.object({ reset_residual: z.boolean().default(false) });
 		const modalComponent: ModalComponent = {
 			ref: SyncToActionsRiskModal,
 			props: {
-				_form: defaults({ update_assessment: false }, zod(schema)),
+				_form: defaults({ reset_residual: false }, zod(schema)),
 				id,
 				schema,
 				debug: false,
