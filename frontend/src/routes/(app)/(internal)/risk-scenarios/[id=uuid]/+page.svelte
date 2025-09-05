@@ -24,6 +24,10 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import { defaults } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import z from 'zod';
 
 	interface Props {
 		data: PageData;
@@ -86,18 +90,19 @@
 				throw new Error('Failed to fetch applied controls sync data');
 			}
 		});
+		const schema = z.object({ reset_residual: z.boolean().default(false) });
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: SyncToActionsRiskModal,
 			props: {
-				_form: { id: data.scenario.id },
+				_form: defaults({ reset_residual: false }, zod(schema)),
+				schema,
 				id: id,
 				debug: false,
 				URLModel: 'risk-scenarios',
 				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
+				listProps: {
 					items: appliedControlsSync.changes.map((ac) => ac.name),
-					message: m.theFollowingChangesWillBeApplied()
+					message: m.theFollowingControlsWillBeMovedToExisting()
 				}
 			}
 		};
