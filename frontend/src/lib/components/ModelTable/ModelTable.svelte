@@ -35,6 +35,7 @@
 	import RowsPerPage from './RowsPerPage.svelte';
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
+	import ThFilter from './ThFilter.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates } from '$lib/utils/stores';
@@ -44,6 +45,8 @@
 		source?: TableSource;
 		interactive?: boolean;
 		search?: boolean;
+		thFilter?: boolean;
+		thFilterFields?: string[];
 		rowsPerPage?: boolean;
 		rowCount?: boolean;
 		pagination?: boolean;
@@ -90,6 +93,8 @@
 		source = { head: [], body: [] },
 		interactive = true,
 		search = true,
+		thFilter = false,
+		thFilterFields = [],
 		rowsPerPage = true,
 		rowCount = true,
 		pagination = true,
@@ -485,6 +490,17 @@
 					<th class="{regionHeadCell} select-none text-end"></th>
 				{/if}
 			</tr>
+			{#if thFilter}
+				<tr>
+					{#each Object.entries(tableSource.head) as [key, _]}
+						{#if thFilterFields.includes(key)}
+							<ThFilter {handler} filterBy={key} />
+						{:else}
+							<th></th>
+						{/if}
+					{/each}
+				</tr>
+			{/if}
 		</thead>
 		<ContextMenu.Root>
 			<tbody class="table-body w-full border-b border-b-surface-100-900 {regionBody}">
