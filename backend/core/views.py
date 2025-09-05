@@ -15,7 +15,17 @@ import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from django.db.models import F, Count, Q, ExpressionWrapper, FloatField, Value, Min
+from django.db.models import (
+    F,
+    Count,
+    Q,
+    ExpressionWrapper,
+    FloatField,
+    Value,
+    Min,
+    Subquery,
+    OuterRef,
+)
 from django.db.models.functions import Greatest, Coalesce
 
 
@@ -5955,21 +5965,16 @@ class TaskTemplateViewSet(BaseModelViewSet):
         qs = super().get_queryset()
         ordering = self.request.query_params.get("ordering", "")
 
-        if any(
-            field in ordering
-            for field in (
-                "next_occurrence",
-                "last_occurrence_status",
-            )
-        ):
+        if any(f in ordering for f in ("next_occurrence", "last_occurrence_status")):
+            today = timezone.localdate()
             qs = qs.annotate(
                 next_occurrence=Min(
                     "tasknode__due_date",
-                    filter=Q(tasknode__due_date__gte=timezone.now()),
+                    filter=Q(tasknode__due_date__gte=today),
                 ),
                 last_occurrence_status=Subquery(
                     TaskNode.objects.filter(
-                        task_template=OuterRef("pk"), due_date__lt=timezone.now()
+                        task_template=OuterRef("pk"), due_date__lt=today
                     )
                     .order_by("-due_date")
                     .values("status")[:1]

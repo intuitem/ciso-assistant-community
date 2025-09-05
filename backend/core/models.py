@@ -5185,18 +5185,31 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     )
 
     def get_next_occurrence(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__gte=today
-        ).order_by("due_date")
-        return task_nodes.first().due_date if task_nodes.exists() else None
+        # Reuse annotation when present (added by viewset for ordering)
+        annotated = getattr(self, "next_occurrence", None)
+        if annotated is not None:
+            return annotated
+        today = timezone.localdate()
+        tn = (
+            TaskNode.objects.filter(task_template=self, due_date__gte=today)
+            .order_by("due_date")
+            .only("due_date")
+            .first()
+        )
+        return tn.due_date if tn else None
 
     def get_last_occurrence_status(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__lt=today
-        ).order_by("-due_date")
-        return task_nodes[0].status if task_nodes.exists() else None
+        annotated = getattr(self, "last_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        today = timezone.localdate()
+        tn = (
+            TaskNode.objects.filter(task_template=self, due_date__lt=today)
+            .order_by("-due_date")
+            .only("status")
+            .first()
+        )
+        return tn.status if tn else None
 
     class Meta:
         verbose_name = "Task template"
