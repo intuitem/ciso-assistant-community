@@ -387,6 +387,7 @@ class PerimeterViewSet(BaseModelViewSet):
     search_fields = ["name", "ref_id", "description"]
     filterset_fields = ["folder", "campaigns"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
         return Response(dict(Perimeter.PRJ_LC_STATUS))
@@ -582,6 +583,7 @@ class AssetViewSet(BaseModelViewSet):
     def perform_update(self, serializer):
         return self._perform_write(serializer)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
     def type(self, request):
         return Response(dict(Asset.Type.choices))
@@ -1546,6 +1548,27 @@ class AppliedControlViewSet(BaseModelViewSet):
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        """Optimize queries by prefetching related objects used in the table view and serializer"""
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "reference_control",
+            )
+            .prefetch_related(
+                "owner",
+                "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "findings",  # Used for findings_count
+                "evidences",  # Serialized as FieldsRelatedField
+                "objectives",  # ManyToManyField to OrganisationObjective
+                "assets",  # ManyToManyField used in table
+                "security_exceptions",  # Serialized as FieldsRelatedField
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -2557,6 +2580,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                     )
         risk_acceptance = serializer.save()
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
     def state(self, request):
         return Response(dict(RiskAcceptance.ACCEPTANCE_STATE))
@@ -4481,7 +4505,26 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        """Optimize queries for table view and serializer, with conditional annotations for sorting"""
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "framework",  # Displayed in table
+                "perimeter",  # Displayed in table
+                "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
+                "campaign",  # Serialized as FieldsRelatedField
+            )
+            .prefetch_related(
+                "assets",  # ManyToManyField serialized as FieldsRelatedField
+                "evidences",  # ManyToManyField serialized as FieldsRelatedField
+                "authors",  # ManyToManyField from Assessment parent class
+                "reviewers",  # ManyToManyField from Assessment parent class
+            )
+        )
+
         ordering = self.request.query_params.get("ordering", "")
 
         if any(
@@ -5358,6 +5401,26 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "requirement__ref_id",
     ]
 
+    def get_queryset(self):
+        """Optimize queries for table view and serializer - high-impact due to many nested relationships"""
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "compliance_assessment",  # Displayed in table and serialized
+                "compliance_assessment__perimeter",  # perimeter field uses compliance_assessment.perimeter
+                "compliance_assessment__perimeter__folder",  # Nested FieldsRelatedField optimization
+                "requirement",  # Used for name (__str__), description, assessable in table
+            )
+            .prefetch_related(
+                "evidences",  # ManyToManyField serialized as FieldsRelatedField
+                "applied_controls",  # ManyToManyField to AppliedControl
+                "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+            )
+        )
+
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
         cache.clear()
@@ -5786,6 +5849,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     def severity(self, request):
         return Response(dict(Severity.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
@@ -5804,10 +5868,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(FindingsAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(FindingsAssessment.Category.choices))
@@ -5909,6 +5975,7 @@ class FindingViewSet(BaseModelViewSet):
         "evidences",
     ]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
@@ -6163,6 +6230,7 @@ class TaskTemplateViewSet(BaseModelViewSet):
         )  # Synchronize task nodes when fetching a task template
         return Response(serializer_class(super().get_object()).data)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
@@ -6173,6 +6241,7 @@ class TaskNodeViewSet(BaseModelViewSet):
     filterset_fields = ["status", "task_template"]
     ordering = ["due_date"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
