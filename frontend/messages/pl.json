@@ -1707,5 +1707,6 @@
 	"dataWizardLoadExcelData": "Załaduj dane Excel",
 	"associatedCampaigns": "Powiązane kampanie",
 	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
-	"saveAndContinue": "Zapisz i kontynuuj"
+	"saveAndContinue": "Zapisz i kontynuuj",
+	"nextOccurrenceStatus": "Następny status wystąpienia"
 }

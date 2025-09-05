@@ -1862,6 +1862,9 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     last_occurrence_status = serializers.ReadOnlyField(
         source="get_last_occurrence_status"
     )
+    next_occurrence_status = serializers.ReadOnlyField(
+        source="get_next_occurrence_status"
+    )
 
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()

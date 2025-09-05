@@ -2087,5 +2087,6 @@
 	"dataWizardSelectRiskMatrix": "Sélectionner une matrice de risque",
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
-	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)"
+	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
+	"nextOccurrenceStatus": "Statut de la prochaine occurrence"
 }

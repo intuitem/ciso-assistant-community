@@ -5184,32 +5184,46 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Link"),
     )
 
+    def _get_task_node_value(self, field, date_filter=None, order_by=None):
+        queryset = TaskNode.objects.filter(task_template=self)
+        if date_filter:
+            queryset = queryset.filter(**date_filter)
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        return queryset.values_list(field, flat=True).first()
+
     def get_next_occurrence(self):
-        # Reuse annotation when present (added by viewset for ordering)
         annotated = getattr(self, "next_occurrence", None)
         if annotated is not None:
             return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("due_date")
         today = timezone.localdate()
-        tn = (
-            TaskNode.objects.filter(task_template=self, due_date__gte=today)
-            .order_by("due_date")
-            .only("due_date")
-            .first()
+        return self._get_task_node_value(
+            "due_date", date_filter={"due_date__gte": today}, order_by="due_date"
         )
-        return tn.due_date if tn else None
 
     def get_last_occurrence_status(self):
+        if not self.is_recurrent:
+            return None
         annotated = getattr(self, "last_occurrence_status", None)
         if annotated is not None:
             return annotated
         today = timezone.localdate()
-        tn = (
-            TaskNode.objects.filter(task_template=self, due_date__lt=today)
-            .order_by("-due_date")
-            .only("status")
-            .first()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__lt": today}, order_by="-due_date"
         )
-        return tn.status if tn else None
+
+    def get_next_occurrence_status(self):
+        annotated = getattr(self, "next_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("status")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
 
     class Meta:
         verbose_name = "Task template"
