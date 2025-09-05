@@ -5221,21 +5221,46 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Link"),
     )
 
-    @property
-    def next_occurrence(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__gte=today
-        ).order_by("due_date")
-        return task_nodes.first().due_date if task_nodes.exists() else None
+    def _get_task_node_value(self, field, date_filter=None, order_by=None):
+        queryset = TaskNode.objects.filter(task_template=self)
+        if date_filter:
+            queryset = queryset.filter(**date_filter)
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        return queryset.values_list(field, flat=True).first()
 
-    @property
-    def last_occurrence_status(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__lte=today
-        ).order_by("-due_date")
-        return task_nodes[0].status if task_nodes.exists() else None
+    def get_next_occurrence(self):
+        annotated = getattr(self, "next_occurrence", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("due_date")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "due_date", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
+
+    def get_last_occurrence_status(self):
+        if not self.is_recurrent:
+            return None
+        annotated = getattr(self, "last_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__lt": today}, order_by="-due_date"
+        )
+
+    def get_next_occurrence_status(self):
+        annotated = getattr(self, "next_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("status")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
 
     class Meta:
         verbose_name = "Task template"

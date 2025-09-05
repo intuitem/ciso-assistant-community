@@ -22,6 +22,9 @@ from django.db.models import (
     ExpressionWrapper,
     FloatField,
     Value,
+    Min,
+    Subquery,
+    OuterRef,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -6076,6 +6079,42 @@ class TimelineEntryViewSet(BaseModelViewSet):
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        ordering = self.request.query_params.get("ordering", "")
+
+        if any(
+            f in ordering
+            for f in (
+                "next_occurrence",
+                "last_occurrence_status",
+                "next_occurrence_status",
+            )
+        ):
+            today = timezone.localdate()
+            qs = qs.annotate(
+                next_occurrence=Min(
+                    "tasknode__due_date",
+                    filter=Q(tasknode__due_date__gte=today),
+                ),
+                last_occurrence_status=Subquery(
+                    TaskNode.objects.filter(
+                        task_template=OuterRef("pk"), due_date__lt=today
+                    )
+                    .order_by("-due_date")
+                    .values("status")[:1]
+                ),
+                next_occurrence_status=Subquery(
+                    TaskNode.objects.filter(
+                        task_template=OuterRef("pk"), due_date__gte=today
+                    )
+                    .order_by("due_date")
+                    .values("status")[:1]
+                ),
+            )
+
+        return qs
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""

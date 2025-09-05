@@ -1532,6 +1532,7 @@ export const listViewFields = {
 			'assigned_to',
 			'lastOccurrenceStatus',
 			'nextOccurrence',
+			'nextOccurrenceStatus',
 			'folder'
 		],
 		body: [
@@ -1540,6 +1541,7 @@ export const listViewFields = {
 			'assigned_to',
 			'last_occurrence_status',
 			'next_occurrence',
+			'next_occurrence_status',
 			'folder'
 		],
 		filters: {

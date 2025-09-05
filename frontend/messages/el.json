@@ -1664,5 +1664,6 @@
 	"dataWizardParsingResults": "Αποτελέσματα ανάλυσης:",
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
 	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
-	"saveAndContinue": "Αποθήκευση και συνέχιση"
+	"saveAndContinue": "Αποθήκευση και συνέχιση",
+	"nextOccurrenceStatus": "Κατάσταση επόμενης εμφάνισης"
 }
