@@ -5225,6 +5225,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             pk=pk,
         )
 
+        assessable = str(
+            self.request.query_params.get("assessable", "false")
+        ).lower() in {"true", "1", "yes"}
         requirement_assessments_objects = (
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=not assessable

@@ -4323,7 +4323,7 @@ class ComplianceAssessment(Assessment):
             implementation_filter = Q()
             for group in self.selected_implementation_groups:
                 implementation_filter |= Q(
-                    requirement__implementation_groups__icontains=group
+                    requirement__implementation_groups__contains=[group]
                 )
             base_filter &= implementation_filter
 
