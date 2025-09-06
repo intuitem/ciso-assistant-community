@@ -25,6 +25,8 @@ from django.db.models import (
     Min,
     Subquery,
     OuterRef,
+    When,
+    Case,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -6099,9 +6101,17 @@ class TaskTemplateViewSet(BaseModelViewSet):
         ):
             today = timezone.localdate()
             qs = qs.annotate(
-                next_occurrence=Min(
-                    "tasknode__due_date",
-                    filter=Q(tasknode__due_date__gte=today),
+                next_occurrence=Case(
+                    When(is_recurrent=False, then=Min("tasknode__due_date")),
+                    When(
+                        is_recurrent=True,
+                        then=Min(
+                            "tasknode__due_date",
+                            filter=Q(tasknode__due_date__gte=today),
+                        ),
+                    ),
+                    default=Value(None),
+                    output_field=models.DateField(),
                 ),
                 last_occurrence_status=Subquery(
                     TaskNode.objects.filter(
@@ -6110,12 +6120,28 @@ class TaskTemplateViewSet(BaseModelViewSet):
                     .order_by("-due_date")
                     .values("status")[:1]
                 ),
-                next_occurrence_status=Subquery(
-                    TaskNode.objects.filter(
-                        task_template=OuterRef("pk"), due_date__gte=today
-                    )
-                    .order_by("due_date")
-                    .values("status")[:1]
+                next_occurrence_status=Case(
+                    When(
+                        is_recurrent=False,
+                        then=Subquery(
+                            TaskNode.objects.filter(task_template=OuterRef("pk"))
+                            .order_by("due_date")
+                            .values("status")[:1]
+                        ),
+                    ),
+                    When(
+                        is_recurrent=True,
+                        then=Subquery(
+                            TaskNode.objects.filter(
+                                task_template=OuterRef("pk"),
+                                due_date__gte=today,
+                            )
+                            .order_by("due_date")
+                            .values("status")[:1]
+                        ),
+                    ),
+                    default=Value(None),
+                    output_field=models.CharField(),
                 ),
             )
 
