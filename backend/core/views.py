@@ -5188,10 +5188,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
-        compliance_assessment = (
-            ComplianceAssessment.objects.select_related("framework")
-            .prefetch_related("requirement_assessments__requirement")
-            .get(id=pk)
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
+            .prefetch_related("requirement_assessments__requirement"),
+            pk=pk,
         )
 
         _framework = compliance_assessment.framework
@@ -5213,14 +5214,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def requirements_list(self, request, pk):
         """Returns the list of requirement assessments for the different audit modes"""
         assessable = self.request.query_params.get("assessable", False)
-        compliance_assessment = (
-            ComplianceAssessment.objects.select_related("framework")
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
             .prefetch_related(
                 "requirement_assessments__requirement",
                 "requirement_assessments__evidences",
                 "requirement_assessments__applied_controls",
-            )
-            .get(id=pk)
+            ),
+            pk=pk,
         )
 
         requirement_assessments_objects = (
