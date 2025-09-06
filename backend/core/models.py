@@ -19,7 +19,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery
+from django.db.models import F, Q, OuterRef, Subquery, Count
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -4303,13 +4303,6 @@ class ComplianceAssessment(Assessment):
         return measures_status_count
 
     def donut_render(self) -> dict:
-        def union_queries(base_query, groups, field_name):
-            queries = [
-                base_query.filter(**{f"{field_name}__icontains": group}).distinct()
-                for group in groups
-            ]
-            return queries[0].union(*queries[1:]) if queries else base_query.none()
-
         color_map = {
             RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
@@ -4322,65 +4315,57 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Status.DONE: "#86efac",
         }
 
+        # Base filter for all queries
+        base_filter = Q(compliance_assessment=self, requirement__assessable=True)
+
+        # Add implementation groups filter if needed
+        if self.selected_implementation_groups:
+            implementation_filter = Q()
+            for group in self.selected_implementation_groups:
+                implementation_filter |= Q(
+                    requirement__implementation_groups__icontains=group
+                )
+            base_filter &= implementation_filter
+
+        # Get result counts in a single query
+        result_counts = (
+            RequirementAssessment.objects.filter(base_filter)
+            .values("result")
+            .annotate(count=Count("id", distinct=True))
+        )
+        result_count_dict = {item["result"]: item["count"] for item in result_counts}
+
+        # Get status counts in a single query
+        status_counts = (
+            RequirementAssessment.objects.filter(base_filter)
+            .values("status")
+            .annotate(count=Count("id", distinct=True))
+        )
+        status_count_dict = {item["status"]: item["count"] for item in status_counts}
+
+        # Build result data
         compliance_assessments_result = {"values": [], "labels": []}
         for result in RequirementAssessment.Result.values:
-            assessable_requirements_filter = {
-                "compliance_assessment": self,
-                "requirement__assessable": True,
-            }
-
-            base_query = RequirementAssessment.objects.filter(
-                result=result, **assessable_requirements_filter
-            ).distinct()
-
-            if self.selected_implementation_groups:
-                union_query = union_queries(
-                    base_query,
-                    self.selected_implementation_groups,
-                    "requirement__implementation_groups",
-                )
-            else:
-                union_query = base_query
-
-            count = union_query.count()
+            count = result_count_dict.get(result, 0)
             value_entry = {
                 "name": result,
                 "localName": camel_case(result),
                 "value": count,
                 "itemStyle": {"color": color_map[result]},
             }
-
             compliance_assessments_result["values"].append(value_entry)
             compliance_assessments_result["labels"].append(result)
 
+        # Build status data
         compliance_assessments_status = {"values": [], "labels": []}
         for status in RequirementAssessment.Status.values:
-            assessable_requirements_filter = {
-                "compliance_assessment": self,
-                "requirement__assessable": True,
-            }
-
-            base_query = RequirementAssessment.objects.filter(
-                status=status, **assessable_requirements_filter
-            ).distinct()
-
-            if self.selected_implementation_groups:
-                union_query = union_queries(
-                    base_query,
-                    self.selected_implementation_groups,
-                    "requirement__implementation_groups",
-                )
-            else:
-                union_query = base_query
-
-            count = union_query.count()
+            count = status_count_dict.get(status, 0)
             value_entry = {
                 "name": status,
                 "localName": camel_case(status),
                 "value": count,
                 "itemStyle": {"color": color_map[status]},
             }
-
             compliance_assessments_status["values"].append(value_entry)
             compliance_assessments_status["labels"].append(status)
 
