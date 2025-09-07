@@ -9,6 +9,7 @@ export default {
 	riskAssessmentVersion: '1.4.2',
 	riskAssessmentVersion2: '1.4.3',
 	riskScenarioName: 'Test risk scenario',
+	ebiosRMName: 'Test EBIOS RM study',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
 	securityExceptionName: 'Test exception',
