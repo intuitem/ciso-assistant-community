@@ -1,0 +1,1 @@
+DB_HOST=localhost LOG_LEVEL=DEBUG DB_PORT=5433 POSTGRES_NAME=demo POSTGRES_USER=demo POSTGRES_PASSWORD=demo DJANGO_DEBUG=True python manage.py runserver

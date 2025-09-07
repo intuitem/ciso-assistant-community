@@ -1,0 +1,9 @@
+[
+  {
+    "name": "pg",
+    "listen": "0.0.0.0:5433",
+    "upstream": "postgres:5432",
+    "enabled": true
+  }
+]
+

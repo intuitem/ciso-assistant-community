@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: demo-postgres
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - lab
+    # On n’expose PAS 5432 vers l’hôte : on force le passage par Toxiproxy.
+    command: >
+      postgres
+        -c log_min_duration_statement=0
+        -c log_statement=none 
+        -c log_connections=on
+        -c log_disconnections=on
+        -c log_line_prefix='%m [%p] %u@%d app=%a host=%h '
+        -c log_duration=off
+
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: demo-toxiproxy
+    command: ["-host=0.0.0.0", "-config=/config/toxiproxy.json"]
+    ports:
+      - "5433:5433"   # Port client vers PG à travers Toxiproxy
+      - "8474:8474"   # API d’admin de Toxiproxy
+    volumes:
+      - ./toxiproxy.json:/config/toxiproxy.json:ro
+    depends_on:
+      - postgres
+    networks:
+      - lab
+
+volumes:
+  pgdata:
+
+networks:
+  lab:
+    driver: bridge
+
