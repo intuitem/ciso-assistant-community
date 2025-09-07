@@ -5155,10 +5155,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
-        compliance_assessment = (
-            ComplianceAssessment.objects.select_related("framework")
-            .prefetch_related("requirement_assessments__requirement")
-            .get(id=pk)
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
+            .prefetch_related("requirement_assessments__requirement"),
+            pk=pk,
         )
         return Response(
             {
