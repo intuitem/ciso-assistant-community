@@ -239,6 +239,7 @@ class CurrentUserView(views.APIView):
         domain_permissions = RoleAssignment.get_permissions_per_folder(
             principal=user, recursive=True
         )
+        domain_permissions = {k: list(v) for k, v in domain_permissions.items()}
 
         res_data = {
             "id": user.id,
