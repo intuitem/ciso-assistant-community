@@ -1202,7 +1202,7 @@
 	"workshopOne": "Семінар 1",
 	"refIdSemiColon": "Ідентифікатор посилання:",
 	"addFearedEvent": "Додати подію, що викликає побоювання",
-	"addEbiosRMstudy": "Додати дослідження Ebios RM",
+	"addEbiosRmStudy": "Додати дослідження Ebios RM",
 	"noAuthor": "Автора не призначено",
 	"noReviewer": "Рецензента не призначено",
 	"selectAudit": "Виберіть аудит",
@@ -1479,5 +1479,6 @@
 	"isThirdParty": "Третя сторона?",
 	"keepLocalLogin": "Дозволений локальний (non-SSO) логін?",
 	"keepLocalLoginHelpText": "Коли глобальне SSO обов'язкове, це дозволяє користувачу обійти це налаштування та використовувати локальний пароль за потреби.",
-	"saveAndContinue": "Зберегти та продовжити"
+	"saveAndContinue": "Зберегти та продовжити",
+	"nextOccurrenceStatus": "Статус наступного випадку"
 }

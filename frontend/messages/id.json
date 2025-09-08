@@ -996,7 +996,7 @@
 	"workshopOne": "Workshop 1",
 	"refIdSemiColon": "ID Referensi:",
 	"addFearedEvent": "Tambahkan kejadian yang ditakuti",
-	"addEbiosRMstudy": "Tambahkan studi Ebios RM",
+	"addEbiosRmStudy": "Tambahkan studi Ebios RM",
 	"noAuthor": "Tidak ada penulis yang ditugaskan",
 	"noReviewer": "Tidak ada peninjau yang ditugaskan",
 	"selectAudit": "Pilih audit",
@@ -1150,5 +1150,6 @@
 	"matchingScenarios": "Skenario yang cocok",
 	"select": "Pilih",
 	"deselect": "Batalkan Pilihan",
-	"saveAndContinue": "Simpan dan lanjutkan"
+	"saveAndContinue": "Simpan dan lanjutkan",
+	"nextOccurrenceStatus": "Status kejadian berikutnya"
 }

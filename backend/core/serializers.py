@@ -1905,8 +1905,13 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
 
-    next_occurrence = serializers.DateField(read_only=True)
-    last_occurrence_status = serializers.CharField(read_only=True)
+    next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
+    last_occurrence_status = serializers.ReadOnlyField(
+        source="get_last_occurrence_status"
+    )
+    next_occurrence_status = serializers.ReadOnlyField(
+        source="get_next_occurrence_status"
+    )
 
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()
