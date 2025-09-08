@@ -207,10 +207,12 @@ class CurrentUserView(views.APIView):
 
         user = request.user
 
+        # getting only what we need
         user_groups_data = list(user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
         permissions = {}
+        # chaining and avoiding the loop
         permission_rows = (
             RoleAssignment.objects.filter(
                 models.Q(user=user) | models.Q(user_group__in=user.user_groups.all())
@@ -218,38 +220,39 @@ class CurrentUserView(views.APIView):
             .values_list("role__permissions__codename", "role__permissions__name")
             .distinct()
         )
-
+        # keeping only what we need
         for codename, name in permission_rows:
             if codename:  # Skip None values
                 permissions[codename] = {"str": name}
 
         accessible_domains = RoleAssignment.get_accessible_folders(
-            Folder.get_root_folder(), user, Folder.ContentType.DOMAIN
+            Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
         )
-        accessible_domains = [str(f) for f in accessible_domains]
 
         domain_permissions = RoleAssignment.get_permissions_per_folder(
             principal=user, recursive=True
         )
-        domain_permissions = {k: list(v) for k, v in domain_permissions.items()}
+        domain_permissions = {
+            k: list(v) for k, v in domain_permissions.items()
+        }  # this what matters
 
         res_data = {
-            "id": user.id,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "is_active": user.is_active,
-            "date_joined": user.date_joined,
+            "id": request.user.id,
+            "email": request.user.email,
+            "first_name": request.user.first_name,
+            "last_name": request.user.last_name,
+            "is_active": request.user.is_active,
+            "date_joined": request.user.date_joined,
             "user_groups": user_groups,
-            "roles": user.get_roles(),
+            "roles": request.user.get_roles(),
             "permissions": permissions,
-            "is_third_party": user.is_third_party,
-            "is_admin": user.is_admin(),
-            "is_local": user.is_local,
-            "accessible_domains": accessible_domains,
+            "is_third_party": request.user.is_third_party,
+            "is_admin": request.user.is_admin(),
+            "is_local": request.user.is_local,
+            "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
-            "preferences": user.preferences,
+            "preferences": request.user.preferences,
         }
         return Response(res_data, status=HTTP_200_OK)
 
