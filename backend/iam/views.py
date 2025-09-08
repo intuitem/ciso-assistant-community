@@ -205,10 +205,8 @@ class CurrentUserView(views.APIView):
                 status=HTTP_401_UNAUTHORIZED,
             )
 
-        user = request.user
-
         # getting only what we need
-        user_groups_data = list(user.user_groups.values("name", "builtin"))
+        user_groups_data = list(request.user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
         accessible_domains = RoleAssignment.get_accessible_folders(
@@ -216,7 +214,7 @@ class CurrentUserView(views.APIView):
         )
 
         domain_permissions = RoleAssignment.get_permissions_per_folder(
-            principal=user, recursive=True
+            principal=request.user, recursive=True
         )
         domain_permissions = {
             k: list(v) for k, v in domain_permissions.items()
