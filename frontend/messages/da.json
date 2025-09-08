@@ -1245,5 +1245,7 @@
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
 	"deselect": "Fravælg",
-	"saveAndContinue": "Gem og fortsæt"
+	"saveAndContinue": "Gem og fortsæt",
+	"actor": "Aktør",
+	"action": "Handling"
 }

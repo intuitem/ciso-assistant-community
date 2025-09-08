@@ -1150,5 +1150,7 @@
 	"matchingScenarios": "Skenario yang cocok",
 	"select": "Pilih",
 	"deselect": "Batalkan Pilihan",
-	"saveAndContinue": "Simpan dan lanjutkan"
+	"saveAndContinue": "Simpan dan lanjutkan",
+	"actor": "Pelaku",
+	"action": "Aksi"
 }

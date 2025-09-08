@@ -1340,5 +1340,7 @@
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
-	"saveAndContinue": "Salva e continua"
+	"saveAndContinue": "Salva e continua",
+	"actor": "Attore",
+	"action": "Azione"
 }
