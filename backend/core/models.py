@@ -1857,7 +1857,7 @@ class Asset(
         for child_asset, parent_asset in links:
             child_to_parents.setdefault(child_asset, set()).add(parent_asset)
             parent_to_children.setdefault(parent_asset, set()).add(child_asset)
-        ancestors = set()
+        ancestors = {self}
         q = [self]
         visited_ancestors = {self}
         while q:
@@ -1873,16 +1873,31 @@ class Asset(
         return self.child_assets.all()
 
     def get_descendants(self) -> set[Self]:
-        result = {self}
-        # load whole m2m table in memory to avoid multiple queries
-        m2m_entries = set(Asset.parent_assets.through.objects.all())
-        children_assets = {
-            a.id: a for a in Asset.objects.filter(parent_assets__isnull=False)
-        }
-        for x in m2m_entries:
-            if x.to_asset_id == self.id and children_assets.get(x.from_asset_id):
-                result.add(children_assets[x.from_asset_id])
-        return result
+        asset_map = {a.id: a for a in Asset.objects.all()}
+        all_ancestor_ids = asset_map.keys()
+        _links = Asset.parent_assets.through.objects.filter(
+            Q(from_asset_id__in=all_ancestor_ids) | Q(to_asset_id__in=all_ancestor_ids)
+        ).values_list("from_asset_id", "to_asset_id")
+        links = [
+            (asset_map[child], asset_map[parent])
+            for child, parent in _links
+            if child in asset_map and parent in asset_map
+        ]
+        parent_to_children = {}
+        descendants = set()
+        for child_asset, parent_asset in links:
+            parent_to_children.setdefault(parent_asset, set()).add(child_asset)
+            q = [self]
+            visited_descendants = {self.id}
+            while q:
+                curr_asset = q.pop(0)
+                if curr_asset.id != self.id:
+                    descendants.add(curr_asset)
+                for child_asset in parent_to_children.get(curr_asset, []):
+                    if child_asset.id not in visited_descendants:
+                        visited_descendants.add(child_asset.id)
+                        q.append(child_asset)
+        return descendants
 
     @property
     def children_assets(self):
