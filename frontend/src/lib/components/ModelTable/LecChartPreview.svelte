@@ -35,12 +35,15 @@
 		const echarts = await import('echarts');
 		if (chart) {
 			chart.dispose();
+			chart = null;
 		}
 
 		if (!chartContainer) {
 			return;
 		}
 
+		// Ensure the container is clean before initializing
+		chartContainer.innerHTML = '';
 		chart = echarts.init(chartContainer, null, { renderer: 'svg' });
 
 		// Filter out zero values for logarithmic x-axis (can't display x=0 on log scale)
@@ -143,6 +146,11 @@
 	$effect(() => {
 		// This will run whenever cell or meta changes
 		if (cell && meta) {
+			// Dispose existing chart first to prevent mixing
+			if (chart) {
+				chart.dispose();
+				chart = null;
+			}
 			initializeChart();
 		}
 	});
@@ -152,6 +160,7 @@
 		return () => {
 			if (chart) {
 				chart.dispose();
+				chart = null;
 			}
 		};
 	});

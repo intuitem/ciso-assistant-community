@@ -144,6 +144,24 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         metrics = current_hypothesis.simulation_data.get("metrics", {})
         return metrics.get("mean_annual_loss")
 
+    @property
+    def display_ale(self):
+        """
+        Get the Annual Loss Expectancy (ALE) with currency from global settings.
+        Returns "No ALE calculated" if no ALE is available.
+        """
+        ale_value = self.ale
+        if ale_value is None:
+            return "No ALE calculated"
+
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        return f"{ale_value:,.0f} {currency}"
+
     class Meta:
         verbose_name = _("Quantitative Risk Scenario")
         verbose_name_plural = _("Quantitative Risk Scenarios")

@@ -1567,7 +1567,7 @@ export const listViewFields = {
 			'assets',
 			'threats',
 			'qualifications',
-			'ale'
+			'display_ale'
 		],
 		filters: {
 			status: RISK_ASSESSMENT_STATUS_FILTER,
