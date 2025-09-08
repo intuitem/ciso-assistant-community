@@ -103,6 +103,7 @@ class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
+    ale = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
 
     class Meta:
         model = QuantitativeRiskScenario
@@ -133,6 +134,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
         source="get_simulation_parameters_display", read_only=True
     )
     lec_data = serializers.SerializerMethodField()
+    ale = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     treatment_cost = serializers.DecimalField(
         max_digits=12, decimal_places=2, read_only=True
     )

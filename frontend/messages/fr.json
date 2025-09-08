@@ -2121,5 +2121,7 @@
 	"oneTimeImplementationCost": "Coût de mise en œuvre",
 	"annualOperationalCost": "Coût opérationnel annuel",
 	"annualManDaysHelpText": "Jours-personne nécessaires annuellement",
-	"treatmentCost": "Coût de traitement"
+	"treatmentCost": "Coût de traitement",
+	"currentAle": "ALE actuel",
+	"inherent": "Inhérent"
 }

@@ -2163,5 +2163,7 @@
 	"oneTimeImplementationCost": "One-time implementation cost",
 	"annualOperationalCost": "Annual operational cost",
 	"annualManDaysHelpText": "People/days needed annually",
-	"treatmentCost": "Treatment cost"
+	"treatmentCost": "Treatment cost",
+	"currentAle": "Current ALE",
+	"inherent": "Inherent"
 }

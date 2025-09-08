@@ -131,6 +131,30 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         candidates = [f"QRS.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
+    @property
+    def ale(self):
+        """
+        Get the Annual Loss Expectancy (ALE) from the current stage hypothesis.
+        Returns None if no current stage hypothesis exists or has no simulation data.
+        """
+        current_hypothesis = self.hypotheses.filter(risk_stage="current").first()
+        if not current_hypothesis or not current_hypothesis.simulation_data:
+            return None
+
+        metrics = current_hypothesis.simulation_data.get("metrics", {})
+        return metrics.get("mean_annual_loss")
+
+    class Meta:
+        verbose_name = _("Quantitative Risk Scenario")
+        verbose_name_plural = _("Quantitative Risk Scenarios")
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["quantitative_risk_study", "name"],
+                name="unique_scenario_name_per_study",
+            )
+        ]
+
 
 class QuantitativeRiskHypothesis(
     NameDescriptionMixin, FilteringLabelMixin, FolderMixin
@@ -194,7 +218,11 @@ class QuantitativeRiskHypothesis(
                 fields=["quantitative_risk_scenario", "risk_stage"],
                 condition=models.Q(risk_stage__in=["current", "inherent"]),
                 name="unique_current_inherent_per_scenario",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["quantitative_risk_scenario", "name"],
+                name="unique_hypothesis_name_per_scenario",
+            ),
         ]
 
     def run_simulation(self, dry_run: bool = False):
@@ -336,6 +364,8 @@ class QuantitativeRiskHypothesis(
     @property
     def treatment_cost(self):
         """Calculate the total treatment cost based on applied controls."""
+
+        # I'm assuming that the current controls are part of the baseline so cost is not considered
         total_cost = 0
 
         # Add cost of added controls
@@ -355,3 +385,15 @@ class QuantitativeRiskHypothesis(
         if cost == 0:
             return "No cost"
         return self._format_currency(cost)
+
+    @property
+    def ale(self):
+        """
+        Get the Annual Loss Expectancy (ALE) from this hypothesis's simulation data.
+        Returns None if no simulation data exists.
+        """
+        if not self.simulation_data:
+            return None
+
+        metrics = self.simulation_data.get("metrics", {})
+        return metrics.get("mean_annual_loss")

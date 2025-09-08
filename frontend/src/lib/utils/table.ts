@@ -1556,7 +1556,8 @@ export const listViewFields = {
 			'quantitativeRiskStudy',
 			'assets',
 			'threats',
-			'qualifications'
+			'qualifications',
+			'currentAle'
 		],
 		body: [
 			'is_selected',
@@ -1565,7 +1566,8 @@ export const listViewFields = {
 			'quantitative_risk_study',
 			'assets',
 			'threats',
-			'qualifications'
+			'qualifications',
+			'ale'
 		],
 		filters: {
 			status: RISK_ASSESSMENT_STATUS_FILTER,
@@ -1581,6 +1583,7 @@ export const listViewFields = {
 			'riskStage',
 			'simulationParameters',
 			'lecChart',
+			'ale',
 			'treatmentCost',
 			'isSelected'
 		],
@@ -1590,6 +1593,7 @@ export const listViewFields = {
 			'risk_stage',
 			'simulation_parameters_display',
 			'lec_data',
+			'ale',
 			'treatment_cost',
 			'is_selected'
 		],
