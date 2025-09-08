@@ -208,7 +208,7 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = $state(true);
+	let invalidateTable = $state(false);
 
 	$tableHandlers[baseEndpoint] = handler;
 

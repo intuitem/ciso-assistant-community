@@ -12,9 +12,13 @@ BACKEND_PORT=8173
 MAILER_WEB_SERVER_PORT=8073
 MAILER_SMTP_SERVER_PORT=1073
 
+
+ENTERPRISE_SETTINGS="enterprise_core.settings"
+
 KEYCLOAK_PORT=8080
 KEYCLOAK_ADMIN="admin"
 KEYCLOAK_ADMIN_PASSWORD="admin"
+
 QUICK_MODE_ACTIVATED=1
 KEEP_DATABASE_SNAPSHOT=1
 
@@ -42,6 +46,8 @@ for arg in "$@"; do
       echo "Invalid format for --mailer argument. Please use --mailer=PORT/PORT"
       exit 1
     fi
+  elif [[ $arg == -e ]] || [[ $arg == --enterprise ]]; then
+    ENTERPRISE=1
   elif [[ $arg == -q ]]; then
     QUICK_MODE_ACTIVATED=1
   elif [[ $arg == --no-quick ]]; then
@@ -76,6 +82,7 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
   echo "  --no-sudo               Run docker commands without using sudo as a prefix."
   echo "  --port=PORT             Run the backend server on the specified port (default: $BACKEND_PORT)"
   echo "  -m, --mailer=PORT/PORT  Use an existing mailer service on the optionally defined ports (default: $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT)"
+  echo "  -e, --enterprise        Run the tests on the enterprise version of the CISO Assistant"
 
   echo "Playwright options:"
   echo "  --browser=NAME          Run the tests in the specified browser (chromium, firefox, webkit)"
@@ -180,6 +187,49 @@ cleanup() {
   exit 0
 }
 
+django_args() {
+  if [[ -n "$ENTERPRISE" ]]; then
+    echo "--settings=$ENTERPRISE_SETTINGS"
+  fi
+}
+
+build_frontend() {
+  if [[ -n "$ENTERPRISE" ]]; then
+    echo "Building the enterprise version of the frontend..."
+    cd "$APP_DIR"/enterprise/frontend || exit 1
+    make clean && make
+  else
+    echo "Building the community version of the frontend..."
+    pnpm run build
+  fi
+}
+
+compute_frontend_hash() {
+  if [[ -n "$ENTERPRISE" ]]; then
+    echo "Computing the hash for the enterprise version of the frontend..."
+    find "$APP_DIR"/enterprise/frontend/.build/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
+    return
+  else
+    "$(find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum)"
+  fi
+}
+
+run_tests() {
+  if [[ -n "$ENTERPRISE" ]]; then
+    echo "Running tests for the enterprise version..."
+    cd "$APP_DIR"/enterprise/frontend || exit 1
+    make pre-tests
+    cd "$APP_DIR"/enterprise/frontend/.build/frontend || exit 1
+  else
+    echo "Running tests for the community version..."
+  fi
+  if [[ -n "$QUICK_MODE_ACTIVATED" ]]; then
+    pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" --project=chromium "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
+  else
+    pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
+  fi
+}
+
 finish() {
   echo "Test successfully completed!"
   cleanup
@@ -248,25 +298,27 @@ export EMAIL_PORT=$MAILER_SMTP_SERVER_PORT
 export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
 export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 
+export LICENSE_SEATS=999
+
 cd "$APP_DIR"/backend/ || exit 1
-if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
-  poetry run python3 manage.py makemigrations
-  poetry run python3 manage.py migrate
-elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]] || ! poetry run python3 manage.py migrate --check; then
-  poetry run python3 manage.py makemigrations
-  poetry run python3 manage.py migrate
+if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
+  poetry run python3 manage.py makemigrations "$(django_args)"
+  poetry run python3 manage.py migrate "$(django_args)"
+elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
+  poetry run python3 manage.py makemigrations "$(django_args)"
+  poetry run python3 manage.py migrate "$(django_args)"
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
 else
   # Copying the initial database instead of applying the migrations saves a lot of time
   cp "$DB_DIR/$DB_INIT_NAME" "$DB_DIR/$DB_NAME"
 fi
 
-poetry run python3 manage.py createsuperuser --noinput
+poetry run python3 manage.py createsuperuser --noinput "$(django_args)"
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup poetry run python3 manage.py runserver localhost:$BACKEND_PORT >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup poetry run python3 manage.py runserver "$BACKEND_PORT" "$(django_args)" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup poetry run python3 manage.py runserver localhost:$BACKEND_PORT >/dev/null 2>&1 &
+  nohup poetry run python3 manage.py runserver "$BACKEND_PORT" "$(django_args)" >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"
@@ -290,16 +342,16 @@ else
 fi
 echo "=========================================================================================="
 
-FRONTEND_HASH_FILE="$APP_DIR/frontend/tests/.frontend_hash"
-FRONTEND_HASH=$(find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum)
+if [[ -n "$ENTERPRISE" ]]; then
+  FRONTEND_HASH_FILE="$APP_DIR/frontend/tests/.frontend_hash.enterprise"
+else
+  FRONTEND_HASH_FILE="$APP_DIR/frontend/tests/.frontend_hash"
+fi
+FRONTEND_HASH=$(compute_frontend_hash)
 
 if [ "$(cat "$FRONTEND_HASH_FILE")" != "$FRONTEND_HASH" ]; then
-  pnpm run build # Required for the "pnpm run preview" command of playwright.config.ts
+  build_frontend # Required for the "pnpm run preview" command of playwright.config.ts
   echo "$FRONTEND_HASH" >"$FRONTEND_HASH_FILE"
 fi
 
-if [[ "$QUICK_MODE_ACTIVATED" -eq 1 ]]; then
-  pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" --project=chromium "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
-else
-  pnpm playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}" "${SCRIPT_SHORT_ARGS[@]}"
-fi
+run_tests
