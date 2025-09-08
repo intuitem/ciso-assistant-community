@@ -371,6 +371,7 @@ class ContentTypeListView(APIView):
             content_types.append(
                 {"label": model.__name__, "value": model._meta.model_name}
             )
+        content_types.sort(key=lambda x: x["label"].lower())
         return Response(content_types)
 
 

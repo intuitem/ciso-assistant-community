@@ -3,15 +3,12 @@ from django.utils.formats import date_format
 
 import magic
 import structlog
-from core.views import BaseModelViewSet, GenericFilterSet
 from core.permissions import IsAdministrator
 from django.db import models, transaction
 from django.db.models import CharField, Value, BooleanField, Case, When
 from django.db.models.functions import Lower, Cast, Coalesce
 import django_filters as df
 from django.contrib.auth.models import Permission
-from django.conf import settings
-from iam.models import User
 from rest_framework import status
 from rest_framework.decorators import (
     action,
@@ -28,12 +25,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.conf import settings
 
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from core.utils import MAIN_ENTITY_DEFAULT_NAME
-from iam.models import User, Role, UserGroup
+from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
 
-from iam.models import RoleAssignment
 from tprm.models import Folder
 from uuid import UUID
 
@@ -435,6 +431,8 @@ class LogEntryFilterSet(GenericFilterSet):
         }
 
     def filter_content_type_model(self, queryset, name, value):
+        if not value:
+            return queryset
         normalized = value.replace(" ", "").lower()
         return queryset.filter(content_type__model__icontains=normalized)
 

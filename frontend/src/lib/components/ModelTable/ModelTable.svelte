@@ -266,7 +266,7 @@
 		listViewFields[tableURLModel] &&
 		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
-			: (source?.filters ?? {}); // source.filters is used by enterprise frontend
+			: (source?.filters ?? {});
 
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
