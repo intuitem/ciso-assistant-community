@@ -188,13 +188,12 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name = _("Ebios RM Study")
         verbose_name_plural = _("Ebios RM Studies")
         ordering = ["created_at"]
-    
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.quotation_method == "express":
             for scenario in self.operational_scenarios.all():
                 scenario.update_likelihood_from_operating_modes()
-
 
     @property
     def parsed_matrix(self):
@@ -810,8 +809,7 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         self.folder = self.operational_scenario.folder
         super().save(*args, **kwargs)
         self.operational_scenario.update_likelihood_from_operating_modes()
-        
-    
+
     def delete(self, *args, **kwargs):
         operational_scenario = self.operational_scenario
         super().delete(*args, **kwargs)
@@ -981,9 +979,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             return
 
         max_likelihood = (
-            self.operating_modes.aggregate(
-                max_l=models.Max("likelihood")
-            )["max_l"]
+            self.operating_modes.aggregate(max_l=models.Max("likelihood"))["max_l"]
             if self.operating_modes.exists()
             else -1
         )
@@ -991,9 +987,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         self.likelihood = max_likelihood
         self.save(update_fields=["likelihood"])
 
-    def update_scenarios_likelihood_on_quotation_method_change(
-        self
-    ):
+    def update_scenarios_likelihood_on_quotation_method_change(self):
         if self.ebios_rm_study.quotation_method != "express":
             return
 
