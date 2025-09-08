@@ -211,19 +211,7 @@ class CurrentUserView(views.APIView):
         user_groups_data = list(user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
-        permissions = {}
-        # chaining and avoiding the loop
-        permission_rows = (
-            RoleAssignment.objects.filter(
-                models.Q(user=user) | models.Q(user_group__in=user.user_groups.all())
-            )
-            .values_list("role__permissions__codename", "role__permissions__name")
-            .distinct()
-        )
-        # keeping only what we need
-        for codename, name in permission_rows:
-            if codename:  # Skip None values
-                permissions[codename] = {"str": name}
+        permissions = request.user.permissions
 
         accessible_domains = RoleAssignment.get_accessible_folders(
             Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
