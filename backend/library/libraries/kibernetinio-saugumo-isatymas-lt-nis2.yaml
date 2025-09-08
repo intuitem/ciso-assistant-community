@@ -1,4 +1,4 @@
-convert_library_version: "v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don't use any Compatibility Mode}"
+convert_library_version: "v2"
 urn: urn:intuitem:risk:library:kibernetinio-saugumo-istatymas
 locale: lt
 ref_id: TAP-24-1377
@@ -152,7 +152,7 @@ objects:
       ref_id: LT.TECH.9
       name: Spragų valdymas ir atskleidimas
       category: technical
-      description: Turi būti nustatyta tvarka saugumo spragų identifikavimui, vertinimui, šalinimui ir atskleisdimui, užtikrinant laiku atliekamus sistemos atnaujinimus ir pataisas.
+      description: Turi būti nustatyta tvarka saugumo spragų identifikavimui, vertinimui, šalinimui ir atskleisimui, užtikrinant laiku atliekamus sistemos atnaujinimus ir pataisas.
 
   framework:
     urn: urn:intuitem:risk:framework:kibernetinio-saugumo-istatymas
