@@ -917,11 +917,25 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        for ra in RoleAssignment.get_role_assignments(principal):
-            for p in ra.role.permissions.all():
-                permission_dict = {p.codename: {"str": str(p)}}
-                permissions.update(permission_dict)
 
+        # Build the filter query based on principal type
+        if isinstance(principal, UserGroup):
+            # If principal is a UserGroup, only look for role assignments to that group
+            query_filter = models.Q(user_group=principal)
+        else:
+            # If principal is a User, look for direct assignments and assignments via user groups
+            query_filter = models.Q(user=principal)
+            if hasattr(principal, "user_groups"):
+                query_filter |= models.Q(user_group__in=principal.user_groups.all())
+
+        permission_rows = (
+            RoleAssignment.objects.filter(query_filter)
+            .values_list("role__permissions__codename", "role__permissions__name")
+            .distinct()
+        )
+        for codename, name in permission_rows:
+            if codename:
+                permissions[codename] = {"str": name}
         return permissions
 
     @staticmethod
