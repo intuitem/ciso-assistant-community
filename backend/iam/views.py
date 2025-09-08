@@ -210,14 +210,6 @@ class CurrentUserView(views.APIView):
         user_groups_data = list(user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
-        roles = list(
-            RoleAssignment.objects.filter(
-                models.Q(user=user) | models.Q(user_group__in=user.user_groups.all())
-            )
-            .values_list("role__name", flat=True)
-            .distinct()
-        )
-
         permissions = {}
         permission_rows = (
             RoleAssignment.objects.filter(
@@ -249,7 +241,7 @@ class CurrentUserView(views.APIView):
             "is_active": user.is_active,
             "date_joined": user.date_joined,
             "user_groups": user_groups,
-            "roles": roles,
+            "roles": user.get_roles(),
             "permissions": permissions,
             "is_third_party": user.is_third_party,
             "is_admin": user.is_admin(),
