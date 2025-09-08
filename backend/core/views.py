@@ -5216,7 +5216,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk):
         """Returns the list of requirement assessments for the different audit modes"""
-        assessable = self.request.query_params.get("assessable", False)
+        assessable = str(
+            self.request.query_params.get("assessable", "false")
+        ).lower() in {"true", "1", "yes"}
         compliance_assessment = get_object_or_404(
             self.get_queryset()
             .select_related("framework")
@@ -5228,9 +5230,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             pk=pk,
         )
 
-        assessable = str(
-            self.request.query_params.get("assessable", "false")
-        ).lower() in {"true", "1", "yes"}
         requirement_assessments_objects = (
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=not assessable
