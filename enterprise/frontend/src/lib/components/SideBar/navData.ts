@@ -374,6 +374,12 @@ export const navData = {
 					permissions: ['view_filteringlabel']
 				},
 				{
+					name: 'terminologies',
+					fa_icon: 'fa-solid fa-language',
+					href: '/terminologies',
+					permissions: ['view_terminology']
+				},
+				{
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
