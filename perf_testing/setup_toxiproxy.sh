@@ -1,4 +1,3 @@
-# setup_toxiproxy.sh
 #!/bin/bash
 
 echo "Setting up Toxiproxy..."

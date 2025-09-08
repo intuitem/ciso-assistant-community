@@ -1,4 +1,3 @@
-# remove_latency.sh
 #!/bin/bash
 echo "Removing database latency..."
 curl -X DELETE http://localhost:8474/proxies/postgres/toxics/latency \

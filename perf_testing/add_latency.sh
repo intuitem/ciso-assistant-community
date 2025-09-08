@@ -1,6 +1,5 @@
-# add_latency.sh
 #!/bin/bash
-LATENCY=${1:-100} # Default 100ms if no argument provided
+LATENCY=${1:-10} # Default 10ms if no argument provided
 
 echo "Adding ${LATENCY}ms latency to database..."
 curl -X POST http://localhost:8474/proxies/postgres/toxics \
