@@ -12,6 +12,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		updated_fields?: Set<string>;
+		[key: string]: any;
 		object?: any;
 	}
 
@@ -22,7 +23,8 @@
 		formDataCache = $bindable({}),
 		initialData = {},
 		updated_fields = new Set(),
-		object
+		object,
+		...rest
 	}: Props = $props();
 
 	let isParentLocked = $derived(object?.risk_assessment?.is_locked || false);
@@ -45,6 +47,8 @@
 			console.error('Error fetching default ref_id:', error);
 		}
 	}
+
+	const scopeFolder = $derived(rest?.scopeFolder || { id: '' });
 </script>
 
 <AutocompleteSelect
@@ -77,6 +81,9 @@
 	multiple
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsDetailedUrlParameters={[
+		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
+	]}
 	optionsInfoFields={{
 		fields: [
 			{
@@ -96,6 +103,9 @@
 	multiple
 	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsDetailedUrlParameters={[
+		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
+	]}
 	optionsLabelField="auto"
 	field="threats"
 	cacheLock={cacheLocks['threats']}
