@@ -952,22 +952,37 @@ class FilteringLabelViewSet(BaseModelViewSet):
     ordering = ["label"]
 
 
+class RiskAssessmentFilterSet(GenericFilterSet):
+    status_choices = list(RiskAssessment.Status.choices)
+    status_choices.append(("--", "--"))
+    status = df.MultipleChoiceFilter(choices=status_choices, method="filter_status")
+
+    class Meta:
+        model = RiskAssessment
+        fields = {
+            "perimeter": ["exact"],
+            "folder": ["exact"],
+            "authors": ["exact"],
+            "risk_matrix": ["exact"],
+            "status": ["exact"],
+            "ebios_rm_study": ["exact"],
+            "reviewers": ["exact"],
+        }
+
+    def filter_status(self, queryset, name, value):
+        ra_undefined_status = queryset.filter(status__isnull=True)
+        if "--" in value:
+            return queryset.filter(status__in=value) | ra_undefined_status
+        return queryset.filter(status__in=value)
+
+
 class RiskAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.
     """
 
     model = RiskAssessment
-    filterset_fields = [
-        "perimeter",
-        "folder",
-        "authors",
-        "risk_matrix",
-        "status",
-        "ebios_rm_study",
-        "authors",
-        "reviewers",
-    ]
+    filterset_class = RiskAssessmentFilterSet
 
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()

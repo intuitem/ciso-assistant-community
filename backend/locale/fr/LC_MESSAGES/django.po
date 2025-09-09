@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-11 18:23+0000\n"
+"POT-Creation-Date: 2025-09-09 15:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,543 +18,561 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ebios_rm/models.py:20
+#: ebios_rm/models.py:59
 msgid "Planned"
 msgstr ""
 
-#: ebios_rm/models.py:21
+#: ebios_rm/models.py:60
 msgid "In progress"
 msgstr ""
 
-#: ebios_rm/models.py:22
+#: ebios_rm/models.py:61
 msgid "In review"
 msgstr ""
 
-#: ebios_rm/models.py:23
+#: ebios_rm/models.py:62
 msgid "Done"
 msgstr ""
 
-#: ebios_rm/models.py:24
+#: ebios_rm/models.py:63
 msgid "Deprecated"
 msgstr ""
 
-#: ebios_rm/models.py:29
+#: ebios_rm/models.py:109
 msgid "Risk matrix"
 msgstr ""
 
-#: ebios_rm/models.py:32
-msgid ""
-"Risk matrix used as a reference for the study. Defaults to `urn:intuitem:"
-"risk:library:risk-matrix-4x4-ebios-rm`"
+#: ebios_rm/models.py:111
+msgid "Risk matrix used as a reference for the study"
 msgstr ""
 
-#: ebios_rm/models.py:38 ebios_rm/models.py:118
+#: ebios_rm/models.py:116 ebios_rm/models.py:258
 msgid "Assets"
 msgstr ""
 
-#: ebios_rm/models.py:40
+#: ebios_rm/models.py:118
 msgid "Assets that are pertinent to the study"
 msgstr ""
 
-#: ebios_rm/models.py:46
+#: ebios_rm/models.py:124
 msgid "Compliance assessments"
 msgstr ""
 
-#: ebios_rm/models.py:49
+#: ebios_rm/models.py:127
 msgid ""
 "Compliance assessments established as security baseline during workshop 1.4"
 msgstr ""
 
-#: ebios_rm/models.py:55
-msgid "Risk assessments"
-msgstr ""
-
-#: ebios_rm/models.py:57
-msgid "Risk assessments generated at the end of workshop 4"
-msgstr ""
-
-#: ebios_rm/models.py:62
+#: ebios_rm/models.py:133
 msgid "Reference entity"
 msgstr ""
 
-#: ebios_rm/models.py:64
+#: ebios_rm/models.py:135
 msgid "Entity that is the focus of the study"
 msgstr ""
 
-#: ebios_rm/models.py:73
+#: ebios_rm/models.py:144
 msgid "Version of the Ebios RM study (eg. 1.0, 2.0, etc.)"
 msgstr ""
 
-#: ebios_rm/models.py:74
+#: ebios_rm/models.py:145
 msgid "Version"
 msgstr ""
 
-#: ebios_rm/models.py:81
+#: ebios_rm/models.py:152
 msgid "Status"
 msgstr ""
 
-#: ebios_rm/models.py:88
+#: ebios_rm/models.py:159
 msgid "Authors"
 msgstr ""
 
-#: ebios_rm/models.py:94
+#: ebios_rm/models.py:165
 msgid "Reviewers"
 msgstr ""
 
-#: ebios_rm/models.py:97
+#: ebios_rm/models.py:168
 msgid "Observation"
 msgstr ""
 
-#: ebios_rm/models.py:100
+#: ebios_rm/models.py:171
+msgid "Metadata"
+msgstr ""
+
+#: ebios_rm/models.py:179
+msgid "Quotation method"
+msgstr ""
+
+#: ebios_rm/models.py:181
+msgid ""
+"Method used to quote the study: 'manual' for manual likelihood assessment, "
+"'express' for automatic propagation from operating modes"
+msgstr ""
+
+#: ebios_rm/models.py:188
 msgid "Ebios RM Study"
 msgstr ""
 
-#: ebios_rm/models.py:101
+#: ebios_rm/models.py:189
 msgid "Ebios RM Studies"
 msgstr ""
 
-#: ebios_rm/models.py:112 ebios_rm/models.py:201 ebios_rm/models.py:254
-#: ebios_rm/models.py:365 ebios_rm/models.py:401
+#: ebios_rm/models.py:252 ebios_rm/models.py:388 ebios_rm/models.py:473
+#: ebios_rm/models.py:603 ebios_rm/models.py:638 ebios_rm/models.py:837
 msgid "EBIOS RM study"
 msgstr ""
 
-#: ebios_rm/models.py:120
+#: ebios_rm/models.py:260
 msgid "Assets that are affected by the feared event"
 msgstr ""
 
-#: ebios_rm/models.py:125
+#: ebios_rm/models.py:265
 msgid "Qualifications"
 msgstr ""
 
-#: ebios_rm/models.py:127
+#: ebios_rm/models.py:267
 msgid "Qualifications carried by the feared event"
 msgstr ""
 
-#: ebios_rm/models.py:131
+#: ebios_rm/models.py:271
 msgid "Gravity"
 msgstr ""
 
-#: ebios_rm/models.py:132 ebios_rm/models.py:230 ebios_rm/models.py:320
-#: ebios_rm/models.py:382 ebios_rm/models.py:421
+#: ebios_rm/models.py:272 ebios_rm/models.py:425 ebios_rm/models.py:539
+#: ebios_rm/models.py:657 ebios_rm/models.py:861
 msgid "Is selected"
 msgstr ""
 
-#: ebios_rm/models.py:133 ebios_rm/models.py:231 ebios_rm/models.py:321
-#: ebios_rm/models.py:383 ebios_rm/models.py:422
+#: ebios_rm/models.py:273 ebios_rm/models.py:426 ebios_rm/models.py:540
+#: ebios_rm/models.py:658 ebios_rm/models.py:862
 msgid "Justification"
 msgstr ""
 
-#: ebios_rm/models.py:136
+#: ebios_rm/models.py:278
 msgid "Feared event"
 msgstr ""
 
-#: ebios_rm/models.py:137 ebios_rm/models.py:205
+#: ebios_rm/models.py:279 ebios_rm/models.py:393
 msgid "Feared events"
 msgstr ""
 
-#: ebios_rm/models.py:169
-msgid "State"
-msgstr ""
-
-#: ebios_rm/models.py:170
-msgid "Organized crime"
-msgstr ""
-
-#: ebios_rm/models.py:171
-msgid "Terrorist"
-msgstr ""
-
-#: ebios_rm/models.py:172
-msgid "Activist"
-msgstr ""
-
-#: ebios_rm/models.py:173
-msgid "Competitor"
-msgstr ""
-
-#: ebios_rm/models.py:174
-msgid "Amateur"
-msgstr ""
-
-#: ebios_rm/models.py:175
-msgid "Avenger"
-msgstr ""
-
-#: ebios_rm/models.py:176
-msgid "Pathological"
-msgstr ""
-
-#: ebios_rm/models.py:209
+#: ebios_rm/models.py:401
 msgid "Risk origin"
 msgstr ""
 
-#: ebios_rm/models.py:211
+#: ebios_rm/models.py:408
 msgid "Target objective"
 msgstr ""
 
-#: ebios_rm/models.py:213
+#: ebios_rm/models.py:410
 msgid "Motivation"
 msgstr ""
 
-#: ebios_rm/models.py:218
+#: ebios_rm/models.py:415
 msgid "Resources"
 msgstr ""
 
-#: ebios_rm/models.py:223
-msgid "Pertinence"
-msgstr ""
-
-#: ebios_rm/models.py:228
+#: ebios_rm/models.py:420
 msgid "Activity"
 msgstr ""
 
-#: ebios_rm/models.py:237 ebios_rm/models.py:370
+#: ebios_rm/models.py:436 ebios_rm/models.py:609
 msgid "RO/TO couple"
 msgstr ""
 
-#: ebios_rm/models.py:238
+#: ebios_rm/models.py:437
 msgid "RO/TO couples"
 msgstr ""
 
-#: ebios_rm/models.py:248
+#: ebios_rm/models.py:467
 msgid "Client"
 msgstr ""
 
-#: ebios_rm/models.py:249
+#: ebios_rm/models.py:468
 msgid "Partner"
 msgstr ""
 
-#: ebios_rm/models.py:250
+#: ebios_rm/models.py:469
 msgid "Supplier"
 msgstr ""
 
-#: ebios_rm/models.py:255
+#: ebios_rm/models.py:474
 msgid "EBIOS RM study that the stakeholder is part of"
 msgstr ""
 
-#: ebios_rm/models.py:262 tprm/models.py:27 tprm/models.py:97
+#: ebios_rm/models.py:481 tprm/models.py:29 tprm/models.py:99
 msgid "Entity"
 msgstr ""
 
-#: ebios_rm/models.py:264
+#: ebios_rm/models.py:483
 msgid "Entity qualified by the stakeholder"
 msgstr ""
 
-#: ebios_rm/models.py:268
+#: ebios_rm/models.py:487
 msgid "Applied controls"
 msgstr ""
 
-#: ebios_rm/models.py:271
+#: ebios_rm/models.py:490
 msgid "Controls applied to lower stakeholder criticality"
 msgstr ""
 
-#: ebios_rm/models.py:275
+#: ebios_rm/models.py:494
 msgid "Category"
 msgstr ""
 
-#: ebios_rm/models.py:279
+#: ebios_rm/models.py:498
 msgid "Current dependency"
 msgstr ""
 
-#: ebios_rm/models.py:284
+#: ebios_rm/models.py:503
 msgid "Current penetration"
 msgstr ""
 
-#: ebios_rm/models.py:289
+#: ebios_rm/models.py:508
 msgid "Current maturity"
 msgstr ""
 
-#: ebios_rm/models.py:294
+#: ebios_rm/models.py:513
 msgid "Current trust"
 msgstr ""
 
-#: ebios_rm/models.py:300
+#: ebios_rm/models.py:519
 msgid "Residual dependency"
 msgstr ""
 
-#: ebios_rm/models.py:305
+#: ebios_rm/models.py:524
 msgid "Residual penetration"
 msgstr ""
 
-#: ebios_rm/models.py:310
+#: ebios_rm/models.py:529
 msgid "Residual maturity"
 msgstr ""
 
-#: ebios_rm/models.py:315
+#: ebios_rm/models.py:534
 msgid "Residual trust"
 msgstr ""
 
-#: ebios_rm/models.py:324
+#: ebios_rm/models.py:545
 msgid "Stakeholder"
 msgstr ""
 
-#: ebios_rm/models.py:325 ebios_rm/models.py:376
+#: ebios_rm/models.py:546 ebios_rm/models.py:650
 msgid "Stakeholders"
 msgstr ""
 
-#: ebios_rm/models.py:372
+#: ebios_rm/models.py:611
 msgid "RO/TO couple from which the attach path is derived"
 msgstr ""
 
-#: ebios_rm/models.py:378
+#: ebios_rm/models.py:618
+msgid "Strategic Scenario"
+msgstr ""
+
+#: ebios_rm/models.py:619
+msgid "Strategic Scenarios"
+msgstr ""
+
+#: ebios_rm/models.py:643
+msgid "Strategic scenario"
+msgstr ""
+
+#: ebios_rm/models.py:646
+msgid "Strategic scenario from which the attack path is derived"
+msgstr ""
+
+#: ebios_rm/models.py:652
 msgid "Stakeholders leveraged by the attack path"
 msgstr ""
 
-#: ebios_rm/models.py:381 ebios_rm/models.py:419
-msgid "Description"
-msgstr ""
-
-#: ebios_rm/models.py:386
+#: ebios_rm/models.py:663 ebios_rm/models.py:843
 msgid "Attack path"
 msgstr ""
 
-#: ebios_rm/models.py:387 ebios_rm/models.py:407
+#: ebios_rm/models.py:664
 msgid "Attack paths"
 msgstr ""
 
-#: ebios_rm/models.py:409
-msgid "Attack paths that are pertinent to the operational scenario"
+#: ebios_rm/models.py:736
+msgid "Threat"
 msgstr ""
 
-#: ebios_rm/models.py:413
-msgid "Threats"
+#: ebios_rm/models.py:738
+msgid "Threat that the elementary action is derived from"
 msgstr ""
 
-#: ebios_rm/models.py:416
-msgid "Threats leveraged by the operational scenario"
-msgstr ""
-
-#: ebios_rm/models.py:420
-msgid "Likelihood"
-msgstr ""
-
-#: ebios_rm/models.py:425
+#: ebios_rm/models.py:782 ebios_rm/models.py:869
 msgid "Operational scenario"
 msgstr ""
 
-#: ebios_rm/models.py:426
+#: ebios_rm/models.py:788
+msgid "Elementary actions"
+msgstr ""
+
+#: ebios_rm/models.py:790
+msgid "Elementary actions that are part of the operating mode"
+msgstr ""
+
+#: ebios_rm/models.py:850
+msgid "Threats"
+msgstr ""
+
+#: ebios_rm/models.py:853
+msgid "Threats leveraged by the operational scenario"
+msgstr ""
+
+#: ebios_rm/models.py:857
+msgid "Operating modes description"
+msgstr ""
+
+#: ebios_rm/models.py:858
+msgid "Description of the operating modes of the operational scenario"
+msgstr ""
+
+#: ebios_rm/models.py:860
+msgid "Likelihood"
+msgstr ""
+
+#: ebios_rm/models.py:870
 msgid "Operational scenarios"
 msgstr ""
 
-#: iam/models.py:78
+#: iam/models.py:88
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:79
+#: iam/models.py:89
 msgid "DOMAIN"
 msgstr ""
 
-#: iam/models.py:80
+#: iam/models.py:90
 msgid "ENCLAVE"
 msgstr ""
 
-#: iam/models.py:90
+#: iam/models.py:100
 msgid "parent folder"
 msgstr ""
 
-#: iam/models.py:100
+#: iam/models.py:110
 msgid "Folder"
 msgstr ""
 
-#: iam/models.py:101
+#: iam/models.py:111
 msgid "Folders"
 msgstr ""
 
-#: iam/models.py:223
+#: iam/models.py:313
 msgid "user group"
 msgstr ""
 
-#: iam/models.py:224 iam/models.py:371
+#: iam/models.py:314 iam/models.py:474
 msgid "user groups"
 msgstr ""
 
-#: iam/models.py:299
+#: iam/models.py:396
 msgid "Welcome to Ciso Assistant!"
 msgstr "Bienvenue sur CISO Assistant !"
 
-#: iam/models.py:346
+#: iam/models.py:444
 msgid "last name"
 msgstr ""
 
-#: iam/models.py:347
+#: iam/models.py:445
 msgid "first name"
 msgstr ""
 
-#: iam/models.py:354
+#: iam/models.py:452
+msgid ""
+"If True allow the user to log in using the normal login form even with SSO "
+"forced."
+msgstr ""
+
+#: iam/models.py:457
 msgid "active"
 msgstr ""
 
-#: iam/models.py:357
+#: iam/models.py:460
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: iam/models.py:361
+#: iam/models.py:464
 msgid "date joined"
 msgstr ""
 
-#: iam/models.py:363
+#: iam/models.py:466
 msgid "superuser status"
 msgstr ""
 
-#: iam/models.py:366
+#: iam/models.py:469
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: iam/models.py:374
+#: iam/models.py:477
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
 msgstr ""
 
-#: iam/models.py:389
+#: iam/models.py:495
 msgid "user"
 msgstr ""
 
-#: iam/models.py:390
+#: iam/models.py:496
 msgid "users"
 msgstr ""
 
-#: iam/models.py:557
+#: iam/models.py:688
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:572
+#: iam/models.py:705
 msgid "Domain"
 msgstr ""
 
-#: iam/models.py:578
+#: iam/models.py:711
 msgid "Role"
 msgstr ""
 
-#: iam/models.py:579
+#: iam/models.py:712
 msgid "sub folders are visible"
 msgstr ""
 
-#: iam/sso/models.py:73
+#: iam/sso/models.py:74
 msgid "is enabled"
 msgstr ""
 
-#: iam/sso/models.py:78
+#: iam/sso/models.py:77
+msgid "Force SSO Login"
+msgstr ""
+
+#: iam/sso/models.py:80
 msgid "provider"
 msgstr ""
 
-#: iam/sso/models.py:82
+#: iam/sso/models.py:84
 msgid "provider ID"
 msgstr ""
 
-#: iam/sso/models.py:86
+#: iam/sso/models.py:88
 msgid "name"
 msgstr ""
 
-#: iam/sso/models.py:88
+#: iam/sso/models.py:90
 msgid "client id"
 msgstr ""
 
-#: iam/sso/models.py:90
+#: iam/sso/models.py:92
 msgid "App ID, or consumer key"
 msgstr ""
 
-#: iam/sso/models.py:94
+#: iam/sso/models.py:96
 msgid "secret key"
 msgstr ""
 
-#: iam/sso/models.py:97
+#: iam/sso/models.py:99
 msgid "API secret, client secret, or consumer secret"
 msgstr ""
 
-#: iam/sso/models.py:100
+#: iam/sso/models.py:102
 msgid "key"
 msgstr ""
 
-#: iam/sso/models.py:100
+#: iam/sso/models.py:102
 msgid "Key"
 msgstr ""
 
-#: iam/views.py:128
+#: iam/views.py:282
 msgid "CISO Assistant: Password Reset"
 msgstr "CISO Assistant : réinitialisation de mot de passe"
 
-#: tprm/models.py:20
+#: tprm/models.py:22
 msgid "Owned folders"
 msgstr ""
 
-#: tprm/models.py:28
+#: tprm/models.py:30
 msgid "Entities"
 msgstr ""
 
-#: tprm/models.py:42
+#: tprm/models.py:44
 msgid "Blocker"
 msgstr ""
 
-#: tprm/models.py:43
+#: tprm/models.py:45
 msgid "Warning"
 msgstr ""
 
-#: tprm/models.py:44
+#: tprm/models.py:46
 msgid "Ok"
 msgstr ""
 
-#: tprm/models.py:45
+#: tprm/models.py:47
 msgid "Not applicable"
 msgstr ""
 
-#: tprm/models.py:47 tprm/models.py:130
+#: tprm/models.py:49 tprm/models.py:132
 msgid "Criticality"
 msgstr ""
 
-#: tprm/models.py:48
+#: tprm/models.py:50
 msgid "Penetration"
 msgstr ""
 
-#: tprm/models.py:49
+#: tprm/models.py:51
 msgid "Dependency"
 msgstr ""
 
-#: tprm/models.py:50
+#: tprm/models.py:52
 msgid "Maturity"
 msgstr ""
 
-#: tprm/models.py:51
+#: tprm/models.py:53
 msgid "Trust"
 msgstr ""
 
-#: tprm/models.py:55
+#: tprm/models.py:57
 msgid "Representative"
 msgstr ""
 
-#: tprm/models.py:66 tprm/models.py:136
+#: tprm/models.py:68 tprm/models.py:146
 msgid "Solutions"
 msgstr ""
 
-#: tprm/models.py:77
+#: tprm/models.py:79
 msgid "Conclusion"
 msgstr ""
 
-#: tprm/models.py:83
+#: tprm/models.py:85
 msgid "Entity assessment"
 msgstr ""
 
-#: tprm/models.py:84
+#: tprm/models.py:86
 msgid "Entity assessments"
 msgstr ""
 
-#: tprm/models.py:119
+#: tprm/models.py:121
 msgid "Provider entity"
 msgstr ""
 
-#: tprm/models.py:125
+#: tprm/models.py:127
 msgid "Recipient entity"
 msgstr ""
 
-#: tprm/models.py:135
+#: tprm/models.py:136
+msgid "Related assets"
+msgstr ""
+
+#: tprm/models.py:138
+msgid "Assets related to the solution"
+msgstr ""
+
+#: tprm/models.py:145
 msgid "Solution"
 msgstr ""
 
-#: tprm/serializers.py:74
+#: tprm/serializers.py:92
 msgid "Framework required"
 msgstr ""
 
