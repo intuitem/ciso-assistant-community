@@ -59,7 +59,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         default=dict,
         help_text=_(
-            "Risk tolerance points and curve data. Expected format: {'points': [{'probability': float, 'acceptable_loss': float}], 'curve_data': {'loss_values': [...], 'probability_values': [...]}}"
+            "Risk tolerance points and curve data. Expected format: {'points': {'point1': {'probability': float, 'acceptable_loss': float}, 'point2': {'probability': float, 'acceptable_loss': float}}, 'curve_data': {'loss_values': [...], 'probability_values': [...]}}"
         ),
     )
     distribution_model = models.CharField(
