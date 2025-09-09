@@ -130,8 +130,8 @@
 					{form}
 					field="risk_tolerance.points.point1.probability"
 					label="Point 1 - Probability"
-					min={0.001}
-					max={0.999}
+					min={0.01}
+					max={0.99}
 					step={0.01}
 					helpText="Probability value (0.01-0.99)"
 				/>
@@ -149,8 +149,8 @@
 					{form}
 					field="risk_tolerance.points.point2.probability"
 					label="Point 2 - Probability"
-					min={0.001}
-					max={0.999}
+					min={0.01}
+					max={0.99}
 					step={0.01}
 					helpText="Probability value (0.01-0.99)"
 				/>

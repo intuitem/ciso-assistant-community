@@ -691,14 +691,14 @@ export const quantitativeRiskStudySchema = z.object({
 				.object({
 					point1: z
 						.object({
-							probability: z.number().min(0.001).max(0.999).optional(),
+							probability: z.number().min(0.01).max(0.99).optional(),
 							acceptable_loss: z.number().min(1).optional()
 						})
 						.default({ probability: 0.99 })
 						.optional(),
 					point2: z
 						.object({
-							probability: z.number().min(0.001).max(0.909).optional(),
+							probability: z.number().min(0.01).max(0.99).optional(),
 							acceptable_loss: z.number().min(1).optional()
 						})
 						.optional()
