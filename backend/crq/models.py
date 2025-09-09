@@ -54,7 +54,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="quantitative_risk_study_reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
-    risk_appetite = models.JSONField(null=True, blank=True, default=dict)
+    risk_tolerance = models.JSONField(null=True, blank=True, default=dict)
     distribution_model = models.CharField(
         max_length=100,
         choices=Distribution_model.choices,
@@ -214,6 +214,10 @@ class QuantitativeRiskHypothesis(
     parameters = models.JSONField(blank=True, null=True, default=dict)
     simulation_data = models.JSONField(blank=True, null=True, default=dict)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    is_simulation_fresh = models.BooleanField(
+        verbose_name=_("Is simulation fresh"), default=False
+    )
 
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
 
@@ -421,6 +425,8 @@ class QuantitativeRiskHypothesis(
         """
         Calculate Return on Controls (ROC) for residual hypotheses.
 
+        reduction in expected loss is the diff between the current and the residual ALE
+
         ROC = (Current ALE - Residual ALE - Treatment Cost) / Treatment Cost
 
         Only applies to residual hypotheses. Returns None if:
@@ -473,7 +479,7 @@ class QuantitativeRiskHypothesis(
                 return "Cannot calculate ROC"
 
         # Format as percentage
-        return f"{roc_value * 100:.1f}%"
+        return f"{roc_value * 100:.0f}%"
 
     @property
     def roc_interpretation(self):
