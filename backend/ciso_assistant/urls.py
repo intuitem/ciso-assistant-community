@@ -38,3 +38,6 @@ urlpatterns = [
     path("serdes/", include("serdes.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
 ]
+
+
+urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
