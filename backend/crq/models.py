@@ -69,6 +69,57 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Distribution model"),
     )
 
+    def __str__(self):
+        return f"{self.name}"
+
+    def get_risk_tolerance_display(self):
+        """Return human-readable format of risk tolerance points"""
+        if not self.risk_tolerance or not self.risk_tolerance.get("points"):
+            return "Not configured"
+
+        # Get currency from global settings
+        from global_settings.models import GlobalSettings
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        points = self.risk_tolerance["points"]
+        display_parts = []
+
+        # Handle point1
+        if "point1" in points and isinstance(points["point1"], dict):
+            point1 = points["point1"]
+            prob = point1.get("probability")
+            loss = point1.get("acceptable_loss")
+            if prob is not None:
+                prob_display = f"{prob * 100:.1f}%"
+                if loss is not None:
+                    loss_display = f"{loss:,.0f} {currency}"
+                else:
+                    loss_display = "N/A"
+                display_parts.append(
+                    f"Point 1: {prob_display} probability, {loss_display} acceptable loss"
+                )
+
+        # Handle point2
+        if "point2" in points and isinstance(points["point2"], dict):
+            point2 = points["point2"]
+            prob = point2.get("probability")
+            loss = point2.get("acceptable_loss")
+            if prob is not None:
+                prob_display = f"{prob * 100:.1f}%"
+                if loss is not None:
+                    loss_display = f"{loss:,.0f} {currency}"
+                else:
+                    loss_display = "N/A"
+                display_parts.append(
+                    f"Point 2: {prob_display} probability, {loss_display} acceptable loss"
+                )
+
+        return " | ".join(display_parts) if display_parts else "Not configured"
+
     class Meta:
         verbose_name = _("Quantitative Risk Study")
         verbose_name_plural = _("Quantitative Risk Studies")

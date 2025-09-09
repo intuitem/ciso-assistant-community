@@ -83,6 +83,9 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    risk_tolerance_display = serializers.CharField(
+        source="get_risk_tolerance_display", read_only=True
+    )
 
     class Meta:
         model = QuantitativeRiskStudy

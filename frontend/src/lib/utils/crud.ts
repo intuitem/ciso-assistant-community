@@ -1444,6 +1444,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'status' },
+			{ field: 'risk_tolerance_display' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'observation' }
