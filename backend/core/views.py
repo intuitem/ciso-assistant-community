@@ -376,8 +376,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def _get_optimized_object_data(self, queryset):
         """
-        Calculates objectives and descendants for a queryset of assets
-        in a query-efficient manner.
+        Calculate folder full paths for objects in the queryset in 1 DB request.
         """
         initial_objects = list(queryset)
         if not initial_objects:
@@ -387,7 +386,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
             path = []
-            queue = deque([obj.folder.id])
+            if hasattr(obj, "folder"):
+                queue = deque([obj.folder.id])
+            elif hasattr(obj, "parent_folder") and obj.parent_folder:
+                queue = deque([obj.parent_folder.id])
+            else:
+                continue
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
