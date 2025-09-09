@@ -1277,16 +1277,32 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     campaign = FieldsRelatedField()
-    framework = FieldsRelatedField(
-        [
-            "id",
-            "min_score",
-            "max_score",
-            "implementation_groups_definition",
-            "ref_id",
-            "reference_controls",
-        ]
-    )
+    framework = serializers.SerializerMethodField()
+
+    def get_framework(self, obj):
+        from .serializer_fields import FieldsRelatedField
+
+        # Include reference_controls only for detail view
+        request = self.context.get("request")
+        # maybe we can find a better way for this condition
+        is_list_view = request and (
+            "limit" in request.query_params or "offset" in request.query_params
+        )
+
+        if is_list_view:
+            fields = ["id"]
+        else:
+            fields = [
+                "id",
+                "min_score",
+                "max_score",
+                "implementation_groups_definition",
+                "ref_id",
+                "reference_controls",
+            ]
+
+        return FieldsRelatedField(fields).to_representation(obj.framework)
+
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
