@@ -24,7 +24,7 @@ def update_audits_perimeter(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("tprm", "0005_solution_assets"),
+        ("tprm", "0006_entityassessment_is_locked"),
     ]
 
     operations = [
