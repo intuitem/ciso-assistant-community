@@ -274,7 +274,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
