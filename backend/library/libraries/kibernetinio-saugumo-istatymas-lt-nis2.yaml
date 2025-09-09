@@ -1,5 +1,5 @@
 convert_library_version: "v2"
-urn: urn:intuitem:risk:library:kibernetinio-saugumo-istatymas
+urn: urn:ovidijus.balkauskas:risk:library:kibernetinio-saugumo-istatymas
 locale: lt
 ref_id: TAP-24-1377
 name: Lietuvos Respublikos kibernetinio saugumo įstatymo įgyvendinimas (NIS2)
@@ -8,170 +8,167 @@ copyright: Lietuvos Respublikos Vyriausybė
 version: 1
 publication_date: 2025-09-08
 provider: Lietuvos Respublikos Vyriausybė
-packager: ciso-assistant-community
-dependencies:
-  - urn:intuitem:risk:library:nis2-directive
-  - urn:intuitem:risk:library:doc-pol
+packager: ovidijus.balkauskas
 objects:
   reference_controls:
     # Policy Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
       ref_id: LT.POL.1
       name: Kibernetinio saugumo politikos dokumentas
       category: policy
       description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi patvirtinti tinklų ir informacinių sistemų kibernetinio saugumo politikos dokumentą, kuriame turi būti nustatyta veiklos užtikrinant kibernetinį saugumą tikslai, kibernetinį saugumą reglamentuojančių teisės aktų sąrašas, kiti politikos dokumentai, darbuotojų įsipareigojimai ir reguliarios peržiūros reikalavimai.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.pol.risk-management
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.risk-management
       ref_id: LT.POL.2
       name: Rizikos vertinimo ir valdymo tvarka
       category: policy
       description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi nustatyti kibernetinio saugumo subjekto tinklų ir informacinių sistemų rizikos vertinimo ir valdymo tvarką, apimančią už rizikos vertinimą atsakingų asmenų paskyrimą, vertinimo procesus, priimtiną rizikos lygį ir periodišumo reikalavimus.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.pol.business-continuity
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.business-continuity
       ref_id: LT.POL.3
       name: Veiklos tęstinumo valdymo planas
       category: policy
       description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi patvirtinti tinklų ir informacinių sistemų veiklos tęstinumo valdymo planą, kuriame nurodomi taikymo kriterijai, veiklos kriterijai, atsakingi asmenys, valdymo grupės reikalavimai, atstatymo planai, išbandymo reikalavimai ir atsarginių kopijų parametrai.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.pol.incident-response
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.incident-response
       ref_id: LT.POL.4
       name: Kibernetinių incidentų valdymo planas
       category: policy
       description: Kibernetinio saugumo subjektas kibernetinių incidentų valdymą organizuoja pagal kibernetinio saugumo subjekto patvirtintą kibernetinių incidentų valdymo planą, kuris privalo apimti proceso dalyvius, etapus, veiksmus, terminus ir rezultatus.
 
     # Process Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.risk-assessment
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.risk-assessment
       ref_id: LT.PROC.1
       name: Rizikos vertinimo vykdymas
       category: process
       description: Rizikos vertinimas turi būti atliekamas ne rečiau kaip kartą per metus, įvykus esminiams organizaciniams pokyčiams, taip pat įvykus dideliam kibernetiniam incidentui. Atlikus rizikos vertinimą, turi būti parengta rizikos vertinimo ataskaita ir rizikos valdymo planas.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.personnel-mgmt
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.personnel-mgmt
       ref_id: LT.PROC.2
       name: Kibernetinio saugumo personalo valdymas
       category: process
       description: Kibernetinio saugumo subjekto vadovas ar jo įgaliotas asmuo turi paskirti už kibernetinį saugumą atsakingus asmenis ir užtikrinti, kad NKSC būtų informuotas apie paskirtus atsakingus asmenis per KSIS. Kibernetinio saugumo vadovas ir saugos įgaliotinis negali vykdyti funkcijų, susijusių su tinklų ar informacinių sistemų administravimu.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.incident-handling
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.incident-handling
       ref_id: LT.PROC.3
       name: Kibernetinių incidentų valdymo vykdymas
       category: process
       description: Kibernetinio saugumo subjekto Saugumo operacijų centras apie kibernetinius incidentus informuoja NKSC, juos registruodamas Kibernetinio saugumo informacinės sistemos posistemyje – Nacionalinėje kibernetinių incidentų valdymo platformoje. Apie didelius kibernetinius incidentus informuojama per 24 valandas, pateikiant pradinį vertinimą, per 72 valandas – išsamų poveikio vertinimą, per vieną mėnesį – galutinę ataskaitą.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.audit-logging
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.audit-logging
       ref_id: LT.PROC.4
       name: Auditui skirtų duomenų registravimas
       category: process
       description: Turi būti fiksuojami žurnaliniai įrašai apie naudotojų prisijungimus, duomenų pakeitimus, sistemos konfigūracijos pakeitimus ir kitus saugumo požiūriu reikšmingus įvykius. Žurnaliniai įrašai turi būti saugomi ne trumpiau kaip 90 kalendorinių dienų ir analizuojami ne rečiau kaip kartą per mėnesį.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.nksc-reporting
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.nksc-reporting
       ref_id: LT.PROC.5
       name: Ataskaitos NKSC teikimas
       category: process
       description: Kibernetinio saugumo subjektai turi pateikti ir atnaujinti kibernetinio saugumo politikos dokumento patvirtinimo duomenis NKSC į KSIS ne vėliau kaip per 5 darbo dienas nuo dokumento patvirtinimo. Taip pat teikiami rizikos vertinimo ataskaitos ir veiklos tęstinumo valdymo plano išbandymo ataskaitos patvirtinimo duomenys.
 
     # Technical Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.network-segmentation
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.network-segmentation
       ref_id: LT.TECH.1
       name: Tinklų segmentavimas ir prieigos kontrolė
       category: technical
       description: Kibernetinio saugumo subjekto vidinės tinklų ir informacinės sistemos turi būti atskirtos nuo viešųjų ryšių tinklų naudojant saugasienį. Saugasienės saugumo taisyklės turi būti nuolat peržiūrimos ir prireikus atnaujinamos, atliekant detalią taisyklių analizę ne rečiau kaip kartą per 6 mėnesius.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.authentication
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.authentication
       ref_id: LT.TECH.2
       name: Autentifikavimo ir autorizavimo sistemos
       category: technical
       description: Turi būti įdiegtos ir veikti autentifikavimo ir autorizavimo sistemos, užtikrinančios, kad tik įgalioti naudotojai galėtų prisijungti prie tinklų ir informacinių sistemų. Naudotojų teisių valdymas turi būti centralizuotas ir reguliariai peržiūrimas.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.monitoring
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.monitoring
       ref_id: LT.TECH.3
       name: Saugumo stebėsena ir aptikimas
       category: technical
       description: Turi būti įdiegtos ir veikti įsilaužimo aptikimo sistemos, kurios stebėtų į tinklą ir informacinę sistemą įeinantį ir iš jos išeinantį duomenų srautą. Neįprasta veikla turi būti užfiksuojama žurnaliniuose įrašuose ir automatizuotomis priemonėmis sukuriamas automatinis pranešimas.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.backup-recovery
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.backup-recovery
       ref_id: LT.TECH.4
       name: Atsarginių kopijų ir atstatymo sistemos
       category: technical
       description: Kibernetinio saugumo subjektas turi nustatyti atsarginių duomenų kopijų kūrimo, saugojimo ir duomenų atkūrimo iš jų reikalavimus, apibrėžti atsarginio kopijavimo mastą ir dažnį, atsižvelgdamas į veiklos tęstinumo valdymo plane nustatytus atstatymo reikalavimus (RTO, RPO).
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.availability
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.availability
       ref_id: LT.TECH.5
       name: Sistemų prieinamumo užtikrinimas
       category: technical
       description: Turi būti užtikrintas kibernetinio saugumo subjekto įvertintų kaip kritinių veiklos tęstinumui būtinų tinklų ir informacinių sistemų prieinamumas ne mažiau kaip 96 proc. laiko svarbiems subjektams ir ne mažiau kaip 99 proc. laiko esminiams subjektams.
 
     # Physical Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.phys.access-control
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.phys.access-control
       ref_id: LT.PHYS.1
       name: Fizinės prieigos kontrolė
       category: physical
       description: Turi būti užtikrinta fizinė prieigos kontrolė prie tinklų ir informacinių sistemų komponentų, serverių patalpų ir duomenų centrų. Prieiga turi būti suteikiama tik įgaliotiems asmenims ir fiksuojama specialiuose žurnaliniuose įrašuose.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.phys.secure-areas
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.phys.secure-areas
       ref_id: LT.PHYS.2
       name: Saugių sričių užtikrinimas
       category: physical
       description: Kritinės svarbos tinklų ir informacinių sistemų komponentai turi būti laikomi specialiai įrengtose saugiose srityse, apsaugotose nuo fizinio poveikio, aplinkos veiksnių ir neteisėtos prieigos.
 
     # Detailed Logging Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.time-sources
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.time-sources
       ref_id: LT.TECH.6
       name: Laiko sinchronizacija
       category: technical
       description: Tinklai ir informacinės sistemos turi turėti ne mažiau kaip 2 laiko šaltinius, kad užtikrintų tikslų laiko žymėjimą žurnaliniuose įrašuose.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.log-analysis
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.log-analysis
       ref_id: LT.TECH.7
       name: Žurnalų analizė ir peržiūra
       category: technical
       description: Žurnalinių įrašų duomenys turi būti analizuojami įgalioto asmens ne rečiau kaip kartą per mėnesį ir apie analizės rezultatų nuokrypius informuojamas kibernetinio saugumo vadovas ir (ar) saugos įgaliotinis.
 
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.log-protection
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.log-protection
       ref_id: LT.TECH.8
       name: Žurnalų apsauga ir saugojimas
       category: technical
       description: Žurnaliniai įrašai turi būti saugomi ne trumpiau kaip 90 kalendorinių dienų specializuotoje tam pritaikytoje techninėje ar programinėje įrangoje. Draudžiama žurnalinius įrašus trinti, keisti, kol nesibaigia žurnalinių įrašų saugojimo terminas.
 
     # Supply Chain Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.supply-chain
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.supply-chain
       ref_id: LT.PROC.6
       name: Tiekimo grandinės saugumo valdymas
       category: process
       description: Kibernetinio saugumo subjektas turi įvertinti ir valdyti su tiekimo grandine susijusią riziką, įskaitant trečiųjų šalių paslaugų teikėjų kibernetinio saugumo įvertinimą ir sutarčių saugumo reikalavimus.
 
     # Acquisition and Development Controls
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.proc.secure-development
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.secure-development
       ref_id: LT.PROC.7
       name: Saugus sistemų kūrimas ir plėtojimas
       category: process
       description: Tinklų ir informacinių sistemų įsigijimas, plėtojimas ir priežiūra turi būti vykdomi atsižvelgiant į saugumo reikalavimus, įskaitant spragų valdymą ir atskleidimą.
 
     # Vulnerability Management
-    - urn: urn:intuitem:risk:function:nis2-lt:lt.tech.vulnerability-mgmt
+    - urn: urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.vulnerability-mgmt
       ref_id: LT.TECH.9
       name: Spragų valdymas ir atskleidimas
       category: technical
       description: Turi būti nustatyta tvarka saugumo spragų identifikavimui, vertinimui, šalinimui ir atskleisimui, užtikrinant laiku atliekamus sistemos atnaujinimus ir pataisas.
 
   framework:
-    urn: urn:intuitem:risk:framework:kibernetinio-saugumo-istatymas
+    urn: urn:ovidijus.balkauskas:risk:framework:kibernetinio-saugumo-istatymas
     ref_id: TAP-24-1377
     name: Lietuvos Respublikos kibernetinio saugumo įstatymo įgyvendinimas
     description: Lietuvos Respublikos Vyriausybės 2024 m. lapkričio 6 d. nutarimas Nr. 945 dėl Lietuvos Respublikos kibernetinio saugumo įstatymo įgyvendinimo
     implementation_groups_definition:
+      - ref_id: Common
+        name: Bendri reikalavimai
+        description: Visiems kibernetinio saugumo subjektams taikomi reikalavimai
       - ref_id: Essential
         name: Esminiai subjektai
         description: Reikalavimai esminiams kibernetinio saugumo subjektams
       - ref_id: Important
         name: Svarbūs subjektai
         description: Reikalavimai svarbiems kibernetinio saugumo subjektams
-      - ref_id: Common
-        name: Bendri reikalavimai
-        description: Visiems kibernetinio saugumo subjektams taikomi reikalavimai
     requirement_nodes:
       # Top Level Structure
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:governance
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:governance
         assessable: false
         depth: 1
         name: Kibernetinio saugumo valdymas
@@ -179,7 +176,7 @@ objects:
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
         assessable: false
         depth: 1
         name: Rizikos valdymas
@@ -187,7 +184,7 @@ objects:
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:organizational
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:organizational
         assessable: false
         depth: 1
         name: Organizaciniai reikalavimai
@@ -195,7 +192,7 @@ objects:
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:technical
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:technical
         assessable: false
         depth: 1
         name: Techniniai reikalavimai
@@ -203,7 +200,7 @@ objects:
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:business-continuity
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:business-continuity
         assessable: false
         depth: 1
         name: Veiklos tęstinumas
@@ -211,7 +208,7 @@ objects:
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
         assessable: false
         depth: 1
         name: Incidentų valdymas
@@ -220,274 +217,274 @@ objects:
           - Common
 
       # Cybersecurity Governance (Sections 4-6)
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:governance
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:governance
         ref_id: "4"
         name: Kibernetinio saugumo politikos dokumentas
         description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi patvirtinti tinklų ir informacinių sistemų kibernetinio saugumo politikos dokumentą, kuriame turi būti nustatyta veiklos užtikrinant kibernetinį saugumą tikslai, kibernetinį saugumą reglamentuojančių teisės aktų sąrašas, kiti politikos dokumentai, darbuotojų įsipareigojimai ir reguliarios peržiūros reikalavimai.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4.1
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4.1
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
         ref_id: "4.1"
         name: Veiklos tikslai
         description: Politikos dokumente turi būti nustatyta veiklos užtikrinant kibernetinį saugumą tikslai, suformuluoti pagal Kibernetinio saugumo įstatyme nustatytus kibernetinio saugumo principus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4.2
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4.2
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
         ref_id: "4.2"
         name: Taikytini teisės aktai
         description: Politikos dokumente turi būti pateiktas kibernetinį saugumą reglamentuojančių teisės aktų, kuriais vadovaujamasi, sąrašas.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4.3
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4.3
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
         ref_id: "4.3"
         name: Papildomi politikos dokumentai
         description: Politikos dokumente turi būti nurodyti kiti kibernetinio saugumo politikos dokumentai, kuriais vadovaujamasi įgyvendinant tinklų ir informacinių sistemų saugumo politiką.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4.4
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4.4
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
         ref_id: "4.4"
         name: Darbuotojų įsipareigojimai
         description: Politikos dokumente turi būti nustatyti kibernetinio saugumo politikos įsipareigojimai, kurių turi laikytis darbuotojai ir trečiosios šalys.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4.5
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4.5
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:4
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
         ref_id: "4.5"
         name: Reguliarios peržiūros
         description: Politikos dokumente turi būti nustatyti įsipareigojimai reguliariai, ne rečiau kaip kartą per metus arba pasikeitus aplinkybėms, peržiūrėti ir atnaujinti kibernetinio saugumo politikos dokumentus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.cybersec-policy
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.cybersec-policy
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:5
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:5
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:governance
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:governance
         ref_id: "5"
         name: Duomenų teikimas NKSC
         description: Kibernetinio saugumo subjektai turi pateikti ir (ar) atnaujinti kibernetinio saugumo politikos dokumento (-ų) patvirtinimo duomenis, nurodydami dokumento pavadinimą, patvirtinimo datą ir registracijos numerį, NKSC į KSIS ne vėliau kaip per 5 darbo dienas nuo šio dokumento (-ų) patvirtinimo ir (ar) pakeitimo dienos.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.nksc-reporting
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.nksc-reporting
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:6
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:6
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:governance
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:governance
         ref_id: "6"
         name: Dokumentų pateikimas patikrinimo metu
         description: NKSC, atlikdamas kibernetinio saugumo subjekto patikrinimą, turi teisę pareikalauti pateikti dokumentų kopijas į KSIS ne vėliau kaip per 5 darbo dienas nuo NKSC prašymo gavimo dienos.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.nksc-reporting
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.nksc-reporting
 
       # Risk Management (Sections 7-15)
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:7
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:7
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
         ref_id: "7"
         name: Rizikos vertinimo ir valdymo tvarka
         description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi nustatyti kibernetinio saugumo subjekto tinklų ir informacinių sistemų rizikos vertinimo ir valdymo tvarką, apimančią už rizikos vertinimą, rizikos vertinimo proceso priežiūrą bei nuolatinį tobulinimą atsakingo asmens arba asmenų paskyrimą, vertinimo ir valdymo procesus, priimtiną kibernetinio saugumo subjektui rizikos lygį, rizikos vertinimo periodiškumo reikalavimus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.risk-management
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.risk-management
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:8
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:8
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
         ref_id: "8"
         name: Rizikos vertinimo proceso elementai
         description: Rizikos vertinimo ir valdymo procesas turi apimti bent šiuos elementus - tinklų ir informacinių sistemų identifikavimą ir klasifikavimą, rizikos analizę, apimančią grėsmių ir spragų analizę ir vertinimą, galimą poveikį, rizikos apskaičiavimą, rizikos valdymo priemonių pasirinkimą.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.risk-assessment
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.risk-assessment
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:9
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:9
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
         ref_id: "9"
         name: Rizikos vertinimo periodiškumas
         description: Rizikos vertinimas turi būti atliekamas ne rečiau kaip kartą per metus, įvykus esminiams kibernetinio saugumo subjekto organizaciniams ar kitiems reikšmingiems pokyčiams, taip pat įvykus dideliam kibernetiniam incidentui.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.risk-assessment
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.risk-assessment
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:10
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:10
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:risk-management
         ref_id: "10"
         name: Rizikos vertinimo ataskaita ir valdymo planas
         description: Atlikus rizikos vertinimą, kibernetinio saugumo subjektai turi parengti rizikos vertinimo ataskaitą ir, jei rizikos vertinimo metu yra nustatoma šalinumų trūkumų, rizikos valdymo planą, kuriuos patvirtina kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.risk-assessment
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.risk-assessment
 
       # Organizational Requirements (Sections 16-26)
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:16
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:16
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:organizational
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:organizational
         ref_id: "16"
         name: Atsakingų asmenų paskyrimas
         description: Kibernetinio saugumo subjekto vadovas ar jo įgaliotas asmuo turi paskirti už kibernetinį saugumą atsakingus asmenis, nurodytus Kibernetinio saugumo įstatymo 15 straipsnyje, ir kitus už Aprašo reikalavimų įgyvendinimą atsakingus asmenis.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.personnel-mgmt
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.personnel-mgmt
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:17
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:17
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:organizational
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:organizational
         ref_id: "17"
         name: Informavimas apie atsakingus asmenis
         description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi užtikrinti, kad NKSC būtų informuotas apie paskirtus už kibernetinį saugumą atsakingus asmenis per KSIS ir būtų pateikta KSIS nuostatuose nurodyto turinio kontaktinė informacija.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.personnel-mgmt
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.personnel-mgmt
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:19
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:19
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:organizational
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:organizational
         ref_id: "19"
         name: Funkcijų atskyrimas
         description: Kibernetinio saugumo vadovas ir (ar) saugos įgaliotinis negali vykdyti funkcijų, susijusių su tinklų ar informacinių sistemų administravimu ar kitomis pareigybėmis, susijusiomis su techninės kompiuterinės įrangos ar programinės įrangos priežiūra ir valdymu.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.personnel-mgmt
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.personnel-mgmt
 
       # Technical Requirements (Section 26)
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         assessable: false
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:technical
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:technical
         ref_id: "26"
         name: Techniniai saugumo reikalavimai
         description: Kibernetinio saugumo subjektams taikomi techniniai reikalavimai
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26.1
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.1
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "26.1"
         name: Žurnalų registravimas
         description: Turi būti fiksuojami žurnaliniai įrašai apie naudotojų prisijungimus prie tinklų ir informacinės sistemos, duomenų pakeitimus, sistemos konfigūracijos pakeitimus ir kitus saugumo požiūriu reikšmingus įvykius.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.audit-logging
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.audit-logging
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26.4
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.4
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "26.4"
         name: Tinklo sąsajos stebėsena
         description: Priemonės, naudojamos vidinės tinklų ir informacinės sistemos sąsajoje su viešųjų elektroninių ryšių tinklu, turi būti nustatytos taip, kad žurnaliniuose įrašuose fiksuotų visus įvykius, susijusius su įeinančiais ir išeinančiais duomenų srautais.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.monitoring
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.monitoring
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26.12
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.12
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "26.12"
         name: Įsibrovimo aptikimo sistemos
         description: Turi būti įdiegtos ir veikti įsibrovimo aptikimo sistemos, kurios stebėtų į tinklą ir informacinę sistemą įeinantį ir iš jos išeinantį duomenų srautą.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.monitoring
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.monitoring
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26.14
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.14
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "26.14"
         name: Saugasienės
         description: Kibernetinio saugumo subjekto vidinės tinklų ir informacinės sistemos turi būti atskirtos nuo viešųjų ryšių tinklų naudojant saugasienį.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.network-segmentation
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.network-segmentation
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26.15
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.15
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "26.15"
         name: Saugasienės taisyklių peržiūra
         description: Saugasienės saugumo taisyklės turi būti nuolat peržiūrimos ir prireikus atnaujinamos. Būtina atlikti detalią taisyklių analizę ne rečiau kaip kartą per 6 mėnesius.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.network-segmentation
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.network-segmentation
 
       # Detailed Logging Requirements (Table 1)
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         assessable: false
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "LOG"
         name: Žurnalinių įrašų registravimas
         description: Detalūs žurnalinių įrašų registravimo reikalavimai pagal 1 lentelę
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-1.1
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-1.1
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "1.1"
         name: Sistemos komponentų įjungimas ir išjungimas
         description: Turi būti fiksuojami tinklų ir informacinės sistemos komponentų (serverių, virtualių serverių, saugasienių, maršrutizatorių, komutatorių ir kitų subjekto identifikuotų svarbių komponentų) įjungimas, išjungimas ar perkrovimas.
@@ -495,12 +492,12 @@ objects:
           - Common
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.audit-logging
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.audit-logging
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-1.2
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-1.2
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "1.2"
         name: Autentifikavimo įvykiai
         description: Turi būti fiksuojami naudotojų ir administratorių autentifikavimo įvykiai.
@@ -508,12 +505,12 @@ objects:
           - Common
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.audit-logging
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.audit-logging
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-1.3
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-1.3
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "1.3"
         name: Prieigos teisių pakeitimai
         description: Turi būti fiksuojami naudotojų, administratorių paskyrų sukūrimas, prieigos prie tinklų ir informacinių sistemų pakeitimai.
@@ -521,12 +518,12 @@ objects:
           - Common
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.audit-logging
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.audit-logging
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-1.4
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-1.4
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "1.4"
         name: Administratorių veiksmai
         description: Turi būti fiksuojami administratorių atliekami veiksmai.
@@ -534,12 +531,12 @@ objects:
           - Common
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.audit-logging
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.audit-logging
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-time-sources
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-time-sources
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "2"
         name: Laiko šaltiniai
         description: Tinklai ir informacinės sistemos turi turėti ne mažiau kaip 2 laiko šaltinius.
@@ -547,12 +544,12 @@ objects:
           - Common
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.time-sources
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.time-sources
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-retention
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-retention
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "7"
         name: Žurnalų saugojimo terminas
         description: Žurnaliniai įrašai turi būti saugomi ne trumpiau kaip 90 kalendorinių dienų.
@@ -560,195 +557,195 @@ objects:
           - Common
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.log-protection
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.log-protection
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-analysis
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-analysis
         assessable: true
         depth: 4
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:log-events
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:log-events
         ref_id: "11"
         name: Žurnalų analizė
         description: Žurnalinių įrašų duomenys turi būti analizuojami įgalioto asmens ne rečiau kaip kartą per mėnesį ir apie analizės rezultatų nuokrypius informuojamas kibernetinio saugumo vadovas.
         implementation_groups:
           - Essential
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.log-analysis
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.log-analysis
 
       # Supply Chain and Acquisition Requirements
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:supply-chain
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:supply-chain
         assessable: false
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:technical
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:technical
         ref_id: "SC"
         name: Tiekimo grandinės saugumas
         description: Tiekimo grandinės saugumo reikalavimai
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:sc-assessment
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sc-assessment
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:supply-chain
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:supply-chain
         ref_id: "SC.1"
         name: Tiekėjų saugumo vertinimas
         description: Kibernetinio saugumo subjektas turi įvertinti trečiųjų šalių paslaugų teikėjų kibernetinio saugumo lygį ir nustatyti sutarčių saugumo reikalavimus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.supply-chain
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.supply-chain
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:acquisition
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:acquisition
         assessable: false
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:technical
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:technical
         ref_id: "ACQ"
         name: Sistemų įsigijimas ir plėtojimas
         description: Tinklų ir informacinių sistemų įsigijimo, plėtojimo ir priežiūros saugumo reikalavimai
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:acq-security
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:acq-security
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:acquisition
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:acquisition
         ref_id: "ACQ.1"
         name: Saugus sistemų kūrimas
         description: Tinklų ir informacinių sistemų įsigijimas, plėtojimas ir priežiūra turi būti vykdomi atsižvelgiant į saugumo reikalavimus, įskaitant spragų valdymą.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.secure-development
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.secure-development
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:vulnerability-mgmt
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:vulnerability-mgmt
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:acquisition
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:acquisition
         ref_id: "VULN.1"
         name: Spragų valdymas
         description: Turi būti nustatyta tvarka saugumo spragų identifikavimui, vertinimui, šalinimui ir atskleidimui, užtikrinant laiku atliekamus sistemos atnaujinimus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.vulnerability-mgmt
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.vulnerability-mgmt
 
       # Physical Security Requirements
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:physical
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:physical
         assessable: false
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:technical
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:technical
         ref_id: "PHYS"
         name: Fizinis saugumas
         description: Fizinio saugumo reikalavimai
         implementation_groups:
           - Common
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:phys-access
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:phys-access
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:physical
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:physical
         ref_id: "PHYS.1"
         name: Fizinės prieigos kontrolė
         description: Turi būti užtikrinta fizinė prieigos kontrolė prie tinklų ir informacinių sistemų komponentų, serverių patalpų ir duomenų centrų.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.phys.access-control
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.phys.access-control
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:secure-areas
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:secure-areas
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:physical
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:physical
         ref_id: "PHYS.2"
         name: Saugių sričių užtikrinimas
         description: Kritinės svarbos tinklų ir informacinių sistemų komponentai turi būti laikomi specialiai įrengtose saugiose srityse, apsaugotose nuo fizinio poveikio.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.phys.secure-areas
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.phys.secure-areas
 
       # Business Continuity (Sections 27-31)
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:27
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:27
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:business-continuity
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:business-continuity
         ref_id: "27"
         name: Veiklos tęstinumo valdymo planas
         description: Kibernetinio saugumo subjekto vadovas arba jo įgaliotas asmuo turi patvirtinti tinklų ir informacinių sistemų veiklos tęstinumo valdymo planą, kuriame turi būti nurodyta sąlygos, kada pradedamas taikyti planas, veiklos kriterijai, atsakingi asmenys, valdymo grupės reikalavimai, detalus atstatymo planas, veiksmingumo išbandymo reikalavimai ir atsarginių kopijų parametrai.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.business-continuity
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.business-continuity
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:28
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:28
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:business-continuity
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:business-continuity
         ref_id: "28"
         name: Atsarginių kopijų reikalavimai
         description: Kibernetinio saugumo subjektas turi nustatyti atsarginių duomenų kopijų kūrimo, saugojimo ir duomenų atkūrimo iš jų reikalavimus, apibrėžti atsarginio kopijavimo mastą ir dažnį, atsižvelgdamas į veiklos tęstinumo valdymo plane nustatytus tinklų ir informacinių sistemų nustatytus atkūrimo reikalavimus (RTO, RPO).
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.backup-recovery
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.backup-recovery
 
       # Technical Requirements with Entity Differentiation
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:tech-availability-important
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:tech-availability-important
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "16.1"
         name: Sistemų prieinamumas - svarbūs subjektai
         description: Turi būti užtikrintas kibernetinio saugumo subjekto įvertintų kaip kritinių veiklos tęstinumui būtinų tinklų ir informacinių sistemų prieinamumas ne mažiau kaip 96 proc. laiko.
         implementation_groups:
           - Important
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.availability
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.availability
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:tech-availability-essential
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:tech-availability-essential
         assessable: true
         depth: 3
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:26
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
         ref_id: "16.2"
         name: Sistemų prieinamumas - esminiai subjektai
         description: Turi būti užtikrintas kibernetinio saugumo subjekto įvertintų kaip kritinių veiklos tęstinumui būtinų tinklų ir informacinių sistemų prieinamumas ne mažiau kaip 99 proc. laiko.
         implementation_groups:
           - Essential
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.tech.availability
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.tech.availability
 
       # Incident Management
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-planning
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-planning
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
         ref_id: INC.1
         name: Kibernetinių incidentų valdymo planavimas
         description: Kibernetinio saugumo subjektas kibernetinių incidentų valdymą organizuoja pagal kibernetinio saugumo subjekto patvirtintą kibernetinių incidentų valdymo planą. Šis planas privalo apimti proceso dalyvius, etapus, veiksmus, terminus ir rezultatus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.pol.incident-response
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.pol.incident-response
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-reporting
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-reporting
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
         ref_id: INC.2
         name: Incidentų pranešimas NKSC
         description: Kibernetinio saugumo subjekto Saugumo operacijų centras apie kibernetinius incidentus informuoja NKSC, juos registruodamas Kibernetinio saugumo informacinės sistemos posistemyje – Nacionalinėje kibernetinių incidentų valdymo platformoje. Apie didelius kibernetinius incidentus informuojama per nustatytus terminus.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.incident-handling
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.incident-handling
 
-      - urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-major-criteria
+      - urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-major-criteria
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
+        parent_urn: urn:ovidijus.balkauskas:risk:req_node:kibernetinio-saugumo-istatymas:incident-management
         ref_id: INC.3
         name: Didelių incidentų kriterijai
         description: Laikoma, kad įvyko didelis kibernetinis incidentas, kai kibernetinio saugumo subjektas patiria ar gali patirti didelių paslaugų teikimo sutrikimų, didelių finansinių nuostolių arba incidentas paveiks kitus asmenis sukeldamas didelę turtinę ar neturtinę žalą.
         implementation_groups:
           - Common
         reference_controls:
-          - urn:intuitem:risk:function:nis2-lt:lt.proc.incident-handling
+          - urn:ovidijus.balkauskas:risk:function:nis2-lt:lt.proc.incident-handling
