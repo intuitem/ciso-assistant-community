@@ -384,58 +384,25 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return {}
 
         path_results = {}
-        folder_map = {}
-
-        folder_ids = {
-            Folder.get_folder(obj).id
-            for obj in initial_objects
-            if Folder.get_folder(obj) is not None
-        }
-
-        if folder_ids:
-            # Iteratively find all parent folders
-            all_folder_ids = set(folder_ids)
-            level_ids = set(folder_ids)
-            while level_ids:
-                parent_ids = set(
-                    Folder.objects.filter(id__in=level_ids).values_list(
-                        "parent_folder", flat=True
-                    )
-                )
-                parent_ids.discard(None)  # Remove the root's null parent
-
-                new_parent_ids = parent_ids - all_folder_ids
-                if not new_parent_ids:
-                    break
-                all_folder_ids.update(new_parent_ids)
-                level_ids = new_parent_ids
-
-            # Fetch all relevant folder data in one query
-            all_folders = Folder.objects.filter(id__in=all_folder_ids)
-            folder_map = {
-                f.id: {
-                    "id": f.id,
-                    "str": str(f),
-                    "parent_id": f.parent_folder.id if f.parent_folder else None,
-                }
-                for f in all_folders
-            }
-
-        # Build the path for each object
+        folders = {f.id: f for f in Folder.objects.all()}
         for obj in initial_objects:
-            if not Folder.get_folder(obj):
-                path_results[obj.id] = []
-                continue
-
             path = []
-            curr_folder_id = Folder.get_folder(obj).id
-            while curr_folder_id in folder_map:
-                folder_data = folder_map[curr_folder_id]
-                path.append(folder_data)
-                curr_folder_id = folder_data["parent_id"]
-
-            path.reverse()
-            path_results[obj.id] = path[1:] if len(path) > 1 else path
+            queue = deque([obj.folder.id])
+            while queue:
+                folder_id = queue.popleft()
+                folder = folders[folder_id]
+                path.append(
+                    {
+                        "str": str(folder),
+                        "id": folder.id,
+                        "parent_id": folder.parent_folder.id
+                        if folder.parent_folder
+                        else None,
+                    }
+                )
+                if folder.parent_folder:
+                    queue.append(folder.parent_folder.id)
+            path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
         return {
             "paths": path_results,
