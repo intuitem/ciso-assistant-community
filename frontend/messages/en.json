@@ -2179,7 +2179,7 @@
 	"rocDisplay": "ROC",
 	"rocInterpretation": "ROC Interpretation",
 	"rocHelpText": "Return on Controls - calculated as (Current ALE - Residual ALE - Treatment Cost) / Treatment Cost. Only applies to residual hypotheses.",
-	"isSimulationFresh": "Simulation Status",
+	"isSimulationFresh": "Is simulation fresh",
 	"simulationFresh": "Simulation data is up to date",
 	"simulationNotFresh": "Simulation data is outdated - parameters have changed"
 }

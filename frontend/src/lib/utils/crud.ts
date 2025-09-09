@@ -1505,6 +1505,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'quantitative_risk_scenario' },
 			{ field: 'simulation_parameters_display' },
+			{ field: 'is_simulation_fresh' },
 			{ field: 'ale' },
 			{ field: 'treatment_cost' },
 			{ field: 'roc' },

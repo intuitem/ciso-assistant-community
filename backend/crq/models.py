@@ -130,6 +130,21 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         """
         return risk_tolerance_curve(self.risk_tolerance)
 
+    def save(self, *args, **kwargs):
+        """
+        Override save to mark related hypotheses simulation as not fresh when risk_tolerance changes.
+        """
+        # Check if risk_tolerance has changed (only for existing instances)
+        if self.pk:
+            old_instance = QuantitativeRiskStudy.objects.get(pk=self.pk)
+            if old_instance.risk_tolerance != self.risk_tolerance:
+                # Mark all related hypotheses as not fresh
+                QuantitativeRiskHypothesis.objects.filter(
+                    quantitative_risk_scenario__quantitative_risk_study=self
+                ).update(is_simulation_fresh=False)
+
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = _("Quantitative Risk Study")
         verbose_name_plural = _("Quantitative Risk Studies")
@@ -397,7 +412,8 @@ class QuantitativeRiskHypothesis(
 
         if not dry_run:
             self.simulation_data = simulation_results
-            self.save(update_fields=["simulation_data"])
+            self.is_simulation_fresh = True
+            self.save(update_fields=["simulation_data", "is_simulation_fresh"])
 
             # Update the risk tolerance curve in the parent study
             study = self.quantitative_risk_scenario.quantitative_risk_study
@@ -580,5 +596,10 @@ class QuantitativeRiskHypothesis(
         """
         Override save to mark simulation as not fresh when parameters change.
         """
+        # Check if parameters have changed (only for existing instances)
+        if self.pk:
+            old_instance = QuantitativeRiskHypothesis.objects.get(pk=self.pk)
+            if old_instance.parameters != self.parameters:
+                self.is_simulation_fresh = False
 
         super().save(*args, **kwargs)
