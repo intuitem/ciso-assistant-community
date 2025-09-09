@@ -190,6 +190,8 @@
 	"importMatrices": "Importa matrici",
 	"importFrameworks": "Importa framework",
 	"importMappings": "Importa mappature",
+	"importThreats": "Importa minacce",
+	"importReferenceControls": "Importa controlli di riferimento",
 	"summary": "Riepilogo",
 	"composer": "Compositore",
 	"statistics": "Statistiche",
@@ -1055,7 +1057,7 @@
 	"workshopOne": "Workshop 1",
 	"refIdSemiColon": "ID di riferimento:",
 	"addFearedEvent": "Aggiungi evento temuto",
-	"addEbiosRMstudy": "Aggiungi studio Ebios RM",
+	"addEbiosRmStudy": "Aggiungi studio Ebios RM",
 	"noAuthor": "Nessun autore assegnato",
 	"noReviewer": "Nessun revisore assegnato",
 	"selectAudit": "Seleziona audit",
@@ -1337,5 +1339,7 @@
 	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
-	"deselect": "Deseleziona"
+	"deselect": "Deseleziona",
+	"saveAndContinue": "Salva e continua",
+	"nextOccurrenceStatus": "Stato prossima occorrenza"
 }

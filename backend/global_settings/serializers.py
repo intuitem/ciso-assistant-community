@@ -94,6 +94,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     inherent_risk = serializers.BooleanField(
         source="value.inherent_risk", required=False, default=False
     )
+    organisation_objectives = serializers.BooleanField(
+        source="value.organisation_objectives", required=False, default=True
+    )
+    organisation_issues = serializers.BooleanField(
+        source="value.organisation_issues", required=False, default=True
+    )
+    terminologies = serializers.BooleanField(
+        source="value.terminologies", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
@@ -112,6 +121,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "privacy",
             "experimental",
             "inherent_risk",
+            "organisation_objectives",
+            "organisation_issues",
+            "terminologies",
         ]
         read_only_fields = ["name"]
 

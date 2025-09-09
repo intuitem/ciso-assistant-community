@@ -869,22 +869,22 @@ class LoadedLibrary(LibraryMixin):
     @property
     def _objects(self):
         res = {}
-        if self.frameworks.count() > 0:
+        if self.frameworks.exists():
             res["framework"] = update_translations_in_object(
                 model_to_dict(self.frameworks.first())
             )
             res["framework"].update(self.frameworks.first().library_entry)
-        if self.threats.count() > 0:
+        if self.threats.exists():
             res["threats"] = [
                 update_translations_in_object(model_to_dict(threat))
                 for threat in self.threats.all()
             ]
-        if self.reference_controls.count() > 0:
+        if self.reference_controls.exists():
             res["reference_controls"] = [
                 update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
-        if self.risk_matrices.count() > 0:
+        if self.risk_matrices.exists():
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
             res["risk_matrix"]["probability"] = update_translations(matrix.probability)
@@ -985,7 +985,7 @@ class Threat(
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() > 0:
+        if self.requirements.exists():
             return False
         return True
 
@@ -1051,7 +1051,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() or self.appliedcontrol_set.count() > 0:
+        if self.requirements.exists() or self.appliedcontrol_set.exists():
             return False
         return True
 
@@ -1182,7 +1182,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         """
         Returns True if the framework can be deleted
         """
-        if self.compliance_assessment_set.count() > 0:
+        if self.compliance_assessment_set.exists():
             return False
         return True
 
@@ -1302,6 +1302,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             "name": parent_requirement.name,
             "description": parent_requirement.description,
         }
+
+    @property
+    def safe_display_str(self):
+        fallback_ref = ":".join(self.urn.split(":")[5:])
+        return self.display_short if self.display_short else fallback_ref
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -1803,6 +1808,7 @@ class Asset(
         "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -2326,7 +2332,27 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                         ],
                     },
                 ],
-            }
+            },
+            {
+                "name": "assetClassFacilities",
+                "description": "Facilities",
+                "children": [
+                    {
+                        "name": "assetClassPhysicalAccessPoint",
+                    },
+                    {
+                        "name": "assetClassArchivesRoom",
+                    },
+                    {
+                        "name": "assetClassPrimaryBuilding",
+                    },
+                    {
+                        "name": "assetClassPhysicalSecuritySystem",
+                    },
+                    {"name": "assetClassSafetySystem"},
+                    {"name": "assetClassExternalFacilities"},
+                ],
+            },
         ]
 
         AssetClass.create_hierarchy(cis_hierarchy)
@@ -2705,6 +2731,14 @@ class AppliedControl(
         related_name="applied_controls",
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    objectives = models.ManyToManyField(
+        "OrganisationObjective",
+        blank=True,
+        verbose_name=_("Objectives"),
+        related_name="applied_controls",
+    )
 
     fields_to_check = ["name"]
 
@@ -2735,6 +2769,10 @@ class AppliedControl(
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_assigned(self):
+        return self.owner.exists()
 
     @property
     def mid(self):
@@ -2781,7 +2819,7 @@ class AppliedControl(
         return reqs + scenarios + sh_actions
 
     def has_evidences(self):
-        return self.evidences.count() > 0
+        return self.evidences.exists()
 
     def eta_missed(self):
         return (
@@ -2795,6 +2833,129 @@ class AppliedControl(
         days_remaining = (self.eta - date.today()).days
 
         return max(-1, days_remaining)
+
+
+class OrganisationIssue(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Category(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        POLITICAL = "political", "Political"
+        ECONOMIC = "economic", "Economic"
+        SOCIAL = "social", "Social"
+        TECHNOLOGY = "technology", "Technology"
+        LEGAL = (
+            "legal",
+            "Legal",
+        )
+        ENVIRONMENTAL = "environmental", "Environmental"
+        ORGANISATION_STRUCTURE = "organisationStructure", "Organisation Structure"
+        HUMAN_RESOURCES = "humanResources", "Human resources"
+        INTERNAL_PROCESSES = "internalProcesses", "Internal processes"
+        FINANCIAL_CAPACITY = "financialCapacity", "Financial capacity"
+        COMPANY_CULTURE = "companyCulture", "Company culture / communication"
+
+    class Origin(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        INTERNAL = "internal", "Internal"
+        EXTERNAL = "external", "External"
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=Category.choices,
+        max_length=32,
+        default=Category.UNDEFINED,
+        blank=True,
+    )
+    origin = models.CharField(
+        verbose_name=_("Origin"),
+        choices=Origin.choices,
+        max_length=32,
+        default=Origin.UNDEFINED,
+        blank=True,
+    )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Issue")
+        verbose_name_plural = _("Issues")
+
+
+class OrganisationObjective(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        IN_PROGRESS = "in_progress", "In progress"
+        ACHIEVED = "achieved", "Achieved"
+        DEGRADED = "degraded", "Degraded"
+        DEPRECATED = "deprecated", "Deprecated"
+
+    class Health(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        ON_TRACK = "on_track", "On track"
+        AT_RISK = "at_risk", "At risk"
+        OFF_TRACK = "off_track", "Off track"
+
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    issues = models.ManyToManyField(
+        OrganisationIssue,
+        blank=True,
+        verbose_name="issues",
+        related_name="objectives",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    tasks = models.ManyToManyField(
+        "TaskTemplate",
+        blank=True,
+        verbose_name="Issue",
+        related_name="objectives",
+    )
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    health = models.CharField(
+        max_length=100,
+        choices=Health.choices,
+        default=Health.UNDEFINED,
+        verbose_name=_("Health"),
+    )
+    eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Objective")
+        verbose_name_plural = _("Objectives")
 
 
 class PolicyManager(models.Manager):
@@ -2939,6 +3100,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    is_locked = models.BooleanField(
+        default=False,
+        null=True,
+        verbose_name=_("Is locked"),
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -3003,6 +3169,17 @@ class RiskAssessment(Assessment):
                 .count()
             )
         return output
+
+    def sync_to_applied_controls(self, reset_residual=False, dry_run: bool = False):
+        scenarios: list[RiskScenario] = list(self.risk_scenarios.all())
+        changed_scenarios = list()
+        for scenario in scenarios:
+            cur = scenario.sync_to_applied_controls(
+                reset_residual=reset_residual, dry_run=dry_run
+            )
+            if len(cur) > 0:
+                changed_scenarios.append(scenario)
+        return changed_scenarios
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
@@ -3481,6 +3658,10 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
+    @property
+    def is_locked(self) -> bool:
+        return self.risk_assessment.is_locked
+
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
@@ -3576,6 +3757,32 @@ class RiskScenario(NameDescriptionMixin):
             return self.DEFAULT_SOK_OPTIONS[-1]
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
+    def sync_to_applied_controls(self, reset_residual=False, dry_run=True):
+        """
+        If all extra controls are active, move them to existing controls and reset the residual assessment.
+
+        Params:
+            dry_run (bool): if True, do not actually perform the operation, just return the list of controls that would be moved.
+        """
+        extra_controls = list(self.applied_controls.all())
+        if not extra_controls:
+            return []
+        if not all(
+            [ac.status == AppliedControl.Status.ACTIVE for ac in extra_controls]
+        ):
+            return []
+        if not dry_run:
+            with transaction.atomic():
+                self.current_impact = self.residual_impact
+                self.current_proba = self.residual_proba
+                self.existing_applied_controls.add(*extra_controls)
+                self.applied_controls.clear()
+                if reset_residual:
+                    self.residual_impact = -1
+                    self.residual_proba = -1
+                self.save()
+        return extra_controls
+
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
@@ -3641,7 +3848,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = "Campaigns"
 
     def metrics(self):
-        if ComplianceAssessment.objects.filter(campaign=self).count() == 0:
+        if not ComplianceAssessment.objects.filter(campaign=self).exists():
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
             [
@@ -3867,7 +4074,7 @@ class ComplianceAssessment(Assessment):
                 new_result = infer_result(ac)
                 if ra.result != new_result:
                     changes[str(ra.id)] = {
-                        "str": str(ra),
+                        "str": str(ra.requirement.safe_display_str),
                         "current": ra.result,
                         "new": new_result,
                     }
@@ -4527,6 +4734,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             "description",
         )
 
+    @property
+    def is_locked(self) -> bool:
+        return self.compliance_assessment.is_locked
+
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
     ) -> dict | None:
@@ -4772,9 +4983,15 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         verbose_name=_("Evidences"),
     )
 
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
     class Meta:
         verbose_name = _("Finding")
         verbose_name_plural = _("Findings")
+
+    @property
+    def is_locked(self) -> bool:
+        return self.findings_assessment.is_locked
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
@@ -4996,21 +5213,54 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         related_name="task_templates",
     )
 
-    @property
-    def next_occurrence(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__gte=today
-        ).order_by("due_date")
-        return task_nodes.first().due_date if task_nodes.exists() else None
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
+        verbose_name=_("Link"),
+    )
 
-    @property
-    def last_occurrence_status(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__lte=today
-        ).order_by("-due_date")
-        return task_nodes[0].status if task_nodes.exists() else None
+    def _get_task_node_value(self, field, date_filter=None, order_by=None):
+        queryset = TaskNode.objects.filter(task_template=self)
+        if date_filter:
+            queryset = queryset.filter(**date_filter)
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        return queryset.values_list(field, flat=True).first()
+
+    def get_next_occurrence(self):
+        annotated = getattr(self, "next_occurrence", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("due_date")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "due_date", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
+
+    def get_last_occurrence_status(self):
+        if not self.is_recurrent:
+            return None
+        annotated = getattr(self, "last_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__lt": today}, order_by="-due_date"
+        )
+
+    def get_next_occurrence_status(self):
+        annotated = getattr(self, "next_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("status")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
 
     class Meta:
         verbose_name = "Task template"
@@ -5176,3 +5426,110 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
+
+
+class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    """
+    Model to store custom terminology for the application
+    """
+
+    class FieldPath(models.TextChoices):
+        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+
+    DEFAULT_ROTO_RISK_ORIGINS = [
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    field_path = models.CharField(
+        max_length=100,
+        verbose_name=_("Field path"),
+        choices=FieldPath.choices,
+    )
+    builtin = models.BooleanField(
+        default=False,
+        verbose_name=_("Built-in"),
+        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Visible"),
+        help_text=_("Indicates if the terminology is visible in the UI"),
+    )
+    translations = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name=_("Translations"),
+        help_text=_("JSON field to store translations for different languages"),
+    )
+
+    @classmethod
+    def create_default_roto_risk_origins(cls):
+        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
+            Terminology.objects.update_or_create(
+                name=risk_origin["name"],
+                field_path=risk_origin["field_path"],
+                defaults=risk_origin,
+            )
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations or self.name
+
+    def __str__(self) -> str:
+        return self.get_name_translated or self.name

@@ -169,6 +169,18 @@ export const navData = {
 					permissions: ['view_appliedcontrol']
 				},
 				{
+					name: 'organisationIssues',
+					fa_icon: 'fa-solid fa-briefcase',
+					href: '/organisation-issues',
+					permissions: ['view_organisationissue']
+				},
+				{
+					name: 'organisationObjectives',
+					fa_icon: 'fa-solid fa-bullseye',
+					href: '/organisation-objectives',
+					permissions: ['view_organisationobjective']
+				},
+				{
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-signature',
 					href: '/risk-acceptances'
@@ -235,7 +247,7 @@ export const navData = {
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
-					permissions: ['view_appliedcontrol'] //this is temporary workaround to manage 3rd parties
+					permissions: ['view_perimeter'] //this is temporary workaround to manage 3rd parties
 				}
 			]
 		},
@@ -246,12 +258,7 @@ export const navData = {
 					name: 'tprmOverview',
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
-					permissions: [
-						'view_entity',
-						'view_solution',
-						'view_entityassessment',
-						'view_appliedcontrol'
-					]
+					permissions: ['view_entity', 'view_solution', 'view_entityassessment']
 				},
 				{
 					name: 'entities',
@@ -312,6 +319,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-tag',
 					href: '/filtering-labels',
 					permissions: ['view_filteringlabel']
+				},
+				{
+					name: 'terminologies',
+					fa_icon: 'fa-solid fa-language',
+					href: '/terminologies',
+					permissions: ['view_terminology']
 				},
 				{
 					name: 'settings',

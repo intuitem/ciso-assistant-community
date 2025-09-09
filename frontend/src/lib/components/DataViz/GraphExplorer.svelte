@@ -46,7 +46,7 @@
 
 	let searchQuery = $state('');
 	let chart: echarts.ECharts;
-	let currentEmphasisNodeId: number | null = null;
+	let currentEmphasisNodeIds: number[] = []; // Track multiple emphasized nodes
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
 
@@ -283,38 +283,66 @@
 		};
 	};
 
-	const handleNodeEmphasis = (nodeId: number | null) => {
+	/**
+	 * Emphasizes (highlights) specific nodes in the chart by their IDs.
+	 * Downplays previously emphasized nodes before applying new emphasis.
+	 *
+	 * @param nodeIds - A single node ID, an array of node IDs, or null to clear emphasis.
+	 */
+	const handleNodesEmphasis = (nodeIds: number[] | number | null) => {
 		if (!chart) return;
 
-		if (currentEmphasisNodeId !== null) {
+		// Convert single ID to array for uniform handling
+		const newNodeIds = Array.isArray(nodeIds) ? nodeIds : nodeIds !== null ? [nodeIds] : [];
+
+		if (currentEmphasisNodeIds.length > 0) {
 			chart.dispatchAction({
 				type: 'downplay',
-				dataIndex: currentEmphasisNodeId
+				dataIndex: currentEmphasisNodeIds
 			});
 		}
 
-		if (nodeId !== null && nodeId !== currentEmphasisNodeId) {
+		if (newNodeIds.length > 0) {
 			chart.dispatchAction({
 				type: 'highlight',
-				dataIndex: nodeId
+				dataIndex: newNodeIds
 			});
 		}
-
-		currentEmphasisNodeId = nodeId !== currentEmphasisNodeId ? nodeId : null;
+		if (
+			currentEmphasisNodeIds.length > 0 && // avoid infinite loop when both are empty, which shouldn't happen
+			JSON.stringify(currentEmphasisNodeIds) === JSON.stringify(newNodeIds)
+		) {
+			// Same nodes, clear emphasis
+			handleNodesEmphasis(null);
+			currentEmphasisNodeIds = []; // this goes after to avoid
+		} else if (newNodeIds.length !== 0) {
+			// Not same nodes and not empty, set new emphasis
+			currentEmphasisNodeIds = newNodeIds;
+		}
 	};
 
+	/**
+	 * Searches nodes by name and emphasizes those that match the query.
+	 * Shows an alert if no nodes are found.
+	 *
+	 * @param query - The search string used to match node names.
+	 */
 	// Search function, maybe we can improve it later for fuzzy search?
-	const searchNode = (query: string) => {
+	const searchNodes = (query: string) => {
 		if (!query.trim()) return;
 
 		const normalizedQuery = query.toLowerCase().trim();
-		const node = data.nodes.find((n) => n.name.toLowerCase().includes(normalizedQuery));
+		const nodes = data.nodes.filter((n) => n.name.toLowerCase().includes(normalizedQuery));
 
-		if (node && node.id !== undefined) {
-			handleNodeEmphasis(node.id);
-			chart?.dispatchAction({
-				type: 'focusNodeAdjacency',
-				dataIndex: node.id
+		const nodeIds = nodes.map((node) => node.id).filter((id) => id != null);
+
+		if (nodeIds.length > 0) {
+			handleNodesEmphasis(nodeIds);
+			nodeIds.forEach((id) => {
+				chart?.dispatchAction({
+					type: 'focusNodeAdjacency',
+					dataIndex: id
+				});
 			});
 		} else {
 			alert('No matching nodes found');
@@ -336,9 +364,9 @@
 
 		chart.on('click', (params) => {
 			if (params.dataType === 'node') {
-				handleNodeEmphasis(params.data.id);
+				handleNodesEmphasis(params.data.id);
 			} else {
-				handleNodeEmphasis(null);
+				handleNodesEmphasis(null);
 			}
 		});
 
@@ -360,7 +388,7 @@
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
-			searchNode(searchQuery);
+			searchNodes(searchQuery);
 		}
 	};
 </script>
@@ -379,7 +407,7 @@
 		<button
 			type="button"
 			class="text-gray-600 hover:text-gray-700"
-			onclick={() => searchNode(searchQuery)}
+			onclick={() => searchNodes(searchQuery)}
 			aria-label="Search"
 		>
 			<svg

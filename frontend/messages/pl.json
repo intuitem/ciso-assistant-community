@@ -196,6 +196,8 @@
 	"importMatrices": "Importuj macierze",
 	"importFrameworks": "Importuj struktury",
 	"importMappings": "Importuj mapowania",
+	"importThreats": "Importuj zagrożenia",
+	"importReferenceControls": "Importuj kontrole referencyjne",
 	"summary": "Podsumowanie",
 	"composer": "Kompozytor",
 	"statistics": "Statystyki",
@@ -1235,7 +1237,7 @@
 	"workshopOne": "Warsztat 1",
 	"refIdSemiColon": "Identyfikator refencji:",
 	"addFearedEvent": "Dodaj strachu wydarzenia",
-	"addEbiosRMstudy": "Dodaj badanie Ebios RM",
+	"addEbiosRmStudy": "Dodaj badanie Ebios RM",
 	"noAuthor": "Żaden autor nie przypisał",
 	"noReviewer": "Żadnego recenzenta",
 	"selectAudit": "Wybierz Audyt",
@@ -1704,5 +1706,7 @@
 	"dataWizardTemplatesAndGuidelines": "Szablony i wytyczne",
 	"dataWizardLoadExcelData": "Załaduj dane Excel",
 	"associatedCampaigns": "Powiązane kampanie",
-	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty"
+	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
+	"saveAndContinue": "Zapisz i kontynuuj",
+	"nextOccurrenceStatus": "Następny status wystąpienia"
 }

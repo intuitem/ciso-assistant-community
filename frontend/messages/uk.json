@@ -191,6 +191,8 @@
 	"importMatrices": "Імпорт матриць",
 	"importFrameworks": "Імпорт фреймворків",
 	"importMappings": "Імпорт зіставлень",
+	"importThreats": "Імпорт загроз",
+	"importReferenceControls": "Імпорт типових контролів",
 	"summary": "Зведення",
 	"composer": "Композитор",
 	"statistics": "Статистика",
@@ -1200,7 +1202,7 @@
 	"workshopOne": "Семінар 1",
 	"refIdSemiColon": "Ідентифікатор посилання:",
 	"addFearedEvent": "Додати подію, що викликає побоювання",
-	"addEbiosRMstudy": "Додати дослідження Ebios RM",
+	"addEbiosRmStudy": "Додати дослідження Ebios RM",
 	"noAuthor": "Автора не призначено",
 	"noReviewer": "Рецензента не призначено",
 	"selectAudit": "Виберіть аудит",
@@ -1476,5 +1478,7 @@
 	"businessImpactAnalysis": "Аналіз впливу на бізнес (ВІА)",
 	"isThirdParty": "Третя сторона?",
 	"keepLocalLogin": "Дозволений локальний (non-SSO) логін?",
-	"keepLocalLoginHelpText": "Коли глобальне SSO обов'язкове, це дозволяє користувачу обійти це налаштування та використовувати локальний пароль за потреби."
+	"keepLocalLoginHelpText": "Коли глобальне SSO обов'язкове, це дозволяє користувачу обійти це налаштування та використовувати локальний пароль за потреби.",
+	"saveAndContinue": "Зберегти та продовжити",
+	"nextOccurrenceStatus": "Статус наступного випадку"
 }

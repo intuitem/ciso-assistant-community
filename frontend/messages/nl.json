@@ -190,6 +190,8 @@
 	"importMatrices": "Matrijzen importeren",
 	"importFrameworks": "Kaders importeren",
 	"importMappings": "Importeer toewijzingen",
+	"importThreats": "Importeer bedreigingen",
+	"importReferenceControls": "Importeer referentiecontroles",
 	"summary": "Samenvatting",
 	"composer": "Samensteller",
 	"statistics": "Statistieken",
@@ -960,5 +962,7 @@
 	"matchingScenarios": "Overeenkomende scenario's",
 	"select": "Selecteer",
 	"deselect": "Deselecteer",
-	"fearedEventAssetHelpText": "Gevreesde gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit."
+	"fearedEventAssetHelpText": "Gevreesde gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit.",
+	"saveAndContinue": "Opslaan en doorgaan",
+	"nextOccurrenceStatus": "Status volgende herhaling"
 }

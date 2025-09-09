@@ -1,4 +1,5 @@
 import time
+from icecream import ic
 
 from .helpers import get_referential_translation
 from pathlib import Path
@@ -96,11 +97,17 @@ class RequirementNodeImporter:
             questions=self.requirement_data.get("questions"),
         )
         for threat in self.requirement_data.get("threats", []):
+            logger.info(
+                f"Parsing the threats for {self.requirement_data.get('ref_id')}"
+            )
             requirement_node.threats.add(
                 Threat.objects.get(urn=threat.lower())
             )  # URN are not case insensitive in the whole codebase yet, we should fix that and make sure URNs are always transformed into lowercase before being used.
 
         for reference_control in self.requirement_data.get("reference_controls", []):
+            logger.info(
+                f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
+            )
             requirement_node.reference_controls.add(
                 ReferenceControl.objects.get(urn=reference_control.lower())
             )
