@@ -415,3 +415,93 @@ class QuantitativeRiskHypothesis(
 
         metrics = self.simulation_data.get("metrics", {})
         return metrics.get("mean_annual_loss")
+
+    @property
+    def roc(self):
+        """
+        Calculate Return on Controls (ROC) for residual hypotheses.
+
+        ROC = (Current ALE - Residual ALE - Treatment Cost) / Treatment Cost
+
+        Only applies to residual hypotheses. Returns None if:
+        - This is not a residual hypothesis
+        - No current hypothesis exists in the same scenario
+        - Treatment cost is zero or negative
+        - Missing ALE data
+        """
+        if self.risk_stage != "residual":
+            return None
+
+        # Find the current hypothesis in the same scenario
+        current_hypothesis = self.quantitative_risk_scenario.hypotheses.filter(
+            risk_stage="current"
+        ).first()
+
+        if not current_hypothesis:
+            return None
+
+        # Get ALEs
+        current_ale = current_hypothesis.ale
+        residual_ale = self.ale
+
+        if current_ale is None or residual_ale is None:
+            return None
+
+        # Get treatment cost
+        treatment_cost = self.treatment_cost
+
+        if treatment_cost <= 0:
+            return None
+
+        # Calculate ROC
+        risk_reduction = current_ale - residual_ale
+        net_benefit = risk_reduction - treatment_cost
+        roc = net_benefit / treatment_cost
+
+        return roc
+
+    @property
+    def roc_display(self):
+        """
+        Returns a human-readable format of the ROC.
+        """
+        roc_value = self.roc
+        if roc_value is None:
+            if self.risk_stage != "residual":
+                return "N/A (not residual hypothesis)"
+            else:
+                return "Cannot calculate ROC"
+
+        # Format as percentage
+        return f"{roc_value * 100:.1f}%"
+
+    @property
+    def roc_interpretation(self):
+        """
+        Returns an interpretation of the ROC value.
+        """
+        roc_value = self.roc
+        if roc_value is None:
+            return None
+
+        if roc_value > 0:
+            return "Positive ROC - Investment is profitable"
+        elif roc_value == 0:
+            return "Break-even - Investment covers its cost"
+        else:
+            return "Negative ROC - Investment costs more than benefits"
+
+    def save(self, *args, **kwargs):
+        """
+        Override save to mark simulation as not fresh when parameters change.
+        """
+        if self.pk:  # Only for existing objects
+            try:
+                old_instance = QuantitativeRiskHypothesis.objects.get(pk=self.pk)
+                # Check if parameters changed
+                if old_instance.parameters != self.parameters:
+                    self.simulation_fresh = False
+            except QuantitativeRiskHypothesis.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)

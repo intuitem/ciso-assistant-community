@@ -59,6 +59,7 @@
 	label={m.hypothesisStage()}
 	cacheLock={cacheLocks['risk_stage']}
 	bind:cachedValue={formDataCache['risk_stage']}
+  helpText="You can have multiple residual (future) hypotheses but only one current (present) and one inherent (past)"
 />
 
 <Dropdown
@@ -76,6 +77,7 @@
 		cacheLock={cacheLocks['existing_applied_controls']}
 		bind:cachedValue={formDataCache['existing_applied_controls']}
 		label={m.existingControls()}
+    helpText="What do you currently have. It's part of your baseline and doesn't count on the treatment cost."
 	/>
 	<AutocompleteSelect
 		{form}
@@ -86,6 +88,7 @@
 		cacheLock={cacheLocks['added_applied_controls']}
 		bind:cachedValue={formDataCache['added_applied_controls']}
 		label={m.addedControls()}
+    helpText="What do you need to implement to reduce the risk."
 	/>
 	<AutocompleteSelect
 		{form}
@@ -96,6 +99,7 @@
 		cacheLock={cacheLocks['removed_applied_controls']}
 		bind:cachedValue={formDataCache['removed_applied_controls']}
 		label={m.removedControls()}
+    helpText="Useful to simulate cost-saving opportunities or inherent risk posture"
 	/>
 </Dropdown>
 

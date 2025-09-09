@@ -1504,13 +1504,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'quantitative_risk_scenario' },
 			{ field: 'simulation_parameters_display' },
+			{ field: 'ale' },
 			{ field: 'treatment_cost' },
+			{ field: 'roc' },
+			{ field: 'roc_display' },
+			{ field: 'roc_interpretation' },
 			{ field: 'risk_stage' },
 			{ field: 'existing_applied_controls' },
 			{ field: 'added_applied_controls' },
 			{ field: 'removed_applied_controls' },
 			{ field: 'observation' },
-			{ filed: 'is_selected' }
+			{ field: 'is_selected' }
 		],
 		terminologies: {
 			name: 'terminology',

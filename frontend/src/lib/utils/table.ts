@@ -1585,6 +1585,7 @@ export const listViewFields = {
 			'lecChart',
 			'ale',
 			'treatmentCost',
+			'rocDisplay',
 			'isSelected'
 		],
 		body: [
@@ -1595,6 +1596,7 @@ export const listViewFields = {
 			'lec_data',
 			'ale',
 			'treatment_cost',
+			'roc_display',
 			'is_selected'
 		],
 		filters: {
