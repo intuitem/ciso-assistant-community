@@ -139,6 +139,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     )
     lec_data = serializers.SerializerMethodField()
     risk_tolerance_curve = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
     ale = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     treatment_cost = serializers.DecimalField(
         max_digits=12, decimal_places=2, read_only=True
@@ -192,6 +193,13 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
 
         # Convert to [x, y] pairs for ECharts, same format as the LEC endpoint
         return [[loss, prob] for loss, prob in zip(loss_data, probability_data)]
+
+    def get_currency(self, obj):
+        """Return currency symbol from global settings"""
+        from global_settings.models import GlobalSettings
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        return general_settings.value.get("currency", "€") if general_settings else "€"
 
     class Meta:
         model = QuantitativeRiskHypothesis

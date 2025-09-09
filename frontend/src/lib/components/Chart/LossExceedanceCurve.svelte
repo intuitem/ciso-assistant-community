@@ -8,6 +8,7 @@
 		name?: string;
 		data?: Array<[number, number]>;
 		toleranceData?: Array<[number, number]>;
+		currency?: string;
 		title?: string;
 		xAxisLabel?: string;
 		yAxisLabel?: string;
@@ -29,6 +30,7 @@
 		name = 'loss-exceedance',
 		data = undefined,
 		toleranceData = undefined,
+		currency = '$',
 		title = 'Loss Exceedance Curve',
 		xAxisLabel = 'Loss Amount ($)',
 		yAxisLabel = 'Exceedance Probability',
@@ -96,7 +98,7 @@
 					if (params.length === 0) return '';
 
 					const lossAmount = params[0].value[0];
-					let tooltip = `${xAxisLabel}: $${lossAmount.toLocaleString()}<br/>`;
+					let tooltip = `${xAxisLabel.replace('($)', `(${currency})`)}: ${currency}${lossAmount.toLocaleString()}<br/>`;
 
 					// Find loss exceedance and risk tolerance series
 					const lossExceedanceParam = params.find((p: any) => p.seriesName === 'Loss Exceedance');
@@ -138,13 +140,13 @@
 				axisLabel: {
 					formatter: function (value: number) {
 						if (value >= 1000000000) {
-							return '$' + (value / 1000000000).toFixed(0) + 'B';
+							return currency + (value / 1000000000).toFixed(0) + 'B';
 						} else if (value >= 1000000) {
-							return '$' + (value / 1000000).toFixed(0) + 'M';
+							return currency + (value / 1000000).toFixed(0) + 'M';
 						} else if (value >= 1000) {
-							return '$' + (value / 1000).toFixed(0) + 'K';
+							return currency + (value / 1000).toFixed(0) + 'K';
 						} else {
-							return '$' + value.toFixed(0);
+							return currency + value.toFixed(0);
 						}
 					}
 				},

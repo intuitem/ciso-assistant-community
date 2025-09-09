@@ -99,6 +99,7 @@
 						<LossExceedanceCurve
 							data={data.lec.data}
 							toleranceData={data.data.risk_tolerance_curve}
+							currency={data.data.currency || '$'}
 							xMin={lecMinValue()}
 							xMax={lecMaxValue()}
 							height="h-96"
@@ -125,11 +126,12 @@
 					</div>
 					{#if data.lec.metrics}
 						{@const metrics = data.lec.metrics}
+						{@const currency = data.data.currency || '$'}
 						{@const formatCurrency = (value) => {
-							if (value >= 1000000000) return `$${(value / 1000000000).toFixed(1)}B`;
-							if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-							if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
-							return `$${Math.round(value).toLocaleString()}`;
+							if (value >= 1000000000) return `${currency}${(value / 1000000000).toFixed(1)}B`;
+							if (value >= 1000000) return `${currency}${(value / 1000000).toFixed(1)}M`;
+							if (value >= 1000) return `${currency}${(value / 1000).toFixed(0)}K`;
+							return `${currency}${Math.round(value).toLocaleString()}`;
 						}}
 						{@const scenarioLosses = Object.entries(metrics)
 							.filter(([key, _]) => key.startsWith('loss_with_') && key.endsWith('_percent'))
