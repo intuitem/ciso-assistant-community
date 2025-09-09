@@ -5452,7 +5452,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
-        compliance_assessment = self.get_object()
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
+            .prefetch_related("requirement_assessments__requirement"),
+            pk=pk,
+        )
         return Response(
             {
                 "score": compliance_assessment.get_global_score(),
@@ -5481,15 +5486,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
-        _framework = self.get_object().framework
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
+            .prefetch_related("requirement_assessments__requirement"),
+            pk=pk,
+        )
+
+        _framework = compliance_assessment.framework
         tree = get_sorted_requirement_nodes(
-            RequirementNode.objects.filter(framework=_framework).all(),
-            RequirementAssessment.objects.filter(
-                compliance_assessment=self.get_object()
+            RequirementNode.objects.filter(framework=_framework)
+            .select_related("framework")
+            .all(),
+            compliance_assessment.requirement_assessments.select_related(
+                "requirement"
             ).all(),
             _framework.max_score,
         )
-        implementation_groups = self.get_object().selected_implementation_groups
+        implementation_groups = compliance_assessment.selected_implementation_groups
         return Response(
             filter_graph_by_implementation_groups(tree, implementation_groups)
         )
@@ -5497,13 +5511,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk):
         """Returns the list of requirement assessments for the different audit modes"""
-        assessable = self.request.query_params.get("assessable", False)
-        requirement_assessments_objects = self.get_object().get_requirement_assessments(
-            include_non_assessable=not assessable
+        assessable = str(
+            self.request.query_params.get("assessable", "false")
+        ).lower() in {"true", "1", "yes"}
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
+            .prefetch_related(
+                "requirement_assessments__requirement",
+                "requirement_assessments__evidences",
+                "requirement_assessments__applied_controls",
+            ),
+            pk=pk,
+        )
+
+        requirement_assessments_objects = (
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=not assessable
+            )
         )
         requirements_objects = RequirementNode.objects.filter(
-            framework=self.get_object().framework
-        )
+            framework=compliance_assessment.framework
+        ).select_related("framework")
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects, many=True
         ).data
@@ -5642,8 +5671,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def threats_metrics(self, request, pk=None):
-        compliance_assessment = self.get_object()
-
+        compliance_assessment = get_object_or_404(
+            self.get_queryset()
+            .select_related("framework")
+            .prefetch_related("requirement_assessments__requirement__threats"),
+            pk=pk,
+        )
         # is this needed or overlapping with the IAM checks inherited?
         self.check_object_permissions(request, compliance_assessment)
 

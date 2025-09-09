@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: demo
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+    ports:
+      - "5432:5432" # Keep original port for direct access if needed
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.12.0
+    ports:
+      - "8474:8474" # Toxiproxy API
+      - "5433:5433" # Proxied PostgreSQL port
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
