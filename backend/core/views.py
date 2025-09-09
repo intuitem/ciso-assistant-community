@@ -982,6 +982,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "reviewers",
     ]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            "folder",
+            "perimeter",
+            "perimeter__folder",
+            "risk_matrix",
+            "ebios_rm_study",
+        ).prefetch_related(
+            "authors",
+            "reviewers",
+            "risk_scenarios",
+        )
+
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
         if instance.ebios_rm_study:
@@ -2309,6 +2323,22 @@ class RiskScenarioViewSet(BaseModelViewSet):
     filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            "risk_assessment",
+            "risk_assessment__risk_matrix",
+            "risk_assessment__perimeter",
+            "risk_assessment__perimeter__folder",
+        ).prefetch_related(
+            "threats",
+            "assets",
+            "applied_controls",
+            "existing_applied_controls",
+            "owner",
+            "security_exceptions",
+        )
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
