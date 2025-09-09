@@ -987,13 +987,6 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         self.likelihood = max_likelihood
         self.save(update_fields=["likelihood"])
 
-    def update_scenarios_likelihood_on_quotation_method_change(self):
-        if self.ebios_rm_study.quotation_method != "express":
-            return
-
-        for scenario in self.ebios_rm_study.operational_scenarios.all():
-            scenario.update_likelihood_from_operating_modes()
-
 
 class KillChain(AbstractBaseModel, FolderMixin):
     class LogicOperator(models.TextChoices):
