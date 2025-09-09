@@ -138,6 +138,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
         source="get_simulation_parameters_display", read_only=True
     )
     lec_data = serializers.SerializerMethodField()
+    risk_tolerance_curve = serializers.SerializerMethodField()
     ale = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     treatment_cost = serializers.DecimalField(
         max_digits=12, decimal_places=2, read_only=True
@@ -155,6 +156,32 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
 
         loss_data = obj.simulation_data.get("loss", [])
         probability_data = obj.simulation_data.get("probability", [])
+
+        if (
+            not loss_data
+            or not probability_data
+            or len(loss_data) != len(probability_data)
+        ):
+            return None
+
+        # Convert to [x, y] pairs for ECharts, same format as the LEC endpoint
+        return [[loss, prob] for loss, prob in zip(loss_data, probability_data)]
+
+    def get_risk_tolerance_curve(self, obj):
+        """Return risk tolerance curve data from the parent study"""
+        study = obj.quantitative_risk_scenario.quantitative_risk_study
+
+        # Check if risk tolerance curve data exists
+        if (
+            not study.risk_tolerance
+            or "curve_data" not in study.risk_tolerance
+            or "error" in study.risk_tolerance.get("curve_data", {})
+        ):
+            return None
+
+        curve_data = study.risk_tolerance["curve_data"]
+        loss_data = curve_data.get("loss_values", [])
+        probability_data = curve_data.get("probability_values", [])
 
         if (
             not loss_data

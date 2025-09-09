@@ -16,6 +16,7 @@ from .utils import (
     simulate_scenario_annual_loss,
     create_loss_exceedance_curve,
     calculate_risk_insights,
+    risk_tolerance_curve,
 )
 
 import numpy as np
@@ -119,6 +120,15 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                 )
 
         return " | ".join(display_parts) if display_parts else "Not configured"
+
+    def generate_risk_tolerance_curve(self):
+        """
+        Generate the risk tolerance Loss Exceedance Curve from the configured points.
+
+        Returns:
+            Dict with curve data, fitted parameters, and statistics
+        """
+        return risk_tolerance_curve(self.risk_tolerance)
 
     class Meta:
         verbose_name = _("Quantitative Risk Study")
@@ -389,6 +399,17 @@ class QuantitativeRiskHypothesis(
             self.simulation_data = simulation_results
             self.save(update_fields=["simulation_data"])
 
+            # Update the risk tolerance curve in the parent study
+            study = self.quantitative_risk_scenario.quantitative_risk_study
+            if study.risk_tolerance:
+                curve_data = study.generate_risk_tolerance_curve()
+                if curve_data and "error" not in curve_data:
+                    # Update the risk_tolerance with the generated curve data
+                    updated_risk_tolerance = study.risk_tolerance.copy()
+                    updated_risk_tolerance["curve_data"] = curve_data
+                    study.risk_tolerance = updated_risk_tolerance
+                    study.save(update_fields=["risk_tolerance"])
+
         return simulation_results
 
     def get_simulation_parameters_display(self):
@@ -559,13 +580,5 @@ class QuantitativeRiskHypothesis(
         """
         Override save to mark simulation as not fresh when parameters change.
         """
-        if self.pk:  # Only for existing objects
-            try:
-                old_instance = QuantitativeRiskHypothesis.objects.get(pk=self.pk)
-                # Check if parameters changed
-                if old_instance.parameters != self.parameters:
-                    self.simulation_fresh = False
-            except QuantitativeRiskHypothesis.DoesNotExist:
-                pass
 
         super().save(*args, **kwargs)

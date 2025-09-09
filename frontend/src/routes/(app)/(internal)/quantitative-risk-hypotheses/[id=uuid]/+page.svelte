@@ -44,6 +44,7 @@
 
 	$inspect(data);
 	$inspect('LEC data:', data.lec);
+	$inspect('Risk tolerance curve:', data.data.risk_tolerance_curve);
 
 	run(() => {
 		if (form?.message?.simulationComplete) {
@@ -97,6 +98,7 @@
 					{#key data.lec.simulation_timestamp}
 						<LossExceedanceCurve
 							data={data.lec.data}
+							toleranceData={data.data.risk_tolerance_curve}
 							xMin={lecMinValue()}
 							xMax={lecMaxValue()}
 							height="h-96"

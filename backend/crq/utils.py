@@ -175,9 +175,166 @@ def run_agg_simulation(
     return results
 
 
-def get_lognormal_params():
-    pass
+def get_lognormal_params_from_points(point1: Dict, point2: Dict) -> Tuple[float, float]:
+    """
+    Calculate lognormal distribution parameters (mu, sigma) from two risk tolerance points.
+
+    Args:
+        point1: Dict with 'probability' and 'acceptable_loss' keys
+        point2: Dict with 'probability' and 'acceptable_loss' keys
+
+    Returns:
+        (mu, sigma): Parameters for lognormal distribution
+
+    Raises:
+        ValueError: If points are invalid or cannot fit lognormal distribution
+    """
+    # Extract values
+    p1, loss1 = point1["probability"], point1["acceptable_loss"]
+    p2, loss2 = point2["probability"], point2["acceptable_loss"]
+
+    # Validate inputs
+    if not (0 < p1 < 1 and 0 < p2 < 1):
+        raise ValueError("Probabilities must be between 0 and 1")
+    if not (loss1 > 0 and loss2 > 0):
+        raise ValueError("Losses must be positive")
+    if p1 == p2:
+        raise ValueError("Points must have different probabilities")
+    if loss1 == loss2:
+        raise ValueError("Points must have different losses")
+
+    # Convert probabilities to z-scores (normal quantiles)
+    # We use 1-p because we want exceedance probabilities
+    try:
+        from scipy.stats import norm
+
+        z1 = norm.ppf(1 - p1)  # Exceedance probability
+        z2 = norm.ppf(1 - p2)
+    except ImportError:
+        raise ValueError(
+            "scipy is required for risk tolerance curve generation. Please install scipy."
+        )
+
+    # Take logarithm of losses
+    ln_loss1 = np.log(loss1)
+    ln_loss2 = np.log(loss2)
+
+    # Solve for sigma and mu
+    # ln_loss = mu + sigma * z
+    # ln_loss1 = mu + sigma * z1
+    # ln_loss2 = mu + sigma * z2
+
+    sigma = (ln_loss2 - ln_loss1) / (z2 - z1)
+    mu = ln_loss1 - sigma * z1
+
+    return mu, sigma
 
 
-def risk_tolerance_curve():
-    pass
+def generate_risk_tolerance_lec(
+    point1: Dict, point2: Dict, n_points: int = 1000
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Generate Loss Exceedance Curve from two risk tolerance points using fitted lognormal distribution.
+
+    Args:
+        point1: Dict with 'probability' and 'acceptable_loss' keys
+        point2: Dict with 'probability' and 'acceptable_loss' keys
+        n_points: Number of points for the curve
+
+    Returns:
+        (loss_values, exceedance_probabilities): Arrays for plotting LEC
+    """
+    # Get lognormal parameters
+    mu, sigma = get_lognormal_params_from_points(point1, point2)
+
+    # Generate probability range (from high probability to low probability)
+    min_prob = min(point1["probability"], point2["probability"])
+    max_prob = max(point1["probability"], point2["probability"])
+
+    # Extend range slightly beyond the points for better visualization
+    prob_range = max_prob - min_prob
+    min_display_prob = max(1e-6, min_prob - 0.1 * prob_range)
+    max_display_prob = min(0.99, max_prob + 0.1 * prob_range)
+
+    # Create exceedance probabilities (decreasing)
+    exceedance_probs = np.logspace(
+        np.log10(min_display_prob), np.log10(max_display_prob), n_points
+    )[::-1]  # Reverse for decreasing order
+
+    # Convert to normal quantiles and then to lognormal losses
+    try:
+        from scipy.stats import norm
+
+        z_scores = norm.ppf(1 - exceedance_probs)
+        loss_values = np.exp(mu + sigma * z_scores)
+    except ImportError:
+        raise ValueError(
+            "scipy is required for risk tolerance curve generation. Please install scipy."
+        )
+
+    return loss_values, exceedance_probs
+
+
+def risk_tolerance_curve(risk_tolerance_data: Dict) -> Dict:
+    """
+    Generate risk tolerance curve data from risk tolerance points.
+
+    Args:
+        risk_tolerance_data: Dict containing risk tolerance points
+
+    Returns:
+        Dict with curve data and fitted parameters
+    """
+    if not risk_tolerance_data or "points" not in risk_tolerance_data:
+        return {}
+
+    points = risk_tolerance_data["points"]
+
+    # Check if we have both points
+    if "point1" not in points or "point2" not in points:
+        return {}
+
+    point1 = points["point1"]
+    point2 = points["point2"]
+
+    # Validate point structure
+    required_keys = ["probability", "acceptable_loss"]
+    if not all(key in point1 and key in point2 for key in required_keys):
+        return {}
+
+    try:
+        # Generate the LEC
+        loss_values, exceedance_probs = generate_risk_tolerance_lec(point1, point2)
+
+        # Get fitted parameters
+        mu, sigma = get_lognormal_params_from_points(point1, point2)
+
+        # Calculate distribution statistics
+        try:
+            from scipy.stats import lognorm
+
+            dist = lognorm(s=sigma, scale=np.exp(mu))
+        except ImportError:
+            raise ValueError(
+                "scipy is required for risk tolerance curve generation. Please install scipy."
+            )
+
+        return {
+            "loss_values": loss_values.tolist(),
+            "probability_values": exceedance_probs.tolist(),
+            "fitted_parameters": {
+                "mu": float(mu),
+                "sigma": float(sigma),
+                "distribution": "lognormal",
+            },
+            "statistics": {
+                "mean": float(dist.mean()),
+                "median": float(dist.median()),
+                "std": float(dist.std()),
+                "var_95": float(dist.ppf(0.95)),
+                "var_99": float(dist.ppf(0.99)),
+            },
+        }
+
+    except Exception as e:
+        return {"error": str(e)}

@@ -61,6 +61,27 @@
 					fontWeight: 'bold'
 				}
 			},
+			legend: {
+				show: toleranceData && toleranceData.length > 0,
+				top: '5%',
+				right: '10%',
+				data: [
+					{
+						name: 'Loss Exceedance',
+						icon: 'circle',
+						itemStyle: {
+							color: '#ff6b6b'
+						}
+					},
+					{
+						name: 'Risk Tolerance',
+						icon: 'circle',
+						itemStyle: {
+							color: '#28a745'
+						}
+					}
+				]
+			},
 			grid: {
 				show: false,
 				left: '10%',
@@ -72,8 +93,36 @@
 				show: !!enableTooltip,
 				trigger: 'axis',
 				formatter: function (params: any) {
-					const point = params[0];
-					return `${xAxisLabel}: $${point.value[0].toLocaleString()}<br/>${yAxisLabel}: ${(point.value[1] * 100).toFixed(2)}%`;
+					if (params.length === 0) return '';
+
+					const lossAmount = params[0].value[0];
+					let tooltip = `${xAxisLabel}: $${lossAmount.toLocaleString()}<br/>`;
+
+					// Find loss exceedance and risk tolerance series
+					const lossExceedanceParam = params.find((p: any) => p.seriesName === 'Loss Exceedance');
+					const riskToleranceParam = params.find((p: any) => p.seriesName === 'Risk Tolerance');
+
+					if (lossExceedanceParam) {
+						tooltip += `Loss Exceedance: ${(lossExceedanceParam.value[1] * 100).toFixed(2)}%<br/>`;
+					}
+
+					if (riskToleranceParam) {
+						tooltip += `Risk Tolerance: ${(riskToleranceParam.value[1] * 100).toFixed(2)}%<br/>`;
+
+						// Add interpretation
+						if (lossExceedanceParam && riskToleranceParam) {
+							const exceedanceProb = lossExceedanceParam.value[1];
+							const toleranceProb = riskToleranceParam.value[1];
+
+							if (exceedanceProb > toleranceProb) {
+								tooltip += '<span style="color: #dc3545;">⚠️ Exceeds risk tolerance</span>';
+							} else {
+								tooltip += '<span style="color: #28a745;">✓ Within risk tolerance</span>';
+							}
+						}
+					}
+
+					return tooltip;
 				}
 			},
 			xAxis: {
@@ -132,6 +181,7 @@
 					type: 'line',
 					smooth: true,
 					symbol: 'none',
+					symbolSize: 0,
 					showSymbol: false,
 					lineStyle: {
 						color: '#ff6b6b',
@@ -151,7 +201,22 @@
 						])
 					},
 					data: data
-				}
+				},
+				// Risk tolerance curve series (only if toleranceData is provided)
+				...(toleranceData && toleranceData.length > 0 ? [{
+					name: 'Risk Tolerance',
+					type: 'line',
+					smooth: true,
+					symbol: 'none',
+					symbolSize: 0,
+					showSymbol: false,
+					lineStyle: {
+						color: '#28a745',
+						width: 3,
+						type: 'dashed'
+					},
+					data: toleranceData
+				}] : [])
 			]
 		};
 
