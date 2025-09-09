@@ -1901,53 +1901,69 @@ class Asset(
     @classmethod
     def _prefetch_graph_data(cls, initial_assets: list) -> dict:
         """
-        Finds all ancestors and descendants of the initial assets, then fetches
-        only the relevant subgraph of objects and links for efficient in-memory traversal.
+        Finds all ancestors and descendants of the initial assets using a constant
+        number of database queries (3), ideal for deep or complex hierarchies.
+
+        This method pre-fetches all parent-child links into memory to build a
+        complete graph, then traverses it without any further database calls to
+        identify the relevant subgraph.
         """
+        if not initial_assets:
+            return {"child_to_parents": {}, "parent_to_children": {}}
+
+        # First query: fetch all parent-child relationships in the entire table
+        all_links = cls.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+
+        # Build in-memory maps of the entire graph
+        child_to_parents_map = {}
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            child_to_parents_map.setdefault(child_id, set()).add(parent_id)
+            parent_to_children_map.setdefault(parent_id, set()).add(child_id)
+
+        # find all relevant IDs (ancestors and descendants).
         initial_ids = {asset.id for asset in initial_assets}
         all_relevant_ids = set(initial_ids)
 
-        # Iteratively find all ancestor IDs
-        ids_to_process = set(initial_ids)
-        while ids_to_process:
-            parent_ids = set(
-                Asset.parent_assets.through.objects.filter(
-                    from_asset_id__in=ids_to_process
-                ).values_list("to_asset_id", flat=True)
-            )
+        # find all ancestors
+        queue = deque(initial_ids)
+        visited_ancestors = set(initial_ids)
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in visited_ancestors:
+                    visited_ancestors.add(parent_id)
+                    all_relevant_ids.add(parent_id)
+                    queue.append(parent_id)
 
-            new_ids = parent_ids - all_relevant_ids
-            if not new_ids:
-                break
-            all_relevant_ids.update(new_ids)
-            ids_to_process = new_ids
+        # find all descendants
+        queue = deque(initial_ids)
+        visited_descendants = set(initial_ids)
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_descendants:
+                    visited_descendants.add(child_id)
+                    all_relevant_ids.add(child_id)
+                    queue.append(child_id)
 
-        # Iteratively find all descendant IDs
-        ids_to_process = set(initial_ids)
-        while ids_to_process:
-            child_ids = set(
-                Asset.parent_assets.through.objects.filter(
-                    to_asset_id__in=ids_to_process
-                ).values_list("from_asset_id", flat=True)
-            )
+        # Second query: fetch all the actual assets
+        asset_map = {a.id: a for a in cls.objects.filter(id__in=all_relevant_ids)}
 
-            new_ids = child_ids - all_relevant_ids
-            if not new_ids:
-                break
-            all_relevant_ids.update(new_ids)
-            ids_to_process = new_ids
-
-        # Now fetch only the objects and links within this relevant subgraph
-        asset_map = {a.id: a for a in Asset.objects.filter(id__in=all_relevant_ids)}
-
-        links = Asset.parent_assets.through.objects.filter(
+        # Third query: fetch only the links connecting the relevant assets
+        # This ensures we only build the subgraph we care about.
+        relevant_links = cls.parent_assets.through.objects.filter(
             from_asset_id__in=all_relevant_ids, to_asset_id__in=all_relevant_ids
         ).values_list("from_asset_id", "to_asset_id")
 
-        # Build the object maps for in-memory traversal
+        # Build the final object maps for in-memory traversal by the caller
         obj_child_to_parents = {}
         obj_parent_to_children = {}
-        for child_id, parent_id in links:
+        for child_id, parent_id in relevant_links:
             child_obj = asset_map.get(child_id)
             parent_obj = asset_map.get(parent_id)
             if child_obj and parent_obj:
