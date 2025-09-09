@@ -12,7 +12,6 @@ BACKEND_PORT=8173
 MAILER_WEB_SERVER_PORT=8073
 MAILER_SMTP_SERVER_PORT=1073
 
-
 ENTERPRISE_SETTINGS="enterprise_core.settings"
 
 KEYCLOAK_PORT=8080
@@ -189,7 +188,7 @@ cleanup() {
 
 django_args() {
   if [[ -n "$ENTERPRISE" ]]; then
-    echo "--settings=$ENTERPRISE_SETTINGS"
+    echo " --settings=$ENTERPRISE_SETTINGS"
   fi
 }
 
@@ -210,7 +209,7 @@ compute_frontend_hash() {
     find "$APP_DIR"/enterprise/frontend/.build/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
     return
   else
-    "$(find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum)"
+    find "$APP_DIR"/frontend/{src,messages} -type f \( -name "*.ts" -o -name "*.svelte" -o -name "*.json" \) -print0 | xargs -0 md5sum | md5sum
   fi
 }
 
@@ -302,23 +301,23 @@ export LICENSE_SEATS=999
 
 cd "$APP_DIR"/backend/ || exit 1
 if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
-  poetry run python3 manage.py makemigrations "$(django_args)"
-  poetry run python3 manage.py migrate "$(django_args)"
+  poetry run python3 manage.py makemigrations"$(django_args)"
+  poetry run python3 manage.py migrate"$(django_args)"
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
-  poetry run python3 manage.py makemigrations "$(django_args)"
-  poetry run python3 manage.py migrate "$(django_args)"
+  poetry run python3 manage.py makemigrations"$(django_args)"
+  poetry run python3 manage.py migrate"$(django_args)"
   cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
 else
   # Copying the initial database instead of applying the migrations saves a lot of time
   cp "$DB_DIR/$DB_INIT_NAME" "$DB_DIR/$DB_NAME"
 fi
 
-poetry run python3 manage.py createsuperuser --noinput "$(django_args)"
+poetry run python3 manage.py createsuperuser --noinput"$(django_args)"
 if [[ -n "$STORE_BACKEND_OUTPUT" ]]; then
-  nohup poetry run python3 manage.py runserver "$BACKEND_PORT" "$(django_args)" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+  nohup poetry run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >"$APP_DIR"/frontend/tests/utils/.testbackendoutput.out 2>&1 &
   echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-  nohup poetry run python3 manage.py runserver "$BACKEND_PORT" "$(django_args)" >/dev/null 2>&1 &
+  nohup poetry run python3 manage.py runserver "$BACKEND_PORT""$(django_args)" >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"
