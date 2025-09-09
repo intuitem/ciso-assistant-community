@@ -44,7 +44,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
-from collections import defaultdict
+from collections import defaultdict, deque
 
 logger = get_logger(__name__)
 
@@ -1838,66 +1838,59 @@ class Asset(
         return self.type == Asset.Type.SUPPORT
 
     def ancestors_plus_self(self) -> set[Self]:
-        parent_assets = {
-            a.id: a for a in Asset.objects.filter(child_assets__isnull=False)
-        }
-        all_ancestor_ids = parent_assets.keys()
-        _links = Asset.parent_assets.through.objects.filter(
-            Q(from_asset_id__in=all_ancestor_ids) | Q(to_asset_id__in=all_ancestor_ids)
-        ).values_list("from_asset_id", "to_asset_id")
-        initial_links = [(self, parent) for parent in self.parent_assets.all()]
-        links = initial_links + [
-            (parent_assets[child], parent_assets[parent])
-            for child, parent in _links
-            if child in parent_assets and parent in parent_assets
-        ]
-
-        child_to_parents = {}
-        parent_to_children = {}
-        for child_asset, parent_asset in links:
-            child_to_parents.setdefault(child_asset, set()).add(parent_asset)
-            parent_to_children.setdefault(parent_asset, set()).add(child_asset)
-        ancestors = {self}
-        q = [self]
-        visited_ancestors = {self}
-        while q:
-            curr_asset = q.pop(0)
-            for parent_asset in child_to_parents.get(curr_asset, []):
-                if parent_asset not in visited_ancestors:
-                    visited_ancestors.add(parent_asset)
-                    ancestors.add(parent_asset)
-                    q.append(parent_asset)
-        return ancestors
+        """
+        Returns a set containing the asset itself and all its ancestors using a
+        constant number of queries (2).
+        """
+        all_links = self.__class__.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+        child_to_parents_map = {}
+        for child_id, parent_id in all_links:
+            if child_id not in child_to_parents_map:
+                child_to_parents_map[child_id] = set()
+            child_to_parents_map[child_id].add(parent_id)
+        ancestor_ids = {self.pk}
+        queue = deque([self.pk])  # NOTE: using deque rather than list for O(1) pops
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in ancestor_ids:
+                    ancestor_ids.add(parent_id)
+                    queue.append(parent_id)
+        return set(self.__class__.objects.filter(pk__in=ancestor_ids))
 
     def get_children(self):
         return self.child_assets.all()
 
     def get_descendants(self) -> set[Self]:
-        asset_map = {a.id: a for a in Asset.objects.all()}
-        all_ancestor_ids = asset_map.keys()
-        _links = Asset.parent_assets.through.objects.filter(
-            Q(from_asset_id__in=all_ancestor_ids) | Q(to_asset_id__in=all_ancestor_ids)
-        ).values_list("from_asset_id", "to_asset_id")
-        links = [
-            (asset_map[child], asset_map[parent])
-            for child, parent in _links
-            if child in asset_map and parent in asset_map
-        ]
-        parent_to_children = {}
-        descendants = set()
-        for child_asset, parent_asset in links:
-            parent_to_children.setdefault(parent_asset, set()).add(child_asset)
-            q = [self]
-            visited_descendants = {self.id}
-            while q:
-                curr_asset = q.pop(0)
-                if curr_asset.id != self.id:
-                    descendants.add(curr_asset)
-                for child_asset in parent_to_children.get(curr_asset, []):
-                    if child_asset.id not in visited_descendants:
-                        visited_descendants.add(child_asset.id)
-                        q.append(child_asset)
-        return descendants
+        """
+        Returns a set of all descendant assets using a constant number of
+        queries (2).
+        """
+        all_links = self.__class__.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            if parent_id not in parent_to_children_map:
+                parent_to_children_map[parent_id] = set()
+            parent_to_children_map[parent_id].add(child_id)
+        descendant_ids = set()
+        visited_ids = {
+            self.pk
+        }  # NOTE: keeping track of visited ids as a guardrail in the unlikely event of cycles in the assets graph
+        queue = deque([self.pk])  # NOTE: using deque rather than list for O(1) pops
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_ids:
+                    visited_ids.add(child_id)
+                    descendant_ids.add(child_id)
+                    queue.append(child_id)
+        return set(self.__class__.objects.filter(pk__in=descendant_ids))
 
     @property
     def children_assets(self):
