@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -121,5 +122,47 @@
 			cacheLock={cacheLocks['observation']}
 			bind:cachedValue={formDataCache['observation']}
 		/>
+
+		<div class="space-y-2">
+			<h5 class="font-medium text-gray-600 my-2 py-2">Risk Tolerance Points</h5>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point1.probability"
+					label="Point 1 - Probability"
+					min={0.001}
+					max={0.999}
+					step={0.01}
+					helpText="Probability value (0.01-0.99)"
+				/>
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point1.acceptable_loss"
+					label="Point 1 - Acceptable Loss"
+					min={1}
+					step={1}
+					helpText="Acceptable loss amount (minimum 1)"
+				/>
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point2.probability"
+					label="Point 2 - Probability"
+					min={0.001}
+					max={0.999}
+					step={0.01}
+					helpText="Probability value (0.01-0.99)"
+				/>
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point2.acceptable_loss"
+					label="Point 2 - Acceptable Loss"
+					min={1}
+					step={1}
+					helpText="Acceptable loss amount (minimum 1)"
+				/>
+			</div>
+		</div>
 	</Dropdown>
 {/if}

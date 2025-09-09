@@ -54,7 +54,14 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="quantitative_risk_study_reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
-    risk_tolerance = models.JSONField(null=True, blank=True, default=dict)
+    risk_tolerance = models.JSONField(
+        null=True,
+        blank=True,
+        default=dict,
+        help_text=_(
+            "Risk tolerance points and curve data. Expected format: {'points': [{'probability': float, 'acceptable_loss': float}], 'curve_data': {'loss_values': [...], 'probability_values': [...]}}"
+        ),
+    )
     distribution_model = models.CharField(
         max_length=100,
         choices=Distribution_model.choices,

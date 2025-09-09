@@ -685,7 +685,36 @@ export const quantitativeRiskStudySchema = z.object({
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	risk_appetite: jsonSchema.optional(),
+	risk_tolerance: z
+		.object({
+			points: z
+				.object({
+					point1: z
+						.object({
+							probability: z.number().min(0.001).max(0.999).optional(),
+							acceptable_loss: z.number().min(1).optional()
+						})
+						.default({ probability: 0.99 })
+						.optional(),
+					point2: z
+						.object({
+							probability: z.number().min(0.001).max(0.909).optional(),
+							acceptable_loss: z.number().min(1).optional()
+						})
+						.optional()
+				})
+				.optional(),
+			curve_data: z
+				.object({
+					loss_values: z.array(z.number()).optional(),
+					probability_values: z.array(z.number()).optional()
+				})
+				.optional()
+		})
+		.optional()
+		.default({
+			points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
+		}),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	folder: z.string()
