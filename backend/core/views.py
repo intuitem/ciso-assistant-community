@@ -365,6 +365,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
 
 class ContentTypeListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
     def get(self, request, format=None):
         content_types = []
         for model in apps.get_models():
