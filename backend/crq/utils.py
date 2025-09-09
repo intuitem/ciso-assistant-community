@@ -97,9 +97,9 @@ def calculate_risk_insights(
         "expected_shortfall_99": np.mean(losses[losses >= np.percentile(losses, 99)]),
         "maximum_credible_loss": np.max(losses),
         "prob_zero_loss": np.mean(losses == 0),
+        "prob_above_10k": np.mean(losses > 10_000),
+        "prob_above_100k": np.mean(losses > 100_000),
         "prob_above_1M": np.mean(losses > 1_000_000),
-        "prob_above_10M": np.mean(losses > 10_000_000),
-        "prob_above_100M": np.mean(losses > 100_000_000),
     }
 
     # Add probability-based loss metrics if probability is provided
@@ -107,8 +107,13 @@ def calculate_risk_insights(
         # Create loss exceedance curve
         sorted_losses, exceedance_probs = create_loss_exceedance_curve(losses)
 
-        # Find losses at P/2, P/4, P/8 probability levels
-        target_probs = [probability / 2, probability / 4, probability / 8]
+        # Find losses at P/2, P/4, P/8, P/16 probability levels
+        target_probs = [
+            probability / 2,
+            probability / 4,
+            probability / 8,
+            probability / 16,
+        ]
 
         for target_prob in target_probs:
             # Find the loss value where exceedance probability is closest to target
