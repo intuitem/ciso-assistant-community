@@ -1280,26 +1280,23 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     framework = serializers.SerializerMethodField()
 
     def get_framework(self, obj):
-        from .serializer_fields import FieldsRelatedField
-
-        # Include reference_controls only for detail view
-        request = self.context.get("request")
+        fields = [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
+        # I need less info about the audit's fwk if I'm in a list view
         # maybe we can find a better way for this condition
+        request = self.context.get("request")
         is_list_view = request and (
             "limit" in request.query_params or "offset" in request.query_params
         )
 
         if is_list_view:
             fields = ["id"]
-        else:
-            fields = [
-                "id",
-                "min_score",
-                "max_score",
-                "implementation_groups_definition",
-                "ref_id",
-                "reference_controls",
-            ]
 
         return FieldsRelatedField(fields).to_representation(obj.framework)
 
