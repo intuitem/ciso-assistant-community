@@ -1219,7 +1219,7 @@
 	"workshopOne": "Atelier 1",
 	"refIdSemiColon": "ID :",
 	"addFearedEvent": "Ajouter un événement redouté",
-	"addEbiosRMstudy": "Ajouter une étude Ebios RM",
+	"addEbiosRmStudy": "Ajouter une étude Ebios RM",
 	"noAuthor": "Aucun auteur attribué",
 	"noReviewer": "Aucun relecteur assigné",
 	"selectAudit": "Sélectionner un audit",
@@ -1517,6 +1517,12 @@
 	"syncToAppliedControlsMessage": "Cette opération permettra de synchroniser votre niveau de conformité sur le statut des mesures associées. Cette opération ne pourrait pas être annulée.",
 	"syncToAppliedControlsSuccess": "La synchronisation a été réalisée avec succès",
 	"syncToAppliedControlsError": "Erreur lors de la synchronisation",
+	"syncToAppliedControlsRiskScenarioMessage": "Si toutes les mesures supplémentaires appliquées à ce scénario de risque sont actives, celles-ci seront transférées vers les mesures existantes et l'évaluation résiduelle sera réinitialisée.",
+	"syncToAppliedControlsRiskAssessmentMessage": "Les scénarios seront synchronisés au niveau de risque résiduel en fonction de la progression de leurs mesures supplémentaires.\nPour chaque scénario, si toutes ses mesures supplémentaires sont actives, elles seront déplacées vers les mesures existantes et le niveau de risque courant sera aligné sur le risque résiduel.",
+	"riskScenarioSyncWithChanges": "{ref_id} {name} - Niveau actuel : {current_level} ➡️ {residual_level}",
+	"theFollowingControlsWillBeMovedToExisting": "Les mesures suivantes seront déplacées vers les mesures existantes de ce scénario :",
+	"resetResidual": "Réinitialiser le risque résiduel",
+	"resetResidualHelpText": "L'activation de cette option réinitialisera le niveau de risque résiduel, ce qui pourrait aider à préparer une nouvelle évaluation",
 	"settingsRiskMatrixSwapAxes": "Inverser les axes",
 	"settingsRiskMatrixSwapAxesHelpText": "Cette option inverse les axes de vraisemblance et d’impact. Si elle est activée, l’impact sera affiché sur l’axe vertical (ordonnées) et la vraisemblance sur l’axe horizontal (abscisses).",
 	"settingsRiskMatrixFlipVertical": "Inverser verticalement",
@@ -2089,5 +2095,6 @@
 	"dataWizardSelectRiskMatrix": "Sélectionner une matrice de risque",
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
-	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)"
+	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
+	"nextOccurrenceStatus": "Statut de la prochaine occurrence"
 }

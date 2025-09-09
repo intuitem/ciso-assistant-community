@@ -3170,6 +3170,17 @@ class RiskAssessment(Assessment):
             )
         return output
 
+    def sync_to_applied_controls(self, reset_residual=False, dry_run: bool = False):
+        scenarios: list[RiskScenario] = list(self.risk_scenarios.all())
+        changed_scenarios = list()
+        for scenario in scenarios:
+            cur = scenario.sync_to_applied_controls(
+                reset_residual=reset_residual, dry_run=dry_run
+            )
+            if len(cur) > 0:
+                changed_scenarios.append(scenario)
+        return changed_scenarios
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
@@ -3748,6 +3759,32 @@ class RiskScenario(NameDescriptionMixin):
         if self.strength_of_knowledge < 0:
             return self.DEFAULT_SOK_OPTIONS[-1]
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
+
+    def sync_to_applied_controls(self, reset_residual=False, dry_run=True):
+        """
+        If all extra controls are active, move them to existing controls and reset the residual assessment.
+
+        Params:
+            dry_run (bool): if True, do not actually perform the operation, just return the list of controls that would be moved.
+        """
+        extra_controls = list(self.applied_controls.all())
+        if not extra_controls:
+            return []
+        if not all(
+            [ac.status == AppliedControl.Status.ACTIVE for ac in extra_controls]
+        ):
+            return []
+        if not dry_run:
+            with transaction.atomic():
+                self.current_impact = self.residual_impact
+                self.current_proba = self.residual_proba
+                self.existing_applied_controls.add(*extra_controls)
+                self.applied_controls.clear()
+                if reset_residual:
+                    self.residual_impact = -1
+                    self.residual_proba = -1
+                self.save()
+        return extra_controls
 
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
@@ -5187,21 +5224,46 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Link"),
     )
 
-    @property
-    def next_occurrence(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__gte=today
-        ).order_by("due_date")
-        return task_nodes.first().due_date if task_nodes.exists() else None
+    def _get_task_node_value(self, field, date_filter=None, order_by=None):
+        queryset = TaskNode.objects.filter(task_template=self)
+        if date_filter:
+            queryset = queryset.filter(**date_filter)
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        return queryset.values_list(field, flat=True).first()
 
-    @property
-    def last_occurrence_status(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__lte=today
-        ).order_by("-due_date")
-        return task_nodes[0].status if task_nodes.exists() else None
+    def get_next_occurrence(self):
+        annotated = getattr(self, "next_occurrence", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("due_date")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "due_date", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
+
+    def get_last_occurrence_status(self):
+        if not self.is_recurrent:
+            return None
+        annotated = getattr(self, "last_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__lt": today}, order_by="-due_date"
+        )
+
+    def get_next_occurrence_status(self):
+        annotated = getattr(self, "next_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("status")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
 
     class Meta:
         verbose_name = "Task template"

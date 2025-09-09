@@ -1057,7 +1057,7 @@
 	"workshopOne": "Workshop 1",
 	"refIdSemiColon": "ID di riferimento:",
 	"addFearedEvent": "Aggiungi evento temuto",
-	"addEbiosRMstudy": "Aggiungi studio Ebios RM",
+	"addEbiosRmStudy": "Aggiungi studio Ebios RM",
 	"noAuthor": "Nessun autore assegnato",
 	"noReviewer": "Nessun revisore assegnato",
 	"selectAudit": "Seleziona audit",
@@ -1341,6 +1341,7 @@
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
 	"saveAndContinue": "Salva e continua",
+	"nextOccurrenceStatus": "Stato prossima occorrenza",
 	"actor": "Attore",
 	"action": "Azione"
 }
