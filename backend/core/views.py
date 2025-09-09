@@ -671,6 +671,7 @@ class AssetViewSet(BaseModelViewSet):
                 "owner",
                 "security_exceptions",
                 "filtering_labels",
+                "personal_data",
             )
         )
 
@@ -680,139 +681,39 @@ class AssetViewSet(BaseModelViewSet):
         and descendants, ensuring maximum query efficiency.
         """
         optimized_data = super()._get_optimized_object_data(queryset)
-
         initial_assets = list(queryset)
         if not initial_assets:
             return optimized_data
 
-        initial_ids = {asset.id for asset in initial_assets}
+        graph_data = Asset._prefetch_graph_data(initial_assets)
+        child_to_parents = graph_data["child_to_parents"]
+        parent_to_children = graph_data["parent_to_children"]
 
-        # Find all unique ancestors for the assets in the queryset.
-        # Needed for calculating inherited objectives.
-        all_ancestor_ids = set(initial_ids)
-        level_ids = set(initial_ids)
-        while level_ids:
-            parent_ids = set(
-                Asset.parent_assets.through.objects.filter(
-                    from_asset_id__in=level_ids
-                ).values_list("to_asset_id", flat=True)
-            )
-            new_parent_ids = parent_ids - all_ancestor_ids
-            if not new_parent_ids:
-                break
-            all_ancestor_ids.update(new_parent_ids)
-            level_ids = new_parent_ids
-
-        all_related_assets = Asset.objects.filter(id__in=all_ancestor_ids)
-        asset_map = {asset.id: asset for asset in all_related_assets}
-
-        _links = Asset.parent_assets.through.objects.filter(
-            Q(from_asset_id__in=all_ancestor_ids) | Q(to_asset_id__in=all_ancestor_ids)
-        ).values_list("from_asset_id", "to_asset_id")
-        links = [
-            (asset_map[child], asset_map[parent])
-            for child, parent in _links
-            if child in asset_map and parent in asset_map
-        ]
-
-        child_to_parents = {}
-        parent_to_children = {}
-        for child_asset, parent_asset in links:
-            child_to_parents.setdefault(child_asset, set()).add(parent_asset)
-            parent_to_children.setdefault(parent_asset, set()).add(child_asset)
-
-        # Cache settings and prepare result dictionaries.
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        scale = (
-            general_settings.value.get("security_objective_scale", "1-4")
-            if general_settings
-            else "1-4"
-        )
-
+        scale = Asset._get_security_objective_scale()
         sec_obj_results = {}
         dro_obj_results = {}
         descendant_results = {}
 
         for asset in initial_assets:
-            # Calculate descendants
-            descendants = set()
-            q = [asset]
-            visited_descendants = {asset.id}
-            while q:
-                curr_asset = q.pop(0)
-                if curr_asset.id != asset.id:
-                    descendants.add(curr_asset)
-                for child_asset in parent_to_children.get(curr_asset, []):
-                    if child_asset.id not in visited_descendants:
-                        visited_descendants.add(child_asset.id)
-                        q.append(child_asset)
+            # Calculate and store descendants.
+            descendants = Asset._get_all_descendants(asset, parent_to_children)
             descendant_results[asset.id] = [
-                {"id": str(descendant.id), "str": str(descendant)}
-                for descendant in descendants
+                {"id": str(d.id), "str": str(d)} for d in descendants
             ]
 
-            # Calculate objectives
+            # Calculate and store objectives.
             if asset.is_primary:
-                # For primary assets, objectives are taken directly from the model.
-                sec_obj_results[asset.id] = self._format_security_objectives(
-                    asset.security_objectives.get("objectives", {}), scale
-                )
-                dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
-                    asset.disaster_recovery_objectives.get("objectives", {})
-                )
-                continue
+                sec_obj = asset.security_objectives.get("objectives", {})
+                dro_obj = asset.disaster_recovery_objectives.get("objectives", {})
+            else:
+                ancestors = Asset._get_all_ancestors(asset, child_to_parents)
+                primary_ancestors = {anc for anc in ancestors if anc.is_primary}
+                sec_obj = Asset._aggregate_security_objectives(primary_ancestors)
+                dro_obj = Asset._aggregate_dro_objectives(primary_ancestors)
 
-            # For support assets, find all ancestors using the pre-fetched map.
-            ancestors = set()
-            q = [asset]
-            visited_ancestors = {asset}
-            while q:
-                curr_asset = q.pop(0)
-                for parent_asset in child_to_parents.get(curr_asset, []):
-                    if parent_asset not in visited_ancestors:
-                        visited_ancestors.add(parent_asset)
-                        ancestors.add(parent_asset)
-                        q.append(parent_asset)
-
-            primary_ancestors = {anc for anc in ancestors if anc.is_primary}
-
-            # Aggregate security objectives (highest value wins)
-            agg_sec_obj = {}
-            for p_asset in primary_ancestors:
-                for key, content in p_asset.security_objectives.get(
-                    "objectives", {}
-                ).items():
-                    if not content.get("is_enabled", False):
-                        continue
-                    if key not in agg_sec_obj:
-                        agg_sec_obj[key] = content.copy()
-                    else:
-                        agg_sec_obj[key]["value"] = max(
-                            agg_sec_obj[key].get("value", 0), content.get("value", 0)
-                        )
-
-            # Aggregate disaster recovery objectives (lowest value wins)
-            agg_dro_obj = {}
-            for p_asset in primary_ancestors:
-                for key, content in p_asset.disaster_recovery_objectives.get(
-                    "objectives", {}
-                ).items():
-                    if key not in agg_dro_obj:
-                        agg_dro_obj[key] = content.copy()
-                    else:
-                        # Ensure we handle cases where 'value' might be missing
-                        current_val = agg_dro_obj[key].get("value")
-                        new_val = content.get("value")
-                        if current_val is not None and new_val is not None:
-                            agg_dro_obj[key]["value"] = min(current_val, new_val)
-                        elif new_val is not None:
-                            agg_dro_obj[key]["value"] = new_val
-
-            sec_obj_results[asset.id] = self._format_security_objectives(
-                agg_sec_obj, scale
-            )
+            sec_obj_results[asset.id] = self._format_security_objectives(sec_obj, scale)
             dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
-                agg_dro_obj
+                dro_obj
             )
 
         optimized_data.update(
@@ -822,7 +723,6 @@ class AssetViewSet(BaseModelViewSet):
                 "descendants": descendant_results,
             }
         )
-
         return optimized_data
 
     def _format_security_objectives(self, objectives, scale):

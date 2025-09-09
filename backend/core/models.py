@@ -1898,6 +1898,136 @@ class Asset(
         descendant_ids = [d.id for d in descendants]
         return Asset.objects.filter(id__in=descendant_ids).exclude(id=self.id)
 
+    @classmethod
+    def _prefetch_graph_data(cls, initial_assets: list) -> dict:
+        """
+        Finds all ancestors and descendants of the initial assets, then fetches
+        only the relevant subgraph of objects and links for efficient in-memory traversal.
+        """
+        initial_ids = {asset.id for asset in initial_assets}
+        all_relevant_ids = set(initial_ids)
+
+        # Iteratively find all ancestor IDs
+        ids_to_process = set(initial_ids)
+        while ids_to_process:
+            parent_ids = set(
+                Asset.parent_assets.through.objects.filter(
+                    from_asset_id__in=ids_to_process
+                ).values_list("to_asset_id", flat=True)
+            )
+
+            new_ids = parent_ids - all_relevant_ids
+            if not new_ids:
+                break
+            all_relevant_ids.update(new_ids)
+            ids_to_process = new_ids
+
+        # Iteratively find all descendant IDs
+        ids_to_process = set(initial_ids)
+        while ids_to_process:
+            child_ids = set(
+                Asset.parent_assets.through.objects.filter(
+                    to_asset_id__in=ids_to_process
+                ).values_list("from_asset_id", flat=True)
+            )
+
+            new_ids = child_ids - all_relevant_ids
+            if not new_ids:
+                break
+            all_relevant_ids.update(new_ids)
+            ids_to_process = new_ids
+
+        # Now fetch only the objects and links within this relevant subgraph
+        asset_map = {a.id: a for a in Asset.objects.filter(id__in=all_relevant_ids)}
+
+        links = Asset.parent_assets.through.objects.filter(
+            from_asset_id__in=all_relevant_ids, to_asset_id__in=all_relevant_ids
+        ).values_list("from_asset_id", "to_asset_id")
+
+        # Build the object maps for in-memory traversal
+        obj_child_to_parents = {}
+        obj_parent_to_children = {}
+        for child_id, parent_id in links:
+            child_obj = asset_map.get(child_id)
+            parent_obj = asset_map.get(parent_id)
+            if child_obj and parent_obj:
+                obj_child_to_parents.setdefault(child_obj, set()).add(parent_obj)
+                obj_parent_to_children.setdefault(parent_obj, set()).add(child_obj)
+
+        return {
+            "child_to_parents": obj_child_to_parents,
+            "parent_to_children": obj_parent_to_children,
+        }
+
+    @classmethod
+    def _get_all_descendants(cls, start_asset, parent_to_children: dict) -> set:
+        """Performs an in-memory BFS to find all descendants."""
+        descendants = set()
+        queue = deque([start_asset])
+        visited = {start_asset}
+        while queue:
+            current = queue.popleft()
+            for child in parent_to_children.get(current, set()):
+                if child not in visited:
+                    visited.add(child)
+                    descendants.add(child)
+                    queue.append(child)
+        return descendants
+
+    @classmethod
+    def _get_all_ancestors(cls, start_asset, child_to_parents: dict) -> set:
+        """Performs an in-memory BFS to find all ancestors."""
+        ancestors = set()
+        queue = deque([start_asset])
+        visited = {start_asset}
+        while queue:
+            current = queue.popleft()
+            for parent in child_to_parents.get(current, set()):
+                if parent not in visited:
+                    visited.add(parent)
+                    ancestors.add(parent)
+                    queue.append(parent)
+        return ancestors
+
+    @classmethod
+    def _aggregate_security_objectives(cls, primary_ancestors: set) -> dict:
+        """Aggregates security objectives from primary ancestors (highest value wins)."""
+        agg_obj = {}
+        for asset in primary_ancestors:
+            objectives = asset.security_objectives.get("objectives", {})
+            for key, content in objectives.items():
+                if not content.get("is_enabled", False):
+                    continue
+
+                value = content.get("value", 0)
+                if key not in agg_obj or value > agg_obj[key].get("value", 0):
+                    agg_obj[key] = content.copy()
+        return agg_obj
+
+    @classmethod
+    def _aggregate_dro_objectives(cls, primary_ancestors: set) -> dict:
+        """Aggregates DRO objectives from primary ancestors (lowest value wins)."""
+        agg_obj = {}
+        for asset in primary_ancestors:
+            objectives = asset.disaster_recovery_objectives.get("objectives", {})
+            for key, content in objectives.items():
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                current_value = agg_obj.get(key, {}).get("value")
+                if current_value is None or value < current_value:
+                    agg_obj[key] = content.copy()
+        return agg_obj
+
+    @classmethod
+    def _get_security_objective_scale(cls) -> str:
+        """Fetches the global setting for the security objective scale."""
+        settings = GlobalSettings.objects.filter(name="general").first()
+        if settings:
+            return settings.value.get("security_objective_scale", "1-4")
+        return "1-4"
+
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
         Gets the security objectives of a given asset.
