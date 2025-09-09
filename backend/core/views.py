@@ -576,6 +576,19 @@ class AssetViewSet(BaseModelViewSet):
     filterset_class = AssetFilter
     search_fields = ["name", "description", "ref_id"]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            "folder",
+            "asset_class",
+        ).prefetch_related(
+            "parent_assets",
+            "owner",
+            "filtering_labels",
+            "security_exceptions",
+            "personal_data",
+        )
+
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")
         if type == Asset.Type.PRIMARY:
