@@ -9,7 +9,7 @@ def migrate_qualifications_to_terminology(apps, schema_editor):
     Migrate data from old qualifications field (Qualification model)
     to new qualifications field (Terminology model) by matching names
     """
-    EscalationThresholds = apps.get_model("ebios_rm", "EscalationThresholds")
+    EscalationThresholds = apps.get_model("resilience", "EscalationThresholds")
     Terminology = apps.get_model("core", "Terminology")
 
     db_alias = schema_editor.connection.alias
