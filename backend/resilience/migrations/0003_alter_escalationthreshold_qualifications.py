@@ -9,13 +9,13 @@ def migrate_qualifications_to_terminology(apps, schema_editor):
     Migrate data from old qualifications field (Qualification model)
     to new qualifications field (Terminology model) by matching names
     """
-    EscalationThresholds = apps.get_model("resilience", "EscalationThresholds")
+    EscalationThreshold = apps.get_model("resilience", "EscalationThreshold")
     Terminology = apps.get_model("core", "Terminology")
 
     db_alias = schema_editor.connection.alias
 
     for escalation_thresholds in (
-        EscalationThresholds.objects.using(db_alias)
+        EscalationThreshold.objects.using(db_alias)
         .prefetch_related("qualifications")
         .all()
     ):
