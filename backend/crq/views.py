@@ -283,12 +283,12 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
         # Get all scenarios for this study
         scenarios = quantitative_risk_study.risk_scenarios.all()
 
-        # Get all hypotheses from these scenarios
+        # Get all hypotheses from these scenarios that are selected
         hypotheses = QuantitativeRiskHypothesis.objects.filter(
-            quantitative_risk_scenario__in=scenarios
+            quantitative_risk_scenario__in=scenarios, is_selected=True
         )
 
-        # Get all added controls from these hypotheses
+        # Get all added controls from these selected hypotheses
         return AppliedControl.objects.filter(
             quantitative_risk_hypotheses_added__in=hypotheses
         ).distinct()

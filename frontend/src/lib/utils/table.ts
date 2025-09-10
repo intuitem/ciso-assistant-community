@@ -1584,6 +1584,7 @@ export const listViewFields = {
 			'simulationParameters',
 			'lecChart',
 			'ale',
+			'addedAppliedControls',
 			'treatmentCost',
 			'rocDisplay',
 			'isSelected'
@@ -1595,6 +1596,7 @@ export const listViewFields = {
 			'simulation_parameters_display',
 			'lec_data',
 			'ale',
+			'added_applied_controls',
 			'treatment_cost',
 			'roc_display',
 			'is_selected'

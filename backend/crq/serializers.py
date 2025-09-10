@@ -126,6 +126,41 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
         model = QuantitativeRiskHypothesis
         fields = "__all__"
 
+    def validate(self, attrs):
+        """
+        Validate that only one residual hypothesis per scenario can be selected at a time.
+        """
+        attrs = super().validate(attrs)
+
+        # Only validate if is_selected is being set to True and risk_stage is residual
+        is_selected = attrs.get("is_selected", False)
+        risk_stage = attrs.get("risk_stage")
+        scenario = attrs.get("quantitative_risk_scenario")
+
+        if is_selected and risk_stage == "residual" and scenario:
+            # Check if there are other selected residual hypotheses in the same scenario
+            existing_selected_residual = QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=scenario,
+                risk_stage="residual",
+                is_selected=True,
+            )
+
+            # Exclude the current instance if we're updating
+            if self.instance:
+                existing_selected_residual = existing_selected_residual.exclude(
+                    id=self.instance.id
+                )
+
+            if existing_selected_residual.exists():
+                selected_hypothesis = existing_selected_residual.first()
+                raise serializers.ValidationError(
+                    {
+                        "is_selected": f'Another residual hypothesis "{selected_hypothesis.name}" is already selected for this scenario. Only one residual hypothesis can be selected per scenario.'
+                    }
+                )
+
+        return attrs
+
 
 class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     quantitative_risk_scenario = FieldsRelatedField()
