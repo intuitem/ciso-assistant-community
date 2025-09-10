@@ -2121,6 +2121,7 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published", "builtin"]
+        exclude = ["folder", "is_published"]

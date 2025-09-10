@@ -88,7 +88,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="qualifications"
+	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
 	label={m.qualifications()}
 	helpText={m.fearedEventQualificationHelpText()}

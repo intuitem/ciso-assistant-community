@@ -959,6 +959,234 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
+class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    """
+    Model to store custom terminology for the application
+    """
+
+    class FieldPath(models.TextChoices):
+        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+        QUALIFICATIONS = "qualifications", "qualifications"
+
+    DEFAULT_ROTO_RISK_ORIGINS = [
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_QUALIFICATIONS = [
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "integrity",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "availability",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "proof",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "authenticity",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "privacy",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "safety",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "reputation",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "operational",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "legal",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "financial",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "Governance",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "missions_and_organizational_services",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "human",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "material",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "environmental",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "image",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "trust",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+    ]
+
+    field_path = models.CharField(
+        max_length=100,
+        verbose_name=_("Field path"),
+        choices=FieldPath.choices,
+    )
+    builtin = models.BooleanField(
+        default=False,
+        verbose_name=_("Built-in"),
+        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Visible"),
+        help_text=_("Indicates if the terminology is visible in the UI"),
+    )
+    translations = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name=_("Translations"),
+        help_text=_("JSON field to store translations for different languages"),
+    )
+
+    @classmethod
+    def create_default_roto_risk_origins(cls):
+        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
+            Terminology.objects.update_or_create(
+                name=risk_origin["name"],
+                field_path=risk_origin["field_path"],
+                defaults=risk_origin,
+            )
+
+    @classmethod
+    def create_default_qualifications(cls):
+        for qualification in cls.DEFAULT_QUALIFICATIONS:
+            Terminology.objects.update_or_create(
+                name=qualification["name"],
+                field_path=qualification["field_path"],
+                defaults=qualification,
+            )
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations or self.name
+
+    def __str__(self) -> str:
+        return self.get_name_translated or self.name
+
+
 class Threat(
     ReferentialObjectMixin,
     I18nObjectMixin,
@@ -2676,10 +2904,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
     qualifications = models.ManyToManyField(
-        Qualification,
-        related_name="incidents",
-        verbose_name="Qualifications",
-        blank=True,
+        Terminology,
+        verbose_name="Qualification",
+        related_name="incidents_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
     )
 
     reported_at = models.DateTimeField(
@@ -3819,7 +4050,15 @@ class RiskScenario(NameDescriptionMixin):
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
 
-    qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
+    qualifications = models.ManyToManyField(
+        Terminology,
+        verbose_name="Qualification",
+        related_name="risk_scenarios_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+    )
 
     strength_of_knowledge = models.IntegerField(
         default=-1,
@@ -5614,110 +5853,3 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
-
-
-class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
-    """
-    Model to store custom terminology for the application
-    """
-
-    class FieldPath(models.TextChoices):
-        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
-
-    DEFAULT_ROTO_RISK_ORIGINS = [
-        {
-            "name": "state",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "organized_crime",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "terrorist",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "activist",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "competitor",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "amateur",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "avenger",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "pathological",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-        {
-            "name": "other",
-            "builtin": True,
-            "field_path": FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
-    ]
-
-    field_path = models.CharField(
-        max_length=100,
-        verbose_name=_("Field path"),
-        choices=FieldPath.choices,
-    )
-    builtin = models.BooleanField(
-        default=False,
-        verbose_name=_("Built-in"),
-        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
-    )
-    is_visible = models.BooleanField(
-        default=True,
-        verbose_name=_("Is Visible"),
-        help_text=_("Indicates if the terminology is visible in the UI"),
-    )
-    translations = models.JSONField(
-        default=dict,
-        blank=True,
-        null=True,
-        verbose_name=_("Translations"),
-        help_text=_("JSON field to store translations for different languages"),
-    )
-
-    @classmethod
-    def create_default_roto_risk_origins(cls):
-        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
-            Terminology.objects.update_or_create(
-                name=risk_origin["name"],
-                field_path=risk_origin["field_path"],
-                defaults=risk_origin,
-            )
-
-    @property
-    def get_name_translated(self) -> str:
-        translations = self.translations if self.translations else {}
-        locale_translations = translations.get(get_language(), {})
-        return locale_translations or self.name
-
-    def __str__(self) -> str:
-        return self.get_name_translated or self.name

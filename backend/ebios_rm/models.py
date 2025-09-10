@@ -266,11 +266,13 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         help_text=_("Assets that are affected by the feared event"),
     )
     qualifications = models.ManyToManyField(
-        Qualification,
-        blank=True,
-        verbose_name=_("Qualifications"),
-        related_name="feared_events",
-        help_text=_("Qualifications carried by the feared event"),
+        Terminology,
+        verbose_name="Qualification",
+        related_name="feared_events_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
