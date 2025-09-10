@@ -264,11 +264,11 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
     """
 
     # Override to exclude cost field which causes JSONField filtering issues
-    filterset_fields = {
-        field: lookups
-        for field, lookups in ActionPlanList.filterset_fields.items()
-        if field != "cost"
-    }
+    # filterset_fields = {
+    #     field: lookups
+    #     for field, lookups in ActionPlanList.filterset_fields.items()
+    #     if field != "cost"
+    # }
 
     def get_serializer_class(self):
         from .serializers import QuantitativeRiskStudyActionPlanSerializer

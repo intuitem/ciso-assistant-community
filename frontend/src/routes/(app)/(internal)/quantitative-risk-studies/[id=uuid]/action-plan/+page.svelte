@@ -14,11 +14,11 @@
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
-		csf_function: 'csfFunction',
-		eta: 'eta',
-		expiry_date: 'expiryDate',
 		effort: 'effort',
-		quantitative_risk_scenarios: 'affectedScenarios'
+    annual_cost: 'cost',
+    control_impact: "controlImpact",
+		eta: 'eta',
+		quantitative_risk_scenarios: 'scenarios'
 	};
 
 	const appliedControls: TableSource = {
@@ -32,7 +32,7 @@ $inspect(data);
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.perimeter()}:
+		{m.folder()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/folders/{data.quantitative_risk_study.folder.id}/"
@@ -73,10 +73,10 @@ $inspect(data);
 				'status',
 				'priority',
 				'category',
-				'csf_function',
-				'eta',
-				'expiry_date',
 				'effort',
+        'annual_cost',
+        'control_impact',
+				'eta',
 				'quantitative_risk_scenarios'
 			]}
 		/>
