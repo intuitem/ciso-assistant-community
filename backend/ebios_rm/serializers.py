@@ -92,7 +92,7 @@ class FearedEventWriteSerializer(BaseModelSerializer):
 
 class FearedEventReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
-    qualifications = FieldsRelatedField(["name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     gravity = serializers.JSONField(source="get_gravity_display")
     folder = FieldsRelatedField()

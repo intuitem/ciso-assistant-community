@@ -4,16 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0094_alter_incident_qualifications_and_more'),
-        ('resilience', '0002_businessimpactanalysis_is_locked'),
+        ("core", "0094_alter_incident_qualifications_and_more"),
+        ("resilience", "0002_businessimpactanalysis_is_locked"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='escalationthreshold',
-            name='qualifications',
-            field=models.ManyToManyField(limit_choices_to={'field_path': 'qualifications', 'is_visible': True}, related_name='escalation_thresholds_qualifications', to='core.terminology', verbose_name='Qualification'),
+            model_name="escalationthreshold",
+            name="qualifications",
+            field=models.ManyToManyField(
+                limit_choices_to={"field_path": "qualifications", "is_visible": True},
+                related_name="escalation_thresholds_qualifications",
+                to="core.terminology",
+                verbose_name="Qualification",
+            ),
         ),
     ]

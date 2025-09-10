@@ -25,14 +25,14 @@ def restore_qualifications_from_terminology(apps, schema_editor):
     """
     Restaure les relations vers les objets Terminology correspondants
     """
-    FearedEvent = apps.get_model('ebios_rm', 'FearedEvent')
-    Terminology = apps.get_model('core', 'Terminology')
-    
+    FearedEvent = apps.get_model("ebios_rm", "FearedEvent")
+    Terminology = apps.get_model("core", "Terminology")
+
     # Mapping entre les noms de qualifications et terminology
     qualification_mapping = {
         "Confidentiality": "Integrity",  # À ajuster selon vos besoins
         "Integrity": "Integrity",
-        "Availability": "Availability", 
+        "Availability": "Availability",
         "Proof": "Proof",
         "Authenticity": "Authenticity",
         "Privacy": "Privacy",
@@ -45,11 +45,11 @@ def restore_qualifications_from_terminology(apps, schema_editor):
         "Missions and Organizational Services": "Missions and Organizational Services",
         "Human": "Human",
         "Material": "Material",
-        "Environmental": "Environmental", 
+        "Environmental": "Environmental",
         "Image": "Image",
         "Trust": "Trust",
     }
-    
+
     db_alias = schema_editor.connection.alias
     with schema_editor.connection.cursor() as cursor:
         # Récupérer les relations sauvegardées
@@ -57,22 +57,25 @@ def restore_qualifications_from_terminology(apps, schema_editor):
             SELECT fearedevent_id, qualification_name, qualification_urn
             FROM temp_fearedevent_qualifications
         """)
-        
+
         for feared_event_id, qual_name, qual_urn in cursor.fetchall():
             try:
                 feared_event = FearedEvent.objects.get(id=feared_event_id)
                 terminology_name = qualification_mapping.get(qual_name, qual_name)
-                
+
                 try:
                     terminology = Terminology.objects.get(
-                        name=terminology_name,
-                        field_path='qualifications'
+                        name=terminology_name, field_path="qualifications"
                     )
                     feared_event.qualifications.add(terminology)
-                    print(f"Migrated: {qual_name} -> {terminology_name} for FearedEvent {feared_event_id}")
+                    print(
+                        f"Migrated: {qual_name} -> {terminology_name} for FearedEvent {feared_event_id}"
+                    )
                 except Terminology.DoesNotExist:
-                    print(f"Warning: Terminology '{terminology_name}' not found for qualification '{qual_name}'")
-                    
+                    print(
+                        f"Warning: Terminology '{terminology_name}' not found for qualification '{qual_name}'"
+                    )
+
             except FearedEvent.DoesNotExist:
                 print(f"Warning: FearedEvent {feared_event_id} not found")
 
@@ -88,35 +91,26 @@ def cleanup_temp_table(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0094_alter_incident_qualifications_and_more'),
-        ('ebios_rm', '0015_replace_risk_origin'),
+        ("core", "0094_alter_incident_qualifications_and_more"),
+        ("ebios_rm", "0015_replace_risk_origin"),
     ]
 
     operations = [
         # Étape 1: Sauvegarder les données existantes
-        migrations.RunPython(
-            save_existing_qualifications
-        ),
-        
+        migrations.RunPython(save_existing_qualifications),
         # Étape 2: Altérer le champ (cela supprime l'ancienne relation)
         migrations.AlterField(
-            model_name='fearedevent',
-            name='qualifications', 
+            model_name="fearedevent",
+            name="qualifications",
             field=models.ManyToManyField(
-                limit_choices_to={'field_path': 'qualifications', 'is_visible': True}, 
-                related_name='feared_events_qualifications', 
-                to='core.terminology', 
-                verbose_name='Qualification'
+                limit_choices_to={"field_path": "qualifications", "is_visible": True},
+                related_name="feared_events_qualifications",
+                to="core.terminology",
+                verbose_name="Qualification",
             ),
         ),
-        
         # Étape 3: Restaurer les données vers les nouveaux objets
-        migrations.RunPython(
-            restore_qualifications_from_terminology
-        ),
-        
+        migrations.RunPython(restore_qualifications_from_terminology),
         # Étape 4: Nettoyer la table temporaire
-        migrations.RunPython(
-            cleanup_temp_table
-        ),
+        migrations.RunPython(cleanup_temp_table),
     ]

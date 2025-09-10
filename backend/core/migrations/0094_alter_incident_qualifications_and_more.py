@@ -4,29 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0093_alter_asset_parent_assets'),
+        ("core", "0093_alter_asset_parent_assets"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='incident',
-            name='qualifications',
-            field=models.ManyToManyField(limit_choices_to={'field_path': 'qualifications', 'is_visible': True}, related_name='incidents_qualifications', to='core.terminology', verbose_name='Qualification'),
+            model_name="incident",
+            name="qualifications",
+            field=models.ManyToManyField(
+                limit_choices_to={"field_path": "qualifications", "is_visible": True},
+                related_name="incidents_qualifications",
+                to="core.terminology",
+                verbose_name="Qualification",
+            ),
         ),
         migrations.RemoveField(
-            model_name='riskscenario',
-            name='qualifications',
+            model_name="riskscenario",
+            name="qualifications",
         ),
         migrations.AlterField(
-            model_name='terminology',
-            name='field_path',
-            field=models.CharField(choices=[('ro_to.risk_origin', 'ro_to/risk_origin'), ('qualifications', 'qualifications')], max_length=100, verbose_name='Field path'),
+            model_name="terminology",
+            name="field_path",
+            field=models.CharField(
+                choices=[
+                    ("ro_to.risk_origin", "ro_to/risk_origin"),
+                    ("qualifications", "qualifications"),
+                ],
+                max_length=100,
+                verbose_name="Field path",
+            ),
         ),
         migrations.AddField(
-            model_name='riskscenario',
-            name='qualifications',
-            field=models.ManyToManyField(limit_choices_to={'field_path': 'qualifications', 'is_visible': True}, related_name='risk_scenarios_qualifications', to='core.terminology', verbose_name='Qualification'),
+            model_name="riskscenario",
+            name="qualifications",
+            field=models.ManyToManyField(
+                limit_choices_to={"field_path": "qualifications", "is_visible": True},
+                related_name="risk_scenarios_qualifications",
+                to="core.terminology",
+                verbose_name="Qualification",
+            ),
         ),
     ]
