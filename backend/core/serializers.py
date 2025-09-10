@@ -855,6 +855,30 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
 
+class AppliedControlListSerializer(AppliedControlReadSerializer):
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "ref_id",
+            "id",
+            "name",
+            "description",
+            "path",
+            "folder",
+            "status",
+            "is_assigned",
+            "eta",
+            "owner",
+            "findings_count",
+            "created_at",
+            "updated_at",
+            "priority",
+            "category",
+            "filtering_labels",
+            "owner",
+        ]
+
+
 class ActionPlanSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
@@ -1435,11 +1459,11 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     framework = FieldsRelatedField(
         [
             "id",
-            # "min_score",
-            # "max_score",
-            # "implementation_groups_definition",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
             "ref_id",
-            # "reference_controls",
+            "reference_controls",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
