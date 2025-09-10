@@ -332,6 +332,24 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_labels.append(str(new_label.id))
         return new_labels
 
+    def list(self, request, *args, **kwargs):
+        """
+        Override the list method to inject optimized data into the serializer context.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        objects = page if page is not None else queryset
+        # 1. Perform the bulk calculation for the current page (or entire set if not paginated)
+        optimized_data = self._get_optimized_object_data(objects)
+        # 2. Pass the data to the serializer via context
+        context = self.get_serializer_context()
+        context["optimized_data"] = optimized_data
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True, context=context)
+        return Response(serializer.data)
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -355,6 +373,44 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         return super().destroy(request, *args, **kwargs)
+
+    def _get_optimized_object_data(self, queryset):
+        """
+        Calculate folder full paths for objects in the queryset in 1 DB request.
+        """
+        initial_objects = list(queryset)
+        if not initial_objects:
+            return {}
+
+        path_results = {}
+        folders = {f.id: f for f in Folder.objects.all()}
+        for obj in initial_objects:
+            path = []
+            if hasattr(obj, "folder"):
+                queue = deque([obj.folder.id])
+            elif hasattr(obj, "parent_folder") and obj.parent_folder:
+                queue = deque([obj.parent_folder.id])
+            else:
+                continue
+            while queue:
+                folder_id = queue.popleft()
+                folder = folders[folder_id]
+                path.append(
+                    {
+                        "str": str(folder),
+                        "id": folder.id,
+                        "parent_id": folder.parent_folder.id
+                        if folder.parent_folder
+                        else None,
+                    }
+                )
+                if folder.parent_folder:
+                    queue.append(folder.parent_folder.id)
+            path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
+
+        return {
+            "paths": path_results,
+        }
 
     class Meta:
         abstract = True
@@ -502,6 +558,20 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
     search_fields = ["name", "provider", "description"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "library",  # FieldsRelatedField includes library
+            )
+            .prefetch_related(
+                "filtering_labels__folder",  # FieldsRelatedField includes folder
+            )
+        )
+
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -539,14 +609,13 @@ class ThreatViewSet(BaseModelViewSet):
 
 
 class AssetFilter(GenericFilterSet):
-    exclude_childrens = df.ModelChoiceFilter(
+    exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
-        method="filter_exclude_childrens",
-        label="Exclude childrens",
+        method="filter_exclude_children",
+        label="Exclude children",
     )
 
-    def filter_exclude_childrens(self, queryset, name, value):
-        print(value.get_descendants())
+    def filter_exclude_children(self, queryset, name, value):
         descendants = value.get_descendants()
         return queryset.exclude(id__in=[descendant.id for descendant in descendants])
 
@@ -556,7 +625,7 @@ class AssetFilter(GenericFilterSet):
             "folder",
             "type",
             "parent_assets",
-            "exclude_childrens",
+            "exclude_children",
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
@@ -575,6 +644,117 @@ class AssetViewSet(BaseModelViewSet):
     model = Asset
     filterset_class = AssetFilter
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self) -> models.query.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("asset_class", "folder")
+            .prefetch_related(
+                "parent_assets",
+                "child_assets",
+                "owner",
+                "security_exceptions",
+                "filtering_labels",
+                "personal_data",
+            )
+        )
+
+    def _get_optimized_object_data(self, queryset):
+        """
+        Extends the base optimization to add asset-specific data for objectives
+        and descendants, ensuring maximum query efficiency.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        initial_assets = list(queryset)
+        if not initial_assets:
+            return optimized_data
+
+        graph_data = Asset._prefetch_graph_data(initial_assets)
+        child_to_parents = graph_data["child_to_parents"]
+        parent_to_children = graph_data["parent_to_children"]
+
+        scale = Asset._get_security_objective_scale()
+        sec_obj_results = {}
+        dro_obj_results = {}
+        descendant_results = {}
+
+        for asset in initial_assets:
+            # Calculate and store descendants.
+            descendants = Asset._get_all_descendants(asset, parent_to_children)
+            descendant_results[asset.id] = [
+                {"id": str(d.id), "str": str(d)} for d in descendants
+            ]
+
+            # Calculate and store objectives.
+            if asset.is_primary:
+                sec_obj = asset.security_objectives.get("objectives", {})
+                dro_obj = asset.disaster_recovery_objectives.get("objectives", {})
+            else:
+                ancestors = Asset._get_all_ancestors(asset, child_to_parents)
+                primary_ancestors = {anc for anc in ancestors if anc.is_primary}
+                sec_obj = Asset._aggregate_security_objectives(primary_ancestors)
+                dro_obj = Asset._aggregate_dro_objectives(primary_ancestors)
+
+            sec_obj_results[asset.id] = self._format_security_objectives(sec_obj, scale)
+            dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
+                dro_obj
+            )
+
+        optimized_data.update(
+            {
+                "security_objectives": sec_obj_results,
+                "disaster_recovery_objectives": dro_obj_results,
+                "descendants": descendant_results,
+            }
+        )
+        return optimized_data
+
+    def _format_security_objectives(self, objectives, scale):
+        if not objectives:
+            return []
+        return [
+            {
+                "str": f"{key.upper()}: {Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}"
+            }
+            for key, content in sorted(
+                objectives.items(),
+                key=lambda x: Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
+                if x[0] in Asset.DEFAULT_SECURITY_OBJECTIVES
+                else -1,
+            )
+            if content.get("is_enabled", False)
+            and content.get("value", -1) in range(0, 5)
+        ]
+
+    def _format_disaster_recovery_objectives(self, objectives):
+        if not objectives:
+            return []
+
+        def format_seconds(s: int) -> str:
+            if not isinstance(s, int) or s < 0:
+                return "0s"
+            h, r = divmod(s, 3600)
+            m, s_rem = divmod(r, 60)
+            parts = []
+            if h > 0:
+                parts.append(f"{h}h")
+            if m > 0:
+                parts.append(f"{m:02d}m")
+            if s_rem > 0 or not parts:
+                parts.append(f"{s_rem:02d}s")
+            return "".join(parts)
+
+        return [
+            {"str": f"{key.upper()}: {format_seconds(content.get('value', 0))}"}
+            for key, content in sorted(
+                objectives.items(),
+                key=lambda x: Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0])
+                if x[0] in Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES
+                else -1,
+            )
+            if content.get("value") is not None and content.get("value") > 0
+        ]
 
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")
@@ -983,6 +1163,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     model = RiskAssessment
     filterset_class = RiskAssessmentFilterSet
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            "folder",
+            "perimeter",
+            "perimeter__folder",
+            "risk_matrix",
+            "ebios_rm_study",
+        ).prefetch_related(
+            "authors",
+            "reviewers",
+            "risk_scenarios",
+        )
 
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
@@ -2311,6 +2505,22 @@ class RiskScenarioViewSet(BaseModelViewSet):
     filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            "risk_assessment",
+            "risk_assessment__risk_matrix",
+            "risk_assessment__perimeter",
+            "risk_assessment__perimeter__folder",
+        ).prefetch_related(
+            "threats",
+            "assets",
+            "applied_controls",
+            "existing_applied_controls",
+            "owner",
+            "security_exceptions",
+        )
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(

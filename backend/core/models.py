@@ -44,7 +44,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
-from collections import defaultdict
+from collections import defaultdict, deque
 
 logger = get_logger(__name__)
 
@@ -1764,7 +1764,11 @@ class Asset(
         max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_("type")
     )
     parent_assets = models.ManyToManyField(
-        "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
+        "self",
+        blank=True,
+        verbose_name=_("parent assets"),
+        symmetrical=False,
+        related_name="child_assets",
     )
     reference_link = models.URLField(
         null=True,
@@ -1834,27 +1838,211 @@ class Asset(
         return self.type == Asset.Type.SUPPORT
 
     def ancestors_plus_self(self) -> set[Self]:
-        result = {self}
-        for x in self.parent_assets.all():
-            result.update(x.ancestors_plus_self())
-        return set(result)
+        """
+        Returns a set containing the asset itself and all its ancestors using a
+        constant number of queries (2).
+        """
+        all_links = self.__class__.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+        child_to_parents_map = {}
+        for child_id, parent_id in all_links:
+            if child_id not in child_to_parents_map:
+                child_to_parents_map[child_id] = set()
+            child_to_parents_map[child_id].add(parent_id)
+        ancestor_ids = {self.pk}
+        queue = deque([self.pk])  # NOTE: using deque rather than list for O(1) pops
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in ancestor_ids:
+                    ancestor_ids.add(parent_id)
+                    queue.append(parent_id)
+        return set(self.__class__.objects.filter(pk__in=ancestor_ids))
 
     def get_children(self):
-        return Asset.objects.filter(parent_assets=self)
+        return self.child_assets.all()
 
     def get_descendants(self) -> set[Self]:
-        children = self.get_children()
-        sub_children = set()
-        for child in children:
-            sub_children.add(child)
-            sub_children.update(child.get_descendants())
-        return sub_children
+        """
+        Returns a set of all descendant assets using a constant number of
+        queries (2).
+        """
+        all_links = self.__class__.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            if parent_id not in parent_to_children_map:
+                parent_to_children_map[parent_id] = set()
+            parent_to_children_map[parent_id].add(child_id)
+        descendant_ids = set()
+        visited_ids = {
+            self.pk
+        }  # NOTE: keeping track of visited ids as a guardrail in the unlikely event of cycles in the assets graph
+        queue = deque([self.pk])  # NOTE: using deque rather than list for O(1) pops
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_ids:
+                    visited_ids.add(child_id)
+                    descendant_ids.add(child_id)
+                    queue.append(child_id)
+        return set(self.__class__.objects.filter(pk__in=descendant_ids))
 
     @property
     def children_assets(self):
         descendants = self.get_descendants()
         descendant_ids = [d.id for d in descendants]
         return Asset.objects.filter(id__in=descendant_ids).exclude(id=self.id)
+
+    @classmethod
+    def _prefetch_graph_data(cls, initial_assets: list) -> dict:
+        """
+        Finds all ancestors and descendants of the initial assets using a constant
+        number of database queries (3), ideal for deep or complex hierarchies.
+
+        This method pre-fetches all parent-child links into memory to build a
+        complete graph, then traverses it without any further database calls to
+        identify the relevant subgraph.
+        """
+        if not initial_assets:
+            return {"child_to_parents": {}, "parent_to_children": {}}
+
+        # First query: fetch all parent-child relationships in the entire table
+        all_links = cls.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+
+        # Build in-memory maps of the entire graph
+        child_to_parents_map = {}
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            child_to_parents_map.setdefault(child_id, set()).add(parent_id)
+            parent_to_children_map.setdefault(parent_id, set()).add(child_id)
+
+        # find all relevant IDs (ancestors and descendants).
+        initial_ids = {asset.id for asset in initial_assets}
+        all_relevant_ids = set(initial_ids)
+
+        # find all ancestors
+        queue = deque(initial_ids)
+        visited_ancestors = set(initial_ids)
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in visited_ancestors:
+                    visited_ancestors.add(parent_id)
+                    all_relevant_ids.add(parent_id)
+                    queue.append(parent_id)
+
+        # find all descendants
+        queue = deque(initial_ids)
+        visited_descendants = set(initial_ids)
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_descendants:
+                    visited_descendants.add(child_id)
+                    all_relevant_ids.add(child_id)
+                    queue.append(child_id)
+
+        # Second query: fetch all the actual assets
+        asset_map = {a.id: a for a in cls.objects.filter(id__in=all_relevant_ids)}
+
+        # Third query: fetch only the links connecting the relevant assets
+        # This ensures we only build the subgraph we care about.
+        relevant_links = cls.parent_assets.through.objects.filter(
+            from_asset_id__in=all_relevant_ids, to_asset_id__in=all_relevant_ids
+        ).values_list("from_asset_id", "to_asset_id")
+
+        # Build the final object maps for in-memory traversal by the caller
+        obj_child_to_parents = {}
+        obj_parent_to_children = {}
+        for child_id, parent_id in relevant_links:
+            child_obj = asset_map.get(child_id)
+            parent_obj = asset_map.get(parent_id)
+            if child_obj and parent_obj:
+                obj_child_to_parents.setdefault(child_obj, set()).add(parent_obj)
+                obj_parent_to_children.setdefault(parent_obj, set()).add(child_obj)
+
+        return {
+            "child_to_parents": obj_child_to_parents,
+            "parent_to_children": obj_parent_to_children,
+        }
+
+    @classmethod
+    def _get_all_descendants(cls, start_asset, parent_to_children: dict) -> set:
+        """Performs an in-memory BFS to find all descendants."""
+        descendants = set()
+        queue = deque([start_asset])
+        visited = {start_asset}
+        while queue:
+            current = queue.popleft()
+            for child in parent_to_children.get(current, set()):
+                if child not in visited:
+                    visited.add(child)
+                    descendants.add(child)
+                    queue.append(child)
+        return descendants
+
+    @classmethod
+    def _get_all_ancestors(cls, start_asset, child_to_parents: dict) -> set:
+        """Performs an in-memory BFS to find all ancestors."""
+        ancestors = set()
+        queue = deque([start_asset])
+        visited = {start_asset}
+        while queue:
+            current = queue.popleft()
+            for parent in child_to_parents.get(current, set()):
+                if parent not in visited:
+                    visited.add(parent)
+                    ancestors.add(parent)
+                    queue.append(parent)
+        return ancestors
+
+    @classmethod
+    def _aggregate_security_objectives(cls, primary_ancestors: set) -> dict:
+        """Aggregates security objectives from primary ancestors (highest value wins)."""
+        agg_obj = {}
+        for asset in primary_ancestors:
+            objectives = asset.security_objectives.get("objectives", {})
+            for key, content in objectives.items():
+                if not content.get("is_enabled", False):
+                    continue
+
+                value = content.get("value", 0)
+                if key not in agg_obj or value > agg_obj[key].get("value", 0):
+                    agg_obj[key] = content.copy()
+        return agg_obj
+
+    @classmethod
+    def _aggregate_dro_objectives(cls, primary_ancestors: set) -> dict:
+        """Aggregates DRO objectives from primary ancestors (lowest value wins)."""
+        agg_obj = {}
+        for asset in primary_ancestors:
+            objectives = asset.disaster_recovery_objectives.get("objectives", {})
+            for key, content in objectives.items():
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                current_value = agg_obj.get(key, {}).get("value")
+                if current_value is None or value < current_value:
+                    agg_obj[key] = content.copy()
+        return agg_obj
+
+    @classmethod
+    def _get_security_objective_scale(cls) -> str:
+        """Fetches the global setting for the security objective scale."""
+        settings = GlobalSettings.objects.filter(name="general").first()
+        if settings:
+            return settings.value.get("security_objective_scale", "1-4")
+        return "1-4"
 
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
