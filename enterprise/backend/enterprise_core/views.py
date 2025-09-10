@@ -5,8 +5,8 @@ import magic
 import structlog
 from core.permissions import IsAdministrator
 from django.db import models, transaction
-from django.db.models import CharField, Value, BooleanField, Case, When
-from django.db.models.functions import Lower, Cast, Coalesce
+from django.db.models import CharField, Value, Case, When
+from django.db.models.functions import Lower, Cast
 import django_filters as df
 from django.contrib.auth.models import Permission
 from rest_framework import status
@@ -464,11 +464,11 @@ class LogEntryViewSet(
     def get_queryset(self):
         return LogEntry.objects.all().annotate(
             folder=Lower(
-                Coalesce(Cast("additional_data__folder", CharField()), Value(""))
-            ),
-            folder_isnull=Case(
-                When(additional_data__folder=None, then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField(),
+                Case(
+                    When(additional_data=None, then=Value("")),
+                    When(additional_data__folder=None, then=Value("")),
+                    default=Cast("additional_data__folder", CharField()),
+                    output_field=CharField(),
+                )
             ),
         )
