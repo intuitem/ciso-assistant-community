@@ -1027,7 +1027,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     DEFAULT_QUALIFICATIONS = [
         {
-            "name": "pathological",
+            "name": "confidentiality",
             "builtin": True,
             "field_path": FieldPath.QUALIFICATIONS,
             "is_visible": True,
@@ -1093,7 +1093,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
         {
-            "name": "Governance",
+            "name": "governance",
             "builtin": True,
             "field_path": FieldPath.QUALIFICATIONS,
             "is_visible": True,
