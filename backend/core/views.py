@@ -558,6 +558,20 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
     search_fields = ["name", "provider", "description"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+                "library",  # FieldsRelatedField includes library
+            )
+            .prefetch_related(
+                "filtering_labels__folder",  # FieldsRelatedField includes folder
+            )
+        )
+
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
