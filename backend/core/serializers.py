@@ -1377,6 +1377,31 @@ class CampaignWriteSerializer(BaseModelSerializer):
         return super().create(validated_data)
 
 
+class ComplianceAssessmentListSerializer(BaseModelSerializer):
+    framework = FieldsRelatedField(
+        [
+            "id",
+            "ref_id",
+        ]
+    )
+    progress = serializers.ReadOnlyField(source="get_progress")
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "ref_id",
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "updated_at",
+            "framework",
+            "is_locked",
+            "progress",
+            "perimeter",
+        ]
+
+
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
