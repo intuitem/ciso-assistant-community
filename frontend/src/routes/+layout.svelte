@@ -12,6 +12,7 @@
 	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import ProblematicScenariosModal from '$lib/components/Modals/ProblematicScenariosModal.svelte';
 	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
 	import {
 		initializeToastStore,
@@ -79,7 +80,8 @@
 		// Set a unique modal ID, then pass the component reference
 		displayJSONModal: { ref: DisplayJSONModal },
 		createModal: { ref: CreateModal },
-		deleteConfirmModal: { ref: DeleteConfirmModal }
+		deleteConfirmModal: { ref: DeleteConfirmModal },
+		problematicScenariosModal: { ref: ProblematicScenariosModal }
 	};
 
 	run(() => {

@@ -1,6 +1,6 @@
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.views import Response
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import time
@@ -9,6 +9,7 @@ from .models import (
     QuantitativeRiskScenario,
     QuantitativeRiskHypothesis,
 )
+from core.models import AppliedControl
 
 from rest_framework.decorators import action
 
@@ -254,3 +255,59 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class QuantitativeRiskStudyActionPlanList(ActionPlanList):
+    """
+    Action plan for quantitative risk studies.
+    Returns controls from hypotheses in the study.
+    """
+
+    # Override filterset_fields to remove cost (JSONField issue)
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "category": ["exact"],
+        "csf_function": ["exact"],
+        "priority": ["exact"],
+        "reference_control": ["exact"],
+        "effort": ["exact"],
+        "control_impact": ["exact"],
+        # Remove cost/annual_cost - causes filtering issues
+        "filtering_labels": ["exact"],
+        "risk_scenarios": ["exact"],
+        "risk_scenarios_e": ["exact"],
+        "requirement_assessments": ["exact"],
+        "evidences": ["exact"],
+        "objectives": ["exact"],
+        "assets": ["exact"],
+        "stakeholders": ["exact"],
+        "progress_field": ["exact"],
+        "security_exceptions": ["exact"],
+        "owner": ["exact"],
+        "findings": ["exact"],
+        "eta": ["exact", "lte", "gte", "lt", "gt"],
+    }
+
+    def get_serializer_class(self):
+        from .serializers import QuantitativeRiskStudyActionPlanSerializer
+
+        return QuantitativeRiskStudyActionPlanSerializer
+
+    def get_queryset(self):
+        quantitative_risk_study: QuantitativeRiskStudy = (
+            QuantitativeRiskStudy.objects.get(id=self.kwargs["pk"])
+        )
+
+        # Get all scenarios for this study
+        scenarios = quantitative_risk_study.risk_scenarios.all()
+
+        # Get all hypotheses from these scenarios
+        hypotheses = QuantitativeRiskHypothesis.objects.filter(
+            quantitative_risk_scenario__in=scenarios
+        )
+
+        # Get all added controls from these hypotheses
+        return AppliedControl.objects.filter(
+            quantitative_risk_hypotheses_added__in=hypotheses
+        ).distinct()

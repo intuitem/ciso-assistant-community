@@ -293,6 +293,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
+			{ field: 'quantitative_risk_scenarios', urlModel: 'quantitative-risk-scenarios' },
 			{ field: 'assets', urlModel: 'assets' }
 		],
 		reverseForeignKeyFields: [

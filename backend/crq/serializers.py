@@ -2,7 +2,9 @@ from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import (
     BaseModelSerializer,
+    ActionPlanSerializer,
 )
+from core.models import AppliedControl
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -204,3 +206,51 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     class Meta:
         model = QuantitativeRiskHypothesis
         fields = "__all__"
+
+
+class QuantitativeRiskStudyActionPlanSerializer(ActionPlanSerializer):
+    """
+    Serializer for CRQ action plan that shows controls with the scenarios they affect.
+    """
+
+    quantitative_risk_scenarios = serializers.SerializerMethodField()
+
+    def get_quantitative_risk_scenarios(self, obj):
+        """
+        Get the quantitative risk scenarios affected by this control.
+        """
+        pk = self.context.get("pk")
+        if pk is None:
+            return []
+
+        # Find hypotheses in this study that have this control as added control
+        from .models import QuantitativeRiskStudy
+
+        try:
+            study = QuantitativeRiskStudy.objects.get(id=pk)
+            scenarios = study.risk_scenarios.all()
+
+            # Get hypotheses that have this control added
+            hypotheses_with_control = QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario__in=scenarios, added_applied_controls=obj
+            )
+
+            # Get unique scenarios from these hypotheses
+            affected_scenarios = []
+            seen_scenario_ids = set()
+
+            for hypothesis in hypotheses_with_control:
+                scenario = hypothesis.quantitative_risk_scenario
+                if scenario.id not in seen_scenario_ids:
+                    seen_scenario_ids.add(scenario.id)
+                    affected_scenarios.append(
+                        {
+                            "str": f"{scenario.ref_id} - {scenario.name}",
+                            "id": str(scenario.id),
+                        }
+                    )
+
+            return affected_scenarios
+
+        except Exception:
+            return []
