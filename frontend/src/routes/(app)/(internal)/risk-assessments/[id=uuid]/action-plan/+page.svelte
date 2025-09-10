@@ -15,7 +15,7 @@
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
-		cost: 'cost',
+		annual_cost: 'cost',
 		risk_scenarios: 'matchingScenarios'
 	};
 
@@ -69,7 +69,7 @@
 				'eta',
 				'expiry_date',
 				'effort',
-				'cost',
+				'annual_cost',
 				'risk_scenarios'
 			]}
 		/>
