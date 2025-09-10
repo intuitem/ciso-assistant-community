@@ -1377,7 +1377,7 @@ class CampaignWriteSerializer(BaseModelSerializer):
         return super().create(validated_data)
 
 
-class ComplianceAssessmentListSerializer(BaseModelSerializer):
+class ComplianceAssessmentListSerializer(AssessmentReadSerializer):
     framework = FieldsRelatedField(
         [
             "id",
@@ -1399,6 +1399,9 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "is_locked",
             "progress",
             "perimeter",
+            "authors",
+            "reviewers",
+            "path",
         ]
 
 
@@ -1410,11 +1413,11 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     framework = FieldsRelatedField(
         [
             "id",
-            "min_score",
-            "max_score",
-            "implementation_groups_definition",
+            # "min_score",
+            # "max_score",
+            # "implementation_groups_definition",
             "ref_id",
-            "reference_controls",
+            # "reference_controls",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
