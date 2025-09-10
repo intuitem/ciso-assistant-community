@@ -4,9 +4,9 @@
 	import { setContext, onDestroy } from 'svelte';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
@@ -65,7 +65,7 @@
 
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
-	import { superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -216,6 +216,9 @@
 			}
 		}
 	});
+
+	let isLoading = $state(false);
+	const { form: formData } = _form;
 </script>
 
 {#if missingConstraints.length > 0}
@@ -636,9 +639,26 @@
 					}}>{m.cancel()}</button
 				>
 				<button
-					class="btn preset-filled-primary-500 font-semibold w-full"
+					class="btn preset-filled-primary-500 font-semibold w-full {isLoading
+						? 'cursor-wait'
+						: ''}"
 					data-testid="save-button"
-					type="submit">{m.save()}</button
+					type="submit"
+					onclick={(e) => {
+						if (URLModel !== 'folders-import') return;
+						if (isLoading) {
+							e.preventDefault();
+							e.stopPropagation();
+							return;
+						}
+
+						const schema = modelSchema(URLModel);
+						const result = schema.safeParse($formData);
+						if (!result.success) return;
+
+						isLoading = true;
+					}}
+					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
 				>
 			{:else}
 				{#if cancelButton}
