@@ -379,7 +379,7 @@
 													<ul>
 														{#each value as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id}
+																{#if val.str && val.id && key !== 'qualifications'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
