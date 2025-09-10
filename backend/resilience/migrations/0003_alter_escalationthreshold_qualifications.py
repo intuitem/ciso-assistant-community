@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 limit_choices_to={"field_path": "qualifications", "is_visible": True},
-                related_name="feared_events_qualifications",
+                related_name="escalation_thresholds_qualifications",
                 to="core.terminology",
                 verbose_name="Qualifications",
             ),

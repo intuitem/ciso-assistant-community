@@ -2905,7 +2905,7 @@ class Incident(NameDescriptionMixin, FolderMixin):
     )
     qualifications = models.ManyToManyField(
         Terminology,
-        verbose_name="Qualification",
+        verbose_name="Qualifications",
         related_name="incidents_qualifications",
         limit_choices_to={
             "field_path": Terminology.FieldPath.QUALIFICATIONS,
@@ -4053,7 +4053,7 @@ class RiskScenario(NameDescriptionMixin):
 
     qualifications = models.ManyToManyField(
         Terminology,
-        verbose_name="Qualification",
+        verbose_name="Qualifications",
         related_name="risk_scenarios_qualifications",
         limit_choices_to={
             "field_path": Terminology.FieldPath.QUALIFICATIONS,

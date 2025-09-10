@@ -186,7 +186,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     quali_impact = IntegerField(default=-1)  # based on the matrix
     qualifications = models.ManyToManyField(
         Terminology,
-        verbose_name="Qualification",
+        verbose_name="Qualifications",
         related_name="escalation_thresholds_qualifications",
         limit_choices_to={
             "field_path": Terminology.FieldPath.QUALIFICATIONS,
