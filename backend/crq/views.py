@@ -263,30 +263,11 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
     Returns controls from hypotheses in the study.
     """
 
-    # Override filterset_fields to remove cost (JSONField issue)
+    # Override to exclude cost field which causes JSONField filtering issues
     filterset_fields = {
-        "folder": ["exact"],
-        "status": ["exact"],
-        "category": ["exact"],
-        "csf_function": ["exact"],
-        "priority": ["exact"],
-        "reference_control": ["exact"],
-        "effort": ["exact"],
-        "control_impact": ["exact"],
-        # Remove cost/annual_cost - causes filtering issues
-        "filtering_labels": ["exact"],
-        "risk_scenarios": ["exact"],
-        "risk_scenarios_e": ["exact"],
-        "requirement_assessments": ["exact"],
-        "evidences": ["exact"],
-        "objectives": ["exact"],
-        "assets": ["exact"],
-        "stakeholders": ["exact"],
-        "progress_field": ["exact"],
-        "security_exceptions": ["exact"],
-        "owner": ["exact"],
-        "findings": ["exact"],
-        "eta": ["exact", "lte", "gte", "lt", "gt"],
+        field: lookups
+        for field, lookups in ActionPlanList.filterset_fields.items()
+        if field != "cost"
     }
 
     def get_serializer_class(self):
