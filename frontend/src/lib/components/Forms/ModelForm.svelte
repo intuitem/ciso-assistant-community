@@ -619,6 +619,10 @@
 				{context}
 				{...rest}
 			/>
+		{:else if URLModel === 'organisation-issues'}
+			<OrganisationIssueForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		{:else if URLModel === 'organisation-objectives'}
+			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'terminologies'}
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'roles'}
