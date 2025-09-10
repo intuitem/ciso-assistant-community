@@ -205,20 +205,24 @@
 					data: data
 				},
 				// Risk tolerance curve series (only if toleranceData is provided)
-				...(toleranceData && toleranceData.length > 0 ? [{
-					name: 'Risk Tolerance',
-					type: 'line',
-					smooth: true,
-					symbol: 'none',
-					symbolSize: 0,
-					showSymbol: false,
-					lineStyle: {
-						color: '#28a745',
-						width: 3,
-						type: 'dashed'
-					},
-					data: toleranceData
-				}] : [])
+				...(toleranceData && toleranceData.length > 0
+					? [
+							{
+								name: 'Risk Tolerance',
+								type: 'line',
+								smooth: true,
+								symbol: 'none',
+								symbolSize: 0,
+								showSymbol: false,
+								lineStyle: {
+									color: '#28a745',
+									width: 3,
+									type: 'dashed'
+								},
+								data: toleranceData
+							}
+						]
+					: [])
 			]
 		};
 

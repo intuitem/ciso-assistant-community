@@ -136,7 +136,9 @@
 						{@const scenarioLosses = Object.entries(metrics)
 							.filter(([key, _]) => key.startsWith('loss_with_') && key.endsWith('_percent'))
 							.map(([key, value]) => {
-								const percentage = parseFloat(key.replace('loss_with_', '').replace('_percent', '').replace('_', '.'));
+								const percentage = parseFloat(
+									key.replace('loss_with_', '').replace('_percent', '').replace('_', '.')
+								);
 								return { key, value, percentage };
 							})
 							.sort((a, b) => b.percentage - a.percentage)}
@@ -147,25 +149,33 @@
 							<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 								{#if metrics.mean_annual_loss !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-blue-600 mb-2">{formatCurrency(metrics.mean_annual_loss)}</div>
+										<div class="text-2xl font-bold text-blue-600 mb-2">
+											{formatCurrency(metrics.mean_annual_loss)}
+										</div>
 										<div class="text-sm text-gray-600">Mean Annual Loss</div>
 									</div>
 								{/if}
 								{#if metrics.var_95 !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-orange-600 mb-2">{formatCurrency(metrics.var_95)}</div>
+										<div class="text-2xl font-bold text-orange-600 mb-2">
+											{formatCurrency(metrics.var_95)}
+										</div>
 										<div class="text-sm text-gray-600">VaR 95%</div>
 									</div>
 								{/if}
 								{#if metrics.var_99 !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-red-600 mb-2">{formatCurrency(metrics.var_99)}</div>
+										<div class="text-2xl font-bold text-red-600 mb-2">
+											{formatCurrency(metrics.var_99)}
+										</div>
 										<div class="text-sm text-gray-600">VaR 99%</div>
 									</div>
 								{/if}
 								{#if metrics.var_999 !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-red-800 mb-2">{formatCurrency(metrics.var_999)}</div>
+										<div class="text-2xl font-bold text-red-800 mb-2">
+											{formatCurrency(metrics.var_999)}
+										</div>
 										<div class="text-sm text-gray-600">VaR 99.9%</div>
 									</div>
 								{/if}
@@ -178,25 +188,33 @@
 							<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
 								{#if metrics.prob_zero_loss !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-green-600 mb-2">{(metrics.prob_zero_loss * 100).toFixed(1)}%</div>
+										<div class="text-2xl font-bold text-green-600 mb-2">
+											{(metrics.prob_zero_loss * 100).toFixed(1)}%
+										</div>
 										<div class="text-sm text-gray-600">Zero Loss</div>
 									</div>
 								{/if}
 								{#if metrics.prob_above_10k !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-yellow-600 mb-2">{(metrics.prob_above_10k * 100).toFixed(2)}%</div>
+										<div class="text-2xl font-bold text-yellow-600 mb-2">
+											{(metrics.prob_above_10k * 100).toFixed(2)}%
+										</div>
 										<div class="text-sm text-gray-600">Over $10K</div>
 									</div>
 								{/if}
 								{#if metrics.prob_above_100k !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-orange-600 mb-2">{(metrics.prob_above_100k * 100).toFixed(2)}%</div>
+										<div class="text-2xl font-bold text-orange-600 mb-2">
+											{(metrics.prob_above_100k * 100).toFixed(2)}%
+										</div>
 										<div class="text-sm text-gray-600">Over $100K</div>
 									</div>
 								{/if}
 								{#if metrics.prob_above_1M !== undefined}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-red-600 mb-2">{(metrics.prob_above_1M * 100).toFixed(2)}%</div>
+										<div class="text-2xl font-bold text-red-600 mb-2">
+											{(metrics.prob_above_1M * 100).toFixed(2)}%
+										</div>
 										<div class="text-sm text-gray-600">Over $1M</div>
 									</div>
 								{/if}
@@ -207,9 +225,11 @@
 						<div>
 							<h4 class="text-md font-medium text-gray-700 mb-4">Scenario-Based Losses</h4>
 							<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-								{#each scenarioLosses as {key, value, percentage}}
+								{#each scenarioLosses as { key, value, percentage }}
 									<div class="text-center">
-										<div class="text-2xl font-bold text-purple-600 mb-2">{formatCurrency(value)}</div>
+										<div class="text-2xl font-bold text-purple-600 mb-2">
+											{formatCurrency(value)}
+										</div>
 										<div class="text-sm text-gray-600">Loss with {percentage}% chance</div>
 									</div>
 								{/each}

@@ -15,8 +15,8 @@
 		priority: 'priority',
 		category: 'category',
 		effort: 'effort',
-    annual_cost: 'cost',
-    control_impact: "controlImpact",
+		annual_cost: 'cost',
+		control_impact: 'controlImpact',
 		eta: 'eta',
 		quantitative_risk_scenarios: 'scenarios'
 	};
@@ -27,7 +27,7 @@
 		meta: []
 	};
 
-$inspect(data);
+	$inspect(data);
 </script>
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
@@ -54,9 +54,7 @@ $inspect(data);
 	<div class="flex justify-between items-center">
 		<div>
 			<p class="text-xl font-extrabold">Action Plan</p>
-			<p class="text-sm text-gray-500">
-				Controls from quantitative risk hypotheses
-			</p>
+			<p class="text-sm text-gray-500">Controls from quantitative risk hypotheses</p>
 		</div>
 	</div>
 
@@ -74,8 +72,8 @@ $inspect(data);
 				'priority',
 				'category',
 				'effort',
-        'annual_cost',
-        'control_impact',
+				'annual_cost',
+				'control_impact',
 				'eta',
 				'quantitative_risk_scenarios'
 			]}
