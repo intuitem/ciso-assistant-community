@@ -159,6 +159,29 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
                     }
                 )
 
+        if risk_stage == "current" and scenario:
+            existing_current = QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=scenario, risk_stage="current"
+            )
+            if existing_current.exists():
+                current_hypothesis = existing_current.first()
+                raise serializers.ValidationError(
+                    {
+                        "risk_stage": f'There is already a current hypothsis "{current_hypothesis.name}". Only one current is allowed.'
+                    }
+                )
+
+        if risk_stage == "inherent" and scenario:
+            existing_inherent = QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=scenario, risk_stage="inherent"
+            )
+            if existing_inherent.exists():
+                inherent_hypothesis = existing_inherent.first()
+                raise serializers.ValidationError(
+                    {
+                        "risk_stage": f'There is already an inherent hypothsis "{inherent_hypothesis.name}". Only one inherent is allowed.'
+                    }
+                )
         return attrs
 
 

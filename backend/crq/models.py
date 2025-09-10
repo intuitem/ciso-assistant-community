@@ -324,11 +324,6 @@ class QuantitativeRiskHypothesis(
         ordering = ["created_at"]
         constraints = [
             models.UniqueConstraint(
-                fields=["quantitative_risk_scenario", "risk_stage"],
-                condition=models.Q(risk_stage__in=["current", "inherent"]),
-                name="unique_current_inherent_per_scenario",
-            ),
-            models.UniqueConstraint(
                 fields=["quantitative_risk_scenario", "name"],
                 name="unique_hypothesis_name_per_scenario",
             ),
