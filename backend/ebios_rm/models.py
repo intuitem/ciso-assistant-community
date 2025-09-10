@@ -273,6 +273,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
             "field_path": Terminology.FieldPath.QUALIFICATIONS,
             "is_visible": True,
         },
+        blank=True,
     )
 
     ref_id = models.CharField(max_length=100, blank=True)

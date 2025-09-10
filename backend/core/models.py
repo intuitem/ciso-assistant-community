@@ -2911,6 +2911,7 @@ class Incident(NameDescriptionMixin, FolderMixin):
             "field_path": Terminology.FieldPath.QUALIFICATIONS,
             "is_visible": True,
         },
+        blank=True,
     )
 
     reported_at = models.DateTimeField(
@@ -4058,6 +4059,7 @@ class RiskScenario(NameDescriptionMixin):
             "field_path": Terminology.FieldPath.QUALIFICATIONS,
             "is_visible": True,
         },
+        blank=True,
     )
 
     strength_of_knowledge = models.IntegerField(

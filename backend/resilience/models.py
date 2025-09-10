@@ -192,6 +192,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
             "field_path": Terminology.FieldPath.QUALIFICATIONS,
             "is_visible": True,
         },
+        blank=True,
     )
     quanti_impact = FloatField(default=0)
     quanti_impact_unit = CharField(
