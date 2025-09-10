@@ -1,5 +1,5 @@
 import importlib
-from typing import Any
+from typing import Any, Optional, Type
 
 import structlog
 from django.contrib.auth import get_user_model
@@ -28,38 +28,96 @@ User = get_user_model()
 
 
 class SerializerFactory:
-    """Factory to get a serializer class from a list of modules.
+    """
+    Factory to conditionally return a serializer class based on the request action.
+
+    This factory searches for specific serializers in a prioritized order:
+    - For 'list' action: Looks for {base_name}ListSerializer, then falls back to {base_name}ReadSerializer.
+    - For 'retrieve' action: Looks for {base_name}RetrieveSerializer, then falls back to {base_name}ReadSerializer.
+    - For write actions ('create', 'update', 'partial_update'): Looks for {base_name}WriteSerializer.
 
     Attributes:
-    modules (list): List of module names to search for the serializer.
+        modules (List[str]): A list of module names to search for serializer classes.
+                             Modules are searched in the reverse order of how they are provided.
     """
 
     def __init__(self, *modules: str):
-        # Reverse to prioritize later modules
+        """
+        Initializes the factory with a list of modules to search.
+
+        Args:
+            *modules (str): A variable number of module names (as strings).
+        """
+        # Reverse the list to prioritize modules added later
         self.modules = list(reversed(modules))
 
-    def get_serializer(self, base_name: str, action: str):
-        if action in ["list", "retrieve"]:
-            serializer_name = f"{base_name}ReadSerializer"
+    def get_serializer_class(
+        self, base_name: str, action: str
+    ) -> Type[serializers.Serializer]:
+        """
+        Gets the appropriate serializer class based on a base name and action.
+
+        Args:
+            base_name (str): The base name for the serializer (e.g., 'User').
+            action (str): The action from the viewset (e.g., 'list', 'retrieve', 'create').
+
+        Returns:
+            The found serializer class.
+
+        Raises:
+            ValueError: If no suitable serializer is found for the given base name and action,
+                        or if the action is not supported.
+        """
+        potential_names: list[str] = []
+
+        if action == "list":
+            potential_names = [
+                f"{base_name}ListSerializer",
+                f"{base_name}ReadSerializer",
+            ]
+        elif action == "retrieve":
+            potential_names = [
+                f"{base_name}RetrieveSerializer",
+                f"{base_name}ReadSerializer",
+            ]
         elif action in ["create", "update", "partial_update"]:
-            serializer_name = f"{base_name}WriteSerializer"
+            potential_names = [f"{base_name}WriteSerializer"]
         else:
-            return None
+            raise ValueError(f"Unsupported action provided: '{action}'")
 
-        return self._get_serializer_class(serializer_name)
-
-    def _get_serializer_class(self, serializer_name: str):
-        for module_name in self.modules:
-            try:
-                serializer_module = importlib.import_module(module_name)
-                serializer_class = getattr(serializer_module, serializer_name)
+        for name in potential_names:
+            serializer_class = self._find_serializer_class(name)
+            if serializer_class:
                 return serializer_class
-            except (ModuleNotFoundError, AttributeError):
-                continue
 
         raise ValueError(
-            f"Serializer {serializer_name} not found in any provided modules"
+            f"No suitable serializer found for base_name '{base_name}' and action '{action}'. "
+            f"Attempted to find: {', '.join(potential_names)}"
         )
+
+    def _find_serializer_class(
+        self, serializer_name: str
+    ) -> Optional[Type[serializers.Serializer]]:
+        """
+        Searches through the provided modules for a serializer class by name.
+
+        Args:
+            serializer_name (str): The name of the serializer class to find.
+
+        Returns:
+            The serializer class if found, otherwise None.
+        """
+        for module_name in self.modules:
+            try:
+                module = importlib.import_module(module_name)
+                # Use getattr with a default to gracefully handle non-existent attributes
+                serializer_class = getattr(module, serializer_name, None)
+                if serializer_class:
+                    return serializer_class
+            except ModuleNotFoundError:
+                # This allows modules to be optional
+                continue
+        return None
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
