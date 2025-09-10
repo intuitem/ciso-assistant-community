@@ -32,7 +32,7 @@
 		toleranceData = undefined,
 		currency = '$',
 		title = 'Loss Exceedance Curve',
-		xAxisLabel = 'Loss Amount ($)',
+		xAxisLabel = 'Loss Amount',
 		yAxisLabel = 'Exceedance Probability',
 		minorSplitLine = false,
 		enableTooltip = false,
