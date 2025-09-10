@@ -505,6 +505,28 @@ class AssetReadSerializer(AssetWriteSerializer):
         return obj.get_disaster_recovery_objectives_display()
 
 
+class AssetListSerializer(AssetReadSerializer):
+    class Meta:
+        model = Asset
+        fields = [
+            "id",
+            "name",
+            "description",
+            "ref_id",
+            "path",
+            "folder",
+            "owner",
+            "filtering_labels",
+            "type",
+            "asset_class",
+            "security_objectives",
+            "disaster_recovery_objectives",
+            "created_at",
+            "updated_at",
+            "is_published",
+        ]
+
+
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
