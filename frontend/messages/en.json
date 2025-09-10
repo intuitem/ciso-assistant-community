@@ -1428,7 +1428,7 @@
 	"quantitativeRiskScenarios": "CRQ - scenarios",
 	"quantitativeRiskHypothesis": "CRQ - Hypothesis",
 	"quantitativeRiskHypotheses": "CRQ - Hypotheses",
-	"addQuantitativeRiskStudy": "Add risk study",
+	"addQuantitativeRiskStudy": "Add risk quantification study",
 	"addQuantitativeRiskScenario": "Add scenario",
 	"addQuantitativeRiskHypothesis": "New hypothesis",
 	"followUp": "Findings tracking",
@@ -2181,5 +2181,6 @@
 	"rocHelpText": "Return on Controls - calculated as (Current ALE - Residual ALE - Treatment Cost) / Treatment Cost. Only applies to residual hypotheses.",
 	"isSimulationFresh": "Is simulation fresh",
 	"simulationFresh": "Simulation data is up to date",
-	"simulationNotFresh": "Simulation data is outdated - parameters have changed"
+	"simulationNotFresh": "Simulation data is outdated - parameters have changed",
+	"riskToleranceDisplay": "Risk tolerance settings"
 }

@@ -711,10 +711,10 @@ export const quantitativeRiskStudySchema = z.object({
 				})
 				.optional()
 		})
-		.optional()
-		.default({
-			points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
-		}),
+		.optional(),
+	// .default({
+	// 	points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
+	// }),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	folder: z.string()

@@ -136,12 +136,16 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         """
         # Check if risk_tolerance has changed (only for existing instances)
         if self.pk:
-            old_instance = QuantitativeRiskStudy.objects.get(pk=self.pk)
-            if old_instance.risk_tolerance != self.risk_tolerance:
-                # Mark all related hypotheses as not fresh
-                QuantitativeRiskHypothesis.objects.filter(
-                    quantitative_risk_scenario__quantitative_risk_study=self
-                ).update(is_simulation_fresh=False)
+            try:
+                old_instance = QuantitativeRiskStudy.objects.get(pk=self.pk)
+                if old_instance.risk_tolerance != self.risk_tolerance:
+                    # Mark all related hypotheses as not fresh
+                    QuantitativeRiskHypothesis.objects.filter(
+                        quantitative_risk_scenario__quantitative_risk_study=self
+                    ).update(is_simulation_fresh=False)
+            except QuantitativeRiskStudy.DoesNotExist:
+                # This is a new instance, no need to compare with previous state
+                pass
 
         super().save(*args, **kwargs)
 
@@ -598,8 +602,12 @@ class QuantitativeRiskHypothesis(
         """
         # Check if parameters have changed (only for existing instances)
         if self.pk:
-            old_instance = QuantitativeRiskHypothesis.objects.get(pk=self.pk)
-            if old_instance.parameters != self.parameters:
-                self.is_simulation_fresh = False
+            try:
+                old_instance = QuantitativeRiskHypothesis.objects.get(pk=self.pk)
+                if old_instance.parameters != self.parameters:
+                    self.is_simulation_fresh = False
+            except QuantitativeRiskHypothesis.DoesNotExist:
+                # This is a new instance, no need to compare with previous state
+                pass
 
         super().save(*args, **kwargs)
