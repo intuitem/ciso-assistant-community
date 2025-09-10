@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
     operations = [
         # Step 1: Add new field pointing to Terminology
         migrations.AddField(
-            model_name="escalationthresholds",
+            model_name="escalationthreshold",
             name="qualifications_new",
             field=models.ManyToManyField(
                 blank=True,
@@ -61,18 +61,18 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_qualifications_to_terminology),
         # Step 3: Remove old field
         migrations.RemoveField(
-            model_name="escalationthresholds",
+            model_name="escalationthreshold",
             name="qualifications",
         ),
         # Step 4: Rename new field to replace old field
         migrations.RenameField(
-            model_name="escalationthresholds",
+            model_name="escalationthreshold",
             old_name="qualifications_new",
             new_name="qualifications",
         ),
         # Step 5: Fix the related_name back to the original value
         migrations.AlterField(
-            model_name="escalationthresholds",
+            model_name="escalationthreshold",
             name="qualifications",
             field=models.ManyToManyField(
                 blank=True,
