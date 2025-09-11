@@ -3,8 +3,7 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
-	import { marked } from 'marked';
-	import sanitizeHtml from 'sanitize-html';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	import { m } from '$paraglide/messages';
 
@@ -47,7 +46,6 @@
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	let showPreview = $state(defaultMode === 'preview');
-	let renderedMarkdown = $state('');
 
 	run(() => {
 		cachedValue = $value;
@@ -56,69 +54,6 @@
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
-	});
-
-	$effect(() => {
-		if (showPreview && $value) {
-			let html = marked($value) as string;
-			html = sanitizeHtml(html, {
-				allowedTags: [
-					'p',
-					'blockquote',
-					'h1',
-					'h2',
-					'h3',
-					'h4',
-					'h5',
-					'h6',
-					'ul',
-					'ol',
-					'li',
-					'strong',
-					'em',
-					'a',
-					'code',
-					'pre',
-					'table',
-					'thead',
-					'tbody',
-					'tr',
-					'th',
-					'td',
-					'img',
-					'hr',
-					'br',
-					'input'
-				],
-				allowedAttributes: {
-					a: ['href', 'name', 'target', 'rel'],
-					img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-					code: ['class'],
-					input: ['type', 'checked', 'disabled'],
-					li: ['class'],
-					ul: ['class']
-				},
-				allowedSchemes: ['http', 'https'],
-				transformTags: {
-					a: sanitizeHtml.simpleTransform(
-						'a',
-						{ rel: 'noopener noreferrer', target: '_blank' },
-						true
-					)
-				}
-			});
-
-			// Clean up excessive spacing
-			html = html
-				.replace(/>\s+</g, '><') // Remove whitespace between tags
-				.replace(/\n\s*\n/g, '\n') // Remove double line breaks
-				.replace(/<\/p>\s*<ul>/g, '</p><ul>') // Remove space between paragraphs and lists
-				.replace(/<\/ul>\s*<p>/g, '</ul><p>') // Remove space between lists and paragraphs
-				.replace(/<\/p>\s*<ol>/g, '</p><ol>') // Remove space between paragraphs and ordered lists
-				.replace(/<\/ol>\s*<p>/g, '</ol><p>'); // Remove space between ordered lists and paragraphs
-
-			renderedMarkdown = html;
-		}
 	});
 
 	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
@@ -166,7 +101,7 @@
 	<div class="control">
 		{#if showPreview}
 			<div
-				class="prose prose-sm max-w-none p-3 border border-surface-300 rounded-md min-h-[120px] bg-surface-50"
+				class="p-3 border border-surface-300 rounded-md min-h-[120px] bg-surface-50"
 				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"
@@ -178,8 +113,8 @@
 					}
 				}}
 			>
-				{#if renderedMarkdown}
-					{@html renderedMarkdown}
+				{#if $value}
+					<MarkdownRenderer content={$value} />
 				{:else}
 					<p class="text-gray-500 italic">{m.markdownCTA()}</p>
 				{/if}
