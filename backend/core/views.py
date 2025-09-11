@@ -3819,7 +3819,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["risk_origin"], _ = Terminology.objects.get_or_create(
                     name=_fields["risk_origin"],
                     is_visible=True,
-                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN
+                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
             case "stakeholder":
@@ -3922,21 +3922,33 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
-                
+
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
                     # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(name__in=qualification_ids)
-                    existing_names = set(existing_qualifications.values_list('name', flat=True))
-                    
+                    existing_qualifications = Terminology.objects.filter(
+                        name__in=qualification_ids
+                    )
+                    existing_names = set(
+                        existing_qualifications.values_list("name", flat=True)
+                    )
+
                     # Find missing names
                     missing_names = set(qualification_ids) - existing_names
-                    
+
                     # Create missing qualifications
                     if missing_names:
-                        Terminology.objects.bulk_create([
-                            Terminology(name=name, is_visible=True, field_path=Terminology.FieldPath.QUALIFICATIONS) for name in missing_names
-                        ], ignore_conflicts=True)
-                    
+                        Terminology.objects.bulk_create(
+                            [
+                                Terminology(
+                                    name=name,
+                                    is_visible=True,
+                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
+                                )
+                                for name in missing_names
+                            ],
+                            ignore_conflicts=True,
+                        )
+
                     # Now set all qualifications
                     obj.qualifications.set(
                         Terminology.objects.filter(name__in=qualification_ids)
@@ -3971,18 +3983,30 @@ class FolderViewSet(BaseModelViewSet):
             case "fearedevent":
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
                     # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(name__in=qualification_ids)
-                    existing_names = set(existing_qualifications.values_list('name', flat=True))
-                    
+                    existing_qualifications = Terminology.objects.filter(
+                        name__in=qualification_ids
+                    )
+                    existing_names = set(
+                        existing_qualifications.values_list("name", flat=True)
+                    )
+
                     # Find missing names
                     missing_names = set(qualification_ids) - existing_names
-                    
+
                     # Create missing qualifications
                     if missing_names:
-                        Terminology.objects.bulk_create([
-                            Terminology(name=name, is_visible=True, field_path=Terminology.FieldPath.QUALIFICATIONS) for name in missing_names
-                        ], ignore_conflicts=True)
-                    
+                        Terminology.objects.bulk_create(
+                            [
+                                Terminology(
+                                    name=name,
+                                    is_visible=True,
+                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
+                                )
+                                for name in missing_names
+                            ],
+                            ignore_conflicts=True,
+                        )
+
                     # Now set all qualifications
                     obj.qualifications.set(
                         Terminology.objects.filter(name__in=qualification_ids)
