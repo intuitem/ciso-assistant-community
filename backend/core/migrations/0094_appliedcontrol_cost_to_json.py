@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
             name="cost",
             field=models.JSONField(
                 blank=True,
-                default=core.models.AppliedControl._get_default_cost,
+                default=core.models._get_default_applied_control_cost,
                 help_text="Detailed cost structure including build and run costs",
                 null=True,
                 validators=[

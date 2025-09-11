@@ -2771,6 +2771,15 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
 
+def _get_default_applied_control_cost():
+    return {
+        "currency": "€",
+        "amortization_period": 1,
+        "build": {"fixed_cost": 0, "people_days": 0},
+        "run": {"fixed_cost": 0, "people_days": 0},
+    }
+
+
 class AppliedControl(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -2899,19 +2908,10 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
-    @staticmethod
-    def _get_default_cost():
-        return {
-            "currency": "€",
-            "amortization_period": 1,
-            "build": {"fixed_cost": 0, "people_days": 0},
-            "run": {"fixed_cost": 0, "people_days": 0},
-        }
-
     cost = models.JSONField(
         null=True,
         blank=True,
-        default=_get_default_cost,
+        default=_get_default_applied_control_cost,
         help_text=_("Detailed cost structure including build and run costs"),
         verbose_name=_("Cost"),
         validators=[
