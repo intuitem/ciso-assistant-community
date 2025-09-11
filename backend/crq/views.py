@@ -341,6 +341,233 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, name="Executive Summary", url_path="executive-summary")
+    def executive_summary(self, request, pk=None):
+        """
+        Returns executive summary data for the quantitative risk study.
+        Includes scenarios that are selected and not in draft status with:
+        - Main information (ref_id, name, description)
+        - Assets, threats, qualifications links
+        - LEC chart data (current, selected residual, risk tolerance)
+        - Current and residual ALE insights
+        - Treatment cost of selected residual hypothesis
+        """
+        study = self.get_object()
+
+        # Get currency from global settings
+        from global_settings.models import GlobalSettings
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        # Get scenarios that are selected and not in draft status
+        selected_scenarios = study.risk_scenarios.filter(is_selected=True).exclude(
+            status="draft"
+        )
+
+        scenarios_data = []
+
+        for scenario in selected_scenarios:
+            scenario_info = {
+                "id": str(scenario.id),
+                "ref_id": scenario.ref_id,
+                "name": scenario.name,
+                "description": scenario.description,
+                "status": scenario.status,
+                # Assets, threats, qualifications
+                "assets": [
+                    {"id": str(asset.id), "name": asset.name}
+                    for asset in scenario.assets.all()
+                ],
+                "threats": [
+                    {"id": str(threat.id), "name": threat.name}
+                    for threat in scenario.threats.all()
+                ],
+                "qualifications": [
+                    {"id": str(qual.id), "name": qual.name}
+                    for qual in scenario.qualifications.all()
+                ],
+                # ALE insights
+                "current_ale": scenario.current_ale,
+                "current_ale_display": scenario.current_ale_display,
+                "residual_ale": scenario.residual_ale,
+                "residual_ale_display": scenario.residual_ale_display,
+            }
+
+            # Calculate risk reduction (current - residual)
+            current_ale = scenario.current_ale
+            residual_ale = scenario.residual_ale
+            if current_ale is not None and residual_ale is not None:
+                risk_reduction = current_ale - residual_ale
+                scenario_info["risk_reduction"] = risk_reduction
+
+                # Format risk reduction display
+                def format_currency(value):
+                    if value >= 1000000000:
+                        return f"{currency}{value / 1000000000:.1f}B"
+                    elif value >= 1000000:
+                        return f"{currency}{value / 1000000:.1f}M"
+                    elif value >= 1000:
+                        return f"{currency}{value / 1000:.0f}K"
+                    else:
+                        return f"{currency}{value:,.0f}"
+
+                scenario_info["risk_reduction_display"] = (
+                    format_currency(risk_reduction)
+                    if risk_reduction > 0
+                    else format_currency(risk_reduction)
+                )
+            else:
+                scenario_info["risk_reduction"] = None
+                scenario_info["risk_reduction_display"] = "Cannot calculate"
+
+            # Get controls information from hypotheses
+            current_hypothesis = scenario.hypotheses.filter(
+                risk_stage="current"
+            ).first()
+            selected_residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+
+            # Existing controls from current hypothesis
+            if current_hypothesis:
+                scenario_info["existing_controls"] = [
+                    {
+                        "id": str(control.id),
+                        "name": control.name,
+                        "category": getattr(control.category, "name", None)
+                        if control.category
+                        else None,
+                        "status": control.status,
+                    }
+                    for control in current_hypothesis.existing_applied_controls.all()
+                ]
+            else:
+                scenario_info["existing_controls"] = []
+
+            # Additional controls from selected residual hypothesis
+            if selected_residual_hypothesis:
+                scenario_info["additional_controls"] = [
+                    {
+                        "id": str(control.id),
+                        "name": control.name,
+                        "category": getattr(control.category, "name", None)
+                        if control.category
+                        else None,
+                        "status": control.status,
+                        "annual_cost": control.annual_cost,
+                    }
+                    for control in selected_residual_hypothesis.added_applied_controls.all()
+                ]
+            else:
+                scenario_info["additional_controls"] = []
+
+            # LEC chart data
+            lec_curves = []
+
+            # Current hypothesis curve (reuse the variable from above)
+            if current_hypothesis and current_hypothesis.simulation_data:
+                simulation_data = current_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    chart_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_data, probability_data)
+                        if loss > 0
+                    ]
+                    lec_curves.append(
+                        {
+                            "name": "Current Risk",
+                            "type": "current",
+                            "data": chart_data,
+                            "hypothesis_id": str(current_hypothesis.id),
+                            "hypothesis_name": current_hypothesis.name,
+                            "metrics": simulation_data.get("metrics", {}),
+                        }
+                    )
+
+            # Selected residual hypothesis curve (reuse the variable from above)
+            if (
+                selected_residual_hypothesis
+                and selected_residual_hypothesis.simulation_data
+            ):
+                simulation_data = selected_residual_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    chart_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_data, probability_data)
+                        if loss > 0
+                    ]
+                    lec_curves.append(
+                        {
+                            "name": "Selected Residual Risk",
+                            "type": "residual",
+                            "data": chart_data,
+                            "hypothesis_id": str(selected_residual_hypothesis.id),
+                            "hypothesis_name": selected_residual_hypothesis.name,
+                            "metrics": simulation_data.get("metrics", {}),
+                        }
+                    )
+
+                # Treatment cost
+                scenario_info["treatment_cost"] = (
+                    selected_residual_hypothesis.treatment_cost
+                )
+                scenario_info["treatment_cost_display"] = (
+                    selected_residual_hypothesis.treatment_cost_display
+                )
+
+            # Risk tolerance curve (same for all scenarios)
+            if study.risk_tolerance and "curve_data" in study.risk_tolerance:
+                curve_data = study.risk_tolerance["curve_data"]
+                if "error" not in curve_data:
+                    loss_values = curve_data.get("loss_values", [])
+                    probability_values = curve_data.get("probability_values", [])
+
+                    if loss_values and probability_values:
+                        tolerance_data = [
+                            [loss, prob]
+                            for loss, prob in zip(loss_values, probability_values)
+                            if loss > 0
+                        ]
+                        lec_curves.append(
+                            {
+                                "name": "Risk Tolerance",
+                                "type": "tolerance",
+                                "data": tolerance_data,
+                                "study_id": str(study.id),
+                                "study_name": study.name,
+                            }
+                        )
+
+            scenario_info["lec_curves"] = lec_curves
+            scenarios_data.append(scenario_info)
+
+        return Response(
+            {
+                "study_id": str(study.id),
+                "study_name": study.name,
+                "study_description": study.description,
+                "currency": currency,
+                "risk_tolerance_display": study.get_risk_tolerance_display(),
+                "scenarios": scenarios_data,
+                "total_scenarios": len(scenarios_data),
+                "total_selected_scenarios": study.risk_scenarios.filter(
+                    is_selected=True
+                ).count(),
+                "total_draft_scenarios": study.risk_scenarios.filter(
+                    status="draft"
+                ).count(),
+            }
+        )
+
 
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario
