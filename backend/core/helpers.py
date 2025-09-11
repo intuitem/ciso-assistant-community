@@ -1332,11 +1332,11 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
     qualification_counts = {}
     for scenario in risk_scenarios:
         if scenario.qualifications:  # Check if qualifications is not empty
-            for qualification in scenario.qualifications:
+            for qualification in scenario.qualifications.all():
                 if qualification in qualification_counts:
-                    qualification_counts[qualification] += 1
+                    qualification_counts[qualification.name] += 1
                 else:
-                    qualification_counts[qualification] = 1
+                    qualification_counts[qualification.name] = 1
 
     # Sort by qualification name and only include those with count > 0
     sorted_qualifications = sorted(
