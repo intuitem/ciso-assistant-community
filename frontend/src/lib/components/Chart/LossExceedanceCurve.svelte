@@ -8,8 +8,10 @@
 		name?: string;
 		data?: Array<[number, number]>;
 		toleranceData?: Array<[number, number]>;
+		residualData?: Array<[number, number]>;
 		currency?: string;
 		title?: string;
+		showTitle?: boolean;
 		xAxisLabel?: string;
 		yAxisLabel?: string;
 		minorSplitLine?: boolean;
@@ -30,8 +32,10 @@
 		name = 'loss-exceedance',
 		data = undefined,
 		toleranceData = undefined,
+		residualData = undefined,
 		currency = '$',
 		title = 'Loss Exceedance Curve',
+		showTitle = true,
 		xAxisLabel = 'Loss Amount',
 		yAxisLabel = 'Exceedance Probability',
 		minorSplitLine = false,
@@ -55,33 +59,48 @@
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		const option = {
-			title: {
+			title: showTitle ? {
 				text: title,
 				left: 'center',
 				textStyle: {
 					fontSize: 16,
 					fontWeight: 'bold'
 				}
-			},
+			} : undefined,
 			legend: {
-				show: toleranceData && toleranceData.length > 0,
+				show: (toleranceData && toleranceData.length > 0) || (residualData && residualData.length > 0),
 				top: '5%',
 				right: '10%',
 				data: [
 					{
-						name: 'Loss Exceedance',
+						name: 'Combined Current Risk',
 						icon: 'circle',
 						itemStyle: {
 							color: '#ff6b6b'
 						}
 					},
-					{
-						name: 'Risk Tolerance',
-						icon: 'circle',
-						itemStyle: {
-							color: '#28a745'
-						}
-					}
+					...(residualData && residualData.length > 0
+						? [
+								{
+									name: 'Combined Residual Risk',
+									icon: 'circle',
+									itemStyle: {
+										color: '#007bff'
+									}
+								}
+							]
+						: []),
+					...(toleranceData && toleranceData.length > 0
+						? [
+								{
+									name: 'Risk Tolerance',
+									icon: 'circle',
+									itemStyle: {
+										color: '#28a745'
+									}
+								}
+							]
+						: [])
 				]
 			},
 			grid: {
@@ -100,26 +119,43 @@
 					const lossAmount = params[0].value[0];
 					let tooltip = `${xAxisLabel.replace('($)', `(${currency})`)}: ${currency}${lossAmount.toLocaleString()}<br/>`;
 
-					// Find loss exceedance and risk tolerance series
-					const lossExceedanceParam = params.find((p: any) => p.seriesName === 'Loss Exceedance');
+					// Find different series
+					const currentRiskParam = params.find((p: any) => p.seriesName === 'Combined Current Risk');
+					const residualRiskParam = params.find((p: any) => p.seriesName === 'Combined Residual Risk');
 					const riskToleranceParam = params.find((p: any) => p.seriesName === 'Risk Tolerance');
 
-					if (lossExceedanceParam) {
-						tooltip += `Loss Exceedance: ${(lossExceedanceParam.value[1] * 100).toFixed(2)}%<br/>`;
+					if (currentRiskParam) {
+						tooltip += `Combined Current Risk: ${(currentRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
+					}
+
+					if (residualRiskParam) {
+						tooltip += `Combined Residual Risk: ${(residualRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
 					}
 
 					if (riskToleranceParam) {
 						tooltip += `Risk Tolerance: ${(riskToleranceParam.value[1] * 100).toFixed(2)}%<br/>`;
 
-						// Add interpretation
-						if (lossExceedanceParam && riskToleranceParam) {
-							const exceedanceProb = lossExceedanceParam.value[1];
+						// Add interpretation comparing current risk with tolerance
+						if (currentRiskParam && riskToleranceParam) {
+							const currentProb = currentRiskParam.value[1];
 							const toleranceProb = riskToleranceParam.value[1];
 
-							if (exceedanceProb > toleranceProb) {
-								tooltip += '<span style="color: #dc3545;">⚠️ Exceeds risk tolerance</span>';
+							if (currentProb > toleranceProb) {
+								tooltip += '<span style="color: #dc3545;">⚠️ Current risk exceeds tolerance</span><br/>';
 							} else {
-								tooltip += '<span style="color: #28a745;">✓ Within risk tolerance</span>';
+								tooltip += '<span style="color: #28a745;">✓ Current risk within tolerance</span><br/>';
+							}
+						}
+
+						// Add interpretation comparing residual risk with tolerance
+						if (residualRiskParam && riskToleranceParam) {
+							const residualProb = residualRiskParam.value[1];
+							const toleranceProb = riskToleranceParam.value[1];
+
+							if (residualProb > toleranceProb) {
+								tooltip += '<span style="color: #dc3545;">⚠️ Residual risk exceeds tolerance</span>';
+							} else {
+								tooltip += '<span style="color: #28a745;">✓ Residual risk within tolerance</span>';
 							}
 						}
 					}
@@ -178,8 +214,9 @@
 				}
 			},
 			series: [
+				// Combined Current Risk curve
 				{
-					name: 'Loss Exceedance',
+					name: 'Combined Current Risk',
 					type: 'line',
 					smooth: true,
 					symbol: 'none',
@@ -204,6 +241,37 @@
 					},
 					data: data
 				},
+				// Combined Residual Risk curve (only if residualData is provided)
+				...(residualData && residualData.length > 0
+					? [
+							{
+								name: 'Combined Residual Risk',
+								type: 'line',
+								smooth: true,
+								symbol: 'none',
+								symbolSize: 0,
+								showSymbol: false,
+								lineStyle: {
+									color: '#007bff',
+									width: 3
+								},
+								areaStyle: {
+									opacity: 0.1,
+									color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+										{
+											offset: 0,
+											color: '#007bff'
+										},
+										{
+											offset: 1,
+											color: 'rgba(0, 123, 255, 0.05)'
+										}
+									])
+								},
+								data: residualData
+							}
+						]
+					: []),
 				// Risk tolerance curve series (only if toleranceData is provided)
 				...(toleranceData && toleranceData.length > 0
 					? [

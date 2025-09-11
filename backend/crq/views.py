@@ -256,6 +256,77 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     f"Failed to sum LEC curves for study {study.id}: {str(e)}"
                 )
 
+        # 4. Collect all selected residual hypothesis LEC curves for summing
+        residual_curves_data = []
+        scenarios_with_residual = []
+
+        for scenario in study.risk_scenarios.all():
+            selected_residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+            if (
+                selected_residual_hypothesis
+                and selected_residual_hypothesis.simulation_data
+            ):
+                simulation_data = selected_residual_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    # Convert to numpy arrays for curve summing
+                    loss_array = np.array(loss_data)
+                    prob_array = np.array(probability_data)
+
+                    # Filter out zero losses
+                    valid_indices = loss_array > 0
+                    if np.any(valid_indices):
+                        residual_curves_data.append(
+                            (loss_array[valid_indices], prob_array[valid_indices])
+                        )
+                        scenarios_with_residual.append(
+                            {
+                                "scenario_id": str(scenario.id),
+                                "scenario_name": scenario.name,
+                                "hypothesis_id": str(selected_residual_hypothesis.id),
+                                "hypothesis_name": selected_residual_hypothesis.name,
+                            }
+                        )
+
+        # 5. Sum all selected residual hypothesis curves if we have any
+        if residual_curves_data:
+            try:
+                combined_residual_losses, combined_residual_probs = sum_lec_curves(
+                    residual_curves_data
+                )
+
+                if (
+                    len(combined_residual_losses) > 0
+                    and len(combined_residual_probs) > 0
+                ):
+                    # Convert to chart-ready format
+                    combined_residual_data = [
+                        [float(loss), float(prob)]
+                        for loss, prob in zip(
+                            combined_residual_losses, combined_residual_probs
+                        )
+                        if loss > 0
+                    ]
+                    curves.append(
+                        {
+                            "name": "Combined Residual Risk",
+                            "type": "combined_residual",
+                            "data": combined_residual_data,
+                            "study_id": str(study.id),
+                            "study_name": study.name,
+                            "component_scenarios": scenarios_with_residual,
+                            "total_scenarios": len(scenarios_with_residual),
+                        }
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to sum residual LEC curves for study {study.id}: {str(e)}"
+                )
+
         # Return the combined curves data
         return Response(
             {
@@ -265,6 +336,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "curves": curves,
                 "total_curves": len(curves),
                 "scenarios_with_current_data": len(scenarios_with_current),
+                "scenarios_with_residual_data": len(scenarios_with_residual),
                 "total_scenarios": study.risk_scenarios.count(),
             }
         )

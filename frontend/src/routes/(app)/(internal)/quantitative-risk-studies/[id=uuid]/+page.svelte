@@ -88,22 +88,28 @@
 				{#if data.combinedLec?.curves && data.combinedLec.curves.length > 0}
 					{@const curves = data.combinedLec.curves}
 					{@const currentRiskCurve = curves.find(c => c.type === 'combined_current')}
+					{@const residualRiskCurve = curves.find(c => c.type === 'combined_residual')}
 					{@const toleranceCurve = curves.find(c => c.type === 'tolerance')}
 
 					<div class="bg-white rounded-lg p-6 shadow-sm">
 						<div class="flex justify-between items-center mb-4">
 							<h3 class="text-lg font-semibold">Combined Loss Exceedance Curve</h3>
 							<div class="text-sm text-gray-600">
-								{data.combinedLec.scenarios_with_current_data} / {data.combinedLec.total_scenarios} scenarios with current data
+								Current: {data.combinedLec.scenarios_with_current_data} / {data.combinedLec.total_scenarios}
+								{#if data.combinedLec.scenarios_with_residual_data}
+									| Residual: {data.combinedLec.scenarios_with_residual_data} / {data.combinedLec.total_scenarios} scenarios
+								{/if}
 							</div>
 						</div>
 
 						<div class="w-full">
 							<LossExceedanceCurve
 								data={currentRiskCurve?.data || []}
+								residualData={residualRiskCurve?.data || []}
 								toleranceData={toleranceCurve?.data || []}
 								currency={data.combinedLec.currency}
 								title="Study Risk Profile"
+								showTitle={false}
 								height="h-96"
 								width="w-full"
 								enableTooltip={true}
