@@ -1554,7 +1554,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     description=scenario.description,
                     existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
-                    qualifications=scenario.qualifications,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -1563,6 +1562,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     justification=scenario.justification,
                     ref_id=scenario.ref_id,
                 )
+                
+                duplicate_scenario.qualifications.set(scenario.qualifications.all())
 
                 for field in [
                     "applied_controls",
