@@ -1470,6 +1470,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ale' },
+			{ field: 'status' },
+			{ field: 'assets' },
+			{ field: 'threats' },
+			{ field: 'qualifications' },
+			{ field: 'is_selected' }
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'quantitative_risk_scenario',
