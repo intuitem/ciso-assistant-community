@@ -964,5 +964,7 @@
 	"deselect": "Deselecteer",
 	"fearedEventAssetHelpText": "Gevreesde gebeurtenissen zijn meestal gekoppeld aan bedrijfswaarden (primaire activa). Ondersteunende activa zijn hier toegestaan voor flexibiliteit.",
 	"saveAndContinue": "Opslaan en doorgaan",
-	"nextOccurrenceStatus": "Status volgende herhaling"
+	"nextOccurrenceStatus": "Status volgende herhaling",
+	"actor": "Actor",
+	"action": "Actie"
 }

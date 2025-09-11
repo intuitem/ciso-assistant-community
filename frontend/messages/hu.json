@@ -963,5 +963,7 @@
 	"deselect": "Kijelölés megszüntetése",
 	"fearedEventAssetHelpText": "A félelemkeltő események általában üzleti értékekkel (elsődleges eszközökkel) vannak összekapcsolva. A támogatási eszközök itt is engedélyezettek a rugalmasság érdekében.",
 	"saveAndContinue": "Mentés és folytatás",
-	"nextOccurrenceStatus": "Következő előfordulás állapota"
+	"nextOccurrenceStatus": "Következő előfordulás állapota",
+	"actor": "Szereplő",
+	"action": "Művelet"
 }

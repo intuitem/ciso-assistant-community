@@ -423,6 +423,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return Response(serializer_class(super().get_object()).data)
 
 
+# Content types
+
+
+class ContentTypeListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
+    def get(self, request, format=None):
+        content_types = []
+        for model in apps.get_models():
+            content_types.append(
+                {"label": model.__name__, "value": model._meta.model_name}
+            )
+        content_types.sort(key=lambda x: x["label"].lower())
+        return Response(content_types)
+
+
 # Risk Assessment
 
 
