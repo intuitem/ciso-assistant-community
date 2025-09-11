@@ -3752,7 +3752,7 @@ class FolderViewSet(BaseModelViewSet):
                     "assets",
                     "applied_controls",
                     "existing_applied_controls",
-                    "qualifications"
+                    "qualifications",
                 ]
                 for field in related__fields:
                     map_key = (
