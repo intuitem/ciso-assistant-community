@@ -1448,6 +1448,7 @@ class ComplianceAssessmentListSerializer(AssessmentReadSerializer):
             "authors",
             "reviewers",
             "path",
+            "version",
         ]
 
 
