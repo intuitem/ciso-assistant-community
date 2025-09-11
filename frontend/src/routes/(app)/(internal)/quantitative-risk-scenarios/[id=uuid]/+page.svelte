@@ -30,6 +30,7 @@
 				};
 			});
 
+			const currency = data.lec.currency || '$';
 			const option = {
 				legend: {
 					top: 0,
@@ -43,14 +44,14 @@
 				},
 				xAxis: {
 					type: 'log',
-					name: 'Loss Amount',
+					name: `Loss Amount (${currency})`,
 					nameLocation: 'middle',
 					nameGap: 30,
 					axisLabel: {
 						formatter: (value: number) => {
-							if (value >= 1000000) return '$' + (value/1000000).toFixed(0) + 'M';
-							if (value >= 1000) return '$' + (value/1000).toFixed(0) + 'K';
-							return '$' + value.toFixed(0);
+							if (value >= 1000000) return currency + (value/1000000).toFixed(0) + 'M';
+							if (value >= 1000) return currency + (value/1000).toFixed(0) + 'K';
+							return currency + value.toFixed(0);
 						}
 					}
 				},

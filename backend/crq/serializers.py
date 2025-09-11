@@ -124,8 +124,10 @@ class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
-    ale = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
-    display_ale = serializers.CharField(read_only=True)
+    current_ale = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
+    current_ale_display = serializers.CharField(read_only=True)
 
     class Meta:
         model = QuantitativeRiskScenario

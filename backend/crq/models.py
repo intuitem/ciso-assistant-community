@@ -219,9 +219,9 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
     @property
-    def ale(self):
+    def current_ale(self):
         """
-        Get the Annual Loss Expectancy (ALE) from the current stage hypothesis.
+        Get the current Annual Loss Expectancy (ALE) from the current stage hypothesis.
         Returns None if no current stage hypothesis exists or has no simulation data.
         """
         current_hypothesis = self.hypotheses.filter(risk_stage="current").first()
@@ -232,14 +232,14 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         return metrics.get("mean_annual_loss")
 
     @property
-    def display_ale(self):
+    def current_ale_display(self):
         """
-        Get the Annual Loss Expectancy (ALE) with currency from global settings.
-        Returns "No ALE calculated" if no ALE is available.
+        Get the current Annual Loss Expectancy (ALE) with currency from global settings.
+        Returns "No current ALE calculated" if no ALE is available.
         """
-        ale_value = self.ale
+        ale_value = self.current_ale
         if ale_value is None:
-            return "No ALE calculated"
+            return "No current ALE calculated"
 
         # Get currency from global settings
         general_settings = GlobalSettings.objects.filter(name="general").first()

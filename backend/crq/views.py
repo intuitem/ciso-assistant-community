@@ -195,6 +195,14 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                         }
                     )
 
+        # Get currency from global settings
+        from global_settings.models import GlobalSettings
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
         # Return the combined curves data
         return Response(
             {
@@ -203,6 +211,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                 "scenario_name": scenario.name,
                 "study_name": study.name,
                 "total_curves": len(curves),
+                "currency": currency,
             }
         )
 

@@ -1477,7 +1477,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'quantitative_risk_study' },
 			{ field: 'name' },
 			{ field: 'description' },
-			{ field: 'ale' },
+			{ field: 'current_ale_display' },
 			{ field: 'status' },
 			{ field: 'assets' },
 			{ field: 'threats' },

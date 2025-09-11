@@ -2172,6 +2172,7 @@
 	"annualManDaysHelpText": "People/days needed annually",
 	"treatmentCost": "Treatment cost",
 	"currentAle": "Current ALE",
+	"currentAleDisplay": "Current ALE",
 	"inherent": "Inherent",
 	"nextOccurrenceStatus": "Next occurrence status",
 	"displayAle": "Annual Loss Expectancy",
