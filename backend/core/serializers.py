@@ -864,6 +864,7 @@ class AppliedControlListSerializer(AppliedControlReadSerializer):
             "id",
             "name",
             "description",
+            "effort",
             "path",
             "folder",
             "status",
@@ -877,6 +878,9 @@ class AppliedControlListSerializer(AppliedControlReadSerializer):
             "category",
             "filtering_labels",
             "owner",
+            "cost",
+            "reference_control",
+            "link",
         ]
 
 
