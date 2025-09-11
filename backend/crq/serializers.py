@@ -99,6 +99,22 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
         model = QuantitativeRiskScenario
         exclude = ["created_at", "updated_at"]
 
+    def create(self, validated_data):
+        # Create the quantitative risk scenario
+        scenario = super().create(validated_data)
+
+        # Automatically create an associated quantitative hypothesis with risk_stage='current'
+        QuantitativeRiskHypothesis.objects.create(
+            quantitative_risk_scenario=scenario,
+            name=f"as-is",
+            risk_stage="current",
+            is_selected=True,
+            ref_id=QuantitativeRiskHypothesis.get_default_ref_id(scenario),
+            folder=scenario.folder,  # Use the same folder as the scenario
+        )
+
+        return scenario
+
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
     quantitative_risk_study = FieldsRelatedField()
@@ -125,6 +141,68 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
     class Meta:
         model = QuantitativeRiskHypothesis
         fields = "__all__"
+
+    def create(self, validated_data):
+        # Check if this is a residual hypothesis and if parameters are not set
+        risk_stage = validated_data.get("risk_stage")
+        scenario = validated_data.get("quantitative_risk_scenario")
+        parameters = validated_data.get("parameters", {})
+
+        # If creating a residual hypothesis without parameters, copy from current hypothesis
+        if (
+            risk_stage == "residual"
+            and scenario
+            and (
+                not parameters
+                or (not parameters.get("probability") and not parameters.get("impact"))
+            )
+        ):
+            # Find the current hypothesis in the same scenario
+            current_hypothesis = QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=scenario, risk_stage="current"
+            ).first()
+
+            # If current hypothesis exists, copy parameters and existing controls
+            if current_hypothesis:
+                # Copy parameters if they exist and user hasn't provided their own
+                if current_hypothesis.parameters:
+                    current_params = current_hypothesis.parameters.copy()
+
+                    # Only copy if the user hasn't provided their own parameters
+                    if not parameters.get("probability") and current_params.get(
+                        "probability"
+                    ):
+                        if "parameters" not in validated_data:
+                            validated_data["parameters"] = {}
+                        validated_data["parameters"]["probability"] = current_params[
+                            "probability"
+                        ]
+
+                    if not parameters.get("impact") and current_params.get("impact"):
+                        if "parameters" not in validated_data:
+                            validated_data["parameters"] = {}
+                        validated_data["parameters"]["impact"] = current_params[
+                            "impact"
+                        ].copy()
+
+        # Create the hypothesis
+        hypothesis = super().create(validated_data)
+
+        # After creating the hypothesis, copy existing applied controls from current hypothesis
+        # Only if the newly created residual hypothesis doesn't have existing controls set
+        if (
+            risk_stage == "residual"
+            and scenario
+            and current_hypothesis
+            and current_hypothesis.existing_applied_controls.exists()
+            and not hypothesis.existing_applied_controls.exists()
+        ):
+            # Copy all existing applied controls from current to residual as existing controls
+            hypothesis.existing_applied_controls.set(
+                current_hypothesis.existing_applied_controls.all()
+            )
+
+        return hypothesis
 
     def validate(self, attrs):
         """
@@ -163,6 +241,10 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
             existing_current = QuantitativeRiskHypothesis.objects.filter(
                 quantitative_risk_scenario=scenario, risk_stage="current"
             )
+            # Exclude the current instance if we're updating
+            if self.instance:
+                existing_current = existing_current.exclude(id=self.instance.id)
+
             if existing_current.exists():
                 current_hypothesis = existing_current.first()
                 raise serializers.ValidationError(
@@ -175,6 +257,10 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
             existing_inherent = QuantitativeRiskHypothesis.objects.filter(
                 quantitative_risk_scenario=scenario, risk_stage="inherent"
             )
+            # Exclude the current instance if we're updating
+            if self.instance:
+                existing_inherent = existing_inherent.exclude(id=self.instance.id)
+
             if existing_inherent.exists():
                 inherent_hypothesis = existing_inherent.first()
                 raise serializers.ValidationError(

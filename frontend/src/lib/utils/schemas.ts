@@ -739,7 +739,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 	existing_applied_controls: z.string().uuid().optional().array().optional(),
 	added_applied_controls: z.string().uuid().optional().array().optional(),
 	removed_applied_controls: z.string().uuid().optional().array().optional(),
-	risk_stage: z.string().optional().default('current'),
+	risk_stage: z.string().optional().default('residual'),
 	ref_id: z.string().optional(),
 	is_selected: z.boolean().default(true),
 	probability: z.coerce.number().min(0).max(1).optional(),
