@@ -1133,9 +1133,9 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
 
 class RiskAssessmentFilterSet(GenericFilterSet):
-    status_choices = list(RiskAssessment.Status.choices)
-    status_choices.append(("--", "--"))
-    status = df.MultipleChoiceFilter(choices=status_choices, method="filter_status")
+    status = df.MultipleChoiceFilter(
+        choices=RiskAssessment.get_status_choices(), method="filter_status"
+    )
 
     class Meta:
         model = RiskAssessment

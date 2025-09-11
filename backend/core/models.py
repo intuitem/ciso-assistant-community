@@ -3382,6 +3382,12 @@ class RiskAssessment(Assessment):
         scenario_count = count
         return scenario_count
 
+    @classmethod
+    def get_status_choices(cls) -> list[tuple[str, str]]:
+        choices = list(RiskAssessment.Status.choices)
+        choices.append(("--", "--"))
+        return choices
+
     def quality_check(self) -> dict:
         errors_lst = list()
         warnings_lst = list()
