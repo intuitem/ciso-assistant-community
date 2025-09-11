@@ -1341,5 +1341,7 @@
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
 	"saveAndContinue": "Salva e continua",
-	"nextOccurrenceStatus": "Stato prossima occorrenza"
+	"nextOccurrenceStatus": "Stato prossima occorrenza",
+	"actor": "Attore",
+	"action": "Azione"
 }
