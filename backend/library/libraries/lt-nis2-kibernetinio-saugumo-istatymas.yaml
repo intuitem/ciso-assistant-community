@@ -1,0 +1,2744 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:ovidijusbalkauskas:risk:library:kibernetinio-saugumo-istatymas
+locale: lt
+ref_id: 2024-19589
+name: "Lietuvos Respublikos kibernetinio saugumo \u012Fstatymo reikalavimai subjektams"
+description: "Kibernetinio saugumo reikalavimai, dalis Lietuvos Respublikos kibernetinio\
+  \ saugumo \u012Fstatymo, \u012Fgalinan\u010Dio TIS2 (NIS2) Lietuvos \u012Fstatym\u0173\
+  \ baz\u0117je"
+copyright: "Lietuvos Respublikos Vyriausyb\u0117"
+version: 1
+publication_date: 2025-09-09
+provider: "Lietuvos Respublikos Vyriausyb\u0117"
+packager: ovidijusbalkauskas
+objects:
+  framework:
+    urn: urn:ovidijusbalkauskas:risk:framework:kibernetinio-saugumo-istatymas
+    ref_id: 2024-19589
+    name: "Lietuvos Respublikos kibernetinio saugumo \u012Fstatymo reikalavimai subjektams"
+    description: "Kibernetinio saugumo reikalavimai, dalis Lietuvos Respublikos kibernetinio\
+      \ saugumo \u012Fstatymo, \u012Fgalian\u010Dio TIS2 (NIS2) Lietuvos \u012Fstatym\u0173\
+      \ baz\u0117je"
+    implementation_groups_definition:
+    - ref_id: essential_subject
+      name: Esminiai subjektai
+      description: Reikalavimai esminiams kibernetinio saugumo subjektams
+    - ref_id: important_subject
+      name: "Svarb\u016Bs subjektai"
+      description: Reikalavimai svarbiems kibernetinio saugumo subjektams
+    requirement_nodes:
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec1
+      assessable: false
+      depth: 1
+      ref_id: sec1
+      name: 1 skyrius
+      description: Bendrosios nuostatos
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec1
+      ref_id: '1'
+      name: "Reikalavim\u0173 apra\u0161as"
+      description: "Kibernetinio saugumo reikalavim\u0173 apra\u0161e (toliau \u2013\
+        \ Apra\u0161as) nustatomi kibernetinio saugumo subjektams taikomi kibernetinio\
+        \ saugumo reikalavimai."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec1
+      ref_id: '2'
+      name: Naudojami terminai
+      description: "Apra\u0161e vartojamos s\u0105vokos apibr\u0117\u017Etos Lietuvos\
+        \ Respublikos elektronini\u0173 ry\u0161i\u0173 \u012Fstatyme, Lietuvos Respublikos\
+        \ informacin\u0117s visuomen\u0117s paslaug\u0173 \u012Fstatyme, Lietuvos\
+        \ Respublikos kibernetinio saugumo \u012Fstatyme, Lietuvos Respublikos valstyb\u0117\
+        s informacini\u0173 i\u0161tekli\u0173 valdymo \u012Fstatyme, Lietuvos Respublikos\
+        \ vie\u0161\u0173j\u0173 pirkim\u0173 \u012Fstatyme ir Lietuvos standarte\
+        \ LST EN ISO/IEC 27002."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec1
+      ref_id: '3'
+      name: "Subjektas turi teis\u0119 d\u0117styti nuostatas viename arba atskiruose\
+        \ dokumentuose"
+      description: "Kibernetinio saugumo subjektas, \u012Fgyvendindamas Apra\u0161\
+        o reikalavimus, susijusius su dokument\u0173 tvirtinimu, turi teis\u0119 pasirinkti\
+        \ nurodytus reikalavimus \u012Fgyvendinan\u010Dias nuostatas d\u0117styti\
+        \ viename dokumente arba i\u0161d\u0117styti jas atskiruose dokumentuose."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      assessable: false
+      depth: 1
+      ref_id: sec2
+      name: 2 skyrius
+      description: Kibernetinio saugumo reikalavimai
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec1
+      name: 1 skirsnis
+      description: "Tinkl\u0173 ir informacini\u0173 sistem\u0173 saugumo politika"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:4
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec1
+      ref_id: '4'
+      name: "Tinkl\u0173 ir informacini\u0173 sistem\u0173 kibernetinio saugumo politika"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi patvirtinti tinkl\u0173 ir informacini\u0173 sistem\u0173 kibernetinio\
+        \ saugumo politikos dokument\u0105, kuriame turi b\u016Bti nustatyta:\n4.1.\
+        \ veiklos u\u017Etikrinant kibernetin\u012F saugum\u0105 tikslai, suformuluoti\
+        \ pagal Kibernetinio saugumo \u012Fstatyme nustatytus kibernetinio saugumo\
+        \ principus;\n4.2. kibernetin\u012F saugum\u0105 reglamentuojan\u010Di\u0173\
+        \ teis\u0117s akt\u0173, kuriais vadovaujamasi, s\u0105ra\u0161as;\n4.3. kiti\
+        \ kibernetinio saugumo politikos dokumentai, kuriais vadovaujamasi \u012F\
+        gyvendinant tinkl\u0173 ir informacini\u0173 sistem\u0173 saugumo politik\u0105\
+        ;\n4.4. kibernetinio saugumo politikos \u012Fpareigojimai, kuri\u0173 turi\
+        \ laikytis darbuotojai ir tre\u010Diosios \u0161alys;\n4.5. \u012Fsipareigojimai\
+        \ reguliariai, ne re\u010Diau kaip kart\u0105 per metus arba pasikeitus aplinkyb\u0117\
+        ms, per\u017Ei\u016Br\u0117ti ir atnaujinti kibernetinio saugumo politikos\
+        \ dokumentus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:5
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec1
+      ref_id: '5'
+      name: "Tinkl\u0173 ir informacini\u0173 sistem\u0173 kibernetinio saugumo politikos\
+        \ pateikimas NKSC"
+      description: "Kibernetinio saugumo subjektai turi pateikti ir (ar) atnaujinti\
+        \ kibernetinio saugumo politikos dokumento (-\u0173) patvirtinimo duomenis,\
+        \ nurodydami dokumento pavadinim\u0105, patvirtinimo dat\u0105 ir registracijos\
+        \ numer\u012F, Nacionaliniam kibernetinio saugumo centrui prie Kra\u0161to\
+        \ apsaugos ministerijos (toliau \u2013 NKSC) \u012F Kibernetinio saugumo informacin\u0119\
+        \ sistem\u0105 (toliau \u2013 KSIS) ne v\u0117liau kaip per 5 darbo dienas\
+        \ nuo \u0161io dokumento (-\u0173) patvirtinimo ir (ar) pakeitimo dienos."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:6
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec1
+      ref_id: '6'
+      name: "NKSC gali pareikalauti dokument\u0173"
+      description: "NKSC, atlikdamas kibernetinio saugumo subjekto patikrinim\u0105\
+        , turi teis\u0119 pareikalauti pateikti Apra\u0161o 3 punkte nurodyt\u0173\
+        \ dokument\u0173 kopijas \u012F KSIS ne v\u0117liau kaip per 5 darbo dienas\
+        \ nuo NKSC pra\u0161ymo gavimo dienos."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec2
+      name: 2 skirsnis
+      description: "Kibernetinio saugumo rizikos analiz\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:7
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '7'
+      name: Rizikos vertinimo ir valdymo politika
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti kibernetinio saugumo subjekto tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 rizikos vertinimo ir valdymo tvark\u0105, apiman\u010Di\u0105\
+        :\n7.1. u\u017E rizikos vertinim\u0105, rizikos vertinimo proceso prie\u017E\
+        i\u016Br\u0105 bei nuolatin\u012F tobulinim\u0105 atsakingo asmens arba asmen\u0173\
+        \ paskyrim\u0105;\n7.2. vertinimo ir valdymo proces\u0105;\n7.3. priimtin\u0105\
+        \ kibernetinio saugumo subjektui rizikos lyg\u012F;\n7.4. rizikos vertinimo\
+        \ periodi\u0161kumo reikalavimus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:8
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '8'
+      name: Rizikos vertinimo ir valdymo procesas
+      description: "Rizikos vertinimo ir valdymo procesas turi apimti bent \u0161\
+        iuos elementus:\n8.1. tinkl\u0173 ir informacini\u0173 sistem\u0173 identifikavim\u0105\
+        \ ir klasifikavim\u0105;\n8.2. rizikos analiz\u0119, apiman\u010Di\u0105 gr\u0117\
+        smi\u0173 ir sprag\u0173 analiz\u0119 ir vertinim\u0105, galim\u0105 poveik\u012F\
+        , rizikos apskai\u010Diavim\u0105;\n8.3. rizikos valdymo priemoni\u0173 pasirinkim\u0105\
+        ."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:9
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '9'
+      name: "Rizikos vertinimo da\u017Enumas"
+      description: "Rizikos vertinimas turi b\u016Bti atliekamas ne re\u010Diau kaip\
+        \ kart\u0105 per metus, \u012Fvykus esminiams kibernetinio saugumo subjekto\
+        \ organizaciniams ar kitiems reik\u0161mingiems poky\u010Diams, taip pat \u012F\
+        vykus dideliam kibernetiniam incidentui."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:10
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '10'
+      name: Rizikos vertinimo ataskaita
+      description: "Atlikus rizikos vertinim\u0105, kibernetinio saugumo subjektai\
+        \ turi parengti rizikos vertinimo ataskait\u0105 ir, jei rizikos vertinimo\
+        \ metu yra nustatoma \u0161alinam\u0173 tr\u016Bkum\u0173, rizikos valdymo\
+        \ plan\u0105, kuriuos patvirtina kibernetinio saugumo subjekto vadovas arba\
+        \ jo \u012Fgaliotas asmuo."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:11
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '11'
+      name: Rizikos vertinimo ataskaitos turinys
+      description: "Rizikos vertinimo ataskaita turi apimti bent tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 turto identifikavim\u0105, poveikio vertinim\u0105, gr\u0117\
+        smi\u0173 ir sprag\u0173 vertinimo informacij\u0105 bei rizikos apskai\u010D\
+        iavimo rezultatus pagal kibernetinio saugumo subjekto nustatytus kriterijus,\
+        \ taip pat rizikos valdym\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:12
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '12'
+      name: Rizikos valdymo plano turinys
+      description: "Rizikos valdymo planas turi apimti bent priemoni\u0173 nepriimtinoms\
+        \ rizikoms valdyti nustatym\u0105 ir reikalingus i\u0161teklius, u\u017E priemoni\u0173\
+        \ \u012Fgyvendinim\u0105 atsakingus asmenis bei priemoni\u0173 \u012Fgyvendinimo\
+        \ terminus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:13
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '13'
+      name: Rizikos vertinimo ir valdymo ataskaitos
+      description: "Kibernetinio saugumo subjektas teikia rizikos vertinimo ataskaitos\
+        \ ir rizikos valdymo plano patvirtinimo duomenis, nurodydamas patvirtinimo\
+        \ dat\u0105 ir registracijos numer\u012F bei rizikos vertinimo metu nustatytus\
+        \ apibendrintus rezultatus: identifikuotas gr\u0117smes, j\u0173 tikimyb\u0119\
+        \ ir poveik\u012F veiklai, rizikos lygius ir valdymo priemones, \u012F KSIS\
+        \ ne v\u0117liau kaip per 5 darbo dienas nuo \u0161i\u0173 dokument\u0173\
+        \ patvirtinimo."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:14
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '14'
+      name: "Rizikos vertinimo ir valdymo ataskait\u0173 saugojimas"
+      description: "Kibernetinio saugumo subjekto vadovo arba jo \u012Fgalioto asmens\
+        \ patvirtintos rizikos vertinimo ataskaitos ir rizikos valdymo planai turi\
+        \ b\u016Bti saugomi ne ma\u017Eiau kaip 3 metus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:15
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec2
+      ref_id: '15'
+      name: "NKSC gali pareikalauti ataskait\u0173"
+      description: "NKSC, atlikdamas kibernetinio saugumo subjekto patikrinim\u0105\
+        , turi teis\u0119 pareikalauti kibernetinio saugumo subjekto pateikti rizikos\
+        \ vertinimo ataskaitos kopij\u0105 ir rizikos valdymo priemoni\u0173 plano\
+        \ kopij\u0105. Kibernetinio saugumo subjektas \u0161iuos dokumentus turi pateikti\
+        \ \u012F KSIS ne v\u0117liau kaip per 5 darbo dienas nuo NKSC pra\u0161ymo\
+        \ gavimo dienos."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec3
+      name: 3 skirsnis
+      description: "U\u017E kibernetin\u012F saugum\u0105 atsaking\u0173 asmen\u0173\
+        \ ir kibernetinio saugumo subjekto vadovo ar j \u012Fgalioto asmens pareigos"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:16
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      ref_id: '16'
+      name: "Asmen\u0173 atsaking\u0173 u\u017E kibernetin\u012F saugum\u0105 paskyrimas"
+      description: "Kibernetinio saugumo subjekto vadovas ar jo \u012Fgaliotas asmuo\
+        \ turi paskirti u\u017E kibernetin\u012F saugum\u0105 atsakingus asmenis,\
+        \ nurodytus Kibernetinio saugumo \u012Fstatymo 15 straipsnyje, ir kitus u\u017E\
+        \ Apra\u0161o reikalavim\u0173 \u012Fgyvendinim\u0105 atsakingus asmenis."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:17
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      ref_id: '17'
+      name: "Asmen\u0173 paskyrimo informavimas NKSC"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi u\u017Etikrinti, kad NKSC b\u016Bt\u0173 informuotas apie paskirtus\
+        \ u\u017E kibernetin\u012F saugum\u0105 atsakingus asmenis per KSIS ir b\u016B\
+        t\u0173 pateikta KSIS nuostatuose nurodyto turinio kontaktin\u0117 informacija."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:18
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      ref_id: '18'
+      name: "Asmen\u0173 paskyrimo informavimas darbuotojus"
+      description: "Kibernetinio saugumo subjekto darbuotojai turi b\u016Bti informuoti\
+        \ apie paskirtus u\u017E kibernetin\u012F saugum\u0105 atsakingus asmenis."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:19
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      ref_id: '19'
+      name: Paskirti asmenys negali vykdyti IT administracijos
+      description: "Kibernetinio saugumo vadovas ir (ar) saugos \u012Fgaliotinis negali\
+        \ vykdyti funkcij\u0173, susijusi\u0173 su tinkl\u0173 ar informacini\u0173\
+        \ sistem\u0173 administravimu ar kitomis pareigyb\u0117mis, susijusiomis su\
+        \ technin\u0117s kompiuterin\u0117s \u012Frangos ar programin\u0117s \u012F\
+        rangos prie\u017Ei\u016Bra ir valdymu."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:20
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      ref_id: '20'
+      name: "Atsaking\u0173 asmen\u0173 funkcijos"
+      description: "Kibernetinio saugumo vadovas ir (ar) saugos \u012Fgaliotinis,\
+        \ koordinuodami ir pri\u017Ei\u016Br\u0117dami kibernetinio saugumo politikos\
+        \ dokumentuose nustatyt\u0173 reikalavim\u0173 \u012Fgyvendinim\u0105, turi\
+        \ atlikti \u0161ias funkcijas:\n20.1.    organizuoti kibernetinio saugumo\
+        \ subjekto atitikties \u0161io Apra\u0161o reikalavimams vertinim\u0105 NKSC\
+        \ patvirtintos Kibernetinio saugumo audit\u0173 atlikimo metodikos nustatyta\
+        \ tvarka;\n20.2.    u\u017Etikrinti, kad kibernetinio saugumo politikos dokumentai\
+        \ b\u016Bt\u0173 parengti ir periodi\u0161kai atnaujinami remiantis Kibernetinio\
+        \ saugumo \u012Fstatymo ir j\u012F \u012Fgyvendinan\u010Di\u0173 teis\u0117\
+        s akt\u0173 reikalavimais;\n20.3.    koordinuoti tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 kibernetini\u0173 incident\u0173 tyrimus ir bendradarbiauti\
+        \ su kompetentingomis institucijoms, tirian\u010Diomis kibernetinius incidentus\
+        \ bei neteis\u0117tas veikas, susijusias su kibernetiniais incidentais;\n\
+        20.4.    teikti tinkl\u0173 ir informacini\u0173 sistem\u0173 administratoriui\
+        \ (-iams) ir (ar) naudotojams privalomus vykdyti nurodymus ir pavedimus, susijusius\
+        \ su kibernetinio saugumo politikos dokumentuose nustatyt\u0173 reikalavim\u0173\
+        \ \u012Fgyvendinimu;\n20.5.    organizuoti rizikos vertinim\u0105 ir dalyvauti\
+        \ rizikos vertinimo procese, rengti ir teikti tvirtinti kibernetinio saugumo\
+        \ subjekto vadovui ar jo \u012Fgaliotam asmeniui rizikos vertinimo ataskaitas\
+        \ ir rizikos valdymo planus;\n20.6.    organizuoti darbuotoj\u0173 mokymus\
+        \ kibernetinio saugumo klausimais;\n20.7.    atlikti kitas kibernetinio saugumo\
+        \ politikos dokumentuose ir kituose teis\u0117s aktuose, reglamentuojan\u010D\
+        iuose kibernetin\u012F saugum\u0105, nustatytas ir jam priskirtas funkcijas."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:21
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec3
+      ref_id: '21'
+      name: "Asmen\u0173 atsaking\u0173 u\u017E sistem\u0173 prie\u017Ei\u016Br\u0105\
+        \ paskyrimas"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi paskirti atsaking\u0105 asmen\u012F (administratori\u0173) tinklams\
+        \ ir (ar) informacin\u0117ms sistemoms pri\u017Ei\u016Br\u0117ti, j\u0173\
+        \ veikimui u\u017Etikrinti. \u0160io asmens funkcijos turi apimti tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 naudotoj\u0173 prieigos teisi\u0173 valdym\u0105\
+        , tinkl\u0173 ir informacini\u0173 sistem\u0173 komponent\u0173 (kompiuteri\u0173\
+        , operacini\u0173 sistem\u0173, duomen\u0173 bazi\u0173, taikom\u0173j\u0173\
+        \ program\u0173, saugasieni\u0173, \u012Fsibrovimo aptikimo sistem\u0173)\
+        \ prie\u017Ei\u016Br\u0105, \u0161i\u0173 informacin\u0117s sistemos komponent\u0173\
+        \ s\u0105rank\u0105, informacini\u0173 sistem\u0173 pa\u017Eeid\u017Eiam\u0173\
+        \ viet\u0173 nustatym\u0105, saugumo reikalavim\u0173 atitikties nustatym\u0105\
+        \ ir steb\u0117sen\u0105, reagavim\u0105 \u012F kibernetinius incidentus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec4
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec4
+      name: 4 skirsnis
+      description: "Kibernetini\u0173 incident\u0173 valdymas"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:22
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec4
+      ref_id: '22'
+      name: "Kibernetini\u0173 incident\u0173 valdymo planas"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi patvirtinti kibernetini\u0173 incident\u0173 valdymo plan\u0105, kuris\
+        \ turi atitikti Lietuvos Respublikos Vyriausyb\u0117s patvirtinto Nacionalinio\
+        \ kibernetini\u0173 incident\u0173 valdymo plano nuostatas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:23
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec4
+      ref_id: '23'
+      name: "Incident\u0173 valdymo suderinimas su paslaug\u0173 tiek\u0117jais"
+      description: "Tais atvejais, kai kibernetinio saugumo subjektui tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 paslaugas, susijusias su kibernetini\u0173\
+        \ incident\u0173 valdymu, teikia paslaug\u0173 teik\u0117jai, kibernetinio\
+        \ saugumo subjekto kibernetini\u0173 incident\u0173 valdymo planas turi b\u016B\
+        ti suderintas su paslaug\u0173 teik\u0117ju."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:24
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec4
+      ref_id: '24'
+      name: "Incident\u0173 valdymo plano turinys"
+      description: "Kibernetini\u0173 incident\u0173 valdymo plane turi b\u016Bti\
+        \ nurodyta:\n24.1.    kibernetini\u0173 incident\u0173 nustatymo b\u016Bdai;\n\
+        24.2.    kibernetini\u0173 incident\u0173 vertinimas;\n24.3.    kibernetini\u0173\
+        \ incident\u0173 valdymo organizavimas;\n24.4.    kibernetini\u0173 incident\u0173\
+        \ komunikavimo su suinteresuotomis \u0161alimis nuostatos;\n24.5.    darbuotoj\u0173\
+        , kurie yra atsakingi u\u017E kibernetini\u0173 incident\u0173 valdym\u0105\
+        , atsakomyb\u0117;\n24.6.    kibernetini\u0173 incident\u0173 \u012Frodym\u0173\
+        \ nustatymo, rinkimo, gavimo, prane\u0161imo ir i\u0161saugojimo nuostatos;\n\
+        24.7.    \u012Fgytos kibernetini\u0173 incident\u0173 valdymo patirties vertinimas;\n\
+        24.8.    kibernetini\u0173 incident\u0173 valdymo plano veiksmingumo i\u0161\
+        bandymo ir i\u0161bandymo rezultat\u0173 ataskait\u0173 rengimo nuostatos."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:25
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec4
+      ref_id: '25'
+      name: "\u017Durnalini\u0173 \u012Fra\u0161\u0173 reikalavimai"
+      description: "Kibernetinio saugumo subjektas turi nustatyti \u017Eurnalini\u0173\
+        \ \u012Fra\u0161\u0173 (angl. log) administravimo ir saugojimo, \u012Fsibrovim\u0173\
+        \ aptikimo ir prevencijos reikalavimus, kuriuose turi b\u016Bti nustatyta:\n\
+        25.1. operacini\u0173 sistem\u0173, tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        , technin\u0117s \u012Frangos \u017Eurnalini\u0173 \u012Fra\u0161\u0173 saugojimo,\
+        \ fiksavimo ir analiz\u0117s periodi\u0161kumo reikalavimai;\n25.2. \u012F\
+        einan\u010Dio ir i\u0161einan\u010Dio tinklo duomen\u0173 srauto, antivirusin\u0117\
+        s programin\u0117s \u012Frangos, \u012Fsibrovim\u0173 aptikimo ir prevencijos\
+        \ sistemos ar saugasien\u0117s \u017Eurnalini\u0173 \u012Fra\u0161\u0173 saugojimo\
+        \ fiksavimo ir analiz\u0117s periodi\u0161kumo reikalavimai;\n25.3. tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 konfig\u016Bracini\u0173 ir atsargini\u0173\
+        \ kopij\u0173 fail\u0173 prieigos ar pakeitimo veiksm\u0173 rinkimo reikalavimai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec4
+      ref_id: '26'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 1 lentel\u0117je."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26
+      ref_id: 26.t1
+      name: "1 lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.1
+      name: "\u017Durnalini\u0173 \u012Fra\u0161\u0173 fiksavimas"
+      description: "Turi b\u016Bti fiksuojami bent jau \u0161ie \u017Eurnaliniai \u012F\
+        ra\u0161ai (jei tinkl\u0173 ir informacin\u0117s sistemos dalys palaiko tok\u012F\
+        \ funkcionalum\u0105)"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.1
+      name: "Komponent\u0173 \u012Fjungimo \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: tinkl\u0173 ir informacin\u0117\
+        s sistemos komponent\u0173 (serveri\u0173, virtuali\u0173 serveri\u0173, saugasieni\u0173\
+        , mar\u0161rutizatori\u0173, komutatori\u0173 ir kit\u0173 subjekto identifikuot\u0173\
+        \ svarbi\u0173 komponent\u0173) \u012Fjungimas, i\u0161jungimas ar perkrovimas;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.2
+      name: "Autentifikavimo \u012Fvyki\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: naudotoj\u0173 ir\
+        \ administratori\u0173 autentifikavimo \u012Fvykiai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.3
+      name: "Paskyr\u0173 ir prieig\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: naudotoj\u0173,\
+        \ administratori\u0173 paskyr\u0173 suk\u016Brimas, prieig\u0173 prie tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 pakeitimai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.4
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.4
+      name: "Administratori\u0173 veiksm\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: administratori\u0173\
+        \ atliekami veiksmai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.5
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.5
+      name: "U\u017Edavyni\u0173 \u012Fvyki\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: operacin\u0117se\
+        \ sistemose sukurti ir atlikti sisteminiai u\u017Edavini\u0173 \u012Fvykiai\
+        \ (angl. Scheduled task);"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.6
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.6
+      name: "Grupini\u0173 politik\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: grupini\u0173 politik\u0173\
+        \ pakeitimai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.7
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.7
+      name: "Saugasieni\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: saugasieni\u0173\
+        \ taisykli\u0173 pakeitimai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.8
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.8
+      name: "\u012Era\u0161\u0173 sistemos \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: \u017Eurnalini\u0173\
+        \ \u012Fra\u0161\u0173 rinkimo funkcijos \u012Fjungimas, i\u0161jungimas;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.9
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.9
+      name: "Laiko ir datos \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: operacini\u0173\
+        \ sistem\u0173 laiko ir datos pakeitimai;"
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.10
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.10
+      name: "Saugumo sistem\u0173 \u012Fjungimo \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: saugumo sistem\u0173\
+        \ (antivirusini\u0173, \u012Fsibrovimo aptikimo sistem\u0173) \u012Fjungimas\
+        \ ir i\u0161jungimas;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.11
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.11
+      name: "Servis\u0173 \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: operacin\u0117se\
+        \ sistemose vykstan\u010Di\u0173 proces\u0173 ar servis\u0173 \u012Fvykiai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.12
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.12
+      name: "Tinkl\u0173 ir prietais\u0173 autentifikavimo \u012Fvykiai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 galini\u0173 \u012Frengini\u0173 autentifikavimo \u012Fvykiai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1.13
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.1
+      ref_id: 26.t1.1.13
+      name: "\u012Era\u0161i\u0173 preigos \u012Fra\u0161ai"
+      description: "Fiksuojami \u017Eurnaliniai \u012Fra\u0161ai: \u017Eurnalini\u0173\
+        \ \u012Fra\u0161\u0173 per\u017Ei\u016Br\u0117jimas, trynimas, k\u016Brimas\
+        \ ar keitimas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.2
+      name: "Laiko \u0161altiniai"
+      description: "Tinklai ir informacin\u0117s sistemos turi tur\u0117ti ne ma\u017E\
+        iau kaip 2 laiko \u0161altinius."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.3
+      name: "\u017Durnalini\u0173 \u012Fra\u0161\u0173 metaduomenys"
+      description: "\u017Durnaliniuose \u012Fra\u0161uose turi b\u016Bti fiksuojami\
+        \ bent jau \u0161ie duomenys (jei tinkl\u0173 ir informacin\u0117s sistemos\
+        \ dalys palaiko tok\u012F funkcionalum\u0105):"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3
+      ref_id: 26.t1.3.1
+      name: "\u012Era\u0161\u0173 laikas"
+      description: "Fiksuojami \u017Eurnalin\u0173 \u012Fra\u0161\u0173: \u012Fvykio\
+        \ data ir tikslus laikas;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3
+      ref_id: 26.t1.3.2
+      name: "\u012Era\u0161\u0173 r\u016B\u0161is"
+      description: "Fiksuojami \u017Eurnalin\u0173 \u012Fra\u0161\u0173: \u012Fvykio\
+        \ r\u016B\u0161is (informacija, klaida, saugumo prane\u0161imas, sisteminis\
+        \ prane\u0161imas, persp\u0117jimas (angl. warning));"
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3
+      ref_id: 26.t1.3.3
+      name: Identifikavimo duomenys
+      description: "Fiksuojami \u017Eurnalin\u0173 \u012Fra\u0161\u0173: naudotojo\
+        \ / administratoriaus ir (arba) tinkl\u0173 ir informacin\u0117s sistemos\
+        \ \u012Frenginio, susijusio su \u012Fvykiu, identifikavimo duomenys;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3.4
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.3
+      ref_id: 26.t1.3.4
+      name: "\u012Evykio apra\u0161ymas"
+      description: "Fiksuojami \u017Eurnalin\u0173 \u012Fra\u0161\u0173: \u012Fvykio\
+        \ apra\u0161ymas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.4
+      name: "Duomen\u0173 sraut\u0173 \u012Fra\u0161ai"
+      description: "Priemon\u0117s, naudojamos vidin\u0117s tinkl\u0173 ir informacin\u0117\
+        s sistemos s\u0105sajoje su vie\u0161\u0173j\u0173 elektronini\u0173 ry\u0161\
+        i\u0173 tinklu, turi b\u016Bti nustatytos taip, kad \u017Eurnaliniuose \u012F\
+        ra\u0161uose fiksuot\u0173 visus \u012Fvykius, susijusius su \u012Feinan\u010D\
+        iais ir i\u0161einan\u010Diais duomen\u0173 srautais."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.5
+      name: "\u012Era\u0161\u0173 saugojimo \u012Franga"
+      description: "Tinkl\u0173 ir informacin\u0117s sistemos fiksuojami \u017Eurnaliniai\
+        \ \u012Fra\u0161ai turi b\u016Bti saugomi specializuotoje tam pritaikytoje\
+        \ technin\u0117je ar programin\u0117je \u012Frangoje."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.6
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.6
+      name: "Audito sutrikimo prane\u0161imai"
+      description: "D\u0117l \u012Fvairi\u0173 trikd\u017Ei\u0173 nustojus fiksuoti\
+        \ auditui skirtus duomenis, apie tai nedelsiant (automatiniu prane\u0161imu\
+        \ angl. alert), bet ne v\u0117liau kaip per vien\u0105 darbo dien\u0105 turi\
+        \ b\u016Bti informuojamas kibernetinio saugumo vadovas ir (ar) saugos \u012F\
+        galiotinis."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.7
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.7
+      name: "\u012Era\u0161\u0173 saugojimo trukm\u0117"
+      description: "\u017Durnaliniai \u012Fra\u0161ai turi b\u016Bti saugomi ne trumpiau\
+        \ kaip 90 kalendorini\u0173 dien\u0173."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.8
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.8
+      name: "\u012Era\u0161\u0173 trinimas"
+      description: "Draud\u017Eiama \u017Eurnalinius \u012Fra\u0161us trinti, keisti,\
+        \ kol nesibaig\u0119s \u017Eurnalini\u0173 \u012Fra\u0161\u0173 saugojimo\
+        \ terminas."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.9
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.9
+      name: "\u012Era\u0161\u0173 kopijos"
+      description: "\u017Durnalini\u0173 \u012Fra\u0161\u0173 kopijos turi b\u016B\
+        ti apsaugotos nuo pa\u017Eeidimo, praradimo, nesankcionuoto pakeitimo ar sunaikinimo."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.10
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.10
+      name: "\u012Era\u0161\u0173 naudojimo kontrol\u0117"
+      description: "Naudojimasis \u017Eurnaliniais \u012Fra\u0161ais turi b\u016B\
+        ti kontroliuojamas ir fiksuojamas, \u017Eurnaliniai \u012Fra\u0161ai turi\
+        \ b\u016Bti pasiekiami tik kibernetinio saugumo subjekto \u012Fgaliotiems\
+        \ asmenims ir kibernetinio saugumo vadovui (per\u017Ei\u016Bros teis\u0117\
+        mis)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.11
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.11
+      name: "\u012Era\u0161\u0173 analiz\u0117"
+      description: "\u017Durnalini\u0173 \u012Fra\u0161\u0173 duomenys turi b\u016B\
+        ti analizuojami \u012Fgalioto asmens ne re\u010Diau kaip kart\u0105 per m\u0117\
+        nes\u012F ir apie analiz\u0117s rezultat\u0173 nuokrypius informuojamas kibernetinio\
+        \ saugumo vadovas ir (ar) saugos \u012Fgaliotinis."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.12
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.12
+      name: "\u012Esybrovimo aptikimo sistemos"
+      description: "Turi b\u016Bti \u012Fdiegtos ir veikti \u012Fsibrovimo aptikimo\
+        \ sistemos, kurios steb\u0117t\u0173 \u012F tinkl\u0173 ir informacin\u0119\
+        \ sistem\u0105 \u012Feinant\u012F ir i\u0161 jos i\u0161einant\u012F duomen\u0173\
+        \ sraut\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.13
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.13
+      name: "Ne\u012Fprasta veikla"
+      description: "Ne\u012Fprasta veikla turi b\u016Bti u\u017Efiksuojama \u017E\
+        urnaliniuose \u012Fra\u0161uose ir, jei \u012Fmanoma, automatizuotomis priemon\u0117\
+        mis sukuriamas automatinis prane\u0161imas, kur\u012F matyt\u0173 kibernetinio\
+        \ saugumo vadovas ir (ar) saugos \u012Fgaliotinis."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.14
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.14
+      name: "Tinkl\u0173 atskyrimas"
+      description: "Kibernetinio saugumo subjekto vidin\u0117s tinkl\u0173 ir informacin\u0117\
+        s sistemos turi b\u016Bti atskirtos nuo vie\u0161\u0173j\u0173 ry\u0161i\u0173\
+        \ tinkl\u0173 naudojant saugasien\u0119."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1.15
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:26.t1
+      ref_id: 26.t1.15
+      name: "Saugasieni\u0173 per\u017Ei\u016Bra"
+      description: "Saugasien\u0117s saugumo taisykl\u0117s turi b\u016Bti nuolat\
+        \ per\u017Ei\u016Brimos ir prireikus atnaujinamos. B\u016Btina atlikti detali\u0105\
+        \ taisykli\u0173 analiz\u0119 ne re\u010Diau kaip kart\u0105 per 6 m\u0117\
+        n."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec5
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec5
+      name: 5 skirsnis
+      description: "Veiklos t\u0119stinumas"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:27
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec5
+      ref_id: '27'
+      name: "Veiklos t\u0119stinumo planas"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi patvirtinti tinkl\u0173 ir informacini\u0173 sistem\u0173 veiklos t\u0119\
+        stinumo valdymo plan\u0105, kuriame turi b\u016Bti nurodyta:\n27.1. s\u0105\
+        lygos, kada pradedamas taikyti tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        \ veiklos t\u0119stinumo planas;\n27.2. tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        \ veiklos kriterijai, pagal kuriuos galima nustatyti, ar tinkl\u0173 ir informacin\u0117\
+        s sistemos veikla atkurta;\n27.3. asmenys, atsakingi u\u017E tinkl\u0173 ir\
+        \ informacini\u0173 sistem\u0173 veiklos t\u0119stinumo plano vykdym\u0105\
+        , j\u0173 pareigos ir funkcijos;\n27.4. nuostatos, kuriose turi b\u016Bti\
+        \ nurodyti tinkl\u0173 ir informacini\u0173 sistem\u0173 veiklos t\u0119stinumo\
+        \ valdymo grup\u0117s sud\u0117ties ir jos funkcij\u0173 reikalavimai, \u012F\
+        traukiant reikalavim\u0105, kad veiklos t\u0119stinumo valdymo grup\u0117\
+        s sud\u0117tyje b\u016Bt\u0173 kibernetinio saugumo vadovas ir (ar) saugos\
+        \ \u012Fgaliotinis;\n27.5. nuostatos, kuriose turi b\u016Bti nurodyti tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 veiklos atk\u016Brimo grup\u0117s sud\u0117\
+        ties ir jos funkcij\u0173 reikalavimai;\n27.6. detalus tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 veiklos atk\u016Brimo planas;\n27.7. tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 veiklos t\u0119stinumo valdymo plano veiksmingumo i\u0161bandymo\
+        \ reikalavimai;\n27.8. tinkl\u0173 ir informacini\u0173 sistem\u0173 veiklos\
+        \ t\u0119stinumo valdymo plano veiksmingumo i\u0161bandymo rezultat\u0173\
+        \ ataskait\u0173 rengimo reikalavimai;\n27.9. atsargini\u0173 duomen\u0173\
+        \ kopij\u0173 atk\u016Brimo parametrai pagal kibernetinio saugumo subjekto\
+        \ nustatyt\u0105 tinkl\u0173 ir informacini\u0173 sistem\u0173 ar j\u0173\
+        \ dalies atk\u016Brimo laikotarp\u012F (angl. Recovery time objective, RTO)\
+        \ ir \u0161i\u0173 parametr\u0173 i\u0161bandymo reikalavimai;\n27.10.   \
+        \ tinkl\u0173 ir informacini\u0173 sistem\u0173 ar j\u0173 dalies duomen\u0173\
+        \ praradimo laikas (angl. Recovery point objective, RPO) ir jo i\u0161bandymo\
+        \ reikalavimai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:28
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec5
+      ref_id: '28'
+      name: "Atsargini\u0173 kopij\u0173 reikalavimai"
+      description: "Kibernetinio saugumo subjektas turi nustatyti atsargini\u0173\
+        \ duomen\u0173 kopij\u0173 k\u016Brimo, saugojimo ir duomen\u0173 atk\u016B\
+        rimo i\u0161 j\u0173 reikalavimus, apibr\u0117\u017Eti atsarginio kopijavimo\
+        \ mast\u0105 ir da\u017En\u012F, atsi\u017Evelgdamas \u012F veiklos t\u0119\
+        stinumo valdymo plane nustatytus tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        \ nustatytus atk\u016Brimo reikalavimus (RTO, RPO)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:29
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec5
+      ref_id: '29'
+      name: "Veiklos t\u0119stinumo plano i\u0161bandymo ataskaitos pateikimas"
+      description: "Kibernetinio saugumo subjektas teikia tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 veiklos t\u0119stinumo valdymo plano i\u0161bandymo ataskaitos\
+        \ patvirtinimo duomenis, nurodydamas patvirtinimo dat\u0105 ir registracijos\
+        \ numer\u012F, \u012F KSIS ne v\u0117liau kaip per 5 darbo dienas nuo \u0161\
+        i\u0173 dokument\u0173 patvirtinimo."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:30
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec5
+      ref_id: '30'
+      name: "NKSC gali pareikalauti ataskait\u0173"
+      description: "NKSC, atlikdamas kibernetinio saugumo subjekto patikrinim\u0105\
+        , turi teis\u0119 pareikalauti kibernetinio saugumo subjekto pateikti veiklos\
+        \ t\u0119stinumo valdymo plano i\u0161bandymo ataskaitos kopij\u0105. Kibernetinio\
+        \ saugumo subjektas \u0161iuos dokumentus turi pateikti \u012F KSIS ne v\u0117\
+        liau kaip per 5 darbo dienas nuo NKSC pra\u0161ymo gavimo dienos."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec5
+      ref_id: '31'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 2 lentel\u0117je."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31
+      ref_id: 31.t2
+      name: "2\_lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.16
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2
+      ref_id: 31.t2.16
+      name: "Sistem\u0173 prieinamumas"
+      description: "Turi b\u016Bti u\u017Etikrintas kibernetinio saugumo subjekto\
+        \ \u012Fvertint\u0173 kaip kritini\u0173 veiklos t\u0119stinumui b\u016Btin\u0173\
+        \ tinkl\u0173 ir informacini\u0173 sistem\u0173 prieinamumas"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.16.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.16
+      ref_id: 31.t2.16.1
+      name: "Sistem\u0173 prieinamumas: 96 proc"
+      description: "Kritini\u0173 veiklos t\u0119stinumui b\u016Btin\u0173 tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 prieinamumas: ne ma\u017Eiau kaip 96 proc.\
+        \ laiko;"
+      implementation_groups:
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.16.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.16
+      ref_id: 31.t2.16.2
+      name: "Sistem\u0173 prieinamumas: 99 proc"
+      description: "Kritini\u0173 veiklos t\u0119stinumui b\u016Btin\u0173 tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 prieinamumas: ne ma\u017Eiau kaip 99 proc.\
+        \ laiko."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.17
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2
+      ref_id: 31.t2.17
+      name: "Atsargini\u0173 kopij\u0173 vieta"
+      description: "Kibernetinio saugumo subjekto nustatyta tvarka ir nustatytu reguliarumu\
+        \ turi b\u016Bti daromos atsargin\u0117s duomen\u0173 kopijos (toliau \u2013\
+        \ kopijos) ir turi b\u016Bti laikomos geografi\u0161kai nutolusioje vietoje."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.18
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2
+      ref_id: 31.t2.18
+      name: "Atsargini\u0173 kopij\u0173 testavimas"
+      description: "Kopijos turi b\u016Bti reguliariai testuojamos \u012Fgalioto asmens\
+        \ arba turi b\u016Bti naudojama speciali programin\u0117 \u012Franga, kuri\
+        \ automati\u0161kai patikrina, ar i\u0161 duomen\u0173 kopijos galima atkurti\
+        \ duomenis, kurie b\u016Bt\u0173 visi\u0161kai funkcional\u016Bs."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.19
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2
+      ref_id: 31.t2.19
+      name: "Atsargin\u0117s patalpos"
+      description: "Turi b\u016Bti numatytos atsargin\u0117s patalpos, \u012F kurias\
+        \ galima b\u016Bt\u0173 laikinai perkelti tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 \u012Frang\u0105, nesant galimybi\u0173 t\u0119sti veiklos\
+        \ pagrindin\u0117se patalpose, ir jos turi atitikti pagrindin\u0117ms patalpoms\
+        \ keliamus reikalavimus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2.20
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:31.t2
+      ref_id: 31.t2.20
+      name: "\u012Erangos dubliavimas"
+      description: "Svarbiausia tinkl\u0173 ir informacini\u0173 sistem\u0173 \u012F\
+        ranga, duomen\u0173 perdavimo tinklo mazgai ir ry\u0161io linijos turi b\u016B\
+        ti dubliuoti ir j\u0173 technin\u0117 b\u016Bkl\u0117 nuolat stebima."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec6
+      name: 6 skirsnis
+      description: "Tiekimo grandin\u0117s saugumas"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:32
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '32'
+      name: "Tiekimo grandin\u0117s saugumo valdymo planas"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti tiekimo grandin\u0117s saugumo valdymo tvark\u0105, taikom\u0105\
+        \ paslaug\u0173, darb\u0173 ar \u012Frangos pirkimams, susijusiems su tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 projektavimu, k\u016Brimu, diegimu, naudojimu,\
+        \ prie\u017Ei\u016Bra, modernizavimu ir (ar) kibernetinio saugumo u\u017E\
+        tikrinimu, siekiant ma\u017Einti galimas kilti rizikas tinkl\u0173 ir informacin\u0117\
+        ms sistemoms."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:33
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '33'
+      name: "Tiek\u0117j\u0173 atrankos kriterijai"
+      description: "Kibernetinio saugumo subjektas, nustatydamas tiekimo grandin\u0117\
+        s saugumo valdymo tvark\u0105, turi numatyti tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 tiek\u0117j\u0173 atrankos kriterijus, apiman\u010Dius:\n33.1.\
+        \ tiek\u0117jo atitikt\u012F Apra\u0161e nustatytiems kibernetinio saugumo\
+        \ reikalavimams;\n33.2. kokyb\u0117s reikalavimus tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 produktams, paslaugoms;\n33.3. prieig\u0173 valdym\u0105, \u012F\
+        skaitant prieig\u0173 laikotarpio ribojim\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:34
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '34'
+      name: "Sutar\u010Di\u0173 su tiek\u0117jais reikalavimai"
+      description: "Kibernetinio saugumo subjektas sutartyse su tiek\u0117jais (\u012F\
+        skaitant subtiek\u0117jus), kiek tai susij\u0119 su teikiamomis paslaugomis,\
+        \ turi numatyti:\n34.1. tiek\u0117jo atitikties \u0161iam Apra\u0161ui reikalavimus;\n\
+        34.2. tiek\u0117jo personalui reikalingus \u012Fg\u016Bd\u017Eius ir (ar)\
+        \ mokymus, ir (ar) sertifikatus, ir (ar) kvalifikacij\u0105;\n34.3. tiek\u0117\
+        jo pareig\u0105 prane\u0161ti kibernetinio saugumo subjektui apie visus didelius\
+        \ ir (ar) kitus incidentus, susijusius su kibernetinio saugumo subjekto tinkl\u0173\
+        \ ir informacin\u0117mis sistemomis, kai tik tiek\u0117jas su\u017Eino apie\
+        \ incident\u0105, ir pateikti kibernetinio saugumo subjektui kibernetinio\
+        \ incidento tyrimo ataskait\u0105;\n34.4. teis\u0119 kibernetinio saugumo\
+        \ subjektui arba jo \u012Fgaliotiems paslaug\u0173 teik\u0117jams atlikti\
+        \ tiek\u0117jo atitikties Apra\u0161ui audit\u0105 (\u012Fskaitant neplanin\u012F\
+        ) ir tiek\u0117jo pareig\u0105 sudaryti s\u0105lygas tokiam auditui atlikti\
+        \ sutarties vykdymo laikotarpiu ar \u012Fvykus dideliam incidentui;\n34.5.\
+        \ pareig\u0105 u\u017Etikrinti sprag\u0173, kelian\u010Di\u0173 rizik\u0105\
+        \ kibernetinio saugumo subjekto tinklams ir informacin\u0117ms sistemoms,\
+        \ valdym\u0105;\n34.6. konfidencialumo ir duomen\u0173 neatskleidimo \u012F\
+        sipareigojimus;\n34.7. paslaug\u0173 teikimo lygmenis (angl. Service Level\
+        \ Agreement, SLA);\n34.8. apibr\u0117\u017Eti tiek\u0117j\u0173 prieigos (login\u0117\
+        s ir fizin\u0117s) prie tinkl\u0173 ir informacin\u0117s sistemos lygius ir\
+        \ s\u0105lygas;\n34.9. numatyti reikalavimus, keliamus tiek\u0117jo patalpoms,\
+        \ \u012Frangai, tinkl\u0173 ir informacini\u0173 sistem\u0173 prie\u017Ei\u016B\
+        rai, informacijos perdavimui tinklais;\n34.10.    numatyti tiek\u0117jo ir\
+        \ kibernetinio saugumo subjekto teises ir pareigas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:35
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '35'
+      name: "Tiek\u0117j\u0173 rizikos vertinimo reikalavimai"
+      description: "Kibernetinio saugumo subjektas, tvirtindamas tiekimo grandin\u0117\
+        s saugumo valdymo tvark\u0105, turi numatyti tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 paslaug\u0173 teik\u0117j\u0173 rizikos vertinimo reikalavimus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:36
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '36'
+      name: "Esminio subjekto interneto paslaug\u0173 sutartis"
+      description: "Esminis kibernetinio saugumo subjektas su interneto paslaugos,\
+        \ jei duomen\u0173 perdavimo paslauga yra esmin\u0117 paslaugai teikti, teik\u0117\
+        ju turi b\u016Bti sudar\u0119s sutart\u012F (-is), kurioje (-iose) b\u016B\
+        t\u0173 numatyta:\n36.1. reagavimas \u012F kibernetinius incidentus \u012F\
+        prastomis darbo valandomis;\n36.2. reagavimas \u012F kibernetinius incidentus\
+        \ po darbo valand\u0173;\n36.3. nepertraukiamas interneto paslaugos teikimas:\
+        \ 24 valandas per par\u0105, 7 dienas per savait\u0119;\n36.4. paslaugos sutrikim\u0173\
+        \ registravimas: 24 valandas per par\u0105, 7 dienas per savait\u0119;\n36.5.\
+        \ apsaugos nuo tinkl\u0173 ir informacin\u0117s sistemos trikdymo taikymas\
+        \ (angl. Denial of Service, DoS)."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:37
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '37'
+      name: "Svarbaus subjekto interneto paslaug\u0173 sutartis"
+      description: "Svarbus kibernetinio saugumo subjektas su interneto paslaugos,\
+        \ jei duomen\u0173 perdavimo paslauga yra esmin\u0117 paslaugai teikti, teik\u0117\
+        ju turi b\u016Bti sudar\u0119s sutart\u012F (-is), kurioje (-iose) turi b\u016B\
+        ti numatyta:\n37.1. reagavimas \u012F kibernetinius incidentus \u012Fprastomis\
+        \ darbo valandomis;\n37.2. nepertraukiamas paslaugos teikimas \u012Fprastomis\
+        \ darbo valandomis;\n37.3. paslaugos sutrikim\u0173 registravimas \u012Fprastomis\
+        \ darbo valandomis;\n37.4. apsaugos nuo tinkl\u0173 ir informacin\u0117s sistemos\
+        \ trikdymo taikymas (DoS)."
+      implementation_groups:
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:38
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '38'
+      name: "Sutartyje nurodyt\u0173 reikalavim\u0173 kontrol\u0117"
+      description: "Kibernetinio saugumo subjektas turi vykdyti sutartyje su tiek\u0117\
+        ju nurodyt\u0173 kibernetinio saugumo reikalavim\u0173 \u012Fgyvendinimo kontrol\u0119\
+        ."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:39
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec6
+      ref_id: '39'
+      name: "Tiek\u0117j\u0173 s\u0105ra\u0161as"
+      description: "Kibernetinio saugumo subjektas turi b\u016Bti sudar\u0119s tiek\u0117\
+        j\u0173 s\u0105ra\u0161\u0105, j\u012F tvarkyti ir pasikeitus sutartims per\u017E\
+        i\u016Br\u0117ti ir atnaujinti numatytu periodi\u0161kumu ir kai \u012Fvyksta\
+        \ reik\u0161mingi poky\u010Diai arba reik\u0161mingi incidentai, susij\u0119\
+        \ su tiek\u0117jais."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec7
+      name: 7 skirsnis
+      description: "Tinkl\u0173 ir informacini\u0173 sistem\u0173 \u012Fsigijimas,\
+        \ pl\u0117tojimas ir prie\u017Ei\u016Bros saugumas, \u012Fskaitant sprag\u0173\
+        \ valdym\u0105 ir atskleidim\u0105"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:40
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '40'
+      name: "\u012Esigijimo, pl\u0117tojimo ir prie\u017Ei\u016Bros saugumo u\u017E\
+        tikrinimo tvarka"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti tinkl\u0173 ir informacini\u0173 sistem\u0173 \u012Fsigijimo,\
+        \ pl\u0117tojimo ir prie\u017Ei\u016Bros saugumo u\u017Etikrinimo tvark\u0105\
+        , kuri apimt\u0173:\n40.1. tinkl\u0173 ir informacini\u0173 sistem\u0173 \u012F\
+        sigijimo ir diegimo reikalavimus;\n40.2. saugumo sistem\u0173, skirt\u0173\
+        \ tinklams ir informacin\u0117ms sistemoms nuo kenkimo programin\u0117s \u012F\
+        rangos (virus\u0173, \u0161nipin\u0117jimo programin\u0117s \u012Frangos,\
+        \ nepageidaujamo elektroninio pa\u0161to ir pan.) apsaugoti, naudojimo nuostatas\
+        \ ir atnaujinimo reikalavimus;\n40.3. kompiuteri\u0173 tinklo filtravimo \u012F\
+        rangos (saugasieni\u0173, turinio kontrol\u0117s sistem\u0173, \u012Fgaliot\u0173\
+        j\u0173 serveri\u0173 (angl. proxy) ir kita) pagrindines naudojimo nuostatas;\n\
+        40.4. duomen\u0173 perdavimo tinklo saugumo u\u017Etikrinimo priemones;\n\
+        40.5. elektroninio pa\u0161to saugaus naudojimo nuostatas;\n40.6. leistinos\
+        \ programin\u0117s \u012Frangos s\u0105ra\u0161o tvirtinimo, per\u017Ei\u016B\
+        r\u0117jimo reguliarumo ne re\u010Diau kaip kart\u0105 per metus ir atnaujinimo\
+        \ nuostatas;\n40.7. kitas priemones, naudojamas kibernetiniam saugumui u\u017E\
+        tikrinti."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:41
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '41'
+      name: "\u012Erangos diegimas"
+      description: "Programin\u0119 \u012Frang\u0105 diegia tik kibernetinio saugumo\
+        \ subjekto \u012Fgalioti asmenys. Sistem\u0173 naudotojai negali b\u016Bti\
+        \ \u012Fgaliojami diegti programin\u0119 \u012Frang\u0105 savaranki\u0161\
+        kai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:42
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '42'
+      name: "Poky\u010Di\u0173 valdymo tvarka"
+      description: "Kibernetinio saugumo subjektas turi nustatyti tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 poky\u010Di\u0173 (toliau \u2013 poky\u010Diai) valdymo tvark\u0105\
+        , apiman\u010Di\u0105 planavim\u0105, poky\u010Di\u0173 identifikavim\u0105\
+        , skirstym\u0105 \u012F kategorijas pagal poky\u010Dio tip\u0105, \u012Ftakos\
+        \ vertinim\u0105 ir poky\u010Di\u0173 prioritet\u0173 nustatym\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:43
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '43'
+      name: "Poky\u010Di\u0173 patvirtinimas"
+      description: "Visi poky\u010Diai, galintys sutrikdyti ar sustabdyti kibernetinio\
+        \ saugumo subjekto veikl\u0105, turi b\u016Bti suderinti su kibernetinio saugumo\
+        \ subjekto vadovu ar jo \u012Fgaliotu asmeniu ir turi b\u016Bti patikrinti\
+        \ bandomojoje aplinkoje."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:44
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '44'
+      name: "Patais\u0173 valdymo politika"
+      description: "Kibernetinio saugumo subjektas turi nustatyti patais\u0173 valdymo\
+        \ tvark\u0105. Saugos pataisos turi b\u016Bti testuojamos prie\u0161 jas diegiant\
+        \ produkcin\u0117je aplinkoje. Turi b\u016Bti diegiamos oficiali\u0173 gamintoj\u0173\
+        \ saugos pataisos, prie\u0161 patais\u0173 diegim\u0105 turi b\u016Bti atliekamas\
+        \ j\u0173 vientisumo tikrinimas. Saugos pataisos nediegiamos, jei jose aptinkama\
+        \ sprag\u0173, kurios gali daryti didesn\u0119 \u017Eal\u0105, nei j\u0173\
+        \ diegimo nauda."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:45
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '45'
+      name: "Sprag\u0173 valdymo ir atskleidimo nuostatos"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi patvirtinti sprag\u0173 valdymo ir atskleidimo nuostatas, kuriose turi\
+        \ b\u016Bti nustatyta:\n45.1. sprag\u0173, galin\u010Di\u0173 tur\u0117ti\
+        \ \u012Ftakos kibernetiniam saugumui, nustatymas ir vertinimas;\n45.2. u\u017E\
+        \ sprag\u0173 nustatym\u0105 atsaking\u0173 asmen\u0173 teis\u0117s ir pareigos;\n\
+        45.3. sprag\u0173 nustatymo plano rengimas;\n45.4. sprag\u0173 nustatymo programin\u0117\
+        s \u012Frangos naudojimas;\n45.5. sprag\u0173 nustatymo rezultat\u0173 klasifikavimas;\n\
+        45.6. sprag\u0173 nustatymo ataskait\u0173 rengimas ir nustatyt\u0173 tr\u016B\
+        kum\u0173 \u0161alinimas;\n45.7. reikalavimas nedelsiant pa\u0161alinti sprag\u0105\
+        , \u012Fvertint\u0105 kaip itin reik\u0161ming\u0105 tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 veiklai;\n45.8. reikalavimas reguliariai vertinti spragas,\
+        \ o vis\u0105 tinkl\u0173 informacin\u0117s sistemos sprag\u0173 skenavim\u0105\
+        \ atlikti ne re\u010Diau kaip kas 6 m\u0117nesius;\n45.9. sprag\u0173, apie\
+        \ kurias informacija gauta pagal Kibernetinio saugumo \u012Fstatymo 25 straipsn\u012F\
+        , tyrimas ir informacijos teikimas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:46
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '46'
+      name: "Sprag\u0173 tvarkymo patvirtinimas"
+      description: "Sprag\u0173 tvarkymas turi b\u016Bti suderintas su kibernetinio\
+        \ saugumo subjekto poky\u010Di\u0173 ir incident\u0173 valdymo nuostatomis."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec7
+      ref_id: '47'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 3 lentel\u0117je."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47
+      ref_id: 47.t3
+      name: "3\_lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.21
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.21
+      name: "Infrastrukt\u016Bros schemos"
+      description: "Kibernetinio saugumo subjektas turi tur\u0117ti aktuali\u0105\
+        \ tinkl\u0173 ir informacini\u0173 sistem\u0173 infrastrukt\u016Bros login\u0119\
+        \ schem\u0105 ir vis\u0173 tinkl\u0173 ir informacini\u0173 sistem\u0173 schemas\
+        \ (atnaujinti joms pasikeitus)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.22
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.22
+      name: "\u012Esilau\u017Eimo atak\u0173 p\u0117dsakai"
+      description: "\u012Esilau\u017Eimo atak\u0173 p\u0117dsakai (angl. attack signature)\
+        \ turi b\u016Bti atnaujinami naudojant patikimus aktuali\u0105 informacij\u0105\
+        \ teikian\u010Dius \u0161altinius. Naujausi \u012Fsilau\u017Eimo atak\u0173\
+        \ p\u0117dsakai turi b\u016Bti \u012Fdiegiami ne v\u0117liau kaip per 24 valandas\
+        \ nuo gamintojo paskelbimo apie naujausius \u012Fsilau\u017Eimo atak\u0173\
+        \ p\u0117dsakus datos arba ne v\u0117liau kaip per 72 valandas nuo gamintojo\
+        \ paskelbimo apie naujausius \u012Fsilau\u017Eimo atak\u0173 p\u0117dsakus\
+        \ datos, jeigu kibernetinio saugumo subjekto sprendimu atliekamas \u012Fsilau\u017E\
+        imo atak\u0173 p\u0117dsak\u0173 \u012Fdiegimo ir galimo j\u0173 poveikio\
+        \ kibernetinio saugumo subjekto veiklai vertinimas (testavimas)."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.23
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.23
+      name: "Saugasien\u0117s"
+      description: "Serveriuose (\u012Fskaitant ir virtualias ma\u0161inas) ir darbo\
+        \ stotyse turi b\u016Bti \u012Fjungtos ir sukonfig\u016Bruotos saugasien\u0117\
+        s, kurios kontroliuoja vis\u0105 \u012Feinant\u012F ir i\u0161einant\u012F\
+        \ sraut\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.24
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.24
+      name: "El lai\u0161k\u0173 filtravimas"
+      description: "I\u0161 i\u0161or\u0117s gaunami elektroniniai lai\u0161kai turi\
+        \ b\u016Bti filtruojami, siekiant aptikti ir blokuoti kenksming\u0105 turin\u012F\
+        ."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.25
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.25
+      name: "Konfig\u016Bracj\u0173 saugojimas"
+      description: "Technin\u0117s ir programin\u0117s \u012Frangos, kuri skirta kibernetiniams\
+        \ incidentams aptikti, konfig\u016Bracijos taisykl\u0117s turi b\u016Bti saugomos\
+        \ elektronine forma atskirai nuo tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        \ technin\u0117s \u012Frangos (kartu nurodant atitinkamas datas (\u012Fgyvendinimo,\
+        \ atnaujinimo), atsakingus asmenis, taikymo periodus)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.26
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.26
+      name: "Belaid\u017Eiai tinklai"
+      description: "Prisijungiant prie belaid\u017Eio tinklo (jeigu jungiamasi prie\
+        \ tinkl\u0173 ir informacin\u0117s sistemos vidinio tinklo), turi b\u016B\
+        ti taikomas tinkl\u0173 ir informacini\u0173 sistem\u0173 naudotoj\u0173 tapatumo\
+        \ patvirtinimo EAP (angl. Extensible Authentication Protocol) / TLS (angl.\
+        \ Transport Layer Security) protokolas arba naujesnis protokolas, visuotinai\
+        \ pripa\u017E\u012Fstamas saugiu."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.27
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.27
+      name: Tinklo valdymas
+      description: "Tinklui valdyti turi b\u016Bti naudojami saug\u016Bs tinklo protokolai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.28
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.28
+      name: "Pirevad\u0173 u\u017Edarymas"
+      description: "Turi b\u016Bti u\u017Edrausti / i\u0161jungti visi neb\u016Btini\
+        \ protokolai ir atviri prievadai (angl. port)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.29
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.29
+      name: P2P funcionalumai
+      description: "Kompiuteriuose, mobiliuosiuose \u012Frenginiuose turi b\u016B\
+        ti i\u0161jungtas lygiarangis (angl. peer to peer) funkcionalumas, jei tai\
+        \ n\u0117ra reikalinga darbo funkcijoms atlikti."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.30
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.30
+      name: "Atnaujinim\u0173 diegimai"
+      description: "Turi b\u016Bti diegiami naudojamos programin\u0117s \u012Frangos\
+        \ gamintoj\u0173 ir operacini\u0173 sistem\u0173 rekomenduojami atnaujinimai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.31
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.31
+      name: "Nepalaikom\u0173 versij\u0173 \u012Frangos atskyrimas"
+      description: "Tinkl\u0173 ir informacin\u0117s sistemos, d\u0117l objektyvi\u0173\
+        \ prie\u017Eas\u010Di\u0173 naudojan\u010Dios nepalaikomas operacini\u0173\
+        \ sistem\u0173 ir kitos programin\u0117s \u012Frangos versijas, turi veikti\
+        \ atskirame tinklo segmente, atskirtame nuo pagrindini\u0173 kibernetinio\
+        \ saugumo subjekto veiklos funkcij\u0173."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.32
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.32
+      name: Tinklo segmentavimas
+      description: "Vidinis kibernetinio saugumo subjekto kompiuteri\u0173 tinklas\
+        \ tur\u0117t\u0173 b\u016Bti segmentuotas, jame atskiriant bent:\n32.1. tinkl\u0173\
+        \ ir informacini\u0173 sistem\u0173 valdymo ir administravimo potinkl\u012F\
+        ;\n32.2. atskir\u0105 potinkl\u012F kiekvienai tre\u010Diajai \u0161aliai\
+        \ arba kitais b\u016Bdais u\u017Etikrinant tre\u010Di\u0173j\u0173 \u0161\
+        ali\u0173 prieig\u0105 tik prie tai \u0161aliai reikaling\u0173 resurs\u0173\
+        , kur \u012Fmanoma taikant keli\u0173 veiksni\u0173 prisijungimo autentifikacij\u0105\
+        . Prisijungimas turi b\u016Bti atliekamas naudojant saug\u0173 virtual\u0173\
+        j\u012F privat\u0173 tinkl\u0105 (angl. Virtual private network, VPN). Prisijungimas\
+        \ registruojamas \u012Fvyki\u0173 registravimo \u017Eurnaluose;\n32.3. tinklini\u0173\
+        \ daugiafunkci\u0173 \u012Frengini\u0173 bei spausdintuv\u0173 ir skeneri\u0173\
+        \ potinkl\u012F;\n32.4. IP telefonijos potinkl\u012F;\n32.5. darbo viet\u0173\
+        \ potinkl\u012F;\n32.6. testavimo potinkl\u012F."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.33
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.33
+      name: "Vykdomojo kodo kontrol\u0117s priemon\u0117s"
+      description: "Mobiliuosiuose \u012Frenginiuose ir kompiuterin\u0117se darbo\
+        \ vietose turi b\u016Bti naudojamos vykdomojo kodo (angl. Executable code)\
+        \ kontrol\u0117s priemon\u0117s, kuriomis apribojamas neleistino vykdomojo\
+        \ kodo naudojimas ar informuojamas administratorius apie neleistino vykdomojo\
+        \ kodo naudojim\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.34
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.34
+      name: "Darbo viet\u0173 sistem\u0173 atvaizdai ir nustatymai"
+      description: "Turi b\u016Bti parengti ir \u012Fdiegti kompiuterini\u0173 darbo\
+        \ viet\u0173 (\u012Fskaitant ne\u0161iojamuosius \u012Frenginius) operacini\u0173\
+        \ sistem\u0173 atvaizdai ir (arba) kitos priemon\u0117s su integruotomis saugumo\
+        \ nuostatomis. Atvaizde turi b\u016Bti nustatyti tik veiklai b\u016Btini operacini\u0173\
+        \ sistem\u0173 komponentai (administravimo paskyros, paslaugos (angl. Services),\
+        \ taikomosios programos, tinklo prievadai, atnaujinimai, sistemin\u0117s priemon\u0117\
+        s). Atvaizdai turi b\u016Bti reguliariai per\u017Ei\u016Brimi ir atnaujinami,\
+        \ i\u0161kart atnaujinami nusta\u010Dius nauj\u0173 sprag\u0173 ar atak\u0173\
+        . Pagal parengtus atvaizdus \u012F kompiuterines darbo vietas (\u012Fskaitant\
+        \ ne\u0161iojamuosius \u012Frenginius) turi b\u016Bti \u012Fdiegiama operacin\u0117\
+        \ sistema su saugumo nuostatomis."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.35
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.35
+      name: "Sesijos duomen\u0173 saugojimas"
+      description: "Draud\u017Eiama svetain\u0117s serveriuose saugoti sesijos duomenis\
+        \ (identifikatori\u0173) prisijungimo tikslams, pasibaigus susijungimo sesijai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.36
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.36
+      name: WAF
+      description: "Internetu prieinamoms svetain\u0117ms, tinkl\u0173 ir informacin\u0117\
+        ms sistemoms turi b\u016Bti naudojama svetain\u0117s saugasien\u0117 (angl.\
+        \ Web Application Firewall)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.37
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.37
+      name: OWASP
+      description: "Internetu prieinamoms svetain\u0117ms, tinkl\u0173 ir informacin\u0117\
+        ms sistemoms turi b\u016Bti naudojamos apsaugos nuo pagrindini\u0173 per tinkl\u0105\
+        \ vykdom\u0173 atak\u0173 remiantis OWASP (angl. The Open Web Application\
+        \ Security Project) Top 10 geriausiomis praktikomis (www.owasp.org)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.38
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.38
+      name: "Web form\u0173 kontrol\u0117"
+      description: "\u017Diniatinklio (angl. Web) formose turi b\u016Bti naudojama\
+        \ svetain\u0117s naudotojo \u012Fvedam\u0173 duomen\u0173 kontrol\u0117 (angl.\
+        \ Input validation)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.39
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.39
+      name: "Klaid\u0173 prane\u0161imai naudotojams"
+      description: "Internetu prieinamos tinkl\u0173 ir informacin\u0117s sistemos\
+        \ neturi rodyti naudotojui klaid\u0173 prane\u0161im\u0173 apie tinkl\u0173\
+        \ ir informacin\u0117s sistemos ir programin\u012F kod\u0105 ar server\u012F\
+        ."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.40
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.40
+      name: HTTPS metodai
+      description: "Internetu naudojant HTTPS protokol\u0105 (angl. HyperText Transfer\
+        \ Protocol Secure, HTTPS) prieinamos tinkl\u0173 ir informacin\u0117s sistemos\
+        \ saugumo priemon\u0117s turi leisti tik j\u0173 funkcionalumui u\u017Etikrinti\
+        \ reikalingus protokolo metodus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.41
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.41
+      name: "Kenkimo \u012Frangos aptikimo priemon\u0117s"
+      description: "Kibernetinio saugumo subjekto serveriuose ir kompiuterin\u0117\
+        se darbo vietose turi b\u016Bti naudojamos (jei \u012Fmanoma, centralizuotai)\
+        \ valdomos ir atnaujinamos kenkimo programin\u0117s \u012Frangos aptikimo,\
+        \ steb\u0117jimo realiu laiku priemon\u0117s."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.42
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.42
+      name: "Legali \u012Franga"
+      description: "Naudojama tik legali ir leistina (pagal kibernetinio saugumo subjekto\
+        \ patvirtint\u0105 s\u0105ra\u0161\u0105) programin\u0117 \u012Franga."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3.43
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:47.t3
+      ref_id: 47.t3.43
+      name: "Disk\u0173 vietos steb\u0117jimas"
+      description: "Nuolatos turi b\u016Bti stebimas tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 \u012Frangos laisvos atminties ar vietos diske kiekis, stebima\
+        \ apkrova, resurs\u0173 naudojimas. Pasiekus nustatytas ribines reik\u0161\
+        mes, apie tai turi b\u016Bti informuojami atsakingi asmenys."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec8
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec8
+      name: 8 skirsnis
+      description: "Kibernetinio saugumo reikalavim\u0173 veiksmingumo tvirtinimas"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:48
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec8
+      ref_id: '48'
+      name: "Kibernetinio saugumo reikalavim\u0173 veiksmingumo vertinimo tvarka"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti kibernetinio saugumo reikalavim\u0173 veiksmingumo vertinimo\
+        \ tvark\u0105, apiman\u010Di\u0105:\n48.1. reikalavim\u0105 reguliariai, ne\
+        \ re\u010Diau kaip kart\u0105 per metus, \u012Fvertinti kibernetinio saugumo\
+        \ subjekto atitikt\u012F Kibernetinio saugumo \u012Fstatymui, \u0161io Apra\u0161\
+        o ir kibernetinio saugumo subjekto patvirtintiems kibernetinio saugumo politikos\
+        \ dokumentuose nustatytiems reikalavimams (toliau \u2013 Atitikties vertinimas).\n\
+        48.2.  kibernetinio saugumo subjektui atlikus Atitikties vertinim\u0105, rengiami\
+        \ ir kibernetinio saugumo subjekto vadovo ar jo \u012Fgalioto asmens tvirtinami:\n\
+        48.2.1. atitikties vertinimo ataskaita;\n48.2.2. identifikuot\u0173 neatitik\u010D\
+        i\u0173 (jei nustatyta) \u0161alinimo planas, kuriame paskirti atsakingi vykdytojai,\
+        \ reikalingi i\u0161tekliai ir nustatyti \u012Fgyvendinimo terminai.\n48.3.\
+        \    reikalavim\u0105 reguliariai, ne re\u010Diau kaip kart\u0105 per 3 metus,\
+        \ atlikti kibernetinio saugumo audit\u0105, vadovaujantis Kibernetinio saugumo\
+        \ \u012Fstatymo 14 straipsnio 8 punkto nuostatomis;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:49
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec8
+      ref_id: '49'
+      name: "Kibernetinio saugumo priemoni\u0173 veiksmingumo vertinimo reikalavimus"
+      description: "Kibernetinio saugumo subjektas, atsi\u017Evelgdamas \u012F rizik\u0173\
+        \ vertinimo rezultatus, \u012Fvykusius kibernetinio saugumo incidentus ir\
+        \ j\u0173 valdymo rezultatus, nustato kibernetinio saugumo taikom\u0173 priemoni\u0173\
+        \ veiksmingumo vertinimo reikalavimus:\n49.1.    kokias kibernetinio saugumo\
+        \ reikalavim\u0173 valdymo priemones reikia steb\u0117ti ir vertinti;\n49.2.\
+        \    kokius steb\u0117senos, matavimo, analiz\u0117s ir vertinimo metodus\
+        \ kibernetinio saugumo subjektas taiko; \n49.3.    kokiu periodi\u0161kumu\
+        \ turi b\u016Bti atliekama nustatyt\u0173 metod\u0173 steb\u0117sena ir matavimai;\
+        \ \n49.4.    u\u017E veiksmingumo vertinimo steb\u0117jim\u0105 ir matavim\u0105\
+        \ atsakingus asmenis; \n49.5.    veiksmingumo vertinimo rezultat\u0173 analiz\u0117\
+        s periodi\u0161kum\u0105;\n49.6.    taikom\u0173 kibernetini\u0173 saugumo\
+        \ priemoni\u0173 gerinim\u0105, atsi\u017Evelgiant \u012F vertinimo rezultatus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:50
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec8
+      ref_id: '50'
+      name: "NKSC gali pareikalauti ataskait\u0173"
+      description: "NKSC, atlikdamas kibernetinio saugumo subjekto patikrinim\u0105\
+        , turi teis\u0119 pareikalauti kibernetinio saugumo subjekto pateikti atlikt\u0173\
+        \ kibernetinio saugumo audito, atitikties vertinimo ataskaitos, atitikties\
+        \ vertinimo metu nustatyt\u0173 neatitik\u010Di\u0173 \u0161alinimo plano,\
+        \ rizik\u0173 vertinimo ataskaitos ir rizik\u0173 valdymo plano kopijas. Kibernetinio\
+        \ saugumo subjektas \u0161iuos dokumentus turi pateikti \u012F KSIS ne v\u0117\
+        liau kaip per 5 darbo dienas nuo NKSC pra\u0161ymo gavimo dienos."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:51
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec8
+      ref_id: '51'
+      name: Atitikimo vertinimo siuntimas NKSC
+      description: "Esminis kibernetinio saugumo subjektas ne re\u010Diau kaip kart\u0105\
+        \ per metus teikia atitikties kibernetinio saugumo reikalavimams vertinim\u0105\
+        , u\u017Epildydamas NKSC klausimyn\u0105 KSIS."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec9
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec9
+      name: 9 skirsnis
+      description: "Kibernetin\u0117s higienos praktika ir kibernetinio saugumo mokymai"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:52
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec9
+      ref_id: '52'
+      name: "Kibernetin\u0117s higienos mokym\u0173 organizavimo ir vykdymo tvarka"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti kibernetin\u0117s higienos praktikos organizavimo ir kibernetinio\
+        \ saugumo mokym\u0173 organizavimo ir vykdymo tvark\u0105. Kibernetinio saugumo\
+        \ vadovas turi u\u017Etikrinti, kad ne re\u010Diau kaip kart\u0105 per metus\
+        \ visi kibernetinio saugumo subjekto darbuotojai i\u0161klausyt\u0173 kibernetin\u0117\
+        s higienos praktikos mokymus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:53
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec9
+      ref_id: '53'
+      name: Kibernetinio saugumo aktualijos
+      description: "Kibernetinio saugumo subjektas turi u\u017Etikrinti darbuotoj\u0173\
+        \ informavim\u0105 apie kibernetinio saugumo aktualijas (mokymo ir informavimo\
+        \ b\u016Bdai pasirenkami atsi\u017Evelgiant \u012F tinkl\u0173 ir informacin\u0117\
+        s sistemos specifik\u0105)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:54
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec9
+      ref_id: '54'
+      name: "Mokym\u0173 ataskaitos"
+      description: "Per tris m\u0117nesius po kibernetinio saugumo klausimais organizuot\u0173\
+        \ mokym\u0173 turi b\u016Bti parengta mokym\u0173 ataskaita, kurioje turi\
+        \ b\u016Bti nurodyta mokym\u0173 tema, dalyvi\u0173 skai\u010Dius. Mokymus\
+        \ nurodytomis temomis kibernetinio saugumo subjektas turi teis\u0119 \u012F\
+        sigyti i\u0161 tre\u010Di\u0173j\u0173 \u0161ali\u0173 arba organizuoti pats.\
+        \ Kibernetinio saugumo subjektas parengt\u0105 mokym\u0173 ataskait\u0105\
+        \ turi saugoti ne ma\u017Eiau kaip trejus metus nuo ataskaitos patvirtinimo\
+        \ datos."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec10
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec10
+      name: 10 skirsnis
+      description: "Kriptografijos ir \u0161ifravimo naudojimo pilitika ir proced\u016B\
+        ros"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:55
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec10
+      ref_id: '55'
+      name: "Kriptografijos ir \u0161ifravimo naudojimo tvarka"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti kriptografijos ir \u0161ifravimo naudojimo tvark\u0105, apiman\u010D\
+        i\u0105:\n55.1.    kibernetinio saugumo subjekto kriptografijos ir \u0161\
+        ifravimo priemoni\u0173 naudojimo nuostatas, atsi\u017Evelgiant \u012F kibernetinio\
+        \ saugumo subjekto nustatytus informacijos klasifikavimo ir tvarkymo reikalavimus;\n\
+        55.2.    rakt\u0173 valdym\u0105 (generavimas, sunaikinimas, archyvavimas\
+        \ ir kt.)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:56
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec10
+      ref_id: '56'
+      name: "Rakt\u0173 praradimo informavimas"
+      description: "Praradus kriptografin\u012F rakt\u0105 turi b\u016Bti informuojamas\
+        \ atsakingas asmuo."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec10
+      ref_id: '57'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 4 lentel\u0117je."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57
+      ref_id: 57.t4
+      name: "4\_lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.44
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.44
+      name: VPN
+      description: "Vie\u0161aisiais elektronini\u0173 ry\u0161i\u0173 tinklais perduodamos\
+        \ kibernetinio saugumo subjektui jautrios informacijos konfidencialumas turi\
+        \ b\u016Bti u\u017Etikrintas naudojant \u0161ifravim\u0105 ar virtual\u0173\
+        j\u012F privat\u0173 tinkl\u0105 (angl. Virtual private network, VPN)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.45
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.45
+      name: "Belaid\u017Eio ry\u0161io \u0161ifravimas"
+      description: "Belaidis ry\u0161ys turi b\u016Bti \u0161ifruojamas pagal ger\u0105\
+        j\u0105 saugumo praktik\u0105 rekomenduojamu \u0161ifravimo ilgio raktu. Naudoti\
+        \ visuotinai saugiais pripa\u017E\u012Fstamus raktus ir protokol\u0173 versijas.\
+        \ Belaid\u0117s prieigos stotel\u0117je turi b\u016Bti pakeisti standartiniai\
+        \ gamintojo raktai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.46
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.46
+      name: "Duomen\u0173 perdavimo \u0161ifravimas"
+      description: "Duomenys, perduodami tarp mobiliojo \u012Frenginio ir tinkl\u0173\
+        \ ir informacin\u0117s sistemos, turi b\u016Bti \u0161ifruojami taikant virtualaus\
+        \ privataus tinklo (VPN) technologij\u0105 su TLS / SSL sertifikatu arba naudojama\
+        \ privataus prieigos ta\u0161ko (angl. Access Point Name, APN) per mobiliojo\
+        \ ry\u0161io operatori\u0173 technologija, taikant perduodam\u0173 duomen\u0173\
+        \ \u0161ifravim\u0105 sraute su TLS / SSL sertifikatu, kai VPN technologija\
+        \ n\u0117ra palaikoma mobili\u0173j\u0173 \u012Frengini\u0173."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.47
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.47
+      name: "Laikmen\u0173 \u0161ifravimas"
+      description: "Mobili\u0173j\u0173 \u012Frengini\u0173 laikmenose ir i\u0161\
+        orin\u0117se kompiuterin\u0117se laikmenose laikomi tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 duomenys turi b\u016Bti \u0161ifruojami."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.48
+      name: Kriptografijos reikalavimai
+      description: "Turi b\u016Bti \u012Fgyvendinti svetain\u0117s kriptografijos\
+        \ reikalavimai"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      ref_id: 57.t4.48.1
+      name: "Rakt\u0173 ilgis"
+      description: "turi b\u016Bti naudojami oficialiai pripa\u017Einti saugus ilgio\
+        \ raktai;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      ref_id: 57.t4.48.2
+      name: "Administravimo ry\u0161io \u0161ifravimas"
+      description: "atliekant svetain\u0117s administravimo darbus, ry\u0161ys turi\
+        \ b\u016Bti \u0161ifruojamas;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      ref_id: 57.t4.48.3
+      name: "Sertifikat\u0173 i\u0161davimo tarnybos"
+      description: "\u0161ifruojant naudojami skaitmeniniai sertifikatai privalo b\u016B\
+        ti i\u0161duoti patikim\u0173 sertifikavimo tarnyb\u0173;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48.4
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      ref_id: 57.t4.48.4
+      name: TLS versijos
+      description: "turi b\u016Bti naudojamas TLS standartas (1.3 versija arba naujesn\u0117\
+        );"
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48.5
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      ref_id: 57.t4.48.5
+      name: "Kriptografin\u0117s funkcijos"
+      description: "svetain\u0117s kriptografin\u0117s funkcijos turi b\u016Bti \u012F\
+        diegtos serverio, kuriame yra svetain\u0117, dalyje arba kriptografiniame\
+        \ saugumo modulyje (angl. Hardware security module);"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48.6
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.48
+      ref_id: 57.t4.48.6
+      name: "Kriptografini\u0173 moduli\u0173 trikimas"
+      description: "visi kriptografiniai moduliai turi geb\u0117ti saugiai sutrikti\
+        \ (angl. fail securely)."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.49
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.49
+      name: "Atsargini\u0173 kopij\u0173 \u0161ifravimas"
+      description: "Duomenys atsargin\u0117se kopijose turi b\u016Bti u\u017E\u0161\
+        ifruoti (\u0161ifravimo raktai turi b\u016Bti saugomi atskirai nuo kopij\u0173\
+        ) arba turi b\u016Bti imtasi kit\u0173 priemoni\u0173, neleid\u017Eian\u010D\
+        i\u0173 panaudoti kopij\u0173 informacijai neteis\u0117tai atkurti."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4.50
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:57.t4
+      ref_id: 57.t4.50
+      name: "Audito \u012Fra\u0161ai"
+      description: "Turi b\u016Bti saugomi ir stebimi audito \u012Fra\u0161ai, susij\u0119\
+        \ su kriptografini\u0173 rakt\u0173 valdymo veikla (generavimas, sunaikinimas,\
+        \ archyvavimas, naudotoj\u0173 veiksmai)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec11
+      name: 11 skirsnis
+      description: "\u017Dmogi\u0161k\u0173j\u0173 i\u0161tekli\u0173 saugumas, fizin\u0117\
+        s prieigos pilitika ir turto valdymas"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:58
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '58'
+      name: "\u017Dmogi\u0161k\u0173j\u0173 i\u0161tekli\u0173 saugumo reikalavimai"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti \u017Emogi\u0161k\u0173j\u0173 i\u0161tekli\u0173 saugumo\
+        \ reikalavimus, kurie apimt\u0173: \n58.1.    reikalavim\u0105, kad prieiga\
+        \ prie kibernetinio saugumo subjekto tinkl\u0173 ir informacin\u0117s sistemos\
+        \ kibernetinio saugumo subjekto darbuotojams ir (arba) paslaug\u0173 teik\u0117\
+        jams b\u016Bt\u0173 suteikiama tik susipa\u017Einus su kibernetinio saugumo\
+        \ politikos dokumentais ir sutikus j\u0173 laikytis;\n58.2.    kibernetinio\
+        \ saugumo subjekto darbuotoj\u0173 ir (arba) paslaug\u0173 teik\u0117j\u0173\
+        \ konfidencialumo arba informacijos neatskleidimo reikalavimus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:59
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '59'
+      name: "Tinkl\u0173 ir sistem\u0173 fizin\u0117s priegos reikalavimai"
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi patvirtinti tinkl\u0173 ir informacini\u0173 sistem\u0173 fizin\u0117\
+        s prieigos reikalavimus, apiman\u010Dius: \n59.1.    patalp\u0173, kurios\
+        \ turi b\u016Bti apsaugotos (patalpos, kuriose laikoma kibernetinio saugumo\
+        \ subjekto tinkl\u0173 ir informacini\u0173 sistem\u0173 \u012Franga, serveriai,\
+        \ naudotoj\u0173 ir administratori\u0173 darbo vietos), s\u0105ra\u0161\u0105\
+        ; \n59.2.    saugomoms patalpoms taikomos fizin\u0117s aplinkos apsaugos ir\
+        \ prieigos kontrol\u0117s priemones; \n59.3.    reikalavim\u0105, kad \u012F\
+        \ kibernetinio saugumo subjekto saugomas patalpas gali patekti tik \u012F\
+        galioti asmenys; \n59.4.    u\u017E fizin\u0117s apsaugos priemoni\u0173 \u012F\
+        gyvendinim\u0105 atsaking\u0173 asmen\u0173 paskyrim\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '60'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 5 lentel\u0117je"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60.t5
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60
+      ref_id: 60.t5
+      name: "5\_lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60.t5.51
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60.t5
+      ref_id: 60.t5.51
+      name: "Patalp\u0173 apsauga"
+      description: "Tinkl\u0173 ir informacin\u0117s sistemos serveri\u0173 patalpos\
+        \ ir patalpos, kuriose saugomos atsargin\u0117s duomen\u0173 kopijos, turi\
+        \ b\u016Bti apsaugotos nuo neteis\u0117to asmen\u0173 patekimo \u012F jas,\
+        \ taikant fizines ar elektronines apsaugos priemones."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60.t5.52
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:60.t5
+      ref_id: 60.t5.52
+      name: "Atsargini\u0173 kopij\u0173 patalp\u0173 apsauga"
+      description: "Kibernetinio saugumo subjekto nustatyta tvarka turi b\u016Bti\
+        \ kontroliuojamas patekimas \u012F tinkl\u0173 ir informacin\u0117s sistemos\
+        \ serveri\u0173 patalpas ir patalpas, kuriose saugomos atsargin\u0117s duomen\u0173\
+        \ kopijos."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:61
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '61'
+      name: Turto valdymo tvarka
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti kibernetinio saugumo subjekto turto valdymo tvark\u0105,\
+        \ apiman\u010Di\u0105: \n61.1.    reikalavim\u0105 parengti ir nuolat atnaujinti\
+        \ tinkl\u0173 ir informacini\u0173 sistem\u0173 turto (kibernetinio saugumo\
+        \ subjekto valdoma technin\u0117 ir programin\u0117 \u012Franga, duomenys),\
+        \ kuriuo grind\u017Eiamos kibernetinio saugumo subjekto veiklos funkcijos,\
+        \ s\u0105ra\u0161\u0105 (toliau \u2013 turto s\u0105ra\u0161as);\n61.2.  \
+        \  turto klasifikavimo reikalavimus pagal j\u0173 svarb\u0105, konfidencialumo,\
+        \ vientisumo ir prieinamumo at\u017Evilgiu; \n61.3.    turto perk\u0117limo\
+        \ u\u017E kibernetinio saugumo subjekto rib\u0173 reikalavimus;\n61.4.   \
+        \ ne\u0161iojam\u0173j\u0173, kei\u010Diam\u0173j\u0173 duomen\u0173 laikmen\u0173\
+        \ naudojimo reikalavimus; \n61.5.    mobili\u0173j\u0173 \u012Frengini\u0173\
+        , kurie gali veikti savaranki\u0161kai ir tur\u0117ti ry\u0161\u012F su tinklu\
+        \ ar internetu kei\u010Diantis j\u0173 buvimo vietai (pavyzd\u017Eiui, ne\u0161\
+        iojamasis kompiuteris, delninukas, i\u0161manusis telefonas) ir naudojam\u0173\
+        \ prisijungti prie kibernetinio saugumo subjekt\u0173 tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173, saugaus naudojimo ir kontrol\u0117s reikalavimus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:62
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '62'
+      name: "Kvalifikuoti \u012Frangos specialistai"
+      description: "Tinkl\u0173 ir informacin\u0117s sistemos \u012Frangos prie\u017E\
+        i\u016Br\u0105 ir gedim\u0173 \u0161alinim\u0105 turi atlikti kvalifikuoti\
+        \ specialistai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:63
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '63'
+      name: "Gedim\u0173 registracija"
+      description: "Tinkl\u0173 ir informacini\u0173 sistem\u0173 technin\u0117s \u012F\
+        rangos gedimai turi b\u016Bti registruojami."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec11
+      ref_id: '64'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 6 lentel\u0117je."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64
+      ref_id: 64.t6
+      name: "6\_lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.53
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6
+      ref_id: 64.t6.53
+      name: "\u012Erangos naudojimo kontrol\u0117"
+      description: "Naudojamos technin\u0117s priemon\u0117s, kurios apribot\u0173\
+        \ neleistin\u0173 (turto s\u0105ra\u0161e nesan\u010Di\u0173) \u012Frengini\u0173\
+        \ prijungim\u0105 prie kibernetinio saugumo subjekto tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173, apribot\u0173 neleistinos technin\u0117s \u012Frangos naudojim\u0105\
+        \ ir informuot\u0173 kibernetinio saugumo subjekto \u012Fgaliot\u0105 asmen\u012F\
+        ."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.54
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6
+      ref_id: 64.t6.54
+      name: "Mobili\u0173j\u0173 \u012Frengini\u0173 valdymas"
+      description: "Kibernetinio saugumo subjektas turi centralizuotai valdyti mobiliuosius\
+        \ \u012Frenginius, kurie turi prieig\u0105 prie tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173, ir juose \u012Fdiegt\u0105 programin\u0119 \u012Frang\u0105\
+        ."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.55
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6
+      ref_id: 64.t6.55
+      name: "Mobili\u0173j\u0173 \u012Frengini\u0173 gr\u0117sm\u0117s"
+      description: "Mobilieji \u012Frenginiai, kuriais nar\u0161oma internete, turi\
+        \ b\u016Bti apsaugoti nuo judri\u0173j\u0173 program\u0173 (angl. mobile code)\
+        \ keliam\u0173 gr\u0117smi\u0173."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.56
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6
+      ref_id: 64.t6.56
+      name: "Mobili\u0173j\u0173 \u012Frengini\u0173 duomen\u0173 valdymas"
+      description: "Mobiliuosiuose \u012Frenginiuose privalo b\u016Bti \u012Fdiegtos\
+        \ priemon\u0117s, leisian\u010Dios nuotoliniu b\u016Bdu neatkuriamai i\u0161\
+        trinti mobiliuosiuose \u012Frenginiuose esan\u010Dius duomenis."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6
+      ref_id: 64.t6.57
+      name: "\u012Erangos ir patalp\u0173 reikalavimai"
+      description: "Reikalavimai tinkl\u0173 ir informacin\u0117s sistemos techninei\
+        \ ir programinei \u012Frangai ir patalpoms"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.1
+      name: "Svarbios \u012Frangos matinimo \u0161altiniai"
+      description: "tinkl\u0173 ir informacini\u0173 sistem\u0173 kompiuterin\u0117\
+        \ \u012Franga, kuri\u0105 kibernetinio saugumo subjektas \u012Fvertino kaip\
+        \ svarbi\u0105, turi tur\u0117ti \u012Ftampos filtr\u0105 ir nepertraukiamo\
+        \ maitinimo \u0161altin\u012F, u\u017Etikrinant\u012F technin\u0117s \u012F\
+        rangos veikim\u0105;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.2
+      name: "Oro kondicionavimo \u012Franga"
+      description: "jei tinkl\u0173 ir informacini\u0173 sistem\u0173 serveri\u0173\
+        \ patalpose esan\u010Dios \u012Frangos bendras galingumas yra daugiau nei\
+        \ 10 kilovat\u0173, turi b\u016Bti \u012Frengta oro kondicionavimo \u012F\
+        ranga;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.3
+      name: "Oro kondicionavimo ir dr\u0117gm\u0117s kontrol\u0117"
+      description: "serveri\u0173 patalpose turi b\u016Bti oro kondicionavimo ir dr\u0117\
+        gm\u0117s kontrol\u0117s \u012Franga;"
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.4
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.4
+      name: Gamintojo rekomendacijos
+      description: "tinkl\u0173 ir informacin\u0117s sistemos technin\u0117 ir programin\u0117\
+        \ \u012Franga turi b\u016Bti pri\u017Ei\u016Brima laikantis gamintojo rekomendacij\u0173\
+        ;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.5
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.5
+      name: "Gaisro ir \u012Fsilau\u017Eimo jutikliai"
+      description: "tinkl\u0173 ir informacin\u0117s sistemos serveri\u0173 patalpose\
+        \ turi b\u016Bti \u012Frengti gaisro ir \u012Fsilau\u017Eimo jutikliai, prijungti\
+        \ prie pastato signalizacijos ir (arba) apsaugos tarnybos steb\u0117jimo pulto;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.6
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.6
+      name: "Gaisro ir \u012Fsilau\u017Eimo jutikliai visose patalpose"
+      description: "visose patalpose, kuriose yra kibernetinio saugumo subjekto technin\u0117\
+        \ \u012Franga, turi b\u016Bti \u012Frengti gaisro jutikliai ir (ar) kitos\
+        \ fizin\u0117s apsaugos priemon\u0117s;"
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57.7
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:64.t6.57
+      ref_id: 64.t6.57.7
+      name: "Kritini\u0173 element\u0173 dublikavimas"
+      description: "kritiniai elementai (oro kondicionavimo \u012Franga, v\u0117dinimas\
+        \ ir dr\u0117gm\u0117s kontrol\u0117, el. energijos tiekimas) turi b\u016B\
+        ti dubliuojami, siekiant u\u017Etikrinti auk\u0161t\u0105 patalpoms eksploatuoti\
+        \ b\u016Btin\u0173 \u012Frengini\u0173 patikimum\u0105."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec12
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2
+      ref_id: sec2.subsec12
+      name: 12 skirsnis
+      description: "Prieigos valdymas ir keli\u0173 veiksni\u0173 tapatumo nustatymo\
+        \ priemon\u0117s"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:65
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec12
+      ref_id: '65'
+      name: Prieigos valdymo tvarka
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi nustatyti prieigos valdymo tvark\u0105, apiman\u010Di\u0105: \n65.1.\
+        \    kibernetinio saugumo subjekto naudotoj\u0173, administratori\u0173, paslaug\u0173\
+        \ teik\u0117j\u0173 grupi\u0173 sudarym\u0105, teisi\u0173 ir prieigos prie\
+        \ kibernetinio saugumo subjekto tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        \ suteikim\u0105 ir valdym\u0105; \n65.2.    administratoriaus (administratori\u0173\
+        ) prieigos prie tinkl\u0173 ir informacin\u0117s sistemos lygius ir juose\
+        \ taikomus kibernetinio saugumo reikalavimus (duomen\u0173 skaitymas, k\u016B\
+        rimas, atnaujinimas, naikinimas, tinkl\u0173 ir informacin\u0117s sistemos\
+        \ naudotoj\u0173 informacijos, prieigos teisi\u0173 redagavimas ir pana\u0161\
+        iai); \n65.3.    tinkl\u0173 ir informacini\u0173 sistem\u0173 naudotoj\u0173\
+        \ registravimo ir i\u0161registravimo reikalavimus ir u\u017E \u0161i\u0173\
+        \ veiksm\u0173 atlikim\u0105 atsakingo asmens paskyrim\u0105; \n65.4.    priemones\
+        \ tinkl\u0173 ir informacini\u0173 sistem\u0173 naudotoj\u0173 tapatybei nustatyti;\
+        \ \n65.5.    tinkl\u0173 ir informacin\u0117s sistemos naudotoj\u0173 ir administratori\u0173\
+        \ slapta\u017Eod\u017Ei\u0173 sudarymo, galiojimo trukm\u0117s ir keitimo\
+        \ reikalavimus: \n65.5.1.   reikalavim\u0105, kad slapta\u017Eod\u017Eiams\
+        \ sudaryti neturi b\u016Bti naudojama asmeninio pob\u016Bd\u017Eio informacija\
+        \ (pavyzd\u017Eiui, gimimo data, \u0161eimos nari\u0173 vardai ir pana\u0161\
+        iai); \n65.5.2.   reikalavim\u0105, kad slapta\u017Eodis negali b\u016Bti\
+        \ sudarytas i\u0161 pasikartojan\u010Di\u0173 arba nuosekli\u0173 simboli\u0173\
+        \ (pvz., \u201Eaaaaaaaaaaaa\u201C arba \u201E0123456789\u201C) ar \u012Fprastos\
+        \ klaviat\u016Bros sekos (pvz., \u201EQwerty\u201C);\n65.5.3.   draudim\u0105\
+        \ technin\u0117je ir programin\u0117je \u012Frangoje naudoti gamintojo nustatytus\
+        \ slapta\u017Eod\u017Eius, jie turi b\u016Bti pakeisti vadovaujantis \u0161\
+        iame skyriuje nustatytais reikalavimais;\n65.6.    draudim\u0105 slapta\u017E\
+        od\u017Eius atskleisti kitiems asmenims;\n65.7.    s\u0105lygas ir atvejus,\
+        \ kada panaikinama tinkl\u0173 ir informacin\u0117s sistemos naudotoj\u0173\
+        \ ir administratori\u0173 teis\u0117 dirbti su konkre\u010Dia informacija;\
+        \ \n65.8.    leistinus nuotolinio naudotoj\u0173 ir administratori\u0173 prisijungimo\
+        \ prie tinkl\u0173 ir informacin\u0117s sistemos b\u016Bdus;\n65.9.    keli\u0173\
+        \ veiksni\u0173 tapatumo priemoni\u0173 naudojimo b\u016Bdus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:66
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec12
+      ref_id: '66'
+      name: "Administratori\u0173 s\u0105ra\u0161as"
+      description: "Kibernetinio saugumo subjektas turi patvirtinti asmen\u0173, kuriems\
+        \ suteiktos administratoriaus teis\u0117s prisijungti prie tinkl\u0173 ir\
+        \ informacini\u0173 sistem\u0173, s\u0105ra\u0161\u0105, kuris periodi\u0161\
+        kai turi b\u016Bti per\u017Ei\u016Brimas u\u017E kibernetin\u012F saugum\u0105\
+        \ atsakingo asmens. S\u0105ra\u0161as turi b\u016Bti per\u017Ei\u016Br\u0117\
+        tas, kai administratorius nu\u0161alinamas arba pasibaigia jo darbo (tarnybos)\
+        \ santykiai."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:67
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec12
+      ref_id: '67'
+      name: "Slapta\u017Eod\u017Ei\u0173 \u0161ifravimas"
+      description: "Slapta\u017Eod\u017Eiai negali b\u016Bti saugomi ar perduodami\
+        \ atviru tekstu. Tik laikinas slapta\u017Eodis gali b\u016Bti perduodamas\
+        \ atviru tekstu, ta\u010Diau atskirai nuo prisijungimo vardo, jeigu naudotojas\
+        \ neturi galimybi\u0173 i\u0161\u0161ifruoti gauto u\u017E\u0161ifruoto slapta\u017E\
+        od\u017Eio ar n\u0117ra technini\u0173 galimybi\u0173 naudotojui perduoti\
+        \ slapta\u017Eod\u012F \u0161ifruotu kanalu ar saugiu elektronini\u0173 ry\u0161\
+        i\u0173 tinklu."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:68
+      assessable: true
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec12
+      ref_id: '68'
+      name: MFA
+      description: "Kibernetinio saugumo subjekto vadovas arba jo \u012Fgaliotas asmuo\
+        \ turi patvirtinti keli\u0173 veiksni\u0173 tapatumo nustatymo ar nuolatinio\
+        \ tapatumo nustatymo sprendim\u0173, saugi\u0173 balso, vaizdo ir teksto ry\u0161\
+        i\u0173 bei saugi\u0173 avarini\u0173 ry\u0161i\u0173 sistem\u0173 subjekto\
+        \ viduje naudojimo nuostatas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69
+      assessable: false
+      depth: 3
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec2.subsec12
+      ref_id: '69'
+      name: Techniniai reikalavimai
+      description: "Kibernetinio saugumo subjektams taikomi techniniai reikalavimai\
+        \ nurodyti 7 lentel\u0117je."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      assessable: false
+      depth: 4
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69
+      ref_id: 69.t7
+      name: "7 lentel\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.58
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.58
+      name: Atskira administrtoriaus paskyra
+      description: "Administratoriaus funkcijos turi b\u016Bti atliekamos naudojant\
+        \ atskir\u0105 tam skirt\u0105 paskyr\u0105, kuri negali b\u016Bti naudojama\
+        \ kasdien\u0117ms naudotojo funkcijoms atlikti."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.59
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.59
+      name: "Administratoriaus teis\u0117s"
+      description: "Naudotojams negali b\u016Bti suteikiamos administratoriaus teis\u0117\
+        s."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.60
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.60
+      name: "Unikal\u016Bs naudotojai"
+      description: "Kiekvienas naudotojas turi b\u016Bti unikaliai atpa\u017E\u012F\
+        stamas."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.61
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.61
+      name: "Keli\u0173 veiksni\u0173 tapatumo nustatymas"
+      description: "Naudotojas ir administratorius turi patvirtinti savo tapatyb\u0119\
+        \ slapta\u017Eod\u017Eiu ir papildoma tapatumo nustatymo priemone (keli\u0173\
+        \ veiksni\u0173 tapatumo nustatymo priemon\u0117s)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.62
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.62
+      name: "Naudotojo galiojimas 3 m\u0117n."
+      description: "Naudotojo teis\u0117 dirbti su konkre\u010Dia tinkl\u0173 ir informacine\
+        \ sistema turi b\u016Bti sustabdoma, kai naudotojas nesinaudoja tinkl\u0173\
+        \ ir informacine sistema ilgiau kaip 3 m\u0117nesius."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.63
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.63
+      name: "Administratoriaus galiojimas 2 m\u0117n."
+      description: "Administratoriaus teis\u0117 dirbti su tinkl\u0173 ir informacine\
+        \ sistema turi b\u016Bti sustabdoma, kai administratorius nesinaudoja tinkl\u0173\
+        \ ir informacine sistema ilgiau kaip 2 m\u0117nesius."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.64
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.64
+      name: "Vartotojo nu\u0161alinimas"
+      description: "Kai naudotojas ar administratorius nu\u0161alinamas nuo darbo\
+        \ (pareig\u0173), neatitinka kituose teis\u0117s aktuose nustatyt\u0173 naudotojo\
+        \ ar administratoriaus kvalifikacini\u0173 reikalavim\u0173, taip pat pasibaigia\
+        \ jo darbo (tarnybos) santykiai, jis praranda patikimum\u0105, jo teis\u0117\
+        \ naudotis tinkl\u0173 ir informacine sistema turi b\u016Bti panaikinta nedelsiant,\
+        \ bet ne v\u0117liau kaip per kibernetinio saugumo subjekto nustatyt\u0105\
+        \ termin\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.65
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.65
+      name: "Paskyr\u0173 blokavimas"
+      description: "Nereikalingos ar nenaudojamos tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 paskyros turi b\u016Bti blokuojamos nedelsiant, bet ne v\u0117\
+        liau kaip per kibernetinio saugumo subjekto nustatyt\u0105 termin\u0105 ir\
+        \ i\u0161trinamos pra\u0117jus \u017Eurnalini\u0173 \u012Fra\u0161\u0173 saugojimo\
+        \ terminui (ne trumpiau kaip 90 kalendorini\u0173 dien\u0173)."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.66
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.66
+      name: Darbo vietos apsauga
+      description: "Baigus darb\u0105 arba pasitraukiant i\u0161 darbo vietos, turi\
+        \ b\u016Bti atsijungiama nuo tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        , \u012Fjungiama ekrano u\u017Esklanda su slapta\u017Eod\u017Eiu."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.67
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.67
+      name: "Neaktyvumo re\u017Eimas"
+      description: "Tinkluose ir informacin\u0117se sistemose neatliekant joki\u0173\
+        \ veiksm\u0173, darbo stotis turi u\u017Esirakinti (ne ilgiau nei po 15 minu\u010D\
+        i\u0173), kad toliau naudotis tinkl\u0173 ir informacine sistema b\u016Bt\u0173\
+        \ galima tik pakartotinai patvirtinus savo tapatyb\u0119."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.68
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.68
+      name: "Slapta\u017Eod\u017Ei\u0173 tvarkykl\u0117s"
+      description: "Tinkl\u0173 ir informacin\u0117s sistemos dalys, tarp j\u0173\
+        \ ir svetain\u0117s ir nar\u0161ykl\u0117s, patvirtinan\u010Dios naudotojo\
+        \ tapatum\u0105, turi drausti i\u0161saugoti slapta\u017Eod\u017Eius, i\u0161\
+        skyrus specializuot\u0105 slapta\u017Eod\u017Ei\u0173 tvarkymo programin\u0119\
+        \ \u012Frang\u0105."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.69
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.69
+      name: "Slapta\u017Eod\u017Ei\u0173 sud\u0117tingumas"
+      description: "Slapta\u017Eodis turi b\u016Bti sudarytas i\u0161 did\u017Ei\u0173\
+        j\u0173 ir ma\u017E\u0173j\u0173 raid\u017Ei\u0173, skai\u010Di\u0173 ir speciali\u0173\
+        j\u0173 simboli\u0173."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.70
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.70
+      name: Bandymai prisijungti
+      description: "Turi b\u016Bti nustatytas maksimalus leistinas naudotoj\u0173\
+        \ m\u0117ginim\u0173 prisijungti prie tinkl\u0173 ir informacini\u0173 sistem\u0173\
+        \ skai\u010Dius \u2013 ne daugiau negu 5 kartai i\u0161 eil\u0117s. Po numatyto\
+        \ bandym\u0173 skai\u010Diaus prisijungti prie tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173 paskyra turi u\u017Esiblokuoti. Atblokuoti gali tik \u012F\
+        galioti asmenys."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.71
+      name: "Naudotoj\u0173 slapta\u017Eod\u017Ei\u0173 reikalavimai"
+      description: "Papildomi naudotojo slapta\u017Eod\u017Ei\u0173 reikalavimai"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71
+      ref_id: 69.t7.71.1
+      name: "Slapta\u017Eod\u017Eiai kei\u010Diami kas 6\_m\u0117n"
+      description: "naudotojo slapta\u017Eodis turi b\u016Bti kei\u010Diamas ne re\u010D\
+        iau kaip kas 6 m\u0117nesius;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71
+      ref_id: 69.t7.71.2
+      name: "10 simboli\u0173"
+      description: "naudotojo slapta\u017Eod\u012F turi sudaryti ne ma\u017Eiau kaip\
+        \ 10 simboli\u0173;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71
+      ref_id: 69.t7.71.3
+      name: "Ne paskutiniai 6\_slapta\u017Eod\u017Eiai"
+      description: "naudotojo kei\u010Diamo slapta\u017Eod\u017Eio neturi b\u016B\
+        ti leid\u017Eiama sudaryti i\u0161 buvusi\u0173 6 paskutini\u0173 slapta\u017E\
+        od\u017Ei\u0173;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71.4
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71
+      ref_id: 69.t7.71.4
+      name: "Slapta\u017Eod\u017Eio keitimas pirm\u0105 kart\u0105"
+      description: "pirm\u0105kart jungiantis prie tinkl\u0173 ir informacini\u0173\
+        \ sistem\u0173, turi b\u016Bti reikalaujama, kad naudotojas pakeist\u0173\
+        \ slapta\u017Eod\u012F;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71.5
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.71
+      ref_id: 69.t7.71.5
+      name: "Slapta\u017Eod\u017Eio keitimas pirm\u0105 kart\u0105"
+      description: "naudotojas turi tur\u0117ti galimyb\u0119 bet kuriuo metu pasikeisti\
+        \ slapta\u017Eod\u012F."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.72
+      name: "Administratori\u0173 slapta\u017Eod\u017Ei\u0173 reikalavimai"
+      description: "Papildomi administratori\u0173 slapta\u017Eod\u017Ei\u0173 reikalavimai"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72
+      ref_id: 69.t7.72.1
+      name: "Slapta\u017Eod\u017Eiai kei\u010Diami kas 6\_m\u0117n"
+      description: "administratori\u0173 slapta\u017Eodis turi b\u016Bti kei\u010D\
+        iamas ne re\u010Diau kaip kas 6 m\u0117nesius;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72
+      ref_id: 69.t7.72.2
+      name: "15\_simboli\u0173"
+      description: "administratori\u0173 slapta\u017Eod\u012F turi sudaryti ne ma\u017E\
+        iau kaip 15 simboli\u0173;"
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.72
+      ref_id: 69.t7.72.3
+      name: "Ne paskutiniai 8 slapta\u017Eod\u017Eiai"
+      description: "administratoriui kei\u010Diant slapta\u017Eod\u012F, neturi b\u016B\
+        ti leid\u017Eiama naudoti slapta\u017Eod\u017Eio i\u0161 buvusi\u0173 8 paskutini\u0173\
+        \ slapta\u017Eod\u017Ei\u0173."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.73
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.73
+      name: "Administratori\u0173 paskyr\u0173 kontrol\u0117"
+      description: "Turi b\u016Bti vykdoma administratori\u0173 paskyr\u0173 kontrol\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.73.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.73
+      ref_id: 69.t7.73.1
+      name: "Paskyr\u0173 tikrinimas"
+      description: "reguliariai, ne re\u010Diau kaip kart\u0105 per metus, tikrinama,\
+        \ ar administratoriaus paskyros atitinka \u0161iame skyriuje nustatytus reikalavimus,\
+        \ ir prane\u0161ama \u012Fgaliotam atsakingam asmeniui apie administratori\u0173\
+        \ paskyras, kurios neatitinka \u0161iame skirsnyje nustatyt\u0173 reikalavim\u0173\
+        ;"
+      implementation_groups:
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.73.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.73
+      ref_id: 69.t7.73.2
+      name: "Paskyr\u0173 kontrol\u0117s priemon\u0117s"
+      description: "naudojamos administratori\u0173 paskyr\u0173 kontrol\u0117s priemon\u0117\
+        s, kurios periodi\u0161kai tikrina administratoriaus paskyras. Apie administratoriaus\
+        \ paskyras, kurios neatitinka \u0161iame skirsnyje nustatyt\u0173 reikalavim\u0173\
+        , turi b\u016Bti prane\u0161ama \u012Fgaliotam asmeniui."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.74
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.74
+      name: "Naudotoj\u0173 paskyr\u0173 kontrol\u0117"
+      description: "Vykdoma naudotoj\u0173 paskyr\u0173 kontrol\u0117"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.74.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.74
+      ref_id: 69.t7.74.1
+      name: "Paskyr\u0173 tikrinimas"
+      description: "reguliariai tikrinama, ar naudotoj\u0173 paskyros atitinka \u0161\
+        iame skirsnyje nustatytus reikalavimus. Apie naudotoj\u0173 paskyras, kurios\
+        \ neatitinka \u0161iame skirsnyje nustatyt\u0173 reikalavim\u0173, turi b\u016B\
+        ti prane\u0161ama \u012Fgaliotam asmeniui;"
+      implementation_groups:
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.74.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.74
+      ref_id: 69.t7.74.2
+      name: "Paskyr\u0173 kontrol\u0117s priemon\u0117s"
+      description: "naudojamos naudotoj\u0173 paskyr\u0173 kontrol\u0117s priemon\u0117\
+        s, kurios periodi\u0161kai tikrina naudotoj\u0173 paskyras. Apie naudotoj\u0173\
+        \ paskyras, kurios neatitinka \u0161iame skirsnyje nustatyt\u0173 reikalavim\u0173\
+        , turi b\u016Bti prane\u0161ama \u012Fgaliotam asmeniui."
+      implementation_groups:
+      - essential_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.75
+      assessable: true
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.75
+      name: Lokalios paskyros
+      description: "Lokalios naudotoj\u0173 ir administratori\u0173 paskyros turi\
+        \ atitikti reikalavimus, nurodytus \u0161iame skirsnyje."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.76
+      assessable: false
+      depth: 5
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7
+      ref_id: 69.t7.76
+      name: Papildomi reikalavimai
+      description: "Papildomi atpa\u017Einties, tapatumo patvirtinimo ir naudojimosi\
+        \ kontrol\u0117s reikalavimai (kibernetinio saugumo subjekto svetain\u0117\
+        ms, pasiekiamoms i\u0161 vie\u0161\u0173j\u0173 elektronini\u0173 ry\u0161\
+        i\u0173 tinkl\u0173)"
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.76.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:69.t7.76
+      ref_id: 69.t7.76.1
+      name: "Nesaugoti prisijungimo duomen\u0173 programiniame kode"
+      description: "programiniame kode draud\u017Eiama i\u0161saugoti duomenis (vard\u0105\
+        , slapta\u017Eod\u012F, aplikacij\u0173 programavimo s\u0105sajas (angl. Application\
+        \ programming interface) raktus / \u017Eenklus (angl. Token) ir kt.), kuriuos\
+        \ atskleidus gali b\u016Bti pasinaudota prieiga prie \u012Frengini\u0173,\
+        \ resurs\u0173, paskyr\u0173 ar valdikli\u0173."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec3
+      assessable: false
+      depth: 1
+      ref_id: sec3
+      name: 3 skyrius
+      description: Baigiamosios nuostatos
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:70
+      assessable: false
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec3
+      ref_id: '70'
+      name: "Kiti teis\u0117s aktai"
+      description: "Apra\u0161o reikalavim\u0173 \u012Fgyvendinimas kibernetinio saugumo\
+        \ subjekt\u0173 neatleid\u017Eia nuo pareigos \u012Fgyvendinti ir kituose\
+        \ teis\u0117s aktuose nustatyt\u0173 reikalavim\u0173, kuriais siekiama u\u017E\
+        tikrinti tinkl\u0173 ir informacini\u0173 sistem\u0173 saugum\u0105, i\u0161\
+        skyrus Kibernetinio saugumo \u012Fstatymo 1 straipsnio 3 dalyje numatytus\
+        \ atvejus."
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:71
+      assessable: true
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec3
+      ref_id: '71'
+      name: "Organizacini\u0173 reikalavim\u0173 terminas"
+      description: "Kibernetinio saugumo subjektai kibernetinio saugumo reikalavimus\
+        \ privalo \u012Fgyvendinti ne v\u0117liau kaip per 12 m\u0117nesi\u0173 nuo\
+        \ j\u0173 \u012Fregistravimo Kibernetinio saugumo informacin\u0117je sistemoje\
+        \ dienos, i\u0161skyrus Apra\u0161o 72 punkte numatytus atvejus."
+      implementation_groups:
+      - essential_subject
+      - important_subject
+    - urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:72
+      assessable: true
+      depth: 2
+      parent_urn: urn:ovidijusbalkauskas:risk:req_node:kibernetinio-saugumo-istatymas:sec3
+      ref_id: '72'
+      name: "Technini\u0173 reikalavim\u0173 terminas"
+      description: "Kibernetinio saugumo subjektai techninius kibernetinio saugumo\
+        \ reikalavimus, nustatytus Apra\u0161o 26, 31, 47, 57, 60, 64, 69 punktuose,\
+        \ privalo \u012Fgyvendinti ne v\u0117liau kaip per 24 m\u0117nesius nuo j\u0173\
+        \ \u012Fregistravimo Kibernetinio saugumo informacin\u0117je sistemoje dienos."
+      implementation_groups:
+      - essential_subject
+      - important_subject
