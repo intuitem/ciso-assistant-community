@@ -21,6 +21,7 @@ from django.db.models import (
     Q,
     ExpressionWrapper,
     FloatField,
+    IntegerField,
     Value,
     Min,
     Subquery,
@@ -4743,39 +4744,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
 
-        ordering = self.request.query_params.get("ordering", "")
-
-        if any(
-            field in ordering
-            for field in (
-                "total_requirements",
-                "assessed_requirements",
-                "progress",
-            )
-        ):
-            qs = qs.annotate(
-                total_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(requirement_assessments__requirement__assessable=True),
-                    distinct=True,
-                ),
-                assessed_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(
-                        ~Q(
-                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                        ),
-                        requirement_assessments__requirement__assessable=True,
+        qs = qs.annotate(
+            total_requirements=Count(
+                "requirement_assessments",
+                filter=Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            assessed_requirements=Count(
+                "requirement_assessments",
+                filter=Q(
+                    ~Q(
+                        requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
                     ),
-                    distinct=True,
+                    requirement_assessments__requirement__assessable=True,
                 ),
-                progress=ExpressionWrapper(
-                    F("assessed_requirements")
-                    * 1.0
-                    / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                    output_field=FloatField(),
-                ),
-            )
+                distinct=True,
+            ),
+            progress=ExpressionWrapper(
+                F("assessed_requirements")
+                * 100
+                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                output_field=IntegerField(),
+            ),
+        )
+
         return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
