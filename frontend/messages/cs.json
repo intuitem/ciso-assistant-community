@@ -953,5 +953,7 @@
 	"saveAndContinue": "Uložit a pokračovat",
 	"image": "Image",
 	"securityObjectives": "Bezpečnostní cíle",
-	"nextOccurrenceStatus": "Stav dalšího výskytu"
+	"nextOccurrenceStatus": "Stav dalšího výskytu",
+	"securityObjectiveScale": "Měřítko bezpečnostních vlastností",
+	"securityObjectiveScaleHelpText": "Vyberte měřítko pro bezpečnostní vlastnosti (1 až 4 výchozí)"
 }

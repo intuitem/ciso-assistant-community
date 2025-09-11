@@ -924,9 +924,7 @@
 	"fixed": "Naprawiono",
 	"general": "Ogólny",
 	"generalSettingsDescription": "Skonfiguruj swoje ogólne ustawienia tutaj.",
-	"securityObjectiveScale": "Skala celu bezpieczeństwa",
 	"generalSettingsUpdated": "Ustawienia ogólne zaktualizowane",
-	"securityObjectiveScaleHelpText": "Wybierz skalę dla celów bezpieczeństwa (domyślnie od 1 do 4)",
 	"labels": "Etykiety",
 	"addLabel": "Dodaj etykietę",
 	"labelsHelpText": "Etykiety służą do kategoryzowania i filtrowania elementów.",
@@ -1709,5 +1707,7 @@
 	"saveAndContinue": "Zapisz i kontynuuj",
 	"nextOccurrenceStatus": "Następny status wystąpienia",
 	"image": "Obraz",
-	"securityObjectives": "Właściwości bezpieczeństwa"
+	"securityObjectives": "Właściwości bezpieczeństwa",
+	"securityObjectiveScale": "Skala właściwości bezpieczeństwa",
+	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)"
 }

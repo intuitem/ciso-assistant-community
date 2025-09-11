@@ -956,5 +956,7 @@
 	"saveAndContinue": "Spara och fortsätt",
 	"nextOccurrenceStatus": "Status för nästa förekomst",
 	"image": "Bild",
-	"securityObjectives": "Säkerhetsmål"
+	"securityObjectives": "Säkerhetsmål",
+	"securityObjectiveScale": "Skala för säkerhetsmål",
+	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)"
 }

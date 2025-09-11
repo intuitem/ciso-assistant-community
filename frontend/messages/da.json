@@ -886,9 +886,7 @@
 	"fixed": "Rettet",
 	"general": "generelt",
 	"generalSettingsDescription": "Konfigurer dine generelle indstillinger her",
-	"securityObjectiveScale": "Skala for sikkerhedsmål",
 	"generalSettingsUpdated": "Generelle indstillinger opdateret",
-	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsmål (1 til 4 som standard)",
 	"labels": "Etiketter",
 	"addLabel": "Tilføj etiket",
 	"labelsHelpText": "Etiketter bruges til at kategorisere og filtrere elementer",
@@ -1247,5 +1245,7 @@
 	"saveAndContinue": "Gem og fortsæt",
 	"nextOccurrenceStatus": "Næste forekomststatus",
 	"image": "Billede",
-	"securityObjectives": "Sikkerhedsegenskaber"
+	"securityObjectives": "Sikkerhedsegenskaber",
+	"securityObjectiveScale": "Skala for sikkerhedsegenskaber",
+	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsegenskaber (1 til 4 som standard)"
 }

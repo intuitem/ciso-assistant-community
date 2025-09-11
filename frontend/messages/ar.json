@@ -933,5 +933,7 @@
 	"saveAndContinue": "حفظ ومتابعة",
 	"nextOccurrenceStatus": "حالة الحدوث التالية",
 	"image": "صورة",
-	"securityObjectives": "خصائص الأمان"
+	"securityObjectives": "خصائص الأمان",
+	"securityObjectiveScale": "مقياس خصائص الأمان",
+	"securityObjectiveScaleHelpText": "اختر مقياسك لخصائص الأمان (1 إلى 4 بشكل افتراضي)"
 }

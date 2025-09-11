@@ -906,9 +906,7 @@
 	"fixed": "Fixée",
 	"general": "Général",
 	"generalSettingsDescription": "Configurez vos paramètres ici.",
-	"securityObjectiveScale": "Échelle des objectifs de sécurité",
 	"generalSettingsUpdated": "Paramètres mis à jour",
-	"securityObjectiveScaleHelpText": "Choisissez votre échelle d'objectifs de sécurité (1 à 4 par défaut)",
 	"labels": "Étiquettes",
 	"addLabel": "Ajouter une étiquette",
 	"labelsHelpText": "Les étiquettes sont utilisées pour catégoriser et filtrer les éléments.",
@@ -2095,5 +2093,7 @@
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
 	"nextOccurrenceStatus": "Statut de la prochaine occurrence",
 	"image": "Image",
-	"securityObjectives": "Propriétés de sécurité"
+	"securityObjectives": "Propriétés de sécurité",
+	"securityObjectiveScale": "Échelle des propriétés de sécurité",
+	"securityObjectiveScaleHelpText": "Choisissez votre échelle pour les propriétés de sécurité (1 à 4 par défaut)"
 }

@@ -966,5 +966,7 @@
 	"saveAndContinue": "Opslaan en doorgaan",
 	"nextOccurrenceStatus": "Status volgende herhaling",
 	"image": "Afbeelding",
-	"securityObjectives": "Beveiligingskenmerken"
+	"securityObjectives": "Beveiligingskenmerken",
+	"securityObjectiveScale": "Schaal voor beveiligingskenmerken",
+	"securityObjectiveScaleHelpText": "Kies uw schaal voor beveiligingskenmerken (standaard 1 tot 4)"
 }

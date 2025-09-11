@@ -963,5 +963,7 @@
 	"saveAndContinue": "Salvar e continuar",
 	"nextOccurrenceStatus": "Próximo status de ocorrência",
 	"image": "Imagem",
-	"securityObjectives": "Propriedades de segurança"
+	"securityObjectives": "Propriedades de segurança",
+	"securityObjectiveScale": "Escala de propriedades de segurança",
+	"securityObjectiveScaleHelpText": "Escolha sua escala para propriedades de segurança (1 a 4 por padrão)"
 }

@@ -887,9 +887,7 @@
 	"fixed": "Risolto",
 	"general": "generale",
 	"generalSettingsDescription": "Configura qui le tue impostazioni generali",
-	"securityObjectiveScale": "Scala obiettivi di sicurezza",
 	"generalSettingsUpdated": "Impostazioni generali aggiornate",
-	"securityObjectiveScaleHelpText": "Scegli la scala dei tuoi obiettivi di sicurezza (1-4 di default)",
 	"labels": "Etichette",
 	"addLabel": "Aggiungi etichetta",
 	"labelsHelpText": "Le etichette servono per categorizzare e filtrare gli elementi",
@@ -1342,5 +1340,7 @@
 	"saveAndContinue": "Salva e continua",
 	"nextOccurrenceStatus": "Stato prossima occorrenza",
 	"image": "Immagine",
-	"securityObjectives": "Proprietà di sicurezza"
+	"securityObjectives": "Proprietà di sicurezza",
+	"securityObjectiveScale": "Scala proprietà di sicurezza",
+	"securityObjectiveScaleHelpText": "Scegli la scala per le proprietà di sicurezza (1 a 4 di default)"
 }

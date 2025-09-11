@@ -965,5 +965,7 @@
 	"saveAndContinue": "Mentés és folytatás",
 	"nextOccurrenceStatus": "Következő előfordulás állapota",
 	"image": "Kép",
-	"securityObjectives": "Biztonsági tulajdonságok"
+	"securityObjectives": "Biztonsági tulajdonságok",
+	"securityObjectiveScale": "Biztonsági tulajdonságok skálája",
+	"securityObjectiveScaleHelpText": "Válassza ki a biztonsági tulajdonságok skáláját (alapértelmezés szerint 1-től 4-ig)"
 }

@@ -873,9 +873,7 @@
 	"fixed": "Telah diperbaiki",
 	"general": "Umum",
 	"generalSettingsDescription": "Konfigurasikan pengaturan umum Anda di sini.",
-	"securityObjectiveScale": "Skala tujuan keamanan",
 	"generalSettingsUpdated": "Pengaturan umum diperbarui",
-	"securityObjectiveScaleHelpText": "Pilih skala untuk tujuan keamanan Anda (1 hingga 4 secara default)",
 	"labels": "Label",
 	"addLabel": "Tambahkan label",
 	"labelsHelpText": "Label digunakan untuk mengkategorikan dan memfilter item.",
@@ -1152,5 +1150,7 @@
 	"saveAndContinue": "Simpan dan lanjutkan",
 	"nextOccurrenceStatus": "Status kejadian berikutnya",
 	"image": "Gambar",
-	"securityObjectives": "Properti keamanan"
+	"securityObjectives": "Properti keamanan",
+	"securityObjectiveScale": "Skala properti keamanan",
+	"securityObjectiveScaleHelpText": "Pilih skala untuk properti keamanan Anda (1 hingga 4 secara default)"
 }

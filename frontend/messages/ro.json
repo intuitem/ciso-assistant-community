@@ -962,5 +962,7 @@
 	"saveAndContinue": "Salvați și continuați",
 	"nextOccurrenceStatus": "Starea următoarei apariții",
 	"image": "Imagine",
-	"securityObjectives": "Proprietăți de securitate"
+	"securityObjectives": "Proprietăți de securitate",
+	"securityObjectiveScale": "Scară proprietăți de securitate",
+	"securityObjectiveScaleHelpText": "Alegeți scala dvs. pentru proprietățile de securitate (1 la 4 implicit)"
 }

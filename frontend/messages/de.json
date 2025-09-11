@@ -970,5 +970,7 @@
 	"saveAndContinue": "Speichern und fortfahren",
 	"nextOccurrenceStatus": "Nächster Status der nächsten Vorkommens",
 	"image": "Bild",
-	"securityObjectives": "Sicherheitsmerkmale"
+	"securityObjectives": "Sicherheitsmerkmale",
+	"securityObjectiveScale": "Skala für Sicherheitsmerkmale",
+	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)"
 }

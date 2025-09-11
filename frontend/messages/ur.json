@@ -933,5 +933,7 @@
 	"saveAndContinue": "محفوظ کریں اور جاری رکھیں",
 	"nextOccurrenceStatus": "حالت اگلے واقعے",
 	"image": "تصویر",
-	"securityObjectives": "سیکیورٹی خصوصیات"
+	"securityObjectives": "سیکیورٹی خصوصیات",
+	"securityObjectiveScale": "سیکیورٹی خصوصیات کی پیمانہ",
+	"securityObjectiveScaleHelpText": "سیکیورٹی خصوصیات کے لیے اپنی پیمانہ منتخب کریں (ڈیفالٹ طور پر 1 سے 4)"
 }

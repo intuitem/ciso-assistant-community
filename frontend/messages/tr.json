@@ -923,9 +923,7 @@
 	"fixed": "Düzeltildi",
 	"general": "Genel",
 	"generalSettingsDescription": "Genel ayarlarınızı buradan yapılandırın.",
-	"securityObjectiveScale": "Güvenlik hedefi ölçeği",
 	"generalSettingsUpdated": "Genel ayarlar güncellendi",
-	"securityObjectiveScaleHelpText": "Güvenlik hedefleri için ölçeğinizi seçin (varsayılan olarak 1 ila 4)",
 	"labels": "Etiketler",
 	"addLabel": "Etiket ekle",
 	"labelsHelpText": "Etiketler, öğeleri kategorize etmek ve filtrelemek için kullanılır.",
@@ -1702,5 +1700,7 @@
 	"saveAndContinue": "Kaydet ve devam et",
 	"nextOccurrenceStatus": "Sonraki gerçekleşme durumu",
 	"image": "Resim",
-	"securityObjectives": "Güvenlik özellikleri"
+	"securityObjectives": "Güvenlik özellikleri",
+	"securityObjectiveScale": "Güvenlik özellikleri ölçeği",
+	"securityObjectiveScaleHelpText": "Güvenlik özellikleri için ölçeğinizi seçin (varsayılan olarak 1 ile 4)"
 }

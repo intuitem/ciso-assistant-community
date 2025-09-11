@@ -934,9 +934,7 @@
 	"fixed": "Fixed",
 	"general": "General",
 	"generalSettingsDescription": "Configure your general settings here.",
-	"securityObjectiveScale": "Security objective scale",
 	"generalSettingsUpdated": "General settings updated",
-	"securityObjectiveScaleHelpText": "Choose your scale for security objectives (1 to 4 by default)",
 	"labels": "Labels",
 	"addLabel": "Add label",
 	"labelsHelpText": "Labels are used to categorize and filter the items.",
@@ -2129,5 +2127,7 @@
 	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)",
 	"nextOccurrenceStatus": "Next occurrence status",
 	"image": "Image",
-	"securityObjectives": "Security properties"
+	"securityObjectives": "Security properties",
+	"securityObjectiveScale": "Security properties scale",
+	"securityObjectiveScaleHelpText": "Choose your scale for security properties (1 to 4 by default)"
 }
