@@ -1625,16 +1625,6 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class QualificationReadSerializer(ReferentialSerializer):
-    class Meta:
-        model = Qualification
-        exclude = ["translations"]
-
-
-class QualificationWriteSerializer(QualificationReadSerializer):
-    pass
-
-
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False

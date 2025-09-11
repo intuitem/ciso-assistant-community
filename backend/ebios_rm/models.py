@@ -12,7 +12,6 @@ from core.models import (
     AppliedControl,
     Asset,
     ComplianceAssessment,
-    Qualification,
     RiskAssessment,
     RiskMatrix,
     Threat,

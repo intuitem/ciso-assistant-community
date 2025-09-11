@@ -2513,11 +2513,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
-    @action(detail=False, name="Get qualification choices")
-    def qualifications(self, request):
-        return Response(dict(RiskScenario.QUALIFICATIONS))
-
     @action(detail=False, name="Get qualifications count")
     def qualifications_count(self, request):
         folder_id = request.query_params.get("folder", None)
@@ -3743,6 +3738,7 @@ class FolderViewSet(BaseModelViewSet):
                     "assets",
                     "applied_controls",
                     "existing_applied_controls",
+                    "qualifications"
                 ]
                 for field in related__fields:
                     map_key = (
@@ -3786,7 +3782,7 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids.update(
                     {
-                        "qualifications_urn": get_mapped_ids(
+                        "qualification_ids": get_mapped_ids(
                             _fields.pop("qualifications", []), link_dump_database_ids
                         ),
                         "asset_ids": get_mapped_ids(
@@ -3926,9 +3922,9 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "fearedevent":
-                if qualifications_urn := many_to_many_map_ids.get("qualifications_urn"):
+                if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
                     obj.qualifications.set(
-                        Qualification.objects.filter(urn__in=qualifications_urn)
+                        Terminology.objects.filter(id__in=qualification_ids)
                     )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
                     obj.assets.set(Asset.objects.filter(id__in=asset_ids))
@@ -4596,15 +4592,6 @@ class QuickStartView(APIView):
             raise
         else:
             return Response(objects, status=status.HTTP_201_CREATED)
-
-
-class QualificationViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows qualifications to be viewed or edited.
-    """
-
-    model = Qualification
-    search_fields = ["name"]
 
 
 class OrganisationObjectiveViewSet(BaseModelViewSet):
