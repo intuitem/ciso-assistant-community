@@ -190,7 +190,7 @@
 									{#if scenario.assets && scenario.assets.length > 0}
 										<div>
 											<h4 class="text-sm font-medium text-gray-900 mb-2">
-												<i class="fa-solid fa-server mr-1"></i>Assets ({scenario.assets.length})
+												<i class="fa-solid fa-gem mr-1"></i>Assets ({scenario.assets.length})
 											</h4>
 											<div class="space-y-1">
 												{#each scenario.assets.slice(0, 3) as asset}
