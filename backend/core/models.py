@@ -3384,6 +3384,7 @@ class RiskAssessment(Assessment):
 
     @classmethod
     def get_status_choices(cls) -> list[tuple[str, str]]:
+        """Returns the status choices with an additional empty choice at the end for null status"""
         choices = list(RiskAssessment.Status.choices)
         choices.append(("--", "--"))
         return choices

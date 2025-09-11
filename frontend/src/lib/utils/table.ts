@@ -125,14 +125,7 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		options: [
-			{ label: '--', value: '--' },
-			{ label: 'planned', value: 'planned' },
-			{ label: 'in_progress', value: 'in_progress' },
-			{ label: 'in_review', value: 'in_review' },
-			{ label: 'done', value: 'done' },
-			{ label: 'deprecated', value: 'deprecated' }
-		],
+		optionsEndpoint: 'risk-assessments/status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',

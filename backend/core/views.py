@@ -1229,7 +1229,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
-        return Response(dict(RiskAssessment.Status.choices))
+        return Response(dict(RiskAssessment.get_status_choices()))
 
     @action(detail=False, name="Get quality check")
     def quality_check(self, request):
