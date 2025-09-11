@@ -3763,9 +3763,12 @@ class FolderViewSet(BaseModelViewSet):
                         if not field.endswith("controls")
                         else f"{field}_ids"
                     )
-                    many_to_many_map_ids[map_key] = get_mapped_ids(
-                        _fields.pop(field, []), link_dump_database_ids
-                    )
+                    if field == "qualifications":
+                        many_to_many_map_ids[map_key] = _fields.pop(field, [])
+                    else:
+                        many_to_many_map_ids[map_key] = get_mapped_ids(
+                            _fields.pop(field, []), link_dump_database_ids
+                        )
 
             case "entity":
                 _fields.pop("owned_folders", None)
@@ -3799,9 +3802,7 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids.update(
                     {
-                        "qualification_ids": get_mapped_ids(
-                            _fields.pop("qualifications", []), link_dump_database_ids
-                        ),
+                        "qualification_ids": _fields.pop("qualifications", []),
                         "asset_ids": get_mapped_ids(
                             _fields.pop("assets", []), link_dump_database_ids
                         ),
@@ -3916,6 +3917,25 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
+                
+                if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
+                    # Get existing qualifications
+                    existing_qualifications = Terminology.objects.filter(name__in=qualification_ids)
+                    existing_names = set(existing_qualifications.values_list('name', flat=True))
+                    
+                    # Find missing names
+                    missing_names = set(qualification_ids) - existing_names
+                    
+                    # Create missing qualifications
+                    if missing_names:
+                        Terminology.objects.bulk_create([
+                            Terminology(name=name, is_visible=True, field_path=Terminology.FieldPath.QUALIFICATIONS) for name in missing_names
+                        ], ignore_conflicts=True)
+                    
+                    # Now set all qualifications
+                    obj.qualifications.set(
+                        Terminology.objects.filter(name__in=qualification_ids)
+                    )
 
                 for field, model_class in {
                     "vulnerability_ids": (Vulnerability, "vulnerabilities"),
@@ -3945,8 +3965,22 @@ class FolderViewSet(BaseModelViewSet):
 
             case "fearedevent":
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
+                    # Get existing qualifications
+                    existing_qualifications = Terminology.objects.filter(name__in=qualification_ids)
+                    existing_names = set(existing_qualifications.values_list('name', flat=True))
+                    
+                    # Find missing names
+                    missing_names = set(qualification_ids) - existing_names
+                    
+                    # Create missing qualifications
+                    if missing_names:
+                        Terminology.objects.bulk_create([
+                            Terminology(name=name, is_visible=True, field_path=Terminology.FieldPath.QUALIFICATIONS) for name in missing_names
+                        ], ignore_conflicts=True)
+                    
+                    # Now set all qualifications
                     obj.qualifications.set(
-                        Terminology.objects.filter(id__in=qualification_ids)
+                        Terminology.objects.filter(name__in=qualification_ids)
                     )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
                     obj.assets.set(Asset.objects.filter(id__in=asset_ids))

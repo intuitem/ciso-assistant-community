@@ -103,7 +103,7 @@ class FearedEventReadSerializer(BaseModelSerializer):
 
 
 class FearedEventImportExportSerializer(BaseModelSerializer):
-    qualifications = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    qualifications = serializers.SlugRelatedField(slug_field="name", read_only=True, many=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
