@@ -1557,7 +1557,8 @@ export const listViewFields = {
 			'assets',
 			'threats',
 			'qualifications',
-			'currentAle'
+			'currentAleDisplay',
+			'status'
 		],
 		body: [
 			'is_selected',
@@ -1567,7 +1568,8 @@ export const listViewFields = {
 			'assets',
 			'threats',
 			'qualifications',
-			'display_current_ale'
+			'current_ale_display',
+			'status'
 		],
 		filters: {
 			status: RISK_ASSESSMENT_STATUS_FILTER,

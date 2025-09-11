@@ -45,6 +45,112 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
     def distribution_model(self, request):
         return Response(dict(QuantitativeRiskStudy.Distribution_model.choices))
 
+    @action(detail=True, name="Combined ALE Metrics", url_path="combined-ale")
+    def combined_ale(self, request, pk=None):
+        """
+        Returns combined ALE metrics for the quantitative risk study:
+        - Current ALE Combined: Sum of current ALE from all scenarios
+        - Residual ALE Combined: Sum of ALE from selected residual hypotheses per scenario
+        """
+        study = self.get_object()
+
+        # Get currency from global settings
+        from global_settings.models import GlobalSettings
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        # Initialize totals
+        current_ale_combined = 0
+        residual_ale_combined = 0
+        scenarios_data = []
+
+        # Process each scenario in the study
+        for scenario in study.risk_scenarios.all():
+            scenario_data = {
+                "scenario_id": str(scenario.id),
+                "scenario_name": scenario.name,
+                "current_ale": None,
+                "residual_ale": None,
+                "residual_hypothesis_name": None,
+            }
+
+            # Get current ALE from the scenario (using the property)
+            current_ale = scenario.current_ale
+            if current_ale is not None:
+                scenario_data["current_ale"] = current_ale
+                current_ale_combined += current_ale
+
+            # Get residual ALE from selected residual hypotheses
+            # For each scenario, we take the ALE of the selected residual hypothesis
+            selected_residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+
+            if (
+                selected_residual_hypothesis
+                and selected_residual_hypothesis.ale is not None
+            ):
+                residual_ale = selected_residual_hypothesis.ale
+                scenario_data["residual_ale"] = residual_ale
+                scenario_data["residual_hypothesis_name"] = (
+                    selected_residual_hypothesis.name
+                )
+                residual_ale_combined += residual_ale
+
+            scenarios_data.append(scenario_data)
+
+        # Format currency helper function
+        def format_currency(value):
+            if value >= 1000000000:
+                return f"{currency}{value / 1000000000:.1f}B"
+            elif value >= 1000000:
+                return f"{currency}{value / 1000000:.1f}M"
+            elif value >= 1000:
+                return f"{currency}{value / 1000:.0f}K"
+            else:
+                return f"{currency}{value:,.0f}"
+
+        return Response(
+            {
+                "study_id": str(study.id),
+                "study_name": study.name,
+                "currency": currency,
+                "combined_metrics": {
+                    "current_ale_combined": current_ale_combined,
+                    "current_ale_combined_display": format_currency(
+                        current_ale_combined
+                    )
+                    if current_ale_combined > 0
+                    else "No current ALE data",
+                    "residual_ale_combined": residual_ale_combined,
+                    "residual_ale_combined_display": format_currency(
+                        residual_ale_combined
+                    )
+                    if residual_ale_combined > 0
+                    else "No residual ALE data",
+                    "risk_reduction": current_ale_combined - residual_ale_combined
+                    if current_ale_combined > 0 and residual_ale_combined > 0
+                    else None,
+                    "risk_reduction_display": format_currency(
+                        current_ale_combined - residual_ale_combined
+                    )
+                    if current_ale_combined > 0 and residual_ale_combined > 0
+                    else "Cannot calculate",
+                },
+                "scenarios": scenarios_data,
+                "total_scenarios": len(scenarios_data),
+                "scenarios_with_current_ale": sum(
+                    1 for s in scenarios_data if s["current_ale"] is not None
+                ),
+                "scenarios_with_residual_ale": sum(
+                    1 for s in scenarios_data if s["residual_ale"] is not None
+                ),
+            }
+        )
+
 
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario

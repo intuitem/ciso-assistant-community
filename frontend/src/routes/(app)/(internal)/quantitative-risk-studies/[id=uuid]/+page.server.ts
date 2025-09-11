@@ -13,9 +13,22 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	// Return the original data
+	// Fetch combined ALE data
+	let combinedAleData = null;
+	try {
+		const url = `${BASE_API_URL}/crq/quantitative-risk-studies/${event.params.id}/combined-ale/`;
+		const response = await event.fetch(url);
+		if (response.ok) {
+			combinedAleData = await response.json();
+		}
+	} catch (error) {
+		console.warn('Failed to fetch combined ALE data:', error);
+	}
+
+	// Return the original data plus combined ALE data
 	return {
-		...detailData
+		...detailData,
+		combinedAle: combinedAleData
 	};
 };
 
