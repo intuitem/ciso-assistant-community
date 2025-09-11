@@ -2899,7 +2899,8 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
-    def _get_default_cost(self):
+    @staticmethod
+    def _get_default_cost():
         return {
             "currency": "€",
             "amortization_period": 1,
