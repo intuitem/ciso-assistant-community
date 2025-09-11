@@ -524,6 +524,7 @@ class AssetListSerializer(AssetReadSerializer):
             "created_at",
             "updated_at",
             "is_published",
+            "parent_assets",
         ]
 
 
