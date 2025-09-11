@@ -3890,9 +3890,11 @@ class FolderViewSet(BaseModelViewSet):
             case "appliedcontrol":
                 if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                     obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
-                
+
                 if objectives_ids := many_to_many_map_ids.get("objective_ids"):
-                    obj.objectives.set(OrganisationObjective.objects.filter(id__in=objectives_ids))
+                    obj.objectives.set(
+                        OrganisationObjective.objects.filter(id__in=objectives_ids)
+                    )
 
             case "requirementassessment":
                 if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
