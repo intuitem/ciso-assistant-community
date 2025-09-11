@@ -606,7 +606,7 @@ class QuantitativeRiskHypothesis(
             if self.risk_stage != "residual":
                 return "N/A (not residual hypothesis)"
             else:
-                return "Cannot calculate ROC"
+                return "Insufficient data"
 
         # Format as percentage
         return f"{roc_value * 100:.0f}%"

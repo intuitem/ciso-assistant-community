@@ -368,6 +368,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         )
 
         scenarios_data = []
+        all_study_assets = set()  # Collect unique assets across all scenarios
 
         for scenario in selected_scenarios:
             scenario_info = {
@@ -395,6 +396,10 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "residual_ale": scenario.residual_ale,
                 "residual_ale_display": scenario.residual_ale_display,
             }
+
+            # Collect unique assets for study-wide summary
+            for asset in scenario.assets.all():
+                all_study_assets.add((str(asset.id), asset.name))
 
             # Calculate risk reduction (current - residual)
             current_ale = scenario.current_ale
@@ -555,6 +560,16 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "study_id": str(study.id),
                 "study_name": study.name,
                 "study_description": study.description,
+                "study_authors": [author.email for author in study.authors.all()],
+                "study_folder": {"id": str(study.folder.id), "name": study.folder.name}
+                if study.folder
+                else None,
+                "study_assets": [
+                    {"id": asset_id, "name": asset_name}
+                    for asset_id, asset_name in sorted(
+                        all_study_assets, key=lambda x: x[1]
+                    )
+                ],
                 "currency": currency,
                 "risk_tolerance_display": study.get_risk_tolerance_display(),
                 "scenarios": scenarios_data,

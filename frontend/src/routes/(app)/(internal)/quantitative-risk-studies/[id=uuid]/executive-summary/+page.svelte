@@ -4,13 +4,16 @@
 	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+  $inspect(data);
 </script>
 
 <svelte:head>
@@ -32,28 +35,44 @@
 	{:then [summaryData, combinedLecData]}
 		{#if summaryData}
 			<!-- Breadcrumb -->
-			<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
-				<p class="font-semibold text-lg">
-					Quantitative Risk Study:
-					<a
-						class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-						href="/quantitative-risk-studies/{page.params.id}/"
-						>{summaryData.study_name}</a
-					>
-				</p>
-				<p>/</p>
-				<p class="font-semibold text-lg">Executive Summary</p>
-			</div>
 
 			<!-- Header -->
 			<div class="bg-white rounded-lg p-6 shadow-sm">
 				<div class="flex justify-between items-start mb-4">
 					<div>
 						<h1 class="text-2xl font-bold text-gray-900 mb-2">
-							Executive Summary: {summaryData.study_name}
+							{summaryData.study_name}
 						</h1>
+						{#if summaryData.study_authors && summaryData.study_authors.length > 0}
+							<div class="font-semibold text-gray-700 mb-2">
+								{m.authors()}: {summaryData.study_authors.join(' | ')}
+							</div>
+						{/if}
+						{#if summaryData.study_folder}
+							<div class="font-semibold text-gray-700 mb-2">
+								{m.domain()}: {summaryData.study_folder.name}
+							</div>
+						{/if}
 						{#if summaryData.study_description}
-							<p class="text-gray-600 mb-4">{summaryData.study_description}</p>
+							<div class="mb-4">
+								<MarkdownRenderer content={summaryData.study_description} class="text-gray-600" />
+							</div>
+						{/if}
+						{#if summaryData.study_assets && summaryData.study_assets.length > 0}
+							<div class="mb-4">
+								<div class="text-sm font-medium text-gray-700 mb-2">Assets:</div>
+								<div class="flex flex-wrap gap-2">
+									{#each summaryData.study_assets as asset}
+										<Anchor
+											href="/assets/{asset.id}"
+											class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm font-medium rounded cursor-pointer transition-colors"
+											breadcrumbAction="push"
+										>
+											{asset.name}
+										</Anchor>
+									{/each}
+								</div>
+							</div>
 						{/if}
 					</div>
 					<Anchor
@@ -159,7 +178,9 @@
 										</div>
 										<h2 class="text-xl font-semibold text-gray-900 mb-2">{scenario.name}</h2>
 										{#if scenario.description}
-											<p class="text-gray-600 mb-4">{scenario.description}</p>
+											<div class="mb-4">
+												<MarkdownRenderer content={scenario.description} class="text-gray-600" />
+											</div>
 										{/if}
 									</div>
 								</div>
@@ -224,7 +245,7 @@
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
 														<i class="fa-solid fa-shield-halved mr-1 text-blue-600"></i>Existing Controls ({scenario.existing_controls.length})
 													</h4>
-													<div class="space-y-2 max-h-32 overflow-y-auto">
+													<div class="space-y-2">
 														{#each scenario.existing_controls as control}
 															<div class="flex items-center justify-between p-2 bg-blue-50 rounded text-sm">
 																<div class="flex-1">
@@ -247,7 +268,7 @@
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
 														<i class="fa-solid fa-plus-circle mr-1 text-green-600"></i>Additional Controls ({scenario.additional_controls.length})
 													</h4>
-													<div class="space-y-2 max-h-32 overflow-y-auto">
+													<div class="space-y-2">
 														{#each scenario.additional_controls as control}
 															<div class="flex items-center justify-between p-2 bg-green-50 rounded text-sm">
 																<div class="flex-1">

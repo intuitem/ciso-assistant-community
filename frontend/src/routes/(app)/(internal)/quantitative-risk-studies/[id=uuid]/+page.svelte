@@ -79,7 +79,7 @@
 					<div class="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
 						<p class="text-center">
 
-							Total Scenarios: {data.combinedAle.total_scenarios}
+						<i class="fa-solid fa-circle-info"></i> Assuming independent scenarios
 						</p>
 					</div>
 				</div>
