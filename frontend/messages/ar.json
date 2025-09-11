@@ -931,5 +931,7 @@
 	"deselect": "إلغاء التحديد",
 	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة",
 	"saveAndContinue": "حفظ ومتابعة",
-	"nextOccurrenceStatus": "حالة الحدوث التالية"
+	"nextOccurrenceStatus": "حالة الحدوث التالية",
+	"actor": "فاعل",
+	"action": "إجراء"
 }
