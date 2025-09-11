@@ -73,7 +73,7 @@
 				right: '10%',
 				data: [
 					{
-						name: 'Combined Current Risk',
+						name: 'Current Risk',
 						icon: 'circle',
 						itemStyle: {
 							color: '#ff6b6b'
@@ -82,7 +82,7 @@
 					...(residualData && residualData.length > 0
 						? [
 								{
-									name: 'Combined Residual Risk',
+									name: 'Residual Risk',
 									icon: 'circle',
 									itemStyle: {
 										color: '#007bff'
@@ -120,16 +120,16 @@
 					let tooltip = `${xAxisLabel.replace('($)', `(${currency})`)}: ${currency}${lossAmount.toLocaleString()}<br/>`;
 
 					// Find different series
-					const currentRiskParam = params.find((p: any) => p.seriesName === 'Combined Current Risk');
-					const residualRiskParam = params.find((p: any) => p.seriesName === 'Combined Residual Risk');
+					const currentRiskParam = params.find((p: any) => p.seriesName === 'Current Risk');
+					const residualRiskParam = params.find((p: any) => p.seriesName === 'Residual Risk');
 					const riskToleranceParam = params.find((p: any) => p.seriesName === 'Risk Tolerance');
 
 					if (currentRiskParam) {
-						tooltip += `Combined Current Risk: ${(currentRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
+						tooltip += `Current Risk: ${(currentRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
 					}
 
 					if (residualRiskParam) {
-						tooltip += `Combined Residual Risk: ${(residualRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
+						tooltip += `Residual Risk: ${(residualRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
 					}
 
 					if (riskToleranceParam) {
@@ -216,7 +216,7 @@
 			series: [
 				// Combined Current Risk curve
 				{
-					name: 'Combined Current Risk',
+					name: 'Current Risk',
 					type: 'line',
 					smooth: true,
 					symbol: 'none',
@@ -245,7 +245,7 @@
 				...(residualData && residualData.length > 0
 					? [
 							{
-								name: 'Combined Residual Risk',
+								name: 'Residual Risk',
 								type: 'line',
 								smooth: true,
 								symbol: 'none',

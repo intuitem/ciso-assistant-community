@@ -17,8 +17,8 @@ from .utils import (
     create_loss_exceedance_curve,
     calculate_risk_insights,
     risk_tolerance_curve,
+    run_combined_simulation,
 )
-from .utils_v2 import run_combined_simulation
 
 import numpy as np
 

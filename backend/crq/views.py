@@ -15,8 +15,7 @@ from rest_framework.decorators import action
 
 import structlog
 import numpy as np
-from .utils import sum_lec_curves
-from .utils_v2 import run_combined_simulation
+from .utils import sum_lec_curves, run_combined_simulation
 
 logger = structlog.get_logger(__name__)
 
