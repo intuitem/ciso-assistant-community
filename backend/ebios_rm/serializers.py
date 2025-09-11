@@ -157,6 +157,7 @@ class RoToImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     feared_events = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    risk_origin = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = RoTo

@@ -3816,6 +3816,11 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
+                _fields["risk_origin"], _ = Terminology.objects.get_or_create(
+                    name=_fields["risk_origin"],
+                    is_visible=True,
+                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN
+                )
 
             case "stakeholder":
                 _fields.update(
