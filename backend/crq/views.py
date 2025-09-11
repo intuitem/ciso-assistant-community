@@ -106,6 +106,106 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(QuantitativeRiskScenario.STATUS_OPTIONS))
 
+    @action(detail=True, name="Combined Loss Exceedance Curves", url_path="lec")
+    def lec(self, request, pk=None):
+        """
+        Returns combined Loss Exceedance Curve data for the scenario:
+        - Current hypothesis curve (if available and has simulation data)
+        - Study risk tolerance curve (if configured)
+        - All residual hypothesis curves (if they have simulation data)
+        """
+        scenario = self.get_object()
+        study = scenario.quantitative_risk_study
+
+        curves = []
+
+        # 1. Add current hypothesis curve if available
+        current_hypothesis = scenario.hypotheses.filter(risk_stage="current").first()
+        if current_hypothesis and current_hypothesis.simulation_data:
+            simulation_data = current_hypothesis.simulation_data
+            loss_data = simulation_data.get("loss", [])
+            probability_data = simulation_data.get("probability", [])
+
+            if loss_data and probability_data:
+                chart_data = [
+                    [loss, prob]
+                    for loss, prob in zip(loss_data, probability_data)
+                    if loss > 0
+                ]
+                curves.append(
+                    {
+                        "name": "Current Risk",
+                        "type": "current",
+                        "data": chart_data,
+                        "hypothesis_id": str(current_hypothesis.id),
+                        "hypothesis_name": current_hypothesis.name,
+                        "metrics": simulation_data.get("metrics", {}),
+                    }
+                )
+
+        # 2. Add study risk tolerance curve if available
+        if study.risk_tolerance and "curve_data" in study.risk_tolerance:
+            curve_data = study.risk_tolerance["curve_data"]
+            if "error" not in curve_data:
+                loss_values = curve_data.get("loss_values", [])
+                probability_values = curve_data.get("probability_values", [])
+
+                if loss_values and probability_values:
+                    tolerance_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_values, probability_values)
+                        if loss > 0
+                    ]
+                    curves.append(
+                        {
+                            "name": "Risk Tolerance",
+                            "type": "tolerance",
+                            "data": tolerance_data,
+                            "study_id": str(study.id),
+                            "study_name": study.name,
+                        }
+                    )
+
+        # 3. Add all residual hypothesis curves
+        residual_hypotheses = scenario.hypotheses.filter(risk_stage="residual").exclude(
+            simulation_data__isnull=True
+        )
+
+        for residual_hypothesis in residual_hypotheses:
+            if residual_hypothesis.simulation_data:
+                simulation_data = residual_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    chart_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_data, probability_data)
+                        if loss > 0
+                    ]
+                    curves.append(
+                        {
+                            "name": f"Residual - {residual_hypothesis.name}",
+                            "type": "residual",
+                            "data": chart_data,
+                            "hypothesis_id": str(residual_hypothesis.id),
+                            "hypothesis_name": residual_hypothesis.name,
+                            "is_selected": residual_hypothesis.is_selected,
+                            "metrics": simulation_data.get("metrics", {}),
+                        }
+                    )
+
+        # Return the combined curves data
+        return Response(
+            {
+                "curves": curves,
+                "scenario_id": str(scenario.id),
+                "scenario_name": scenario.name,
+                "study_name": study.name,
+                "total_curves": len(curves),
+            }
+        )
+
 
 class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     model = QuantitativeRiskHypothesis

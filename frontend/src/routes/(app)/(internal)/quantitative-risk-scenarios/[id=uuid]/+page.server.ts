@@ -1,5 +1,6 @@
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
+import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 import { fail, type Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
@@ -12,9 +13,16 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	// Return the data
+	// Fetch LEC data for the scenario
+	const lecData = await event
+		.fetch(`${BASE_API_URL}/crq/quantitative-risk-scenarios/${event.params.id}/lec/?t=${Date.now()}`)
+		.then((res) => res.json())
+		.catch(() => ({ curves: [] }));
+
+	// Return the combined data
 	return {
-		...detailData
+		...detailData,
+		lec: lecData
 	};
 };
 

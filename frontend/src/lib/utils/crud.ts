@@ -1474,6 +1474,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'ref_id' },
 			{ field: 'folder' },
+			{ field: 'quantitative_risk_study' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'ale' },
