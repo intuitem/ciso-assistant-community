@@ -15,7 +15,6 @@
 			const echarts = await import('echarts');
 			const chart = echarts.init(document.getElementById('combined-lec-chart'));
 
-			const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 			const series = data.lec.curves.map((curve: any, index: number) => {
 				return {
 					name: curve.name,
@@ -24,8 +23,7 @@
 					smooth: true,
 					symbol: 'none',
 					lineStyle: {
-						width: 3,
-						color: colors[index % colors.length]
+						width: 3
 					}
 				};
 			});
@@ -34,12 +32,9 @@
 			const option = {
 				legend: {
 					top: 0,
-					data: data.lec.curves.map((curve: any, index: number) => ({
+					data: data.lec.curves.map((curve: any) => ({
 						name: curve.name,
-						icon: 'circle',
-						itemStyle: {
-							color: colors[index % colors.length]
-						}
+						icon: 'circle'
 					}))
 				},
 				grid: {

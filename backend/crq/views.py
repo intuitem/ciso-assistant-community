@@ -817,6 +817,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     def lec(self, request, pk=None):
         """
         Returns combined Loss Exceedance Curve data for the scenario:
+        - Inherent hypothesis curve (if available and has simulation data)
         - Current hypothesis curve (if available and has simulation data)
         - Study risk tolerance curve (if configured)
         - All residual hypothesis curves (if they have simulation data)
@@ -826,7 +827,31 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
 
         curves = []
 
-        # 1. Add current hypothesis curve if available
+        # 1. Add inherent hypothesis curve if available
+        inherent_hypothesis = scenario.hypotheses.filter(risk_stage="inherent").first()
+        if inherent_hypothesis and inherent_hypothesis.simulation_data:
+            simulation_data = inherent_hypothesis.simulation_data
+            loss_data = simulation_data.get("loss", [])
+            probability_data = simulation_data.get("probability", [])
+
+            if loss_data and probability_data:
+                chart_data = [
+                    [loss, prob]
+                    for loss, prob in zip(loss_data, probability_data)
+                    if loss > 0
+                ]
+                curves.append(
+                    {
+                        "name": "Inherent Risk",
+                        "type": "inherent",
+                        "data": chart_data,
+                        "hypothesis_id": str(inherent_hypothesis.id),
+                        "hypothesis_name": inherent_hypothesis.name,
+                        "metrics": simulation_data.get("metrics", {}),
+                    }
+                )
+
+        # 2. Add current hypothesis curve if available
         current_hypothesis = scenario.hypotheses.filter(risk_stage="current").first()
         if current_hypothesis and current_hypothesis.simulation_data:
             simulation_data = current_hypothesis.simulation_data
@@ -850,7 +875,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                     }
                 )
 
-        # 2. Add study risk tolerance curve if available
+        # 3. Add study risk tolerance curve if available
         if study.risk_tolerance and "curve_data" in study.risk_tolerance:
             curve_data = study.risk_tolerance["curve_data"]
             if "error" not in curve_data:
@@ -873,7 +898,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                         }
                     )
 
-        # 3. Add all residual hypothesis curves
+        # 4. Add all residual hypothesis curves
         residual_hypotheses = scenario.hypotheses.filter(risk_stage="residual").exclude(
             simulation_data__isnull=True
         )
