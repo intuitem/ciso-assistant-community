@@ -56,7 +56,6 @@
 		if (cacheResult) $value = cacheResult;
 	});
 
-
 	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
 	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
 </script>
