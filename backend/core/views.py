@@ -1562,7 +1562,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     justification=scenario.justification,
                     ref_id=scenario.ref_id,
                 )
-                
+
                 duplicate_scenario.qualifications.set(scenario.qualifications.all())
 
                 for field in [

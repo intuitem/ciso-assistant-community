@@ -842,7 +842,6 @@
 	"rpoHelpText": "Objectif du point de récupération",
 	"mtd": "MTD",
 	"mtdHelpText": "Temps d'arrêt maximal tolérable",
-	"securityObjectives": "Objectifs de sécurité",
 	"disasterRecoveryObjectives": "Objectifs de reprise d'activité",
 	"noExpirationDateSet": "Aucune date d'expiration définie",
 	"sumpageTotal": "Total",
@@ -2094,5 +2093,7 @@
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
-	"nextOccurrenceStatus": "Statut de la prochaine occurrence"
+	"nextOccurrenceStatus": "Statut de la prochaine occurrence",
+	"image": "Image",
+	"securityObjectives": "Propriétés de sécurité"
 }

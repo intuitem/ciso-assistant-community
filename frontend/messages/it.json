@@ -823,7 +823,6 @@
 	"rpoHelpText": "Recovery Point Objective (punto di ripristino)",
 	"mtd": "MTD",
 	"mtdHelpText": "Tempo massimo di inattività tollerabile",
-	"securityObjectives": "Obiettivi di sicurezza",
 	"disasterRecoveryObjectives": "Obiettivi di Disaster Recovery",
 	"noExpirationDateSet": "Nessuna data di scadenza impostata",
 	"sumpageTotal": "totale",
@@ -1341,5 +1340,7 @@
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
 	"saveAndContinue": "Salva e continua",
-	"nextOccurrenceStatus": "Stato prossima occorrenza"
+	"nextOccurrenceStatus": "Stato prossima occorrenza",
+	"image": "Immagine",
+	"securityObjectives": "Proprietà di sicurezza"
 }

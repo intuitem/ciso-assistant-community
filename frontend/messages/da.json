@@ -822,7 +822,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maksimal acceptabel nedetid",
-	"securityObjectives": "Sikkerhedsmål",
 	"disasterRecoveryObjectives": "Mål for katastrofegendannelse",
 	"noExpirationDateSet": "Ingen udløbsdato angivet",
 	"sumpageTotal": "total",
@@ -1246,5 +1245,7 @@
 	"select": "Vælg",
 	"deselect": "Fravælg",
 	"saveAndContinue": "Gem og fortsæt",
-	"nextOccurrenceStatus": "Næste forekomststatus"
+	"nextOccurrenceStatus": "Næste forekomststatus",
+	"image": "Billede",
+	"securityObjectives": "Sikkerhedsegenskaber"
 }

@@ -859,7 +859,6 @@
 	"rpoHelpText": "Kurtarma Noktası Hedefi",
 	"mtd": "MTD",
 	"mtdHelpText": "Maksimum Tolere Edilebilir Kesinti Süresi",
-	"securityObjectives": "Güvenlik hedefleri",
 	"disasterRecoveryObjectives": "Olağanüstü Durum Kurtarma hedefleri",
 	"noExpirationDateSet": "Sona erme tarihi ayarlanmadı",
 	"sumpageTotal": "toplam",
@@ -1701,5 +1700,7 @@
 	"dataWizardLoadExcelData": "Excel verisini yükle",
 	"associatedCampaigns": "İlişkili kampanyalar",
 	"saveAndContinue": "Kaydet ve devam et",
-	"nextOccurrenceStatus": "Sonraki gerçekleşme durumu"
+	"nextOccurrenceStatus": "Sonraki gerçekleşme durumu",
+	"image": "Resim",
+	"securityObjectives": "Güvenlik özellikleri"
 }

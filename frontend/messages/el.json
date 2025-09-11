@@ -858,7 +858,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maximum Tolerable Downtime",
-	"securityObjectives": "Στόχοι ασφάλειας",
 	"disasterRecoveryObjectives": "Στόχοι αποκατάστασης καταστροφών",
 	"noExpirationDateSet": "Δεν έχει οριστεί ημερομηνία λήξης",
 	"sumpageTotal": "σύνολο",
@@ -1665,5 +1664,7 @@
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
 	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
 	"saveAndContinue": "Αποθήκευση και συνέχιση",
-	"nextOccurrenceStatus": "Κατάσταση επόμενης εμφάνισης"
+	"nextOccurrenceStatus": "Κατάσταση επόμενης εμφάνισης",
+	"image": "Εικόνα",
+	"securityObjectives": "Ασφαλή ιδιότητες"
 }

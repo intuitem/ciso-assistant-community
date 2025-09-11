@@ -860,7 +860,6 @@
 	"rpoHelpText": "Cel punktu odzyskiwania",
 	"mtd": "Mtd",
 	"mtdHelpText": "Maksymalne tolerowane przestoje",
-	"securityObjectives": "Cele bezpieczeństwa",
 	"disasterRecoveryObjectives": "Cele odzyskiwania po awarii",
 	"noExpirationDateSet": "Brak daty ważności",
 	"sumpageTotal": "całkowity",
@@ -1708,5 +1707,7 @@
 	"associatedCampaigns": "Powiązane kampanie",
 	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
 	"saveAndContinue": "Zapisz i kontynuuj",
-	"nextOccurrenceStatus": "Następny status wystąpienia"
+	"nextOccurrenceStatus": "Następny status wystąpienia",
+	"image": "Obraz",
+	"securityObjectives": "Właściwości bezpieczeństwa"
 }

@@ -960,5 +960,7 @@
 	"deselect": "Deselectează",
 	"fearedEventAssetHelpText": "Evenimentele temute sunt în general legate de valori de afaceri (active principale). Activele de sprijin sunt permise aici pentru flexibilitate.",
 	"saveAndContinue": "Salvați și continuați",
-	"nextOccurrenceStatus": "Starea următoarei apariții"
+	"nextOccurrenceStatus": "Starea următoarei apariții",
+	"image": "Imagine",
+	"securityObjectives": "Proprietăți de securitate"
 }

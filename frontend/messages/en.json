@@ -870,7 +870,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maximum Tolerable Downtime",
-	"securityObjectives": "Security objectives",
 	"disasterRecoveryObjectives": "Disaster Recovery objectives",
 	"noExpirationDateSet": "No expiration date set",
 	"sumpageTotal": "total",
@@ -2129,5 +2128,6 @@
 	"dataWizardRiskAssessmentDescription": "Import risk scenarios with the associated controls",
 	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)",
 	"nextOccurrenceStatus": "Next occurrence status",
-	"image": "Image"
+	"image": "Image",
+	"securityObjectives": "Security properties"
 }

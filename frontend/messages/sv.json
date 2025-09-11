@@ -954,5 +954,7 @@
 	"deselect": "Avmarkera",
 	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet.",
 	"saveAndContinue": "Spara och fortsätt",
-	"nextOccurrenceStatus": "Status för nästa förekomst"
+	"nextOccurrenceStatus": "Status för nästa förekomst",
+	"image": "Bild",
+	"securityObjectives": "Säkerhetsmål"
 }

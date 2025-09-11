@@ -827,7 +827,6 @@
 	"rpoHelpText": "Цільова точка відновлення",
 	"mtd": "MTD",
 	"mtdHelpText": "Максимально допустимий час простою",
-	"securityObjectives": "Цілі безпеки",
 	"disasterRecoveryObjectives": "Цілі аварійного відновлення",
 	"noExpirationDateSet": "Термін дії не встановлено",
 	"sumpageTotal": "Всього",
@@ -1480,5 +1479,7 @@
 	"keepLocalLogin": "Дозволений локальний (non-SSO) логін?",
 	"keepLocalLoginHelpText": "Коли глобальне SSO обов'язкове, це дозволяє користувачу обійти це налаштування та використовувати локальний пароль за потреби.",
 	"saveAndContinue": "Зберегти та продовжити",
-	"nextOccurrenceStatus": "Статус наступного випадку"
+	"nextOccurrenceStatus": "Статус наступного випадку",
+	"image": "Зображення",
+	"securityObjectives": "Властивості безпеки"
 }

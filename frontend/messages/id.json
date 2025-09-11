@@ -809,7 +809,6 @@
 	"rpoHelpText": "Tujuan Titik Pemulihan",
 	"mtd": "MTD",
 	"mtdHelpText": "Maksimum Waktu Henti yang Tolerable",
-	"securityObjectives": "Tujuan keamanan",
 	"disasterRecoveryObjectives": "Tujuan pemulihan bencana",
 	"noExpirationDateSet": "Tidak ada tanggal kedaluwarsa yang ditetapkan",
 	"sumpageTotal": "total",
@@ -1151,5 +1150,7 @@
 	"select": "Pilih",
 	"deselect": "Batalkan Pilihan",
 	"saveAndContinue": "Simpan dan lanjutkan",
-	"nextOccurrenceStatus": "Status kejadian berikutnya"
+	"nextOccurrenceStatus": "Status kejadian berikutnya",
+	"image": "Gambar",
+	"securityObjectives": "Properti keamanan"
 }
