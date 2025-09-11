@@ -10,7 +10,9 @@ export const load: PageServerLoad = async (event) => {
 			const url = `${BASE_API_URL}/crq/quantitative-risk-studies/${id}/executive-summary/`;
 			const response = await event.fetch(url);
 			if (!response.ok) {
-				throw new Error(`Failed to fetch executive summary: ${response.status} ${response.statusText}`);
+				throw new Error(
+					`Failed to fetch executive summary: ${response.status} ${response.statusText}`
+				);
 			}
 			return await response.json();
 		} catch (error) {

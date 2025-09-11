@@ -11,7 +11,7 @@
 
 	onMount(async () => {
 		if (data.lec?.curves?.length > 0) {
-      //temporary embedded chart for now
+			//temporary embedded chart for now
 			const echarts = await import('echarts');
 			const chart = echarts.init(document.getElementById('combined-lec-chart'));
 
@@ -50,8 +50,8 @@
 					nameGap: 30,
 					axisLabel: {
 						formatter: (value: number) => {
-							if (value >= 1000000) return currency + (value/1000000).toFixed(0) + 'M';
-							if (value >= 1000) return currency + (value/1000).toFixed(0) + 'K';
+							if (value >= 1000000) return currency + (value / 1000000).toFixed(0) + 'M';
+							if (value >= 1000) return currency + (value / 1000).toFixed(0) + 'K';
 							return currency + value.toFixed(0);
 						}
 					}

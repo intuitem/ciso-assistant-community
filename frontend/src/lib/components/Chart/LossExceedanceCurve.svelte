@@ -59,16 +59,19 @@
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		const option = {
-			title: showTitle ? {
-				text: title,
-				left: 'center',
-				textStyle: {
-					fontSize: 16,
-					fontWeight: 'bold'
-				}
-			} : undefined,
+			title: showTitle
+				? {
+						text: title,
+						left: 'center',
+						textStyle: {
+							fontSize: 16,
+							fontWeight: 'bold'
+						}
+					}
+				: undefined,
 			legend: {
-				show: (toleranceData && toleranceData.length > 0) || (residualData && residualData.length > 0),
+				show:
+					(toleranceData && toleranceData.length > 0) || (residualData && residualData.length > 0),
 				top: '5%',
 				right: '10%',
 				data: [
@@ -141,9 +144,11 @@
 							const toleranceProb = riskToleranceParam.value[1];
 
 							if (currentProb > toleranceProb) {
-								tooltip += '<span style="color: #dc3545;">⚠️ Current risk exceeds tolerance</span><br/>';
+								tooltip +=
+									'<span style="color: #dc3545;">⚠️ Current risk exceeds tolerance</span><br/>';
 							} else {
-								tooltip += '<span style="color: #28a745;">✓ Current risk within tolerance</span><br/>';
+								tooltip +=
+									'<span style="color: #28a745;">✓ Current risk within tolerance</span><br/>';
 							}
 						}
 
@@ -153,7 +158,8 @@
 							const toleranceProb = riskToleranceParam.value[1];
 
 							if (residualProb > toleranceProb) {
-								tooltip += '<span style="color: #dc3545;">⚠️ Residual risk exceeds tolerance</span>';
+								tooltip +=
+									'<span style="color: #dc3545;">⚠️ Residual risk exceeds tolerance</span>';
 							} else {
 								tooltip += '<span style="color: #28a745;">✓ Residual risk within tolerance</span>';
 							}
