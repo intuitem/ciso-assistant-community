@@ -2173,6 +2173,8 @@
 	"treatmentCost": "Treatment cost",
 	"currentAle": "Current ALE",
 	"currentAleDisplay": "Current ALE",
+	"residualAle": "Residual ALE",
+	"residualAleDisplay": "Residual ALE",
 	"inherent": "Inherent",
 	"nextOccurrenceStatus": "Next occurrence status",
 	"displayAle": "Annual Loss Expectancy",

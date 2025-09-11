@@ -25,10 +25,23 @@ export const load: PageServerLoad = async (event) => {
 		console.warn('Failed to fetch combined ALE data:', error);
 	}
 
-	// Return the original data plus combined ALE data
+	// Fetch combined LEC data
+	let combinedLecData = null;
+	try {
+		const url = `${BASE_API_URL}/crq/quantitative-risk-studies/${event.params.id}/combined-lec/`;
+		const response = await event.fetch(url);
+		if (response.ok) {
+			combinedLecData = await response.json();
+		}
+	} catch (error) {
+		console.warn('Failed to fetch combined LEC data:', error);
+	}
+
+	// Return the original data plus combined data
 	return {
 		...detailData,
-		combinedAle: combinedAleData
+		combinedAle: combinedAleData,
+		combinedLec: combinedLecData
 	};
 };
 

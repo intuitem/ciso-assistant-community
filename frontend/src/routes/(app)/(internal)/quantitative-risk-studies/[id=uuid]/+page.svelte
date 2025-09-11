@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
+	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
 
 	interface Props {
 		data: PageData;
@@ -83,16 +84,46 @@
 					</div>
 				</div>
 
-				<!-- Chart Placeholder Section -->
-				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
-					<div class="flex flex-col items-center space-y-4">
-						<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-						<h5 class="text-lg font-semibold text-gray-600">Charts & Visualizations</h5>
-						<p class="text-gray-500">
-							Charts and additional visualizations will be displayed here.
-						</p>
+				<!-- Combined LEC Chart Section -->
+				{#if data.combinedLec?.curves && data.combinedLec.curves.length > 0}
+					{@const curves = data.combinedLec.curves}
+					{@const currentRiskCurve = curves.find(c => c.type === 'combined_current')}
+					{@const toleranceCurve = curves.find(c => c.type === 'tolerance')}
+
+					<div class="bg-white rounded-lg p-6 shadow-sm">
+						<div class="flex justify-between items-center mb-4">
+							<h3 class="text-lg font-semibold">Combined Loss Exceedance Curve</h3>
+							<div class="text-sm text-gray-600">
+								{data.combinedLec.scenarios_with_current_data} / {data.combinedLec.total_scenarios} scenarios with current data
+							</div>
+						</div>
+
+						<div class="w-full">
+							<LossExceedanceCurve
+								data={currentRiskCurve?.data || []}
+								toleranceData={toleranceCurve?.data || []}
+								currency={data.combinedLec.currency}
+								title="Study Risk Profile"
+								height="h-96"
+								width="w-full"
+								enableTooltip={true}
+								autoYMax={true}
+								classesContainer="min-w-0"
+							/>
+						</div>
 					</div>
-				</div>
+				{:else}
+					<!-- Empty State for LEC Chart -->
+					<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+						<div class="flex flex-col items-center space-y-4">
+							<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
+							<h5 class="text-lg font-semibold text-gray-600">Combined Loss Exceedance Curve</h5>
+							<p class="text-gray-500">
+								No LEC data available. Run simulations on your scenario hypotheses to generate the combined curve.
+							</p>
+						</div>
+					</div>
+				{/if}
 			{:else}
 				<!-- Empty State -->
 				<div class="bg-white rounded-lg p-8 shadow-sm text-center">

@@ -1558,6 +1558,7 @@ export const listViewFields = {
 			'threats',
 			'qualifications',
 			'currentAleDisplay',
+			'residualAleDisplay',
 			'status'
 		],
 		body: [
@@ -1569,6 +1570,7 @@ export const listViewFields = {
 			'threats',
 			'qualifications',
 			'current_ale_display',
+			'residual_ale_display',
 			'status'
 		],
 		filters: {

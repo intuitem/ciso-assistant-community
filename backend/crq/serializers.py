@@ -128,6 +128,10 @@ class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
         max_digits=12, decimal_places=2, read_only=True
     )
     current_ale_display = serializers.CharField(read_only=True)
+    residual_ale = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
+    residual_ale_display = serializers.CharField(read_only=True)
 
     class Meta:
         model = QuantitativeRiskScenario

@@ -249,6 +249,42 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
 
         return f"{ale_value:,.0f} {currency}"
 
+    @property
+    def residual_ale(self):
+        """
+        Get the residual Annual Loss Expectancy (ALE) from the selected residual hypothesis.
+        Returns None if no selected residual hypothesis exists or has no simulation data.
+        """
+        selected_residual_hypothesis = self.hypotheses.filter(
+            risk_stage="residual", is_selected=True
+        ).first()
+        if (
+            not selected_residual_hypothesis
+            or not selected_residual_hypothesis.simulation_data
+        ):
+            return None
+
+        metrics = selected_residual_hypothesis.simulation_data.get("metrics", {})
+        return metrics.get("mean_annual_loss")
+
+    @property
+    def residual_ale_display(self):
+        """
+        Get the residual Annual Loss Expectancy (ALE) with currency from global settings.
+        Returns "No residual ALE calculated" if no ALE is available.
+        """
+        ale_value = self.residual_ale
+        if ale_value is None:
+            return "No residual ALE calculated"
+
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        return f"{ale_value:,.0f} {currency}"
+
     class Meta:
         verbose_name = _("Quantitative Risk Scenario")
         verbose_name_plural = _("Quantitative Risk Scenarios")

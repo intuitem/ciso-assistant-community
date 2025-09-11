@@ -14,6 +14,8 @@ from core.models import AppliedControl
 from rest_framework.decorators import action
 
 import structlog
+import numpy as np
+from .utils import sum_lec_curves
 
 logger = structlog.get_logger(__name__)
 
@@ -83,22 +85,20 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 scenario_data["current_ale"] = current_ale
                 current_ale_combined += current_ale
 
-            # Get residual ALE from selected residual hypotheses
-            # For each scenario, we take the ALE of the selected residual hypothesis
-            selected_residual_hypothesis = scenario.hypotheses.filter(
-                risk_stage="residual", is_selected=True
-            ).first()
-
-            if (
-                selected_residual_hypothesis
-                and selected_residual_hypothesis.ale is not None
-            ):
-                residual_ale = selected_residual_hypothesis.ale
+            # Get residual ALE from the scenario (using the property)
+            residual_ale = scenario.residual_ale
+            if residual_ale is not None:
                 scenario_data["residual_ale"] = residual_ale
-                scenario_data["residual_hypothesis_name"] = (
-                    selected_residual_hypothesis.name
-                )
                 residual_ale_combined += residual_ale
+
+                # Get the selected residual hypothesis name for display
+                selected_residual_hypothesis = scenario.hypotheses.filter(
+                    risk_stage="residual", is_selected=True
+                ).first()
+                if selected_residual_hypothesis:
+                    scenario_data["residual_hypothesis_name"] = (
+                        selected_residual_hypothesis.name
+                    )
 
             scenarios_data.append(scenario_data)
 
@@ -148,6 +148,124 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "scenarios_with_residual_ale": sum(
                     1 for s in scenarios_data if s["residual_ale"] is not None
                 ),
+            }
+        )
+
+    @action(
+        detail=True, name="Combined Loss Exceedance Curves", url_path="combined-lec"
+    )
+    def combined_lec(self, request, pk=None):
+        """
+        Returns combined Loss Exceedance Curve data for the quantitative risk study:
+        - Risk tolerance curve (if configured)
+        - Sum of all current hypothesis LEC curves from study scenarios
+        """
+        study = self.get_object()
+
+        # Get currency from global settings
+        from global_settings.models import GlobalSettings
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        curves = []
+
+        # 1. Add study risk tolerance curve if available
+        if study.risk_tolerance and "curve_data" in study.risk_tolerance:
+            curve_data = study.risk_tolerance["curve_data"]
+            if "error" not in curve_data:
+                loss_values = curve_data.get("loss_values", [])
+                probability_values = curve_data.get("probability_values", [])
+
+                if loss_values and probability_values:
+                    tolerance_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_values, probability_values)
+                        if loss > 0
+                    ]
+                    curves.append(
+                        {
+                            "name": "Risk Tolerance",
+                            "type": "tolerance",
+                            "data": tolerance_data,
+                            "study_id": str(study.id),
+                            "study_name": study.name,
+                        }
+                    )
+
+        # 2. Collect all current hypothesis LEC curves for summing
+        current_curves_data = []
+        scenarios_with_current = []
+
+        for scenario in study.risk_scenarios.all():
+            current_hypothesis = scenario.hypotheses.filter(
+                risk_stage="current"
+            ).first()
+            if current_hypothesis and current_hypothesis.simulation_data:
+                simulation_data = current_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    # Convert to numpy arrays for curve summing
+                    loss_array = np.array(loss_data)
+                    prob_array = np.array(probability_data)
+
+                    # Filter out zero losses
+                    valid_indices = loss_array > 0
+                    if np.any(valid_indices):
+                        current_curves_data.append(
+                            (loss_array[valid_indices], prob_array[valid_indices])
+                        )
+                        scenarios_with_current.append(
+                            {
+                                "scenario_id": str(scenario.id),
+                                "scenario_name": scenario.name,
+                                "hypothesis_id": str(current_hypothesis.id),
+                                "hypothesis_name": current_hypothesis.name,
+                            }
+                        )
+
+        # 3. Sum all current hypothesis curves if we have any
+        if current_curves_data:
+            try:
+                combined_losses, combined_probs = sum_lec_curves(current_curves_data)
+
+                if len(combined_losses) > 0 and len(combined_probs) > 0:
+                    # Convert to chart-ready format
+                    combined_data = [
+                        [float(loss), float(prob)]
+                        for loss, prob in zip(combined_losses, combined_probs)
+                        if loss > 0
+                    ]
+                    curves.append(
+                        {
+                            "name": "Combined Current Risk",
+                            "type": "combined_current",
+                            "data": combined_data,
+                            "study_id": str(study.id),
+                            "study_name": study.name,
+                            "component_scenarios": scenarios_with_current,
+                            "total_scenarios": len(scenarios_with_current),
+                        }
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to sum LEC curves for study {study.id}: {str(e)}"
+                )
+
+        # Return the combined curves data
+        return Response(
+            {
+                "study_id": str(study.id),
+                "study_name": study.name,
+                "currency": currency,
+                "curves": curves,
+                "total_curves": len(curves),
+                "scenarios_with_current_data": len(scenarios_with_current),
+                "total_scenarios": study.risk_scenarios.count(),
             }
         )
 
