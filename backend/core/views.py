@@ -3706,6 +3706,9 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                     _fields.pop("evidences", []), link_dump_database_ids
                 )
+                many_to_many_map_ids["objective_ids"] = get_mapped_ids(
+                    _fields.pop("objectives", []), link_dump_database_ids
+                )
                 ref_control_id = link_dump_database_ids.get(
                     _fields["reference_control"]
                 )
@@ -3887,6 +3890,9 @@ class FolderViewSet(BaseModelViewSet):
             case "appliedcontrol":
                 if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                     obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+                
+                if objectives_ids := many_to_many_map_ids.get("objective_ids"):
+                    obj.objectives.set(OrganisationObjective.objects.filter(id__in=objectives_ids))
 
             case "requirementassessment":
                 if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
