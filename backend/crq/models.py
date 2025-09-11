@@ -18,6 +18,7 @@ from .utils import (
     calculate_risk_insights,
     risk_tolerance_curve,
 )
+from .utils_v2 import run_combined_simulation
 
 import numpy as np
 
