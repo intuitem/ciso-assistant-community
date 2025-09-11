@@ -81,7 +81,7 @@
 			{#if data.lec?.curves?.length > 0}
 				<!-- Multi-Curve LEC Chart -->
 				<div class="bg-white rounded-lg p-4 shadow-sm w-full">
-					<h5 class="text-lg font-semibold text-gray-700 mb-4">Combined Loss Exceedance Curves</h5>
+					<h5 class="text-lg font-semibold text-gray-700 mb-4">Combined hypotheses</h5>
 					<div id="combined-lec-chart" style="height: 400px; width: 100%;"></div>
 				</div>
 			{:else}
