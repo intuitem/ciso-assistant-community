@@ -215,10 +215,11 @@
 
 	let displayEditButton = $derived(function () {
 		return (
-			canEditObject &&
-			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn &&
-			!data.data.builtin || data?.urlModel === 'terminologies'
+			(canEditObject &&
+				!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+				!data.data.urn &&
+				!data.data.builtin) ||
+			data?.urlModel === 'terminologies'
 		);
 	});
 
