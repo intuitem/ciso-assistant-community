@@ -253,6 +253,12 @@ export const navData = {
 					href: '/ebios-rm'
 				},
 				{
+					name: 'quantitativeRiskStudies',
+					fa_icon: 'fa-solid fa-calculator',
+					href: '/quantitative-risk-studies',
+					permissions: ['view_quantitativeriskstudy']
+				},
+				{
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'
