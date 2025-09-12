@@ -95,7 +95,7 @@ logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
 FEATURE_FLAGS = {}
-MODULE_PATHS = {"serializers": "enterprise_core.serializers"}
+MODULE_PATHS = {"serializers": ["enterprise_core.serializers"]}
 ROUTES = {}
 MODULES = {}
 
