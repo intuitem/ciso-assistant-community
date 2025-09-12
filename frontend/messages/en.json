@@ -871,7 +871,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maximum Tolerable Downtime",
-	"securityObjectives": "Security objectives",
 	"disasterRecoveryObjectives": "Disaster Recovery objectives",
 	"noExpirationDateSet": "No expiration date set",
 	"sumpageTotal": "total",
@@ -936,9 +935,7 @@
 	"fixed": "Fixed",
 	"general": "General",
 	"generalSettingsDescription": "Configure your general settings here.",
-	"securityObjectiveScale": "Security objective scale",
 	"generalSettingsUpdated": "General settings updated",
-	"securityObjectiveScaleHelpText": "Choose your scale for security objectives (1 to 4 by default)",
 	"labels": "Labels",
 	"addLabel": "Add label",
 	"labelsHelpText": "Labels are used to categorize and filter the items.",
@@ -2189,5 +2186,9 @@
 	"simulationFresh": "Simulation data is up to date",
 	"simulationNotFresh": "Simulation data is outdated - parameters have changed",
 	"riskToleranceDisplay": "Risk tolerance settings",
-	"lossThresholdDisplay": "Loss threshold"
+	"lossThresholdDisplay": "Loss threshold",
+	"image": "Image",
+	"securityObjectives": "Security properties",
+	"securityObjectiveScale": "Security properties scale",
+	"securityObjectiveScaleHelpText": "Choose your scale for security properties (1 to 4 by default)"
 }

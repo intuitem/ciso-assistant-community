@@ -951,7 +951,11 @@
 	"deselect": "Zrušit výběr",
 	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu.",
 	"saveAndContinue": "Uložit a pokračovat",
+	"image": "Image",
+	"securityObjectives": "Bezpečnostní cíle",
 	"nextOccurrenceStatus": "Stav dalšího výskytu",
+	"securityObjectiveScale": "Měřítko bezpečnostních vlastností",
+	"securityObjectiveScaleHelpText": "Vyberte měřítko pro bezpečnostní vlastnosti (1 až 4 výchozí)",
 	"actor": "Aktér",
 	"action": "Akce"
 }

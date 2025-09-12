@@ -248,7 +248,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'qualifications', urlModel: 'terminologies' }
 		],
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
@@ -724,13 +725,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'user', urlModel: 'users' }
 		]
 	},
-	qualifications: {
-		name: 'qualification',
-		localName: 'qualification',
-		localNamePlural: 'qualifications',
-		verboseName: 'Qualification',
-		verboseNamePlural: 'Qualifications'
-	},
 	'business-impact-analysis': {
 		endpointUrl: 'resilience/business-impact-analysis',
 		name: 'businessimpactanalysis',
@@ -792,7 +786,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'asset_assessment',
 				urlModel: 'asset-assessments',
 				endpointUrl: 'asset-assessments'
-			}
+			},
+			{ field: 'qualifications', urlModel: 'terminologies' }
 		],
 		detailViewFields: [
 			{ field: 'asset_assessment' },
@@ -968,7 +963,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'assets', urlModel: 'assets', urlParams: 'type=PR&ebios_rm_studies=', detail: true },
-			{ field: 'qualifications', urlModel: 'qualifications' }
+			{ field: 'qualifications', urlModel: 'terminologies' }
 		],
 		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]
 	},
@@ -1271,7 +1266,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'qualifications', urlModel: 'terminologies' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [

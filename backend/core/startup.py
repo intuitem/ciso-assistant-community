@@ -45,7 +45,7 @@ READER_PERMISSIONS_LIST = [
     "view_strategicscenario",
     "view_attackpath",
     "view_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -111,7 +111,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_strategicscenario",
     "view_attackpath",
     "view_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -248,7 +248,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -463,7 +463,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -733,11 +733,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_killchain",
     "change_killchain",
     "delete_killchain",
-    # qualifications,
-    "view_qualification",
-    "add_qualification",
-    "change_qualification",
-    "delete_qualification",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -872,7 +867,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import Qualification, AssetClass, Terminology
+    from core.models import AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -996,7 +991,7 @@ def startup(sender: AppConfig, **kwargs):
 
     # Create default Qualifications
     try:
-        Qualification.create_default_qualifications()
+        Terminology.create_default_qualifications()
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
 

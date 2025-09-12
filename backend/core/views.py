@@ -1150,22 +1150,37 @@ class FilteringLabelViewSet(BaseModelViewSet):
     ordering = ["label"]
 
 
+class RiskAssessmentFilterSet(GenericFilterSet):
+    status = df.MultipleChoiceFilter(
+        choices=RiskAssessment.get_status_choices(), method="filter_status"
+    )
+
+    class Meta:
+        model = RiskAssessment
+        fields = {
+            "perimeter": ["exact"],
+            "folder": ["exact"],
+            "authors": ["exact"],
+            "risk_matrix": ["exact"],
+            "status": ["exact"],
+            "ebios_rm_study": ["exact"],
+            "reviewers": ["exact"],
+        }
+
+    def filter_status(self, queryset, name, value):
+        ra_undefined_status = queryset.filter(status__isnull=True)
+        if "--" in value:
+            return queryset.filter(status__in=value) | ra_undefined_status
+        return queryset.filter(status__in=value)
+
+
 class RiskAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.
     """
 
     model = RiskAssessment
-    filterset_fields = [
-        "perimeter",
-        "folder",
-        "authors",
-        "risk_matrix",
-        "status",
-        "ebios_rm_study",
-        "authors",
-        "reviewers",
-    ]
+    filterset_class = RiskAssessmentFilterSet
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -1572,7 +1587,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     description=scenario.description,
                     existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
-                    qualifications=scenario.qualifications,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -1581,6 +1595,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     justification=scenario.justification,
                     ref_id=scenario.ref_id,
                 )
+
+                duplicate_scenario.qualifications.set(scenario.qualifications.all())
 
                 for field in [
                     "applied_controls",
@@ -2542,11 +2558,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
-
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
-    @action(detail=False, name="Get qualification choices")
-    def qualifications(self, request):
-        return Response(dict(RiskScenario.QUALIFICATIONS))
 
     @action(detail=False, name="Get qualifications count")
     def qualifications_count(self, request):
@@ -3727,6 +3738,9 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                     _fields.pop("evidences", []), link_dump_database_ids
                 )
+                many_to_many_map_ids["objective_ids"] = get_mapped_ids(
+                    _fields.pop("objectives", []), link_dump_database_ids
+                )
                 ref_control_id = link_dump_database_ids.get(
                     _fields["reference_control"]
                 )
@@ -3773,6 +3787,7 @@ class FolderViewSet(BaseModelViewSet):
                     "assets",
                     "applied_controls",
                     "existing_applied_controls",
+                    "qualifications",
                 ]
                 for field in related__fields:
                     map_key = (
@@ -3780,9 +3795,12 @@ class FolderViewSet(BaseModelViewSet):
                         if not field.endswith("controls")
                         else f"{field}_ids"
                     )
-                    many_to_many_map_ids[map_key] = get_mapped_ids(
-                        _fields.pop(field, []), link_dump_database_ids
-                    )
+                    if field == "qualifications":
+                        many_to_many_map_ids[map_key] = _fields.pop(field, [])
+                    else:
+                        many_to_many_map_ids[map_key] = get_mapped_ids(
+                            _fields.pop(field, []), link_dump_database_ids
+                        )
 
             case "entity":
                 _fields.pop("owned_folders", None)
@@ -3816,9 +3834,7 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids.update(
                     {
-                        "qualifications_urn": get_mapped_ids(
-                            _fields.pop("qualifications", []), link_dump_database_ids
-                        ),
+                        "qualification_ids": _fields.pop("qualifications", []),
                         "asset_ids": get_mapped_ids(
                             _fields.pop("assets", []), link_dump_database_ids
                         ),
@@ -3831,6 +3847,11 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
+                )
+                _fields["risk_origin"], _ = Terminology.objects.get_or_create(
+                    name=_fields["risk_origin"],
+                    is_visible=True,
+                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
             case "stakeholder":
@@ -3908,6 +3929,11 @@ class FolderViewSet(BaseModelViewSet):
                 if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                     obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
 
+                if objectives_ids := many_to_many_map_ids.get("objective_ids"):
+                    obj.objectives.set(
+                        OrganisationObjective.objects.filter(id__in=objectives_ids)
+                    )
+
             case "requirementassessment":
                 if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
                     obj.applied_controls.set(
@@ -3927,6 +3953,37 @@ class FolderViewSet(BaseModelViewSet):
                     uuids, urns = self._split_uuids_urns(threat_ids)
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+
+                if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
+                    # Get existing qualifications
+                    existing_qualifications = Terminology.objects.filter(
+                        name__in=qualification_ids
+                    )
+                    existing_names = set(
+                        existing_qualifications.values_list("name", flat=True)
+                    )
+
+                    # Find missing names
+                    missing_names = set(qualification_ids) - existing_names
+
+                    # Create missing qualifications
+                    if missing_names:
+                        Terminology.objects.bulk_create(
+                            [
+                                Terminology(
+                                    name=name,
+                                    is_visible=True,
+                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
+                                )
+                                for name in missing_names
+                            ],
+                            ignore_conflicts=True,
+                        )
+
+                    # Now set all qualifications
+                    obj.qualifications.set(
+                        Terminology.objects.filter(name__in=qualification_ids)
                     )
 
                 for field, model_class in {
@@ -3956,9 +4013,35 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "fearedevent":
-                if qualifications_urn := many_to_many_map_ids.get("qualifications_urn"):
+                if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
+                    # Get existing qualifications
+                    existing_qualifications = Terminology.objects.filter(
+                        name__in=qualification_ids
+                    )
+                    existing_names = set(
+                        existing_qualifications.values_list("name", flat=True)
+                    )
+
+                    # Find missing names
+                    missing_names = set(qualification_ids) - existing_names
+
+                    # Create missing qualifications
+                    if missing_names:
+                        Terminology.objects.bulk_create(
+                            [
+                                Terminology(
+                                    name=name,
+                                    is_visible=True,
+                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
+                                )
+                                for name in missing_names
+                            ],
+                            ignore_conflicts=True,
+                        )
+
+                    # Now set all qualifications
                     obj.qualifications.set(
-                        Qualification.objects.filter(urn__in=qualifications_urn)
+                        Terminology.objects.filter(name__in=qualification_ids)
                     )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
                     obj.assets.set(Asset.objects.filter(id__in=asset_ids))
@@ -4626,15 +4709,6 @@ class QuickStartView(APIView):
             raise
         else:
             return Response(objects, status=status.HTTP_201_CREATED)
-
-
-class QualificationViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows qualifications to be viewed or edited.
-    """
-
-    model = Qualification
-    search_fields = ["name"]
 
 
 class OrganisationObjectiveViewSet(BaseModelViewSet):

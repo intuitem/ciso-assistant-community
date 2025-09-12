@@ -131,7 +131,14 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'risk-assessments/status',
+		options: [
+			{ label: '--', value: '--' },
+			{ label: 'planned', value: 'planned' },
+			{ label: 'in_progress', value: 'in_progress' },
+			{ label: 'in_review', value: 'in_review' },
+			{ label: 'done', value: 'done' },
+			{ label: 'deprecated', value: 'deprecated' }
+		],
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
@@ -913,8 +920,8 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'riskScenarios', 'perimeter'],
-		body: ['ref_id', 'str', 'risk_matrix', 'risk_scenarios_count', 'perimeter'],
+		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter'],
+		body: ['ref_id', 'str', 'risk_matrix', 'status', 'risk_scenarios_count', 'perimeter'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1653,8 +1660,8 @@ export const listViewFields = {
 		body: ['name', 'abbreviation']
 	},
 	terminologies: {
-		head: ['field_path', 'name', 'description', 'translations'],
-		body: ['field_path', 'name', 'description', 'translations'],
+		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
+		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
 		filters: {
 			field_path: FIELD_PATH_FILTER,
 			builtin: BUILTIN_FILTER,

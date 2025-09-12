@@ -142,7 +142,7 @@ export const RiskScenarioSchema = z.object({
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
 	treatment: z.string().optional(),
-	qualifications: z.string().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
 	strength_of_knowledge: z.number().default(-1).optional(),
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
@@ -780,7 +780,7 @@ export const fearedEventsSchema = z.object({
 	ebios_rm_study: z.string(),
 	folder: z.string(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional()
 });
 
 export const roToSchema = z.object({

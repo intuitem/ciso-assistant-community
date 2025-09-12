@@ -827,7 +827,6 @@
 	"rpoHelpText": "Цільова точка відновлення",
 	"mtd": "MTD",
 	"mtdHelpText": "Максимально допустимий час простою",
-	"securityObjectives": "Цілі безпеки",
 	"disasterRecoveryObjectives": "Цілі аварійного відновлення",
 	"noExpirationDateSet": "Термін дії не встановлено",
 	"sumpageTotal": "Всього",
@@ -892,9 +891,7 @@
 	"fixed": "Виправлено",
 	"general": "загальний",
 	"generalSettingsDescription": "Налаштуйте загальні параметри тут.",
-	"securityObjectiveScale": "Шкала цілей безпеки",
 	"generalSettingsUpdated": "Загальні налаштування оновлено",
-	"securityObjectiveScaleHelpText": "Виберіть масштаб для цілей безпеки (за замовчуванням від 1 до 4)",
 	"labels": "Мітки",
 	"addLabel": "Додати мітку",
 	"labelsHelpText": "Мітки використовуються для категоризації та фільтрації елементів.",
@@ -1481,6 +1478,10 @@
 	"keepLocalLoginHelpText": "Коли глобальне SSO обов'язкове, це дозволяє користувачу обійти це налаштування та використовувати локальний пароль за потреби.",
 	"saveAndContinue": "Зберегти та продовжити",
 	"nextOccurrenceStatus": "Статус наступного випадку",
+	"image": "Зображення",
+	"securityObjectives": "Властивості безпеки",
+	"securityObjectiveScale": "Шкала властивостей безпеки",
+	"securityObjectiveScaleHelpText": "Виберіть шкалу для властивостей безпеки (за замовчуванням 1 до 4)",
 	"actor": "Актор",
 	"action": "Дія"
 }

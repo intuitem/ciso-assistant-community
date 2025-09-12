@@ -969,6 +969,10 @@
 	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt.",
 	"saveAndContinue": "Speichern und fortfahren",
 	"nextOccurrenceStatus": "Nächster Status der nächsten Vorkommens",
+	"image": "Bild",
+	"securityObjectives": "Sicherheitsmerkmale",
+	"securityObjectiveScale": "Skala für Sicherheitsmerkmale",
+	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)",
 	"actor": "Akteur",
 	"action": "Aktion"
 }

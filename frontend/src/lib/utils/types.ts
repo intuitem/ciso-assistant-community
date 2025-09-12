@@ -77,8 +77,6 @@ export const URL_MODEL = [
 	'elementary-actions',
 	'operating-modes',
 	'kill-chains',
-	// qualifications
-	'qualifications',
 	'processings',
 	'processing-natures',
 	'security-exceptions',
