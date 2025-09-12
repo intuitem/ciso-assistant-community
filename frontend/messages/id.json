@@ -1151,5 +1151,7 @@
 	"select": "Pilih",
 	"deselect": "Batalkan Pilihan",
 	"saveAndContinue": "Simpan dan lanjutkan",
-	"nextOccurrenceStatus": "Status kejadian berikutnya"
+	"nextOccurrenceStatus": "Status kejadian berikutnya",
+	"actor": "Pelaku",
+	"action": "Aksi"
 }
