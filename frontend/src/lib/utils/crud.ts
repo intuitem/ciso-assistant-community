@@ -1526,6 +1526,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ale_display' },
 			{ field: 'treatment_cost_display' },
 			{ field: 'roc_display' },
+			{ field: 'roc_calculation_explanation' },
 			{ field: 'risk_stage' },
 			{ field: 'existing_applied_controls' },
 			{ field: 'added_applied_controls' },

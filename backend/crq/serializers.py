@@ -302,6 +302,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     roc = serializers.DecimalField(max_digits=12, decimal_places=4, read_only=True)
     roc_display = serializers.CharField(read_only=True)
     roc_interpretation = serializers.CharField(read_only=True)
+    roc_calculation_explanation = serializers.CharField(read_only=True)
     folder = FieldsRelatedField()
 
     def get_lec_data(self, obj):

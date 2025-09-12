@@ -861,6 +861,56 @@ class QuantitativeRiskHypothesis(
         else:
             return "Negative ROC - Investment costs more than benefits"
 
+    @property
+    def roc_calculation_explanation(self):
+        """
+        Returns a detailed explanation of the ROC calculation with specific values.
+        """
+        if self.risk_stage != "residual":
+            return "ROSI calculation only available for residual hypotheses."
+
+        # Find the current hypothesis in the same scenario
+        current_hypothesis = self.quantitative_risk_scenario.hypotheses.filter(
+            risk_stage="current"
+        ).first()
+
+        if not current_hypothesis:
+            return "Cannot calculate ROSI: No current hypothesis found for comparison."
+
+        # Get ALEs
+        current_ale = current_hypothesis.ale
+        residual_ale = self.ale
+
+        if current_ale is None or residual_ale is None:
+            return "Cannot calculate ROSI: Missing ALE data from simulation results."
+
+        # Get treatment cost
+        treatment_cost = self.treatment_cost
+
+        if treatment_cost <= 0:
+            return "Cannot calculate ROC: Treatment cost must be positive."
+
+        # Calculate components
+        risk_reduction = current_ale - residual_ale
+        net_benefit = risk_reduction - treatment_cost
+        roc_value = net_benefit / treatment_cost
+
+        # Format values without losing precision
+        roc_percentage = f"{roc_value * 100:.1f}%"
+
+        explanation = (
+            f"ROSI Calculation:\n"
+            f"• Current ALE: {current_ale:,.2f}\n"
+            f"• Residual ALE: {residual_ale:,.2f}\n"
+            f"• Risk Reduction: {risk_reduction:,.2f}\n"
+            f"• Treatment Cost: {treatment_cost:,.2f}\n"
+            f"• Net Benefit: {net_benefit:,.2f}\n"
+            f"• ROSI = Net Benefit ÷ Treatment Cost = {roc_percentage}\n\n"
+            f"Formula: ROSI = (Current ALE - Residual ALE - Treatment Cost) ÷ Treatment Cost"
+        )
+
+        return explanation
+
     def save(self, *args, **kwargs):
         """
         Override save to mark simulation as not fresh when parameters change.
