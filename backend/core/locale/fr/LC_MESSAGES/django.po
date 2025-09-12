@@ -520,12 +520,6 @@ msgstr "Trier par"
 msgid "Security objective ordering"
 msgstr ""
 
-#: core/models.py:1283
-#, fuzzy
-#| msgid "Justification"
-msgid "Qualification"
-msgstr "Justification"
-
 #: core/models.py:1284 core/models.py:2466
 #, fuzzy
 #| msgid "Justification"
