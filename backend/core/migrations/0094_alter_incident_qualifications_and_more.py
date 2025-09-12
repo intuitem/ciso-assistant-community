@@ -8,7 +8,7 @@ from django.db import migrations, models
 def normalize_name(name: str) -> str:
     """
     Normalize qualification names into a consistent snake_case-like format.
-    Example: "High-RiskEvent" -> "high_risk_event"
+    Example: "High Risk Event" -> "high_risk_event"
     """
     return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
