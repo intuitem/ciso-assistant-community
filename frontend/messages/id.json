@@ -1152,5 +1152,7 @@
 	"image": "Gambar",
 	"securityObjectives": "Properti keamanan",
 	"securityObjectiveScale": "Skala properti keamanan",
-	"securityObjectiveScaleHelpText": "Pilih skala untuk properti keamanan Anda (1 hingga 4 secara default)"
+	"securityObjectiveScaleHelpText": "Pilih skala untuk properti keamanan Anda (1 hingga 4 secara default)",
+	"actor": "Pelaku",
+	"action": "Aksi"
 }

@@ -955,5 +955,7 @@
 	"securityObjectives": "Bezpečnostní cíle",
 	"nextOccurrenceStatus": "Stav dalšího výskytu",
 	"securityObjectiveScale": "Měřítko bezpečnostních vlastností",
-	"securityObjectiveScaleHelpText": "Vyberte měřítko pro bezpečnostní vlastnosti (1 až 4 výchozí)"
+	"securityObjectiveScaleHelpText": "Vyberte měřítko pro bezpečnostní vlastnosti (1 až 4 výchozí)",
+	"actor": "Aktér",
+	"action": "Akce"
 }

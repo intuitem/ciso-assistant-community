@@ -151,6 +151,7 @@ urlpatterns = [
         RiskAssessmentActionPlanList.as_view(),
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
+    path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
 ]
 
 # Additional modules take precedence over the default modules

@@ -1247,5 +1247,7 @@
 	"image": "Billede",
 	"securityObjectives": "Sikkerhedsegenskaber",
 	"securityObjectiveScale": "Skala for sikkerhedsegenskaber",
-	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsegenskaber (1 til 4 som standard)"
+	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsegenskaber (1 til 4 som standard)",
+	"actor": "Aktør",
+	"action": "Handling"
 }

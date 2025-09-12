@@ -958,5 +958,7 @@
 	"image": "Bild",
 	"securityObjectives": "Säkerhetsmål",
 	"securityObjectiveScale": "Skala för säkerhetsmål",
-	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)"
+	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)",
+	"actor": "Aktör",
+	"action": "Åtgärd"
 }

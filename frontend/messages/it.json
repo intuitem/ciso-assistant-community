@@ -1342,5 +1342,7 @@
 	"image": "Immagine",
 	"securityObjectives": "Proprietà di sicurezza",
 	"securityObjectiveScale": "Scala proprietà di sicurezza",
-	"securityObjectiveScaleHelpText": "Scegli la scala per le proprietà di sicurezza (1 a 4 di default)"
+	"securityObjectiveScaleHelpText": "Scegli la scala per le proprietà di sicurezza (1 a 4 di default)",
+	"actor": "Attore",
+	"action": "Azione"
 }

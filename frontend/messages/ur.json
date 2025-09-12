@@ -935,5 +935,7 @@
 	"image": "تصویر",
 	"securityObjectives": "سیکیورٹی خصوصیات",
 	"securityObjectiveScale": "سیکیورٹی خصوصیات کی پیمانہ",
-	"securityObjectiveScaleHelpText": "سیکیورٹی خصوصیات کے لیے اپنی پیمانہ منتخب کریں (ڈیفالٹ طور پر 1 سے 4)"
+	"securityObjectiveScaleHelpText": "سیکیورٹی خصوصیات کے لیے اپنی پیمانہ منتخب کریں (ڈیفالٹ طور پر 1 سے 4)",
+	"actor": "اداکار",
+	"action": "عمل"
 }

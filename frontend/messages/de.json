@@ -972,5 +972,7 @@
 	"image": "Bild",
 	"securityObjectives": "Sicherheitsmerkmale",
 	"securityObjectiveScale": "Skala für Sicherheitsmerkmale",
-	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)"
+	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)",
+	"actor": "Akteur",
+	"action": "Aktion"
 }

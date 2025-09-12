@@ -968,5 +968,7 @@
 	"image": "Afbeelding",
 	"securityObjectives": "Beveiligingskenmerken",
 	"securityObjectiveScale": "Schaal voor beveiligingskenmerken",
-	"securityObjectiveScaleHelpText": "Kies uw schaal voor beveiligingskenmerken (standaard 1 tot 4)"
+	"securityObjectiveScaleHelpText": "Kies uw schaal voor beveiligingskenmerken (standaard 1 tot 4)",
+	"actor": "Actor",
+	"action": "Actie"
 }

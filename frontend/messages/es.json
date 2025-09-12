@@ -972,5 +972,7 @@
 	"image": "Imagen",
 	"securityObjectives": "Propiedades de seguridad",
 	"securityObjectiveScale": "Escala de propiedades de seguridad",
-	"securityObjectiveScaleHelpText": "Elija su escala para las propiedades de seguridad (1 a 4 por defecto)"
+	"securityObjectiveScaleHelpText": "Elija su escala para las propiedades de seguridad (1 a 4 por defecto)",
+	"actor": "Actor",
+	"action": "Acción"
 }

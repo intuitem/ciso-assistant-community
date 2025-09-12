@@ -21,6 +21,7 @@ from django.db.models import (
     Q,
     ExpressionWrapper,
     FloatField,
+    IntegerField,
     Value,
     Min,
     Subquery,
@@ -420,6 +421,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         serializer_class = self.get_serializer_class(action="update")
 
         return Response(serializer_class(super().get_object()).data)
+
+
+# Content types
+
+
+class ContentTypeListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
+    def get(self, request, format=None):
+        content_types = []
+        for model in apps.get_models():
+            content_types.append(
+                {"label": model.__name__, "value": model._meta.model_name}
+            )
+        content_types.sort(key=lambda x: x["label"].lower())
+        return Response(content_types)
 
 
 # Risk Assessment
@@ -4804,39 +4822,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
 
-        ordering = self.request.query_params.get("ordering", "")
-
-        if any(
-            field in ordering
-            for field in (
-                "total_requirements",
-                "assessed_requirements",
-                "progress",
-            )
-        ):
-            qs = qs.annotate(
-                total_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(requirement_assessments__requirement__assessable=True),
-                    distinct=True,
-                ),
-                assessed_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(
-                        ~Q(
-                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                        ),
-                        requirement_assessments__requirement__assessable=True,
+        qs = qs.annotate(
+            total_requirements=Count(
+                "requirement_assessments",
+                filter=Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            assessed_requirements=Count(
+                "requirement_assessments",
+                filter=Q(
+                    ~Q(
+                        requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
                     ),
-                    distinct=True,
+                    requirement_assessments__requirement__assessable=True,
                 ),
-                progress=ExpressionWrapper(
-                    F("assessed_requirements")
-                    * 1.0
-                    / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                    output_field=FloatField(),
-                ),
-            )
+                distinct=True,
+            ),
+            progress=ExpressionWrapper(
+                F("assessed_requirements")
+                * 100
+                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                output_field=IntegerField(),
+            ),
+        )
+
         return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
