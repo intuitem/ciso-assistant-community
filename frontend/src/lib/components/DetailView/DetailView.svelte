@@ -378,7 +378,7 @@
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value as val}
+														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id && key !== 'qualifications'}
 																	{@const itemHref = `/${

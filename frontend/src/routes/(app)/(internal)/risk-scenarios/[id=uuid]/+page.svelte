@@ -451,7 +451,7 @@
 			<p class="text-sm font-semibold text-gray-400">{m.qualifications()}</p>
 			<p>
 				<span class="font-semibold">
-					{#each data.scenario.qualifications as qualification, i}
+					{#each data.scenario.qualifications.sort( (a, b) => safeTranslate(a.str).localeCompare(safeTranslate(b.str)) ) as qualification, i}
 						{#if i > 0},{/if}
 						{safeTranslate(qualification.str) || m.undefined()}
 					{/each}
