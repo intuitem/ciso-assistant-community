@@ -8,6 +8,9 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { onMount } from 'svelte';
+
+	let displayCurrency = $state('€'); // Default to Euro
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -30,6 +33,25 @@
 		object = {},
 		context = 'default'
 	}: Props = $props();
+
+	// Declare form store at top level
+	const formStore = form.form;
+
+	// Fetch currency from global settings
+	onMount(async () => {
+		try {
+			const response = await fetch('/global-settings');
+			if (response.ok) {
+				const globalSettings = await response.json();
+				const generalSetting = globalSettings.results?.find((setting: any) => setting.name === 'general');
+				if (generalSetting?.value?.currency) {
+					displayCurrency = generalSetting.value.currency;
+				}
+			}
+		} catch (error) {
+			console.warn('Could not fetch global settings for currency:', error);
+		}
+	});
 </script>
 
 <AutocompleteSelect
@@ -87,7 +109,7 @@
 		<NumberField
 			{form}
 			field="loss_threshold"
-			label={m.lossThreshold()}
+			label="{m.lossThreshold()} ({displayCurrency})"
 			min={0}
 			step={1}
 			helpText={m.lossThresholdHelpText()}
@@ -110,7 +132,7 @@
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point1.acceptable_loss"
-					label="Point 1 - Acceptable Loss"
+					label="Point 1 - Acceptable Loss ({displayCurrency})"
 					min={1}
 					step={1}
 					helpText="Acceptable loss amount for point 1"
@@ -129,7 +151,7 @@
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point2.acceptable_loss"
-					label="Point 2 - Acceptable Loss"
+					label="Point 2 - Acceptable Loss ({displayCurrency})"
 					min={1}
 					step={1}
 					helpText="Acceptable loss amount for point 2"

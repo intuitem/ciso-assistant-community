@@ -7,8 +7,12 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { onMount } from 'svelte';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+
+	let displayCurrency = $state('€'); // Default to Euro
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -30,6 +34,25 @@
 		object = {},
 		context = 'default'
 	}: Props = $props();
+
+	// Declare form store at top level
+	const formStore = form.form;
+
+	// Fetch currency from global settings
+	onMount(async () => {
+		try {
+			const response = await fetch('/global-settings');
+			if (response.ok) {
+				const globalSettings = await response.json();
+				const generalSetting = globalSettings.results?.find((setting: any) => setting.name === 'general');
+				if (generalSetting?.value?.currency) {
+					displayCurrency = generalSetting.value.currency;
+				}
+			}
+		} catch (error) {
+			console.warn('Could not fetch global settings for currency:', error);
+		}
+	});
 </script>
 
 <TextField
@@ -125,7 +148,7 @@
 	<TextField
 		{form}
 		field="impact.lb"
-		label={m.expectedLossLowerBound()}
+		label="{m.expectedLossLowerBound()} ({displayCurrency})"
 		type="number"
 		step="10"
 		min="10"
@@ -136,7 +159,7 @@
 	<TextField
 		{form}
 		field="impact.ub"
-		label={m.expectedLossUpperBound()}
+		label="{m.expectedLossUpperBound()} ({displayCurrency})"
 		type="number"
 		step="10"
 		min="20"
