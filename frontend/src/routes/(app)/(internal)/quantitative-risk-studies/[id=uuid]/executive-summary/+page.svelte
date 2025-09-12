@@ -60,7 +60,7 @@
 						{/if}
 						{#if summaryData.study_assets && summaryData.study_assets.length > 0}
 							<div class="mb-4">
-								<div class="text-sm font-medium text-gray-700 mb-2">Assets:</div>
+								<div class="text-sm font-medium text-gray-700 mb-2">{m.assets()}:</div>
 								<div class="flex flex-wrap gap-2">
 									{#each summaryData.study_assets as asset}
 										<Anchor
@@ -119,7 +119,7 @@
 
 				<div class="bg-white rounded-lg p-6 shadow-sm">
 					<div class="flex justify-between items-center mb-4">
-						<h2 class="text-xl font-semibold">Combined Study Risk Profile</h2>
+						<h2 class="text-xl font-semibold">Portfolio risk profile</h2>
 						<div class="text-sm text-gray-600">
 							Current: {combinedLecData.scenarios_with_current_data} / {combinedLecData.total_scenarios}
 							{#if combinedLecData.scenarios_with_residual_data}
