@@ -183,9 +183,10 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)
-            self._assign_third_party_respondents(
-                instance, representatives, old_representatives
-            )
+            if "representatives" in validated_data:
+                self._assign_third_party_respondents(
+                    instance, representatives, old_representatives
+                )
         return instance
 
     class Meta:
