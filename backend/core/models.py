@@ -1158,7 +1158,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name=_("Translations"),
         help_text=_("JSON field to store translations for different languages"),
     )
-    
+
     fields_to_check = ["name", "field_path"]
 
     @classmethod
