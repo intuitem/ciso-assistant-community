@@ -44,7 +44,9 @@
 			const response = await fetch('/global-settings');
 			if (response.ok) {
 				const globalSettings = await response.json();
-				const generalSetting = globalSettings.results?.find((setting: any) => setting.name === 'general');
+				const generalSetting = globalSettings.results?.find(
+					(setting: any) => setting.name === 'general'
+				);
 				if (generalSetting?.value?.currency) {
 					displayCurrency = generalSetting.value.currency;
 				}

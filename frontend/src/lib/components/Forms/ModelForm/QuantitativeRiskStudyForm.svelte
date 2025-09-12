@@ -43,7 +43,9 @@
 			const response = await fetch('/global-settings');
 			if (response.ok) {
 				const globalSettings = await response.json();
-				const generalSetting = globalSettings.results?.find((setting: any) => setting.name === 'general');
+				const generalSetting = globalSettings.results?.find(
+					(setting: any) => setting.name === 'general'
+				);
 				if (generalSetting?.value?.currency) {
 					displayCurrency = generalSetting.value.currency;
 				}
@@ -105,7 +107,12 @@
 		bind:cachedValue={formDataCache['distribution_model']}
 	/>
 
-	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-bullseye" header="Tolerance Settings">
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-bullseye"
+		header="Tolerance Settings"
+	>
 		<NumberField
 			{form}
 			field="loss_threshold"
