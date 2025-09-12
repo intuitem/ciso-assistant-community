@@ -57,7 +57,7 @@ def reverse_cost_conversion(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0093_alter_asset_parent_assets"),
+        ("core", "0095_delete_qualification"),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from core.models import (
     AppliedControl,
     Asset,
     FilteringLabelMixin,
-    Qualification,
+    Terminology,
     Threat,
     Vulnerability,
 )
@@ -17,10 +17,7 @@ from .utils import (
     create_loss_exceedance_curve,
     calculate_risk_insights,
     risk_tolerance_curve,
-    run_combined_simulation,
 )
-
-import numpy as np
 
 
 class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
@@ -409,9 +406,13 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         related_name="quantitative_risk_scenarios",
     )
     qualifications = models.ManyToManyField(
-        Qualification,
+        Terminology,
         related_name="quantitative_risk_scenarios",
         verbose_name="Qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
         blank=True,
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
