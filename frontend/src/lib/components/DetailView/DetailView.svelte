@@ -218,7 +218,7 @@
 			canEditObject &&
 			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
 			!data.data.urn &&
-			!data.data.builtin
+			!data.data.builtin || data?.urlModel === 'terminologies'
 		);
 	});
 
