@@ -88,16 +88,27 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     def _create_or_update_audit(self, instance, audit_data):
         if audit_data["create_audit"]:
-            if not audit_data["framework"]:
+            if not audit_data.get("framework"):
                 raise serializers.ValidationError(
                     {"framework": [_("Framework required")]}
                 )
 
             with transaction.atomic():
+                locked = EntityAssessment.objects.select_for_update().get(
+                    pk=instance.pk
+                )  # lock entity assessment until the end of the transaction
+                if getattr(locked, "compliance_assessment_id", None):
+                    raise serializers.ValidationError(
+                        {
+                            "create_audit": [
+                                _("An audit already exists for this assessment")
+                            ]
+                        }
+                    )
                 audit = ComplianceAssessment.objects.create(
-                    name=instance.name,
+                    name=locked.name,
                     framework=audit_data["framework"],
-                    perimeter=instance.perimeter,
+                    perimeter=locked.perimeter,
                     selected_implementation_groups=audit_data[
                         "selected_implementation_groups"
                     ],
