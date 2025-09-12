@@ -56,6 +56,7 @@
 		multiple
 		optionsEndpoint="user-groups"
 		field="user_groups"
+		pathField="path"
 		cacheLock={cacheLocks['user_groups']}
 		bind:cachedValue={formDataCache['user_groups']}
 		label={m.userGroups()}
