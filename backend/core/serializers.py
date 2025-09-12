@@ -141,7 +141,7 @@ class ReferentialSerializer(BaseModelSerializer):
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
@@ -189,7 +189,7 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
 
 
 class VulnerabilityReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
@@ -234,7 +234,7 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
 
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
     approver = FieldsRelatedField(["id", "first_name", "last_name"])
@@ -262,7 +262,7 @@ class PerimeterWriteSerializer(BaseModelSerializer):
 
 
 class PerimeterReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     lc_status = serializers.CharField(source="get_lc_status_display")
     default_assignee = FieldsRelatedField(many=True)
@@ -326,7 +326,7 @@ class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
@@ -468,7 +468,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
 
 
 class AssetClassReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     parent = FieldsRelatedField()
     full_path = serializers.CharField()
 
@@ -490,7 +490,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 
 
 class ReferenceControlReadSerializer(ReferentialSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["folder"], many=True)
@@ -547,7 +547,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 
 
 class ThreatReadSerializer(ReferentialSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["folder"], many=True)
@@ -744,7 +744,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 
 
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
     priority = serializers.CharField(source="get_priority_display")
@@ -932,7 +932,7 @@ class PolicyWriteSerializer(AppliedControlWriteSerializer):
 
 
 class PolicyReadSerializer(AppliedControlReadSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
 
     class Meta:
         model = Policy
@@ -1101,7 +1101,7 @@ class FolderWriteSerializer(BaseModelSerializer):
 
 
 class FolderReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
 
     content_type = serializers.CharField(source="get_content_type_display")
@@ -1182,7 +1182,7 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 
 
 class EvidenceReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     attachment = serializers.CharField(source="filename")
     size = serializers.CharField(source="get_size")
     folder = FieldsRelatedField()
@@ -1320,7 +1320,7 @@ class CampaignWriteSerializer(BaseModelSerializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     campaign = FieldsRelatedField()
@@ -1609,7 +1609,7 @@ class ComputeMappingSerializer(serializers.Serializer):
 
 
 class FilteringLabelReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
 
     class Meta:
@@ -1647,7 +1647,7 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
 
 
 class SecurityExceptionReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
     approver = FieldsRelatedField()
@@ -1690,7 +1690,7 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
     evidences = FieldsRelatedField(many=True)
@@ -1726,7 +1726,7 @@ class FindingWriteSerializer(BaseModelSerializer):
 
 
 class FindingReadSerializer(FindingWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     vulnerabilities = FieldsRelatedField(many=True)
@@ -1858,7 +1858,7 @@ class TimelineEntryWriteSerializer(BaseModelSerializer):
 
 
 class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     str = serializers.CharField(source="__str__", read_only=True)
     author = FieldsRelatedField()
     folder = FieldsRelatedField()
@@ -1876,7 +1876,7 @@ class IncidentWriteSerializer(BaseModelSerializer):
 
 
 class IncidentReadSerializer(IncidentWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
@@ -1896,7 +1896,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
 
 
 class TaskTemplateReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -2085,7 +2085,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
 
 class TaskNodeReadSerializer(BaseModelSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = PathField(read_only=True)
     task_template = FieldsRelatedField()
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
