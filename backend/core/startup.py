@@ -1003,7 +1003,9 @@ def startup(sender: AppConfig, **kwargs):
         "interface_agg_scenario_matrix": False,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings, _ = GlobalSettings.objects.get_or_create(
+            name="general", value=default_settings
+        )
         current_value = settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")
