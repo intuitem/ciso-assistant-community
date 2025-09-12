@@ -215,10 +215,11 @@
 
 	let displayEditButton = $derived(function () {
 		return (
-			canEditObject &&
-			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn &&
-			!data.data.builtin
+			(canEditObject &&
+				!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+				!data.data.urn &&
+				!data.data.builtin) ||
+			data?.urlModel === 'terminologies'
 		);
 	});
 
@@ -377,9 +378,9 @@
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value as val}
+														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id}
+																{#if val.str && val.id && key !== 'qualifications'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel

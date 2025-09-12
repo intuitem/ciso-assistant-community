@@ -49,7 +49,7 @@ test('User can import a domain from a .bak file', async ({ logedPage, page }) =>
 
 		// Build a unique domain name for this import
 		const domainName = `imported_domain_${Date.now()}`;
-		const filePath = new URL('../utils/sample-domain-schema-2.bak', import.meta.url).pathname;
+		const filePath = new URL('../utils/sample-domain-schema-3.bak', import.meta.url).pathname;
 
 		// Open the import dialog and fill in the form.
 		await page.getByTestId('import-button').click();
