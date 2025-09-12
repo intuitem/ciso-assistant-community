@@ -1099,13 +1099,6 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
     Returns controls from hypotheses in the study.
     """
 
-    # Override to exclude cost field which causes JSONField filtering issues
-    # filterset_fields = {
-    #     field: lookups
-    #     for field, lookups in ActionPlanList.filterset_fields.items()
-    #     if field != "cost"
-    # }
-
     def get_serializer_class(self):
         return QuantitativeRiskStudyActionPlanSerializer
 

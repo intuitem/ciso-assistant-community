@@ -386,45 +386,6 @@ def run_combined_simulation(
     return results
 
 
-def run_agg_simulation(
-    scenarios: Dict[str, Dict],
-    n_simulations: int = 100_000,
-    random_seed: Optional[int] = None,
-) -> Dict[str, np.ndarray]:
-    """
-    Legacy function for backward compatibility.
-    Now uses the new mathematically consistent approach.
-
-    Args:
-        scenarios: Dictionary of scenarios with keys 'P', 'LB', 'UB'
-        n_simulations: Number of Monte Carlo iterations
-        random_seed: Random seed for reproducibility
-
-    Returns:
-        Dictionary with scenario losses and portfolio total
-    """
-    # Convert old format to new format
-    scenarios_params = {}
-    for name, params in scenarios.items():
-        scenarios_params[name] = {
-            "probability": params["P"],
-            "lower_bound": params["LB"],
-            "upper_bound": params["UB"],
-        }
-
-    # Use new combined simulation approach
-    simulation_results = run_combined_simulation(
-        scenarios_params, n_simulations, random_seed=random_seed
-    )
-
-    # Convert back to old format (just raw losses)
-    results = {}
-    for name, result_data in simulation_results.items():
-        results[name] = result_data["raw_losses"]
-
-    return results
-
-
 def get_lognormal_params_from_points(point1: Dict, point2: Dict) -> Tuple[float, float]:
     """
     Calculate lognormal distribution parameters (mu, sigma) from two risk tolerance points.
@@ -616,6 +577,7 @@ def risk_tolerance_curve(risk_tolerance_data: Dict) -> Dict:
     point2 = points["point2"]
 
     # Validate point structure
+    required_keys = ["probability", "acceptable_loss"]
     if not all(key in point1 and key in point2 for key in required_keys):
         return {}
 
