@@ -257,8 +257,8 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 simulation_methods_used.add(curve["simulation_method"])
 
         primary_method = (
-            "mathematically_consistent"
-            if "mathematically_consistent" in simulation_methods_used
+            "direct_simulation"
+            if "direct_simulation" in simulation_methods_used
             else "cached"
             if "cached" in simulation_methods_used
             else "none"
@@ -291,7 +291,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "total_scenarios": study.risk_scenarios.count(),
                 "simulation_method": primary_method,
                 "simulation_methods_used": list(simulation_methods_used),
-                "note": "Using cached portfolio simulation results for optimal performance",
+                "note": "Portfolio risk calculations using cached simulation results for optimal performance",
             }
         )
 

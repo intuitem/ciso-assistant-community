@@ -249,7 +249,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         "metrics": portfolio_result.get("metrics", {}),
                         "scenarios": current_scenarios_info,
                         "total_scenarios": len(current_scenarios_info),
-                        "method": "mathematically_consistent",
+                        "method": "direct_simulation",
                     }
             except Exception as e:
                 logger.warning(
@@ -312,7 +312,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         "metrics": portfolio_result.get("metrics", {}),
                         "scenarios": residual_scenarios_info,
                         "total_scenarios": len(residual_scenarios_info),
-                        "method": "mathematically_consistent",
+                        "method": "direct_simulation",
                     }
             except Exception as e:
                 logger.warning(
