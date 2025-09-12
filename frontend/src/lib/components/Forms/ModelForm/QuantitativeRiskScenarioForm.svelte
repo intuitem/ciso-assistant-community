@@ -115,8 +115,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-    optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
-    optionsLabelField="translated_name"
+		optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+		optionsLabelField="translated_name"
 		field="qualifications"
 		cacheLock={cacheLocks['qualifications']}
 		bind:cachedValue={formDataCache['qualifications']}
