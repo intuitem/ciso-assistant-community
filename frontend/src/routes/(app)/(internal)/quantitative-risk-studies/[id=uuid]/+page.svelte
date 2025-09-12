@@ -31,6 +31,13 @@
 			>
 				<i class="fa-solid fa-chart-line mr-2"></i>Executive Summary
 			</Anchor>
+			<!-- <Anchor -->
+			<!-- 	href={`${page.url.pathname}/key-metrics`} -->
+			<!-- 	class="btn variant-filled-tertiary h-fit" -->
+			<!-- 	breadcrumbAction="push" -->
+			<!-- > -->
+			<!-- 	<i class="fa-solid fa-chart-simple mr-2"></i>Key Metrics -->
+			<!-- </Anchor> -->
 		</div>
 	{/snippet}
 

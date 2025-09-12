@@ -73,6 +73,14 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         default=Distribution_model.LOGNORMAL_CI90,
         verbose_name=_("Distribution model"),
     )
+    portfolio_simulation = models.JSONField(
+        null=True,
+        blank=True,
+        default=dict,
+        help_text=_(
+            "Cached portfolio simulation results to improve performance. Contains current and residual portfolio calculations with metadata."
+        ),
+    )
 
     def __str__(self):
         return f"{self.name}"
@@ -249,7 +257,7 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
             x.ref_id for x in quantitative_risk_study.risk_scenarios.all()
         ]
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"QRS.{i:02d}" for i in range(1, nb_scenarios + 1)]
+        candidates = [f"QR.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
     @property
@@ -269,19 +277,28 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
     def current_ale_display(self):
         """
         Get the current Annual Loss Expectancy (ALE) with currency from global settings.
-        Returns "No current ALE calculated" if no ALE is available.
+        Returns "No ALE calculated" if no ALE is available.
         """
         ale_value = self.current_ale
         if ale_value is None:
-            return "No current ALE calculated"
+            return "No ALE calculated"
 
+        return self._format_currency(ale_value)
+
+    def _format_currency(self, value):
+        """Helper method to format currency values."""
         # Get currency from global settings
         general_settings = GlobalSettings.objects.filter(name="general").first()
         currency = (
             general_settings.value.get("currency", "€") if general_settings else "€"
         )
 
-        return f"{ale_value:,.0f} {currency}"
+        if value >= 1_000_000:
+            return f"{value / 1_000_000:.1f}M {currency}"
+        elif value >= 1_000:
+            return f"{value / 1_000:.0f}K {currency}"
+        else:
+            return f"{value:,.0f} {currency}"
 
     @property
     def residual_ale(self):
@@ -305,19 +322,13 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
     def residual_ale_display(self):
         """
         Get the residual Annual Loss Expectancy (ALE) with currency from global settings.
-        Returns "No residual ALE calculated" if no ALE is available.
+        Returns "No ALE calculated" if no ALE is available.
         """
         ale_value = self.residual_ale
         if ale_value is None:
-            return "No residual ALE calculated"
+            return "No ALE calculated"
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
-
-        return f"{ale_value:,.0f} {currency}"
+        return self._format_currency(ale_value)
 
     class Meta:
         verbose_name = _("Quantitative Risk Scenario")
@@ -572,8 +583,20 @@ class QuantitativeRiskHypothesis(
         """Returns a human-readable format of the treatment cost."""
         cost = self.treatment_cost
         if cost == 0:
-            return "No cost"
+            return "--"
         return self._format_currency(cost)
+
+    @property
+    def ale_display(self):
+        """
+        Get the Annual Loss Expectancy (ALE) with currency from global settings.
+        Returns "No ALE calculated" if no ALE is available.
+        """
+        ale_value = self.ale
+        if ale_value is None:
+            return "No ALE calculated"
+
+        return self._format_currency(ale_value)
 
     @property
     def ale(self):

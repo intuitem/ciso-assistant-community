@@ -755,6 +755,104 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, name="Key Metrics Data", url_path="key-metrics")
+    def key_metrics_data(self, request, pk=None):
+        """
+        Returns key metrics data for quantitative risk scenarios scoped per study.
+        Provides the following info per scenario based on risk metrics:
+        - name
+        - ale (Annual Loss Expectancy)
+        - var_95 (Value at Risk 95%)
+        - var_99 (Value at Risk 99%)
+        - var_999 (Value at Risk 99.9%)
+        - proba_of_exceeding_threshold (Probability of exceeding the loss threshold)
+
+        Data is provided for both current and residual risk levels based on risk_stage.
+        Current level uses hypothesis with risk_stage='current'
+        Residual level uses hypothesis with risk_stage='residual' and is_selected=True
+        """
+        study: QuantitativeRiskStudy = self.get_object()
+
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        scenarios_data = []
+
+        # Process each scenario in the study
+        for scenario in study.risk_scenarios.all():
+            scenario_info = {
+                "id": str(scenario.id),
+                "name": scenario.name,
+                "current_level": None,
+                "residual_level": None,
+            }
+
+            # Get current level data (risk_stage = 'current')
+            current_hypothesis = scenario.hypotheses.filter(
+                risk_stage="current"
+            ).first()
+            if current_hypothesis and current_hypothesis.simulation_data:
+                metrics = current_hypothesis.simulation_data.get("metrics", {})
+                loss_threshold = study.loss_threshold
+
+                current_data = {
+                    "ale": metrics.get("mean_annual_loss"),
+                    "var_95": metrics.get("var_95"),
+                    "var_99": metrics.get("var_99"),
+                    "var_999": metrics.get("var_999"),
+                    "proba_of_exceeding_threshold": metrics.get("prob_above_threshold")
+                    if loss_threshold
+                    else None,
+                    "hypothesis_id": str(current_hypothesis.id),
+                    "hypothesis_name": current_hypothesis.name,
+                }
+                scenario_info["current_level"] = current_data
+
+            # Get residual level data (risk_stage = 'residual' and is_selected = True)
+            residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+            if residual_hypothesis and residual_hypothesis.simulation_data:
+                metrics = residual_hypothesis.simulation_data.get("metrics", {})
+                loss_threshold = study.loss_threshold
+
+                residual_data = {
+                    "ale": metrics.get("mean_annual_loss"),
+                    "var_95": metrics.get("var_95"),
+                    "var_99": metrics.get("var_99"),
+                    "var_999": metrics.get("var_999"),
+                    "proba_of_exceeding_threshold": metrics.get("prob_above_threshold")
+                    if loss_threshold
+                    else None,
+                    "hypothesis_id": str(residual_hypothesis.id),
+                    "hypothesis_name": residual_hypothesis.name,
+                }
+                scenario_info["residual_level"] = residual_data
+
+            scenarios_data.append(scenario_info)
+
+        return Response(
+            {
+                "study_id": str(study.id),
+                "study_name": study.name,
+                "currency": currency,
+                "loss_threshold": study.loss_threshold,
+                "loss_threshold_display": study.loss_threshold_display,
+                "scenarios": scenarios_data,
+                "total_scenarios": len(scenarios_data),
+                "scenarios_with_current_data": sum(
+                    1 for s in scenarios_data if s["current_level"] is not None
+                ),
+                "scenarios_with_residual_data": sum(
+                    1 for s in scenarios_data if s["residual_level"] is not None
+                ),
+                "note": "ALE = Annual Loss Expectancy, VaR = Value at Risk at specified percentiles, proba_of_exceeding_threshold calculated only if study has loss_threshold configured",
+            }
+        )
+
 
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario

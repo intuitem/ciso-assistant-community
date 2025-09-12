@@ -2181,6 +2181,8 @@
 	"roc": "ROSI",
 	"returnOnControls": "ROSI",
 	"rocDisplay": "ROSI",
+	"aleDisplay": "ALE",
+	"treatmentCostDisplay": "Treatment cost",
 	"rocInterpretation": "ROSI Interpretation",
 	"rocHelpText": "Return On Security Invstment - calculated as (Current ALE - Residual ALE - Treatment Cost) / Treatment Cost. Only applies to residual hypotheses.",
 	"isSimulationFresh": "Is simulation fresh",

@@ -24,6 +24,7 @@
 		xMax?: number;
 		xMin?: number;
 		autoYMax?: boolean;
+		enableZoom?: boolean;
 	}
 
 	let {
@@ -48,7 +49,8 @@
 		xMin = undefined,
 		autoYMax = false,
 		xAxisScale = 'log',
-		yAxisScale = 'linear'
+		yAxisScale = 'linear',
+		enableZoom = false
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
@@ -70,6 +72,34 @@
 							fontWeight: 'bold'
 						}
 					}
+				: undefined,
+			dataZoom: enableZoom
+				? [
+						{
+							type: 'slider',
+							xAxisIndex: 0,
+							filterMode: 'none',
+							bottom: 0,
+							height: 30,
+							showDetail: false,
+							handleStyle: {
+								color: '#007bff'
+							},
+							dataBackground: {
+								areaStyle: {
+									color: 'rgba(0, 123, 255, 0.1)'
+								},
+								lineStyle: {
+									color: '#007bff'
+								}
+							}
+						},
+						{
+							type: 'inside',
+							xAxisIndex: 0,
+							filterMode: 'none'
+						}
+					]
 				: undefined,
 			legend: {
 				show:
@@ -113,7 +143,7 @@
 				left: '10%',
 				right: '10%',
 				top: '15%',
-				bottom: '15%'
+				bottom: enableZoom ? '20%' : '15%'
 			},
 			tooltip: {
 				show: !!enableTooltip,

@@ -1599,9 +1599,9 @@ export const listViewFields = {
 			'risk_stage',
 			'simulation_parameters_display',
 			'lec_data',
-			'ale',
+			'ale_display',
 			'added_applied_controls',
-			'treatment_cost',
+			'treatment_cost_display',
 			'roc_display',
 			'is_selected'
 		],
