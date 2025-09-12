@@ -194,6 +194,16 @@
 										<div class="text-sm text-gray-600">Zero Loss</div>
 									</div>
 								{/if}
+								{#if metrics.prob_above_threshold !== undefined && data.data.loss_threshold}
+									<div class="text-center p-3 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm">
+										<div class="text-2xl font-bold text-purple-600 mb-2">
+											{(metrics.prob_above_threshold * 100).toFixed(2)}%
+										</div>
+										<div class="text-sm text-gray-600">
+											Over {data.data.loss_threshold_display || `${currency}${data.data.loss_threshold.toLocaleString()}`}
+										</div>
+									</div>
+								{/if}
 								{#if metrics.prob_above_10k !== undefined}
 									<div class="text-center">
 										<div class="text-2xl font-bold text-yellow-600 mb-2">

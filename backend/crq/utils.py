@@ -75,7 +75,7 @@ def create_loss_exceedance_curve(losses: np.ndarray) -> Tuple[np.ndarray, np.nda
 
 
 def calculate_risk_insights(
-    losses: np.ndarray, probability: float = None
+    losses: np.ndarray, probability: float = None, loss_threshold: float = None
 ) -> Dict[str, float]:
     """
     Calculate standard risk metrics from loss distribution.
@@ -83,6 +83,7 @@ def calculate_risk_insights(
     Args:
         losses: Array of annual loss values
         probability: Original probability of the risk event (optional)
+        loss_threshold: Custom loss threshold for probability calculation (optional)
 
     Returns:
         Dictionary of risk metrics
@@ -102,6 +103,10 @@ def calculate_risk_insights(
         "prob_above_100k": np.mean(losses > 100_000),
         "prob_above_1M": np.mean(losses > 1_000_000),
     }
+
+    # Add loss_threshold probability if provided
+    if loss_threshold is not None and loss_threshold > 0:
+        metrics["prob_above_threshold"] = np.mean(losses > loss_threshold)
 
     # Add probability-based loss metrics if probability is provided
     if probability is not None and probability > 0:

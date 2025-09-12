@@ -88,6 +88,7 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
     risk_tolerance_display = serializers.CharField(
         source="get_risk_tolerance_display", read_only=True
     )
+    loss_threshold_display = serializers.CharField(read_only=True)
 
     class Meta:
         model = QuantitativeRiskStudy
@@ -352,6 +353,19 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
 
         general_settings = GlobalSettings.objects.filter(name="general").first()
         return general_settings.value.get("currency", "€") if general_settings else "€"
+
+    loss_threshold = serializers.SerializerMethodField()
+    loss_threshold_display = serializers.SerializerMethodField()
+
+    def get_loss_threshold(self, obj):
+        """Return loss threshold from parent study"""
+        study = obj.quantitative_risk_scenario.quantitative_risk_study
+        return study.loss_threshold if study else None
+
+    def get_loss_threshold_display(self, obj):
+        """Return formatted loss threshold from parent study"""
+        study = obj.quantitative_risk_scenario.quantitative_risk_study
+        return study.loss_threshold_display if study else None
 
     class Meta:
         model = QuantitativeRiskHypothesis

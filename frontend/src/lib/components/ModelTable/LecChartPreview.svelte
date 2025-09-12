@@ -80,13 +80,13 @@
 				axisLabel: {
 					formatter: function (value: number) {
 						if (value >= 1000000000) {
-							return '$' + (value / 1000000000).toFixed(0) + 'B';
+							return  (value / 1000000000).toFixed(0) + 'B';
 						} else if (value >= 1000000) {
-							return '$' + (value / 1000000).toFixed(0) + 'M';
+							return  (value / 1000000).toFixed(0) + 'M';
 						} else if (value >= 1000) {
-							return '$' + (value / 1000).toFixed(0) + 'K';
+							return  (value / 1000).toFixed(0) + 'K';
 						} else {
-							return '$' + value.toFixed(0);
+							return  value.toFixed(0);
 						}
 					},
 					fontSize: 8

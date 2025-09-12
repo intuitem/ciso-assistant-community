@@ -64,6 +64,9 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             "Risk tolerance points and curve data. Expected format: {'points': {'point1': {'probability': float, 'acceptable_loss': float}, 'point2': {'probability': float, 'acceptable_loss': float}}, 'curve_data': {'loss_values': [...], 'probability_values': [...]}}"
         ),
     )
+    loss_threshold = models.FloatField(
+        verbose_name="Loss threshold", blank=True, null=True
+    )
     distribution_model = models.CharField(
         max_length=100,
         choices=Distribution_model.choices,
@@ -119,6 +122,23 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                 )
 
         return " | ".join(display_parts) if display_parts else "Not configured"
+
+    @property
+    def loss_threshold_display(self):
+        """
+        Get the loss threshold with currency from global settings.
+        Returns "Not set" if no loss threshold is configured.
+        """
+        if self.loss_threshold is None:
+            return "Not set"
+
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        return f"{self.loss_threshold:,.0f} {currency}"
 
     def generate_risk_tolerance_curve(self):
         """
@@ -422,7 +442,10 @@ class QuantitativeRiskHypothesis(
         loss_values, exceedance_probs = create_loss_exceedance_curve(losses)
 
         # 3. Calculate risk metrics
-        metrics = calculate_risk_insights(losses, probability)
+        # Get loss_threshold from parent study
+        study = self.quantitative_risk_scenario.quantitative_risk_study
+        loss_threshold = study.loss_threshold if study else None
+        metrics = calculate_risk_insights(losses, probability, loss_threshold)
 
         # 4. Downsample for visualization (take every nth point to reduce data size)
         downsample_factor = max(1, len(loss_values) // 1000)  # Max 1000 points

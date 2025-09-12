@@ -123,6 +123,17 @@
 			bind:cachedValue={formDataCache['observation']}
 		/>
 
+		<NumberField
+			{form}
+			field="loss_threshold"
+			label="Loss Threshold"
+			min={0}
+			step={1}
+			helpText="Loss threshold value"
+			cacheLock={cacheLocks['loss_threshold']}
+			bind:cachedValue={formDataCache['loss_threshold']}
+		/>
+
 		<div class="space-y-2">
 			<h5 class="font-medium text-gray-600 my-2 py-2">Risk Tolerance Points</h5>
 			<div class="grid grid-cols-2 gap-4">

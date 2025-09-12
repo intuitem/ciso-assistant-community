@@ -2186,5 +2186,6 @@
 	"isSimulationFresh": "Is simulation fresh",
 	"simulationFresh": "Simulation data is up to date",
 	"simulationNotFresh": "Simulation data is outdated - parameters have changed",
-	"riskToleranceDisplay": "Risk tolerance settings"
+	"riskToleranceDisplay": "Risk tolerance settings",
+	"lossThresholdDisplay": "Loss threshold"
 }
