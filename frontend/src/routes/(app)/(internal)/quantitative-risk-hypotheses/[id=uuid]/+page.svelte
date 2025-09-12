@@ -99,6 +99,7 @@
 						<LossExceedanceCurve
 							data={data.lec.data}
 							toleranceData={data.data.risk_tolerance_curve}
+							lossThreshold={data.data.loss_threshold}
 							currency={data.data.currency || '$'}
 							xMin={lecMinValue()}
 							xMax={lecMaxValue()}

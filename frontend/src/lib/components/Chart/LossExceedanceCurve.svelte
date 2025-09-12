@@ -9,6 +9,7 @@
 		data?: Array<[number, number]>;
 		toleranceData?: Array<[number, number]>;
 		residualData?: Array<[number, number]>;
+		lossThreshold?: number;
 		currency?: string;
 		title?: string;
 		showTitle?: boolean;
@@ -33,6 +34,7 @@
 		data = undefined,
 		toleranceData = undefined,
 		residualData = undefined,
+		lossThreshold = undefined,
 		currency = '$',
 		title = 'Loss Exceedance Curve',
 		showTitle = true,
@@ -62,7 +64,7 @@
 			title: showTitle
 				? {
 						text: title,
-						left: 'center',
+						left: 'left',
 						textStyle: {
 							fontSize: 16,
 							fontWeight: 'bold'
@@ -245,7 +247,38 @@
 							}
 						])
 					},
-					data: data
+					data: data,
+					...(lossThreshold !== undefined && lossThreshold > 0
+						? {
+								markLine: {
+									silent: false,
+									symbol: 'none',
+									label: {
+										show: true,
+										position: 'end',
+										formatter: `Loss Threshold: ${currency}${lossThreshold.toLocaleString()}`,
+										fontSize: 12,
+										color: '#7c3aed',
+										backgroundColor: 'rgba(255, 255, 255, 0.9)',
+										borderColor: '#7c3aed',
+										borderWidth: 1,
+										borderRadius: 4,
+										padding: [4, 8]
+									},
+									lineStyle: {
+										color: '#7c3aed',
+										width: 2,
+										type: 'dashed'
+									},
+									data: [
+										{
+											xAxis: lossThreshold,
+											name: 'Loss Threshold'
+										}
+									]
+								}
+							}
+						: {})
 				},
 				// Combined Residual Risk curve (only if residualData is provided)
 				...(residualData && residualData.length > 0
