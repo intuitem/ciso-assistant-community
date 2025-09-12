@@ -842,7 +842,6 @@
 	"rpoHelpText": "Objectif du point de récupération",
 	"mtd": "MTD",
 	"mtdHelpText": "Temps d'arrêt maximal tolérable",
-	"securityObjectives": "Objectifs de sécurité",
 	"disasterRecoveryObjectives": "Objectifs de reprise d'activité",
 	"noExpirationDateSet": "Aucune date d'expiration définie",
 	"sumpageTotal": "Total",
@@ -907,9 +906,7 @@
 	"fixed": "Fixée",
 	"general": "Général",
 	"generalSettingsDescription": "Configurez vos paramètres ici.",
-	"securityObjectiveScale": "Échelle des objectifs de sécurité",
 	"generalSettingsUpdated": "Paramètres mis à jour",
-	"securityObjectiveScaleHelpText": "Choisissez votre échelle d'objectifs de sécurité (1 à 4 par défaut)",
 	"labels": "Étiquettes",
 	"addLabel": "Ajouter une étiquette",
 	"labelsHelpText": "Les étiquettes sont utilisées pour catégoriser et filtrer les éléments.",
@@ -2096,5 +2093,9 @@
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
-	"nextOccurrenceStatus": "Statut de la prochaine occurrence"
+	"nextOccurrenceStatus": "Statut de la prochaine occurrence",
+	"image": "Image",
+	"securityObjectives": "Propriétés de sécurité",
+	"securityObjectiveScale": "Échelle des propriétés de sécurité",
+	"securityObjectiveScaleHelpText": "Choisissez votre échelle pour les propriétés de sécurité (1 à 4 par défaut)"
 }

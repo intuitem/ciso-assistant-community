@@ -933,6 +933,10 @@
 	"fearedEventAssetHelpText": "डरने वाले घटनाएँ आमतौर पर व्यवसाय मूल्यों (प्राथमिक संपत्तियों) से जुड़ी होती हैं। लचीलापन के लिए यहाँ सहायक संपत्तियों की अनुमति है।",
 	"saveAndContinue": "सहेजें और जारी रखें",
 	"nextOccurrenceStatus": "अगला घटना स्थिति",
+	"image": "छवि",
+	"securityObjectives": "सुरक्षा गुण",
+	"securityObjectiveScale": "सुरक्षा गुण स्केल",
+	"securityObjectiveScaleHelpText": "सुरक्षा गुणों के लिए अपना स्केल चुनें (डिफ़ॉल्ट रूप से 1 से 4)",
 	"actor": "अभिनेता",
 	"action": "क्रिया"
 }
