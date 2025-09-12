@@ -199,13 +199,19 @@
 													{#if scenario.description}
 														<div>
 															<h4 class="text-sm font-medium text-gray-900 mb-2">Description</h4>
-															<MarkdownRenderer content={scenario.description} class="text-gray-600" />
+															<MarkdownRenderer
+																content={scenario.description}
+																class="text-gray-600"
+															/>
 														</div>
 													{/if}
 													{#if scenario.observation}
 														<div>
 															<h4 class="text-sm font-medium text-gray-900 mb-2">Observation</h4>
-															<MarkdownRenderer content={scenario.observation} class="text-gray-600" />
+															<MarkdownRenderer
+																content={scenario.observation}
+																class="text-gray-600"
+															/>
 														</div>
 													{/if}
 												</div>
