@@ -18,7 +18,7 @@ from .models import (
     QuantitativeRiskHypothesis,
 )
 from .serializers import QuantitativeRiskStudyActionPlanSerializer
-from .utils import sum_lec_curves, run_combined_simulation
+from .utils import run_combined_simulation
 
 logger = structlog.get_logger(__name__)
 
@@ -194,289 +194,61 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                         }
                     )
 
-        # 2. Collect current hypothesis parameters for mathematically consistent simulation
-        current_scenarios_params = {}
-        scenarios_with_current = []
+        # 2. Use cached portfolio simulation for current risk
+        portfolio_data = study.get_or_generate_portfolio_simulation()
 
-        for scenario in study.risk_scenarios.all():
-            current_hypothesis = scenario.hypotheses.filter(
-                risk_stage="current"
-            ).first()
-            if current_hypothesis and current_hypothesis.parameters:
-                params = current_hypothesis.parameters
+        # Add current portfolio curve if available
+        if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
+            current_data = portfolio_data["current"]
+            loss_data = current_data.get("loss", [])
+            probability_data = current_data.get("probability", [])
 
-                # Extract required parameters
-                probability = params.get("probability")
-                impact = params.get("impact", {})
-                lower_bound = impact.get("lb")
-                upper_bound = impact.get("ub")
-                distribution = impact.get("distribution")
-
-                # Validate parameters for new simulation method
-                if (
-                    probability is not None
-                    and lower_bound is not None
-                    and upper_bound is not None
-                    and distribution == "LOGNORMAL-CI90"
-                    and lower_bound > 0
-                    and upper_bound > lower_bound
-                ):
-                    current_scenarios_params[scenario.name] = {
-                        "probability": probability,
-                        "lower_bound": lower_bound,
-                        "upper_bound": upper_bound,
+            if loss_data and probability_data:
+                combined_data = [
+                    [float(loss), float(prob)]
+                    for loss, prob in zip(loss_data, probability_data)
+                    if loss > 0
+                ]
+                curves.append(
+                    {
+                        "name": "Combined Current Risk",
+                        "type": "combined_current",
+                        "data": combined_data,
+                        "study_id": str(study.id),
+                        "study_name": study.name,
+                        "component_scenarios": current_data.get("scenarios", []),
+                        "total_scenarios": current_data.get("total_scenarios", 0),
+                        "simulation_method": current_data.get("method", "cached"),
                     }
-
-                    scenarios_with_current.append(
-                        {
-                            "scenario_id": str(scenario.id),
-                            "scenario_name": scenario.name,
-                            "hypothesis_id": str(current_hypothesis.id),
-                            "hypothesis_name": current_hypothesis.name,
-                        }
-                    )
-
-        # 3. Run mathematically consistent combined simulation if we have scenarios
-        if current_scenarios_params:
-            try:
-                simulation_results = run_combined_simulation(
-                    scenarios_params=current_scenarios_params,
-                    n_simulations=100_000,
-                    random_seed=42,
                 )
 
-                # Add portfolio total curve from mathematically consistent simulation
-                if "Portfolio_Total" in simulation_results:
-                    portfolio_result = simulation_results["Portfolio_Total"]
-                    loss_data = portfolio_result["loss"]
-                    probability_data = portfolio_result["probability"]
+        # 3. Use cached portfolio simulation for residual risk
+        # Add residual portfolio curve if available from cache
+        if portfolio_data.get("residual") and not portfolio_data["residual"].get(
+            "error"
+        ):
+            residual_data = portfolio_data["residual"]
+            residual_loss_data = residual_data.get("loss", [])
+            residual_probability_data = residual_data.get("probability", [])
 
-                    if loss_data and probability_data:
-                        combined_data = [
-                            [float(loss), float(prob)]
-                            for loss, prob in zip(loss_data, probability_data)
-                            if loss > 0
-                        ]
-                        curves.append(
-                            {
-                                "name": "Combined Current Risk",
-                                "type": "combined_current",
-                                "data": combined_data,
-                                "study_id": str(study.id),
-                                "study_name": study.name,
-                                "component_scenarios": scenarios_with_current,
-                                "total_scenarios": len(scenarios_with_current),
-                                "simulation_method": "mathematically_consistent",
-                            }
-                        )
-
-            except Exception as e:
-                logger.warning(
-                    f"Failed to run combined simulation for study {study.id}: {str(e)}"
-                )
-
-                # Fallback to old method if new method fails
-                logger.info(
-                    f"Falling back to curve interpolation method for study {study.id}"
-                )
-                current_curves_data = []
-
-                for scenario in study.risk_scenarios.all():
-                    current_hypothesis = scenario.hypotheses.filter(
-                        risk_stage="current"
-                    ).first()
-                    if current_hypothesis and current_hypothesis.simulation_data:
-                        simulation_data = current_hypothesis.simulation_data
-                        loss_data = simulation_data.get("loss", [])
-                        probability_data = simulation_data.get("probability", [])
-
-                        if loss_data and probability_data:
-                            loss_array = np.array(loss_data)
-                            prob_array = np.array(probability_data)
-                            valid_indices = loss_array > 0
-                            if np.any(valid_indices):
-                                current_curves_data.append(
-                                    (
-                                        loss_array[valid_indices],
-                                        prob_array[valid_indices],
-                                    )
-                                )
-
-                if current_curves_data:
-                    try:
-                        combined_losses, combined_probs = sum_lec_curves(
-                            current_curves_data
-                        )
-                        if len(combined_losses) > 0 and len(combined_probs) > 0:
-                            combined_data = [
-                                [float(loss), float(prob)]
-                                for loss, prob in zip(combined_losses, combined_probs)
-                                if loss > 0
-                            ]
-                            curves.append(
-                                {
-                                    "name": "Combined Current Risk",
-                                    "type": "combined_current",
-                                    "data": combined_data,
-                                    "study_id": str(study.id),
-                                    "study_name": study.name,
-                                    "component_scenarios": scenarios_with_current,
-                                    "total_scenarios": len(scenarios_with_current),
-                                    "simulation_method": "fallback_interpolation",
-                                }
-                            )
-                    except Exception as fallback_error:
-                        logger.error(
-                            f"Both new and fallback methods failed for study {study.id}: {str(fallback_error)}"
-                        )
-
-        # 4. Collect selected residual hypothesis parameters for mathematically consistent simulation
-        residual_scenarios_params = {}
-        scenarios_with_residual = []
-
-        for scenario in study.risk_scenarios.all():
-            selected_residual_hypothesis = scenario.hypotheses.filter(
-                risk_stage="residual", is_selected=True
-            ).first()
-            if selected_residual_hypothesis and selected_residual_hypothesis.parameters:
-                params = selected_residual_hypothesis.parameters
-
-                # Extract required parameters
-                probability = params.get("probability")
-                impact = params.get("impact", {})
-                lower_bound = impact.get("lb")
-                upper_bound = impact.get("ub")
-                distribution = impact.get("distribution")
-
-                # Validate parameters for new simulation method
-                if (
-                    probability is not None
-                    and lower_bound is not None
-                    and upper_bound is not None
-                    and distribution == "LOGNORMAL-CI90"
-                    and lower_bound > 0
-                    and upper_bound > lower_bound
-                ):
-                    residual_scenarios_params[scenario.name] = {
-                        "probability": probability,
-                        "lower_bound": lower_bound,
-                        "upper_bound": upper_bound,
+            if residual_loss_data and residual_probability_data:
+                combined_residual_data = [
+                    [float(loss), float(prob)]
+                    for loss, prob in zip(residual_loss_data, residual_probability_data)
+                    if loss > 0
+                ]
+                curves.append(
+                    {
+                        "name": "Combined Residual Risk",
+                        "type": "combined_residual",
+                        "data": combined_residual_data,
+                        "study_id": str(study.id),
+                        "study_name": study.name,
+                        "component_scenarios": residual_data.get("scenarios", []),
+                        "total_scenarios": residual_data.get("total_scenarios", 0),
+                        "simulation_method": residual_data.get("method", "cached"),
                     }
-
-                    scenarios_with_residual.append(
-                        {
-                            "scenario_id": str(scenario.id),
-                            "scenario_name": scenario.name,
-                            "hypothesis_id": str(selected_residual_hypothesis.id),
-                            "hypothesis_name": selected_residual_hypothesis.name,
-                        }
-                    )
-
-        # 5. Run mathematically consistent combined simulation for residual scenarios
-        if residual_scenarios_params:
-            try:
-                residual_simulation_results = run_combined_simulation(
-                    scenarios_params=residual_scenarios_params,
-                    n_simulations=100_000,
-                    random_seed=43,  # Different seed for residual
                 )
-
-                # Add residual portfolio total curve from mathematically consistent simulation
-                if "Portfolio_Total" in residual_simulation_results:
-                    residual_portfolio_result = residual_simulation_results[
-                        "Portfolio_Total"
-                    ]
-                    residual_loss_data = residual_portfolio_result["loss"]
-                    residual_probability_data = residual_portfolio_result["probability"]
-
-                    if residual_loss_data and residual_probability_data:
-                        combined_residual_data = [
-                            [float(loss), float(prob)]
-                            for loss, prob in zip(
-                                residual_loss_data, residual_probability_data
-                            )
-                            if loss > 0
-                        ]
-                        curves.append(
-                            {
-                                "name": "Combined Residual Risk",
-                                "type": "combined_residual",
-                                "data": combined_residual_data,
-                                "study_id": str(study.id),
-                                "study_name": study.name,
-                                "component_scenarios": scenarios_with_residual,
-                                "total_scenarios": len(scenarios_with_residual),
-                                "simulation_method": "mathematically_consistent",
-                            }
-                        )
-
-            except Exception as e:
-                logger.warning(
-                    f"Failed to run combined residual simulation for study {study.id}: {str(e)}"
-                )
-
-                # Fallback to old method if new method fails
-                logger.info(
-                    f"Falling back to curve interpolation method for residual scenarios in study {study.id}"
-                )
-                residual_curves_data = []
-
-                for scenario in study.risk_scenarios.all():
-                    selected_residual_hypothesis = scenario.hypotheses.filter(
-                        risk_stage="residual", is_selected=True
-                    ).first()
-                    if (
-                        selected_residual_hypothesis
-                        and selected_residual_hypothesis.simulation_data
-                    ):
-                        simulation_data = selected_residual_hypothesis.simulation_data
-                        loss_data = simulation_data.get("loss", [])
-                        probability_data = simulation_data.get("probability", [])
-
-                        if loss_data and probability_data:
-                            loss_array = np.array(loss_data)
-                            prob_array = np.array(probability_data)
-                            valid_indices = loss_array > 0
-                            if np.any(valid_indices):
-                                residual_curves_data.append(
-                                    (
-                                        loss_array[valid_indices],
-                                        prob_array[valid_indices],
-                                    )
-                                )
-
-                if residual_curves_data:
-                    try:
-                        combined_residual_losses, combined_residual_probs = (
-                            sum_lec_curves(residual_curves_data)
-                        )
-                        if (
-                            len(combined_residual_losses) > 0
-                            and len(combined_residual_probs) > 0
-                        ):
-                            combined_residual_data = [
-                                [float(loss), float(prob)]
-                                for loss, prob in zip(
-                                    combined_residual_losses, combined_residual_probs
-                                )
-                                if loss > 0
-                            ]
-                            curves.append(
-                                {
-                                    "name": "Combined Residual Risk",
-                                    "type": "combined_residual",
-                                    "data": combined_residual_data,
-                                    "study_id": str(study.id),
-                                    "study_name": study.name,
-                                    "component_scenarios": scenarios_with_residual,
-                                    "total_scenarios": len(scenarios_with_residual),
-                                    "simulation_method": "fallback_interpolation",
-                                }
-                            )
-                    except Exception as fallback_error:
-                        logger.error(
-                            f"Both new and fallback residual methods failed for study {study.id}: {str(fallback_error)}"
-                        )
 
         # Determine which simulation method was primarily used
         simulation_methods_used = set()
@@ -487,10 +259,24 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         primary_method = (
             "mathematically_consistent"
             if "mathematically_consistent" in simulation_methods_used
-            else "fallback_interpolation"
-            if "fallback_interpolation" in simulation_methods_used
+            else "cached"
+            if "cached" in simulation_methods_used
             else "none"
         )
+
+        # Calculate scenario counts from portfolio data
+        current_scenario_count = 0
+        residual_scenario_count = 0
+
+        if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
+            current_scenario_count = portfolio_data["current"].get("total_scenarios", 0)
+
+        if portfolio_data.get("residual") and not portfolio_data["residual"].get(
+            "error"
+        ):
+            residual_scenario_count = portfolio_data["residual"].get(
+                "total_scenarios", 0
+            )
 
         # Return the combined curves data
         return Response(
@@ -500,12 +286,12 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "currency": currency,
                 "curves": curves,
                 "total_curves": len(curves),
-                "scenarios_with_current_data": len(scenarios_with_current),
-                "scenarios_with_residual_data": len(scenarios_with_residual),
+                "scenarios_with_current_data": current_scenario_count,
+                "scenarios_with_residual_data": residual_scenario_count,
                 "total_scenarios": study.risk_scenarios.count(),
                 "simulation_method": primary_method,
                 "simulation_methods_used": list(simulation_methods_used),
-                "note": "Using mathematically consistent combined simulation when hypothesis parameters are available, falling back to curve interpolation otherwise",
+                "note": "Using cached portfolio simulation results for optimal performance",
             }
         )
 

@@ -157,6 +157,175 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         """
         return risk_tolerance_curve(self.risk_tolerance)
 
+    def get_or_generate_portfolio_simulation(self, force_refresh=False):
+        """
+        Get cached portfolio simulation results or generate new ones if cache is empty/stale.
+
+        Args:
+            force_refresh: Force regeneration of cached data
+
+        Returns:
+            Dict containing current and residual portfolio simulation results
+        """
+        from .utils import run_combined_simulation
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        # Check if cache exists and is not empty (unless forcing refresh)
+        if (
+            not force_refresh
+            and self.portfolio_simulation
+            and isinstance(self.portfolio_simulation, dict)
+            and self.portfolio_simulation.get("current")
+            and self.portfolio_simulation.get("residual")
+        ):
+            logger.info(f"Using cached portfolio simulation for study {self.id}")
+            return self.portfolio_simulation
+
+        logger.info(f"Generating portfolio simulation for study {self.id}")
+
+        portfolio_data = {
+            "current": None,
+            "residual": None,
+            "metadata": {
+                "generated_at": str(self.updated_at),
+                "scenarios_count": self.risk_scenarios.count(),
+            },
+        }
+
+        # Generate current portfolio simulation
+        current_scenarios_params = {}
+        current_scenarios_info = []
+
+        for scenario in self.risk_scenarios.all():
+            current_hypothesis = scenario.hypotheses.filter(
+                risk_stage="current"
+            ).first()
+            if current_hypothesis and current_hypothesis.parameters:
+                params = current_hypothesis.parameters
+
+                # Extract and validate parameters
+                probability = params.get("probability")
+                impact = params.get("impact", {})
+                lower_bound = impact.get("lb")
+                upper_bound = impact.get("ub")
+                distribution = impact.get("distribution")
+
+                if (
+                    probability is not None
+                    and lower_bound is not None
+                    and upper_bound is not None
+                    and distribution == "LOGNORMAL-CI90"
+                    and lower_bound > 0
+                    and upper_bound > lower_bound
+                ):
+                    current_scenarios_params[scenario.name] = {
+                        "probability": probability,
+                        "lower_bound": lower_bound,
+                        "upper_bound": upper_bound,
+                    }
+                    current_scenarios_info.append(
+                        {
+                            "scenario_id": str(scenario.id),
+                            "scenario_name": scenario.name,
+                            "hypothesis_id": str(current_hypothesis.id),
+                            "hypothesis_name": current_hypothesis.name,
+                        }
+                    )
+
+        if current_scenarios_params:
+            try:
+                current_results = run_combined_simulation(
+                    scenarios_params=current_scenarios_params,
+                    n_simulations=100_000,
+                    random_seed=42,
+                )
+                if "Portfolio_Total" in current_results:
+                    portfolio_result = current_results["Portfolio_Total"]
+                    portfolio_data["current"] = {
+                        "loss": portfolio_result["loss"],
+                        "probability": portfolio_result["probability"],
+                        "metrics": portfolio_result.get("metrics", {}),
+                        "scenarios": current_scenarios_info,
+                        "total_scenarios": len(current_scenarios_info),
+                        "method": "mathematically_consistent",
+                    }
+            except Exception as e:
+                logger.warning(
+                    f"Failed to generate current portfolio simulation for study {self.id}: {str(e)}"
+                )
+                portfolio_data["current"] = {"error": str(e)}
+
+        # Generate residual portfolio simulation
+        residual_scenarios_params = {}
+        residual_scenarios_info = []
+
+        for scenario in self.risk_scenarios.all():
+            selected_residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+            if selected_residual_hypothesis and selected_residual_hypothesis.parameters:
+                params = selected_residual_hypothesis.parameters
+
+                # Extract and validate parameters
+                probability = params.get("probability")
+                impact = params.get("impact", {})
+                lower_bound = impact.get("lb")
+                upper_bound = impact.get("ub")
+                distribution = impact.get("distribution")
+
+                if (
+                    probability is not None
+                    and lower_bound is not None
+                    and upper_bound is not None
+                    and distribution == "LOGNORMAL-CI90"
+                    and lower_bound > 0
+                    and upper_bound > lower_bound
+                ):
+                    residual_scenarios_params[scenario.name] = {
+                        "probability": probability,
+                        "lower_bound": lower_bound,
+                        "upper_bound": upper_bound,
+                    }
+                    residual_scenarios_info.append(
+                        {
+                            "scenario_id": str(scenario.id),
+                            "scenario_name": scenario.name,
+                            "hypothesis_id": str(selected_residual_hypothesis.id),
+                            "hypothesis_name": selected_residual_hypothesis.name,
+                        }
+                    )
+
+        if residual_scenarios_params:
+            try:
+                residual_results = run_combined_simulation(
+                    scenarios_params=residual_scenarios_params,
+                    n_simulations=100_000,
+                    random_seed=43,
+                )
+                if "Portfolio_Total" in residual_results:
+                    portfolio_result = residual_results["Portfolio_Total"]
+                    portfolio_data["residual"] = {
+                        "loss": portfolio_result["loss"],
+                        "probability": portfolio_result["probability"],
+                        "metrics": portfolio_result.get("metrics", {}),
+                        "scenarios": residual_scenarios_info,
+                        "total_scenarios": len(residual_scenarios_info),
+                        "method": "mathematically_consistent",
+                    }
+            except Exception as e:
+                logger.warning(
+                    f"Failed to generate residual portfolio simulation for study {self.id}: {str(e)}"
+                )
+                portfolio_data["residual"] = {"error": str(e)}
+
+        # Cache the results
+        self.portfolio_simulation = portfolio_data
+        self.save(update_fields=["portfolio_simulation"])
+
+        return portfolio_data
+
     def save(self, *args, **kwargs):
         """
         Override save to mark related hypotheses simulation as not fresh when risk_tolerance changes.
@@ -508,6 +677,10 @@ class QuantitativeRiskHypothesis(
                     updated_risk_tolerance["curve_data"] = curve_data
                     study.risk_tolerance = updated_risk_tolerance
                     study.save(update_fields=["risk_tolerance"])
+
+            # Invalidate portfolio simulation cache since hypothesis simulation has changed
+            study.portfolio_simulation = {}
+            study.save(update_fields=["portfolio_simulation"])
 
         return simulation_results
 
