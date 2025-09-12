@@ -152,9 +152,8 @@ def simulate_portfolio_annual_losses(
     random_seed: Optional[int] = None,
 ) -> Dict[str, np.ndarray]:
     """
-    Run Monte Carlo simulation for multiple risk scenarios simultaneously.
-    This ensures mathematical consistency by using the same random draw
-    for all scenarios in each simulation iteration.
+    Run Monte Carlo simulation for multiple risk scenarios independently.
+    Each scenario uses its own independent random draws for frequency and severity.
 
     Args:
         scenario_params: List of dicts, each with keys:
@@ -203,20 +202,16 @@ def simulate_portfolio_annual_losses(
     for scenario_dist in scenario_distributions:
         results[scenario_dist["name"]] = np.zeros(n_simulations)
 
-    # Run simulation with consistent random draws across scenarios
+    # Run simulation with independent random draws for each scenario
     for i in range(n_simulations):
-        # Single random draw for frequency determination across all scenarios
-        frequency_draw = rng.random()
-
         for scenario_dist in scenario_distributions:
+            # Independent frequency draw for each scenario
+            frequency_draw = rng.random()
+
             # Stage 1: Frequency - does event occur this year?
             if frequency_draw < scenario_dist["probability"]:
                 # Stage 2: Severity - what's the loss magnitude?
-                # Use consistent random seed per iteration for severity
-                severity_rng = np.random.default_rng(rng.integers(0, 2**31))
-                loss = severity_rng.lognormal(
-                    scenario_dist["mu"], scenario_dist["sigma"]
-                )
+                loss = rng.lognormal(scenario_dist["mu"], scenario_dist["sigma"])
                 results[scenario_dist["name"]][i] = loss
             # else: loss remains 0 (initialized above)
 
