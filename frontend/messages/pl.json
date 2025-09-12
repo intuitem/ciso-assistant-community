@@ -860,7 +860,6 @@
 	"rpoHelpText": "Cel punktu odzyskiwania",
 	"mtd": "Mtd",
 	"mtdHelpText": "Maksymalne tolerowane przestoje",
-	"securityObjectives": "Cele bezpieczeństwa",
 	"disasterRecoveryObjectives": "Cele odzyskiwania po awarii",
 	"noExpirationDateSet": "Brak daty ważności",
 	"sumpageTotal": "całkowity",
@@ -925,9 +924,7 @@
 	"fixed": "Naprawiono",
 	"general": "Ogólny",
 	"generalSettingsDescription": "Skonfiguruj swoje ogólne ustawienia tutaj.",
-	"securityObjectiveScale": "Skala celu bezpieczeństwa",
 	"generalSettingsUpdated": "Ustawienia ogólne zaktualizowane",
-	"securityObjectiveScaleHelpText": "Wybierz skalę dla celów bezpieczeństwa (domyślnie od 1 do 4)",
 	"labels": "Etykiety",
 	"addLabel": "Dodaj etykietę",
 	"labelsHelpText": "Etykiety służą do kategoryzowania i filtrowania elementów.",
@@ -1708,5 +1705,9 @@
 	"associatedCampaigns": "Powiązane kampanie",
 	"recentlyUpdatedAudits": "Niedawno zaktualizowane audyty",
 	"saveAndContinue": "Zapisz i kontynuuj",
-	"nextOccurrenceStatus": "Następny status wystąpienia"
+	"nextOccurrenceStatus": "Następny status wystąpienia",
+	"image": "Obraz",
+	"securityObjectives": "Właściwości bezpieczeństwa",
+	"securityObjectiveScale": "Skala właściwości bezpieczeństwa",
+	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)"
 }

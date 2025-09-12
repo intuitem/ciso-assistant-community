@@ -436,10 +436,11 @@
 				<div class="w-1/2">
 					<AutocompleteSelect
 						form={_form}
-						options={data.qualificationChoices}
-						multiple={true}
+						multiple
+						optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 						field="qualifications"
-						label={m.qualification()}
+						label={m.qualifications()}
+						optionsLabelField="translated_name"
 						baseClass="flex-1"
 					/>
 				</div>

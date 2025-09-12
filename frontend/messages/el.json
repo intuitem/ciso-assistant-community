@@ -858,7 +858,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maximum Tolerable Downtime",
-	"securityObjectives": "Στόχοι ασφάλειας",
 	"disasterRecoveryObjectives": "Στόχοι αποκατάστασης καταστροφών",
 	"noExpirationDateSet": "Δεν έχει οριστεί ημερομηνία λήξης",
 	"sumpageTotal": "σύνολο",
@@ -923,9 +922,7 @@
 	"fixed": "Διορθωμένο",
 	"general": "γενικά",
 	"generalSettingsDescription": "Ρυθμίστε τις γενικές ρυθμίσεις εδώ.",
-	"securityObjectiveScale": "Κλίμακα στόχων ασφάλειας",
 	"generalSettingsUpdated": "Οι γενικές ρυθμίσεις ενημερώθηκαν",
-	"securityObjectiveScaleHelpText": "Επιλέξτε την κλίμακα (1‑4 προεπιλογή) για τους στόχους ασφάλειας",
 	"labels": "Ετικέτες",
 	"addLabel": "Προσθήκη ετικέτας",
 	"labelsHelpText": "Οι ετικέτες βοηθούν στην κατηγοριοποίηση και στο φιλτράρισμα αντικειμένων.",
@@ -1665,5 +1662,9 @@
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
 	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
 	"saveAndContinue": "Αποθήκευση και συνέχιση",
-	"nextOccurrenceStatus": "Κατάσταση επόμενης εμφάνισης"
+	"nextOccurrenceStatus": "Κατάσταση επόμενης εμφάνισης",
+	"image": "Εικόνα",
+	"securityObjectives": "Ασφαλή ιδιότητες",
+	"securityObjectiveScale": "Κλίμακα ασφαλών ιδιοτήτων",
+	"securityObjectiveScaleHelpText": "Επιλέξτε την κλίμακα σας για τις ασφαλείς ιδιότητες (1 έως 4 από προεπιλογή)"
 }

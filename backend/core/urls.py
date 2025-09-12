@@ -82,11 +82,6 @@ router.register(
     basename="filtering-labels",
 )
 router.register(
-    r"qualifications",
-    QualificationViewSet,
-    basename="qualifications",
-)
-router.register(
     r"security-exceptions",
     SecurityExceptionViewSet,
     basename="security-exceptions",
