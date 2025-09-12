@@ -2,9 +2,11 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { run } from 'svelte/legacy';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -25,6 +27,15 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	// Convert priority values from strings to integers for proper schema validation
+	run(() => {
+		if (model?.selectOptions?.priority) {
+			model.selectOptions.priority.forEach((element) => {
+				element.value = parseInt(element.value);
+			});
+		}
+	});
 </script>
 
 <AutocompleteSelect
@@ -45,6 +56,15 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+/>
+
+<Select
+	{form}
+	options={model.selectOptions['priority']}
+	field="priority"
+	label={m.priority()}
+	cacheLock={cacheLocks['priority']}
+	bind:cachedValue={formDataCache['priority']}
 />
 
 <Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.roToIsSelectedHelpText()} />
@@ -119,5 +139,12 @@
 		label={m.status()}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
+	/>
+	<MarkdownField
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
 	/>
 </Dropdown>

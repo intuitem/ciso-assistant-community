@@ -1478,11 +1478,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'quantitative_risk_study' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'priority' },
 			{ field: 'current_ale_display' },
 			{ field: 'status' },
 			{ field: 'assets' },
 			{ field: 'threats' },
 			{ field: 'qualifications' },
+			{ field: 'observation' },
 			{ field: 'is_selected' }
 		],
 		reverseForeignKeyFields: [
@@ -1492,8 +1494,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'crq/quantitative-risk-hypotheses'
 			}
 		],
-		selectFields: [{ field: 'status', endpointUrl: 'crq/quantitative-risk-scenarios' }],
-		filters: [{ field: 'quantitative_risk_study' }, { field: 'status' }]
+		selectFields: [
+			{ field: 'status', endpointUrl: 'crq/quantitative-risk-scenarios' },
+			{ field: 'priority', endpointUrl: 'crq/quantitative-risk-scenarios' }
+		],
+		filters: [{ field: 'quantitative_risk_study' }, { field: 'status' }, { field: 'priority' }]
 	},
 	'quantitative-risk-hypotheses': {
 		name: 'quantitativeriskhypothesis',

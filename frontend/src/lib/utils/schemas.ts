@@ -726,10 +726,12 @@ export const quantitativeRiskScenarioSchema = z.object({
 	quantitative_risk_study: z.string().uuid(),
 	assets: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
+	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('draft'),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	threats: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable(),
 	is_selected: z.boolean().default(true),
 	ref_id: z.string().optional()
 });

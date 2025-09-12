@@ -152,7 +152,7 @@
 				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 					<div class="flex flex-col items-center space-y-4">
 						<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-						<h3 class="text-lg font-semibold text-gray-600">Combined Loss Exceedance Curve</h3>
+						<h3 class="text-lg font-semibold text-gray-600">Portfolio overview</h3>
 						<p class="text-gray-500">
 							No combined LEC data available. Run simulations on your scenario hypotheses to
 							generate the combined curve.
@@ -169,24 +169,46 @@
 							<div class="p-6 pb-4">
 								<div class="flex justify-between items-start">
 									<div class="flex-1">
-										<div class="flex items-center gap-3 mb-2">
-											<Anchor
-												href="/quantitative-risk-scenarios/{scenario.id}"
-												class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm font-medium rounded cursor-pointer transition-colors"
-												breadcrumbAction="push"
-											>
-												{scenario.ref_id}
-											</Anchor>
-											<span
-												class="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded capitalize"
-											>
-												{scenario.status}
-											</span>
+										<div class="flex items-center justify-between mb-2">
+											<div class="flex items-center gap-3">
+												<Anchor
+													href="/quantitative-risk-scenarios/{scenario.id}"
+													class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm font-medium rounded cursor-pointer transition-colors"
+													breadcrumbAction="push"
+												>
+													{scenario.ref_id}
+												</Anchor>
+												<span
+													class="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded capitalize"
+												>
+													{scenario.status}
+												</span>
+											</div>
+											{#if scenario.priority}
+												<span
+													class="px-2 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded"
+												>
+													P{scenario.priority}
+												</span>
+											{/if}
 										</div>
 										<h2 class="text-xl font-semibold text-gray-900 mb-2">{scenario.name}</h2>
-										{#if scenario.description}
+										{#if scenario.description || scenario.observation}
 											<div class="mb-4">
-												<MarkdownRenderer content={scenario.description} class="text-gray-600" />
+												<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+													{#if scenario.description}
+														<div>
+															<h4 class="text-sm font-medium text-gray-900 mb-2">Description</h4>
+															<MarkdownRenderer content={scenario.description} class="text-gray-600" />
+														</div>
+													{/if}
+													{#if scenario.observation}
+														<div>
+															<h4 class="text-sm font-medium text-gray-900 mb-2">Observation</h4>
+															<MarkdownRenderer content={scenario.observation} class="text-gray-600" />
+														</div>
+													{/if}
+												</div>
 											</div>
 										{/if}
 									</div>

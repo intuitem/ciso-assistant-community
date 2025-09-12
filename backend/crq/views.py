@@ -528,9 +528,11 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             general_settings.value.get("currency", "€") if general_settings else "€"
         )
 
-        # Get scenarios that are selected and not in draft status
-        selected_scenarios = study.risk_scenarios.filter(is_selected=True).exclude(
-            status="draft"
+        # Get scenarios that are selected and not in draft status, ordered by priority then ref_id
+        selected_scenarios = (
+            study.risk_scenarios.filter(is_selected=True)
+            .exclude(status="draft")
+            .order_by("priority", "ref_id")
         )
 
         scenarios_data = []
@@ -542,7 +544,9 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "ref_id": scenario.ref_id,
                 "name": scenario.name,
                 "description": scenario.description,
+                "observation": scenario.observation,
                 "status": scenario.status,
+                "priority": scenario.priority,
                 # Assets, threats, qualifications
                 "assets": [
                     {"id": str(asset.id), "name": asset.name}
@@ -761,6 +765,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
         "vulnerabilities",
         "qualifications",
         "status",
+        "priority",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
@@ -811,6 +816,11 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(QuantitativeRiskScenario.STATUS_OPTIONS))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get priority choices")
+    def priority(self, request):
+        return Response(dict(QuantitativeRiskScenario.PRIORITY))
 
     @action(detail=True, name="Combined Loss Exceedance Curves", url_path="lec")
     def lec(self, request, pk=None):

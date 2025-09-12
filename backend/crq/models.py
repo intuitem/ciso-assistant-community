@@ -198,6 +198,20 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         ("accept", _("Accept")),
         ("transfer", _("Transfer")),
     ]
+
+    PRIORITY = [
+        (1, _("P1")),
+        (2, _("P2")),
+        (3, _("P3")),
+        (4, _("P4")),
+    ]
+
+    priority = models.PositiveSmallIntegerField(
+        choices=PRIORITY,
+        null=True,
+        blank=True,
+        verbose_name=_("Priority"),
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_OPTIONS,
@@ -223,6 +237,7 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         verbose_name="Qualifications",
         blank=True,
     )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=True)

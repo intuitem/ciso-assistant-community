@@ -90,7 +90,7 @@
 
 					<div class="bg-white rounded-lg p-6 shadow-sm">
 						<div class="flex justify-between items-center mb-4">
-							<h3 class="text-lg font-semibold">Combined Loss Exceedance Curve</h3>
+							<h3 class="text-lg font-semibold">Portfolio overview</h3>
 							<div class="text-sm text-gray-600">
 								Current: {data.combinedLec.scenarios_with_current_data} / {data.combinedLec
 									.total_scenarios}
