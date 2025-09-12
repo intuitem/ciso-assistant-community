@@ -1,6 +1,5 @@
 import time
 import structlog
-import numpy as np
 
 from rest_framework import status
 from rest_framework.views import Response
@@ -18,7 +17,6 @@ from .models import (
     QuantitativeRiskHypothesis,
 )
 from .serializers import QuantitativeRiskStudyActionPlanSerializer
-from .utils import run_combined_simulation
 
 logger = structlog.get_logger(__name__)
 
