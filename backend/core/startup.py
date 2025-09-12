@@ -1004,7 +1004,7 @@ def startup(sender: AppConfig, **kwargs):
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
-            name="general", value=default_settings
+            name="general", defaults={"value": default_settings}
         )
         current_value = settings.value or {}
 
