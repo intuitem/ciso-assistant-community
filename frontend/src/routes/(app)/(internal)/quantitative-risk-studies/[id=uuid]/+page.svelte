@@ -106,6 +106,7 @@
 								data={currentRiskCurve?.data || []}
 								residualData={residualRiskCurve?.data || []}
 								toleranceData={toleranceCurve?.data || []}
+								lossThreshold={data.data.loss_threshold}
 								currency={data.combinedLec.currency}
 								title="Study Risk Profile"
 								showTitle={false}

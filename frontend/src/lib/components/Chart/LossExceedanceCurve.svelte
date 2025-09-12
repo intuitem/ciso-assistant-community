@@ -64,7 +64,7 @@
 			title: showTitle
 				? {
 						text: title,
-						left: 'left',
+						left: 'center',
 						textStyle: {
 							fontSize: 16,
 							fontWeight: 'bold'
@@ -75,7 +75,7 @@
 				show:
 					(toleranceData && toleranceData.length > 0) || (residualData && residualData.length > 0),
 				top: '5%',
-				right: '10%',
+				left: '10%',
 				data: [
 					{
 						name: 'Current Risk',

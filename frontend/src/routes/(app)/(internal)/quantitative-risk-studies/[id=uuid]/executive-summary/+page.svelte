@@ -135,6 +135,7 @@
 							data={currentRiskCurve?.data || []}
 							residualData={residualRiskCurve?.data || []}
 							toleranceData={toleranceCurve?.data || []}
+							lossThreshold={summaryData.loss_threshold}
 							currency={combinedLecData.currency}
 							title="Combined Study Risk Profile"
 							showTitle={false}
@@ -365,6 +366,7 @@
 												data={currentCurve?.data || []}
 												residualData={residualCurve?.data || []}
 												toleranceData={toleranceCurve?.data || []}
+												lossThreshold={summaryData.loss_threshold}
 												currency={summaryData.currency}
 												title="Scenario Risk Profile"
 												showTitle={false}

@@ -738,6 +738,8 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 ],
                 "currency": currency,
                 "risk_tolerance_display": study.get_risk_tolerance_display(),
+                "loss_threshold": study.loss_threshold,
+                "loss_threshold_display": study.loss_threshold_display,
                 "scenarios": scenarios_data,
                 "total_scenarios": len(scenarios_data),
                 "total_selected_scenarios": study.risk_scenarios.filter(
