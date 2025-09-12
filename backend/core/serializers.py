@@ -83,7 +83,9 @@ class SerializerFactory:
         elif action in ["create", "update", "partial_update"]:
             potential_names = [f"{base_name}WriteSerializer"]
         else:
-            raise ValueError(f"Unsupported action provided: '{action}'")
+            potential_names = [
+                f"{base_name}WriteSerializer"
+            ]  # write serializers are the baseline for read serializers, so fall back to them
 
         for name in potential_names:
             serializer_class = self._find_serializer_class(name)
