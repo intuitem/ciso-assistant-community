@@ -1,20 +1,23 @@
-from rest_framework import status, generics
+import time
+import structlog
+import numpy as np
+
+from rest_framework import status
 from rest_framework.views import Response
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
+from rest_framework.decorators import action
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-import time
+
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
+from core.models import AppliedControl
+from global_settings.models import GlobalSettings
+
 from .models import (
     QuantitativeRiskStudy,
     QuantitativeRiskScenario,
     QuantitativeRiskHypothesis,
 )
-from core.models import AppliedControl
-
-from rest_framework.decorators import action
-
-import structlog
-import numpy as np
+from .serializers import QuantitativeRiskStudyActionPlanSerializer
 from .utils import sum_lec_curves, run_combined_simulation
 
 logger = structlog.get_logger(__name__)
@@ -54,11 +57,9 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         - Current ALE Combined: Sum of current ALE from all scenarios
         - Residual ALE Combined: Sum of ALE from selected residual hypotheses per scenario
         """
-        study = self.get_object()
+        study: QuantitativeRiskStudy = self.get_object()  # type: ignore[unreachable]
 
         # Get currency from global settings
-        from global_settings.models import GlobalSettings
-
         general_settings = GlobalSettings.objects.filter(name="general").first()
         currency = (
             general_settings.value.get("currency", "€") if general_settings else "€"
@@ -160,11 +161,9 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         - Risk tolerance curve (if configured)
         - Sum of all current hypothesis LEC curves from study scenarios
         """
-        study = self.get_object()
+        study: QuantitativeRiskStudy = self.get_object()
 
         # Get currency from global settings
-        from global_settings.models import GlobalSettings
-
         general_settings = GlobalSettings.objects.filter(name="general").first()
         currency = (
             general_settings.value.get("currency", "€") if general_settings else "€"
@@ -521,11 +520,9 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         - Current and residual ALE insights
         - Treatment cost of selected residual hypothesis
         """
-        study = self.get_object()
+        study: QuantitativeRiskStudy = self.get_object()
 
         # Get currency from global settings
-        from global_settings.models import GlobalSettings
-
         general_settings = GlobalSettings.objects.filter(name="general").first()
         currency = (
             general_settings.value.get("currency", "€") if general_settings else "€"
@@ -822,7 +819,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
         - Study risk tolerance curve (if configured)
         - All residual hypothesis curves (if they have simulation data)
         """
-        scenario = self.get_object()
+        scenario: QuantitativeRiskScenario = self.get_object()
         study = scenario.quantitative_risk_study
 
         curves = []
@@ -928,8 +925,6 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                     )
 
         # Get currency from global settings
-        from global_settings.models import GlobalSettings
-
         general_settings = GlobalSettings.objects.filter(name="general").first()
         currency = (
             general_settings.value.get("currency", "€") if general_settings else "€"
@@ -1008,7 +1003,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         """
         Returns the Loss Exceedance Curve data from stored simulation results.
         """
-        hypothesis = self.get_object()
+        hypothesis: QuantitativeRiskHypothesis = self.get_object()
 
         # Check if we have simulation data
         if not hypothesis.simulation_data:
@@ -1049,7 +1044,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         Triggers a Monte Carlo simulation for a specific risk hypothesis.
         Requires probability and impact parameters to be set on the hypothesis.
         """
-        hypothesis = self.get_object()
+        hypothesis: QuantitativeRiskHypothesis = self.get_object()
 
         try:
             # Run the simulation (this will save the results to the database)
@@ -1112,8 +1107,6 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
     # }
 
     def get_serializer_class(self):
-        from .serializers import QuantitativeRiskStudyActionPlanSerializer
-
         return QuantitativeRiskStudyActionPlanSerializer
 
     def get_queryset(self):

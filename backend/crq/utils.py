@@ -1,5 +1,6 @@
 import numpy as np
-from typing import Dict, Tuple, List, Optional, Union
+from scipy.stats import norm, lognorm
+from typing import Dict, Tuple, List, Optional
 
 
 def mu_sigma_from_lognorm_90pct(lower_bound: float, upper_bound: float):
@@ -284,14 +285,7 @@ def simulate_portfolio_with_correlation(
         for i in range(n_simulations):
             correlated_normals = rng.multivariate_normal(mean, correlation_matrix)
             # Convert to uniform using normal CDF approximation
-            try:
-                from scipy.stats import norm
-
-                uniform_draws = norm.cdf(correlated_normals)
-            except ImportError:
-                raise ValueError(
-                    "scipy is required for correlation support. Please install scipy."
-                )
+            uniform_draws = norm.cdf(correlated_normals)
 
             for j, scenario_dist in enumerate(scenario_distributions):
                 if uniform_draws[j] < scenario_dist["probability"]:
@@ -461,15 +455,8 @@ def get_lognormal_params_from_points(point1: Dict, point2: Dict) -> Tuple[float,
 
     # Convert probabilities to z-scores (normal quantiles)
     # We use 1-p because we want exceedance probabilities
-    try:
-        from scipy.stats import norm
-
-        z1 = norm.ppf(1 - p1)  # Exceedance probability
-        z2 = norm.ppf(1 - p2)
-    except ImportError:
-        raise ValueError(
-            "scipy is required for risk tolerance curve generation. Please install scipy."
-        )
+    z1 = norm.ppf(1 - p1)  # Exceedance probability
+    z2 = norm.ppf(1 - p2)
 
     # Take logarithm of losses
     ln_loss1 = np.log(loss1)
@@ -518,15 +505,8 @@ def generate_risk_tolerance_lec(
     )[::-1]  # Reverse for decreasing order
 
     # Convert to normal quantiles and then to lognormal losses
-    try:
-        from scipy.stats import norm
-
-        z_scores = norm.ppf(1 - exceedance_probs)
-        loss_values = np.exp(mu + sigma * z_scores)
-    except ImportError:
-        raise ValueError(
-            "scipy is required for risk tolerance curve generation. Please install scipy."
-        )
+    z_scores = norm.ppf(1 - exceedance_probs)
+    loss_values = np.exp(mu + sigma * z_scores)
 
     return loss_values, exceedance_probs
 
@@ -636,7 +616,6 @@ def risk_tolerance_curve(risk_tolerance_data: Dict) -> Dict:
     point2 = points["point2"]
 
     # Validate point structure
-    required_keys = ["probability", "acceptable_loss"]
     if not all(key in point1 and key in point2 for key in required_keys):
         return {}
 
@@ -648,14 +627,7 @@ def risk_tolerance_curve(risk_tolerance_data: Dict) -> Dict:
         mu, sigma = get_lognormal_params_from_points(point1, point2)
 
         # Calculate distribution statistics
-        try:
-            from scipy.stats import lognorm
-
-            dist = lognorm(s=sigma, scale=np.exp(mu))
-        except ImportError:
-            raise ValueError(
-                "scipy is required for risk tolerance curve generation. Please install scipy."
-            )
+        dist = lognorm(s=sigma, scale=np.exp(mu))
 
         return {
             "loss_values": loss_values.tolist(),

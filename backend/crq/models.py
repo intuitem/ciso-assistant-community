@@ -80,8 +80,6 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             return "Not configured"
 
         # Get currency from global settings
-        from global_settings.models import GlobalSettings
-
         general_settings = GlobalSettings.objects.filter(name="general").first()
         currency = (
             general_settings.value.get("currency", "€") if general_settings else "€"
