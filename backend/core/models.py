@@ -1182,11 +1182,15 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
-        locale_translations = translations.get(get_language(), {})
-        return locale_translations or self.name
+        locale_translation = translations.get(get_language(), "")
+        return locale_translation.capitalize() or self.name.capitalize()
 
     def __str__(self) -> str:
-        return self.get_name_translated or self.name
+        return (
+            self.get_name_translated.capitalize()
+            if self.get_name_translated
+            else self.name.capitalize()
+        )
 
 
 class Threat(
