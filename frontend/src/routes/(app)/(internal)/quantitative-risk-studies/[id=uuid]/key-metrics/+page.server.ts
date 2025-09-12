@@ -10,9 +10,7 @@ export const load: PageServerLoad = async (event) => {
 			const url = `${BASE_API_URL}/crq/quantitative-risk-studies/${id}/key-metrics/`;
 			const response = await event.fetch(url);
 			if (!response.ok) {
-				throw new Error(
-					`Failed to fetch key metrics: ${response.status} ${response.statusText}`
-				);
+				throw new Error(`Failed to fetch key metrics: ${response.status} ${response.statusText}`);
 			}
 			return await response.json();
 		} catch (error) {

@@ -102,25 +102,39 @@
 					<table class="min-w-full divide-y divide-gray-200">
 						<thead class="bg-gray-50">
 							<tr>
-								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									Scenario
 								</th>
-								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									Level
 								</th>
-								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									ALE
 								</th>
-								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									VaR 95%
 								</th>
-								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									VaR 99%
 								</th>
-								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									VaR 99.9%
 								</th>
-								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+								>
 									P(>Threshold)
 								</th>
 							</tr>
@@ -134,7 +148,9 @@
 											<div class="text-sm font-medium text-gray-900">{scenario.name}</div>
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-center">
-											<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+											<span
+												class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+											>
 												Current
 											</span>
 										</td>
@@ -165,7 +181,9 @@
 											{/if}
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-center">
-											<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+											<span
+												class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+											>
 												Residual
 											</span>
 										</td>
