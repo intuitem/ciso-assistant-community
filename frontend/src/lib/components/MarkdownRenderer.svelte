@@ -74,7 +74,7 @@
 </script>
 
 {#if renderedContent}
-	<div class="prose prose-sm max-w-none {className}">
+	<div class="prose prose-sm max-w-none whitespace-pre-line {className}">
 		{@html renderedContent}
 	</div>
 {:else}

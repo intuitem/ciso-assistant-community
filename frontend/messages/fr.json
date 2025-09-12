@@ -1567,6 +1567,8 @@
 	"changeImpact": "... l'impact",
 	"changeEffort": "... l'effort",
 	"changePriority": "... la priorité",
+	"actor": "Acteur",
+	"action": "Action",
 	"errorUpdatingObject": "Une erreur s'est produite lors de la mise à jour de l'objet {object}.",
 	"assetClassDevices": "Appareils",
 	"assetClassEnterpriseAssets": "Actifs d'Entreprise",
