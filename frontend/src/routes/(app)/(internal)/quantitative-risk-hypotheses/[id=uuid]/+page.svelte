@@ -209,7 +209,7 @@
 										<div class="text-2xl font-bold text-yellow-600 mb-2">
 											{(metrics.prob_above_10k * 100).toFixed(2)}%
 										</div>
-										<div class="text-sm text-gray-600">Over $10K</div>
+										<div class="text-sm text-gray-600">Over {currency}10K</div>
 									</div>
 								{/if}
 								{#if metrics.prob_above_100k !== undefined}
@@ -217,7 +217,7 @@
 										<div class="text-2xl font-bold text-orange-600 mb-2">
 											{(metrics.prob_above_100k * 100).toFixed(2)}%
 										</div>
-										<div class="text-sm text-gray-600">Over $100K</div>
+										<div class="text-sm text-gray-600">Over {currency}100K</div>
 									</div>
 								{/if}
 								{#if metrics.prob_above_1M !== undefined}
@@ -225,7 +225,7 @@
 										<div class="text-2xl font-bold text-red-600 mb-2">
 											{(metrics.prob_above_1M * 100).toFixed(2)}%
 										</div>
-										<div class="text-sm text-gray-600">Over $1M</div>
+										<div class="text-sm text-gray-600">Over {currency}1M</div>
 									</div>
 								{/if}
 							</div>
