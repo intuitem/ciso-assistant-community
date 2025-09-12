@@ -648,6 +648,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
         "qualifications",
         "status",
         "priority",
+        "is_selected",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]

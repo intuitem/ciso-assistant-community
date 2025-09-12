@@ -1848,8 +1848,8 @@
 	"expectedLossLowerBound": "Expected Loss Lower Bound (LB)",
 	"expectedLossUpperBound": "Expected Loss Upper Bound (UB)",
 	"probabilityHelpText": "Estimated probability value between 0 and 1, based on the knowledge you have",
-	"lowerBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be LOWER than this.",
-	"upperBoundHelpText": "Remember that, given the current distribution, 5% of the time it will be HIGHER than this.",
+	"lowerBoundHelpText": "Loss in best case scenario. 5% of the time it could be LOWER than this.",
+	"upperBoundHelpText": "Loss in worst case scenario. 5% of the time it will be HIGHER than this.",
 	"simulationParameters": "Simulation Parameters",
 	"simulationParametersDisplay": "Simulation Parameters",
 	"lossAtPDiv2": "Loss at P/2",
@@ -2191,5 +2191,9 @@
 	"image": "Image",
 	"securityObjectives": "Security properties",
 	"securityObjectiveScale": "Security properties scale",
-	"securityObjectiveScaleHelpText": "Choose your scale for security properties (1 to 4 by default)"
+	"securityObjectiveScaleHelpText": "Choose your scale for security properties (1 to 4 by default)",
+	"isSelectedHelpText": "Decide if it should be passed to the study",
+	"quantRiskPriorityHelpText": "Useful for analyst to force an order on the exec summary",
+	"lossThreshold": "Loss threshold",
+	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance"
 }

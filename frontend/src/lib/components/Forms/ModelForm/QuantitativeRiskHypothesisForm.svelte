@@ -154,4 +154,4 @@
 	bind:cachedValue={formDataCache['observation']}
 />
 
-<Checkbox {form} field="is_selected" label={m.isSelected()} />
+<Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.isSelectedHelpText()} />

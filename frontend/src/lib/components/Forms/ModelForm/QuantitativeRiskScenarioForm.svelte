@@ -58,16 +58,7 @@
 	bind:cachedValue={formDataCache['ref_id']}
 />
 
-<Select
-	{form}
-	options={model.selectOptions['priority']}
-	field="priority"
-	label={m.priority()}
-	cacheLock={cacheLocks['priority']}
-	bind:cachedValue={formDataCache['priority']}
-/>
-
-<Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.roToIsSelectedHelpText()} />
+<Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.isSelectedHelpText()} />
 <AutocompleteSelect
 	{form}
 	multiple
@@ -101,6 +92,15 @@
 />
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<Select
+		{form}
+		options={model.selectOptions['priority']}
+		field="priority"
+		label={m.priority()}
+		helpText={m.quantRiskPriorityHelpText()}
+		cacheLock={cacheLocks['priority']}
+		bind:cachedValue={formDataCache['priority']}
+	/>
 	<AutocompleteSelect
 		{form}
 		multiple

@@ -147,6 +147,24 @@ const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: '--', value: '--' },
+			{ label: 'draft', value: 'draft' },
+			{ label: 'open', value: 'open' },
+			{ label: 'mitigate', value: 'mitigate' },
+			{ label: 'accept', value: 'accept' },
+			{ label: 'transfer', value: 'transfer' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const RISK_STAGE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1581,10 +1599,10 @@ export const listViewFields = {
 			'status'
 		],
 		filters: {
-			status: RISK_ASSESSMENT_STATUS_FILTER,
+			status: QUANT_RISK_SCENARIO_STATUS_FILTER,
 			assets: ASSET_FILTER,
 			threats: THREAT_FILTER,
-			qualifications: QUALIFICATION_FILTER
+			is_selected: IS_SELECTED_FILTER
 		}
 	},
 	'quantitative-risk-hypotheses': {

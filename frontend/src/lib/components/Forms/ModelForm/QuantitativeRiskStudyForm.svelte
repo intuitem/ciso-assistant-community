@@ -115,21 +115,13 @@
 			bind:cachedValue={formDataCache['due_date']}
 		/>
 
-		<MarkdownField
-			{form}
-			field="observation"
-			label={m.observation()}
-			cacheLock={cacheLocks['observation']}
-			bind:cachedValue={formDataCache['observation']}
-		/>
-
 		<NumberField
 			{form}
 			field="loss_threshold"
-			label="Loss Threshold"
+			label={m.lossThreshold()}
 			min={0}
 			step={1}
-			helpText="Loss threshold value"
+			helpText={m.lossThresholdHelpText()}
 			cacheLock={cacheLocks['loss_threshold']}
 			bind:cachedValue={formDataCache['loss_threshold']}
 		/>
@@ -144,6 +136,7 @@
 					min={0.01}
 					max={0.99}
 					step={0.01}
+					placeholder={0.99}
 					helpText="Probability value (0.01-0.99)"
 				/>
 				<NumberField
@@ -163,6 +156,7 @@
 					min={0.01}
 					max={0.99}
 					step={0.01}
+					placeholder={0.01}
 					helpText="Probability value (0.01-0.99)"
 				/>
 				<NumberField
@@ -175,5 +169,13 @@
 				/>
 			</div>
 		</div>
+
+		<MarkdownField
+			{form}
+			field="observation"
+			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
+		/>
 	</Dropdown>
 {/if}
