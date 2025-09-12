@@ -83,6 +83,61 @@
 		bind:cachedValue={formDataCache['distribution_model']}
 	/>
 
+	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-bullseye" header="Tolerance Settings">
+		<NumberField
+			{form}
+			field="loss_threshold"
+			label={m.lossThreshold()}
+			min={0}
+			step={1}
+			helpText={m.lossThresholdHelpText()}
+			cacheLock={cacheLocks['loss_threshold']}
+			bind:cachedValue={formDataCache['loss_threshold']}
+		/>
+
+		<div class="space-y-2">
+			<h5 class="font-medium text-gray-600 my-2 py-2">Risk Tolerance Points</h5>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point1.probability"
+					label="Point 1 - Probability"
+					min={0.01}
+					max={0.99}
+					step={0.01}
+					helpText="Probability value (0.01-0.99). You can start with 0.99 for the most frequent acceptable issues"
+				/>
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point1.acceptable_loss"
+					label="Point 1 - Acceptable Loss"
+					min={1}
+					step={1}
+					helpText="Acceptable loss amount for point 1"
+				/>
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point2.probability"
+					label="Point 2 - Probability"
+					min={0.01}
+					max={0.99}
+					step={0.01}
+					helpText="Probability value (0.01-0.99), You can close with 0.01 for the most rare acceptable cases"
+				/>
+				<NumberField
+					{form}
+					field="risk_tolerance.points.point2.acceptable_loss"
+					label="Point 2 - Acceptable Loss"
+					min={1}
+					step={1}
+					helpText="Acceptable loss amount for point 2"
+				/>
+			</div>
+		</div>
+	</Dropdown>
+
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<AutocompleteSelect
 			{form}
@@ -114,61 +169,6 @@
 			cacheLock={cacheLocks['due_date']}
 			bind:cachedValue={formDataCache['due_date']}
 		/>
-
-		<NumberField
-			{form}
-			field="loss_threshold"
-			label={m.lossThreshold()}
-			min={0}
-			step={1}
-			helpText={m.lossThresholdHelpText()}
-			cacheLock={cacheLocks['loss_threshold']}
-			bind:cachedValue={formDataCache['loss_threshold']}
-		/>
-
-		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">Risk Tolerance Points</h5>
-			<div class="grid grid-cols-2 gap-4">
-				<NumberField
-					{form}
-					field="risk_tolerance.points.point1.probability"
-					label="Point 1 - Probability"
-					min={0.01}
-					max={0.99}
-					step={0.01}
-					placeholder={0.99}
-					helpText="Probability value (0.01-0.99)"
-				/>
-				<NumberField
-					{form}
-					field="risk_tolerance.points.point1.acceptable_loss"
-					label="Point 1 - Acceptable Loss"
-					min={1}
-					step={1}
-					helpText="Acceptable loss amount (minimum 1)"
-				/>
-			</div>
-			<div class="grid grid-cols-2 gap-4">
-				<NumberField
-					{form}
-					field="risk_tolerance.points.point2.probability"
-					label="Point 2 - Probability"
-					min={0.01}
-					max={0.99}
-					step={0.01}
-					placeholder={0.01}
-					helpText="Probability value (0.01-0.99)"
-				/>
-				<NumberField
-					{form}
-					field="risk_tolerance.points.point2.acceptable_loss"
-					label="Point 2 - Acceptable Loss"
-					min={1}
-					step={1}
-					helpText="Acceptable loss amount (minimum 1)"
-				/>
-			</div>
-		</div>
 
 		<MarkdownField
 			{form}
