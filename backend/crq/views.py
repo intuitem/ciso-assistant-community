@@ -916,6 +916,8 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                 "study_name": study.name,
                 "total_curves": len(curves),
                 "currency": currency,
+                "loss_threshold": study.loss_threshold,
+                "loss_threshold_display": study.loss_threshold_display,
             }
         )
 

@@ -15,10 +15,14 @@
 			const echarts = await import('echarts');
 			const chart = echarts.init(document.getElementById('combined-lec-chart'));
 
+			const currency = data.lec.currency || '€';
+			const lossThreshold = data.lec.loss_threshold;
+
 			const series = data.lec.curves.map((curve: any, index: number) => {
 				// Define specific styling for current risk and risk tolerance curves
 				let lineStyle: any = { width: 3 };
 				let itemStyle: any = {};
+				let markLine: any = {};
 
 				if (curve.name === 'Current Risk' || curve.name === 'Combined Current Risk') {
 					// Current risk: bold red line
@@ -30,6 +34,37 @@
 					itemStyle = {
 						color: '#FF6367'
 					};
+
+					// Add loss threshold line to the first current risk curve
+					if (lossThreshold && lossThreshold > 0) {
+						markLine = {
+							silent: false,
+							symbol: 'none',
+							label: {
+								show: true,
+								position: 'end',
+								formatter: `Loss Threshold: ${currency}${lossThreshold.toLocaleString()}`,
+								fontSize: 12,
+								color: '#7c3aed',
+								backgroundColor: 'rgba(255, 255, 255, 0.9)',
+								borderColor: '#7c3aed',
+								borderWidth: 1,
+								borderRadius: 4,
+								padding: [4, 8]
+							},
+							lineStyle: {
+								color: '#7c3aed',
+								width: 2,
+								type: 'dashed'
+							},
+							data: [
+								{
+									xAxis: lossThreshold,
+									name: 'Loss Threshold'
+								}
+							]
+						};
+					}
 				} else if (curve.name === 'Risk Tolerance') {
 					// Risk tolerance: dashed orange line
 					lineStyle = {
@@ -42,7 +77,7 @@
 					};
 				}
 
-				return {
+				const seriesConfig: any = {
 					name: curve.name,
 					type: 'line',
 					data: curve.data,
@@ -51,10 +86,51 @@
 					lineStyle,
 					itemStyle
 				};
+
+				// Add markLine only if it has data
+				if (markLine.data) {
+					seriesConfig.markLine = markLine;
+				}
+
+				return seriesConfig;
 			});
 
-			const currency = data.lec.currency || '$';
+
 			const option = {
+				tooltip: {
+					show: true,
+					trigger: 'axis',
+					backgroundColor: 'rgba(255, 255, 255, 0.95)',
+					borderColor: '#ddd',
+					borderWidth: 1,
+					textStyle: {
+						color: '#333'
+					},
+					formatter: function (params: any) {
+						if (params.length === 0) return '';
+
+						const lossAmount = params[0].value[0];
+						let tooltip = `Loss Amount: ${currency}${lossAmount.toLocaleString()}<br/>`;
+
+						// Add each curve's probability value
+						params.forEach((param: any) => {
+							const probability = param.value[1];
+							const percentageDisplay = (probability * 100).toFixed(2);
+
+							// Use different colors for different curve types
+							let color = param.color;
+							if (param.seriesName === 'Current Risk' || param.seriesName === 'Combined Current Risk') {
+								color = '#FF6367';
+							} else if (param.seriesName === 'Risk Tolerance') {
+								color = '#7CCF00';
+							}
+
+							tooltip += `<span style="color: ${color};">●</span> ${param.seriesName}: ${percentageDisplay}%<br/>`;
+						});
+
+						return tooltip;
+					}
+				},
 				legend: {
 					top: 0,
 					data: data.lec.curves.map((curve: any) => ({
