@@ -14,6 +14,7 @@ type SidebarBackendKeys = {
 	experimental: boolean;
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
+	quantitative_risk_studies: boolean;
 	terminologies: boolean;
 };
 
@@ -33,6 +34,7 @@ type SidebarFrontendKeys = {
 	experimental: boolean;
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
+	quantitativeRiskStudies: boolean;
 	terminologies: boolean;
 };
 
@@ -55,6 +57,7 @@ export function getSidebarVisibleItems(
 		experimental: featureFlags?.experimental ?? false,
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
+		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
 		terminologies: featureFlags?.terminologies ?? true
 	};
 }
