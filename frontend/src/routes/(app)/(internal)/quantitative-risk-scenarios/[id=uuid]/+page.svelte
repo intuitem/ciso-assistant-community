@@ -29,7 +29,7 @@
 					lineStyle = {
 						width: 4,
 						color: '#FF6367',
-            type: 'solid'
+						type: 'solid'
 					};
 					itemStyle = {
 						color: '#FF6367'
@@ -95,7 +95,6 @@
 				return seriesConfig;
 			});
 
-
 			const option = {
 				tooltip: {
 					show: true,
@@ -119,7 +118,10 @@
 
 							// Use different colors for different curve types
 							let color = param.color;
-							if (param.seriesName === 'Current Risk' || param.seriesName === 'Combined Current Risk') {
+							if (
+								param.seriesName === 'Current Risk' ||
+								param.seriesName === 'Combined Current Risk'
+							) {
 								color = '#FF6367';
 							} else if (param.seriesName === 'Risk Tolerance') {
 								color = '#7CCF00';

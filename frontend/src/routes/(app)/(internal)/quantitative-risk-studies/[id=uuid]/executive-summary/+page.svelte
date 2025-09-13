@@ -96,23 +96,32 @@
 					{#if combinedLecData?.current_threshold_probability_display}
 						<div class="text-center">
 							<div class="text-sm text-gray-600 font-medium mb-1">Current profile</div>
-							<div class="text-lg font-bold text-orange-600">{combinedLecData.current_threshold_probability_display}</div>
+							<div class="text-lg font-bold text-orange-600">
+								{combinedLecData.current_threshold_probability_display}
+							</div>
 							<div class="text-xs text-gray-500">Probability to exceed threshold</div>
 						</div>
 					{/if}
 					{#if combinedLecData?.residual_threshold_probability_display}
 						<div class="text-center">
 							<div class="text-sm text-gray-600 font-medium mb-1">Residual profile</div>
-							<div class="text-lg font-bold text-green-600">{combinedLecData.residual_threshold_probability_display}</div>
+							<div class="text-lg font-bold text-green-600">
+								{combinedLecData.residual_threshold_probability_display}
+							</div>
 							<div class="text-xs text-gray-500">Probability to exceed threshold</div>
 						</div>
 					{/if}
 					{#if summaryData.study_total_treatment_cost_display}
 						<div class="text-center">
 							<div class="text-sm text-gray-600 font-medium mb-1">Total Treatment Cost</div>
-							<div class="text-lg font-bold text-purple-600">{summaryData.study_total_treatment_cost_display}</div>
+							<div class="text-lg font-bold text-purple-600">
+								{summaryData.study_total_treatment_cost_display}
+							</div>
 							<div class="text-xs text-gray-500">
-								{summaryData.unique_added_controls_count || 0} unique control{summaryData.unique_added_controls_count === 1 ? '' : 's'}
+								{summaryData.unique_added_controls_count || 0} unique control{summaryData.unique_added_controls_count ===
+								1
+									? ''
+									: 's'}
 							</div>
 						</div>
 					{/if}
@@ -438,9 +447,7 @@
 					<i class="fa-solid fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
 					<h3 class="text-xl font-semibold text-gray-600 mb-2">No Selected Scenarios</h3>
 					<p class="text-gray-500 mb-4">No scenarios are selected in this study.</p>
-					<p class="text-sm text-gray-400">
-						Select scenarios to see the executive summary.
-					</p>
+					<p class="text-sm text-gray-400">Select scenarios to see the executive summary.</p>
 				</div>
 			{/if}
 		{:else}
