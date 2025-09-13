@@ -1337,7 +1337,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 item.get("expiry_date"),
                 item.get("effort"),
                 item.get("impact"),
-                item.get("cost"),
+                item.get("annual_cost"),
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
             ]
@@ -1754,7 +1754,6 @@ class AppliedControlFilterSet(GenericFilterSet):
             "reference_control": ["exact", "isnull"],
             "effort": ["exact"],
             "control_impact": ["exact"],
-            "cost": ["exact"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
@@ -2388,7 +2387,6 @@ class ActionPlanList(generics.ListAPIView):
         "reference_control": ["exact"],
         "effort": ["exact"],
         "control_impact": ["exact"],
-        "cost": ["exact"],
         "filtering_labels": ["exact"],
         "risk_scenarios": ["exact"],
         "risk_scenarios_e": ["exact"],
@@ -5094,7 +5092,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("expiry_date"),
                     item.get("effort"),
                     item.get("impact"),
-                    item.get("cost"),
+                    item.get("annual_cost"),
                     "\n".join(
                         [ra.get("str") for ra in item.get("requirement_assessments")]
                     ),
@@ -6130,8 +6128,8 @@ def export_mp_csv(request):
         "eta",
         "priority",
         "effort",
-        "impact",
-        "cost",
+        "control_impact",
+        "annual_cost",
         "link",
         "status",
     ]
@@ -6154,8 +6152,8 @@ def export_mp_csv(request):
             mtg.reference_control,
             mtg.eta,
             mtg.effort,
-            mtg.impact,
-            mtg.cost,
+            mtg.control_impact,
+            mtg.annual_cost,
             mtg.link,
             mtg.status,
         ]

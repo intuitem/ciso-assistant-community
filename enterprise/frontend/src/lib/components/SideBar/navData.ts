@@ -109,7 +109,10 @@ export const navData = {
 				{
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
-					href: '/roles'
+					href: '/roles',
+					permissions: [
+						'add_role',
+					]
 				},
 				{
 					name: 'roleAssignments',
@@ -251,6 +254,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'quantitativeRiskStudies',
+					fa_icon: 'fa-solid fa-calculator',
+					href: '/quantitative-risk-studies',
+					permissions: ['view_quantitativeriskstudy']
 				},
 				{
 					name: 'riskScenarios',

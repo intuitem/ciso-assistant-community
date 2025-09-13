@@ -30,7 +30,7 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications', 'interface']);
+	let openAccordionItems = $state(['notifications', 'interface', 'financial']);
 </script>
 
 <Accordion
@@ -186,6 +186,37 @@
 				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
 			/>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="financial">
+		{#snippet control()}
+			<i class="fa-solid fa-coins mr-2"></i>Financial Settings
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4 space-y-4">
+				<Select
+					{form}
+					field="currency"
+					options={[
+						{ label: 'Euro (€)', value: '€' },
+						{ label: 'US Dollar ($)', value: '$' },
+						{ label: 'British Pound (£)', value: '£' },
+						{ label: 'Japanese Yen (¥)', value: '¥' },
+						{ label: 'Canadian Dollar (C$)', value: 'C$' },
+						{ label: 'Australian Dollar (A$)', value: 'A$' }
+					]}
+					label="Currency"
+					helpText="Select the default currency for financial calculations"
+				/>
+				<NumberField
+					{form}
+					field="daily_rate"
+					label="Daily Rate"
+					helpText="Default daily rate for cost calculations"
+					min={0}
+					step={1}
+				/>
+			</div>
 		{/snippet}
 	</Accordion.Item>
 </Accordion>
