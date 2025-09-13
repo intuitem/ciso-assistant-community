@@ -327,7 +327,8 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     def save(self, *args, **kwargs):
         """
-        Override save to mark related hypotheses simulation as not fresh when risk_tolerance changes.
+        Override save to mark related hypotheses simulation as not fresh when risk_tolerance changes
+        and automatically regenerate the risk tolerance curve.
         """
         # Check if risk_tolerance has changed (only for existing instances)
         if self.pk:
@@ -338,6 +339,15 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                     QuantitativeRiskHypothesis.objects.filter(
                         quantitative_risk_scenario__quantitative_risk_study=self
                     ).update(is_simulation_fresh=False)
+
+                    # Automatically regenerate the risk tolerance curve
+                    if self.risk_tolerance:
+                        curve_data = self.generate_risk_tolerance_curve()
+                        if curve_data and "error" not in curve_data:
+                            # Update the risk_tolerance with the generated curve data
+                            updated_risk_tolerance = self.risk_tolerance.copy()
+                            updated_risk_tolerance["curve_data"] = curve_data
+                            self.risk_tolerance = updated_risk_tolerance
             except QuantitativeRiskStudy.DoesNotExist:
                 # This is a new instance, no need to compare with previous state
                 pass
