@@ -265,15 +265,25 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         # Calculate scenario counts from portfolio data
         current_scenario_count = 0
         residual_scenario_count = 0
+        current_threshold_probability = None
+        residual_threshold_probability = None
 
         if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
             current_scenario_count = portfolio_data["current"].get("total_scenarios", 0)
+            # Get threshold probability from metrics if loss threshold is set
+            current_metrics = portfolio_data["current"].get("metrics", {})
+            current_threshold_probability = current_metrics.get("prob_above_threshold")
 
         if portfolio_data.get("residual") and not portfolio_data["residual"].get(
             "error"
         ):
             residual_scenario_count = portfolio_data["residual"].get(
                 "total_scenarios", 0
+            )
+            # Get threshold probability from metrics if loss threshold is set
+            residual_metrics = portfolio_data["residual"].get("metrics", {})
+            residual_threshold_probability = residual_metrics.get(
+                "prob_above_threshold"
             )
 
         # Return the combined curves data
@@ -289,6 +299,16 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "total_scenarios": study.risk_scenarios.count(),
                 "simulation_method": primary_method,
                 "simulation_methods_used": list(simulation_methods_used),
+                "loss_threshold": study.loss_threshold,
+                "loss_threshold_display": study.loss_threshold_display,
+                "current_threshold_probability": current_threshold_probability,
+                "residual_threshold_probability": residual_threshold_probability,
+                "current_threshold_probability_display": f"{current_threshold_probability * 100:.1f}%"
+                if current_threshold_probability is not None
+                else None,
+                "residual_threshold_probability_display": f"{residual_threshold_probability * 100:.1f}%"
+                if residual_threshold_probability is not None
+                else None,
                 "note": "Portfolio risk calculations using cached simulation results for optimal performance",
             }
         )

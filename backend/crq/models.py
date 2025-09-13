@@ -237,6 +237,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                     scenarios_params=current_scenarios_params,
                     n_simulations=100_000,
                     random_seed=42,
+                    loss_threshold=self.loss_threshold,
                 )
                 if "Portfolio_Total" in current_results:
                     portfolio_result = current_results["Portfolio_Total"]
@@ -300,6 +301,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                     scenarios_params=residual_scenarios_params,
                     n_simulations=100_000,
                     random_seed=43,
+                    loss_threshold=self.loss_threshold,
                 )
                 if "Portfolio_Total" in residual_results:
                     portfolio_result = residual_results["Portfolio_Total"]

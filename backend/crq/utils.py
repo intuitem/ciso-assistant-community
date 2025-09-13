@@ -316,6 +316,7 @@ def run_combined_simulation(
     n_simulations: int = 100_000,
     correlation_matrix: Optional[np.ndarray] = None,
     random_seed: Optional[int] = None,
+    loss_threshold: Optional[float] = None,
 ) -> Dict[str, Dict]:
     """
     Run combined Monte Carlo simulation for multiple scenarios with consistent aggregation.
@@ -326,6 +327,7 @@ def run_combined_simulation(
         n_simulations: Number of Monte Carlo iterations
         correlation_matrix: Optional correlation matrix for scenarios
         random_seed: Random seed for reproducibility
+        loss_threshold: Optional loss threshold for probability calculations
 
     Returns:
         Dictionary with scenario results and combined portfolio metrics.
@@ -366,10 +368,12 @@ def run_combined_simulation(
 
         # Calculate metrics
         if name == "Portfolio_Total":
-            metrics = calculate_risk_insights(losses)
+            metrics = calculate_risk_insights(losses, loss_threshold=loss_threshold)
         else:
             original_probability = scenarios_params[name]["probability"]
-            metrics = calculate_risk_insights(losses, original_probability)
+            metrics = calculate_risk_insights(
+                losses, original_probability, loss_threshold
+            )
 
         # Downsample for visualization
         downsample_factor = max(1, len(loss_values) // 1000)
@@ -528,3 +532,22 @@ def risk_tolerance_curve(risk_tolerance_data: Dict) -> Dict:
 
     except Exception as e:
         return {"error": str(e)}
+
+
+def calculate_threshold_exceedance_probability(
+    loss_data: np.ndarray, threshold: float
+) -> float:
+    """
+    Calculate probability of exceeding a loss threshold from simulation data.
+
+    Args:
+        loss_data: Array of simulated loss values
+        threshold: Loss threshold value
+
+    Returns:
+        Probability of exceeding the threshold (0-1)
+    """
+    if len(loss_data) == 0 or threshold is None or threshold <= 0:
+        return 0.0
+
+    return float(np.mean(loss_data > threshold))
