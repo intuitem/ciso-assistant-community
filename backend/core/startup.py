@@ -1047,7 +1047,9 @@ def startup(sender: AppConfig, **kwargs):
         "daily_rate": 500,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings, _ = GlobalSettings.objects.get_or_create(
+            name="general", defaults={"value": default_settings}
+        )
         current_value = settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")
