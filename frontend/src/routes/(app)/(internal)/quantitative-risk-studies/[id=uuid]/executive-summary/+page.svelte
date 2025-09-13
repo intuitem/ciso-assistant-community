@@ -161,6 +161,7 @@
 							width="w-full"
 							enableTooltip={true}
 							autoYMax={true}
+							autoXMax={true}
 							classesContainer="min-w-0"
 						/>
 					</div>
@@ -422,6 +423,7 @@
 												width="w-full"
 												enableTooltip={true}
 												autoYMax={true}
+												autoXMax={true}
 												classesContainer="min-w-0"
 											/>
 										</div>

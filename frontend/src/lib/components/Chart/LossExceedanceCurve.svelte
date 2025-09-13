@@ -24,6 +24,7 @@
 		xMax?: number;
 		xMin?: number;
 		autoYMax?: boolean;
+		autoXMax?: boolean;
 		enableZoom?: boolean;
 	}
 
@@ -48,6 +49,7 @@
 		xMax = 1000000,
 		xMin = undefined,
 		autoYMax = false,
+		autoXMax = false,
 		xAxisScale = 'log',
 		yAxisScale = 'linear',
 		enableZoom = false
@@ -55,8 +57,28 @@
 
 	const chart_id = `${name}_div`;
 
-	// Use provided xMin or calculate from data, fallback to xMax/100000
-	const calculatedXMin = xMin ?? (xMax ? xMax / 100000 : undefined);
+	// Helper function to calculate max loss from data arrays
+	function getMaxLossFromData(...dataArrays: (Array<[number, number]> | undefined)[]): number | undefined {
+		let maxLoss = 0;
+		for (const dataArray of dataArrays) {
+			if (dataArray && dataArray.length > 0) {
+				for (const [loss] of dataArray) {
+					if (loss > maxLoss) {
+						maxLoss = loss;
+					}
+				}
+			}
+		}
+		return maxLoss > 0 ? maxLoss : undefined;
+	}
+
+	// Calculate dynamic X-axis bounds
+	const calculatedXMax = autoXMax
+		? (getMaxLossFromData(data, toleranceData, residualData) ?? xMax)
+		: xMax;
+
+	// Use provided xMin or calculate from data, fallback to calculatedXMax/100000
+	const calculatedXMin = xMin ?? (calculatedXMax ? calculatedXMax / 100000 : undefined);
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -206,7 +228,7 @@
 				name: xAxisLabel,
 				nameLocation: 'middle',
 				min: calculatedXMin,
-				max: xMax,
+				max: calculatedXMax,
 				nameGap: 30,
 				minorSplitLine: {
 					show: minorSplitLine
