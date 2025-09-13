@@ -111,153 +111,173 @@
 						/>
 					{/key}
 				</div>
-
-				<!-- Risk Metrics -->
-				<div class="bg-white rounded-lg p-6 shadow-sm">
-					<div class="flex justify-between items-center mb-4">
-						<h3 class="text-lg font-semibold">Risk Insights</h3>
-						{#if data.data.impact?.lb && data.data.impact?.ub}
-							<button
-								onclick={() => (showDistributionModal = true)}
-								class="text-sm text-blue-600 hover:text-blue-800 underline"
-							>
-								View Distribution
-							</button>
-						{/if}
-					</div>
-					{#if data.lec.metrics}
-						{@const metrics = data.lec.metrics}
-						{@const currency = data.data.currency || '$'}
-						{@const formatCurrency = (value) => {
-							if (value >= 1000000000) return `${currency}${(value / 1000000000).toFixed(1)}B`;
-							if (value >= 1000000) return `${currency}${(value / 1000000).toFixed(1)}M`;
-							if (value >= 1000) return `${currency}${(value / 1000).toFixed(0)}K`;
-							return `${currency}${Math.round(value).toLocaleString()}`;
-						}}
-						{@const scenarioLosses = Object.entries(metrics)
-							.filter(([key, _]) => key.startsWith('loss_with_') && key.endsWith('_percent'))
-							.map(([key, value]) => {
-								const percentage = parseFloat(
-									key.replace('loss_with_', '').replace('_percent', '').replace('_', '.')
-								);
-								return { key, value, percentage };
-							})
-							.sort((a, b) => b.percentage - a.percentage)}
-
-						<!-- Risk Metrics - First Row: VaR Metrics -->
-						<div class="mb-8">
-							<h4 class="text-md font-medium text-gray-700 mb-4">Value at Risk Metrics</h4>
-							<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-								{#if metrics.mean_annual_loss !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-blue-600 mb-2">
-											{formatCurrency(metrics.mean_annual_loss)}
-										</div>
-										<div class="text-sm text-gray-600">Mean Annual Loss</div>
-									</div>
-								{/if}
-								{#if metrics.var_95 !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-orange-600 mb-2">
-											{formatCurrency(metrics.var_95)}
-										</div>
-										<div class="text-sm text-gray-600">VaR 95%</div>
-									</div>
-								{/if}
-								{#if metrics.var_99 !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-red-600 mb-2">
-											{formatCurrency(metrics.var_99)}
-										</div>
-										<div class="text-sm text-gray-600">VaR 99%</div>
-									</div>
-								{/if}
-								{#if metrics.var_999 !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-red-800 mb-2">
-											{formatCurrency(metrics.var_999)}
-										</div>
-										<div class="text-sm text-gray-600">VaR 99.9%</div>
-									</div>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Loss Probabilities - Second Row -->
-						<div class="mb-8">
-							<h4 class="text-md font-medium text-gray-700 mb-4">Loss Probabilities</h4>
-							<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
-								{#if metrics.prob_zero_loss !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-green-600 mb-2">
-											{(metrics.prob_zero_loss * 100).toFixed(1)}%
-										</div>
-										<div class="text-sm text-gray-600">Zero Loss</div>
-									</div>
-								{/if}
-								{#if metrics.prob_above_threshold !== undefined && data.data.loss_threshold}
-									<div
-										class="text-center p-3 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm"
-									>
-										<div class="text-2xl font-bold text-purple-600 mb-2">
-											{(metrics.prob_above_threshold * 100).toFixed(2)}%
-										</div>
-										<div class="text-sm text-gray-600">
-											Over {data.data.loss_threshold_display ||
-												`${currency}${data.data.loss_threshold.toLocaleString()}`}
-										</div>
-									</div>
-								{/if}
-								{#if metrics.prob_above_10k !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-yellow-600 mb-2">
-											{(metrics.prob_above_10k * 100).toFixed(2)}%
-										</div>
-										<div class="text-sm text-gray-600">Over {currency}10K</div>
-									</div>
-								{/if}
-								{#if metrics.prob_above_100k !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-orange-600 mb-2">
-											{(metrics.prob_above_100k * 100).toFixed(2)}%
-										</div>
-										<div class="text-sm text-gray-600">Over {currency}100K</div>
-									</div>
-								{/if}
-								{#if metrics.prob_above_1M !== undefined}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-red-600 mb-2">
-											{(metrics.prob_above_1M * 100).toFixed(2)}%
-										</div>
-										<div class="text-sm text-gray-600">Over {currency}1M</div>
-									</div>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Probability-Based Losses - Third Row -->
-						<div>
-							<h4 class="text-md font-medium text-gray-700 mb-4">Scenario-Based Losses</h4>
-							<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-								{#each scenarioLosses as { key, value, percentage }}
-									<div class="text-center">
-										<div class="text-2xl font-bold text-purple-600 mb-2">
-											{formatCurrency(value)}
-										</div>
-										<div class="text-sm text-gray-600">Loss with {percentage}% chance</div>
-									</div>
-								{/each}
-							</div>
+			{:else}
+				<!-- Show message for stale or missing data -->
+				<div class="bg-white rounded-lg p-8 text-center shadow-sm">
+					{#if data.lec?.message}
+						<div class="text-orange-600 mb-4">
+							<i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
+							<p class="font-medium">{data.lec.message}</p>
 						</div>
 					{:else}
-						<p class="text-gray-500">No metrics available</p>
+						<div class="text-gray-500">
+							<i class="fa-solid fa-chart-line text-2xl mb-2"></i>
+							<p>No LEC data available. Run a simulation to generate the chart.</p>
+						</div>
 					{/if}
 				</div>
-			{:else}
-				<div class="bg-white rounded-lg p-8 text-center text-gray-500 shadow-sm">
-					No LEC data available. Run a simulation to generate the chart.
-				</div>
+
 			{/if}
+
+			<!-- Risk Metrics -->
+			<div class="bg-white rounded-lg p-6 shadow-sm">
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-lg font-semibold">Risk Insights</h3>
+					{#if data.data.impact?.lb && data.data.impact?.ub}
+						<button
+							onclick={() => (showDistributionModal = true)}
+							class="text-sm text-blue-600 hover:text-blue-800 underline"
+						>
+							View Distribution
+						</button>
+					{/if}
+				</div>
+				{#if data.lec?.metrics && Object.keys(data.lec.metrics).length > 0}
+					{@const metrics = data.lec.metrics}
+					{@const currency = data.data.currency || '$'}
+					{@const formatCurrency = (value) => {
+						if (value >= 1000000000) return `${currency}${(value / 1000000000).toFixed(1)}B`;
+						if (value >= 1000000) return `${currency}${(value / 1000000).toFixed(1)}M`;
+						if (value >= 1000) return `${currency}${(value / 1000).toFixed(0)}K`;
+						return `${currency}${Math.round(value).toLocaleString()}`;
+					}}
+					{@const scenarioLosses = Object.entries(metrics)
+						.filter(([key, _]) => key.startsWith('loss_with_') && key.endsWith('_percent'))
+						.map(([key, value]) => {
+							const percentage = parseFloat(
+								key.replace('loss_with_', '').replace('_percent', '').replace('_', '.')
+							);
+							return { key, value, percentage };
+						})
+						.sort((a, b) => b.percentage - a.percentage)}
+
+					<!-- Risk Metrics - First Row: VaR Metrics -->
+					<div class="mb-8">
+						<h4 class="text-md font-medium text-gray-700 mb-4">Value at Risk Metrics</h4>
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+							{#if metrics.mean_annual_loss !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-blue-600 mb-2">
+										{formatCurrency(metrics.mean_annual_loss)}
+									</div>
+									<div class="text-sm text-gray-600">Mean Annual Loss</div>
+								</div>
+							{/if}
+							{#if metrics.var_95 !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-orange-600 mb-2">
+										{formatCurrency(metrics.var_95)}
+									</div>
+									<div class="text-sm text-gray-600">VaR 95%</div>
+								</div>
+							{/if}
+							{#if metrics.var_99 !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-red-600 mb-2">
+										{formatCurrency(metrics.var_99)}
+									</div>
+									<div class="text-sm text-gray-600">VaR 99%</div>
+								</div>
+							{/if}
+							{#if metrics.var_999 !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-red-800 mb-2">
+										{formatCurrency(metrics.var_999)}
+									</div>
+									<div class="text-sm text-gray-600">VaR 99.9%</div>
+								</div>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Loss Probabilities - Second Row -->
+					<div class="mb-8">
+						<h4 class="text-md font-medium text-gray-700 mb-4">Loss Probabilities</h4>
+						<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+							{#if metrics.prob_zero_loss !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-green-600 mb-2">
+										{(metrics.prob_zero_loss * 100).toFixed(1)}%
+									</div>
+									<div class="text-sm text-gray-600">Zero Loss</div>
+								</div>
+							{/if}
+							{#if metrics.prob_above_threshold !== undefined && data.data.loss_threshold}
+								<div
+									class="text-center p-3 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm"
+								>
+									<div class="text-2xl font-bold text-purple-600 mb-2">
+										{(metrics.prob_above_threshold * 100).toFixed(2)}%
+									</div>
+									<div class="text-sm text-gray-600">
+										Over {data.data.loss_threshold_display ||
+											`${currency}${data.data.loss_threshold.toLocaleString()}`}
+									</div>
+								</div>
+							{/if}
+							{#if metrics.prob_above_10k !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-yellow-600 mb-2">
+										{(metrics.prob_above_10k * 100).toFixed(2)}%
+									</div>
+									<div class="text-sm text-gray-600">Over {currency}10K</div>
+								</div>
+							{/if}
+							{#if metrics.prob_above_100k !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-orange-600 mb-2">
+										{(metrics.prob_above_100k * 100).toFixed(2)}%
+									</div>
+									<div class="text-sm text-gray-600">Over {currency}100K</div>
+								</div>
+							{/if}
+							{#if metrics.prob_above_1M !== undefined}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-red-600 mb-2">
+										{(metrics.prob_above_1M * 100).toFixed(2)}%
+									</div>
+									<div class="text-sm text-gray-600">Over {currency}1M</div>
+								</div>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Probability-Based Losses - Third Row -->
+					<div>
+						<h4 class="text-md font-medium text-gray-700 mb-4">Scenario-Based Losses</h4>
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+							{#each scenarioLosses as { key, value, percentage }}
+								<div class="text-center">
+									<div class="text-2xl font-bold text-purple-600 mb-2">
+										{formatCurrency(value)}
+									</div>
+									<div class="text-sm text-gray-600">Loss with {percentage}% chance</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{:else}
+					<div class="text-center text-gray-500">
+						{#if data.lec?.message}
+							<i class="fa-solid fa-calculator text-2xl mb-2"></i>
+							<p>No metrics available. {data.lec.message}</p>
+						{:else}
+							<i class="fa-solid fa-calculator text-2xl mb-2"></i>
+							<p>No metrics available. Run a simulation to see risk insights.</p>
+						{/if}
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/snippet}
 </DetailView>

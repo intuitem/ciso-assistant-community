@@ -897,15 +897,22 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
     def lec(self, request, pk=None):
         """
         Returns the Loss Exceedance Curve data from stored simulation results.
+        Returns empty data if simulation is not fresh (parameters have changed).
         """
         hypothesis: QuantitativeRiskHypothesis = self.get_object()
 
-        # Check if we have simulation data
-        if not hypothesis.simulation_data:
+        # Check if simulation data is fresh - if not, return empty data
+        if not hypothesis.is_simulation_fresh or not hypothesis.simulation_data:
             return Response(
                 {
                     "data": [],
-                    "message": "No simulation data available. Please run a simulation first.",
+                    "metrics": {},
+                    "parameters_used": {},
+                    "simulation_timestamp": "",
+                    "message": "Parameters have changed. Please run a new simulation to see updated results."
+                    if not hypothesis.is_simulation_fresh
+                    else "No simulation data available. Please run a simulation first.",
+                    "is_simulation_fresh": hypothesis.is_simulation_fresh,
                 }
             )
 
@@ -930,6 +937,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
                 "metrics": simulation_data.get("metrics", {}),
                 "parameters_used": simulation_data.get("parameters_used", {}),
                 "simulation_timestamp": simulation_data.get("simulation_timestamp", ""),
+                "is_simulation_fresh": hypothesis.is_simulation_fresh,
             }
         )
 
