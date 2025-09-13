@@ -339,6 +339,13 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
         scenarios_data = []
         all_study_assets = set()  # Collect unique assets across all scenarios
+        all_added_controls = (
+            set()
+        )  # Track unique controls to avoid duplication in total cost
+        all_removed_controls = (
+            set()
+        )  # Track unique controls removed to calculate savings
+        total_treatment_cost = 0  # Track total treatment cost across all scenarios
 
         for scenario in selected_scenarios:
             scenario_info = {
@@ -438,6 +445,17 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     }
                     for control in selected_residual_hypothesis.added_applied_controls.all()
                 ]
+
+                # Track unique controls for study-wide cost calculation
+                for (
+                    control
+                ) in selected_residual_hypothesis.added_applied_controls.all():
+                    all_added_controls.add(control.id)
+
+                for (
+                    control
+                ) in selected_residual_hypothesis.removed_applied_controls.all():
+                    all_removed_controls.add(control.id)
             else:
                 scenario_info["additional_controls"] = []
 
@@ -527,6 +545,48 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             scenario_info["lec_curves"] = lec_curves
             scenarios_data.append(scenario_info)
 
+        # Calculate total treatment cost based on unique controls (avoiding duplication)
+        from core.models import AppliedControl
+
+        study_total_treatment_cost = 0
+
+        # Add costs of unique added controls
+        if all_added_controls:
+            added_controls = AppliedControl.objects.filter(id__in=all_added_controls)
+            study_total_treatment_cost += sum(
+                control.annual_cost
+                for control in added_controls
+                if control.annual_cost is not None
+            )
+
+        # Subtract costs of unique removed controls (savings)
+        if all_removed_controls:
+            removed_controls = AppliedControl.objects.filter(
+                id__in=all_removed_controls
+            )
+            study_total_treatment_cost -= sum(
+                control.annual_cost
+                for control in removed_controls
+                if control.annual_cost is not None
+            )
+
+        # Format study total treatment cost
+        def format_currency(value):
+            if value >= 1000000000:
+                return f"{currency}{value / 1000000000:.1f}B"
+            elif value >= 1000000:
+                return f"{currency}{value / 1000000:.1f}M"
+            elif value >= 1000:
+                return f"{currency}{value / 1000:.0f}K"
+            else:
+                return f"{currency}{value:,.0f}"
+
+        study_total_treatment_cost_display = (
+            format_currency(study_total_treatment_cost)
+            if study_total_treatment_cost != 0
+            else "--"
+        )
+
         return Response(
             {
                 "study_id": str(study.id),
@@ -554,6 +614,10 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "total_draft_scenarios": study.risk_scenarios.filter(
                     status="draft"
                 ).count(),
+                "study_total_treatment_cost": study_total_treatment_cost,
+                "study_total_treatment_cost_display": study_total_treatment_cost_display,
+                "unique_added_controls_count": len(all_added_controls),
+                "unique_removed_controls_count": len(all_removed_controls),
             }
         )
 

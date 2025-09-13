@@ -84,7 +84,7 @@
 					</Anchor>
 				</div>
 
-				<!-- Risk Thresholds -->
+				<!-- Risk Thresholds and Treatment Cost -->
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
 					{#if summaryData.loss_threshold}
 						<div class="text-center">
@@ -93,25 +93,25 @@
 							<div class="text-xs text-gray-500">Maximum acceptable loss</div>
 						</div>
 					{/if}
-					{#if summaryData.risk_tolerance_display}
-						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Risk Tolerance</div>
-							<div class="text-lg font-bold text-blue-600">{summaryData.risk_tolerance_display}</div>
-							<div class="text-xs text-gray-500">Defined risk appetite</div>
-						</div>
-					{/if}
 					{#if combinedLecData?.current_threshold_probability_display}
 						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Current Risk Probability</div>
+							<div class="text-sm text-gray-600 font-medium mb-1">Current profile</div>
 							<div class="text-lg font-bold text-orange-600">{combinedLecData.current_threshold_probability_display}</div>
 							<div class="text-xs text-gray-500">Probability to exceed threshold</div>
 						</div>
 					{/if}
 					{#if combinedLecData?.residual_threshold_probability_display}
 						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Residual Risk Probability</div>
+							<div class="text-sm text-gray-600 font-medium mb-1">Residual profile</div>
 							<div class="text-lg font-bold text-green-600">{combinedLecData.residual_threshold_probability_display}</div>
 							<div class="text-xs text-gray-500">Probability to exceed threshold</div>
+						</div>
+					{/if}
+					{#if summaryData.study_total_treatment_cost_display}
+						<div class="text-center">
+							<div class="text-sm text-gray-600 font-medium mb-1">Total Treatment Cost</div>
+							<div class="text-lg font-bold text-purple-600">{summaryData.study_total_treatment_cost_display}</div>
+							<div class="text-xs text-gray-500">Cost of risk treatments</div>
 						</div>
 					{/if}
 				</div>
