@@ -111,7 +111,9 @@
 						<div class="text-center">
 							<div class="text-sm text-gray-600 font-medium mb-1">Total Treatment Cost</div>
 							<div class="text-lg font-bold text-purple-600">{summaryData.study_total_treatment_cost_display}</div>
-							<div class="text-xs text-gray-500">Cost of risk treatments</div>
+							<div class="text-xs text-gray-500">
+								{summaryData.unique_added_controls_count || 0} unique control{summaryData.unique_added_controls_count === 1 ? '' : 's'}
+							</div>
 						</div>
 					{/if}
 				</div>
