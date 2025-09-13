@@ -9,13 +9,7 @@
 		customClass?: string;
 	}
 
-	let {
-		count = '0',
-		label,
-		href = '#',
-		emphasis = false,
-		customClass = ''
-	}: Props = $props();
+	let { count = '0', label, href = '#', emphasis = false, customClass = '' }: Props = $props();
 
 	// Enhanced emphasis styling
 	const emphasisClasses = emphasis
@@ -49,10 +43,14 @@
 
 {#snippet cardContent()}
 	<div class="flex-1 flex flex-col justify-center">
-		<div class="text-2xl font-bold text-gray-800 leading-none mb-1 group-hover:text-violet-800 transition-colors duration-200">
+		<div
+			class="text-2xl font-bold text-gray-800 leading-none mb-1 group-hover:text-violet-800 transition-colors duration-200"
+		>
 			{formattedCount()}
 		</div>
-		<div class="text-xs font-medium text-gray-600 capitalize group-hover:text-violet-700 transition-colors duration-200">
+		<div
+			class="text-xs font-medium text-gray-600 capitalize group-hover:text-violet-700 transition-colors duration-200"
+		>
 			{label}
 		</div>
 	</div>

@@ -40,7 +40,7 @@
 	</div>
 
 	<!-- Cards Grid -->
-	<div class="{gridClasses()}">
+	<div class={gridClasses()}>
 		{@render children()}
 	</div>
 </div>
