@@ -16,15 +16,40 @@
 			const chart = echarts.init(document.getElementById('combined-lec-chart'));
 
 			const series = data.lec.curves.map((curve: any, index: number) => {
+				// Define specific styling for current risk and risk tolerance curves
+				let lineStyle: any = { width: 3 };
+				let itemStyle: any = {};
+
+				if (curve.name === 'Current Risk' || curve.name === 'Combined Current Risk') {
+					// Current risk: bold red line
+					lineStyle = {
+						width: 4,
+						color: '#FF6367',
+            type: 'solid'
+					};
+					itemStyle = {
+						color: '#FF6367'
+					};
+				} else if (curve.name === 'Risk Tolerance') {
+					// Risk tolerance: dashed orange line
+					lineStyle = {
+						width: 3,
+						color: '#7CCF00',
+						type: 'dashed'
+					};
+					itemStyle = {
+						color: '#7CCF00'
+					};
+				}
+
 				return {
 					name: curve.name,
 					type: 'line',
 					data: curve.data,
 					smooth: true,
 					symbol: 'none',
-					lineStyle: {
-						width: 3
-					}
+					lineStyle,
+					itemStyle
 				};
 			});
 
