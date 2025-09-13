@@ -202,6 +202,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.openid_connect",
     "allauth.mfa",
     "huey.contrib.djhuey",
+    "storages",
 ]
 
 MIDDLEWARE = [
