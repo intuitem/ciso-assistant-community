@@ -162,7 +162,7 @@
 							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
 								<!-- Compliance Section (2/5 of width) -->
 								<div class="xl:col-span-2">
-									<CardGroup title={m.sumpageSectionCompliance()} icon="fa-solid fa-list-check">
+									<CardGroup title={m.sumpageSectionCompliance()} icon="fa-solid fa-list-check" maxColumns={3}>
 										<SimpleCard
 											count={metrics.compliance.used_frameworks}
 											label={m.usedFrameworks()}

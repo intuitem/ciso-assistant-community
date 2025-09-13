@@ -3,10 +3,24 @@
 		title: string;
 		icon?: string;
 		description?: string;
+		maxColumns?: 2 | 3 | 4;
 		children: import('svelte').Snippet;
 	}
 
-	let { title, icon = '', description = '', children }: Props = $props();
+	let { title, icon = '', description = '', maxColumns = 4, children }: Props = $props();
+
+	// Generate responsive grid classes based on maxColumns
+	const gridClasses = $derived(() => {
+		switch (maxColumns) {
+			case 2:
+				return 'grid grid-cols-1 sm:grid-cols-2 gap-3';
+			case 3:
+				return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3';
+			case 4:
+			default:
+				return 'grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3';
+		}
+	});
 </script>
 
 <div class="space-y-3">
@@ -26,7 +40,7 @@
 	</div>
 
 	<!-- Cards Grid -->
-	<div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3">
+	<div class="{gridClasses()}">
 		{@render children()}
 	</div>
 </div>

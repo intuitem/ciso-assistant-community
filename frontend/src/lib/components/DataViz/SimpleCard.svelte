@@ -31,10 +31,19 @@
 		${emphasisClasses} ${customClass}
 	`;
 
-	// Format count with thousand separators if it's a number
+	// Format count with proper formatting for numbers, percentages, and ratios
 	const formattedCount = $derived(() => {
-		const numericCount = parseInt(count);
-		return isNaN(numericCount) ? count : numericCount.toLocaleString();
+		// Convert to string first to handle both string and number inputs
+		const countStr = String(count);
+
+		// If it already contains % or /, return as-is since it's already formatted
+		if (countStr.includes('%') || countStr.includes('/')) {
+			return countStr;
+		}
+
+		// Try to parse as number for thousand separators
+		const numericCount = parseInt(countStr);
+		return isNaN(numericCount) ? countStr : numericCount.toLocaleString();
 	});
 </script>
 
