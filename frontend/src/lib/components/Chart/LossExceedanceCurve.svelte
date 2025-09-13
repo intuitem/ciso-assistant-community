@@ -58,7 +58,9 @@
 	const chart_id = `${name}_div`;
 
 	// Helper function to calculate max loss from data arrays
-	function getMaxLossFromData(...dataArrays: (Array<[number, number]> | undefined)[]): number | undefined {
+	function getMaxLossFromData(
+		...dataArrays: (Array<[number, number]> | undefined)[]
+	): number | undefined {
 		let maxLoss = 0;
 		for (const dataArray of dataArrays) {
 			if (dataArray && dataArray.length > 0) {
