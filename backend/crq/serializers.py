@@ -107,7 +107,7 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
         # Automatically create an associated quantitative hypothesis with risk_stage='current'
         QuantitativeRiskHypothesis.objects.create(
             quantitative_risk_scenario=scenario,
-            name=f"as-is",
+            name="baseline",
             risk_stage="current",
             is_selected=True,
             ref_id=QuantitativeRiskHypothesis.get_default_ref_id(scenario),
