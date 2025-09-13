@@ -155,42 +155,43 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
         scenario = validated_data.get("quantitative_risk_scenario")
         parameters = validated_data.get("parameters", {})
 
+        # Find the current hypothesis in the same scenario (for residual hypothesis logic)
+        current_hypothesis = None
+        if risk_stage == "residual" and scenario:
+            current_hypothesis = QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=scenario, risk_stage="current"
+            ).first()
+
         # If creating a residual hypothesis without parameters, copy from current hypothesis
         if (
             risk_stage == "residual"
             and scenario
+            and current_hypothesis
             and (
                 not parameters
                 or (not parameters.get("probability") and not parameters.get("impact"))
             )
         ):
-            # Find the current hypothesis in the same scenario
-            current_hypothesis = QuantitativeRiskHypothesis.objects.filter(
-                quantitative_risk_scenario=scenario, risk_stage="current"
-            ).first()
-
             # If current hypothesis exists, copy parameters and existing controls
-            if current_hypothesis:
-                # Copy parameters if they exist and user hasn't provided their own
-                if current_hypothesis.parameters:
-                    current_params = current_hypothesis.parameters.copy()
+            if current_hypothesis.parameters:
+                current_params = current_hypothesis.parameters.copy()
 
-                    # Only copy if the user hasn't provided their own parameters
-                    if not parameters.get("probability") and current_params.get(
+                # Only copy if the user hasn't provided their own parameters
+                if not parameters.get("probability") and current_params.get(
+                    "probability"
+                ):
+                    if "parameters" not in validated_data:
+                        validated_data["parameters"] = {}
+                    validated_data["parameters"]["probability"] = current_params[
                         "probability"
-                    ):
-                        if "parameters" not in validated_data:
-                            validated_data["parameters"] = {}
-                        validated_data["parameters"]["probability"] = current_params[
-                            "probability"
-                        ]
+                    ]
 
-                    if not parameters.get("impact") and current_params.get("impact"):
-                        if "parameters" not in validated_data:
-                            validated_data["parameters"] = {}
-                        validated_data["parameters"]["impact"] = current_params[
-                            "impact"
-                        ].copy()
+                if not parameters.get("impact") and current_params.get("impact"):
+                    if "parameters" not in validated_data:
+                        validated_data["parameters"] = {}
+                    validated_data["parameters"]["impact"] = current_params[
+                        "impact"
+                    ].copy()
 
         # Create the hypothesis
         hypothesis = super().create(validated_data)
