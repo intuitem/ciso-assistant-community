@@ -14,6 +14,7 @@
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
+	import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -527,7 +528,13 @@
 										<td class={regionCell} role="gridcell">
 											{#if component && browser}
 												{@const CellComponent = component}
-												<CellComponent {meta} cell={value} />
+												{#if CellComponent === LecChartPreview}
+													{#key `${meta?.id || rowIndex}-${key}`}
+														<CellComponent {meta} cell={value} />
+													{/key}
+												{:else}
+													<CellComponent {meta} cell={value} />
+												{/if}
 											{:else}
 												<span class="base-font-family whitespace-pre-line break-words">
 													{#if Array.isArray(value)}

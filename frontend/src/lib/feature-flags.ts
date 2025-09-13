@@ -21,7 +21,8 @@ export function loadFeatureFlags() {
 		compliance: {},
 		tprm: {},
 		privacy: {},
-		experimental: {}
+		experimental: {},
+		quantitativeRiskStudies: {}
 	};
 	return ff;
 }

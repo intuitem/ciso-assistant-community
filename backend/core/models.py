@@ -2865,6 +2865,15 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
 
+def _get_default_applied_control_cost():
+    return {
+        "currency": "€",
+        "amortization_period": 1,
+        "build": {"fixed_cost": 0, "people_days": 0},
+        "run": {"fixed_cost": 0, "people_days": 0},
+    }
+
+
 class AppliedControl(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -2993,10 +3002,45 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
-    cost = models.FloatField(
+    cost = models.JSONField(
         null=True,
-        help_text=_("Cost of the measure (using globally-chosen currency)"),
+        blank=True,
+        default=_get_default_applied_control_cost,
+        help_text=_("Detailed cost structure including build and run costs"),
         verbose_name=_("Cost"),
+        validators=[
+            JSONSchemaInstanceValidator(
+                {
+                    "type": "object",
+                    "properties": {
+                        "currency": {"type": "string"},
+                        "amortization_period": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 1,
+                        },
+                        "build": {
+                            "type": "object",
+                            "properties": {
+                                "fixed_cost": {"type": "number", "minimum": 0},
+                                "people_days": {"type": "number", "minimum": 0},
+                            },
+                            "additionalProperties": False,
+                        },
+                        "run": {
+                            "type": "object",
+                            "properties": {
+                                "fixed_cost": {"type": "number", "minimum": 0},
+                                "people_days": {"type": "number", "minimum": 0},
+                            },
+                            "additionalProperties": False,
+                        },
+                    },
+                    "additionalProperties": False,
+                }
+            )
+        ],
     )
     progress_field = models.IntegerField(
         default=0,
@@ -3063,6 +3107,79 @@ class AppliedControl(
     @property
     def csv_value(self):
         return f"[{self.status}] {self.name}" if self.status else self.name
+
+    @property
+    def annual_cost(self):
+        """Returns the annualized cost as a numeric value"""
+        if not self.cost:
+            return 0
+
+        build_cost = self.cost.get("build", {})
+        run_cost = self.cost.get("run", {})
+        amortization_period = self.cost.get("amortization_period", 1)
+
+        # Get daily rate from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = (
+            general_settings.value.get("daily_rate", 500) if general_settings else 500
+        )
+
+        # Calculate annual cost
+        annual_cost = 0
+
+        # Amortized build costs
+        build_fixed = build_cost.get("fixed_cost", 0)
+        build_people = build_cost.get("people_days", 0)
+        if build_fixed > 0:
+            annual_cost += build_fixed / amortization_period
+        if build_people > 0:
+            annual_cost += (build_people * daily_rate) / amortization_period
+
+        # Annual run costs
+        run_fixed = run_cost.get("fixed_cost", 0)
+        run_people = run_cost.get("people_days", 0)
+        if run_fixed > 0:
+            annual_cost += run_fixed
+        if run_people > 0:
+            annual_cost += run_people * daily_rate
+
+        return annual_cost
+
+    @property
+    def display_cost(self):
+        """Returns a human-readable cost display string"""
+        if not self.cost:
+            return ""
+
+        currency = self.cost.get("currency", "")
+        parts = []
+
+        build_cost = self.cost.get("build", {})
+        run_cost = self.cost.get("run", {})
+
+        if build_cost:
+            build_fixed = build_cost.get("fixed_cost", 0)
+            build_people = build_cost.get("people_days", 0)
+            if build_fixed > 0 or build_people > 0:
+                build_parts = []
+                if build_fixed > 0:
+                    build_parts.append(f"{build_fixed}{currency}")
+                if build_people > 0:
+                    build_parts.append(f"{build_people} people days")
+                parts.append(f"Build: {', '.join(build_parts)}")
+
+        if run_cost:
+            run_fixed = run_cost.get("fixed_cost", 0)
+            run_people = run_cost.get("people_days", 0)
+            if run_fixed > 0 or run_people > 0:
+                run_parts = []
+                if run_fixed > 0:
+                    run_parts.append(f"{run_fixed}{currency}")
+                if run_people > 0:
+                    run_parts.append(f"{run_people} people days")
+                parts.append(f"Run: {', '.join(run_parts)}")
+
+        return " | ".join(parts) if parts else ""
 
     def get_ranking_score(self):
         value = 0

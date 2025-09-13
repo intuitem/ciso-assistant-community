@@ -16,8 +16,18 @@ APPLIED_CONTROL_EFFORT = ("L", "Large")
 APPLIED_CONTROL_EFFORT2 = ("M", "Medium")
 APPLIED_CONTROL_LINK = "https://example.com"
 APPLIED_CONTROL_ETA = "2024-01-01"
-APPLIED_CONTROL_COST = 24.42
-APPLIED_CONTROL_COST2 = 25.43
+APPLIED_CONTROL_COST = {
+    "currency": "€",
+    "amortization_period": 1,
+    "build": {"fixed_cost": 24.42, "people_days": 0},
+    "run": {"fixed_cost": 0, "people_days": 0},
+}
+APPLIED_CONTROL_COST2 = {
+    "currency": "$",
+    "amortization_period": 2,
+    "build": {"fixed_cost": 25.43, "people_days": 2},
+    "run": {"fixed_cost": 10.50, "people_days": 1},
+}
 
 
 @pytest.mark.django_db
