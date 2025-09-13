@@ -51,7 +51,10 @@
 
 	run(() => {
 		if (form?.message?.simulationComplete) {
-			invalidateAll();
+			// Add a small delay to ensure database transaction is committed
+			setTimeout(() => {
+				invalidateAll();
+			}, 100);
 		}
 	});
 </script>

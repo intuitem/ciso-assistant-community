@@ -1,4 +1,3 @@
-import time
 import structlog
 
 from rest_framework import status
@@ -6,6 +5,7 @@ from rest_framework.views import Response
 from rest_framework.decorators import action
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.db import transaction
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
 from core.models import AppliedControl
@@ -312,11 +312,9 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             general_settings.value.get("currency", "€") if general_settings else "€"
         )
 
-        # Get scenarios that are selected and not in draft status, ordered by priority then ref_id
-        selected_scenarios = (
-            study.risk_scenarios.filter(is_selected=True)
-            .exclude(status="draft")
-            .order_by("priority", "ref_id")
+        # Get all selected scenarios regardless of status, ordered by priority then ref_id
+        selected_scenarios = study.risk_scenarios.filter(is_selected=True).order_by(
+            "priority", "ref_id"
         )
 
         scenarios_data = []
@@ -950,11 +948,11 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
         hypothesis: QuantitativeRiskHypothesis = self.get_object()
 
         try:
-            # Run the simulation (this will save the results to the database)
-            simulation_results = hypothesis.run_simulation(dry_run=False)
-
-            # Add a small delay to simulate processing time
-            time.sleep(2)
+            # Run the simulation and ensure the data is saved
+            with transaction.atomic():
+                simulation_results = hypothesis.run_simulation(dry_run=False)
+                # Force save to database within the transaction
+                hypothesis.refresh_from_db()
 
             return Response(
                 {

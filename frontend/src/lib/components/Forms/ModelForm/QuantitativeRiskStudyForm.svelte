@@ -111,7 +111,7 @@
 		open={false}
 		style="hover:text-primary-700"
 		icon="fa-solid fa-bullseye"
-		header="Tolerance Settings"
+		header="Tolerance settings"
 	>
 		<NumberField
 			{form}
@@ -139,7 +139,7 @@
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point1.acceptable_loss"
-					label="Point 1 - Acceptable Loss ({displayCurrency})"
+					label="Point 1 - Tolerable Loss ({displayCurrency})"
 					min={1}
 					step={1}
 					helpText="Acceptable loss amount for point 1"
@@ -158,7 +158,7 @@
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point2.acceptable_loss"
-					label="Point 2 - Acceptable Loss ({displayCurrency})"
+					label="Point 2 - Tolerable Loss ({displayCurrency})"
 					min={1}
 					step={1}
 					helpText="Acceptable loss amount for point 2"

@@ -84,29 +84,22 @@
 					</Anchor>
 				</div>
 
-				<!-- Summary Stats -->
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-					<div class="text-center">
-						<div class="text-2xl font-bold text-blue-600">{summaryData.total_scenarios}</div>
-						<div class="text-sm text-gray-600">Selected Scenarios</div>
-						<div class="text-xs text-gray-500">(non-draft)</div>
-					</div>
-					<div class="text-center">
-						<div class="text-2xl font-bold text-gray-600">
-							{summaryData.total_selected_scenarios}
+				<!-- Risk Thresholds -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+					{#if summaryData.loss_threshold}
+						<div class="text-center">
+							<div class="text-sm text-gray-600 font-medium mb-1">Loss Threshold</div>
+							<div class="text-lg font-bold text-red-600">{summaryData.loss_threshold_display}</div>
+							<div class="text-xs text-gray-500">Maximum acceptable loss</div>
 						</div>
-						<div class="text-sm text-gray-600">Total Selected</div>
-						<div class="text-xs text-gray-500">(including draft)</div>
-					</div>
-					<div class="text-center">
-						<div class="text-2xl font-bold text-gray-500">{summaryData.total_draft_scenarios}</div>
-						<div class="text-sm text-gray-600">Draft Scenarios</div>
-						<div class="text-xs text-gray-500">(excluded)</div>
-					</div>
-					<div class="text-center">
-						<div class="text-sm text-gray-600 font-medium">Risk Tolerance</div>
-						<div class="text-xs text-gray-500">{summaryData.risk_tolerance_display}</div>
-					</div>
+					{/if}
+					{#if summaryData.risk_tolerance_display}
+						<div class="text-center">
+							<div class="text-sm text-gray-600 font-medium mb-1">Risk Tolerance</div>
+							<div class="text-lg font-bold text-blue-600">{summaryData.risk_tolerance_display}</div>
+							<div class="text-xs text-gray-500">Defined risk appetite</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -178,19 +171,21 @@
 												>
 													{scenario.ref_id}
 												</Anchor>
+											</div>
+											<div class="flex items-center gap-2">
 												<span
 													class="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded capitalize"
 												>
 													{scenario.status}
 												</span>
+												{#if scenario.priority}
+													<span
+														class="px-2 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded"
+													>
+														P{scenario.priority}
+													</span>
+												{/if}
 											</div>
-											{#if scenario.priority}
-												<span
-													class="px-2 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded"
-												>
-													P{scenario.priority}
-												</span>
-											{/if}
 										</div>
 										<h2 class="text-xl font-semibold text-gray-900 mb-2">{scenario.name}</h2>
 										{#if scenario.description || scenario.observation}
@@ -426,9 +421,9 @@
 				<div class="bg-white rounded-lg p-12 shadow-sm text-center">
 					<i class="fa-solid fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
 					<h3 class="text-xl font-semibold text-gray-600 mb-2">No Selected Scenarios</h3>
-					<p class="text-gray-500 mb-4">No scenarios are selected and non-draft in this study.</p>
+					<p class="text-gray-500 mb-4">No scenarios are selected in this study.</p>
 					<p class="text-sm text-gray-400">
-						Select scenarios and ensure they are not in draft status to see the executive summary.
+						Select scenarios to see the executive summary.
 					</p>
 				</div>
 			{/if}
