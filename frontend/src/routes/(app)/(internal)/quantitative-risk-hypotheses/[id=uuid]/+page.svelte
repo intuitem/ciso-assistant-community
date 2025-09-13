@@ -12,6 +12,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
+	import { getToastStore } from '$lib/components/Toast/stores.ts';
 
 	interface Props {
 		data: PageData;
@@ -24,6 +25,8 @@
 	let calculatedMu = $state<number | undefined>();
 	let calculatedSigma = $state<number | undefined>();
 	let xAxisScale = $state<'linear' | 'log'>('linear');
+
+	const toastStore = getToastStore();
 
 	// Calculate min and max values for the LEC chart from the data
 	const lecMinValue = $derived(() => {
@@ -61,9 +64,29 @@
 				action="?/runSimulation"
 				use:enhance={() => {
 					simulationIsLoading = true;
-					return async ({ update }) => {
+					return async ({ result, update }) => {
 						await update();
 						simulationIsLoading = false;
+
+						// Handle responses immediately in the enhance callback
+						if (result.type === 'success') {
+							if (result.data?.error) {
+								const errorData = result.data.message;
+								toastStore.trigger({
+									message: `Simulation Failed: ${errorData.details || errorData.error || 'Unknown error occurred'}`,
+									background: 'bg-red-400 text-white',
+									timeout: 2000,
+									autohide: true
+								});
+							} else if (result.data?.success) {
+								toastStore.trigger({
+									message: 'Simulation completed successfully!',
+									background: 'bg-green-500 text-white',
+									autohide: true,
+									timeout: 2000
+								});
+							}
+						}
 					};
 				}}
 			>
@@ -126,7 +149,6 @@
 						</div>
 					{/if}
 				</div>
-
 			{/if}
 
 			<!-- Risk Metrics -->
