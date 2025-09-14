@@ -518,10 +518,83 @@
 					</section>
 				</Tabs.Panel>
 				<Tabs.Panel value="compliance">
-					<span class="text-xl font-extrabold"
-						><a href="/recap" class="hover:text-purple-500">{m.sectionMoved()}</a></span
-					>
-					<div class="flex flex-col space-y-2"></div>
+					<section class="space-y-6">
+						<div class="flex justify-between items-center">
+							<h2 class="text-xl font-extrabold">{m.complianceAnalytics()}</h2>
+							<a href="/recap" class="text-sm text-blue-600 hover:text-blue-800">
+								{m.viewDetailedRecap()} →
+							</a>
+						</div>
+
+						{#if data.complianceAnalytics && Object.keys(data.complianceAnalytics).length > 0}
+							<div class="space-y-8">
+								{#each Object.entries(data.complianceAnalytics) as [frameworkName, frameworkData]}
+									<div class="bg-white rounded-lg p-6 border border-gray-200">
+										<!-- Framework Header -->
+										<div class="flex justify-between items-center mb-4">
+											<h3 class="text-lg font-semibold text-gray-800">{frameworkName}</h3>
+											<div class="text-sm text-gray-600">
+												{m.averageProgress()}:
+												<span class="font-medium text-blue-600">{frameworkData.framework_average}%</span>
+											</div>
+										</div>
+
+										<!-- Domains -->
+										<div class="space-y-4">
+											{#each frameworkData.domains as domain}
+												<div class="border-l-4 border-blue-200 pl-4">
+													<div class="flex justify-between items-center mb-2">
+														<h4 class="font-medium text-gray-700">{domain.domain}</h4>
+														<span class="text-sm text-gray-600">
+															{m.averageProgress()}: {domain.domain_average}%
+														</span>
+													</div>
+
+													<!-- Assessments -->
+													<div class="space-y-2">
+														{#each domain.assessments as assessment}
+															<div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+																<div class="flex-1">
+																	<div class="font-medium text-sm text-gray-800">
+																		{assessment.assessment_name}
+																	</div>
+																	<div class="text-xs text-gray-600">
+																		{m.perimeter()}: {assessment.perimeter} |
+																		{m.status()}: {assessment.status}
+																	</div>
+																</div>
+																<div class="text-sm font-medium">
+																	<div class="flex items-center space-x-2">
+																		<div class="w-16 bg-gray-200 rounded-full h-2">
+																			<div
+																				class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+																				style="width: {assessment.progress}%"
+																			></div>
+																		</div>
+																		<span class="text-blue-600 min-w-[3rem] text-right">
+																			{assessment.progress}%
+																		</span>
+																	</div>
+																</div>
+															</div>
+														{/each}
+													</div>
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/each}
+							</div>
+						{:else}
+							<div class="text-center py-12 bg-gray-50 rounded-lg">
+								<div class="text-gray-500">
+									<i class="fas fa-chart-bar text-4xl mb-4"></i>
+									<p class="text-lg font-medium">{m.noComplianceData()}</p>
+									<p class="text-sm">{m.createComplianceAssessment()}</p>
+								</div>
+							</div>
+						{/if}
+					</section>
 				</Tabs.Panel>
 			</div>
 		{/key}
