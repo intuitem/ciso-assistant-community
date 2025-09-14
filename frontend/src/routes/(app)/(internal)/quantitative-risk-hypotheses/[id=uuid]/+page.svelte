@@ -28,7 +28,6 @@
 
 	const toastStore = getToastStore();
 
-
 	run(() => {
 		if (form?.message?.simulationComplete) {
 			// Add a small delay to ensure database transaction is committed

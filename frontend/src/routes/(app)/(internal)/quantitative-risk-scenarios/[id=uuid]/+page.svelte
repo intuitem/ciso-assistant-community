@@ -176,7 +176,6 @@
 			window.addEventListener('resize', () => chart.resize());
 		}
 	});
-
 </script>
 
 <DetailView {data}>
