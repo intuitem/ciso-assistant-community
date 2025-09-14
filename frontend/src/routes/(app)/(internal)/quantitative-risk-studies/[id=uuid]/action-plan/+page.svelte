@@ -27,7 +27,6 @@
 		meta: []
 	};
 
-	$inspect(data);
 </script>
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">

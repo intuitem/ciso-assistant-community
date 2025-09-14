@@ -28,9 +28,6 @@
 
 	const toastStore = getToastStore();
 
-	$inspect(data);
-	$inspect('LEC data:', data.lec);
-	$inspect('Risk tolerance curve:', data.data.risk_tolerance_curve);
 
 	run(() => {
 		if (form?.message?.simulationComplete) {

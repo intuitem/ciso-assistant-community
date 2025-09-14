@@ -177,7 +177,6 @@
 		}
 	});
 
-	$inspect(data);
 </script>
 
 <DetailView {data}>
