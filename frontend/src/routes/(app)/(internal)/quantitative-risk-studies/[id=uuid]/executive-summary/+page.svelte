@@ -13,7 +13,6 @@
 	}
 
 	let { data }: Props = $props();
-	$inspect(data);
 </script>
 
 <svelte:head>
