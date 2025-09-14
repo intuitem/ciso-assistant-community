@@ -11,7 +11,6 @@
 	}
 
 	let { data }: Props = $props();
-	$inspect(data);
 </script>
 
 <DetailView {data}>
