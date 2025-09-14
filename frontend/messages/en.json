@@ -1404,7 +1404,7 @@
 	"redZoneRadius": "Red zone radius",
 	"progressField": "Progress",
 	"recap": "Summary",
-	"complianceAnalytics": "Compliance",
+	"complianceAnalytics": "Progress by framework",
 	"viewDetailedRecap": "Details",
 	"noComplianceData": "No data",
 	"createComplianceAssessment": "You don't have any audits yet or have access to.",

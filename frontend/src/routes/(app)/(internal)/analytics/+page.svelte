@@ -520,7 +520,7 @@
 				<Tabs.Panel value="compliance">
 					<section class="space-y-6">
 						<div class="flex justify-between items-center mb-6">
-							<h2 class="text-2xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
+							<h2 class="text-xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
 							<a href="/recap" class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors">
 								{m.viewDetailedRecap()}
 								<i class="fas fa-arrow-right text-xs"></i>
@@ -541,7 +541,7 @@
 												<div class="flex items-center gap-2">
 													<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
 													<div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm">
-														<div class="w-12 bg-gray-200 rounded-full h-1.5">
+														<div class="w-32 bg-gray-200 rounded-full h-1.5">
 															<div
 																class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
 																style="width: {frameworkData.framework_average}%"
