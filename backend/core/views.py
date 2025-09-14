@@ -5707,6 +5707,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["get"], name="Get compliance analytics")
+    def analytics(self, request):
+        """
+        Returns compliance analytics data grouped by framework and domain
+        """
+        folder_id = request.query_params.get("folder", None)
+        analytics_data = get_compliance_analytics(request.user, folder_id)
+        return Response(analytics_data, status=status.HTTP_200_OK)
+
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
