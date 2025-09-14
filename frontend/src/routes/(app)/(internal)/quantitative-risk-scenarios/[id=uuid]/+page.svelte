@@ -176,8 +176,6 @@
 			window.addEventListener('resize', () => chart.resize());
 		}
 	});
-
-	$inspect(data);
 </script>
 
 <DetailView {data}>
