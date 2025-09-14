@@ -1056,10 +1056,35 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         return model.objects.filter(id__in=object_ids)
 
-    # Get viewable compliance assessments with related data
-    viewable_assessments = viewable_items(
-        ComplianceAssessment, folder_id
-    ).select_related("framework", "folder", "perimeter")
+    # Get viewable compliance assessments with related data and progress annotation
+    from django.db.models import Count, Q, F, Value, IntegerField, ExpressionWrapper
+    from django.db.models.functions import Greatest, Coalesce
+
+    viewable_assessments = (
+        viewable_items(ComplianceAssessment, folder_id)
+        .select_related("framework", "folder", "perimeter")
+        .annotate(
+            total_requirements=Count(
+                "requirement_assessments",
+                filter=Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            assessed_requirements=Count(
+                "requirement_assessments",
+                filter=~Q(
+                    requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                )
+                & Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            progress=ExpressionWrapper(
+                F("assessed_requirements")
+                * 100
+                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                output_field=IntegerField(),
+            ),
+        )
+    )
 
     framework_data = {}
 
@@ -1089,13 +1114,12 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "assessments": [],
             }
 
-        # Add assessment data
-        progress = assessment.get_progress()
+        # Add assessment data using annotated progress
         framework_data[framework_name]["domains"][domain_name]["assessments"].append(
             {
                 "assessment_id": str(assessment.id),
                 "assessment_name": assessment.name,
-                "progress": progress,
+                "progress": assessment.progress,
                 "perimeter": perimeter_name,
                 "perimeter_id": perimeter_id,
                 "status": assessment.status,
