@@ -521,7 +521,10 @@
 					<section class="space-y-6">
 						<div class="flex justify-between items-center mb-6">
 							<h2 class="text-xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
-							<a href="/recap" class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors">
+							<a
+								href="/recap"
+								class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors"
+							>
 								{m.viewDetailedRecap()}
 								<i class="fas fa-arrow-right text-xs"></i>
 							</a>
@@ -532,7 +535,9 @@
 								{#each Object.entries(data.complianceAnalytics) as [frameworkName, frameworkData]}
 									<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 										<!-- Framework Header -->
-										<div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+										<div
+											class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"
+										>
 											<div class="flex justify-between items-center">
 												<div class="flex items-center gap-3">
 													<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -540,7 +545,9 @@
 												</div>
 												<div class="flex items-center gap-2">
 													<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
-													<div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm">
+													<div
+														class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm"
+													>
 														<div class="w-32 bg-gray-200 rounded-full h-1.5">
 															<div
 																class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
@@ -560,7 +567,9 @@
 											{#each frameworkData.domains as domain}
 												<div class="relative">
 													<!-- Domain Header -->
-													<div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+													<div
+														class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
+													>
 														<div class="flex items-center gap-2">
 															<i class="fas fa-folder text-amber-500 text-sm"></i>
 															<h4 class="font-medium text-gray-800">{domain.domain}</h4>
@@ -584,7 +593,9 @@
 													<!-- Assessments Grid -->
 													<div class="grid gap-3">
 														{#each domain.assessments as assessment}
-															<div class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200">
+															<div
+																class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+															>
 																<div class="flex justify-between items-start gap-4">
 																	<div class="flex-1 min-w-0">
 																		<div class="font-medium text-gray-900 mb-1 truncate">
@@ -596,8 +607,19 @@
 																				<span>{assessment.perimeter}</span>
 																			</div>
 																			<div class="flex items-center gap-1">
-																				<div class="w-2 h-2 rounded-full {assessment.status === 'done' ? 'bg-green-400' : assessment.status === 'in_progress' ? 'bg-blue-400' : assessment.status === 'in_review' ? 'bg-yellow-400' : 'bg-gray-400'}"></div>
-																				<span class="capitalize">{assessment.status?.replace('_', ' ') || 'No status'}</span>
+																				<div
+																					class="w-2 h-2 rounded-full {assessment.status === 'done'
+																						? 'bg-green-400'
+																						: assessment.status === 'in_progress'
+																							? 'bg-blue-400'
+																							: assessment.status === 'in_review'
+																								? 'bg-yellow-400'
+																								: 'bg-gray-400'}"
+																				></div>
+																				<span class="capitalize"
+																					>{assessment.status?.replace('_', ' ') ||
+																						'No status'}</span
+																				>
 																			</div>
 																		</div>
 																	</div>
@@ -606,11 +628,27 @@
 																		<div class="flex items-center gap-2">
 																			<div class="w-20 bg-gray-200 rounded-full h-2">
 																				<div
-																					class="h-2 rounded-full transition-all duration-500 {assessment.progress >= 80 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : assessment.progress >= 50 ? 'bg-gradient-to-r from-blue-400 to-cyan-500' : assessment.progress >= 25 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gradient-to-r from-red-400 to-pink-500'}"
+																					class="h-2 rounded-full transition-all duration-500 {assessment.progress >=
+																					80
+																						? 'bg-gradient-to-r from-green-400 to-emerald-500'
+																						: assessment.progress >= 50
+																							? 'bg-gradient-to-r from-blue-400 to-cyan-500'
+																							: assessment.progress >= 25
+																								? 'bg-gradient-to-r from-yellow-400 to-orange-500'
+																								: 'bg-gradient-to-r from-red-400 to-pink-500'}"
 																					style="width: {assessment.progress}%"
 																				></div>
 																			</div>
-																			<span class="font-semibold text-sm min-w-[3rem] text-right {assessment.progress >= 80 ? 'text-green-600' : assessment.progress >= 50 ? 'text-blue-600' : assessment.progress >= 25 ? 'text-orange-600' : 'text-red-600'}">
+																			<span
+																				class="font-semibold text-sm min-w-[3rem] text-right {assessment.progress >=
+																				80
+																					? 'text-green-600'
+																					: assessment.progress >= 50
+																						? 'text-blue-600'
+																						: assessment.progress >= 25
+																							? 'text-orange-600'
+																							: 'text-red-600'}"
+																			>
 																				{assessment.progress}%
 																			</span>
 																		</div>
@@ -626,7 +664,9 @@
 								{/each}
 							</div>
 						{:else}
-							<div class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
+							<div
+								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+							>
 								<div class="text-gray-400 mb-4">
 									<i class="fas fa-chart-bar text-6xl"></i>
 								</div>
@@ -634,7 +674,10 @@
 									<p class="text-xl font-semibold mb-2">{m.noComplianceData()}</p>
 									<p class="text-sm text-gray-500">{m.createComplianceAssessment()}</p>
 								</div>
-								<a href="/compliance-assessments" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+								<a
+									href="/compliance-assessments"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								>
 									<i class="fas fa-plus text-sm"></i>
 									Create Assessment
 								</a>
