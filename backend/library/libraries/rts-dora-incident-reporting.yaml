@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:rts-dora-incident-reporting
 locale: en
 ref_id: RTS-DORA-incident-reporting
@@ -19,10 +21,23 @@ description: 'Article 20 of DORA mandates the European Supervisory Authorities (
 
   https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf'
 copyright: ESA
-version: 1
-publication_date: 2024-08-12
+version: 2
+publication_date: 2025-09-15
 provider: ESA
 packager: intuitem
+translations:
+  fr:
+    name: "RTS DORA - Rapports d\u2019incidents"
+    description: "L\u2019article 20 de la DORA charge les autorit\xE9s europ\xE9ennes\
+      \ de surveillance (AES) d\u2019\xE9laborer, par l\u2019interm\xE9diaire du comit\xE9\
+      \ mixte et en consultation avec la Banque centrale europ\xE9enne et l\u2019\
+      Agence de l\u2019Union europ\xE9enne pour la cybers\xE9curit\xE9, des projets\
+      \ de normes techniques de r\xE9glementation (RTS) \xE9tablissant le contenu\
+      \ des rapports d\u2019incidents li\xE9s aux TIC et la notification des cybermenaces\
+      \ significatives, ainsi que les d\xE9lais impartis aux EF pour signaler ces\
+      \ incidents aux autorit\xE9s comp\xE9tentes.\n\nVoici le lien du deuxi\xE8me\
+      \ lot de produits de police en vertu de DORA :\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+      \nVoici le lien du document :\nhttps://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf"
 objects:
   framework:
     urn: urn:intuitem:risk:framework:rts-dora-incident-reporting
@@ -44,10 +59,29 @@ objects:
       Here is the link of the document :
 
       https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf"'
+    translations:
+      fr:
+        name: "RTS DORA - Rapports d\u2019incidents"
+        description: "L\u2019article 20 de la DORA charge les autorit\xE9s europ\xE9\
+          ennes de surveillance (AES) d\u2019\xE9laborer, par l\u2019interm\xE9diaire\
+          \ du comit\xE9 mixte et en consultation avec la Banque centrale europ\xE9\
+          enne et l\u2019Agence de l\u2019Union europ\xE9enne pour la cybers\xE9curit\xE9\
+          , des projets de normes techniques de r\xE9glementation (RTS) \xE9tablissant\
+          \ le contenu des rapports d\u2019incidents li\xE9s aux TIC et la notification\
+          \ des cybermenaces significatives, ainsi que les d\xE9lais impartis aux\
+          \ EF pour signaler ces incidents aux autorit\xE9s comp\xE9tentes.\n\nVoici\
+          \ le lien du deuxi\xE8me lot de produits de police en vertu de DORA :\n\
+          https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+          \nVoici le lien du document :\nhttps://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf"
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-1
+    - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       assessable: false
       depth: 1
+      ref_id: Recital
+    - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 1
       description: Given that Regulation (EU) 2022/2554 aims to harmonise and streamline
         incident reporting requirements, and to ensure that competent and other relveant
@@ -57,9 +91,23 @@ objects:
         authorities should provide essential and exhaustive information about the
         incident, in a consistent and standardised manner for all financial entities
         within the scope of Regulation (EU) 2022/2554.
+      translations:
+        fr:
+          description: "\xC9tant donn\xE9 que le r\xE8glement (UE) 2022/2554 vise\
+            \ \xE0 harmoniser et \xE0 rationaliser les obligations de d\xE9claration\
+            \ des incidents et \xE0 veiller \xE0 ce que les autorit\xE9s comp\xE9\
+            tentes et les autres autorit\xE9s concern\xE9es re\xE7oivent toutes les\
+            \ informations n\xE9cessaires sur l\u2019incident majeur afin de prendre\
+            \ des mesures de surveillance et de pr\xE9venir les effets de contagion\
+            \ potentiels, les rapports d\u2019incidents majeurs soumis par les entit\xE9\
+            s financi\xE8res aux autorit\xE9s comp\xE9tentes devraient fournir des\
+            \ informations essentielles et exhaustives sur l\u2019incident,  de mani\xE8\
+            re coh\xE9rente et normalis\xE9e pour toutes les entit\xE9s financi\xE8\
+            res relevant du champ d\u2019application du r\xE8glement (UE) 2022/2554."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-2
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 2
       description: With a view to ensure the harmonisation of the reporting requirements
         for major incidents and to maintain a consistent approach with Directive (EU)
@@ -67,9 +115,20 @@ objects:
         for all types of financial entities. The time limits should also be consistent
         with, to the greatest extent possible, and at least equivalent in effect to
         the requirements set out in Directive (EU) 2022/2555.
+      translations:
+        fr:
+          description: "Afin d\u2019assurer l\u2019harmonisation des obligations de\
+            \ d\xE9claration des incidents majeurs et de maintenir une approche coh\xE9\
+            rente avec la directive (UE) 2022/2555, les d\xE9lais de d\xE9claration\
+            \ des incidents majeurs devraient \xEAtre coh\xE9rents pour tous les types\
+            \ d\u2019entit\xE9s financi\xE8res. Les d\xE9lais devraient \xE9galement\
+            \ \xEAtre coh\xE9rents, dans toute la mesure du possible, et au moins\
+            \ \xE9quivalents en effet aux exigences \xE9nonc\xE9es dans la directive\
+            \ (UE) 2022/2555."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-3
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 3
       description: In order to take proper action, competent authorities need to receive
         information about the major incident at the very early stages after the incident
@@ -82,9 +141,27 @@ objects:
         burden to the financial entity at a time when it will be handling with the
         incident, the content of such initial notification should be limited to the
         most significant information.
+      translations:
+        fr:
+          description: "Afin de prendre les mesures appropri\xE9es, les autorit\xE9\
+            s comp\xE9tentes doivent recevoir des informations sur l\u2019incident\
+            \ majeur d\xE8s les premiers stades apr\xE8s que l\u2019incident a \xE9\
+            t\xE9 class\xE9 comme majeur. Par cons\xE9quent, le d\xE9lai de soumission\
+            \ de la notification initiale devrait \xEAtre aussi court que possible\
+            \ apr\xE8s la classification de l\u2019incident, mais aussi offrir une\
+            \ certaine souplesse aux entit\xE9s financi\xE8res, en particulier pour\
+            \ les mod\xE8les d\u2019affaires de services non urgents, avec un d\xE9\
+            lai plus long apr\xE8s que les entit\xE9s financi\xE8res ont pris connaissance\
+            \ de l\u2019incident au cas o\xF9 les entit\xE9s financi\xE8res auraient\
+            \ besoin de plus de temps pour traiter l\u2019incident. Afin d\u2019\xE9\
+            viter d\u2019imposer une charge de d\xE9claration excessive \xE0 l\u2019\
+            entit\xE9 financi\xE8re au moment o\xF9 celle-ci sera charg\xE9e de g\xE9\
+            rer l\u2019incident, le contenu de cette notification initiale devrait\
+            \ \xEAtre limit\xE9 aux informations les plus importantes."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-4
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 4
       description: Given that, after having received the initial notification, competent
         authorities will need more detailed information about the incident with the
@@ -93,32 +170,69 @@ objects:
         may want to take, the reporting timelines should be such to allow competent
         authorities to receive the information timely, while ensuring financial entities
         have sufficient time to obtain complete and accurate information.
+      translations:
+        fr:
+          description: "\xC9tant donn\xE9 qu\u2019apr\xE8s avoir re\xE7u la notification\
+            \ initiale, les autorit\xE9s comp\xE9tentes auront besoin d\u2019informations\
+            \ plus d\xE9taill\xE9es sur l\u2019incident dans le rapport interm\xE9\
+            diaire et de l\u2019ensemble des informations pertinentes dans le rapport\
+            \ final pour \xE9valuer plus avant la situation et \xE9valuer les mesures\
+            \ de surveillance qu\u2019elles pourraient vouloir prendre, les d\xE9\
+            lais de notification devraient \xEAtre tels que les autorit\xE9s comp\xE9\
+            tentes puissent recevoir les informations en temps utile,  tout en veillant\
+            \ \xE0 ce que les entit\xE9s financi\xE8res disposent de suffisamment\
+            \ de temps pour obtenir des informations compl\xE8tes et exactes."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-5
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 5
       description: In accordance with the proportionality requirement set out in Article
         20(a), second sub-paragraph of Regulation (EU) 2022/2554, the reporting timelines
         should not pose burden to microenterprises and other financial entities that
         are not significant. Therefore, the reporting timelines should take into account,
         in particular weekends and bank holidays.
+      translations:
+        fr:
+          description: "Conform\xE9ment \xE0 l\u2019exigence de proportionnalit\xE9\
+            \ \xE9nonc\xE9e \xE0 l\u2019article 20, point a), deuxi\xE8me alin\xE9\
+            a, du r\xE8glement (UE) 2022/2554, les d\xE9lais de d\xE9claration ne\
+            \ devraient pas repr\xE9senter une charge pour les microentreprises et\
+            \ autres entit\xE9s financi\xE8res qui ne sont pas importantes. Par cons\xE9\
+            quent, les d\xE9lais de d\xE9claration doivent tenir compte, en particulier,\
+            \ des week-ends et des jours f\xE9ri\xE9s."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-6
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 6
       description: Since significant cyber threats are to be reported on a voluntary
         basis, the requested information should not pose burden to financial entities
         to obtain and should be more limited than the information requested for major
         incidents.
+      translations:
+        fr:
+          description: "\xC9tant donn\xE9 que les cybermenaces importantes doivent\
+            \ \xEAtre signal\xE9es sur une base volontaire, les informations demand\xE9\
+            es ne devraient pas repr\xE9senter un fardeau pour les entit\xE9s financi\xE8\
+            res et devraient \xEAtre plus limit\xE9es que les informations demand\xE9\
+            es pour les incidents majeurs."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-7
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 7
       description: This Regulation is based on the draft regulatory technical standards
         submitted to the Commission by the European Supervisory Authorities.
+      translations:
+        fr:
+          description: "Le pr\xE9sent r\xE8glement se fonde sur les projets de normes\
+            \ techniques de r\xE9glementation soumis \xE0 la Commission par les autorit\xE9\
+            s europ\xE9ennes de surveillance."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital-8
       assessable: false
-      depth: 1
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
       ref_id: Recital 8
       description: "The European Supervisory Authorities have conducted open public\
         \ consultations on the draft regulatory technical standards on which this\
@@ -126,11 +240,24 @@ objects:
         \ requested the advice of the [\u2026] Stakeholder Group established in accordance\
         \ with Article 37 of Regulations (EU) No 1093/2010, 1094/2010 and 1095/2010\
         \ of the European Parliament and of the Council"
+      translations:
+        fr:
+          description: "Les autorit\xE9s europ\xE9ennes de surveillance ont men\xE9\
+            \ des consultations publiques ouvertes sur les projets de normes techniques\
+            \ de r\xE9glementation sur lesquels se fonde le pr\xE9sent r\xE8glement,\
+            \ analys\xE9 les co\xFBts et avantages potentiels qui y sont associ\xE9\
+            s et demand\xE9 l\u2019avis de la [...] Groupe des parties int\xE9ress\xE9\
+            es constitu\xE9 conform\xE9ment \xE0 l\u2019article 37 des r\xE8glements\
+            \ (UE) n\xB0 1093/2010, (UE) n\xB0 1094/2010 et (CE) n\xB0 1095/2010 du\
+            \ Parlement europ\xE9en et du Conseil"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-1
       assessable: false
       depth: 1
       ref_id: Article 1
       description: General provisions
+      translations:
+        fr:
+          description: "Dispositions g\xE9n\xE9rales"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node11
       assessable: true
       depth: 2
@@ -139,12 +266,24 @@ objects:
         intermediate report or the final report with the content as set out in this
         Regulation following the description and instructions as set out in the Implementing
         Regulation [insert reference once published in OJ].
+      translations:
+        fr:
+          description: "Les entit\xE9s financi\xE8res fournissent la notification\
+            \ initiale, le rapport interm\xE9diaire ou le rapport final dont le contenu\
+            \ est d\xE9fini dans le pr\xE9sent r\xE8glement, conform\xE9ment \xE0\
+            \ la description et aux instructions \xE9nonc\xE9es dans le r\xE8glement\
+            \ d\u2019application [ins\xE9rer la r\xE9f\xE9rence une fois publi\xE9\
+            e au JO]."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-2
       assessable: false
       depth: 1
       ref_id: Article 2
       description: General information to be provided in the major incident initial
         notification, intermediate and final reports
+      translations:
+        fr:
+          description: "Renseignements g\xE9n\xE9raux \xE0 fournir dans la notification\
+            \ initiale, les rapports interm\xE9diaires et finaux d\u2019incident majeur"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node13
       assessable: false
       depth: 2
@@ -152,6 +291,11 @@ objects:
       description: 'When submitting the initial notification, the intermediate report
         and the final report, financial entities shall provide the following general
         information:'
+      translations:
+        fr:
+          description: "Lors de la soumission de la notification initiale, du rapport\
+            \ interm\xE9diaire et du rapport final, les entit\xE9s financi\xE8res\
+            \ fournissent les informations g\xE9n\xE9rales suivantes\_:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.a
       assessable: true
       depth: 3
@@ -159,6 +303,10 @@ objects:
       ref_id: 2.a
       description: the type of report as referred to in Article 19(4) of Regulation
         (EU)2022/2554;
+      translations:
+        fr:
+          description: "le type de rapport vis\xE9 \xE0 l\u2019article 19, paragraphe\
+            \ 4, du r\xE8glement (UE) 2022/2554\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.b
       assessable: true
       depth: 3
@@ -167,6 +315,12 @@ objects:
       description: name, LEI code of the financial entity and specify, which of the
         type of entities referred to in Article 2(1) of Regulation (EU)2022/2554 it
         is authorised or registered as;
+      translations:
+        fr:
+          description: "le nom, le code LEI de l\u2019entit\xE9 financi\xE8re et pr\xE9\
+            cisez sous quel type d\u2019entit\xE9s vis\xE9 \xE0 l\u2019article 2,\
+            \ paragraphe 1, du r\xE8glement (UE) 2022/2554 elle est agr\xE9\xE9e ou\
+            \ enregistr\xE9e\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.c
       assessable: true
       depth: 3
@@ -174,6 +328,10 @@ objects:
       ref_id: 2.c
       description: name and identification code of the entity submitting the report
         for the financial entity;
+      translations:
+        fr:
+          description: "le nom et le code d\u2019identification de l\u2019entit\xE9\
+            \ qui soumet la d\xE9claration pour l\u2019entit\xE9 financi\xE8re\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.d
       assessable: true
       depth: 3
@@ -181,6 +339,10 @@ objects:
       ref_id: 2.d
       description: names and LEI codes of all financial entities covered in the aggregated
         report, where applicable.
+      translations:
+        fr:
+          description: "les noms et les codes LEI de toutes les entit\xE9s financi\xE8\
+            res couvertes par le rapport agr\xE9g\xE9, le cas \xE9ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.e
       assessable: true
       depth: 3
@@ -188,6 +350,10 @@ objects:
       ref_id: 2.e
       description: contact details of the contact persons responsible for communicating
         with the competent authority;
+      translations:
+        fr:
+          description: "les coordonn\xE9es des personnes de contact charg\xE9es de\
+            \ communiquer avec l\u2019autorit\xE9 comp\xE9tente\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.f
       assessable: true
       depth: 3
@@ -195,41 +361,65 @@ objects:
       ref_id: 2.f
       description: identification of the parent undertaking of the group, where applicable;
         and
+      translations:
+        fr:
+          description: "l\u2019identification de l\u2019entreprise m\xE8re du groupe,\
+            \ le cas \xE9ch\xE9ant\_; et"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:2.g
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node13
       ref_id: 2.g
       description: reporting currency.
+      translations:
+        fr:
+          description: "devise de d\xE9claration."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-3
       assessable: false
       depth: 1
       ref_id: Article 3
       description: Content of initial notifications
+      translations:
+        fr:
+          description: Contenu des notifications initiales
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-3
       description: 'Financial entities shall provide at least the following information
         about the incident in the initial notification:'
+      translations:
+        fr:
+          description: "Les entit\xE9s financi\xE8res fournissent au moins les informations\
+            \ suivantes sur l\u2019incident dans la notification initiale\_:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.a
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.a
       description: incident reference code
+      translations:
+        fr:
+          description: "Code de r\xE9f\xE9rence de l\u2019incident"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.b
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.b
       description: date and time of detection and classification of the incident;
+      translations:
+        fr:
+          description: "la date et l\u2019heure de la d\xE9tection et de la classification\
+            \ de l\u2019incident\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.c
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.c
       description: description of the incident;
+      translations:
+        fr:
+          description: "description de l\u2019incident\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.d
       assessable: true
       depth: 3
@@ -238,30 +428,52 @@ objects:
       description: classification criteria that triggered the incident report as set
         out in [Articles 1 to 8 of Delegated Regulation [insert number once published
         in official journal];
+      translations:
+        fr:
+          description: "les crit\xE8res de classification \xE0 l\u2019origine de la\
+            \ d\xE9claration d\u2019incident tels que d\xE9finis aux [articles 1er\
+            \ \xE0 8 du r\xE8glement d\xE9l\xE9gu\xE9 [ins\xE9rer le num\xE9ro une\
+            \ fois publi\xE9 au Journal officiel]\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.e
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.e
       description: members States impacted by the incident, where applicable;
+      translations:
+        fr:
+          description: "les \xC9tats membres touch\xE9s par l\u2019incident, le cas\
+            \ \xE9ch\xE9ant\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.f
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.f
       description: information on how the incident has been discovered;
+      translations:
+        fr:
+          description: "des informations sur la fa\xE7on dont l\u2019incident a \xE9\
+            t\xE9 d\xE9couvert\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.g
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.g
       description: information about the origin of the incident, where available;
+      translations:
+        fr:
+          description: "des informations sur l\u2019origine de l\u2019incident, le\
+            \ cas \xE9ch\xE9ant\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.h
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.h
       description: indication whether a business continuity plan has been activated;
+      translations:
+        fr:
+          description: "l\u2019indication si un plan de continuit\xE9 des activit\xE9\
+            s a \xE9t\xE9 activ\xE9 ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.i
       assessable: true
       depth: 3
@@ -269,23 +481,37 @@ objects:
       ref_id: 3.i
       description: information about the reclassification of the incident from major
         to non-major, where applicable; and
+      translations:
+        fr:
+          description: "des renseignements sur la reclassification de l\u2019incident\
+            \ de majeur \xE0 non majeur, le cas \xE9ch\xE9ant\_; et"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:3.j
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node22
       ref_id: 3.j
       description: other information, where available.
+      translations:
+        fr:
+          description: "d\u2019autres renseignements, le cas \xE9ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-4
       assessable: false
       depth: 1
       ref_id: Article 4
       description: Content of intermediate reports
+      translations:
+        fr:
+          description: "Contenu des rapports interm\xE9diaires"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-4
       description: 'Financial entities shall provide at least the following information
         about the incident in the intermediate report:'
+      translations:
+        fr:
+          description: "Les entit\xE9s financi\xE8res fournissent au moins les informations\
+            \ suivantes sur l\u2019incident dans le rapport interm\xE9diaire\_:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.a
       assessable: true
       depth: 3
@@ -293,12 +519,19 @@ objects:
       ref_id: 4.a
       description: incident reference code provided by the competent authority, where
         applicable;
+      translations:
+        fr:
+          description: "le code de r\xE9f\xE9rence de l\u2019incident fourni par l\u2019\
+            autorit\xE9 comp\xE9tente, le cas \xE9ch\xE9ant\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.b
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.b
       description: date and time of occurrence of the incident;
+      translations:
+        fr:
+          description: "la date et l\u2019heure de l\u2019incident\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.c
       assessable: true
       depth: 3
@@ -306,6 +539,10 @@ objects:
       ref_id: 4.c
       description: date and time when regular activities have been restored, where
         applicable;
+      translations:
+        fr:
+          description: "la date et l\u2019heure du r\xE9tablissement des activit\xE9\
+            s habituelles, le cas \xE9ch\xE9ant\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.d
       assessable: true
       depth: 3
@@ -313,42 +550,69 @@ objects:
       ref_id: 4.d
       description: information about the classification criteria that triggered the
         incident report;
+      translations:
+        fr:
+          description: "des informations sur les crit\xE8res de classification qui\
+            \ ont d\xE9clench\xE9 le rapport d\u2019incident ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.e
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.e
       description: type of the incident;
+      translations:
+        fr:
+          description: "le type d\u2019incident\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.f
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.f
       description: threats and techniques used by the threat actor, where applicable;
+      translations:
+        fr:
+          description: "les menaces et les techniques utilis\xE9es par l\u2019auteur\
+            \ de menace, le cas \xE9ch\xE9ant\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.g
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.g
       description: affected functional areas and business processes;
+      translations:
+        fr:
+          description: "les secteurs fonctionnels et les processus op\xE9rationnels\
+            \ touch\xE9s\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.h
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.h
       description: affected infrastructure components supporting business processes;
+      translations:
+        fr:
+          description: "les composantes d\u2019infrastructure touch\xE9es \xE0 l\u2019\
+            appui des processus op\xE9rationnels\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.i
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.i
       description: impact on the financial interest of clients;
+      translations:
+        fr:
+          description: "l\u2019impact sur l\u2019int\xE9r\xEAt financier des clients\_\
+            ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.j
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.j
       description: information about reporting to other authorities;
+      translations:
+        fr:
+          description: "des informations sur la d\xE9claration \xE0 d\u2019autres\
+            \ autorit\xE9s\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.k
       assessable: true
       depth: 3
@@ -356,29 +620,48 @@ objects:
       ref_id: 4.k
       description: temporary actions/measures taken or planned to be taken to recover
         from the incident; and
+      translations:
+        fr:
+          description: "les mesures temporaires prises ou pr\xE9vues pour se remettre\
+            \ de l\u2019incident\_; et"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:4.l
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node34
       ref_id: 4.l
       description: information on indicators of compromise, where applicable.
+      translations:
+        fr:
+          description: "des informations sur les indicateurs de compromission, le\
+            \ cas \xE9ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-5
       assessable: false
       depth: 1
       ref_id: Article 5
       description: Content of final reports
+      translations:
+        fr:
+          description: Contenu des rapports finaux
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node48
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-5
       description: 'Financial entities shall provide the following information about
         the incident in the final report:'
+      translations:
+        fr:
+          description: "Les entit\xE9s financi\xE8res fournissent les informations\
+            \ suivantes sur l\u2019incident dans le rapport final\_:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:5.a
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node48
       ref_id: 5.a
       description: information about the root causes of the incident
+      translations:
+        fr:
+          description: "des renseignements sur les causes profondes de l\u2019incident\_\
+            ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:5.b
       assessable: true
       depth: 3
@@ -386,18 +669,29 @@ objects:
       ref_id: 5.b
       description: dates and times when the incident was resolved and the root cause
         addressed;
+      translations:
+        fr:
+          description: "les dates et les heures auxquelles l\u2019incident a \xE9\
+            t\xE9 r\xE9solu et la cause profonde trait\xE9e\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:5.c
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node48
       ref_id: 5.c
       description: information on the incident resolution;
+      translations:
+        fr:
+          description: "des informations sur la r\xE9solution de l\u2019incident ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:5.d
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node48
       ref_id: 5.d
       description: information relevant for resolution authorities, where applicable;
+      translations:
+        fr:
+          description: "les informations pertinentes pour les autorit\xE9s de r\xE9\
+            solution, le cas \xE9ch\xE9ant\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:5.f
       assessable: true
       depth: 3
@@ -405,18 +699,32 @@ objects:
       ref_id: 5.f
       description: information about direct and indirect costs and losses stemming
         from the incident and information about financial recoveries; and
+      translations:
+        fr:
+          description: "des informations sur les co\xFBts et les pertes directs et\
+            \ indirects d\xE9coulant de l\u2019incident et des informations sur les\
+            \ recouvrements financiers\_; et"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:5.e
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node48
       ref_id: 5.e
       description: information about recurring incidents, where applicable.
+      translations:
+        fr:
+          description: "des informations sur les incidents r\xE9currents, le cas \xE9\
+            ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-6
       assessable: false
       depth: 1
       ref_id: Article 6
       description: Time limits for the initial notification and intermediate report
         and final reports referred to in Article 19(4) of Regulation (EU)2022/2554
+      translations:
+        fr:
+          description: "D\xE9lais pour la notification initiale, le rapport interm\xE9\
+            diaire et les rapports finaux vis\xE9s \xE0 l\u2019article 19, paragraphe\
+            \ 4, du r\xE8glement (UE) 2022/2554"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.1
       assessable: true
       depth: 2
@@ -425,6 +733,12 @@ objects:
       description: 'The time limits for the submission of the initial notification
         and the intermediate and final reports as referred to in Article 19(4)(a)
         to (c) of Regulation (EU)2022/2554 shall be as follows:'
+      translations:
+        fr:
+          description: "Les d\xE9lais pour la pr\xE9sentation de la notification initiale\
+            \ et des rapports interm\xE9diaire et final vis\xE9s \xE0 l\u2019article\
+            \ 19, paragraphe 4, points a) \xE0 c), du r\xE8glement (UE) 2022/2554\
+            \ sont les suivants\_:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.1.a
       assessable: true
       depth: 3
@@ -434,6 +748,12 @@ objects:
         4 hours from the moment of classification of the incident as major, but no
         later than 24 hours from the moment the financial entity has become aware
         of the incident;
+      translations:
+        fr:
+          description: "le rapport initial est soumis le plus t\xF4t possible dans\
+            \ les 4 heures suivant la qualification de l\u2019incident majeur, mais\
+            \ au plus tard dans les 24 heures suivant la date \xE0 laquelle l\u2019\
+            entit\xE9 financi\xE8re a pris connaissance de l\u2019incident\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.1.b
       assessable: true
       depth: 3
@@ -445,6 +765,16 @@ objects:
         19(4)(b) of Regulation (EU) 2022/2554. Financial entities shall submit without
         undue delay an updated inter- mediate report, in any case, when regular activities
         have been recovered.
+      translations:
+        fr:
+          description: "Un rapport interm\xE9diaire est soumis au plus tard dans les\
+            \ 72 heures suivant la soumission de la notification initiale, m\xEAme\
+            \ si l\u2019\xE9tat ou le traitement de l\u2019incident n\u2019a pas chang\xE9\
+            \ conform\xE9ment \xE0 l\u2019article 19, paragraphe 4, point b), du r\xE8\
+            glement (UE) 2022/2554. Les entit\xE9s financi\xE8res soumettent sans\
+            \ retard injustifi\xE9 un rapport interm\xE9diaire actualis\xE9, en tout\
+            \ \xE9tat de cause, lorsque les activit\xE9s normales ont \xE9t\xE9 r\xE9\
+            tablies."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.1.c
       assessable: true
       depth: 3
@@ -452,6 +782,10 @@ objects:
       ref_id: 6.1.c
       description: the final report shall be submitted no later than one month from
         the submission of the latest updated intermediate report.
+      translations:
+        fr:
+          description: "Le rapport final est soumis au plus tard un mois apr\xE8s\
+            \ la pr\xE9sentation du dernier rapport interm\xE9diaire mis \xE0 jour."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.2
       assessable: true
       depth: 2
@@ -461,6 +795,13 @@ objects:
         the 24 hours is classified as major at a later stage, the financial entity
         shall submit the initial notification within the four-hours after the classification
         of the incident.
+      translations:
+        fr:
+          description: "Lorsqu\u2019un incident qui n\u2019a pas \xE9t\xE9 class\xE9\
+            \ comme majeur dans les 24 heures est class\xE9 comme majeur \xE0 un stade\
+            \ ult\xE9rieur, l\u2019entit\xE9 financi\xE8re soumet la notification\
+            \ initiale dans les quatre heures suivant la classification de l\u2019\
+            incident."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.3
       assessable: true
       depth: 2
@@ -471,6 +812,14 @@ objects:
         1, financial entities shall inform the competent authority without undue delay,
         but no later than the respective time limit for submission of the notification/report,
         and shall explain the reasons for the delay.
+      translations:
+        fr:
+          description: "Lorsque les entit\xE9s financi\xE8res ne sont pas en mesure\
+            \ de soumettre la notification initiale, le rapport interm\xE9diaire ou\
+            \ le rapport final dans les d\xE9lais fix\xE9s au paragraphe 1, elles\
+            \ en informent l\u2019autorit\xE9 comp\xE9tente dans les meilleurs d\xE9\
+            lais, mais au plus tard dans le d\xE9lai imparti pour la soumission de\
+            \ la notification ou du rapport, et expliquent les raisons de ce retard."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.4
       assessable: true
       depth: 2
@@ -481,6 +830,14 @@ objects:
         in the Member State of the reporting financial entity, the financial entity
         may submit the initial notification, intermediate or final reports by noon
         of the next working day.
+      translations:
+        fr:
+          description: "Lorsque le d\xE9lai de pr\xE9sentation d\u2019une notification\
+            \ initiale, d\u2019un rapport interm\xE9diaire ou d\u2019un rapport final\
+            \ tombe un jour de week-end ou un jour f\xE9ri\xE9 dans l\u2019\xC9tat\
+            \ membre de l\u2019entit\xE9 financi\xE8re d\xE9clarante, celle-ci peut\
+            \ soumettre la notification initiale, les rapports interm\xE9diaires ou\
+            \ finaux au plus tard \xE0 midi le jour ouvrable suivant."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:6.5
       assessable: true
       depth: 2
@@ -493,11 +850,27 @@ objects:
         Directive (EU) 2022/2555, or financial entities de- clared as significant
         or systemic by the competent authority. In this case, the financial entities
         shall apply the time limits set out in paragraph 1.
+      translations:
+        fr:
+          description: "Le paragraphe 4 ne s\u2019applique pas \xE0 la pr\xE9sentation\
+            \ d\u2019une notification initiale et d\u2019un rapport interm\xE9diaire\
+            \ par les \xE9tablissements de cr\xE9dit, les contreparties centrales,\
+            \ les op\xE9rateurs de plates-formes de n\xE9gociation et d\u2019autres\
+            \ entit\xE9s financi\xE8res identifi\xE9es comme entit\xE9s essentielles\
+            \ ou importantes en vertu des r\xE8gles nationales transposant l\u2019\
+            article 3 de la directive (UE) 2022/2555, ou les entit\xE9s financi\xE8\
+            res d\xE9clar\xE9es comme importantes ou syst\xE9miques par l\u2019autorit\xE9\
+            \ comp\xE9tente. Dans ce cas, les entit\xE9s financi\xE8res appliquent\
+            \ les d\xE9lais fix\xE9s au paragraphe 1."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-7
       assessable: false
       depth: 1
       ref_id: Article 7
       description: Content of the voluntary notification of significant cyber threat
+      translations:
+        fr:
+          description: "Contenu de la notification volontaire d\u2019une cybermenace\
+            \ importante"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node65
       assessable: true
       depth: 2
@@ -505,6 +878,11 @@ objects:
       description: 'The content of the notification in relation to significant cyber
         threats in accordance with Article 19(2) of Regulation (EU) 2022/2554 shall
         cover:'
+      translations:
+        fr:
+          description: "Le contenu de la notification relative aux cybermenaces significatives\
+            \ conform\xE9ment \xE0 l\u2019article 19, paragraphe 2, du r\xE8glement\
+            \ (UE) 2022/2554 couvre\_:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.a
       assessable: true
       depth: 3
@@ -512,6 +890,10 @@ objects:
       ref_id: 7.a
       description: general information about the reporting entity as set out in Article
         4;
+      translations:
+        fr:
+          description: "des informations g\xE9n\xE9rales sur l\u2019entit\xE9 d\xE9\
+            clarante vis\xE9es \xE0 l\u2019article 4\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.b
       assessable: true
       depth: 3
@@ -519,12 +901,20 @@ objects:
       ref_id: 7.b
       description: date and time of detection of the significant cyber threat and
         any other relevant timestamps related to the threat;
+      translations:
+        fr:
+          description: "la date et l\u2019heure de la d\xE9tection de la cybermenace\
+            \ importante et tout autre horodatage pertinent li\xE9 \xE0 la menace\
+            \ ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.c
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node65
       ref_id: 7.c
       description: description of the significant cyber threat;
+      translations:
+        fr:
+          description: "la description de la cybermenace importante\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.d
       assessable: true
       depth: 3
@@ -532,6 +922,11 @@ objects:
       ref_id: 7.d
       description: information about the potential impact of the cyber threat on the
         financial entity, its clients and/or financial counterparts;
+      translations:
+        fr:
+          description: "des informations sur l\u2019impact potentiel de la cybermenace\
+            \ sur l\u2019entit\xE9 financi\xE8re, ses clients et/ou ses contreparties\
+            \ financi\xE8res ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.e
       assessable: true
       depth: 3
@@ -539,6 +934,11 @@ objects:
       ref_id: 7.e
       description: the classification criteria that would have triggered a major incident
         report, if the cyber threat had materialised;
+      translations:
+        fr:
+          description: "les crit\xE8res de classification qui auraient d\xE9clench\xE9\
+            \ un rapport d\u2019incident majeur, si la menace cyber s\u2019\xE9tait\
+            \ mat\xE9rialis\xE9e ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.f
       assessable: true
       depth: 3
@@ -546,6 +946,10 @@ objects:
       ref_id: 7.f
       description: information about the status of the cyber threat and any changes
         in the threat activity;
+      translations:
+        fr:
+          description: "des renseignements sur l\u2019\xE9tat de la cybermenace et\
+            \ tout changement dans l\u2019activit\xE9 de menace\_;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.g
       assessable: true
       depth: 3
@@ -554,6 +958,11 @@ objects:
       description: description of the actions taken by the financial entity to prevent
         the materiali- sation of the significant cyber threats, where applicable;
         and
+      translations:
+        fr:
+          description: "une description des mesures prises par l\u2019entit\xE9 financi\xE8\
+            re pour emp\xEAcher la mat\xE9rialisation des cybermenaces importantes,\
+            \ le cas \xE9ch\xE9ant ; et"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.h
       assessable: true
       depth: 3
@@ -561,26 +970,46 @@ objects:
       ref_id: 7.h
       description: information about notification of the cyber threat to other financial
         entities or authorities;
+      translations:
+        fr:
+          description: "des informations sur la notification de la cybermenace \xE0\
+            \ d\u2019autres entit\xE9s financi\xE8res ou autorit\xE9s ;"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.i
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node65
       ref_id: 7.i
       description: information on indicators of compromise, where applicable; and
+      translations:
+        fr:
+          description: "des informations sur les indicateurs de compromission, le\
+            \ cas \xE9ch\xE9ant\_; et"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:7.j
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node65
       ref_id: 7.j
       description: other relevant information, where available.
+      translations:
+        fr:
+          description: "d\u2019autres informations pertinentes, le cas \xE9ch\xE9\
+            ant."
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-8
       assessable: false
       depth: 1
       ref_id: Article 8
       description: Entry into force
+      translations:
+        fr:
+          description: "Entr\xE9e en vigueur"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:node77
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:article-8
       description: This Regulation shall enter into force on the twentieth day following
         that of its publication in the Official Journal of the European Union.
+      translations:
+        fr:
+          description: "Le pr\xE9sent r\xE8glement entre en vigueur le vingti\xE8\
+            me jour suivant celui de sa publication au Journal officiel de l\u2019\
+            Union europ\xE9enne."
