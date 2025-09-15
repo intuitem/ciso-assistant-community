@@ -293,7 +293,7 @@
 				<input type="hidden" name="is_published" value={false} />
 				<button
 					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-					data-testid="unpublish-button"
+					data-testid="form-unpublish-button"
 					type="submit"
 				>
 					<i class="fa-solid fa-lock mr-2"></i>
@@ -303,7 +303,7 @@
 				<input type="hidden" name="is_published" value={true} />
 				<button
 					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-					data-testid="publish-button"
+					data-testid="form-publish-button"
 					type="submit"
 				>
 					<i class="fa-solid fa-globe mr-2"></i>

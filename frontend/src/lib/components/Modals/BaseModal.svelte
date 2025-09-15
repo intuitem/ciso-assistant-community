@@ -15,7 +15,7 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
+	<div class="modal-example-form {cBase}" data-testid="modal-title">
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
 		<article class="max-w-[65ch]">{$modalStore[0].body ?? '(body missing)'}</article>
 		{@render children?.()}
