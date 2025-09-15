@@ -135,7 +135,7 @@
 
 					const newNumber = Number(newText);
 
-					if (newNumber !== newNumber || newNumber > max) {
+					if (Number.isNaN(newNumber) || newNumber > max) {
 						e.preventDefault();
 					}
 					if (!stringifiedValueRegex.test(newText)) {
