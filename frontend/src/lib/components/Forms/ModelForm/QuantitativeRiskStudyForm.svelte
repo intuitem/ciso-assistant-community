@@ -131,17 +131,18 @@
 					{form}
 					field="risk_tolerance.points.point1.probability"
 					label="Point 1 - Probability"
+					commaSupported={true}
 					min={0.01}
 					max={0.99}
-					step={0.01}
+					floatPrecision={2}
 					helpText="Probability value (0.01-0.99). You can start with 0.99 for the most frequent acceptable issues"
 				/>
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point1.acceptable_loss"
 					label="Point 1 - Tolerable Loss ({displayCurrency})"
+					commaSupported={true}
 					min={1}
-					step={1}
 					helpText="Acceptable loss amount for point 1"
 				/>
 			</div>
@@ -150,17 +151,18 @@
 					{form}
 					field="risk_tolerance.points.point2.probability"
 					label="Point 2 - Probability"
+					commaSupported={true}
 					min={0.01}
 					max={0.99}
-					step={0.01}
+					floatPrecision={2}
 					helpText="Probability value (0.01-0.99), You can close with 0.01 for the most rare acceptable cases"
 				/>
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point2.acceptable_loss"
 					label="Point 2 - Tolerable Loss ({displayCurrency})"
+					commaSupported={true}
 					min={1}
-					step={1}
 					helpText="Acceptable loss amount for point 2"
 				/>
 			</div>
