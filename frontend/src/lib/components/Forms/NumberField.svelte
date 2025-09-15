@@ -118,9 +118,7 @@
 					const selectionStart = targetElem.selectionStart;
 					const selectionEnd = targetElem.selectionEnd;
 
-					const currentText = e.target.value;
-					// const newText = currentText + e.data;
-
+					const currentText = targetElem.value;
 					const newText =
 						currentText.slice(0, selectionStart) + e.data + currentText.slice(selectionEnd);
 					console.log('===>', newText);
