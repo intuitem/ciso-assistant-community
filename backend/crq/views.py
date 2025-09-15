@@ -1090,7 +1090,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
                 {
                     "success": False,
                     "error": "Invalid parameters",
-                    "details": str(e),
+                    "details": "",
                     "hint": "Please ensure the hypothesis has valid probability and impact parameters (probability, impact.distribution='LOGNORMAL-CI90', impact.lb, impact.ub)",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -1102,7 +1102,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
                 {
                     "success": False,
                     "error": "Failed to run simulation",
-                    "details": str(e),
+                    "details": "",
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
