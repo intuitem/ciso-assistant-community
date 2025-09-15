@@ -74,8 +74,13 @@
 	if (commaSupported) {
 		$effect(() => {
 			if (stringifiedValue) {
-				const newValue = Number(stringifiedValue.replace(',', '.'));
-				value.set(newValue);
+				const normalizedStringifiedValue = stringifiedValue.replace(',', '.');
+				const newValue = Number(normalizedStringifiedValue);
+				if (!Number.isNaN(newValue)) {
+					value.set(newValue);
+				} else {
+					console.error(`Failed to parse string '${normalizedStringifiedValue}' to a number.`);
+				}
 			}
 		});
 	}
