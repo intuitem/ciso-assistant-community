@@ -32,7 +32,6 @@ type Fixtures = {
 	threatsPage: PageContent;
 	usersPage: PageContent;
 	securityExceptionsPage: PageContent;
-	ebiosRMPage: PageContent;
 	findingsAssessmentsPage: PageContent;
 	findingsPage: PageContent;
 	businessImpactAnalysisPage: PageContent;
@@ -81,7 +80,6 @@ export const test = base.extend<Fixtures>({
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
-			ebiosRMPage,
 			threatsPage,
 			usersPage
 		},
@@ -105,7 +103,6 @@ export const test = base.extend<Fixtures>({
 			securityExceptionsPage,
 			findingsAssessmentsPage,
 			businessImpactAnalysisPage,
-			ebiosRMPage,
 			assetAssessmentsPage,
 			threatsPage,
 			usersPage
@@ -149,15 +146,6 @@ export const test = base.extend<Fixtures>({
 			{ name: 'attachment', type: type.FILE },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'link', type: type.TEXT }
-		]);
-		await use(ePage);
-	},
-
-	ebiosRMPage: async ({ page }, use) => {
-		const ePage = new PageContent(page, '/ebios-rm', 'Ebios RM', [
-			{ name: 'name', type: type.TEXT },
-			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(ePage);
 	},

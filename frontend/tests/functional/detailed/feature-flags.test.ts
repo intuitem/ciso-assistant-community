@@ -1,12 +1,10 @@
-import { test, expect } from '../../utils/test-utils.js';
+import { test, expect, type Page } from '../../utils/test-utils.js';
 import { PageContent } from '../../utils/page-content.js';
-import { LoginPage } from '../../utils/login-page.js';
-
 import { TestContent } from '../../utils/test-utils.js';
 
 const vars = TestContent.generateTestVars();
 
-const toggleFeatureFlag = async (page, flagTestId, enable) => {
+const toggleFeatureFlag = async (page: Page, flagTestId: string, enable: boolean) => {
 	await page.getByTestId('accordion-item-extra').click();
 	await page.getByTestId('accordion-item-settings').click();
 	await expect(page).toHaveURL('/settings');
@@ -322,12 +320,12 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({
 	logedPage,
 	page,
-	ebiosRMPage
+	ebiosRmStudyPage
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
-	await ebiosRMPage.goto();
-	await ebiosRMPage.hasUrl();
-	await ebiosRMPage.createItem({
+	await ebiosRmStudyPage.goto();
+	await ebiosRmStudyPage.hasUrl();
+	await ebiosRmStudyPage.createItem({
 		name: vars.ebiosRMName,
 		folder: vars.folderName,
 		risk_matrix: '4x4 risk matrix from EBIOS-RM'
