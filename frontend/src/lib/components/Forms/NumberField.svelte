@@ -118,6 +118,13 @@
 					const selectionStart = targetElem.selectionStart;
 					const selectionEnd = targetElem.selectionEnd;
 
+					if (selectionStart === null || selectionEnd === null) {
+						console.error(
+							`Failed to get selection data: selectionStart=${selectionStart} selectionEnd=${selectionEnd}`
+						);
+						return;
+					}
+
 					const currentText = targetElem.value;
 					const newText =
 						currentText.slice(0, selectionStart) + e.data + currentText.slice(selectionEnd);
