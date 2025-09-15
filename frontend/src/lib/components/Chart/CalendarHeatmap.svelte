@@ -45,6 +45,7 @@
 		let calendar_chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		const chartData = data.length > 0 ? data : generateSampleData(year);
+		const today = new Date().toISOString().split('T')[0];
 
 		const option = {
 			title: {
@@ -101,11 +102,27 @@
 					firstDay: 1
 				}
 			},
-			series: {
-				type: 'heatmap',
-				coordinateSystem: 'calendar',
-				data: chartData
-			}
+			series: [
+				{
+					type: 'heatmap',
+					coordinateSystem: 'calendar',
+					data: chartData
+				},
+				{
+					type: 'effectScatter',
+					coordinateSystem: 'calendar',
+					data: year === new Date().getFullYear() ? [[today, 0]] : [],
+					symbolSize: function (val: any) {
+						return 15;
+					},
+					itemStyle: {
+						color: 'transparent',
+						borderColor: '#1f2937',
+						borderWidth: 2
+					},
+					zlevel: 1
+				}
+			]
 		};
 
 		calendar_chart.setOption(option);
