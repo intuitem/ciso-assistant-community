@@ -71,10 +71,14 @@
 			: new RegExp(`^${allowNegative ? '\\-?' : ''}[0-9]+$`);
 	let stringifiedValue = $state(`${$value === undefined ? '' : $value}`);
 
+	function normalizeStringifiedNumber(stringifiedNumber: string): string {
+		return stringifiedNumber.replace(',', '.');
+	}
+
 	if (commaSupported) {
 		$effect(() => {
 			if (stringifiedValue) {
-				const normalizedStringifiedValue = stringifiedValue.replace(',', '.');
+				const normalizedStringifiedValue = normalizeStringifiedNumber(stringifiedValue);
 				const newValue = Number(normalizedStringifiedValue);
 				if (!Number.isNaN(newValue)) {
 					value.set(newValue);
@@ -138,7 +142,7 @@
 
 					if (!newText || (allowNegative && newText === '-')) return;
 
-					const newNumber = Number(newText);
+					const newNumber = Number(normalizeStringifiedNumber(newText));
 
 					if (Number.isNaN(newNumber) || newNumber > max) {
 						e.preventDefault();
