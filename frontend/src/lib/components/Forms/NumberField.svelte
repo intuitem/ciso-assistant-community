@@ -8,6 +8,8 @@
 	interface Props {
 		class?: string;
 		label?: string | undefined;
+		// There is no min parameter as it could prevent a user from rewritting its value
+		// e.g. If max=20 and the want to edit its "30" into "25" he will erase "0" from "30" which will lead to "3" which will be considered less than 20 and therefore blocked, the min should be handled by zod schemas.
 		max?: number;
 		allowNegative?: boolean;
 		floatPrecision?: number;
