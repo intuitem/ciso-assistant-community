@@ -26,7 +26,9 @@
 			id: '1',
 			type: 'custom',
 			data: { label: 'Start Process', blockType: 'input', description: 'Beginning of workflow' },
-			position: { x: 250, y: 50 }
+			position: { x: 250, y: 50 },
+			draggable: true,
+			selectable: true
 		}
 	];
 
@@ -57,8 +59,8 @@
 			const flowBounds = flowElement.getBoundingClientRect();
 
 			const position = {
-				x: event.clientX - flowBounds.left - 75,
-				y: event.clientY - flowBounds.top - 25
+				x: Math.round((event.clientX - flowBounds.left - 75) / 15) * 15, // Snap to grid
+				y: Math.round((event.clientY - flowBounds.top - 25) / 15) * 15   // Snap to grid
 			};
 
 			const blockInfo = blockLibrary.find(b => b.type === type);
@@ -70,9 +72,12 @@
 					label: blockInfo?.label || 'New Node',
 					blockType: type,
 					description: `${blockInfo?.label} component`
-				}
+				},
+				draggable: true,
+				selectable: true
 			};
 
+			// Use a more stable way to add nodes that doesn't trigger repositioning
 			nodes = [...nodes, newNode];
 			nodeId++;
 		}
@@ -87,12 +92,23 @@
 
 	function onNodesChange(event: CustomEvent) {
 		const changes = event.detail;
-		// Apply changes to nodes (position updates, deletions, etc.)
+		if (!changes || changes.length === 0) return;
+
+		// Apply changes to nodes more carefully to prevent layout shifts
 		nodes = nodes.map(node => {
 			const change = changes.find(c => c.id === node.id);
 			if (change) {
 				if (change.type === 'position' && change.position) {
-					return { ...node, position: change.position };
+					// Only update position if it's actually different
+					if (node.position.x !== change.position.x || node.position.y !== change.position.y) {
+						return { ...node, position: change.position };
+					}
+				}
+				if (change.type === 'dimensions' && change.dimensions) {
+					return { ...node, dimensions: change.dimensions };
+				}
+				if (change.type === 'select') {
+					return { ...node, selected: change.selected };
 				}
 				if (change.type === 'remove') {
 					return null;
@@ -252,13 +268,14 @@
 				onnodeclick={onNodeClick}
 				ondrop={onDrop}
 				ondragover={onDragOver}
-				fitView
+				fitView={false}
 				snapToGrid={true}
 				snapGrid={[15, 15]}
 				connectionMode="loose"
 				deleteKeyCode="Delete"
 				multiSelectionKeyCode="Meta"
 				defaultEdgeOptions={{ type: 'smoothstep' }}
+				proOptions={{ hideAttribution: true }}
 			>
 				<Controls />
 				<MiniMap />
