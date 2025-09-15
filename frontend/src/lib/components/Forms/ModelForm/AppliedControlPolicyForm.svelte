@@ -13,6 +13,8 @@
 	import { onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
 
+	let displayCurrency = $state('€'); // Default to Euro
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -32,6 +34,17 @@
 		schema = {},
 		initialData = {}
 	}: Props = $props();
+
+	// Declare form store at top level
+	const formStore = form.form;
+
+	// Update currency when form data changes
+	$effect(() => {
+		const costData = $formStore.cost;
+		if (costData?.currency) {
+			displayCurrency = costData.currency;
+		}
+	});
 
 	onMount(async () => {
 		if (!model.selectOptions) {
@@ -160,14 +173,6 @@
 			cacheLock={cacheLocks['control_impact']}
 			bind:cachedValue={formDataCache['control_impact']}
 		/>
-		<NumberField
-			{form}
-			field="cost"
-			label={m.cost()}
-			helpText={m.costHelpText()}
-			cacheLock={cacheLocks['cost']}
-			bind:cachedValue={formDataCache['cost']}
-		/>
 		<MarkdownField
 			{form}
 			field="observation"
@@ -176,6 +181,69 @@
 			cacheLock={cacheLocks['observation']}
 			bind:cachedValue={formDataCache['observation']}
 		/>
+	</Dropdown>
+
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-money-bill-1"
+		header={m.cost()}
+	>
+		<!-- Build Costs -->
+		<div class="space-y-2">
+			<h5 class="font-medium text-gray-600 my-2 py-2">{m.buildCosts()}</h5>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="cost.build.fixed_cost"
+					label="{m.fixedCost()} ({displayCurrency})"
+					helpText={m.oneTimeImplementationCost()}
+					min={0}
+					step={1}
+				/>
+				<NumberField
+					{form}
+					field="cost.build.people_days"
+					label={m.peopleDays()}
+					helpText={m.implementationHelpText()}
+					min={0}
+					step={0.5}
+				/>
+				<!-- Amortization Period -->
+				<NumberField
+					{form}
+					field="cost.amortization_period"
+					label={m.amortizationPeriod()}
+					helpText={m.amortizationPeriodHelpText()}
+					min={1}
+					max={50}
+					step={1}
+				/>
+			</div>
+		</div>
+
+		<!-- Run Costs -->
+		<div class="space-y-2">
+			<h5 class="font-medium text-gray-600 my-2 py-2">{m.runCosts()}</h5>
+			<div class="grid grid-cols-2 gap-4">
+				<NumberField
+					{form}
+					field="cost.run.fixed_cost"
+					label="{m.fixedCost()} ({displayCurrency})"
+					helpText={m.annualOperationalCost()}
+					min={0}
+					step={1}
+				/>
+				<NumberField
+					{form}
+					field="cost.run.people_days"
+					label={m.peopleDays()}
+					helpText={m.annualManDaysHelpText()}
+					min={0}
+					step={0.5}
+				/>
+			</div>
+		</div>
 	</Dropdown>
 
 	<Dropdown

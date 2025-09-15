@@ -339,24 +339,29 @@
 				class="flex flex-col items-center justify-center border px-4 py-2 shadow-sm rounded-xl space-y-2"
 			>
 				{#if requirementAssessment.description}
-					<div class="flex w-full font-semibold">
-						{requirementAssessment.description}
+					<div class="card w-full font-light text-lg p-4 preset-tonal-primary">
+						<h2 class="font-semibold text-base flex flex-row justify-between">
+							<div>
+								<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
+							</div>
+						</h2>
+						<MarkdownRenderer content={requirementAssessment.description} />
 					</div>
 				{/if}
 				{#if requirementAssessment.assessable}
 					{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference.result}
 						<div
-							class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
+							class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
 						>
-							<h2 class="font-semibold text-lg flex flex-row justify-between">
+							<h2 class="font-semibold text-base flex flex-row justify-between">
 								<div>
 									<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 								</div>
 								<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
 									{#if !hideSuggestionHashmap[requirementAssessment.id]}
-										<i class="fa-solid fa-chevron-down"></i>
+										<i class="fa-solid fa-eye"></i>
 									{:else}
-										<i class="fa-solid fa-chevron-right"></i>
+										<i class="fa-solid fa-eye-slash"></i>
 									{/if}
 								</button>
 							</h2>
@@ -367,9 +372,9 @@
 											<i class="fa-solid fa-pencil"></i>
 											{m.annotation()}
 										</p>
-										<p class="whitespace-pre-line py-1">
-											{data.requirements[i].annotation}
-										</p>
+										<div class="py-1">
+											<MarkdownRenderer content={data.requirements[i].annotation} />
+										</div>
 									</div>
 								{/if}
 								{#if data.requirements[i].typical_evidence}
@@ -378,9 +383,9 @@
 											<i class="fa-solid fa-pencil"></i>
 											{m.typicalEvidence()}
 										</p>
-										<p class="whitespace-pre-line py-1">
-											{data.requirements[i].typical_evidence}
-										</p>
+										<div class="py-1">
+											<MarkdownRenderer content={data.requirements[i].typical_evidence} />
+										</div>
 									</div>
 								{/if}
 								{#if requirementAssessment.mapping_inference.result}

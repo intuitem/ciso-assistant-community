@@ -27,7 +27,9 @@
 		{ field: 'inherent_risk', label: m.inherentRisk() },
 		{ field: 'publish', label: m.publish() },
 		{ field: 'organisation_objectives', label: m.organisationObjectives() },
-		{ field: 'organisation_issues', label: m.organisationIssues() }
+		{ field: 'organisation_issues', label: m.organisationIssues() },
+		{ field: 'quantitative_risk_studies', label: m.quantitativeRiskStudies() },
+		{ field: 'terminologies', label: m.terminologies() }
 	];
 </script>
 

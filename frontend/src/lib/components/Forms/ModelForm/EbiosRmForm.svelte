@@ -15,6 +15,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context: string;
+		[key: string]: any;
 	}
 
 	let {
@@ -23,7 +24,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context
+		context,
+		...rest
 	}: Props = $props();
 
 	let activeActivity: string | null = $state(null);
@@ -164,6 +166,9 @@
 			optionsEndpoint="assets"
 			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
+			optionsDetailedUrlParameters={[
+				rest?.scopeFolder?.id ? ['scope_folder_id', rest.scopeFolder.id] : ['', undefined]
+			]}
 			optionsInfoFields={{
 				fields: [
 					{
@@ -202,6 +207,9 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsDetailedUrlParameters={[
+			rest?.scopeFolder?.id ? ['scope_folder_id', rest.scopeFolder.id] : ['', undefined]
+		]}
 		optionsInfoFields={{
 			fields: [
 				{

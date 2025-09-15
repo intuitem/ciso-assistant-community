@@ -109,7 +109,10 @@ export const navData = {
 				{
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
-					href: '/roles'
+					href: '/roles',
+					permissions: [
+						'add_role',
+					]
 				},
 				{
 					name: 'roleAssignments',
@@ -253,6 +256,12 @@ export const navData = {
 					href: '/ebios-rm'
 				},
 				{
+					name: 'quantitativeRiskStudies',
+					fa_icon: 'fa-solid fa-calculator',
+					href: '/quantitative-risk-studies',
+					permissions: ['view_quantitativeriskstudy']
+				},
+				{
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'
@@ -372,6 +381,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-tag',
 					href: '/filtering-labels',
 					permissions: ['view_filteringlabel']
+				},
+				{
+					name: 'terminologies',
+					fa_icon: 'fa-solid fa-language',
+					href: '/terminologies',
+					permissions: ['view_terminology']
 				},
 				{
 					name: 'settings',

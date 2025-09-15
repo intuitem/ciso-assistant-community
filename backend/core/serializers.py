@@ -4,6 +4,7 @@ from typing import Any
 import structlog
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -106,6 +107,20 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except ValidationError as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
+
+    def get_path(self, obj):
+        """
+        Gets the pre-calculated folder path for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use the pre-calculated path data if available
+            return optimized_data.get("paths", {}).get(obj.id, [])
+
+        # Fallback for single object serialization (e.g., retrieve endpoint)
+        # We manually serialize the folder objects to match the new optimized output
+        folders = obj.get_folder_full_path()
+        return [{"id": f.id, "name": f.name} for f in folders]
 
     class Meta:
         model: models.Model
@@ -381,23 +396,55 @@ class AssetWriteSerializer(BaseModelSerializer):
 
 
 class AssetReadSerializer(AssetWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = serializers.SerializerMethodField()
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
-    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
-    security_objectives = serializers.JSONField(
-        source="get_security_objectives_display"
-    )
-    disaster_recovery_objectives = serializers.JSONField(
-        source="get_disaster_recovery_objectives_display"
-    )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
-
     asset_class = FieldsRelatedField(["name"])
+
+    children_assets = serializers.SerializerMethodField()
+    security_objectives = serializers.SerializerMethodField()
+    disaster_recovery_objectives = serializers.SerializerMethodField()
+
+    def get_children_assets(self, obj):
+        """
+        Gets pre-calculated descendant IDs for list views, with a fallback for detail views.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use pre-calculated data if available
+            return optimized_data.get("descendants", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.children_assets.annotate(str=F("name")).values("id", "str")
+
+    def get_security_objectives(self, obj):
+        """
+        Gets pre-calculated security objectives for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("security_objectives", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_security_objectives_display()
+
+    def get_disaster_recovery_objectives(self, obj):
+        """
+        Gets pre-calculated disaster recovery objectives for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("disaster_recovery_objectives", {}).get(
+                obj.id, []
+            )
+
+        # Fallback for single object serialization
+        return obj.get_disaster_recovery_objectives_display()
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
@@ -568,6 +615,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     version = serializers.StringRelatedField(source="risk_assessment.version")
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(many=True)
 
     treatment = serializers.CharField()
 
@@ -601,6 +649,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         slug_field="pk", read_only=True, many=True
     )
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    qualifications = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = RiskScenario
@@ -635,6 +686,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
+    cost = serializers.JSONField(required=False, allow_null=True)
 
     def create(self, validated_data: Any):
         owner_data = validated_data.get("owner", [])
@@ -711,7 +763,12 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
-    cost = serializers.FloatField()
+    cost = serializers.JSONField()
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
+    currency = serializers.SerializerMethodField()
+    annual_cost_display = serializers.SerializerMethodField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     assets = FieldsRelatedField(many=True)
 
@@ -726,6 +783,18 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if not obj.eta:
             return None
         return time_state(obj.eta.isoformat())
+
+    def get_currency(self, obj):
+        if not obj.cost:
+            return "€"  # Default currency
+        return obj.cost.get("currency", "€")
+
+    def get_annual_cost_display(self, obj):
+        annual_cost = obj.annual_cost
+        if annual_cost == 0:
+            return ""
+        currency = self.get_currency(obj)
+        return f"{annual_cost:,.2f} {currency}"
 
 
 class ActionPlanSerializer(BaseModelSerializer):
@@ -742,7 +811,10 @@ class ActionPlanSerializer(BaseModelSerializer):
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     status = serializers.CharField(source="get_status_display")
-    cost = serializers.FloatField()
+    cost = serializers.JSONField()
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
@@ -988,6 +1060,7 @@ class UserWriteSerializer(BaseModelSerializer):
 
 
 class UserGroupReadSerializer(BaseModelSerializer):
+    path = PathField(source="get_folder_full_path", read_only=True)
     name = serializers.CharField(source="__str__")
     localization_dict = serializers.JSONField(source="get_localization_dict")
     folder = FieldsRelatedField()
@@ -1290,7 +1363,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField(source="get_progress")
+    progress = serializers.ReadOnlyField()
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
 
@@ -1576,16 +1649,6 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class QualificationReadSerializer(ReferentialSerializer):
-    class Meta:
-        model = Qualification
-        exclude = ["translations"]
-
-
-class QualificationWriteSerializer(QualificationReadSerializer):
-    pass
-
-
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
@@ -1833,7 +1896,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
-    qualifications = FieldsRelatedField(["name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
@@ -1858,8 +1921,13 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
 
-    next_occurrence = serializers.DateField(read_only=True)
-    last_occurrence_status = serializers.CharField(read_only=True)
+    next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
+    last_occurrence_status = serializers.ReadOnlyField(
+        source="get_last_occurrence_status"
+    )
+    next_occurrence_status = serializers.ReadOnlyField(
+        source="get_next_occurrence_status"
+    )
 
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()
@@ -2069,6 +2137,8 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published", "builtin"]
+        exclude = ["folder", "is_published"]

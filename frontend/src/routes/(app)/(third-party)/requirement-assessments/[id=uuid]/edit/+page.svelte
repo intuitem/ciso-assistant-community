@@ -32,6 +32,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -272,13 +273,18 @@
 		>
 	</div>
 	{#if data.requirement.description}
-		<p class="whitespace-pre-line p-2 font-light text-lg">
-			👉 {data.requirement.description}
-		</p>
+		<div class="font-light text-lg card p-4 preset-tonal-primary">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
+				<div>
+					<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
+				</div>
+			</h2>
+			<MarkdownRenderer content={data.requirement.description} />
+		</div>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
-		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
-			<h2 class="font-semibold text-lg flex flex-row justify-between">
+		<div class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 				</div>
@@ -343,9 +349,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{annotation}
-						</p>
+						<div class="py-1">
+							<MarkdownRenderer content={annotation} />
+						</div>
 					</div>
 				{/if}
 				{#if typical_evidence}
@@ -354,9 +360,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{typical_evidence}
-						</p>
+						<div class="py-1">
+							<MarkdownRenderer content={typical_evidence} />
+						</div>
 					</div>
 				{/if}
 				{#if mappingInference.result}
