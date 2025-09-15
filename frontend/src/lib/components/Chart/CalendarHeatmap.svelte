@@ -10,6 +10,7 @@
 		height?: string;
 		classesContainer?: string;
 		colorRange?: string[];
+		onDateClick?: (date: string, value: number) => void;
 	}
 
 	let {
@@ -20,7 +21,8 @@
 		width = 'w-full',
 		height = 'h-96',
 		classesContainer = '',
-		colorRange = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
+		colorRange = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
+		onDateClick
 	}: Props = $props();
 
 	const chart_id = `${name}_calendar_div`;
@@ -129,6 +131,31 @@
 
 		window.addEventListener('resize', function () {
 			calendar_chart.resize();
+		});
+
+		// Add click event handler
+		calendar_chart.on('click', function (params: any) {
+			if (params.componentType === 'series') {
+				let clickedDate: string;
+				let clickedValue: number;
+
+				if (params.seriesType === 'heatmap') {
+					// Regular heatmap cell click
+					clickedDate = params.value[0];
+					clickedValue = params.value[1];
+				} else if (params.seriesType === 'effectScatter') {
+					// Current day marker click - find the corresponding value from chartData
+					clickedDate = params.value[0];
+					const dataPoint = chartData.find(([date]) => date === clickedDate);
+					clickedValue = dataPoint ? dataPoint[1] : 0;
+				} else {
+					return;
+				}
+
+				if (onDateClick) {
+					onDateClick(clickedDate, clickedValue);
+				}
+			}
 		});
 	});
 </script>
