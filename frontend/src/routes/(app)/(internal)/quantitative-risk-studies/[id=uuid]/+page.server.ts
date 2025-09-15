@@ -48,5 +48,26 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
+	},
+	retriggerAllSimulations: async (event) => {
+		const endpoint = `${BASE_API_URL}/crq/quantitative-risk-studies/${event.params.id}/retrigger-all-simulations/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST'
+		});
+
+		if (!res.ok) {
+			const response = await res.json();
+			console.error('Error response:', response);
+			return {
+				error: true,
+				message: response
+			};
+		}
+
+		const result = await res.json();
+		return {
+			success: true,
+			message: { simulationsComplete: true, results: result }
+		};
 	}
 };
