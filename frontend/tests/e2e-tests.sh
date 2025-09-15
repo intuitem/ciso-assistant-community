@@ -148,11 +148,7 @@ cleanup() {
     kill $BACKEND_PID >/dev/null 2>&1
     echo "| backend server stopped"
   fi
-  if [[ -f "$DB_DIR/$DB_NAME" ]]; then
-    rm "$DB_DIR/$DB_NAME"
-    echo "| test database deleted"
-  fi
-  if [[ "$KEEP_DATABASE_SNAPSHOT" -ne 1 && -f "$DB_DIR/$DB_INIT_NAME" ]]; then
+  if [[ "$KEEP_DATABASE_SNAPSHOT" -ne 1 || ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
     rm "$DB_DIR/$DB_INIT_NAME"
     echo "| test initial database snapshot deleted"
   fi
@@ -300,7 +296,7 @@ export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 export LICENSE_SEATS=999
 
 cd "$APP_DIR"/backend/ || exit 1
-if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
+if [[ $KEEP_DATABASE_SNAPSHOT -ne 1 ]]; then
   poetry run python3 manage.py makemigrations"$(django_args)"
   poetry run python3 manage.py migrate"$(django_args)"
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
