@@ -767,8 +767,6 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         )
 
         try:
-            from django.db import transaction
-
             results = {
                 "success": True,
                 "message": "All simulations completed successfully",
@@ -779,85 +777,82 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 },
             }
 
-            with transaction.atomic():
-                # Get all scenarios for this study
-                scenarios = study.risk_scenarios.all()
-                logger.info("Processing %d scenarios", len(scenarios))
-                hypothesis_count = 0
-                successful_hypothesis_simulations = 0
-                failed_hypothesis_simulations = []
+            # Get all scenarios for this study
+            scenarios = study.risk_scenarios.all()
+            logger.info("Processing %d scenarios", len(scenarios))
+            hypothesis_count = 0
+            successful_hypothesis_simulations = 0
+            failed_hypothesis_simulations = []
 
-                # Run simulations for all hypotheses in all scenarios
-                for scenario in scenarios:
-                    hypotheses = scenario.hypotheses.all()
+            # Run simulations for all hypotheses in all scenarios
+            for scenario in scenarios:
+                hypotheses = scenario.hypotheses.all()
+                logger.info(
+                    "Scenario %s has %d hypotheses", scenario.name, len(hypotheses)
+                )
+                for hypothesis in hypotheses:
+                    hypothesis_count += 1
                     logger.info(
-                        "Scenario %s has %d hypotheses", scenario.name, len(hypotheses)
+                        "Processing hypothesis %s (id: %s) in scenario %s",
+                        hypothesis.name,
+                        hypothesis.id,
+                        scenario.name,
                     )
-                    for hypothesis in hypotheses:
-                        hypothesis_count += 1
-                        logger.info(
-                            "Processing hypothesis %s (id: %s) in scenario %s",
-                            hypothesis.name,
-                            hypothesis.id,
-                            scenario.name,
-                        )
-                        try:
-                            # Check if hypothesis has valid parameters before running simulation
-                            params = hypothesis.parameters or {}
-                            probability = params.get("probability")
-                            impact = params.get("impact", {})
-                            if probability is not None and impact:
-                                logger.info(
-                                    "Running simulation for hypothesis %s",
-                                    hypothesis.id,
-                                )
-                                simulation_results = hypothesis.run_simulation(
-                                    dry_run=False
-                                )
-                                successful_hypothesis_simulations += 1
-                                logger.info(
-                                    "Simulation successful for hypothesis %s, got %d data points",
-                                    hypothesis.id,
-                                    len(simulation_results.get("loss", [])),
-                                )
-                                results["simulation_results"]["hypothesis_simulations"][
-                                    str(hypothesis.id)
-                                ] = {
-                                    "success": True,
-                                    "scenario": scenario.name,
-                                    "hypothesis": hypothesis.name,
-                                    "data_points": len(
-                                        simulation_results.get("loss", [])
-                                    ),
-                                    "metrics": simulation_results.get("metrics", {}),
-                                }
-                            else:
-                                logger.warning(
-                                    "Hypothesis %s has missing parameters - probability: %s, impact: %s",
-                                    hypothesis.id,
-                                    probability,
-                                    impact,
-                                )
-                                failed_hypothesis_simulations.append(
-                                    {
-                                        "hypothesis_id": str(hypothesis.id),
-                                        "scenario": scenario.name,
-                                        "hypothesis": hypothesis.name,
-                                        "reason": "Missing probability or impact parameters",
-                                    }
-                                )
-                        except Exception as e:
-                            logger.error(
-                                "Error running simulation for hypothesis %s",
+                    try:
+                        # Check if hypothesis has valid parameters before running simulation
+                        params = hypothesis.parameters or {}
+                        probability = params.get("probability")
+                        impact = params.get("impact", {})
+                        if probability is not None and impact:
+                            logger.info(
+                                "Running simulation for hypothesis %s",
                                 hypothesis.id,
+                            )
+                            simulation_results = hypothesis.run_simulation(
+                                dry_run=False
+                            )
+                            successful_hypothesis_simulations += 1
+                            logger.info(
+                                "Simulation successful for hypothesis %s, got %d data points",
+                                hypothesis.id,
+                                len(simulation_results.get("loss", [])),
+                            )
+                            results["simulation_results"]["hypothesis_simulations"][
+                                str(hypothesis.id)
+                            ] = {
+                                "success": True,
+                                "scenario": scenario.name,
+                                "hypothesis": hypothesis.name,
+                                "data_points": len(simulation_results.get("loss", [])),
+                                "metrics": simulation_results.get("metrics", {}),
+                            }
+                        else:
+                            logger.warning(
+                                "Hypothesis %s has missing parameters - probability: %s, impact: %s",
+                                hypothesis.id,
+                                probability,
+                                impact,
                             )
                             failed_hypothesis_simulations.append(
                                 {
                                     "hypothesis_id": str(hypothesis.id),
                                     "scenario": scenario.name,
                                     "hypothesis": hypothesis.name,
+                                    "reason": "Missing probability or impact parameters",
                                 }
                             )
+                    except Exception as e:
+                        logger.error(
+                            "Error running simulation for hypothesis %s",
+                            hypothesis.id,
+                        )
+                        failed_hypothesis_simulations.append(
+                            {
+                                "hypothesis_id": str(hypothesis.id),
+                                "scenario": scenario.name,
+                                "hypothesis": hypothesis.name,
+                            }
+                        )
 
                 # Generate portfolio simulation (combined ALE and LEC)
                 logger.info("Generating portfolio simulation data")
