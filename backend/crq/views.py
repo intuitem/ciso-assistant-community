@@ -747,6 +747,197 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, methods=["post"], url_path="retrigger-all-simulations")
+    def retrigger_all_simulations(self, request, pk=None):
+        """
+        Retriggers all simulations for the quantitative risk study.
+        This includes:
+        - All hypothesis simulations (for each scenario's hypotheses with valid parameters)
+        - Portfolio simulation (combined ALE and LEC curves)
+        - Risk tolerance curve generation
+
+        This operation can be slow as it processes multiple simulations.
+        """
+        logger.info("Starting retrigger_all_simulations for study %s", pk)
+        study: QuantitativeRiskStudy = self.get_object()
+        logger.info(
+            "Found study: %s with %d scenarios",
+            study.name,
+            study.risk_scenarios.count(),
+        )
+
+        try:
+            from django.db import transaction
+
+            results = {
+                "success": True,
+                "message": "All simulations completed successfully",
+                "simulation_results": {
+                    "hypothesis_simulations": {},
+                    "portfolio_generated": False,
+                    "risk_tolerance_generated": False,
+                },
+            }
+
+            with transaction.atomic():
+                # Get all scenarios for this study
+                scenarios = study.risk_scenarios.all()
+                logger.info("Processing %d scenarios", len(scenarios))
+                hypothesis_count = 0
+                successful_hypothesis_simulations = 0
+                failed_hypothesis_simulations = []
+
+                # Run simulations for all hypotheses in all scenarios
+                for scenario in scenarios:
+                    hypotheses = scenario.hypotheses.all()
+                    logger.info(
+                        "Scenario %s has %d hypotheses", scenario.name, len(hypotheses)
+                    )
+                    for hypothesis in hypotheses:
+                        hypothesis_count += 1
+                        logger.info(
+                            "Processing hypothesis %s (id: %s) in scenario %s",
+                            hypothesis.name,
+                            hypothesis.id,
+                            scenario.name,
+                        )
+                        try:
+                            # Check if hypothesis has valid parameters before running simulation
+                            params = hypothesis.parameters or {}
+                            probability = params.get("probability")
+                            impact = params.get("impact", {})
+                            if probability is not None and impact:
+                                logger.info(
+                                    "Running simulation for hypothesis %s",
+                                    hypothesis.id,
+                                )
+                                simulation_results = hypothesis.run_simulation(
+                                    dry_run=False
+                                )
+                                successful_hypothesis_simulations += 1
+                                logger.info(
+                                    "Simulation successful for hypothesis %s, got %d data points",
+                                    hypothesis.id,
+                                    len(simulation_results.get("loss", [])),
+                                )
+                                results["simulation_results"]["hypothesis_simulations"][
+                                    str(hypothesis.id)
+                                ] = {
+                                    "success": True,
+                                    "scenario": scenario.name,
+                                    "hypothesis": hypothesis.name,
+                                    "data_points": len(
+                                        simulation_results.get("loss", [])
+                                    ),
+                                    "metrics": simulation_results.get("metrics", {}),
+                                }
+                            else:
+                                logger.warning(
+                                    "Hypothesis %s has missing parameters - probability: %s, impact: %s",
+                                    hypothesis.id,
+                                    probability,
+                                    impact,
+                                )
+                                failed_hypothesis_simulations.append(
+                                    {
+                                        "hypothesis_id": str(hypothesis.id),
+                                        "scenario": scenario.name,
+                                        "hypothesis": hypothesis.name,
+                                        "reason": "Missing probability or impact parameters",
+                                    }
+                                )
+                        except Exception as e:
+                            logger.error(
+                                "Error running simulation for hypothesis %s: %s",
+                                hypothesis.id,
+                                str(e),
+                            )
+                            failed_hypothesis_simulations.append(
+                                {
+                                    "hypothesis_id": str(hypothesis.id),
+                                    "scenario": scenario.name,
+                                    "hypothesis": hypothesis.name,
+                                    "reason": str(e),
+                                }
+                            )
+
+                # Generate portfolio simulation (combined ALE and LEC)
+                logger.info("Generating portfolio simulation data")
+                try:
+                    # Force refresh combined data after hypothesis simulations
+                    study.refresh_from_db()
+
+                    # Call the view action methods to generate combined data
+                    # This ensures the portfolio data is updated with latest simulation results
+                    logger.info("Generating combined ALE")
+                    combined_ale_response = self.combined_ale(request, pk)
+                    logger.info("Generating combined LEC")
+                    combined_lec_response = self.combined_lec(request, pk)
+
+                    if (
+                        combined_ale_response.status_code == 200
+                        or combined_lec_response.status_code == 200
+                    ):
+                        results["simulation_results"]["portfolio_generated"] = True
+                        logger.info("Portfolio simulation data generated successfully")
+                    else:
+                        logger.warning(
+                            "Portfolio simulation data generation returned non-200 status"
+                        )
+                except Exception as e:
+                    logger.error("Error generating portfolio simulation: %s", str(e))
+                    results["simulation_results"]["portfolio_error"] = str(e)
+
+                # Generate risk tolerance curve if configured
+                try:
+                    if study.risk_tolerance:
+                        # Risk tolerance curve generation is handled automatically
+                        # when the study's risk tolerance parameters are accessed
+                        results["simulation_results"]["risk_tolerance_generated"] = True
+                except Exception as e:
+                    results["simulation_results"]["risk_tolerance_error"] = str(e)
+
+                # Prepare summary
+                results["simulation_results"]["summary"] = {
+                    "total_hypotheses": hypothesis_count,
+                    "successful_simulations": successful_hypothesis_simulations,
+                    "failed_simulations": len(failed_hypothesis_simulations),
+                    "failed_details": failed_hypothesis_simulations[
+                        :10
+                    ],  # Limit to first 10 failures
+                }
+
+                if failed_hypothesis_simulations:
+                    results["message"] = (
+                        f"Completed with {len(failed_hypothesis_simulations)} failures out of {hypothesis_count} hypotheses"
+                    )
+                    if len(failed_hypothesis_simulations) == hypothesis_count:
+                        results["success"] = False
+                        results["message"] = "All hypothesis simulations failed"
+
+                logger.info(
+                    "Simulation summary: %d total, %d successful, %d failed",
+                    hypothesis_count,
+                    successful_hypothesis_simulations,
+                    len(failed_hypothesis_simulations),
+                )
+                logger.info("Final results: %s", results)
+
+            return Response(results)
+
+        except Exception as e:
+            logger.error(
+                "Error during bulk simulation retrigger for study %s: %s", pk, str(e)
+            )
+            return Response(
+                {
+                    "success": False,
+                    "error": "Failed to retrigger simulations",
+                    "details": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario

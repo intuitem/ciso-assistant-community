@@ -1,16 +1,34 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
 	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import { run } from 'svelte/legacy';
+	import { getToastStore } from '$lib/components/Toast/stores.ts';
 
 	interface Props {
 		data: PageData;
+		form: ActionData;
 	}
 
-	let { data }: Props = $props();
+	let { data, form }: Props = $props();
+	let retriggerIsLoading = $state(false);
+
+	const toastStore = getToastStore();
+
+	run(() => {
+		if (form?.message?.simulationsComplete) {
+			// Add a small delay to ensure database transaction is committed
+			setTimeout(() => {
+				invalidateAll();
+			}, 100);
+		}
+	});
 </script>
 
 <DetailView {data}>
@@ -37,6 +55,98 @@
 			<!-- > -->
 			<!-- 	<i class="fa-solid fa-chart-simple mr-2"></i>Key Metrics -->
 			<!-- </Anchor> -->
+			<form
+				method="POST"
+				action="?/retriggerAllSimulations"
+				use:enhance={() => {
+					retriggerIsLoading = true;
+					return async ({ result, update }) => {
+						await update();
+						retriggerIsLoading = false;
+
+						// Handle responses immediately in the enhance callback
+						if (result.type === 'success') {
+							if (result.data?.error) {
+								const errorData = result.data.message;
+								toastStore.trigger({
+									message: `Simulation Failed: ${errorData.details || errorData.error || 'Unknown error occurred'}`,
+									background: 'bg-red-400 text-white',
+									timeout: 5000,
+									autohide: true
+								});
+							} else if (result.data?.success) {
+								// The server action wraps the backend response in message.results
+								const backendResults = result.data.message?.results;
+								const summary = backendResults?.simulation_results?.summary;
+
+								if (backendResults?.success === false) {
+									// Backend reported failure
+									toastStore.trigger({
+										message: `Simulation Failed: ${backendResults.message || 'Unknown error occurred'}`,
+										background: 'bg-red-400 text-white',
+										timeout: 5000,
+										autohide: true
+									});
+								} else {
+									// Backend reported success
+									let message = 'All simulations completed successfully!';
+
+									if (summary) {
+										if (summary.failed_simulations > 0) {
+											message = `Simulations completed with ${summary.failed_simulations} failures out of ${summary.total_hypotheses} hypotheses`;
+										} else {
+											message = `All ${summary.successful_simulations} simulations completed successfully!`;
+										}
+									}
+
+									toastStore.trigger({
+										message: message,
+										background: summary?.failed_simulations > 0 ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white',
+										autohide: true,
+										timeout: 4000
+									});
+								}
+							} else {
+								toastStore.trigger({
+									message: 'Unexpected response format from server',
+									background: 'bg-yellow-500 text-white',
+									timeout: 3000,
+									autohide: true
+								});
+							}
+						} else {
+							// Handle other result types (error, failure, etc.)
+							toastStore.trigger({
+								message: `Request failed: ${result.type}`,
+								background: 'bg-red-400 text-white',
+								timeout: 3000,
+								autohide: true
+							});
+						}
+					};
+				}}
+			>
+				<button
+					type="submit"
+					class="btn bg-purple-500 text-white h-fit"
+					disabled={retriggerIsLoading}
+					title="Retrigger all simulations for this study including hypotheses, portfolio data, and risk tolerance curve"
+				>
+					<span class="mr-2">
+						{#if retriggerIsLoading}
+							<ProgressRing
+								strokeWidth="16px"
+								meterStroke="stroke-white"
+								size="size-6"
+								classes="-ml-2"
+							/>
+						{:else}
+							<i class="fa-solid fa-arrows-rotate"></i>
+						{/if}
+					</span>
+					Retrigger All Simulations
+				</button>
+			</form>
 		</div>
 	{/snippet}
 
