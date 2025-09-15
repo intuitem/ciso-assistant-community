@@ -130,14 +130,15 @@
 					const currentText = targetElem.value;
 					const newText =
 						currentText.slice(0, selectionStart) + e.data + currentText.slice(selectionEnd);
-					console.log('===>', newText);
+
+					if (!newText || (allowNegative && newText === '-')) return;
 
 					const newNumber = Number(newText);
 
 					if (newNumber !== newNumber || newNumber > max) {
 						e.preventDefault();
 					}
-					if (newText && !stringifiedValueRegex.test(newText)) {
+					if (!stringifiedValueRegex.test(newText)) {
 						e.preventDefault();
 					}
 				}}
