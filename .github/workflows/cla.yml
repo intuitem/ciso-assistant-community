@@ -8,7 +8,7 @@ on:
 # Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions:
