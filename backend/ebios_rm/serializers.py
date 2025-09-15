@@ -92,7 +92,7 @@ class FearedEventWriteSerializer(BaseModelSerializer):
 
 class FearedEventReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
-    qualifications = FieldsRelatedField(["name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     gravity = serializers.JSONField(source="get_gravity_display")
     folder = FieldsRelatedField()
@@ -104,7 +104,7 @@ class FearedEventReadSerializer(BaseModelSerializer):
 
 class FearedEventImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
-        slug_field="urn", many=True, read_only=True
+        slug_field="name", read_only=True, many=True
     )
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -140,6 +140,10 @@ class RoToReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     feared_events = FieldsRelatedField(["folder", "id"], many=True)
+    risk_origin = serializers.SerializerMethodField()
+
+    def get_risk_origin(self, obj):
+        return obj.risk_origin.get_name_translated
 
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
@@ -155,6 +159,7 @@ class RoToImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     feared_events = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    risk_origin = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = RoTo
@@ -286,7 +291,9 @@ class AttackPathReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
     stakeholders = FieldsRelatedField(many=True)
-    risk_origin = serializers.CharField(source="ro_to_couple.get_risk_origin_display")
+    risk_origin = serializers.CharField(
+        source="ro_to_couple.risk_origin.get_name_translated"
+    )
     target_objective = serializers.CharField(source="ro_to_couple.target_objective")
 
     strategic_scenario = FieldsRelatedField()

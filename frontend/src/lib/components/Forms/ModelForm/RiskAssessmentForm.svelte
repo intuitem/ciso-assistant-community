@@ -8,6 +8,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Checkbox from '../Checkbox.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -30,6 +31,8 @@
 	}: Props = $props();
 
 	let riskToleranceChoices = $state<{ label: string; value: string }[]>([]);
+
+	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
 	async function handleRiskMatrixChange(id: string) {
 		riskToleranceChoices = [];
@@ -99,7 +102,7 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		disabled={object.id}
+		disabled={object.id || isLocked}
 		translateOptions={false}
 		disableDoubleDash
 		optionsEndpoint="risk-matrices"
@@ -169,6 +172,14 @@
 			label={m.observation()}
 			cacheLock={cacheLocks['observation']}
 			bind:cachedValue={formDataCache['observation']}
+		/>
+		<Checkbox
+			{form}
+			field="is_locked"
+			label={m.isLocked()}
+			helpText={m.isLockedHelpText()}
+			cacheLock={cacheLocks['is_locked']}
+			bind:cachedValue={formDataCache['is_locked']}
 		/>
 	</Dropdown>
 	{#if initialData.ebios_rm_study}

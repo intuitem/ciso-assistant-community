@@ -47,6 +47,11 @@ export class FormContent {
 	async fill(values: { [k: string]: any }) {
 		for (const key in values) {
 			const field = this.fields.get(key);
+			for (const spinner of await this.page.locator('.loading-spinner').all()) {
+				await expect(spinner).not.toBeVisible({
+					timeout: 20_000
+				});
+			}
 
 			// Check if this is a markdown field (description or observation) and handle it
 			if ((key === 'description' || key === 'observation') && field?.type === FormFieldType.TEXT) {
@@ -72,11 +77,6 @@ export class FormContent {
 					await field.locator.selectOption(values[key]);
 					break;
 				case FormFieldType.SELECT_AUTOCOMPLETE:
-					for (const spinner of await this.page.locator('.loading-spinner').all()) {
-						await expect(spinner).not.toBeVisible({
-							timeout: 20_000
-						});
-					}
 					await expect(async () => {
 						if (
 							(await field.locator.getByRole('option').isVisible()) &&

@@ -34,6 +34,8 @@
 
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 
+	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -217,5 +219,13 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<Checkbox
+		{form}
+		field="is_locked"
+		label={m.isLocked()}
+		helpText={m.isLockedHelpText()}
+		cacheLock={cacheLocks['is_locked']}
+		bind:cachedValue={formDataCache['is_locked']}
 	/>
 </Dropdown>

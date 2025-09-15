@@ -1,0 +1,17 @@
+subject: "CISO Assistant: You have been assigned to '${assessment_name}'"
+body: |
+  Hello,
+
+  You have been assigned as an author to the following Audit:
+
+  - Name: ${assessment_name}
+  - Description: ${assessment_description}
+  - Framework: ${framework_name}
+  - Status: ${assessment_status}
+  - Due Date: ${assessment_due_date}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view and manage this audit:
+  ${ciso_assistant_url}
+
+  Thank you.
