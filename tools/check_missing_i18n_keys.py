@@ -1,7 +1,7 @@
 """
 Check missing i18n keys
 
-This script compare keys with the frontend/messages/en.json for every file in frontend/messages to detect missing i18n keys in locale files compared to the default English file.
+This script compare keys with the frontend/messages/en.json for every file in frontend/messages to detect missing i18n keys in locale files compared to a base locale file.
 
 Usage:
     python check_missing_i18n_keys.py [-d|--dir frontend/messages] [-b|--base en] [-t|--target fr] [-o|--output output.csv]
@@ -63,7 +63,7 @@ def save_report_to_csv(report: list, report_path: Path, base_file_path: Path) ->
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Detect missing i18n keys compared to English locale."
+        description="Detect missing i18n keys from target locale(s) compared to a base locale."
     )
     parser.add_argument(
         "-d", "--dir",
