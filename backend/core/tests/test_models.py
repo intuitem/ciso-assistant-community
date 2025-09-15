@@ -919,6 +919,36 @@ class TestAsset:
                 security_objectives=security_objectives,
             )
 
+    def test_asset_get_descendants(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        primary_asset = Asset.objects.create(
+            name="Primary", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        child1 = Asset.objects.create(
+            name="Child 1", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+        child1.parent_assets.add(primary_asset)
+        child2 = Asset.objects.create(
+            name="Child 2", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+        child2.parent_assets.add(child1)
+        assert primary_asset.get_descendants() == {child1, child2}
+
+    def test_asset_ancestors_plus_self(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        primary_asset = Asset.objects.create(
+            name="Primary", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        child1 = Asset.objects.create(
+            name="Child 1", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+        child1.parent_assets.add(primary_asset)
+        child2 = Asset.objects.create(
+            name="Child 2", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+        child2.parent_assets.add(child1)
+        assert child2.ancestors_plus_self() == {child1, child2, primary_asset}
+
 
 @pytest.mark.django_db
 class TestLibrary:

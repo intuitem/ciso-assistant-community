@@ -12,10 +12,10 @@ from core.models import (
     AppliedControl,
     Asset,
     ComplianceAssessment,
-    Qualification,
     RiskAssessment,
     RiskMatrix,
     Threat,
+    Terminology,
 )
 from core.validators import (
     JSONSchemaInstanceValidator,
@@ -188,6 +188,12 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = _("Ebios RM Studies")
         ordering = ["created_at"]
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.quotation_method == "express":
+            for scenario in self.operational_scenarios.all():
+                scenario.update_likelihood_from_operating_modes()
+
     @property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
@@ -259,11 +265,14 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         help_text=_("Assets that are affected by the feared event"),
     )
     qualifications = models.ManyToManyField(
-        Qualification,
+        Terminology,
+        verbose_name="Qualifications",
+        related_name="feared_events_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
         blank=True,
-        verbose_name=_("Qualifications"),
-        related_name="feared_events",
-        help_text=_("Qualifications carried by the feared event"),
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
@@ -354,17 +363,6 @@ class RoToManager(models.Manager):
 
 
 class RoTo(AbstractBaseModel, FolderMixin):
-    class RiskOrigin(models.TextChoices):
-        STATE = "state", _("State")
-        ORGANIZED_CRIME = "organized_crime", _("Organized crime")
-        TERRORIST = "terrorist", _("Terrorist")
-        ACTIVIST = "activist", _("Activist")
-        COMPETITOR = "competitor", _("Competitor")
-        AMATEUR = "amateur", _("Amateur")
-        AVENGER = "avenger", _("Avenger")
-        PATHOLOGICAL = "pathological", _("Pathological")
-        OTHER = "other", _("Other")
-
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
         VERY_LOW = 1, "very_low"
@@ -405,8 +403,15 @@ class RoTo(AbstractBaseModel, FolderMixin):
         blank=True,
     )
 
-    risk_origin = models.CharField(
-        max_length=32, verbose_name=_("Risk origin"), choices=RiskOrigin.choices
+    risk_origin = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        verbose_name=_("Risk origin"),
+        related_name="roto_risk_origins",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
     )
     target_objective = models.TextField(verbose_name=_("Target objective"))
     motivation = models.PositiveSmallIntegerField(
@@ -433,7 +438,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     objects = RoToManager()
 
     def __str__(self) -> str:
-        return f"{self.get_risk_origin_display()} - {self.target_objective}"
+        return f"{self.risk_origin.get_name_translated} - {self.target_objective}"
 
     class Meta:
         verbose_name = _("RO/TO couple")
@@ -805,6 +810,12 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.operational_scenario.folder
         super().save(*args, **kwargs)
+        self.operational_scenario.update_likelihood_from_operating_modes()
+
+    def delete(self, *args, **kwargs):
+        operational_scenario = self.operational_scenario
+        super().delete(*args, **kwargs)
+        operational_scenario.update_likelihood_from_operating_modes()
 
     @property
     def ebios_rm_study(self):
@@ -965,33 +976,18 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             "value": risk_index,
         }
 
-    @receiver([post_save, post_delete], sender=OperatingMode)
-    def update_likelihood_from_operating_modes(sender, instance, **kwargs):
-        if instance.operational_scenario.ebios_rm_study.quotation_method != "express":
+    def update_likelihood_from_operating_modes(self):
+        if self.ebios_rm_study.quotation_method != "express":
             return
 
         max_likelihood = (
-            instance.operational_scenario.operating_modes.aggregate(
-                max_l=models.Max("likelihood")
-            )["max_l"]
-            if instance.operational_scenario.operating_modes.exists()
+            self.operating_modes.aggregate(max_l=models.Max("likelihood"))["max_l"]
+            if self.operating_modes.exists()
             else -1
         )
 
-        instance.operational_scenario.likelihood = max_likelihood
-        instance.operational_scenario.save(update_fields=["likelihood"])
-
-    @receiver(post_save, sender=EbiosRMStudy)
-    def update_scenarios_likelihood_on_quotation_method_change(
-        sender, instance, **kwargs
-    ):
-        if instance.quotation_method != "express":
-            return
-
-        for scenario in instance.operational_scenarios.all():
-            scenario.update_likelihood_from_operating_modes(
-                instance=scenario.operating_modes.first()
-            )
+        self.likelihood = max_likelihood
+        self.save(update_fields=["likelihood"])
 
 
 class KillChain(AbstractBaseModel, FolderMixin):

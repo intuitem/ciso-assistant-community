@@ -58,6 +58,12 @@ const YES_NO_UNSET_OPTIONS = [
 	{ label: 'NO', value: 'NO' },
 	{ label: '--', value: '--' }
 ];
+
+const RISK_STAGE_OPTIONS = [
+	{ label: 'Inherent', value: 'inherent' },
+	{ label: 'Current', value: 'current' },
+	{ label: 'Residual', value: 'residual' }
+];
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -125,11 +131,45 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'risk-assessments/status',
+		options: [
+			{ label: '--', value: '--' },
+			{ label: 'planned', value: 'planned' },
+			{ label: 'in_progress', value: 'in_progress' },
+			{ label: 'in_review', value: 'in_review' },
+			{ label: 'done', value: 'done' },
+			{ label: 'deprecated', value: 'deprecated' }
+		],
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: '--', value: '--' },
+			{ label: 'draft', value: 'draft' },
+			{ label: 'open', value: 'open' },
+			{ label: 'mitigate', value: 'mitigate' },
+			{ label: 'accept', value: 'accept' },
+			{ label: 'transfer', value: 'transfer' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const RISK_STAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'risk_stage',
+		options: RISK_STAGE_OPTIONS,
 		multiple: true
 	}
 };
@@ -212,6 +252,7 @@ const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+
 const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -343,6 +384,28 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'nature',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-objectives/health',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'health',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -800,6 +863,35 @@ const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const FIELD_PATH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'field_path',
+		optionsEndpoint: 'terminologies/field_path',
+		optionsLabelField: 'label',
+		optionsValueField: 'label',
+		multiple: true
+	}
+};
+
+const BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+const IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -846,8 +938,8 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'riskScenarios', 'perimeter'],
-		body: ['ref_id', 'str', 'risk_matrix', 'risk_scenarios_count', 'perimeter'],
+		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter'],
+		body: ['ref_id', 'str', 'risk_matrix', 'status', 'risk_scenarios_count', 'perimeter'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1458,10 +1550,12 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['name', 'domain', 'status', 'health'],
-		body: ['name', 'folder', 'status', 'health'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'assigned_to'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
 		}
 	},
 	'organisation-issues': {
@@ -1471,6 +1565,83 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER
 		}
 	},
+	'quantitative-risk-studies': {
+		head: ['name', 'description', 'status', 'domain'],
+		body: ['name', 'description', 'status', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: RISK_ASSESSMENT_STATUS_FILTER
+		}
+	},
+	'quantitative-risk-scenarios': {
+		head: [
+			'isSelected',
+			'ref_id',
+			'name',
+			'quantitativeRiskStudy',
+			'assets',
+			'threats',
+			'qualifications',
+			'currentAleDisplay',
+			'residualAleDisplay',
+			'status'
+		],
+		body: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'quantitative_risk_study',
+			'assets',
+			'threats',
+			'qualifications',
+			'current_ale_display',
+			'residual_ale_display',
+			'status'
+		],
+		filters: {
+			status: QUANT_RISK_SCENARIO_STATUS_FILTER,
+			assets: ASSET_FILTER,
+			threats: THREAT_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
+	},
+	'quantitative-risk-hypotheses': {
+		head: [
+			'ref_id',
+			'name',
+			'riskStage',
+			'simulationParameters',
+			'lecChart',
+			'ale',
+			'addedAppliedControls',
+			'treatmentCost',
+			'rocDisplay',
+			'isSelected'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'risk_stage',
+			'simulation_parameters_display',
+			'lec_data',
+			'ale_display',
+			'added_applied_controls',
+			'treatment_cost_display',
+			'roc_display',
+			'is_selected'
+		],
+		filters: {
+			is_selected: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'is_selected',
+					options: YES_NO_OPTIONS,
+					multiple: true
+				}
+			},
+			risk_stage: RISK_STAGE_FILTER
+		}
+	},
 	'task-templates': {
 		head: [
 			'name',
@@ -1478,6 +1649,7 @@ export const listViewFields = {
 			'assigned_to',
 			'lastOccurrenceStatus',
 			'nextOccurrence',
+			'nextOccurrenceStatus',
 			'folder'
 		],
 		body: [
@@ -1486,6 +1658,7 @@ export const listViewFields = {
 			'assigned_to',
 			'last_occurrence_status',
 			'next_occurrence',
+			'next_occurrence_status',
 			'folder'
 		],
 		filters: {
@@ -1503,6 +1676,15 @@ export const listViewFields = {
 	qualifications: {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
+	},
+	terminologies: {
+		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
+		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
+		filters: {
+			field_path: FIELD_PATH_FILTER,
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
+		}
 	},
 	extra: {
 		filters: {

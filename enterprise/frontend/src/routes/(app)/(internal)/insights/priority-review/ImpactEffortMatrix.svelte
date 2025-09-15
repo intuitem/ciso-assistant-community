@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { tableHandlers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 
 	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
@@ -12,9 +11,8 @@
 	let { data }: Props = $props();
 
 	let selectedCell: { impact: number; effort: number } | null = $state(null);
-	let selectedItems: any[] = $state([]);
+	let overrideFilters: {[key: string]: any[]} = $state({control_impact: [], effort: []})
 
-	let modelTableEndpoint = $state('/applied-controls');
 	let modelTableKey = $state(0); // Force re-render when incremented
 
 	function handleCellClick(rowIndex: number, colIndex: number) {
@@ -23,13 +21,12 @@
 		const items = data[rowIndex][colIndex];
 
 		selectedCell = { impact, effort };
-		selectedItems = items;
 
-		// Update the ModelTable endpoint reactively
 		const effortLabel = EFFORT_REVERSE_MAP[effort];
-		modelTableEndpoint = `/applied-controls?control_impact=${impact}&effort=${effortLabel}`;
-
-		$tableHandlers?.['/applied-controls'].invalidate();
+		overrideFilters = {
+			control_impact: [{ value: impact }],
+			effort: [{ value: effortLabel }]
+		};
 
 		modelTableKey++; // Force ModelTable to refresh
 	}
@@ -46,9 +43,7 @@
 
 	function resetFilters() {
 		selectedCell = null;
-		selectedItems = [];
-		modelTableEndpoint = '/applied-controls';
-		$tableHandlers?.['/applied-controls'].invalidate();
+		overrideFilters = {control_impact: [], effort: []};
 		modelTableKey++;
 	}
 </script>
@@ -56,10 +51,10 @@
 <main class="grid grid-cols-6">
 	<div class="w-full max-w-screen-lg mx-auto p-4 col-span-4">
 		<div class="grid grid-cols-6 gap-1 mb-6">
-			<div class="flex justify-end items-center p-2 font-semibold">Impact</div>
+			<div class="flex justify-end items-center p-2 font-semibold">{m.pImpact()}</div>
 			<div class="col-span-5"></div>
 
-			<div class="flex justify-end items-center p-2 text-sm">5 (High)</div>
+			<div class="flex justify-end items-center p-2 text-sm">5 ({m.high()})</div>
 			<div class="col-span-5 row-span-5 border-2 border-gray-300 grid grid-cols-5 gap-1 p-1">
 				{#each data as row, rowIndex}
 					{#each row as col, colIndex}
@@ -75,7 +70,7 @@
 							{#if col.length > 0}
 								<div class="font-semibold text-lg">{col.length}</div>
 								<div class="text-xs text-gray-600">
-									{#if col.length > 1}items{:else}item{/if}
+									{#if col.length > 1}{m.items()}{:else}{m.item()}{/if}
 								</div>
 							{:else}
 								<div class=""></div>
@@ -88,36 +83,36 @@
 			<div class="flex justify-end items-center p-2 text-sm">4</div>
 			<div class="flex justify-end items-center p-2 text-sm">3</div>
 			<div class="flex justify-end items-center p-2 text-sm">2</div>
-			<div class="flex justify-end items-center p-2 text-sm">1 (Low)</div>
+			<div class="flex justify-end items-center p-2 text-sm">1 ({m.low()})</div>
 
 			<!-- Effort labels (bottom) -->
-			<div class="flex justify-end items-center p-2 font-semibold">Effort</div>
-			<div class="flex justify-center items-center p-2 text-sm">1 (Low)</div>
+			<div class="flex justify-end items-center p-2 font-semibold">{m.effort()}</div>
+			<div class="flex justify-center items-center p-2 text-sm">1 ({m.low()})</div>
 			<div class="flex justify-center items-center p-2 text-sm">2</div>
 			<div class="flex justify-center items-center p-2 text-sm">3</div>
 			<div class="flex justify-center items-center p-2 text-sm">4</div>
-			<div class="flex justify-center items-center p-2 text-sm">5 (High)</div>
+			<div class="flex justify-center items-center p-2 text-sm">5 ({m.high()})</div>
 		</div>
 	</div>
 	<!-- Legend -->
 	<div class="mb-4 p-4 rounded">
-		<h3 class="font-semibold mb-2">Priority Legend:</h3>
+		<h3 class="font-semibold mb-2">{m.priorityLegend()}</h3>
 		<div class="flex flex-wrap gap-4 text-sm">
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-green-200 border"></div>
-				<span>Quick Wins</span>
+				<span>{m.quickWins()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-yellow-200 border"></div>
-				<span>Major Projects</span>
+				<span>{m.majorProjects()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-gray-100 border"></div>
-				<span>Fill-ins</span>
+				<span>{m.fillIns()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				<div class="w-4 h-4 bg-red-200 border"></div>
-				<span>Questionable</span>
+				<span>{m.questionable()}</span>
 			</div>
 		</div>
 	</div>
@@ -153,12 +148,21 @@
 	{#key modelTableKey}
 		<ModelTable
 			source={{
-				head: ['ref_id', 'name', 'status', 'priority', 'eta', 'folder', 'effort', 'control_impact'],
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					status: 'status',
+					priority: 'priority',
+					eta: 'eta',
+					folder: 'folder',
+					effort: 'effort',
+					control_impact: 'control_impact'
+				},
 				body: []
 			}}
+			{overrideFilters}
 			hideFilters={true}
 			URLModel="applied-controls"
-			baseEndpoint={modelTableEndpoint}
 		/>
 	{/key}
 </div>

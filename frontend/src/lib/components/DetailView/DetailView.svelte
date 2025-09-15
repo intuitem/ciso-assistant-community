@@ -91,6 +91,8 @@
 			: data.data
 	);
 
+	let hasWidgets = $derived(!!widgets);
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -213,10 +215,11 @@
 
 	let displayEditButton = $derived(function () {
 		return (
-			canEditObject &&
-			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn &&
-			!data.data.builtin
+			(canEditObject &&
+				!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+				!data.data.urn &&
+				!data.data.builtin) ||
+			data?.urlModel === 'terminologies'
 		);
 	});
 
@@ -287,11 +290,15 @@
 		</div>
 	{/if}
 
-	<!-- Main content area - modified to use flex layout -->
+	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
-		<div class="flex flex-row flex-wrap gap-4">
-			<!-- Left side - Details (now takes half width) -->
-			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
+		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
+			<!-- Left side - Details (conditional width) -->
+			<div
+				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+					? 'flex-1 min-w-[300px]'
+					: 'w-full'}"
+			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
 						<div
@@ -355,12 +362,25 @@
 												{:else}
 													--
 												{/if}
+											{:else if key === 'translations'}
+												{#if Object.keys(value).length > 0}
+													<div class="flex flex-col gap-2">
+														{#each Object.entries(value) as [lang, translation]}
+															<div class="flex flex-row gap-2">
+																<strong>{lang}:</strong>
+																<span>{safeTranslate(translation)}</span>
+															</div>
+														{/each}
+													</div>
+												{:else}
+													--
+												{/if}
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value as val}
+														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id}
+																{#if val.str && val.id && key !== 'qualifications'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
@@ -416,7 +436,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation'}
+											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
@@ -434,13 +454,15 @@
 				</dl>
 			</div>
 
-			<!-- Right side - New widgets and metrics area -->
-			<div class="flex-1 min-w-[300px] flex flex-col">
-				<!-- New slot for widgets and metrics -->
-				<div class="h-full">
-					{@render widgets?.()}
+			<!-- Right side - Widgets area (only if widgets exist) -->
+			{#if hasWidgets}
+				<div class="flex-1 min-w-[300px] flex flex-col">
+					<!-- Slot for widgets and metrics -->
+					<div class="h-full">
+						{@render widgets?.()}
+					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
 
 		<!-- Bottom row for action buttons -->

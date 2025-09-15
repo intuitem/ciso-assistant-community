@@ -293,6 +293,7 @@ def get_sorted_requirement_nodes(
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
                 "questions": node.questions,
+                "answers": req_as.answers if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -334,6 +335,7 @@ def get_sorted_requirement_nodes(
                     else None,
                     "max_score": max_score if child_req_as else None,
                     "questions": child.questions,
+                    "answers": child_req_as.answers if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,
@@ -1014,6 +1016,147 @@ def get_metrics(user: User, folder_id):
     return data
 
 
+def get_compliance_analytics(user: User, folder_id=None):
+    """
+    Returns analytics data for compliance assessments structured by:
+    Framework -> Domain (folder) -> Assessment details
+
+    Structure:
+    {
+        "framework_name": {
+            "framework_id": "uuid",
+            "framework_average": 75.5,
+            "domains": [
+                {
+                    "domain": "Domain Name",
+                    "domain_id": "uuid",
+                    "domain_average": 80.0,
+                    "assessments": [
+                        {
+                            "assessment_id": "uuid",
+                            "assessment_name": "Assessment Name",
+                            "progress": 85,
+                            "perimeter": "Perimeter Name",
+                            "perimeter_id": "uuid",
+                            "status": "in_progress"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    """
+
+    def viewable_items(model, folder_id=None):
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, user, model
+        )
+        return model.objects.filter(id__in=object_ids)
+
+    # Get viewable compliance assessments with related data and progress annotation
+    from django.db.models import Count, Q, F, Value, IntegerField, ExpressionWrapper
+    from django.db.models.functions import Greatest, Coalesce
+
+    viewable_assessments = (
+        viewable_items(ComplianceAssessment, folder_id)
+        .select_related("framework", "folder", "perimeter")
+        .annotate(
+            total_requirements=Count(
+                "requirement_assessments",
+                filter=Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            assessed_requirements=Count(
+                "requirement_assessments",
+                filter=~Q(
+                    requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                )
+                & Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            progress=ExpressionWrapper(
+                F("assessed_requirements")
+                * 100
+                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                output_field=IntegerField(),
+            ),
+        )
+    )
+
+    framework_data = {}
+
+    for assessment in viewable_assessments:
+        framework_name = assessment.framework.name
+        framework_id = str(assessment.framework.id)
+        domain_name = assessment.folder.name if assessment.folder else "No Domain"
+        domain_id = str(assessment.folder.id) if assessment.folder else None
+        perimeter_name = (
+            assessment.perimeter.name if assessment.perimeter else "No Perimeter"
+        )
+        perimeter_id = str(assessment.perimeter.id) if assessment.perimeter else None
+
+        # Initialize framework if not exists
+        if framework_name not in framework_data:
+            framework_data[framework_name] = {
+                "framework_id": framework_id,
+                "framework_average": 0,
+                "domains": {},
+            }
+
+        # Initialize domain if not exists
+        if domain_name not in framework_data[framework_name]["domains"]:
+            framework_data[framework_name]["domains"][domain_name] = {
+                "domain_id": domain_id,
+                "domain_average": 0,
+                "assessments": [],
+            }
+
+        # Add assessment data using annotated progress
+        framework_data[framework_name]["domains"][domain_name]["assessments"].append(
+            {
+                "assessment_id": str(assessment.id),
+                "assessment_name": assessment.name,
+                "progress": assessment.progress,
+                "perimeter": perimeter_name,
+                "perimeter_id": perimeter_id,
+                "status": assessment.status,
+            }
+        )
+
+    # Calculate averages
+    for framework_name, framework_info in framework_data.items():
+        all_framework_progress = []
+
+        for domain_name, domain_info in framework_info["domains"].items():
+            # Calculate domain average
+            domain_progress = [a["progress"] for a in domain_info["assessments"]]
+            domain_info["domain_average"] = (
+                round(sum(domain_progress) / len(domain_progress), 1)
+                if domain_progress
+                else 0
+            )
+
+            all_framework_progress.extend(domain_progress)
+
+        # Calculate framework average
+        framework_info["framework_average"] = (
+            round(sum(all_framework_progress) / len(all_framework_progress), 1)
+            if all_framework_progress
+            else 0
+        )
+
+        # Convert domains dict to list for frontend consumption
+        framework_info["domains"] = [
+            {"domain": domain_name, **domain_data}
+            for domain_name, domain_data in framework_info["domains"].items()
+        ]
+
+    return framework_data
+
+
 def get_instance_metrics():
     """
     Returns the instance metrics such as the number of users, domains, perimeters, etc.
@@ -1311,6 +1454,35 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     max_offset = max(values, default=0)
     for label in labels:
         label["max"] = max_offset
+
+    return {"labels": labels, "values": values}
+
+
+def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
+        scoped_folder, user, RiskScenario
+    )[0]
+
+    # Get all risk scenarios that user can view
+    risk_scenarios = RiskScenario.objects.filter(id__in=viewable_scenarios)
+
+    # Count occurrences of each qualification
+    qualification_counts = {}
+    for scenario in risk_scenarios:
+        for qualification in scenario.qualifications.all():
+            key = qualification.name
+            qualification_counts[key] = qualification_counts.get(key, 0) + 1
+
+    # Sort by qualification name and only include those with count > 0
+    sorted_qualifications = sorted(
+        [(qual, count) for qual, count in qualification_counts.items() if count > 0]
+    )
+
+    labels = [qualification for qualification, _ in sorted_qualifications]
+    values = [count for _, count in sorted_qualifications]
 
     return {"labels": labels, "values": values}
 

@@ -113,6 +113,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	pathField="path"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -142,7 +143,7 @@
 		],
 		classes: 'text-blue-500'
 	}}
-	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
+	optionsDetailedUrlParameters={[['exclude_children', object.id]]}
 	optionsLabelField="auto"
 	pathField="path"
 	optionsSelf={object}
