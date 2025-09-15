@@ -33,6 +33,9 @@ importers:
       '@unovis/ts':
         specifier: 1.5.2
         version: 1.5.2
+      '@xyflow/svelte':
+        specifier: ^1.2.4
+        version: 1.2.4(svelte@5.34.8)
       bits-ui:
         specifier: ^0.22.0
         version: 0.22.0(svelte@5.34.8)
@@ -1178,6 +1181,11 @@ packages:
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0 || ^5.0.0
 
+  '@svelte-put/shortcut@4.1.0':
+    resolution: {integrity: sha512-wImNEIkbxAIWFqlfuhcbC+jRPDeRa/uJGIXHMEVVD+jqL9xCwWNnkGQJ6Qb2XVszuRLHlb8SGZDL3Io/h3vs8w==}
+    peerDependencies:
+      svelte: ^5.1.0
+
   '@sveltejs/acorn-typescript@1.0.5':
     resolution: {integrity: sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==}
     peerDependencies:
@@ -1706,6 +1714,14 @@ packages:
 
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
+
+  '@xyflow/svelte@1.2.4':
+    resolution: {integrity: sha512-CygKmc3t+KevPdx9VEWa6Q0O7DegJ6qzYrOH5dQo5zp9Inm2cYAZpkUuk64ry9Djw/gwy7EvrJTjyXetuvBGOg==}
+    peerDependencies:
+      svelte: ^5.25.0
+
+  '@xyflow/system@0.0.68':
+    resolution: {integrity: sha512-QDG2wxIG4qX+uF8yzm1ULVZrcXX3MxPBoxv7O52FWsX87qIImOqifUhfa/TwsvLdzn7ic2DDBH1uI8TKbdNTYA==}
 
   '@zag-js/accordion@1.17.1':
     resolution: {integrity: sha512-LekXbIFOKZetsiu1sNLa852uDJckzMEqFQ0MvW5qMLvVsUuz2pq5Q9bPYdckHkP0B8gK9mQilOUE0D0PY26D/w==}
@@ -5098,6 +5114,10 @@ snapshots:
       qrcode-generator: 1.5.2
       svelte: 5.34.8
 
+  '@svelte-put/shortcut@4.1.0(svelte@5.34.8)':
+    dependencies:
+      svelte: 5.34.8
+
   '@sveltejs/acorn-typescript@1.0.5(acorn@8.15.0)':
     dependencies:
       acorn: 8.15.0
@@ -5786,6 +5806,24 @@ snapshots:
       '@vitest/pretty-format': 3.2.4
       loupe: 3.1.4
       tinyrainbow: 2.0.0
+
+  '@xyflow/svelte@1.2.4(svelte@5.34.8)':
+    dependencies:
+      '@svelte-put/shortcut': 4.1.0(svelte@5.34.8)
+      '@xyflow/system': 0.0.68
+      svelte: 5.34.8
+
+  '@xyflow/system@0.0.68':
+    dependencies:
+      '@types/d3-drag': 3.0.7
+      '@types/d3-interpolate': 3.0.4
+      '@types/d3-selection': 3.0.11
+      '@types/d3-transition': 3.0.9
+      '@types/d3-zoom': 3.0.8
+      d3-drag: 3.0.0
+      d3-interpolate: 3.0.1
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
 
   '@zag-js/accordion@1.17.1':
     dependencies:
