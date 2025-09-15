@@ -101,7 +101,10 @@
 
 									toastStore.trigger({
 										message: message,
-										background: summary?.failed_simulations > 0 ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white',
+										background:
+											summary?.failed_simulations > 0
+												? 'bg-yellow-500 text-white'
+												: 'bg-green-500 text-white',
 										autohide: true,
 										timeout: 4000
 									});
