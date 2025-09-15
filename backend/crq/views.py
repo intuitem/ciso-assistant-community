@@ -339,6 +339,10 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
         scenarios_data = []
         all_study_assets = set()  # Collect unique assets across all scenarios
+        all_study_threats = set()  # Collect unique threats across all scenarios
+        all_study_qualifications = (
+            set()
+        )  # Collect unique qualifications across all scenarios
         all_added_controls = (
             set()
         )  # Track unique controls to avoid duplication in total cost
@@ -376,9 +380,21 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "residual_ale_display": scenario.residual_ale_display,
             }
 
-            # Collect unique assets for study-wide summary
+            # Collect unique assets, threats, and qualifications for study-wide summary
             for asset in scenario.assets.all():
-                all_study_assets.add((str(asset.id), asset.name))
+                folder_name = asset.folder.name if asset.folder else "No Folder"
+                display_name = f"{folder_name}/{asset.name}"
+                all_study_assets.add((str(asset.id), display_name))
+            for threat in scenario.threats.all():
+                folder_name = threat.folder.name if threat.folder else "No Folder"
+                display_name = f"{folder_name}/{threat.name}"
+                all_study_threats.add((str(threat.id), display_name))
+            for qualification in scenario.qualifications.all():
+                folder_name = (
+                    qualification.folder.name if qualification.folder else "No Folder"
+                )
+                display_name = f"{folder_name}/{qualification.name}"
+                all_study_qualifications.add((str(qualification.id), display_name))
 
             # Calculate risk reduction (current - residual)
             current_ale = scenario.current_ale
@@ -600,6 +616,18 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     {"id": asset_id, "name": asset_name}
                     for asset_id, asset_name in sorted(
                         all_study_assets, key=lambda x: x[1]
+                    )
+                ],
+                "study_threats": [
+                    {"id": threat_id, "name": threat_name}
+                    for threat_id, threat_name in sorted(
+                        all_study_threats, key=lambda x: x[1]
+                    )
+                ],
+                "study_qualifications": [
+                    {"id": qualification_id, "name": qualification_name}
+                    for qualification_id, qualification_name in sorted(
+                        all_study_qualifications, key=lambda x: x[1]
                     )
                 ],
                 "currency": currency,
