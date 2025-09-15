@@ -320,7 +320,8 @@ test('Feature Flags - Inherent Risk visibility in Risk scenario detail view page
 test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({
 	logedPage,
 	page,
-	ebiosRmStudyPage
+	ebiosRmStudyPage,
+	riskAssessmentsPage
 }) => {
 	await toggleFeatureFlag(page, 'inherent-risk', true);
 	await ebiosRmStudyPage.goto();
@@ -334,7 +335,10 @@ test('Feature Flags - Inherent Risk visibility in Ebios RM step 5', async ({
 	await page.getByText(vars.ebiosRMName).click();
 
 	await page.getByText('Generate the risk assessment').click();
-	await page.getByTestId('form-input-name').fill('test-risk-assessment-ebios-rm');
+	await riskAssessmentsPage.form.fill({
+		name: 'test-risk-assessment-ebios-rm',
+		perimeter: `${vars.folderName}/${vars.perimeterName}`
+	});
 	await page.getByTestId('save-button').click();
 
 	await expect(page.getByRole('heading', { name: 'Inherent Risk' })).toBeVisible();
