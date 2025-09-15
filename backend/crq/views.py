@@ -854,66 +854,66 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                             }
                         )
 
-                # Generate portfolio simulation (combined ALE and LEC)
-                logger.info("Generating portfolio simulation data")
-                try:
-                    # Force refresh combined data after hypothesis simulations
-                    study.refresh_from_db()
+            # Generate portfolio simulation (combined ALE and LEC) after all scenarios processed
+            logger.info("Generating portfolio simulation data")
+            try:
+                # Force refresh combined data after hypothesis simulations
+                study.refresh_from_db()
 
-                    # Call the view action methods to generate combined data
-                    # This ensures the portfolio data is updated with latest simulation results
-                    logger.info("Generating combined ALE")
-                    combined_ale_response = self.combined_ale(request, pk)
-                    logger.info("Generating combined LEC")
-                    combined_lec_response = self.combined_lec(request, pk)
+                # Call the view action methods to generate combined data
+                # This ensures the portfolio data is updated with latest simulation results
+                logger.info("Generating combined ALE")
+                combined_ale_response = self.combined_ale(request, pk)
+                logger.info("Generating combined LEC")
+                combined_lec_response = self.combined_lec(request, pk)
 
-                    if (
-                        combined_ale_response.status_code == 200
-                        or combined_lec_response.status_code == 200
-                    ):
-                        results["simulation_results"]["portfolio_generated"] = True
-                        logger.info("Portfolio simulation data generated successfully")
-                    else:
-                        logger.warning(
-                            "Portfolio simulation data generation returned non-200 status"
-                        )
-                except Exception as e:
-                    logger.error("Error generating portfolio simulation")
-
-                # Generate risk tolerance curve if configured
-                try:
-                    if study.risk_tolerance:
-                        # Risk tolerance curve generation is handled automatically
-                        # when the study's risk tolerance parameters are accessed
-                        results["simulation_results"]["risk_tolerance_generated"] = True
-                except Exception as e:
-                    logger.error("Error generating risk tolerance LEC")
-
-                # Prepare summary
-                results["simulation_results"]["summary"] = {
-                    "total_hypotheses": hypothesis_count,
-                    "successful_simulations": successful_hypothesis_simulations,
-                    "failed_simulations": len(failed_hypothesis_simulations),
-                    "failed_details": failed_hypothesis_simulations[
-                        :10
-                    ],  # Limit to first 10 failures
-                }
-
-                if failed_hypothesis_simulations:
-                    results["message"] = (
-                        f"Completed with {len(failed_hypothesis_simulations)} failures out of {hypothesis_count} hypotheses"
+                if (
+                    combined_ale_response.status_code == 200
+                    or combined_lec_response.status_code == 200
+                ):
+                    results["simulation_results"]["portfolio_generated"] = True
+                    logger.info("Portfolio simulation data generated successfully")
+                else:
+                    logger.warning(
+                        "Portfolio simulation data generation returned non-200 status"
                     )
-                    if len(failed_hypothesis_simulations) == hypothesis_count:
-                        results["success"] = False
-                        results["message"] = "All hypothesis simulations failed"
+            except Exception as e:
+                logger.error("Error generating portfolio simulation")
 
-                logger.info(
-                    "Simulation summary: %d total, %d successful, %d failed",
-                    hypothesis_count,
-                    successful_hypothesis_simulations,
-                    len(failed_hypothesis_simulations),
+            # Generate risk tolerance curve if configured
+            try:
+                if study.risk_tolerance:
+                    # Risk tolerance curve generation is handled automatically
+                    # when the study's risk tolerance parameters are accessed
+                    results["simulation_results"]["risk_tolerance_generated"] = True
+            except Exception as e:
+                logger.error("Error generating risk tolerance LEC")
+
+            # Prepare summary
+            results["simulation_results"]["summary"] = {
+                "total_hypotheses": hypothesis_count,
+                "successful_simulations": successful_hypothesis_simulations,
+                "failed_simulations": len(failed_hypothesis_simulations),
+                "failed_details": failed_hypothesis_simulations[
+                    :10
+                ],  # Limit to first 10 failures
+            }
+
+            if failed_hypothesis_simulations:
+                results["message"] = (
+                    f"Completed with {len(failed_hypothesis_simulations)} failures out of {hypothesis_count} hypotheses"
                 )
-                logger.info("Final results: %s", results)
+                if len(failed_hypothesis_simulations) == hypothesis_count:
+                    results["success"] = False
+                    results["message"] = "All hypothesis simulations failed"
+
+            logger.info(
+                "Simulation summary: %d total, %d successful, %d failed",
+                hypothesis_count,
+                successful_hypothesis_simulations,
+                len(failed_hypothesis_simulations),
+            )
+            logger.info("Final results: %s", results)
 
             return Response(results)
 
