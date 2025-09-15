@@ -848,16 +848,14 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                                 )
                         except Exception as e:
                             logger.error(
-                                "Error running simulation for hypothesis %s: %s",
+                                "Error running simulation for hypothesis %s",
                                 hypothesis.id,
-                                str(e),
                             )
                             failed_hypothesis_simulations.append(
                                 {
                                     "hypothesis_id": str(hypothesis.id),
                                     "scenario": scenario.name,
                                     "hypothesis": hypothesis.name,
-                                    "reason": str(e),
                                 }
                             )
 
@@ -885,8 +883,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                             "Portfolio simulation data generation returned non-200 status"
                         )
                 except Exception as e:
-                    logger.error("Error generating portfolio simulation: %s", str(e))
-                    results["simulation_results"]["portfolio_error"] = str(e)
+                    logger.error("Error generating portfolio simulation")
 
                 # Generate risk tolerance curve if configured
                 try:
@@ -895,7 +892,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                         # when the study's risk tolerance parameters are accessed
                         results["simulation_results"]["risk_tolerance_generated"] = True
                 except Exception as e:
-                    results["simulation_results"]["risk_tolerance_error"] = str(e)
+                    logger.error("Error generating risk tolerance LEC")
 
                 # Prepare summary
                 results["simulation_results"]["summary"] = {
@@ -926,14 +923,11 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             return Response(results)
 
         except Exception as e:
-            logger.error(
-                "Error during bulk simulation retrigger for study %s: %s", pk, str(e)
-            )
+            logger.error("Error during bulk simulation retrigger for study %s", pk)
             return Response(
                 {
                     "success": False,
                     "error": "Failed to retrigger simulations",
-                    "details": str(e),
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -991,7 +985,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
             )
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id")
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -1186,7 +1180,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
             )
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id")
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -1274,26 +1268,22 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
             )
         except ValueError as e:
             # Handle parameter validation errors specifically
-            logger.warning(
-                "Parameter validation error for hypothesis %s: %s", pk, str(e)
-            )
+            logger.warning("Parameter validation error for hypothesis %s", pk)
             return Response(
                 {
                     "success": False,
                     "error": "Invalid parameters",
-                    "details": "",
                     "hint": "Please ensure the hypothesis has valid probability and impact parameters (probability, impact.distribution='LOGNORMAL-CI90', impact.lb, impact.ub)",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             # Handle other errors
-            logger.error("Error running simulation for hypothesis %s: %s", pk, str(e))
+            logger.error("Error running simulation for hypothesis %s", pk)
             return Response(
                 {
                     "success": False,
                     "error": "Failed to run simulation",
-                    "details": "",
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
