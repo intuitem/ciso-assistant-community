@@ -339,6 +339,10 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
         scenarios_data = []
         all_study_assets = set()  # Collect unique assets across all scenarios
+        all_study_threats = set()  # Collect unique threats across all scenarios
+        all_study_qualifications = (
+            set()
+        )  # Collect unique qualifications across all scenarios
         all_added_controls = (
             set()
         )  # Track unique controls to avoid duplication in total cost
@@ -376,9 +380,21 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "residual_ale_display": scenario.residual_ale_display,
             }
 
-            # Collect unique assets for study-wide summary
+            # Collect unique assets, threats, and qualifications for study-wide summary
             for asset in scenario.assets.all():
-                all_study_assets.add((str(asset.id), asset.name))
+                folder_name = asset.folder.name if asset.folder else "No Folder"
+                display_name = f"{folder_name}/{asset.name}"
+                all_study_assets.add((str(asset.id), display_name))
+            for threat in scenario.threats.all():
+                folder_name = threat.folder.name if threat.folder else "No Folder"
+                display_name = f"{folder_name}/{threat.name}"
+                all_study_threats.add((str(threat.id), display_name))
+            for qualification in scenario.qualifications.all():
+                folder_name = (
+                    qualification.folder.name if qualification.folder else "No Folder"
+                )
+                display_name = f"{folder_name}/{qualification.name}"
+                all_study_qualifications.add((str(qualification.id), display_name))
 
             # Calculate risk reduction (current - residual)
             current_ale = scenario.current_ale
@@ -602,6 +618,18 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                         all_study_assets, key=lambda x: x[1]
                     )
                 ],
+                "study_threats": [
+                    {"id": threat_id, "name": threat_name}
+                    for threat_id, threat_name in sorted(
+                        all_study_threats, key=lambda x: x[1]
+                    )
+                ],
+                "study_qualifications": [
+                    {"id": qualification_id, "name": qualification_name}
+                    for qualification_id, qualification_name in sorted(
+                        all_study_qualifications, key=lambda x: x[1]
+                    )
+                ],
                 "currency": currency,
                 "risk_tolerance_display": study.get_risk_tolerance_display(),
                 "loss_threshold": study.loss_threshold,
@@ -719,6 +747,186 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, methods=["post"], url_path="retrigger-all-simulations")
+    def retrigger_all_simulations(self, request, pk=None):
+        """
+        Retriggers all simulations for the quantitative risk study.
+        This includes:
+        - All hypothesis simulations (for each scenario's hypotheses with valid parameters)
+        - Portfolio simulation (combined ALE and LEC curves)
+        - Risk tolerance curve generation
+
+        This operation can be slow as it processes multiple simulations.
+        """
+        logger.info("Starting retrigger_all_simulations for study %s", pk)
+        study: QuantitativeRiskStudy = self.get_object()
+        logger.info(
+            "Found study: %s with %d scenarios",
+            study.name,
+            study.risk_scenarios.count(),
+        )
+
+        try:
+            results = {
+                "success": True,
+                "message": "All simulations completed successfully",
+                "simulation_results": {
+                    "hypothesis_simulations": {},
+                    "portfolio_generated": False,
+                    "risk_tolerance_generated": False,
+                },
+            }
+
+            # Get all scenarios for this study
+            scenarios = study.risk_scenarios.all()
+            logger.info("Processing %d scenarios", len(scenarios))
+            hypothesis_count = 0
+            successful_hypothesis_simulations = 0
+            failed_hypothesis_simulations = []
+
+            # Run simulations for all hypotheses in all scenarios
+            for scenario in scenarios:
+                hypotheses = scenario.hypotheses.all()
+                logger.info(
+                    "Scenario %s has %d hypotheses", scenario.name, len(hypotheses)
+                )
+                for hypothesis in hypotheses:
+                    hypothesis_count += 1
+                    logger.info(
+                        "Processing hypothesis %s (id: %s) in scenario %s",
+                        hypothesis.name,
+                        hypothesis.id,
+                        scenario.name,
+                    )
+                    try:
+                        # Check if hypothesis has valid parameters before running simulation
+                        params = hypothesis.parameters or {}
+                        probability = params.get("probability")
+                        impact = params.get("impact", {})
+                        if probability is not None and impact:
+                            logger.info(
+                                "Running simulation for hypothesis %s",
+                                hypothesis.id,
+                            )
+                            simulation_results = hypothesis.run_simulation(
+                                dry_run=False
+                            )
+                            successful_hypothesis_simulations += 1
+                            logger.info(
+                                "Simulation successful for hypothesis %s, got %d data points",
+                                hypothesis.id,
+                                len(simulation_results.get("loss", [])),
+                            )
+                            results["simulation_results"]["hypothesis_simulations"][
+                                str(hypothesis.id)
+                            ] = {
+                                "success": True,
+                                "scenario": scenario.name,
+                                "hypothesis": hypothesis.name,
+                                "data_points": len(simulation_results.get("loss", [])),
+                                "metrics": simulation_results.get("metrics", {}),
+                            }
+                        else:
+                            logger.warning(
+                                "Hypothesis %s has missing parameters - probability: %s, impact: %s",
+                                hypothesis.id,
+                                probability,
+                                impact,
+                            )
+                            failed_hypothesis_simulations.append(
+                                {
+                                    "hypothesis_id": str(hypothesis.id),
+                                    "scenario": scenario.name,
+                                    "hypothesis": hypothesis.name,
+                                    "reason": "Missing probability or impact parameters",
+                                }
+                            )
+                    except Exception as e:
+                        logger.error(
+                            "Error running simulation for hypothesis %s",
+                            hypothesis.id,
+                        )
+                        failed_hypothesis_simulations.append(
+                            {
+                                "hypothesis_id": str(hypothesis.id),
+                                "scenario": scenario.name,
+                                "hypothesis": hypothesis.name,
+                            }
+                        )
+
+            # Generate portfolio simulation (combined ALE and LEC) after all scenarios processed
+            logger.info("Generating portfolio simulation data")
+            try:
+                # Force refresh combined data after hypothesis simulations
+                study.refresh_from_db()
+
+                # Call the view action methods to generate combined data
+                # This ensures the portfolio data is updated with latest simulation results
+                logger.info("Generating combined ALE")
+                combined_ale_response = self.combined_ale(request, pk)
+                logger.info("Generating combined LEC")
+                combined_lec_response = self.combined_lec(request, pk)
+
+                if (
+                    combined_ale_response.status_code == 200
+                    or combined_lec_response.status_code == 200
+                ):
+                    results["simulation_results"]["portfolio_generated"] = True
+                    logger.info("Portfolio simulation data generated successfully")
+                else:
+                    logger.warning(
+                        "Portfolio simulation data generation returned non-200 status"
+                    )
+            except Exception as e:
+                logger.error("Error generating portfolio simulation")
+
+            # Generate risk tolerance curve if configured
+            try:
+                if study.risk_tolerance:
+                    # Risk tolerance curve generation is handled automatically
+                    # when the study's risk tolerance parameters are accessed
+                    results["simulation_results"]["risk_tolerance_generated"] = True
+            except Exception as e:
+                logger.error("Error generating risk tolerance LEC")
+
+            # Prepare summary
+            results["simulation_results"]["summary"] = {
+                "total_hypotheses": hypothesis_count,
+                "successful_simulations": successful_hypothesis_simulations,
+                "failed_simulations": len(failed_hypothesis_simulations),
+                "failed_details": failed_hypothesis_simulations[
+                    :10
+                ],  # Limit to first 10 failures
+            }
+
+            if failed_hypothesis_simulations:
+                results["message"] = (
+                    f"Completed with {len(failed_hypothesis_simulations)} failures out of {hypothesis_count} hypotheses"
+                )
+                if len(failed_hypothesis_simulations) == hypothesis_count:
+                    results["success"] = False
+                    results["message"] = "All hypothesis simulations failed"
+
+            logger.info(
+                "Simulation summary: %d total, %d successful, %d failed",
+                hypothesis_count,
+                successful_hypothesis_simulations,
+                len(failed_hypothesis_simulations),
+            )
+            logger.info("Final results: %s", results)
+
+            return Response(results)
+
+        except Exception as e:
+            logger.error("Error during bulk simulation retrigger for study %s", pk)
+            return Response(
+                {
+                    "success": False,
+                    "error": "Failed to retrigger simulations",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario
@@ -772,7 +980,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
             )
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id")
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -967,7 +1175,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
             )
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id")
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -1055,26 +1263,22 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
             )
         except ValueError as e:
             # Handle parameter validation errors specifically
-            logger.warning(
-                "Parameter validation error for hypothesis %s: %s", pk, str(e)
-            )
+            logger.warning("Parameter validation error for hypothesis %s", pk)
             return Response(
                 {
                     "success": False,
                     "error": "Invalid parameters",
-                    "details": str(e),
                     "hint": "Please ensure the hypothesis has valid probability and impact parameters (probability, impact.distribution='LOGNORMAL-CI90', impact.lb, impact.ub)",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             # Handle other errors
-            logger.error("Error running simulation for hypothesis %s: %s", pk, str(e))
+            logger.error("Error running simulation for hypothesis %s", pk)
             return Response(
                 {
                     "success": False,
                     "error": "Failed to run simulation",
-                    "details": str(e),
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
