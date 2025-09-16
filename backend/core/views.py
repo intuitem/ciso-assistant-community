@@ -6210,6 +6210,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
+    
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -6317,6 +6318,7 @@ class FindingViewSet(BaseModelViewSet):
         "applied_controls",
         "evidences",
     ]
+    ordering = ['ref_id']
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
