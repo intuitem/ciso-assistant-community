@@ -31,6 +31,7 @@ from pathlib import Path
 
 
 ALLOWED_OUTPUT_FORMAT = ["csv", "json"]
+DEFAULT_LOCALE_EXTENSION = "json"
 
 
 def load_json(file_path: Path) -> dict:
@@ -42,7 +43,7 @@ def create_report(dir: Path, base_locale: str, target_locale: str, base_file_pat
     base_keys = set(load_json(base_file_path).keys()) # will be used to check against others locales
 
     report = {}
-    for locale_file in dir.glob("*.json"):
+    for locale_file in dir.glob(f"*.{DEFAULT_LOCALE_EXTENSION}"):
         iterated_locale = locale_file.stem
         if iterated_locale == base_locale:
             continue
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         print(f"Output format \"{args.format}\" is not recognized. Choose between csv and json.")
         sys.exit(1)
 
-    base_file_path = args.dir / f"{args.base}.json"
+    base_file_path = args.dir / f"{args.base}.{DEFAULT_LOCALE_EXTENSION}"
     if not base_file_path.exists():
         print(f"Base locale file not found: {base_file_path}")
         sys.exit(1)
