@@ -1,0 +1,1866 @@
+TITRE I
+PRINCIPE GÉNÉRAL
+Article premier
+Profil de risque global et complexité
+Lors de l’élaboration et de la mise en œuvre des politiques, procédures, protocoles et outils de sécurité de TIC visés au titre II 
+et du cadre simplifié de gestion du risque lié aux TIC visé au titre III, il est tenu compte de la taille et du profil de risque 
+global de l’entité financière, ainsi que de la nature, de l’échelle et des éléments tendant à accroître ou réduire la complexité 
+de ses services, activités et opérations, notamment des éléments concernant:
+a) 
+le chiffrement et la cryptographie;
+b) 
+la sécurité des opérations de TIC;
+c) 
+la sécurité des réseaux;
+6/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+d) 
+la gestion des projets TIC et des changements dans les TIC;
+e) 
+l’incidence potentielle du risque lié aux TIC sur la confidentialité, l’intégrité et la disponibilité des données, et 
+l’incidence potentielle des perturbations sur la continuité et la disponibilité des activités de l’entité financière.
+TITRE II
+HARMONISATION ACCRUE DES OUTILS, MÉTHODES, PROCESSUS ET POLITIQUES DE GESTION DU RISQUE LIÉ AUX
+TIC CONFORMÉMENT À L’ARTICLE 15 DU RÈGLEMENT (UE) 2022/2554
+CHAPITRE I
+Politiques, procédures, protocoles et outils de sécurité des TIC
+Section 1
+Article 2
+Éléments généraux des politiques, procédures, protocoles et outils de sécurité des TIC
+1. 
+Les entités financières veillent à ce que leurs politiques de sécurité des TIC, la sécurité de l’information et les 
+procédures, protocoles et outils y afférents visés à l’article 9, paragraphe 2, du règlement (UE) 2022/2554 soient intégrés 
+dans leur cadre de gestion du risque lié aux TIC. Les entités financières établissent les politiques, procédures, protocoles et 
+outils de sécurité des TIC prévus au présent chapitre qui:
+a) 
+garantissent la sécurité des réseaux;
+b) 
+comportent des garanties contre les intrusions et les utilisations abusives des données;
+c) 
+préservent la disponibilité, l’authenticité, l’intégrité et la confidentialité des données, y compris en recourant à des 
+techniques cryptographiques;
+d) 
+garantissent une transmission précise et rapide des données sans perturbation majeure et sans retard injustifié.
+2. 
+Les entités financières veillent à ce que les politiques de sécurité des TIC visées au paragraphe 1:
+a) 
+soient alignées sur les objectifs de l’entité financière en matière de sécurité de l’information définis dans la stratégie de 
+résilience opérationnelle numérique visée à l’article 6, paragraphe 8, du règlement (UE) 2022/2554;
+b) 
+indiquent la date de l’approbation formelle des politiques de sécurité des TIC par l’organe de direction;
+c) 
+contiennent des indicateurs et des mesures pour:
+i) 
+suivre la mise en œuvre des politiques, procédures, protocoles et outils de sécurité des TIC;
+ii) 
+enregistrer les exceptions à cette mise en œuvre;
+iii) 
+veiller à ce que la résilience opérationnelle numérique de l’entité financière soit assurée en cas d’exceptions 
+visées au point ii);
+d) 
+précisent les responsabilités du personnel à tous les niveaux afin d’assurer la sécurité des TIC de l’entité financière;
+e) 
+précisent les conséquences du non-respect, par le personnel de l’entité financière, des politiques de sécurité des TIC, 
+lorsque des dispositions à cet effet ne sont pas prévues dans d’autres politiques de l’entité financière;
+f) 
+répertorient les documents à tenir à jour;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+7/37
+FR 
+JO L du 25.6.2024
+g) 
+précisent les modalités de séparation des fonctions dans le cadre du modèle reposant sur trois lignes de défense ou 
+d’un autre modèle interne de gestion et de contrôle des risques, selon le cas, afin d’éviter les conflits d’intérêts;
+h) 
+tiennent compte des pratiques de pointe et, le cas échéant, des normes telles que définies à l’article 2, point 1), du 
+règlement (UE) no 1025/2012;
+i) 
+définissent les rôles et les responsabilités en ce qui concerne l’élaboration, la mise en œuvre et la maintenance des 
+politiques, procédures, protocoles et outils de sécurité des TIC;
+j) 
+soient réexaminées conformément à l’article 6, paragraphe 5, du règlement (UE) 2022/2554;
+k) 
+tiennent compte des changements importants concernant l’entité financière, notamment des changements 
+importants intervenant dans ses activités ou processus, dans l’éventail des cybermenaces ou dans les obligations 
+légales applicables.
+Section 2
+Article 3
+Gestion du risque lié aux TIC
+Les entités financières élaborent, documentent et mettent en œuvre des politiques et procédures de gestion du risque lié aux 
+TIC qui contiennent l’ensemble des éléments suivants:
+a) 
+l’indication de l’approbation du niveau de tolérance au risque lié aux TIC déterminé conformément à l’article 6, 
+paragraphe 8, point b), du règlement (UE) 2022/2554;
+b) 
+une procédure et une méthode d’évaluation du risque lié aux TIC, précisant:
+i) 
+les vulnérabilités et les menaces qui affectent ou peuvent affecter les fonctions opérationnelles soutenues et 
+les systèmes de TIC et actifs de TIC qui les soutiennent;
+ii) 
+les indicateurs quantitatifs ou qualitatifs à utiliser pour mesurer l’incidence et la probabilité des vulnérabilités 
+et des menaces visées au point i);
+c) 
+la procédure de détermination, de mise en œuvre et de documentation des mesures de traitement du risque lié aux 
+TIC pour les risques liés aux TIC qui ont été identifiés et évalués, y compris la définition des mesures de traitement 
+du risque lié aux TIC nécessaires pour ramener ce risque dans les limites du niveau de tolérance au risque visé au 
+point a);
+d) 
+pour les risques résiduels liés aux TIC qui sont toujours présents à l’issue de la mise en œuvre des mesures de 
+traitement du risque lié aux TIC visées au point c):
+i) 
+des dispositions relatives à l’identification de ces risques résiduels liés aux TIC;
+ii) 
+l’attribution des rôles et des responsabilités concernant:
+1) l’acceptation des risques résiduels liés aux TIC qui dépassent le niveau de tolérance au risque de l’entité
+financière visé au point a);
+2) le processus de réexamen visé au point iv) du présent point d);
+iii) 
+l’établissement d’un inventaire des risques résiduels liés aux TIC qui ont été acceptés, accompagné d’une 
+justification de leur acceptation;
+iv) 
+des dispositions relatives au réexamen, au moins une fois par an, des risques résiduels liés aux TIC qui ont été 
+acceptés, comprenant:
+1) l’indication de tout changement dans les risques résiduels liés aux TIC;
+2) l’évaluation des mesures d’atténuation disponibles;
+3) une évaluation indiquant si les raisons justifiant l’acceptation des risques résiduels liés aux TIC sont
+toujours valables et applicables à la date du réexamen;
+e) 
+des dispositions qui prévoient le suivi:
+i) 
+de tout changement dans l’éventail des risques liés aux TIC et des cybermenaces;
+ii) 
+des vulnérabilités et menaces internes et externes;
+iii) 
+du risque lié aux TIC de l’entité financière, et qui permettent de détecter rapidement les changements 
+susceptibles d’avoir une incidence sur son profil de risque lié aux TIC;
+8/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+f) 
+des dispositions relatives à un processus garantissant la prise en compte de toute modification de la stratégie 
+commerciale et de la stratégie de résilience opérationnelle numérique de l’entité financière.
+La procédure visée au point c) du premier alinéa garantit, aux fins dudit point:
+a) 
+le suivi de l’efficacité des mesures de traitement du risque lié aux TIC qui sont mises en œuvre;
+b) 
+une évaluation indiquant si les niveaux de tolérance au risque établis pour l’entité financière ont été atteints;
+c) 
+une évaluation indiquant si l’entité financière a pris, si nécessaire, des mesures pour corriger ou améliorer ces mesures.
+Section 3
+Gestion des actifs de TIC
+Article 4
+Politique de gestion des actifs de TIC
+1. 
+Dans le cadre des politiques, procédures, protocoles et outils de sécurité des TIC visés à l’article 9, paragraphe 2, du 
+règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre une politique de gestion 
+des actifs de TIC.
+2. 
+La politique de gestion des actifs de TIC visée au paragraphe 1:
+a) 
+prescrit le suivi et la gestion du cycle de vie des actifs de TIC identifiés et classés conformément à l’article 8, 
+paragraphe 1, du règlement (UE) 2022/2554;
+b) 
+prescrit la tenue par l’entité financière d’un registre de tous les éléments suivants:
+i) 
+l’identifiant unique de chaque actif de TIC;
+ii) 
+des informations sur la localisation, physique ou logique, de tous les actifs de TIC;
+iii) 
+le classement de tous les actifs de TIC, tel que prévu par l’article 8, paragraphe 1, du règlement 
+(UE) 2022/2254;
+iv) 
+l’identité des propriétaires d’actifs de TIC;
+v) 
+les fonctions ou services «métiers» soutenus par l’actif de TIC;
+vi) 
+les exigences en matière de continuité des activités de TIC, notamment les objectifs en matière de délai de 
+rétablissement et de point de rétablissement;
+vii) 
+une mention précisant si l’actif de TIC est ou peut être exposé à des réseaux externes, y compris l’internet;
+viii) 
+les liens et interdépendances existant entre les actifs de TIC et les fonctions «métiers» qui utilisent chacun de 
+ces actifs;
+ix) 
+le cas échéant, pour tous les actifs de TIC, les dates d’expiration des services d’appui réguliers, étendus et sur 
+mesure fournis par des prestataires tiers de services TIC, après lesquelles ces actifs de TIC ne sont plus pris 
+en charge par leur fournisseur ou par un prestataire tiers de services TIC;
+c) 
+prescrit la tenue, par les entités financières autres que des microentreprises, d’un registre des informations nécessaires 
+pour procéder à l’évaluation spécifique du risque lié aux TIC sur tous les systèmes de TIC hérités prévue par 
+l’article 8, paragraphe 7, du règlement (UE) 2022/2554.
+Article 5
+Procédure de gestion des actifs de TIC
+1. 
+Les entités financières élaborent, documentent et mettent en œuvre une procédure de gestion des actifs de TIC.
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+9/37
+FR 
+JO L du 25.6.2024
+2. 
+La procédure de gestion des actifs de TIC visée au paragraphe 1 précise les critères utilisés pour procéder à 
+l’évaluation de la criticité des actifs d’information et des actifs de TIC soutenant des fonctions «métiers». Cette évaluation 
+tient compte:
+a) 
+du risque lié aux TIC associé à ces fonctions «métiers» et de leur dépendance à l’égard des actifs d’information ou des 
+actifs de TIC;
+b) 
+de l’incidence que la perte de confidentialité, d’intégrité et de disponibilité de ces actifs d’information et actifs de TIC 
+aurait sur les processus opérationnels et les activités des entités financières.
+Section 4
+Chiffrement et cryptographie
+Article 6
+Chiffrement et contrôles cryptographiques
+1. 
+Dans le cadre de leurs politiques, procédures, protocoles et outils de sécurité de TIC visés à l’article 9, paragraphe 2, 
+du règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre une politique en matière 
+de chiffrement et de contrôles cryptographiques.
+2. 
+Les entités financières conçoivent la politique en matière de chiffrement et de contrôles cryptographiques visée au 
+paragraphe 1 sur la base des résultats d’une classification des données approuvée et de l’évaluation du risque lié aux TIC. Cette politique contient des règles pour tous les éléments suivants:
+a) 
+le chiffrement des données au repos et en transit;
+b) 
+le chiffrement des données en cours d’utilisation, si nécessaire;
+c) 
+le chiffrement des connexions internes au réseau et du trafic avec des tiers;
+d) 
+la gestion des clés cryptographiques visée à l’article 7, y compris des règles relatives à la bonne utilisation, à la 
+protection et au cycle de vie des clés cryptographiques.
+Aux fins du point b), lorsque le chiffrement des données en cours d’utilisation n’est pas possible, les entités financières 
+traitent ces données dans un environnement séparé et protégé, ou prennent des mesures équivalentes pour garantir la 
+confidentialité, l’intégrité, l’authenticité et la disponibilité des données.
+3. 
+Les entités financières incluent dans la politique en matière de chiffrement et de contrôles cryptographiques visée au 
+paragraphe 1 des critères de sélection des techniques cryptographiques et des pratiques d’utilisation, tenant compte des 
+pratiques de pointe, ainsi que des normes définies à l’article 2, point 1), du règlement (UE) no 1025/2012, et de la 
+classification des actifs de TIC concernés effectuée conformément à l’article 8, paragraphe 1, du règlement 
+(UE) 2022/2554. Les entités financières qui ne sont pas en mesure d’appliquer les pratiques de pointe ou les normes, ou 
+d’utiliser les techniques les plus fiables, adoptent des mesures d’atténuation et de suivi qui garantissent la résilience face aux 
+cybermenaces.
+4. 
+Les entités financières incluent dans la politique en matière de chiffrement et de contrôles cryptographiques visée au 
+paragraphe 1 des dispositions relatives à la mise à jour ou à la modification, si nécessaire, de la technologie 
+cryptographique, en fonction de l’évolution de la cryptanalyse. Ces mises à jour ou modifications garantissent que la 
+technologie cryptographique reste résiliente face aux cybermenaces, comme l’exige l’article 10, paragraphe 2, point a). Les 
+entités financières qui ne sont pas en mesure de mettre à jour ou de modifier la technologie cryptographique adoptent des 
+mesures d’atténuation et de suivi qui garantissent la résilience face aux cybermenaces.
+5. 
+Les entités financières incluent dans la politique en matière de chiffrement et de contrôles cryptographiques visée au 
+paragraphe 1 l’obligation d’enregistrer l’adoption des mesures d’atténuation et de suivi adoptées conformément aux 
+paragraphes 3 et 4 et de fournir une explication motivée des raisons pour lesquelles elles procèdent ainsi.
+10/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+Article 7
+Gestion des clés cryptographiques
+1. 
+Les entités financières incluent dans la politique de gestion des clés cryptographiques visée à l’article 6, paragraphe 2, 
+point d), des exigences relatives à la gestion des clés cryptographiques tout au long de leur cycle de vie, notamment en ce qui 
+concerne la génération, le renouvellement, le stockage, la sauvegarde, l’archivage, la récupération, la transmission, le retrait, 
+la révocation et la destruction de ces clés cryptographiques.
+2. 
+Les entités financières définissent et mettent en œuvre des contrôles visant à protéger les clés cryptographiques tout 
+au long de leur cycle de vie contre la perte, les accès non autorisés, la divulgation et la modification. Les entités financières 
+conçoivent ces contrôles sur la base des résultats de la classification des données approuvée et de l’évaluation du risque lié 
+aux TIC.
+3. 
+Les entités financières élaborent et mettent en œuvre des méthodes pour remplacer les clés cryptographiques en cas 
+de perte ou lorsque ces clés sont compromises ou endommagées.
+4. 
+Les entités financières créent et tiennent un registre de tous les certificats et dispositifs de stockage de certificats pour 
+au moins les actifs de TIC qui soutiennent des fonctions critiques ou importantes. Les entités financières tiennent ce registre 
+à jour.
+5. 
+Les entités financières veillent au renouvellement en temps utile des certificats avant leur expiration.
+Section 5
+Sécurité des opérations de TIC
+Article 8
+Politiques et procédures pour les opérations de TIC
+1. 
+Dans le cadre des politiques, procédures, protocoles et outils de sécurité des TIC visés à l’article 9, paragraphe 2, du 
+règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre des politiques et des 
+procédures pour gérer les opérations de TIC. Ces politiques et procédures précisent la manière dont les entités financières 
+gèrent, suivent, contrôlent et restaurent leurs actifs de TIC, y compris la documentation relative aux opérations de TIC.
+2. 
+Les politiques et procédures relatives aux opérations de TIC visées au paragraphe 1 contiennent l’ensemble des 
+éléments suivants:
+a) 
+une description des actifs de TIC, comprenant l’ensemble des éléments suivants:
+i) 
+des exigences relatives à la sécurité de l’installation, de la maintenance, de la configuration et de la 
+désinstallation d’un système de TIC;
+ii) 
+des exigences relatives à la gestion des actifs informationnels utilisés par les actifs de TIC, y compris leur 
+traitement et leur gestion, tant automatisés que manuels;
+iii) 
+des exigences relatives à l’identification et au contrôle des systèmes de TIC hérités;
+b) 
+des contrôles et un suivi des systèmes de TIC, comprenant l’ensemble des éléments suivants:
+i) 
+des exigences de sauvegarde et de restauration des systèmes de TIC;
+ii) 
+des exigences de programmation dans le temps, tenant compte des interdépendances entre les systèmes 
+de TIC;
+iii) 
+des protocoles pour les informations de la piste d’audit et du journal du système;
+iv) 
+des exigences visant à garantir que la réalisation d’audits internes et d’autres tests perturbe le moins possible 
+les activités;
+v) 
+des exigences relatives à la séparation entre les environnements de production des TIC, d’une part, et les 
+environnements de développement, de tests et les autres environnements hors production, d’autre part;
+vi) 
+des exigences imposant que le développement et les tests aient lieu dans des environnements séparés de 
+l’environnement de production;
+vii) 
+les exigences à respecter pour développer et tester en environnement de production;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+11/37
+FR 
+JO L du 25.6.2024
+c) 
+le traitement des erreurs concernant les systèmes de TIC, comprenant l’ensemble des éléments suivants:
+i) 
+des procédures et protocoles de traitement des erreurs;
+ii) 
+les interlocuteurs à contacter pour un appui technique et la remontée d’informations, y compris les 
+interlocuteurs à contacter pour un appui technique externe en cas de problèmes opérationnels ou 
+techniques imprévus;
+iii) 
+les procédures de redémarrage, de reprise et de rétablissement des systèmes de TIC à appliquer en cas de 
+dysfonctionnement des systèmes de TIC.
+Aux fins du point b) v), la séparation tient compte de toutes les composantes de l’environnement, notamment des comptes, 
+données ou connexions, comme l’exige l’article 13, paragraphe 1, point a).
+Aux fins du point b) vii), les politiques et procédures visées au paragraphe 1 prévoient que les cas de réalisation de tests dans 
+un environnement de production soient clairement identifiés et motivés, d’une durée limitée et approuvés par la fonction 
+compétente conformément à l’article 16, paragraphe 6. Les entités financières garantissent la disponibilité, la 
+confidentialité, l’intégrité et l’authenticité des systèmes de TIC et des données de production lors des activités de 
+développement et de test dans l’environnement de production.
+Article 9
+Gestion des capacités et des performances
+1. 
+Dans le cadre des politiques, procédures, protocoles et outils de sécurité des TIC visés à l’article 9, paragraphe 2, du 
+règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre des procédures de gestion 
+des capacités et des performances pour:
+a) 
+l’identification des besoins en capacités de leurs systèmes de TIC;
+b) 
+la mise en œuvre de l’optimisation des ressources;
+c) 
+les procédures de suivi visant à maintenir et à améliorer:
+i) 
+la disponibilité des données et des systèmes de TIC;
+ii) 
+l’efficience des systèmes de TIC;
+iii) 
+la prévention des déficits de capacités en matière de TIC.
+2. 
+Les procédures de gestion des capacités et des performances visées au paragraphe 1 garantissent que les entités 
+financières prennent des mesures adéquates pour tenir compte des spécificités des systèmes de TIC soumis à des processus 
+de passation de marchés ou d’approbation longs ou complexes ou des systèmes de TIC qui requièrent des ressources 
+importantes.
+Article 10
+Gestion des vulnérabilités et des correctifs
+1. 
+Dans le cadre des politiques, procédures, protocoles et outils de sécurité des TIC visés à l’article 9, paragraphe 2, du 
+règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre des procédures de gestion 
+des vulnérabilités.
+2. 
+Les procédures de gestion des vulnérabilités visées au paragraphe 1:
+a) 
+identifient et tiennent à jour des ressources d’information pertinentes et fiables pour renforcer et maintenir la 
+sensibilisation aux vulnérabilités;
+b) 
+prévoient des scans et évaluations automatisés des vulnérabilités des actifs de TIC, la fréquence et le champ 
+d’application de ces activités étant proportionnés à la classification établie conformément à l’article 8, paragraphe 1, 
+du règlement (UE) 2022/2554 et au profil de risque global de l’actif de TIC;
+12/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+c) 
+vérifient:
+i) 
+si les prestataires tiers de services TIC traitent les vulnérabilités liées aux services TIC fournis à l’entité 
+financière;
+ii) 
+si ces prestataires de services informent l’entité financière, en temps utile, au moins des vulnérabilités 
+critiques, ainsi que des statistiques et tendances;
+d) 
+tracent l’utilisation:
+i) 
+de bibliothèques tierces, y compris de bibliothèques à code source ouvert, utilisées par les services TIC qui 
+soutiennent des fonctions critiques ou importantes;
+ii) 
+de services TIC développés par l’entité financière elle-même, ou spécifiquement adaptés ou développés pour 
+elle par un prestataire tiers de services TIC;
+e) 
+établissent des procédures pour une divulgation responsable des vulnérabilités aux clients, aux contreparties et au 
+public;
+f) 
+donnent la priorité au déploiement de correctifs et d’autres mesures d’atténuation pour remédier aux vulnérabilités 
+décelées;
+g) 
+suivent et vérifient la correction des vulnérabilités;
+h) 
+exigent l’enregistrement de toute vulnérabilité détectée touchant les systèmes de TIC et le suivi de leur résolution.
+Aux fins du point b), les entités financières effectuent au moins une fois par semaine les scans et évaluations automatisés des 
+vulnérabilités des actifs de TIC qui soutiennent des fonctions critiques ou importantes.
+Aux fins du point c), les entités financières demandent aux prestataires tiers de services TIC d’enquêter sur les vulnérabilités 
+concernées, d’en déterminer les causes profondes et de mettre en œuvre des mesures d’atténuation appropriées.
+Aux fins du point d), les entités financières surveillent, le cas échéant en collaboration avec le prestataire tiers de services 
+TIC, les versions et mises à jour éventuelles des bibliothèques tierces. Dans le cas d’actifs de TIC prêts à l’emploi ou de 
+composants d’actifs de TIC acquis et utilisés dans le cadre de l’exploitation de services TIC qui ne soutiennent pas des 
+fonctions critiques ou importantes, les entités financières tracent, dans la mesure du possible, l’utilisation de bibliothèques 
+tierces, y compris des bibliothèques à code source ouvert.
+Aux fins du point f), les entités financières tiennent compte de la criticité des vulnérabilités, de la classification établie 
+conformément à l’article 8, paragraphe 1, du règlement (UE) 2022/2554 et du profil de risque des actifs de TIC concernés 
+par les vulnérabilités décelées.
+3. 
+Dans le cadre des politiques, procédures, protocoles et outils de sécurité des TIC visés à l’article 9, paragraphe 2, du 
+règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre des procédures de gestion 
+des correctifs.
+4. 
+Les procédures de gestion des correctifs visées au paragraphe 3:
+a) 
+dans la mesure du possible, identifient et évaluent les correctifs et mises à jour logiciels et matériels disponibles à 
+l’aide d’outils automatisés;
+b) 
+définissent des procédures d’urgence pour l’application des correctifs et des mises à jour des actifs de TIC;
+c) 
+testent et déploient les correctifs logiciels et matériels et les mises à jour visées à l’article 8, paragraphe 2, point b) v), 
+vi) et vii);
+d) 
+fixent des délais pour l’installation des correctifs et mises à jour logiciels et matériels, ainsi que des procédures de 
+remontée d’informations lorsque ces délais ne peuvent pas être respectés.
+Article 11
+Sécurité des données et des systèmes
+1. 
+Dans le cadre des politiques, procédures, protocoles et outils de sécurité des TIC visés à l’article 9, paragraphe 2, du 
+règlement (UE) 2022/2554, les entités financières élaborent, documentent et mettent en œuvre une procédure de sécurité 
+des données et des systèmes.
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+13/37
+FR 
+JO L du 25.6.2024
+2. 
+La procédure de sécurité des données et des systèmes visée au paragraphe 1 contient tous les éléments suivants 
+relatifs à la sécurité des données et des systèmes de TIC, conformément à la classification établie en application de 
+l’article 8, paragraphe 1, du règlement (UE) 2022/2554:
+a) 
+les restrictions d’accès, visées à l’article 21 du présent règlement, appuyant les exigences de protection prévues pour 
+chaque niveau de classification;
+b) 
+l’identification d’une configuration sécurisée de référence pour les actifs de TIC qui réduise à un minimum 
+l’exposition de ces actifs aux cybermenaces, et des mesures visant à vérifier régulièrement que ces références sont 
+effectivement déployées;
+c) 
+la définition de mesures de sécurité visant à garantir que seuls des logiciels autorisés sont installés dans les systèmes 
+de TIC et les périphériques de point de terminaison;
+d) 
+la définition de mesures de sécurité contre les codes malveillants;
+e) 
+la définition de mesures de sécurité visant à garantir que seuls des supports de stockage de données, des systèmes et 
+des périphériques de point de terminaison autorisés sont utilisés pour transférer et stocker les données de l’entité 
+financière;
+f) 
+les exigences suivantes, pour sécuriser l’utilisation de périphériques de point de terminaison portables et de 
+périphériques de point de terminaison non portables privés:
+i) 
+l’obligation d’utiliser une solution de gestion qui permet de gérer à distance les périphériques de point de 
+terminaison et d’effacer à distance les données de l’entité financière;
+ii) 
+l’obligation d’utiliser des mécanismes de sécurité qui ne peuvent pas être modifiés, supprimés ou contournés 
+sans autorisation par des membres du personnel ou par des prestataires tiers de services TIC;
+iii) 
+l’obligation de n’utiliser des dispositifs de stockage de données amovibles que lorsque le risque résiduel lié aux 
+TIC reste dans les limites du niveau de tolérance au risque de l’entité financière visé à l’article 3, premier 
+alinéa, point a);
+g) 
+le processus d’effacement sécurisé des données, présentes dans les locaux de l’entité financière ou stockées à 
+l’extérieur, que l’entité financière n’a plus besoin de collecter ou de stocker;
+h) 
+le processus d’élimination ou de déclassement en toute sécurité des dispositifs de stockage de données, présents dans 
+les locaux de l’entité financière ou stockés à l’extérieur, qui contiennent des informations confidentielles;
+i) 
+la définition et la mise en œuvre, pour les systèmes et les périphériques de point de terminaison, de mesures de 
+sécurité visant à prévenir la perte et la fuite de données;
+j) 
+la mise en œuvre de mesures de sécurité visant à garantir que le télétravail et l’utilisation de périphériques de point de 
+terminaison privés n’aient pas d’incidence négative sur la sécurité des TIC de l’entité financière;
+k) 
+pour les actifs de TIC ou les services TIC exploités par un prestataire tiers de services TIC, la définition et la mise en 
+œuvre d’exigences visant à maintenir la résilience opérationnelle numérique, conformément aux résultats de la 
+classification des données et de l’évaluation du risque lié aux TIC.
+La configuration sécurisée de référence visée au point b) tient compte, aux fins dudit point, des pratiques de pointe et des 
+techniques appropriées définies dans les normes visées à l’article 2, point 1), du règlement (UE) no 1025/2012.
+Aux fins du point k), les entités financières prennent en considération les éléments suivants:
+a) 
+l’application de paramètres recommandés par le vendeur aux éléments exploités par l’entité financière;
+b) 
+une attribution claire des rôles et des responsabilités en matière de sécurité de l’information entre l’entité financière et 
+le prestataire tiers de services TIC, conformément au principe, défini à l’article 28, paragraphe 1, point a), du 
+règlement (UE) 2022/2554, selon lequel l’entité financière est pleinement responsable de son prestataire tiers de 
+services TIC, et conformément à la politique de l’entité financière relative à l’utilisation de services TIC qui 
+soutiennent des fonctions critiques ou importantes, pour les entités financières visées à l’article 28, paragraphe 2, 
+dudit règlement;
+c) 
+la nécessité de garantir et de maintenir des compétences adéquates au sein de l’entité financière en matière de gestion 
+et de sécurité du service utilisé;
+d) 
+des mesures techniques et organisationnelles visant à réduire à un minimum les risques liés à l’infrastructure utilisée 
+par le prestataire tiers de services TIC pour ses services TIC, compte tenu des pratiques de pointe et des normes telles 
+que définies à l’article 2, point 1), du règlement (UE) no 1025/2012.
+14/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+Article 12
+Journalisation
+1. 
+Dans le cadre des garanties contre les intrusions et l’utilisation abusive de données, les entités financières élaborent, 
+documentent et mettent en œuvre des procédures, protocoles et outils de journalisation.
+2. 
+Les procédures, protocoles et outils de journalisation visés au paragraphe 1 contiennent l’ensemble des éléments 
+suivants:
+a) 
+l’identification des événements à enregistrer dans le journal, la durée de conservation des journaux et les mesures 
+visant à sécuriser et à gérer les données des journaux, en tenant compte de la finalité pour laquelle les journaux sont 
+créés;
+b) 
+l’alignement du niveau de détail des journaux sur leur finalité et leur utilisation, afin de permettre la détection 
+effective des activités anormales visées à l’article 24;
+c) 
+l’obligation de consigner dans les journaux les événements relatifs à l’ensemble des éléments suivants:
+i) 
+le contrôle de l’accès logique et physique, tel que visé à l’article 21, et la gestion de l’identité;
+ii) 
+la gestion des capacités;
+iii) 
+la gestion des modifications;
+iv) 
+les opérations de TIC, y compris les activités liées aux systèmes de TIC;
+v) 
+le trafic réseau, y compris les performances des réseaux de TIC;
+d) 
+des mesures visant à protéger les systèmes de journalisation et les informations des journaux contre les 
+manipulations, la suppression et l’accès non autorisé, au repos, en transit et, le cas échéant, en cours d’utilisation;
+e) 
+des mesures visant à détecter les défaillances des systèmes de journalisation;
+f) 
+sans préjudice de toute exigence réglementaire applicable en vertu du droit de l’Union ou du droit national, la 
+synchronisation des horloges de chacun des systèmes de TIC de l’entité financière avec une horloge de référence 
+fiable et documentée.
+Aux fins du point a), les entités financières définissent la durée de conservation, en prenant en considération les objectifs en 
+matière de sécurité des activités et de l’information, la raison de l’enregistrement de l’événement dans les journaux et les 
+résultats de l’évaluation du risque lié aux TIC.
+Section 6
+Sécurité des réseaux
+Article 13
+Gestion de la sécurité des réseaux
+Dans le cadre des garanties de sécurité des réseaux contre les intrusions et l’utilisation abusive de données, les entités 
+financières élaborent, documentent et mettent en œuvre des politiques, des procédures, des protocoles et des outils de 
+gestion de la sécurité des réseaux comprenant l’ensemble des éléments suivants:
+a) 
+la séparation et la segmentation des systèmes et réseaux de TIC, compte tenu:
+i) 
+de la criticité ou de l’importance de la fonction que soutiennent ces systèmes et réseaux de TIC;
+ii) 
+de la classification établie conformément à l’article 8, paragraphe 1, du règlement (UE) 2022/2554;
+iii) 
+du profil de risque global des actifs de TIC qui utilisent ces systèmes et réseaux de TIC;
+b) 
+la documentation de l’ensemble des connexions réseau et des flux de données de l’entité financière;
+c) 
+l’utilisation d’un réseau distinct et spécifique pour l’administration des actifs de TIC;
+d) 
+la définition et la mise en œuvre de contrôles d’accès au réseau afin de prévenir et de détecter les connexions au 
+réseau de l’entité financière à partir de tout appareil ou système non autorisé, ou de tout point de terminaison ne 
+répondant pas aux exigences de l’entité financière en matière de sécurité;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+15/37
+FR 
+JO L du 25.6.2024
+e) 
+le chiffrement des connexions au réseau transitant par des réseaux d’entreprise, des réseaux publics, des réseaux 
+nationaux, des réseaux tiers et des réseaux sans fil, pour les protocoles de communication utilisés, en tenant compte 
+des résultats de la classification de données approuvée, des résultats de l’évaluation du risque lié aux TIC et du 
+chiffrement des connexions au réseau prévu par l’article 6, paragraphe 2;
+f) 
+une conception du réseau conforme aux exigences en matière de sécurité des TIC définies par l’entité financière, 
+tenant compte des pratiques de pointe afin de garantir la confidentialité, l’intégrité et la disponibilité du réseau;
+g) 
+la sécurisation du trafic entre les réseaux internes et l’internet et d’autres connexions externes;
+h) 
+la définition des rôles et responsabilités et des étapes de la spécification, de la mise en œuvre, de l’approbation, de la 
+modification et du réexamen des règles de pare-feu et des filtres de connexion;
+i) 
+la réalisation d’examens de l’architecture du réseau et de la conception de la sécurité du réseau une fois par an, et 
+périodiquement pour les microentreprises, afin de détecter les vulnérabilités potentielles;
+j) 
+des mesures visant à isoler temporairement, si nécessaire, les sous-réseaux et les composants et dispositifs de réseau;
+k) 
+la mise en œuvre d’une configuration sécurisée de référence incluant tous les composants du réseau, et le 
+renforcement du réseau et des dispositifs de réseau conformément aux éventuelles instructions du vendeur, aux 
+normes telles que définies à l’article 2, point 1), du règlement (UE) no 1025/2012, le cas échéant, et aux pratiques de 
+pointe;
+l) 
+les procédures de limitation, de verrouillage et d’arrêt du système et des sessions à distance après une période 
+déterminée d’inactivité;
+m) 
+pour les accords de services de réseau:
+i) 
+l’indication et la spécification des mesures de sécurité des TIC et de l’information, des niveaux de service et 
+des exigences en matière de gestion de tous les services de réseau;
+ii) 
+une indication précisant si ces services sont fournis par un prestataire intra-groupe de services TIC ou par des 
+prestataires tiers de services TIC.
+Aux fins du point h), les entités financières procèdent à un réexamen régulier des règles de pare-feu et des filtres de 
+connexion, conformément à la classification établie en application de l’article 8, paragraphe 1, du règlement 
+(UE) 2022/2554 et au profil de risque global des systèmes de TIC concernés. Pour les systèmes de TIC qui soutiennent des 
+fonctions critiques ou importantes, les entités financières vérifient l’adéquation des règles de pare-feu et des filtres de 
+connexion existants au moins tous les six mois.
+Article 14
+Sécurisation des informations en transit
+1. 
+Dans le cadre des garanties visant à préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des 
+données, les entités financières élaborent, documentent et mettent en œuvre les politiques, procédures, protocoles et outils 
+de protection des informations en transit. Les entités financières veillent en particulier à l’ensemble des éléments suivants:
+a) 
+la disponibilité, l’authenticité, l’intégrité et la confidentialité des données pendant la transmission sur le réseau, et 
+l’établissement de procédures permettant d’évaluer le respect de ces exigences;
+b) 
+la prévention et la détection des fuites de données et le transfert sécurisé d’informations entre l’entité financière et des 
+parties externes;
+c) 
+la mise en œuvre, la documentation et le réexamen régulier d’exigences relatives à des accords de confidentialité ou 
+de non-divulgation reflétant les besoins de l’entité financière en matière de protection des informations tant pour 
+son personnel que pour les tiers.
+2. 
+Les entités financières conçoivent les politiques, procédures, protocoles et outils visant à protéger les informations en 
+transit visées au paragraphe 1 sur la base des résultats de la classification des données approuvée et de l’évaluation du risque 
+lié aux TIC.
+16/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+Section 7
+Gestion des projets de TIC et des changements dans les TIC
+Article 15
+Gestion des projets de TIC
+1. 
+Dans le cadre des garanties visant à préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des 
+données, les entités financières élaborent, documentent et mettent en œuvre une politique de gestion des projets de TIC.
+2. 
+La politique de gestion des projets de TIC visée au paragraphe 1 précise les éléments qui garantissent la gestion 
+efficace des projets de TIC liés à l’acquisition, à la maintenance et, le cas échéant, au développement des systèmes de TIC de 
+l’entité financière.
+3. 
+La politique de gestion des projets de TIC visée au paragraphe 1 comporte l’ensemble des éléments suivants:
+a) 
+les objectifs des projets de TIC;
+b) 
+la gouvernance des projets de TIC, notamment les rôles et responsabilités;
+c) 
+la planification, le calendrier et les étapes des projets de TIC;
+d) 
+l’évaluation des risques liés aux projets de TIC;
+e) 
+les jalons pertinents;
+f) 
+les exigences en matière de gestion des changements;
+g) 
+les tests de toutes les exigences, notamment des exigences de sécurité, et le processus d’approbation correspondant 
+lors du déploiement d’un système de TIC dans l’environnement de production.
+4. 
+La politique de gestion des projets de TIC visée au paragraphe 1 garantit la sécurité de la mise en œuvre des projets de 
+TIC grâce à la fourniture des informations et de l’expertise nécessaires par le domaine d’activité ou les fonctions concernées 
+par les projets de TIC.
+5. 
+Conformément à l’évaluation des risques liés aux projets de TIC visée au paragraphe 3, point d), la politique de 
+gestion des projets de TIC visée au paragraphe 1 prévoit que la mise en place de projets de TIC ayant une incidence sur les 
+fonctions critiques ou importantes de l’entité financière, l’avancement de ces projets et les risques qui y sont associés sont 
+notifiés à l’organe de direction comme suit:
+a) 
+individuellement ou de façon groupée, en fonction de l’importance et de la taille des projets de TIC;
+b) 
+périodiquement et, si nécessaire, chaque fois qu’un évènement l’exige.
+Article 16
+Acquisition, développement et maintenance des systèmes de TIC
+1. 
+Dans le cadre des garanties visant à préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des 
+données, les entités financières élaborent, documentent et mettent en œuvre une politique régissant l’acquisition, le 
+développement et la maintenance des systèmes de TIC. Cette politique:
+a) 
+identifie les pratiques en matière de sécurité et les méthodes relatives à l’acquisition, au développement et à la 
+maintenance des systèmes de TIC;
+b) 
+exige l’identification:
+i) 
+des spécifications techniques et des spécifications techniques des TIC, au sens de l’article 2, points 4) et 5), du 
+règlement (UE) no 1025/2012;
+ii) 
+des exigences relatives à l’acquisition, au développement et à la maintenance des systèmes de TIC, en 
+accordant une attention particulière aux exigences en matière de sécurité des TIC et à leur approbation par la 
+fonction «métier» concernée et par le propriétaire des actifs de TIC conformément aux dispositifs de 
+gouvernance interne de l’entité financière;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+17/37
+FR 
+JO L du 25.6.2024
+c) 
+précise les mesures visant à atténuer le risque d’altération involontaire ou de manipulation intentionnelle des 
+systèmes de TIC lors du développement, de la maintenance et du déploiement de ces systèmes dans l’environnement 
+de production.
+2. 
+Les entités financières élaborent, documentent et mettent en œuvre une procédure d’acquisition, de développement 
+et de maintenance des systèmes de TIC pour les tests et l’approbation de tous les systèmes de TIC avant leur utilisation et 
+après les opérations de maintenance, conformément à l’article 8, paragraphe 2, point b) v), vi) et vii). Le niveau des tests 
+doit être proportionné à la criticité des procédures opérationnelles et des actifs de TIC concernés. Les tests sont conçus 
+pour permettre de vérifier que les nouveaux systèmes de TIC sont aptes à fonctionner comme prévu, ainsi que la qualité du 
+logiciel développé en interne.
+En plus de respecter les exigences prévues au premier alinéa, les contreparties centrales associent, s’il y a lieu, à la 
+conception et à la conduite des tests visés au premier alinéa:
+a) 
+les membres compensateurs et leurs clients;
+b) 
+les contreparties centrales interopérables;
+c) 
+les autres parties intéressées.
+En plus de respecter les exigences énoncées au premier alinéa, les dépositaires centraux de titres associent, s’il y a lieu, à la 
+conception et à la conduite des tests visés au premier alinéa:
+a) 
+les utilisateurs;
+b) 
+les prestataires de services et fournisseurs de services de réseau essentiels;
+c) 
+d’autres dépositaires centraux de titres;
+d) 
+d’autres infrastructures de marché;
+e) 
+d’autres établissements avec lesquels les dépositaires centraux de titres ont constaté des interdépendances dans le 
+cadre de leur politique de continuité des activités.
+3. 
+La procédure visée au paragraphe 2 comprend la réalisation d’examens du code source comprenant des tests aussi 
+bien statiques que dynamiques. Ces tests comprennent des tests de sécurité pour les systèmes et applications exposés à 
+l’internet conformément à l’article 8, paragraphe 2, point b) v), vi) et vii). Les entités financières:
+a) 
+identifient et analysent les vulnérabilités et les anomalies dans le code source;
+b) 
+adoptent un plan d’action pour remédier à ces vulnérabilités et anomalies;
+c) 
+suivent la mise en œuvre de ce plan d’action.
+4. 
+La procédure visée au paragraphe 2 comprend des tests de sécurité des progiciels au plus tard lors de la phase 
+d’intégration, conformément à l’article 8, paragraphe 2, point b) v), vi) et vii).
+5. 
+La procédure visée au paragraphe 2 prévoit que:
+a) 
+les environnements hors production ne stockent que des données de production anonymisées, pseudonymisées ou 
+randomisées;
+b) 
+les entités financières doivent protéger l’intégrité et la confidentialité des données dans les environnements hors 
+production.
+6. 
+Par dérogation au paragraphe 5, la procédure visée au paragraphe 2 peut prévoir que les données de production ne 
+sont stockées que pour des situations de test spécifiques, pendant des durées limitées, et après approbation par la fonction 
+compétente et la notification de ces situations à la fonction de gestion du risque lié aux TIC.
+7. 
+La procédure visée au paragraphe 2 comprend la mise en œuvre de contrôles visant à protéger l’intégrité du code 
+source des systèmes de TIC qui sont développés en interne ou développés par un prestataire tiers de services TIC et fournis 
+à l’entité financière par ce prestataire.
+18/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+8. 
+La procédure visée au paragraphe 2 prévoit que les logiciels propriétaires et, dans la mesure du possible, le code 
+source fourni par des prestataires tiers de services TIC ou provenant de projets à code source ouvert doivent être analysés 
+et testés conformément au paragraphe 3 avant leur déploiement dans l’environnement de production.
+9. 
+Les paragraphes 1 à 8 du présent article s’appliquent également aux systèmes de TIC développés ou gérés par des 
+utilisateurs extérieurs à la fonction TIC, selon une approche fondée sur les risques.
+Article 17
+Gestion des changements dans les TIC
+1. 
+Dans le cadre des garanties visant à préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des 
+données, les entités financières incluent dans les procédures de gestion des changements dans les TIC visées à l’article 9, 
+paragraphe 4, point e), du règlement (UE) 2022/2554, en ce qui concerne tous les changements apportés aux logiciels, au 
+matériel, aux composants de micrologiciels, aux systèmes ou aux paramètres de sécurité, l’ensemble des éléments suivants:
+a) 
+une vérification du respect des exigences en matière de sécurité des TIC;
+b) 
+des mécanismes visant à garantir l’indépendance des fonctions qui approuvent les changements et des fonctions 
+responsables de la demande et de la mise en œuvre de ces changements;
+c) 
+une description claire des rôles et des responsabilités afin de garantir:
+i) 
+que les changements sont définis et planifiés;
+ii) 
+qu’une transition adéquate est conçue;
+iii) 
+que les changements sont testés et finalisés de manière contrôlée;
+iv) 
+qu’il existe une assurance de la qualité efficace;
+d) 
+la documentation et la communication des détails des changements, notamment:
+i) 
+de l’objectif et de la portée du changement;
+ii) 
+du calendrier de mise en œuvre du changement;
+iii) 
+des résultats attendus;
+e) 
+l’identification des procédures et responsabilités de repli, notamment des procédures et responsabilités pour 
+l’abandon des changements ou le rétablissement à la suite de changements qui n’ont pas été mis en œuvre avec 
+succès;
+f) 
+des procédures, protocoles et outils de gestion des changements d’urgence qui offrent des garanties adéquates;
+g) 
+des procédures de documentation, de réévaluation, d’évaluation et d’approbation des changements d’urgence après 
+leur mise en œuvre, y compris des solutions de contournement et des correctifs;
+h) 
+l’identification de l’incidence potentielle d’un changement sur les mesures existantes en matière de sécurité des TIC et 
+une évaluation visant à déterminer si ce changement nécessite l’adoption de mesures supplémentaires en matière de 
+sécurité des TIC.
+2. 
+Après avoir apporté des changements importants à leurs systèmes de TIC, les contreparties centrales et les 
+dépositaires centraux de titres soumettent leurs systèmes de TIC à des tests rigoureux, en simulant des situations de crise.
+Les contreparties centrales associent, s’il y a lieu, à la conception et à la conduite des tests visés au premier alinéa:
+a) 
+les membres compensateurs et leurs clients;
+b) 
+les contreparties centrales interopérables;
+c) 
+les autres parties intéressées.
+Les dépositaires centraux de titres associent, s’il y a lieu, à la conception et à la conduite des tests visés au premier alinéa:
+a) 
+les utilisateurs;
+b) 
+les prestataires de services et fournisseurs de services de réseau essentiels;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+19/37
+FR 
+JO L du 25.6.2024
+c) 
+d’autres dépositaires centraux de titres;
+d) 
+d’autres infrastructures de marché;
+e) 
+d’autres établissements avec lesquels les dépositaires centraux de titres ont constaté des interdépendances dans le 
+cadre de leur politique de continuité des activités de TIC.
+Section 8
+Article 18
+Sécurité physique et environnementale
+1. 
+Dans le cadre des garanties visant à préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des 
+données, les entités financières précisent, documentent et mettent en œuvre une politique de sécurité physique et 
+environnementale. Les entités financières conçoivent cette politique à la lumière de l’éventail des cybermenaces, 
+conformément à la classification établie en application de l’article 8, paragraphe 1, du règlement (UE) 2022/2554, et à la 
+lumière du profil de risque global des actifs de TIC et des actifs informationnels accessibles.
+2. 
+La politique de sécurité physique et environnementale visée au paragraphe 1 comporte l’ensemble des éléments 
+suivants:
+a) 
+une référence à la section de la politique relative au contrôle des droits de gestion des accès visé à l’article 21, premier 
+alinéa, point g);
+b) 
+des mesures de protection des locaux, des centres de données de l’entité financière et des zones sensibles désignées 
+par l’entité financière, où se trouvent les actifs de TIC et les actifs informationnels, contre les attaques, les accidents 
+et les menaces et dangers environnementaux;
+c) 
+des mesures visant à sécuriser les actifs de TIC, tant à l’intérieur qu’à l’extérieur des locaux de l’entité financière, en 
+tenant compte des résultats de l’évaluation du risque lié aux TIC portant sur les actifs de TIC concernés;
+d) 
+des mesures visant à garantir la disponibilité, l’authenticité, l’intégrité et la confidentialité des actifs de TIC, des actifs 
+informationnels et des dispositifs de contrôle de l’accès physique de l’entité financière grâce à une maintenance 
+appropriée;
+e) 
+des mesures visant à préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des données, notamment:
+i) 
+une politique du bureau propre pour les documents;
+ii) 
+une politique de l’écran vide pour les installations de traitement de l’information.
+Aux fins du point b), les mesures de protection contre les menaces et dangers environnementaux sont proportionnées à 
+l’importance des locaux, des centres de données, des zones sensibles désignées et à la criticité des opérations ou des 
+systèmes de TIC qui y sont situés.
+Aux fins du point c), la politique de sécurité physique et environnementale visée au paragraphe 1 comporte des mesures 
+visant à assurer une protection appropriée des actifs de TIC laissés sans surveillance.
+CHAPITRE II
+Politique des ressources humaines et contrôle d’accès
+Article 19
+Politique des ressources humaines
+Les entités financières incluent dans leur politique en matière de ressources humaines ou dans d’autres politiques 
+pertinentes tous les éléments suivants liés à la sécurité des TIC:
+20/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+a) 
+l’identification et l’attribution de toute responsabilité spécifique en matière de sécurité des TIC;
+b) 
+l’obligation pour les membres du personnel de l’entité financière et des prestataires tiers de services TIC qui utilisent 
+des actifs de TIC de l’entité financière ou qui y ont accès:
+i) 
+d’être informés des politiques, procédures et protocoles de sécurité des TIC de l’entité financière et de les 
+respecter;
+ii) 
+de connaître les canaux de notification mis en place par l’entité financière pour la détection des 
+comportements anormaux, y compris, le cas échéant, les canaux de signalement établis conformément à la 
+directive (UE) 2019/1937 du Parlement européen et du Conseil (11);
+iii) 
+de restituer à l’entité financière, après la cessation de leur emploi, tous les actifs de TIC et tous les actifs 
+informationnels matériels en leur possession qui appartiennent à l’entité financière.
+Article 20
+Gestion de l’identité
+1. 
+Dans le cadre de leur contrôle des droits de gestion des accès, les entités financières élaborent, documentent et 
+mettent en œuvre des politiques et procédures de gestion de l’identité qui garantissent l’identification et l’authentification 
+uniques des personnes physiques et des systèmes ayant accès aux informations des entités financières afin de permettre 
+l’attribution de droits d’accès aux utilisateurs conformément à l’article 21.
+2. 
+Les politiques et procédures de gestion de l’identité visées au paragraphe 1 comportent l’ensemble des éléments 
+suivants:
+a) 
+sans préjudice de l’article 21, premier alinéa, point c), une identité unique correspondant à un compte d’utilisateur 
+unique est attribuée à chaque membre du personnel de l’entité financière ou du personnel des prestataires tiers de 
+services TIC qui ont accès aux actifs informationnels et aux actifs de TIC de l’entité financière;
+b) 
+un processus de gestion du cycle de vie pour les identités et les comptes régissant la création, la modification, le 
+réexamen et la mise à jour, la désactivation temporaire et la clôture de tous les comptes.
+Aux fins du point a), les entités financières tiennent des registres de toutes les attributions d’identité. Ces registres sont 
+conservés à la suite d’une réorganisation de l’entité financière ou après la fin d’une relation contractuelle, sans préjudice des 
+exigences en matière de conservation prévues par le droit de l’Union et le droit national applicables.
+Aux fins du point b), les entités financières déploient, lorsque cela est possible et approprié, des solutions automatisées pour 
+le processus de gestion de l’identité tout au long du cycle de vie.
+Article 21
+Contrôle d’accès
+Dans le cadre de leur contrôle des droits de gestion des accès, les entités financières élaborent, documentent et mettent en 
+œuvre une politique qui comporte l’ensemble des éléments suivants:
+a) 
+l’attribution de droits d’accès aux actifs de TIC selon les principes du besoin d’en connaître, du besoin d’en disposer et 
+du moindre privilège, y compris pour l’accès à distance et l’accès d’urgence;
+b) 
+une séparation des tâches visant à empêcher un accès injustifié à des données critiques ou à empêcher l’attribution de 
+combinaisons de droits d’accès susceptibles d’être utilisées pour contourner les contrôles;
+c) 
+des dispositions sur la responsabilité des utilisateurs, en limitant, dans la mesure du possible, l’utilisation de comptes 
+utilisateurs génériques ou partagés et en veillant à ce que les utilisateurs soient à tout moment identifiables pour les 
+actions effectuées dans les systèmes de TIC;
+21/37
+FR 
+JO L du 25.6.2024
+d) 
+des dispositions sur les restrictions d’accès aux actifs de TIC, prévoyant des contrôles et des outils pour empêcher 
+tout accès non autorisé;
+e) 
+des procédures de gestion de comptes permettant d’accorder, de modifier ou de révoquer des droits d’accès pour les 
+comptes d’utilisateurs et les comptes génériques, y compris les comptes génériques d’administrateur, comportant des 
+dispositions relatives à tous les éléments suivants:
+i) 
+l’attribution des rôles et des responsabilités pour l’octroi, le réexamen et la révocation des droits d’accès;
+ii) 
+l’attribution d’accès privilégiés, d’urgence et d’administrateur uniquement sur la base du besoin d’en disposer 
+ou au cas par cas pour tous les systèmes de TIC;
+iii) 
+le retrait des droits d’accès sans retard injustifié à la fin de l’emploi ou lorsque l’accès n’est plus nécessaire;
+iv) 
+la mise à jour des droits d’accès lorsque des modifications sont nécessaires et au moins une fois par an pour 
+tous les systèmes de TIC autres que les systèmes de TIC qui soutiennent des fonctions critiques ou 
+importantes et au moins tous les six mois pour les systèmes de TIC qui soutiennent des fonctions critiques 
+ou importantes;
+f) 
+des méthodes d’authentification, comprenant l’ensemble des éléments suivants:
+i) 
+l’utilisation de méthodes d’authentification proportionnées à la classification établie conformément à 
+l’article 8, paragraphe 1, du règlement (UE) 2022/2554 et au profil de risque global des actifs de TIC et 
+tenant compte des pratiques de pointe;
+ii) 
+l’utilisation de méthodes d’authentification forte conformément aux pratiques et techniques de pointe pour 
+l’accès à distance au réseau de l’entité financière, pour les accès privilégiés, pour l’accès aux actifs de TIC 
+soutenant des fonctions critiques ou importantes ou aux actifs de TIC accessibles au public;
+g) 
+des mesures de contrôle de l’accès physique comprenant:
+i) 
+l’identification et la journalisation des personnes physiques autorisées à accéder aux locaux, aux centres de 
+données et aux zones sensibles désignées par l’entité financière où sont situés les actifs de TIC et les actifs 
+informationnels;
+ii) 
+l’octroi de droits d’accès physique aux actifs de TIC critiques uniquement aux personnes autorisées, 
+conformément aux principes du besoin d’en connaître et du moindre privilège, et au cas par cas;
+iii) 
+le suivi de l’accès physique aux locaux, aux centres de données et aux zones sensibles désignées par l’entité 
+financière où sont situés les actifs de TIC, les actifs informationnels ou les deux types d’actifs;
+iv) 
+le réexamen des droits d’accès physique afin de veiller à ce que les droits d’accès inutiles soient rapidement 
+révoqués.
+Aux fins du point e) i), les entités financières définissent la durée de conservation en prenant en considération les objectifs 
+en matière de sécurité des activités et de l’information, les raisons de l’enregistrement de l’événement dans les journaux et 
+les résultats de l’évaluation du risque lié aux TIC.
+Aux fins du point e) ii), les entités financières utilisent, dans la mesure du possible, des comptes spécifiques pour l’exécution 
+de tâches administratives relatives aux systèmes de TIC. Lorsque cela est possible et approprié, les entités financières 
+déploient des solutions automatisées pour la gestion des accès privilégiés.
+Aux fins du point g) i), l’identification et la journalisation sont proportionnées à l’importance des locaux, des centres de 
+données et des zones sensibles désignées et à la criticité des opérations ou des systèmes de TIC qui y sont situés.
+Aux fins du point g) iii), le suivi est proportionné à la classification établie conformément à l’article 8, paragraphe 1, du 
+règlement (UE) 2022/2554 et à la criticité de la zone accessible.
+22/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+CHAPITRE III
+Détection des incidents liés aux TIC et réponse à ces incidents
+Article 22
+Politique de gestion des incidents liés aux TIC
+Dans le cadre des mécanismes de détection des activités anormales, y compris des problèmes de performance des réseaux de 
+TIC et des incidents liés aux TIC, les entités financières élaborent, documentent et mettent en œuvre une politique en 
+matière d’incidents liés aux TIC dans le cadre de laquelle elles:
+a) 
+documentent le processus de gestion des incidents liés aux TIC visé à l’article 17 du règlement (UE) 2022/2554;
+b) 
+établissent une liste des contacts pertinents avec les fonctions internes et les parties prenantes externes qui sont 
+directement associées à la sécurité des opérations de TIC, notamment en ce qui concerne:
+i) 
+la détection et le suivi des cybermenaces;
+ii) 
+la détection des activités anormales;
+iii) 
+la gestion des vulnérabilités;
+c) 
+établissent, mettent en œuvre et gèrent des mécanismes techniques, organisationnels et opérationnels pour soutenir 
+le processus de gestion des incidents liés aux TIC, notamment des mécanismes permettant de détecter rapidement 
+les activités et comportements anormaux conformément à l’article 23 du présent règlement;
+d) 
+conservent tous les éléments de preuve relatifs aux incidents liés aux TIC pendant une durée qui n’excède pas celle 
+nécessaire à la réalisation des finalités pour lesquelles les données sont collectées, et qui est proportionnée à la 
+criticité des fonctions «métiers», des processus d’appui et des actifs de TIC et informationnels affectés, 
+conformément à l’article 15 du règlement délégué (UE) 2024/1772 de la Commission (12) et à toute exigence en 
+matière de conservation applicable en vertu du droit de l’Union;
+e) 
+établissent et mettent en œuvre des mécanismes permettant d’analyser les incidents importants ou récurrents liés aux 
+TIC et les caractéristiques relatives au nombre et à la fréquence des incidents liés aux TIC.
+Aux fins du point d), les entités financières conservent les éléments de preuve visés audit point de manière sécurisée aux fins 
+dudit point.
+Article 23
+Détection des activités anormales et critères pour la détection des incidents liés aux TIC et la réponse à ces incidents
+1. 
+Les entités financières définissent clairement les rôles et les responsabilités pour ce qui est de détecter efficacement les 
+incidents liés aux TIC et les activités anormales et d’y répondre.
+2. 
+Le mécanisme permettant de détecter rapidement les activités anormales, y compris les problèmes de performance 
+des réseaux de TIC et les incidents liés aux TIC, visé à l’article 10, paragraphe 1, du règlement (UE) 2022/2554, permet aux 
+entités financières:
+a) 
+de collecter, suivre et analyser l’ensemble des éléments suivants:
+i) 
+les facteurs internes et externes, y compris au moins les journaux collectés conformément à l’article 12 du 
+présent règlement, les informations provenant des fonctions «métiers» et des fonctions TIC, et tout problème 
+signalé par les utilisateurs de l’entité financière;
+ii) 
+les cybermenaces potentielles internes et externes, en tenant compte des scénarios couramment utilisés par 
+les acteurs de la menace et des scénarios fondés sur les activités de renseignement sur les menaces;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+23/37
+FR 
+JO L du 25.6.2024
+iii) 
+les notifications, par un prestataire tiers de services TIC de l’entité financière, d’incidents liés aux TIC détectés 
+dans les systèmes et réseaux de TIC du prestataire tiers de services TIC et susceptibles d’affecter l’entité 
+financière;
+b) 
+d’identifier les activités et les comportements anormaux et de mettre en œuvre des outils générant des alertes pour 
+les activités et comportements anormaux, au moins pour les actifs de TIC et les actifs informationnels qui 
+soutiennent des fonctions critiques ou importantes;
+c) 
+de hiérarchiser les alertes visées au point b) afin de permettre que les incidents liés aux TIC détectés soient gérés dans 
+le délai de résolution prévu, tel que spécifié par les entités financières, tant pendant les heures de travail qu’en dehors 
+de celles-ci;
+d) 
+d’enregistrer, analyser et évaluer, automatiquement ou manuellement, toutes les informations pertinentes sur 
+l’ensemble des activités et comportements anormaux.
+Aux fins du point b), les outils visés audit point comprennent des outils qui fournissent des alertes automatisées selon des 
+règles prédéfinies afin de détecter les anomalies affectant l’exhaustivité et l’intégrité des sources de données ou de la collecte 
+de journaux.
+3. 
+Les entités financières protègent tout enregistrement d’activités anormales contre toute falsification et tout accès non 
+autorisé au repos, en transit et, le cas échéant, en cours d’utilisation.
+4. 
+Les entités financières journalisent, pour chaque activité anormale détectée, toutes les informations pertinentes 
+permettant:
+a) 
+de déterminer la date et l’heure de survenance de l’activité anormale;
+b) 
+de déterminer la date et l’heure de détection de l’activité anormale;
+c) 
+de déterminer le type d’activité anormale.
+5. 
+Pour déclencher les processus de détection des incidents liés aux TIC et de réponse à ces incidents visés à l’article 10, 
+paragraphe 2, du règlement (UE) 2022/2554, les entités financières tiennent compte de l’ensemble des critères suivants:
+a) 
+des éléments indiquant qu’une activité malveillante est susceptible d’avoir été menée dans un système ou un réseau de 
+TIC, ou que ce système ou réseau de TIC est susceptible d’avoir été compromis;
+b) 
+des pertes de données détectées en lien avec la disponibilité, l’authenticité, l’intégrité et la confidentialité des données;
+c) 
+une incidence négative détectée sur les transactions et opérations de l’entité financière;
+d) 
+l’indisponibilité des systèmes et réseaux de TIC.
+6. 
+Aux fins du paragraphe 5, les entités financières tiennent également compte de la criticité des services affectés.
+CHAPITRE IV
+Gestion de la continuité des activités de TIC
+Article 24
+Composantes de la politique de continuité des activités de TIC
+1. 
+Les entités financières incluent dans leur politique de continuité des activités de TIC visée à l’article 11, paragraphe 1, 
+du règlement (UE) 2022/2554 l’ensemble des éléments suivants:
+a) 
+une description:
+i) 
+des objectifs de la politique de continuité des activités de TIC, notamment l’interaction entre la continuité des 
+activités de TIC et la continuité globale des activités, en tenant compte des résultats de l’analyse des incidences 
+sur les activités visée à l’article 11, paragraphe 5, du règlement (UE) 2022/2554;
+ii) 
+du champ d’application des dispositifs, plans, procédures et mécanismes de continuité des activités de TIC, y 
+compris des limitations et exclusions;
+iii) 
+de la période de temps à couvrir par les dispositifs, plans, procédures et mécanismes de continuité des 
+activités de TIC;
+24/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+iv) 
+des critères d’activation et de désactivation des plans de continuité des activités de TIC, des plans de réponse 
+et de rétablissement des TIC, ainsi que des plans de communication en situation de crise;
+b) 
+des dispositions concernant:
+i) 
+la gouvernance et l’organisation nécessaires à la mise en œuvre de la politique de continuité des activités de 
+TIC, y compris les rôles, les responsabilités et les procédures de remontée des informations, en veillant à ce 
+que des ressources suffisantes soient disponibles;
+ii) 
+l’alignement entre les plans de continuité des activités de TIC et les plans globaux de continuité des activités, 
+en ce qui concerne au moins l’ensemble des éléments suivants:
+1) les scénarios de défaillance potentielle, notamment les scénarios visés à l’article 26, paragraphe 2, du
+présent règlement;
+2) les objectifs de rétablissement, en précisant que l’entité financière doit être en mesure de rétablir les
+opérations de ses fonctions critiques ou importantes après des perturbations en respectant un objectif 
+en matière de délai de rétablissement et un objectif en matière de point de rétablissement;
+iii) 
+l’élaboration de plans de continuité des activités de TIC en cas de graves perturbations des activités dans le 
+cadre de ces plans, et la hiérarchisation des mesures de continuité des activités de TIC selon une approche 
+fondée sur les risques;
+iv) 
+l’élaboration, le test et l’examen des plans de réponse et de rétablissement des TIC, conformément aux 
+articles 25 et 26 du présent règlement;
+v) 
+l’examen de l’efficacité des dispositifs, plans, procédures et mécanismes de continuité des activités de TIC mis 
+en œuvre, conformément à l’article 26 du présent règlement;
+vi) 
+l’alignement de la politique de continuité des activités de TIC sur:
+1) la politique de communication visée à l’article 14, paragraphe 2, du règlement (UE) 2022/2554;
+2) les mesures de communication et de communication de crise visées à l’article 11, paragraphe 2, point e),
+du règlement (UE) 2022/2554.
+2. 
+En plus de respecter les exigences prévues au paragraphe 1, les contreparties centrales veillent à ce que leur politique 
+de continuité des activités de TIC:
+a) 
+prévoie, pour leurs fonctions critiques, un délai de rétablissement maximal ne dépassant pas deux heures;
+b) 
+tienne compte des liens extérieurs et des interdépendances au sein des infrastructures financières, y compris les 
+plates-formes de négociation compensées par la contrepartie centrale, les systèmes de règlement et de paiement des 
+opérations sur titres, et les établissements de crédit utilisés par la contrepartie centrale ou par une contrepartie 
+centrale à laquelle elle est liée;
+c) 
+exige la mise en place de dispositifs pour:
+i) 
+assurer la continuité des fonctions critiques ou importantes de la contrepartie centrale sur la base de 
+scénarios de sinistres;
+ii) 
+maintenir un site de traitement secondaire capable d’assurer la continuité des fonctions critiques ou 
+importantes de la même manière que le site primaire;
+iii) 
+maintenir ou avoir un accès immédiat à un site opérationnel secondaire permettant au personnel d’assurer la 
+continuité du service si le site opérationnel principal n’est pas disponible;
+iv) 
+évaluer la nécessité de mettre en place des sites de traitement supplémentaires, en particulier lorsque la 
+diversité des profils de risque des sites primaire et secondaire ne permet pas de garantir avec suffisamment 
+de certitude que les objectifs de continuité des activités de la contrepartie centrale seront atteints dans tous 
+les cas de figure.
+Aux fins du point a), les contreparties centrales finalisent les procédures et les paiements de fin de journée à l’heure et à la 
+date requises, et cela en toutes circonstances.
+Aux fins du point c) i), les dispositifs visés audit point garantissent la disponibilité de ressources humaines adéquates, une 
+durée maximale d’indisponibilité des fonctions critiques ainsi qu’un transfert automatique et une reprise des activités sur 
+un site secondaire.
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+25/37
+FR 
+JO L du 25.6.2024
+Aux fins du point c) ii), le site secondaire de traitement visé audit point présente un profil de risque géographique distinct de 
+celui du site primaire.
+3. 
+En plus de respecter les exigences prévues au paragraphe 1, les dépositaires centraux de titres veillent à ce que leur 
+politique de continuité des activités de TIC:
+a) 
+tienne compte des liens et interdépendances avec les utilisateurs, les prestataires de services et fournisseurs de 
+services de réseau essentiels, les autres dépositaires centraux de titres et les autres infrastructures de marché;
+b) 
+exige que ses dispositifs de continuité des activités de TIC garantissent que l’objectif en matière de délai de 
+rétablissement des fonctions critiques ou importantes ne dépasse pas deux heures.
+4. 
+En plus de respecter les exigences prévues au paragraphe 1, les plates-formes de négociation veillent à ce que leur 
+politique de continuité des activités de TIC garantisse:
+a) 
+qu’après un incident perturbateur, la négociation peut reprendre dans les deux heures, ou dans un délai proche de 
+deux heures;
+b) 
+que la quantité maximale de données susceptibles d’être perdues par un service informatique de la plate-forme de 
+négociation après un incident perturbateur est proche de zéro.
+Article 25
+Tests des plans de continuité des activités de TIC
+1. 
+Lorsqu’elles testent les plans de continuité des activités de TIC conformément à l’article 11, paragraphe 6, du 
+règlement (UE) 2022/2554, les entités financières tiennent compte de l’analyse des incidences sur les activités de l’entité 
+financière et de l’évaluation du risque lié aux TIC visée à l’article 3, premier alinéa, point b), du présent règlement.
+2. 
+Les entités financières évaluent, au moyen des tests de leurs plans de continuité des activités de TIC visés au 
+paragraphe 1, si elles sont en mesure d’assurer la continuité de leurs fonctions critiques ou importantes. Ces tests:
+a) 
+sont réalisés sur la base de scénarios de test simulant des perturbations potentielles, y compris un ensemble adéquat 
+de scénarios graves mais plausibles;
+b) 
+comprennent, le cas échéant, des tests des services TIC fournis par des prestataires tiers de services TIC;
+c) 
+pour les entités financières, autres que les microentreprises, visées à l’article 11, paragraphe 6, deuxième alinéa, du 
+règlement (UE) 2022/2554, comprennent des scénarios de basculement entre l’infrastructure de TIC principale et la 
+capacité redondante, les sauvegardes et les installations redondantes;
+d) 
+sont conçus pour éprouver les hypothèses sur lesquelles se fondent les plans de continuité des activités, y compris les 
+dispositifs de gouvernance et les plans de communication en situation de crise;
+e) 
+comportent des procédures visant à vérifier la capacité du personnel des entités financières, des prestataires tiers de 
+services TIC, des systèmes de TIC et des services TIC à répondre de manière adéquate aux scénarios dûment pris en 
+considération conformément à l’article 26, paragraphe 2.
+Aux fins du point a), les entités financières incluent toujours dans les tests les scénarios envisagés pour l’élaboration des 
+plans de continuité des activités.
+Aux fins du point b), les entités financières tiennent dûment compte des scénarios liés à l’insolvabilité ou aux défaillances 
+des prestataires tiers de services TIC ou aux risques politiques dans les juridictions des prestataires tiers de services TIC, le 
+cas échéant.
+Aux fins du point c), les tests permettent de vérifier si au moins les fonctions critiques ou importantes peuvent être exercées 
+de manière appropriée pendant une durée suffisante et si le fonctionnement normal peut être rétabli.
+3. 
+En plus de respecter les exigences prévues au paragraphe 2, les contreparties centrales associent aux tests de leurs 
+plans de continuité des activités de TIC visés au paragraphe 1:
+a) 
+les membres compensateurs;
+b) 
+les prestataires externes;
+26/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+c) 
+les établissements de l’infrastructure financière avec lesquels les contreparties centrales ont constaté des 
+interdépendances dans le cadre de leur politique de continuité des activités.
+4. 
+En plus de respecter les exigences prévues au paragraphe 2, les dépositaires centraux de titres associent, le cas 
+échéant, aux tests de leurs plans de continuité des activités de TIC visés au paragraphe 1:
+a) 
+les utilisateurs des dépositaires centraux de titres;
+b) 
+les prestataires de services et fournisseurs de services de réseau essentiels;
+c) 
+d’autres dépositaires centraux de titres;
+d) 
+d’autres infrastructures de marché;
+e) 
+d’autres établissements avec lesquels les dépositaires centraux de titres ont constaté des interdépendances dans le 
+cadre de leur politique de continuité des activités.
+5. 
+Les entités financières documentent les résultats des tests visés au paragraphe 1. Toute défaillance constatée à la suite 
+de ces tests est analysée, traitée et notifiée à l’organe de direction.
+Article 26
+Plans de réponse et de rétablissement des TIC
+1. 
+Lorsqu’elles élaborent les plans de réponse et de rétablissement des TIC visés à l’article 11, paragraphe 3, du 
+règlement (UE) 2022/2554, les entités financières tiennent compte des résultats de l’analyse des incidences sur les activités 
+de l’entité financière. Ces plans de réponse et de rétablissement des TIC:
+a) 
+définissent les conditions qui déclenchent leur activation ou désactivation, ainsi que toute exception à cette activation 
+ou désactivation;
+b) 
+décrivent les mesures à prendre pour garantir la disponibilité, l’intégrité, la continuité et le rétablissement au moins 
+des systèmes et services TIC qui soutiennent des fonctions critiques ou importantes de l’entité financière;
+c) 
+sont conçus pour atteindre les objectifs de rétablissement des opérations des entités financières;
+d) 
+sont documentés et mis à la disposition du personnel participant à l’exécution des plans de réponse et de 
+rétablissement des TIC et sont facilement accessibles en cas d’urgence;
+e) 
+prévoient des options de rétablissement à court et à long terme, y compris de rétablissement partiel des systèmes;
+f) 
+définissent les objectifs des plans de réponse et de rétablissement des TIC et les conditions permettant de déclarer que 
+ces plans ont été exécutés avec succès.
+Aux fins du point d), les entités financières précisent clairement les rôles et responsabilités.
+2. 
+Les plans de réponse et de rétablissement des TIC visés au paragraphe 1 recensent les scénarios pertinents, y compris 
+les scénarios de graves perturbations des activités et de probabilité accrue de survenance d’une perturbation. Ces plans 
+établissent des scénarios fondés sur les informations actuelles sur les menaces et sur les enseignements tirés des 
+perturbations des activités survenues antérieurement. Les entités financières tiennent dûment compte de tous les scénarios 
+suivants:
+a) 
+des cyberattaques et des basculements entre l’infrastructure de TIC principale et la capacité redondante, les 
+sauvegardes et les installations redondantes;
+b) 
+les scénarios dans lesquels la qualité de l’exécution d’une fonction critique ou importante se détériore à un niveau 
+inacceptable, en prenant alors dûment en considération les incidences potentielles de l’insolvabilité ou d’autres 
+défaillances de tout prestataire tiers de services TIC concerné;
+c) 
+la défaillance partielle ou totale des locaux, notamment des locaux de bureau et des locaux commerciaux, et des 
+centres de données;
+d) 
+une défaillance substantielle des actifs de TIC ou de l’infrastructure de communication;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+27/37
+FR 
+JO L du 25.6.2024
+e) 
+l’indisponibilité d’un nombre critique de membres du personnel ou de personnes chargées de garantir la continuité 
+des opérations;
+f) 
+les incidences des événements liés au changement climatique et à la dégradation de l’environnement, des 
+catastrophes naturelles, des pandémies et des attaques physiques, y compris des intrusions et des attentats terroristes;
+g) 
+les attaques internes;
+h) 
+l’instabilité politique et sociale, y compris, le cas échéant, dans la juridiction du prestataire tiers de services TIC et à 
+l’endroit où les données sont stockées et traitées;
+i) 
+les coupures de courant à une grande échelle.
+3. 
+Lorsque les mesures de rétablissement primaires sont susceptibles de ne pas être réalisables à court terme en raison 
+des coûts, des risques, de problèmes logistiques ou de circonstances imprévues, les plans de réponse et de rétablissement 
+des TIC visés au paragraphe 1 envisagent d’autres options.
+4. 
+Dans le cadre des plans de réponse et de rétablissement des TIC visés au paragraphe 1, les entités financières étudient 
+et mettent en œuvre des mesures de continuité pour atténuer les conséquences des défaillances des prestataires tiers de 
+services TIC qui fournissent des services TIC à l’appui de fonctions critiques ou importantes de l’entité financière.
+CHAPITRE V
+Rapport sur le réexamen du cadre de gestion du risque lié aux TIC
+Article 27
+Format et contenu du rapport sur le réexamen du cadre de gestion du risque lié aux TIC
+1. 
+Les entités financières présentent le rapport sur le réexamen du cadre de gestion du risque lié aux TIC visé à 
+l’article 6, paragraphe 5, du règlement (UE) 2022/2554 dans un format électronique interrogeable.
+2. 
+Les entités financières incluent l’ensemble des informations suivantes dans le rapport visé au paragraphe 1:
+a) 
+une partie introductive qui:
+i) 
+identifie clairement l’entité financière faisant l’objet du rapport et décrit sa structure de groupe, le cas échéant;
+ii) 
+décrit le contexte du rapport en ce qui concerne la nature, l’échelle et la complexité des services, activités et 
+opérations de l’entité financière, son organisation, ses fonctions critiques recensées, sa stratégie, ses grands 
+projets ou activités en cours, ses relations et sa dépendance à l’égard de services et systèmes de TIC internes 
+ou sous-traités, ou les conséquences qu’une perte totale ou une dégradation grave de ces systèmes 
+engendrerait en ce qui concerne les fonctions critiques ou importantes et l’efficience du marché;
+iii) 
+résume les changements majeurs dont le cadre de gestion du risque lié aux TIC a fait l’objet depuis le rapport 
+précédent;
+iv) 
+présente une synthèse du profil de risque lié aux TIC actuel et à court terme, due l’éventail des menaces, de 
+l’évaluation de l’efficacité de ses contrôles et de la posture de sécurité de l’entité financière;
+b) 
+la date d’approbation du rapport par l’organe de direction de l’entité financière;
+c) 
+une description de la raison du réexamen du cadre de gestion du risque lié aux TIC engagé conformément à 
+l’article 6, paragraphe 5, du règlement (UE) 2022/2554;
+d) 
+les dates de début et de fin de la période examinée;
+e) 
+l’indication de la fonction responsable du réexamen;
+f) 
+une description des principales modifications et améliorations dont le cadre de gestion du risque lié aux TIC a fait 
+l’objet depuis le réexamen précédent;
+28/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+g) 
+un résumé des conclusions du réexamen ainsi qu’une analyse et une évaluation détaillées de la gravité des faiblesses, 
+des défaillances et des lacunes du cadre de gestion du risque lié aux TIC au cours de la période examinée;
+h) 
+une description des mesures prises face aux faiblesses, défaillances et lacunes constatées, comprenant l’ensemble des 
+éléments suivants:
+i) 
+un résumé des mesures prises pour remédier aux faiblesses, défaillances et lacunes constatées;
+ii) 
+une date prévue pour la mise en œuvre des mesures et des dates relatives au contrôle interne de la mise en 
+œuvre, y compris des informations sur l’état d’avancement de la mise en œuvre de ces mesures à la date de 
+rédaction du rapport, en expliquant, le cas échéant, s’il existe un risque que les délais ne soient pas respectés;
+iii) 
+les outils à utiliser et l’identification de la fonction responsable de l’exécution des mesures, en précisant si les 
+outils et les fonctions sont internes ou externes;
+iv) 
+une description de l’incidence des modifications envisagées dans les mesures sur les ressources budgétaires, 
+humaines et matérielles de l’entité financière, y compris sur les ressources consacrées à la mise en œuvre de 
+toute mesure corrective;
+v) 
+des informations sur le processus d’information de l’autorité compétente, le cas échéant;
+vi) 
+lorsque les faiblesses, défaillances ou lacunes recensées ne font pas l’objet de mesures correctives, une 
+explication détaillée des critères appliqués pour analyser leur incidence et évaluer le risque résiduel lié aux 
+TIC qui leur est associé, ainsi que des critères appliqués pour accepter ce risque résiduel;
+i) 
+des informations sur les nouvelles évolutions prévues du cadre de gestion du risque lié aux TIC;
+j) 
+les conclusions résultant du réexamen du cadre de gestion du risque lié aux TIC;
+k) 
+des informations sur les réexamens antérieurs, comprenant:
+i) 
+une liste des réexamens antérieurs;
+ii) 
+le cas échéant, un état d’avancement de la mise en œuvre des mesures correctives déterminées dans le dernier 
+rapport;
+iii) 
+lorsque les mesures correctives proposées lors des réexamens précédents se sont révélées inefficaces ou ont 
+créé des difficultés inattendues, une description de la manière dont ces mesures correctives pourraient être 
+améliorées ou de ces difficultés imprévues;
+l) 
+les sources d’information utilisées pour l’élaboration du rapport, y compris l’ensemble des éléments suivants:
+i) 
+pour les entités financières, autres que les microentreprises, visées à l’article 6, paragraphe 6, du règlement 
+(UE) 2022/2554, les résultats des audits internes;
+ii) 
+les résultats des évaluations de la conformité;
+iii) 
+les résultats des tests de résilience opérationnelle numérique et, le cas échéant, les résultats des tests avancés 
+des outils de TIC, des systèmes de TIC et des processus de TIC sur la base de tests de pénétration fondés sur 
+la menace;
+iv) 
+les sources externes.
+Aux fins du point c), lorsque le réexamen a été engagé à la suite d’instructions des autorités de surveillance ou à la suite des 
+conclusions tirées des tests de résilience opérationnelle numérique ou des processus d’audit pertinents, le rapport contient 
+des références explicites à ces instructions ou conclusions, permettant d’identifier la raison du réexamen. Lorsque le 
+réexamen a été engagé à la suite d’incidents liés aux TIC, le rapport contient la liste de tous les incidents liés aux TIC 
+accompagnée d’une analyse de la cause originelle des incidents.
+Aux fins du point f), la description contient une analyse de l’incidence des modifications sur la stratégie de résilience 
+opérationnelle numérique de l’entité financière, sur le cadre de contrôle interne des TIC de l’entité financière et sur la 
+gouvernance de la gestion du risque lié aux TIC de l’entité financière.
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+29/37
+FR 
+JO L du 25.6.2024
+TITRE III
+CADRE SIMPLIFIÉ DE GESTION DU RISQUE LIÉ AUX TIC POUR LES ENTITÉS FINANCIÈRES VISÉES À L’ARTICLE 16,
+PARAGRAPHE 1, DU RÈGLEMENT (UE) 2022/2554
+CHAPITRE I
+Cadre simplifié de gestion du risque lié aux TIC
+Article 28
+Gouvernance et organisation
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 disposent d’un cadre de 
+gouvernance et de contrôle interne qui garantit une gestion efficace et prudente du risque lié aux TIC, en vue d’atteindre un 
+niveau élevé de résilience opérationnelle numérique.
+2. 
+Les entités financières visées au paragraphe 1 veillent, au titre de leur cadre simplifié de gestion du risque lié aux TIC, 
+à ce que leur organe de direction:
+a) 
+assume la responsabilité globale de veiller à ce que le cadre simplifié de gestion du risque lié aux TIC permette de 
+réaliser la stratégie d’entreprise de l’entité financière conformément à l’appétit pour le risque de cette entité 
+financière, et veille à ce que le risque lié aux TIC soit pris en considération dans ce contexte;
+b) 
+définisse clairement les rôles et les responsabilités pour toutes les tâches relatives aux TIC;
+c) 
+définisse les objectifs en matière de sécurité de l’information et les exigences en matière de TIC;
+d) 
+approuve, supervise et réexamine périodiquement:
+i) 
+la classification des actifs informationnels de l’entité financière visée à l’article 30, paragraphe 1, du présent 
+règlement, la liste des principaux risques identifiés et l’analyse des incidences sur les activités ainsi que les 
+politiques connexes;
+ii) 
+les plans de continuité des activités de l’entité financière ainsi que les mesures de réponse et de rétablissement 
+visés à l’article 16, paragraphe 1, point f), du règlement (UE) 2022/2554;
+e) 
+alloue et réexamine au moins une fois par an le budget nécessaire pour satisfaire les besoins de l’entité financière en 
+matière de résilience opérationnelle numérique pour tous les types de ressources, y compris les programmes 
+pertinents de sensibilisation à la sécurité des TIC et les formations pertinentes à la résilience opérationnelle 
+numérique et les compétences en matière de TIC pour l’ensemble du personnel;
+f) 
+précise et met en œuvre les politiques et mesures prévues aux chapitres I, II et III du présent titre permettant 
+d’identifier, d’évaluer et de gérer le risque lié aux TIC auquel l’entité financière est exposée;
+g) 
+définit et met en œuvre les procédures, les protocoles TIC et les outils nécessaires à la protection de tous les actifs 
+informationnels et de TIC;
+h) 
+veille au maintien à jour d’un niveau suffisant de connaissances et de compétences du personnel de l’entité financière 
+permettant à ce dernier de comprendre et d’évaluer le risque lié aux TIC et son incidence sur les opérations de l’entité 
+financière, de façon proportionnée au risque lié aux TIC géré;
+i) 
+établit des modalités d’établissement de rapports, y compris la fréquence, la forme et le contenu des rapports à 
+l’organe de direction sur la sécurité de l’information et la résilience opérationnelle numérique.
+3. 
+Les entités financières visées au paragraphe 1 peuvent, conformément au droit de l’Union et au droit sectoriel 
+national, externaliser les tâches de vérification du respect des exigences en matière de gestion du risque lié aux TIC à des 
+prestataires de services TIC intra-groupe ou à des prestataires tiers de services TIC. Dans le cas d’une telle externalisation, 
+les entités financières demeurent pleinement responsables de la vérification du respect des exigences en matière de gestion 
+du risque lié aux TIC.
+4. 
+Les entités financières visées au paragraphe 1 garantissent une séparation et une indépendance adéquates des 
+fonctions de contrôle et des fonctions d’audit interne.
+30/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+5. 
+Les entités financières visées au paragraphe 1 veillent à ce que leur cadre simplifié de gestion du risque lié aux TIC 
+fasse l’objet d’un audit interne réalisé par des auditeurs conformément au plan d’audit de ces entités financières. Ces 
+auditeurs disposent de connaissances, de compétences et d’une expertise suffisantes en matière de risque lié aux TIC, et 
+sont indépendants. La fréquence et l’objectif des audits des TIC sont proportionnés au risque lié aux TIC de l’entité 
+financière.
+6. 
+Sur la base des résultats de l’audit visé au paragraphe 5, les entités financières visées au paragraphe 1 veillent à la 
+vérification et à la correction en temps utile des constatations d’importance critique de l’audit des TIC.
+Article 29
+Politique et mesures en matière de sécurité de l’information
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 élaborent, documentent et 
+mettent en œuvre une politique de sécurité de l’information dans le contexte du cadre simplifié de gestion du risque lié aux 
+TIC. Cette politique de sécurité de l’information précise les principes et règles généraux visant à protéger la confidentialité, 
+l’intégrité, la disponibilité et l’authenticité des données et des services fournis par ces entités financières.
+2. 
+Sur la base de leur politique en matière de sécurité de l’information visée au paragraphe 1, les entités financières 
+visées au paragraphe 1 établissent et mettent en œuvre des mesures de sécurité des TIC pour atténuer leur exposition au 
+risque lié aux TIC, y compris des mesures d’atténuation mises en œuvre par des prestataires tiers de services TIC.
+Les mesures de sécurité des TIC comprennent toutes les mesures visées aux articles 30 à 38.
+Article 30
+Classification des actifs informationnels et des actifs de TIC
+1. 
+Au titre du cadre simplifié de gestion du risque lié aux TIC visé à l’article 16, paragraphe 1, point a), du règlement 
+(UE) 2022/2554, les entités financières visées au paragraphe 1 dudit article identifient, classent et documentent toutes les 
+fonctions critiques ou importantes, les actifs informationnels et les actifs de TIC qui les soutiennent ainsi que leurs 
+interdépendances. Les entités financières réexaminent cette identification et cette classification en tant que de besoin.
+2. 
+Les entités financières visées au paragraphe 1 identifient toutes les fonctions critiques ou importantes soutenues par 
+des prestataires tiers de services TIC.
+Article 31
+Gestion du risque lié aux TIC
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 incluent dans leur cadre 
+simplifié de gestion du risque lié aux TIC l’ensemble des éléments suivants:
+a) 
+une détermination des niveaux de tolérance au risque lié aux TIC, en fonction de l’appétit pour le risque de l’entité 
+financière;
+b) 
+l’identification et l’évaluation des risques liés aux TIC auxquels l’entité financière est exposée;
+c) 
+la définition de stratégies d’atténuation, au moins pour les risques liés aux TIC qui dépassent les niveaux de tolérance 
+au risque de l’entité financière;
+d) 
+le suivi de l’efficacité des stratégies d’atténuation visées au point c);
+e) 
+l’identification et l’évaluation de tout risque lié aux TIC ou en matière de sécurité de l’information résultant de tout 
+changement majeur dans les systèmes de TIC ou les services TIC, les processus ou les procédures, ou révélé par les 
+résultats des tests de sécurité des TIC ou après tout incident majeur lié aux TIC.
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+31/37
+FR 
+JO L du 25.6.2024
+2. 
+Les entités financières visées au paragraphe 1 effectuent et documentent périodiquement l’évaluation du risque lié 
+aux TIC, de façon proportionnée à leur profil de risque lié aux TIC.
+3. 
+Les entités financières visées au paragraphe 1 surveillent en permanence les menaces et les vulnérabilités qui 
+concernent leurs fonctions critiques ou importantes, ainsi que les actifs informationnels et les actifs de TIC, et réexaminent 
+régulièrement les scénarios de risque ayant une incidence sur ces fonctions critiques ou importantes.
+4. 
+Les entités financières visées au paragraphe 1 définissent des seuils d’alerte et des critères de déclenchement et de 
+lancement des processus de réponse en cas d’incident lié aux TIC.
+Article 32
+Sécurité physique et environnementale
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 définissent et mettent en 
+œuvre des mesures de sécurité physique conçues sur la base de l’éventail des menaces et conformément à la classification 
+visée à l’article 30, paragraphe 1, du présent règlement, au profil de risque global des actifs de TIC et aux actifs 
+informationnels accessibles.
+2. 
+Les mesures visées au paragraphe 1 protègent les locaux des entités financières et, le cas échéant, les centres de 
+données des entités financières dans lesquels les actifs de TIC et les actifs informationnels sont situés contre les accès non 
+autorisés, les attaques et les accidents, ainsi que contre les menaces et dangers environnementaux.
+3. 
+La protection contre les menaces et dangers environnementaux est proportionnée à l’importance des locaux 
+concernés et, le cas échéant, des centres de données et à la criticité des opérations ou des systèmes de TIC qui y sont situés.
+CHAPITRE II
+Autres éléments des systèmes, protocoles et outils visant à réduire au minimum l’incidence du risque lié aux TIC
+Article 33
+Contrôle d’accès
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 élaborent, documentent et mettent 
+en œuvre des procédures de contrôle des accès logiques et physiques, et appliquent, contrôlent et réexaminent 
+périodiquement ces procédures. Ces procédures comportent les éléments suivants de contrôle des accès logiques et 
+physiques:
+a) 
+les droits d’accès aux actifs informationnels, aux actifs de TIC et aux fonctions que ces actifs soutiennent, ainsi qu’aux 
+sites critiques d’exploitation de l’entité financière, sont gérés selon les principes du besoin d’en connaître, du besoin 
+d’en disposer et du droit d’accès minimal, y compris pour l’accès à distance et l’accès d’urgence;
+b) 
+la responsabilité des utilisateurs, qui garantit que les utilisateurs peuvent être identifiés pour les actions effectuées 
+dans les systèmes de TIC;
+c) 
+les procédures de gestion des comptes permettant d’accorder, de modifier ou de révoquer des droits d’accès pour les 
+comptes d’utilisateurs et les comptes génériques, y compris les comptes génériques d’administrateur;
+d) 
+des méthodes d’authentification proportionnées à la classification visée à l’article 30, paragraphe 1, et au profil de 
+risque global des actifs de TIC, et reposant sur les pratiques de pointe;
+e) 
+les droits d’accès sont réexaminés périodiquement et retirés lorsqu’ils ne sont plus nécessaires.
+Aux fins du point c), l’entité financière attribue des accès privilégiés, d’urgence et d’administrateur uniquement sur la base 
+du besoin d’en disposer ou au cas par cas pour tous les systèmes de TIC. Ces accès sont journalisés conformément à 
+l’article 34, premier alinéa, point f).
+32/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+Aux fins du point d), les entités financières utilisent des méthodes d’authentification forte reposant sur les pratiques de 
+pointe pour l’accès à distance à leurs réseaux, pour tout accès privilégié et pour l’accès aux actifs de TIC soutenant des 
+fonctions critiques ou importantes qui sont accessibles au public.
+Article 34
+Sécurité des opérations de TIC
+Dans le cadre de leurs systèmes, protocoles et outils, et pour tous les actifs de TIC, les entités financières visées à l’article 16, 
+paragraphe 1, du règlement (UE) 2022/2554:
+a) 
+suivent et gèrent le cycle de vie de tous les actifs de TIC;
+b) 
+surveillent si les actifs de TIC sont pris en charge par des prestataires tiers de services TIC des entités financières, le 
+cas échéant;
+c) 
+définissent les besoins en capacités de leurs actifs de TIC et les mesures visant à maintenir et à améliorer la 
+disponibilité et l’efficacité des systèmes de TIC et à prévenir les déficits de capacités en matière de TIC avant qu’ils ne 
+se concrétisent;
+d) 
+effectuent des scans et évaluations automatisés des vulnérabilités des actifs de TIC de façon proportionnée à leur 
+classification visée à l’article 30, paragraphe 1, et au profil de risque global de l’actif de TIC, et déploient des 
+correctifs pour remédier aux vulnérabilités identifiées;
+e) 
+gèrent les risques liés aux actifs de TIC obsolètes, non pris en charge ou hérités;
+f) 
+journalisent les événements liés au contrôle des accès logiques et physiques, aux opérations de TIC, y compris aux 
+activités liées aux systèmes et au trafic réseau, et à la gestion des changements dans les TIC;
+g) 
+définissent et mettent en œuvre des mesures de suivi et d’analyse des informations sur les activités et comportements 
+anormaux pour les opérations de TIC critiques ou importantes;
+h) 
+mettent en œuvre des mesures de suivi des informations pertinentes et actualisées sur les cybermenaces;
+i) 
+mettent en œuvre des mesures visant à détecter les éventuelles fuites d’informations, les codes malveillants et les 
+autres menaces pour la sécurité, ainsi que les vulnérabilités de notoriété publique dans les logiciels et le matériel, et 
+vérifient la disponibilité de nouvelles mises à jour de sécurité correspondantes.
+Aux fins du point f), les entités financières adaptent le niveau de détail des journaux en fonction de leur finalité et de leur 
+utilisation des actifs de TIC produisant ces journaux.
+Article 35
+Sécurité des données, des systèmes et des réseaux
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 élaborent et mettent en œuvre, dans 
+le cadre de leurs systèmes, protocoles et outils, des garanties pour assurer la protection des réseaux contre les intrusions et 
+les utilisations abusives des données et préserver la disponibilité, l’authenticité, l’intégrité et la confidentialité des données. En particulier, les entités financières mettent en place, en tenant compte de la classification visée à l’article 30, 
+paragraphe 1, du présent règlement, l’ensemble des éléments suivants:
+a) 
+la définition et la mise en œuvre de mesures visant à protéger les données en cours d’utilisation, en transit et au 
+repos;
+b) 
+la définition et la mise en œuvre de mesures de sécurité concernant l’utilisation de logiciels, de supports de stockage 
+de données, de systèmes et de périphériques de point de terminaison qui transfèrent et stockent des données de 
+l’entité financière;
+c) 
+la définition et la mise en œuvre de mesures visant à prévenir et à détecter les connexions non autorisées au réseau de 
+l’entité financière et à sécuriser le trafic réseau entre les réseaux internes de l’entité financière et l’internet et d’autres 
+connexions externes;
+d) 
+la définition et la mise en œuvre de mesures garantissant la disponibilité, l’authenticité, l’intégrité et la confidentialité 
+des données lors des transmissions sur le réseau;
+e) 
+un processus permettant de supprimer de manière sécurisée les données dans les locaux, ou stockées à l’extérieur, 
+que l’entité financière n’a plus besoin de collecter ou de stocker;
+f) 
+un processus permettant d’éliminer ou de déclasser de manière sécurisée des dispositifs de stockage de données dans 
+les locaux, ou des dispositifs de stockage des données stockés à l’extérieur, qui contiennent des informations 
+confidentielles;
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+33/37
+FR 
+JO L du 25.6.2024
+g) 
+la définition et la mise en œuvre de mesures visant à garantir que le télétravail et l’utilisation de périphériques de 
+point de terminaison privés n’ont pas d’incidence négative sur la capacité de l’entité financière à mener ses activités 
+critiques de manière adéquate, rapide et sûre.
+Article 36
+Tests de sécurité des TIC
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 établissent et mettent en 
+œuvre un plan de tests de sécurité des TIC afin de confirmer l’efficacité de leurs mesures de sécurité des TIC élaborées 
+conformément aux articles 33, 34 et 35 et aux articles 37 et 38 du présent règlement. Les entités financières veillent à ce 
+que ce plan tienne compte des menaces et des vulnérabilités identifiées au titre du cadre simplifié de gestion du risque lié 
+aux TIC visé à l’article 31 du présent règlement.
+2. 
+Les entités financières visées au paragraphe 1 examinent, évaluent et testent les mesures de sécurité des TIC, en 
+tenant compte du profil de risque global des actifs de TIC de l’entité financière.
+3. 
+Les entités financières visées au paragraphe 1 suivent et évaluent les résultats des tests de sécurité et mettent à jour 
+leurs mesures de sécurité en conséquence, sans retard injustifié, lorsque les systèmes de TIC concernés soutiennent des 
+fonctions critiques ou importantes.
+Article 37
+Acquisition, développement et maintenance des systèmes de TIC
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 conçoivent et mettent en œuvre, le 
+cas échéant, une procédure régissant l’acquisition, le développement et la maintenance de systèmes de TIC selon une 
+approche fondée sur les risques. Cette procédure:
+a) 
+prévoit que, avant toute acquisition ou tout développement de systèmes de TIC, les exigences fonctionnelles et non 
+fonctionnelles, y compris les exigences en matière de sécurité de l’information, sont clairement définies et 
+approuvées par la fonction «métier» concernée;
+b) 
+prévoit que les systèmes de TIC sont testés et approuvés avant leur première utilisation et avant l’introduction de 
+changements dans l’environnement de production;
+c) 
+définit les mesures visant à atténuer le risque d’altération involontaire ou de manipulation intentionnelle des 
+systèmes de TIC lors du développement et de la mise en œuvre dans l’environnement de production.
+Article 38
+Gestion des projets de TIC et des changements dans les TIC
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 élaborent, documentent et 
+mettent en œuvre une procédure de gestion des projets de TIC et précisent les rôles et responsabilités liés à sa mise en 
+œuvre. Cette procédure couvre tous les stades des projets de TIC, depuis leur lancement jusqu’à leur clôture.
+2. 
+Les entités financières visées au paragraphe 1 élaborent, documentent et mettent en œuvre une procédure de gestion 
+des changements dans les TIC, afin de garantir que tous les changements apportés aux systèmes de TIC sont consignés, 
+testés, évalués, approuvés, mis en œuvre et vérifiés de manière contrôlée et avec les garanties adéquates pour préserver la 
+résilience opérationnelle numérique de l’entité financière.
+34/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+CHAPITRE III
+Gestion de la continuité des activités de TIC
+Article 39
+Composantes du plan de continuité des activités de TIC
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 élaborent leurs plans de 
+continuité des activités de TIC en prenant en considération les résultats de l’analyse de leurs expositions aux graves 
+perturbations des activités et de leurs incidences potentielles, ainsi que les scénarios auxquels leurs actifs de TIC qui 
+soutiennent des fonctions critiques ou importantes pourraient être exposés, y compris un scénario de cyberattaque.
+2. 
+Les plans de continuité des activités de TIC visés au paragraphe 1:
+a) 
+sont approuvés par l’organe de direction de l’entité financière;
+b) 
+sont documentés et facilement accessibles en cas d’urgence ou de crise;
+c) 
+affectent des ressources suffisantes à leur exécution;
+d) 
+établissent les niveaux de rétablissement et les délais prévus pour le rétablissement et la reprise des fonctions et des 
+principales relations de dépendance internes et externes, y compris les prestataires tiers de services TIC;
+e) 
+définissent les conditions susceptibles de déclencher l’activation des plans de continuité des activités de TIC et les 
+mesures à prendre pour garantir la disponibilité, la continuité et le rétablissement des actifs de TIC des entités 
+financières qui soutiennent des fonctions critiques ou importantes;
+f) 
+définissent les mesures de restauration et de rétablissement pour les fonctions «métiers» critiques ou importantes, les 
+processus de soutien, les actifs informationnels et leurs interdépendances afin d’éviter des effets préjudiciables sur le 
+fonctionnement des entités financières;
+g) 
+définissent des procédures et mesures de sauvegarde qui précisent l’étendue des données concernées par la 
+sauvegarde ainsi que la fréquence minimale de celle-ci, selon la criticité de la fonction qui utilise ces données;
+h) 
+prévoient d’autres options pour le cas où le rétablissement ne serait pas réalisable à court terme en raison des coûts, 
+des risques, de problèmes logistiques ou de circonstances imprévues;
+i) 
+précisent les modalités de communication interne et externe, y compris les plans de remontée des informations;
+j) 
+sont actualisés en fonction des enseignements tirés des incidents, des tests, des nouveaux risques et des menaces 
+identifiés, des changements des objectifs de rétablissement, des changements majeurs apportés à l’organisation de 
+l’entité financière et aux actifs de TIC qui soutiennent des fonctions critiques ou des fonctions «métiers».
+Aux fins du point f), les mesures visées audit point prévoient l’atténuation des défaillances des prestataires tiers critiques.
+Article 40
+Tests des plans de continuité des activités
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 testent leurs plans de 
+continuité des activités visés à l’article 39 du présent règlement, y compris les scénarios visés audit article, au moins une 
+fois par an pour les procédures de sauvegarde et de restauration, ou à chaque modification majeure du plan de continuité 
+des activités.
+2. 
+Les tests des plans de continuité des activités visés au paragraphe 1 doivent démontrer que les entités financières 
+visées audit paragraphe sont en mesure de maintenir la viabilité de leurs activités jusqu’à ce que les opérations critiques 
+soient rétablies et détecter toute lacune de ces plans.
+3. 
+Les entités financières visées au paragraphe 1 documentent les résultats des tests des plans de continuité des activités 
+et toute lacune constatée à la suite de ces tests est analysée, traitée et notifiée à l’organe de direction.
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj 
+35/37
+FR 
+JO L du 25.6.2024
+CHAPITRE IV
+Rapport sur le réexamen du cadre simplifié de gestion du risque lié aux TIC
+Article 41
+Format et contenu du rapport sur le réexamen du cadre simplifié de gestion du risque lié aux TIC
+1. 
+Les entités financières visées à l’article 16, paragraphe 1, du règlement (UE) 2022/2554 présentent le rapport sur le 
+réexamen du cadre de gestion du risque lié aux TIC visé au paragraphe 2 dudit article dans un format électronique 
+interrogeable.
+2. 
+Le rapport visé au paragraphe 1 contient l’ensemble des informations suivantes:
+a) 
+une partie introductive contenant:
+i) 
+une description du contexte du rapport en ce qui concerne la nature, l’échelle et la complexité des services, 
+activités et opérations de l’entité financière, son organisation, ses fonctions critiques recensées, sa stratégie, 
+ses grands projets ou activités en cours, ses relations et sa dépendance à l’égard des services et systèmes de 
+TIC internes ou sous-traités, ou les conséquences qu’une perte totale ou une dégradation grave de ces 
+systèmes engendrerait en ce qui concerne les fonctions critiques ou importantes et l’efficience du marché;
+ii) 
+une synthèse du risque lié aux TIC actuel et à court terme qui a été identifié, de l’éventail des menaces, de 
+l’évaluation de l’efficacité de ses contrôles et de la posture de sécurité de l’entité financière;
+iii) 
+des informations sur le domaine faisant l’objet du rapport;
+iv) 
+un résumé des changements majeurs dont le cadre de gestion du risque lié aux TIC a fait l’objet depuis le 
+rapport précédent;
+v) 
+un résumé et une description de l’incidence des changements dont le cadre simplifié de gestion du risque lié 
+aux TIC a fait l’objet depuis le rapport précédent;
+b) 
+le cas échéant, la date d’approbation du rapport par l’organe de direction de l’entité financière;
+c) 
+une description des raisons du réexamen, notamment:
+i) 
+lorsque le réexamen a été engagé à la suite d’instructions des autorités de surveillance, la preuve de ces 
+instructions;
+ii) 
+lorsque le réexamen a été engagé à la suite d’incidents liés aux TIC, la liste de ces incidents accompagnée d’une 
+analyse de leur cause originelle;
+d) 
+les dates de début et de fin de la période examinée;
+e) 
+la personne responsable du réexamen;
+f) 
+un résumé des constatations et une autoévaluation, comprenant une analyse détaillée, de la gravité des faiblesses, des 
+défaillances et des lacunes identifiées du cadre de gestion du risque lié aux TIC pour la période examinée;
+g) 
+les mesures définies pour remédier aux faiblesses, aux défaillances et aux lacunes du cadre simplifié de gestion du 
+risque lié aux TIC, ainsi que la date prévue pour la mise en œuvre de ces mesures, y compris les suites données aux 
+faiblesses, défaillances et lacunes identifiées dans les rapports précédents, lorsqu’il n’y a pas encore été remédié;
+h) 
+les conclusions générales du réexamen du cadre simplifié de gestion du risque lié aux TIC, y compris les nouvelles 
+évolutions prévues.
+36/37 
+ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj
+JO L du 25.6.2024 
+FR
+TITRE IV
+DISPOSITIONS FINALES
+Article 42
+Entrée en vigueur
+Le présent règlement entre en vigueur le vingtième jour suivant celui de sa publication au Journal officiel de l’Union européenne. Le présent règlement est obligatoire dans tous ses éléments et directement applicable dans tous 
+les États membres.
