@@ -4,7 +4,7 @@ Check missing i18n keys
 This script compare keys with the frontend/messages/en.json for every file in frontend/messages to detect missing i18n keys in locale files compared to a base locale file.
 
 Usage:
-    python check_missing_i18n_keys.py [-d|--dir frontend/messages] [-b|--base en] [-t|--target fr] [-o|--output output.csv]
+    python check_missing_i18n_keys.py [-d|--dir frontend/messages] [-b|--base en] [-t|--target fr] [-o|--output output.csv] [-f|--format csv]
 
 Command-line arguments:
     -d, --dir       : Path to directory containing locale JSON files .
@@ -16,9 +16,11 @@ Command-line arguments:
     -t, --target    : Target locale to compare against.
                       By default check all locales against base.
 
-    -o, --output    : Output JSON file to save missing keys report.
+    -o, --output    : Output file to save missing keys report.
                       Optional, but you'll only get the number of missing keys without it.
 
+    -f, --format    : Output format. Choose between csv and json.
+                      Optional, default is csv.
 """
 
 import csv
@@ -28,9 +30,13 @@ import argparse
 from pathlib import Path
 
 
+ALLOWED_OUTPUT_FORMAT = ["csv", "json"]
+
+
 def load_json(file_path: Path) -> dict:
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def create_report(dir: Path, base_locale: str, target_locale: str, base_file_path: Path) -> list:
     base_keys = set(load_json(base_file_path).keys()) # will be used to check against others locales
@@ -49,6 +55,7 @@ def create_report(dir: Path, base_locale: str, target_locale: str, base_file_pat
 
     return report
 
+
 def save_report_to_csv(report: list, report_path: Path, base_file_path: Path) -> str:
     base_file = load_json(base_file_path)
 
@@ -60,6 +67,23 @@ def save_report_to_csv(report: list, report_path: Path, base_file_path: Path) ->
                 writer.writerow([locale, key, base_file[key]])
 
     print(f"\nReport saved to {report_path}")
+
+
+def save_report_to_json(report: list, report_path: Path, base_file_path: Path) -> str:
+    base_file = load_json(base_file_path)
+
+    json_content = {}
+    for locale in report:
+        json_content[locale] = {}
+        for key in report[locale]:
+            json_content[locale][key] = base_file[key]
+
+    with open(args.output, "w", encoding="utf-8") as f:
+        #Not sure if ascii should be enforced or not. I prefer to show the content as is, it's better for translating. Correct if i'm wrong.
+        json.dump(json_content, f, indent=4, ensure_ascii=False)
+
+    print(f"\nReport saved to {report_path}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -89,10 +113,20 @@ if __name__ == "__main__":
         default=None,
         help="Output JSON file to save missing keys report (optional).",
     )
+    parser.add_argument(
+        "-f", "--format",
+        type=str,
+        default="csv",
+        help="Output format. Choose between csv and json. (optional, default csv).",
+    )
     args = parser.parse_args()
 
     if args.base == args.target:
         print(f"Base locale and target locale are the same.")
+        sys.exit(1)
+
+    if args.output and args.format.lower() not in ALLOWED_OUTPUT_FORMAT:
+        print(f"Output format \"{args.format}\" is not recognized. Choose between csv and json.")
         sys.exit(1)
 
     base_file_path = args.dir / f"{args.base}.json"
@@ -112,4 +146,10 @@ if __name__ == "__main__":
 
     # Save to file if requested
     if args.output:
-        save_report_to_csv(report, args.output, base_file_path)
+        match args.format.lower():
+            case "csv":
+                save_report_to_csv(report, args.output, base_file_path)
+            case "json":
+                save_report_to_json(report, args.output, base_file_path)
+            case _:
+                raise ValueError
