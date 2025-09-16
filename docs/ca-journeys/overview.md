@@ -110,7 +110,7 @@ Choose the relevant standard or framework for your audit.
 
 ![Click here](https://static.guidde.com/v0/qg%2FJ0RVKao966SmT5uQXRHVpcgc2yd2%2F68qUXmai1HgEMzMooV7g6b%2FtvduYKuWj1D2z5QrT9o8N8_doc.png?alt=media\&token=7cce6478-cb78-4058-a8a7-9a7823442caa)
 
-#### 18. Fill "iso"
+#### 18. Search "iso"
 
 Select the International standard ISO/IEC 27001:2022 to align with recognized security practices.
 
@@ -128,19 +128,15 @@ Access the detailed audit sections to review specific requirements.
 
 ![Click 'Save'](https://static.guidde.com/v0/qg%2FJ0RVKao966SmT5uQXRHVpcgc2yd2%2F68qUXmai1HgEMzMooV7g6b%2Fi9vCEB2Zn3pHGFDEptbcNd_doc.png?alt=media\&token=d34a3638-b55d-407c-8b1c-c1f1621d4ed8)
 
-#### 21. Click here
+#### 21. Open the tree structure
 
 Select the section focused on the organization's context for information security.
 
 ![Click here](https://static.guidde.com/v0/qg%2FJ0RVKao966SmT5uQXRHVpcgc2yd2%2F68qUXmai1HgEMzMooV7g6b%2FkgZQBDoeNZFqAVozRUK17W_doc.png?alt=media\&token=71d66fd2-a12a-44f4-a459-6bb77d9932ee)
 
-#### 22. Click "4 - Context of the organization 0%0%0%0%"
 
-Review and identify internal and external factors impacting your security objectives.
 
-![Click '4 - Context of the organization     0%0%0%0%'](https://static.guidde.com/v0/qg%2FJ0RVKao966SmT5uQXRHVpcgc2yd2%2F68qUXmai1HgEMzMooV7g6b%2FuLdRH8jn7bkcch6rg6bnnh_doc.png?alt=media\&token=4f0aea6b-7673-4b28-8e51-1148dac9d351)
-
-#### 23. Click "Identify internal and external factors that influence the organization’s ability to achieve information security objectives, ensuring the ISMS is aligned with its context."
+#### 23. Enter an item to review/update it
 
 Ensure your Information Security Management System (ISMS) aligns with your organization's context by addressing these factors.
 
