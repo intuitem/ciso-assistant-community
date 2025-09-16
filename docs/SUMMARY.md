@@ -74,9 +74,10 @@
 ## CA Journeys
 
 * [00 - initial setup](ca-journeys/00-initial-setup.md)
-* [Overview](ca-journeys/overview.md)
+* [01 - basic audit](ca-journeys/overview.md)
 * [Third Parties Risk Management](ca-journeys/third-parties-risk-management.md)
 * [Etude EBIOS RM](ca-journeys/etude-ebios-rm.md)
+* [New - Cyber Risk Quantification](ca-journeys/new-cyber-risk-quantification.md)
 
 ## Integration
 

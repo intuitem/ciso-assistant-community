@@ -1,5 +1,6 @@
 ---
 description: This is work in progress
+hidden: true
 ---
 
 # Third Parties Risk Management
