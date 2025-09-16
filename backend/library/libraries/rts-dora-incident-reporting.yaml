@@ -22,21 +22,22 @@ description: 'Article 20 of DORA mandates the European Supervisory Authorities (
   https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf'
 copyright: ESA
 version: 2
-publication_date: 2025-09-15
+publication_date: 2025-09-16
 provider: ESA
 packager: intuitem
 translations:
   fr:
     name: "RTS DORA - Rapports d\u2019incidents"
-    description: "L\u2019article 20 de la DORA charge les autorit\xE9s europ\xE9ennes\
-      \ de surveillance (AES) d\u2019\xE9laborer, par l\u2019interm\xE9diaire du comit\xE9\
-      \ mixte et en consultation avec la Banque centrale europ\xE9enne et l\u2019\
-      Agence de l\u2019Union europ\xE9enne pour la cybers\xE9curit\xE9, des projets\
-      \ de normes techniques de r\xE9glementation (RTS) \xE9tablissant le contenu\
-      \ des rapports d\u2019incidents li\xE9s aux TIC et la notification des cybermenaces\
-      \ significatives, ainsi que les d\xE9lais impartis aux EF pour signaler ces\
-      \ incidents aux autorit\xE9s comp\xE9tentes.\n\nVoici le lien du deuxi\xE8me\
-      \ lot de produits de police en vertu de DORA :\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+    description: "[Traduction non officielle]\nL\u2019article 20 de la DORA charge\
+      \ les autorit\xE9s europ\xE9ennes de surveillance (AES) d\u2019\xE9laborer,\
+      \ par l\u2019interm\xE9diaire du comit\xE9 mixte et en consultation avec la\
+      \ Banque centrale europ\xE9enne et l\u2019Agence de l\u2019Union europ\xE9enne\
+      \ pour la cybers\xE9curit\xE9, des projets de normes techniques de r\xE9glementation\
+      \ (RTS) \xE9tablissant le contenu des rapports d\u2019incidents li\xE9s aux\
+      \ TIC et la notification des cybermenaces significatives, ainsi que les d\xE9\
+      lais impartis aux EF pour signaler ces incidents aux autorit\xE9s comp\xE9tentes.\n\
+      \nVoici le lien du deuxi\xE8me lot de produits de police en vertu de DORA :\n\
+      https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
       \nVoici le lien du document :\nhttps://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf"
 objects:
   framework:
@@ -62,16 +63,16 @@ objects:
     translations:
       fr:
         name: "RTS DORA - Rapports d\u2019incidents"
-        description: "L\u2019article 20 de la DORA charge les autorit\xE9s europ\xE9\
-          ennes de surveillance (AES) d\u2019\xE9laborer, par l\u2019interm\xE9diaire\
-          \ du comit\xE9 mixte et en consultation avec la Banque centrale europ\xE9\
-          enne et l\u2019Agence de l\u2019Union europ\xE9enne pour la cybers\xE9curit\xE9\
-          , des projets de normes techniques de r\xE9glementation (RTS) \xE9tablissant\
-          \ le contenu des rapports d\u2019incidents li\xE9s aux TIC et la notification\
-          \ des cybermenaces significatives, ainsi que les d\xE9lais impartis aux\
-          \ EF pour signaler ces incidents aux autorit\xE9s comp\xE9tentes.\n\nVoici\
-          \ le lien du deuxi\xE8me lot de produits de police en vertu de DORA :\n\
-          https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+        description: "[Traduction non officielle]\nL\u2019article 20 de la DORA charge\
+          \ les autorit\xE9s europ\xE9ennes de surveillance (AES) d\u2019\xE9laborer,\
+          \ par l\u2019interm\xE9diaire du comit\xE9 mixte et en consultation avec\
+          \ la Banque centrale europ\xE9enne et l\u2019Agence de l\u2019Union europ\xE9\
+          enne pour la cybers\xE9curit\xE9, des projets de normes techniques de r\xE9\
+          glementation (RTS) \xE9tablissant le contenu des rapports d\u2019incidents\
+          \ li\xE9s aux TIC et la notification des cybermenaces significatives, ainsi\
+          \ que les d\xE9lais impartis aux EF pour signaler ces incidents aux autorit\xE9\
+          s comp\xE9tentes.\n\nVoici le lien du deuxi\xE8me lot de produits de police\
+          \ en vertu de DORA :\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
           \nVoici le lien du document :\nhttps://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting:recital
