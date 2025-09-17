@@ -81,6 +81,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			ebiosRmStudyPage,
 			usersPage
 		},
 		use
@@ -105,6 +106,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			ebiosRmStudyPage,
 			usersPage
 		});
 	},
