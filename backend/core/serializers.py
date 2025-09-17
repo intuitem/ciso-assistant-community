@@ -1242,10 +1242,38 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=User.objects.all(), required=False
     )
+    attachment = serializers.FileField(write_only=True, required=False)
+    link = serializers.URLField(write_only=True, required=False)
 
     class Meta:
         model = Evidence
-        fields = "__all__"
+        exclude = ["is_published"]
+
+    def create(self, validated_data):
+        attachment = validated_data.pop("attachment", None)
+        link = validated_data.pop("link", None)
+
+        m2m_fields = {}
+        for field in [
+            "applied_controls",
+            "requirement_assessments",
+            "findings",
+            "findings_assessments",
+            "timeline_entries",
+            "owner",
+        ]:
+            m2m_fields[field] = validated_data.pop(field, [])
+
+        evidence = Evidence.objects.create(**validated_data)
+
+        for field, value in m2m_fields.items():
+            getattr(evidence, field).set(value)
+
+        EvidenceRevision.objects.get_or_create(
+            evidence=evidence, defaults={"link": link, "attachment": attachment}
+        )
+
+        return evidence
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):

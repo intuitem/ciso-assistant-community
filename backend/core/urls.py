@@ -125,6 +125,11 @@ urlpatterns = [
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path(
+        "evidences/<uuid:pk>/upload/",
+        UploadAttachmentView.as_view(),
+        name="upload",
+    ),
+    path(
         "evidence-revisions/<uuid:pk>/upload/",
         UploadAttachmentView.as_view(),
         name="upload",

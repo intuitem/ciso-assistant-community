@@ -2660,22 +2660,6 @@ class Evidence(
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
 
-    # TODO: Manage file upload to S3/MiniO
-    attachment = models.FileField(
-        #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
-        blank=True,
-        null=True,
-        help_text=_("Attachment for evidence (eg. screenshot, log file, etc.)"),
-        verbose_name=_("Attachment"),
-        validators=[validate_file_size, validate_file_name],
-    )
-    link = models.URLField(
-        blank=True,
-        null=True,
-        max_length=2048,
-        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
-        verbose_name=_("Link"),
-    )
     is_published = models.BooleanField(_("published"), default=True)
 
     owner = models.ManyToManyField(
@@ -2699,12 +2683,14 @@ class Evidence(
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
 
+    def save(self, *args, **kwargs):
+        for revision in EvidenceRevision.objects.filter(evidence=self):
+            revision.is_published = self.is_published
+        super().save(*args, **kwargs)
+
     @property
     def last_revision(self):
-        return (
-            EvidenceRevision.objects.filter(evidence=self).order_by("-version").first()
-            or None
-        )
+        return self.revisions.order_by("-version").first() or None
 
     def get_folder(self):
         if self.applied_controls:
@@ -2748,7 +2734,7 @@ class Evidence(
 
 class EvidenceRevision(AbstractBaseModel, FolderMixin):
     evidence = models.ForeignKey(
-        Evidence, on_delete=models.CASCADE, related_name="revision"
+        Evidence, on_delete=models.CASCADE, related_name="revisions"
     )
     version = models.IntegerField(
         default=1,
@@ -2767,7 +2753,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name=_("Link"),
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
-    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["evidence", "version"]
 
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
@@ -2783,8 +2770,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             self.version = (max_version or 0) + 1
 
         # Set folder to match the evidence's folder
-        if hasattr(self.evidence, "get_folder") and self.evidence.get_folder():
-            self.folder = self.evidence.get_folder()
+        if hasattr(self.evidence, "folder") and self.evidence.folder:
+            self.folder = self.evidence.folder
+
+        self.is_published = self.evidence.is_published
 
         super().save(*args, **kwargs)
 
@@ -2808,7 +2797,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = _("Evidence Revision")
         verbose_name_plural = _("Evidence Revisions")
-        unique_together = ["evidence", "version"]
 
 
 class Incident(NameDescriptionMixin, FolderMixin):

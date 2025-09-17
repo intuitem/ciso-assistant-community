@@ -4725,22 +4725,35 @@ class UploadAttachmentView(APIView):
     serializer_class = AttachmentUploadSerializer
 
     def post(self, request, *args, **kwargs):
-        if request.data:
+        pk = kwargs["pk"]
+        revision = None
+        evidence = None
+
+        try:
+            revision = EvidenceRevision.objects.get(pk=pk)
+            evidence = revision.evidence
+        except EvidenceRevision.DoesNotExist:
             try:
-                evidence = EvidenceRevision.objects.get(id=kwargs["pk"])
-                attachment = request.FILES["file"]
-                if not evidence.attachment and attachment.name != "undefined":
-                    evidence.attachment = attachment
-                elif (
-                    evidence.attachment and attachment.name != "undefined"
-                ) and evidence.attachment != attachment:
-                    evidence.attachment.delete()
-                    evidence.attachment = attachment
-                evidence.save()
-                return Response(status=status.HTTP_200_OK)
-            except Exception:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+                evidence = Evidence.objects.get(pk=pk)
+            except Evidence.DoesNotExist:
+                return Response(
+                    {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+
+        if revision is None:
+            revision = evidence.revisions.order_by(
+                "-version"
+            ).first() or EvidenceRevision.objects.create(evidence=evidence)
+
+        attachment = request.FILES.get("file")
+        if attachment and attachment.name != "undefined":
+            if not revision.attachment or revision.attachment != attachment:
+                if revision.attachment:
+                    revision.attachment.delete()
+                revision.attachment = attachment
+                revision.save()
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class QuickStartView(APIView):
