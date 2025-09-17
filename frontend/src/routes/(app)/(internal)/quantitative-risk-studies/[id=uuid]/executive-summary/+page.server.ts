@@ -37,6 +37,7 @@ export const load: PageServerLoad = async (event) => {
 	};
 
 	return {
+		title: "Executive summary",
 		stream: {
 			executiveSummary: getExecutiveSummary(),
 			combinedLec: getCombinedLec()
