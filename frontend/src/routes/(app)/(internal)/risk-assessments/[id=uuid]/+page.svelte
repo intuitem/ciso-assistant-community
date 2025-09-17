@@ -11,16 +11,22 @@
 	import { m } from '$paraglide/messages';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { getLocale } from '$paraglide/runtime';
-	import { listViewFields } from '$lib/utils/table';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import List from '$lib/components/List/List.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import z from 'zod';
 
-	let { data } = $props();
+	let { data, form } = $props();
 
 	let exportPopupOpen = $state(false);
 
@@ -44,6 +50,7 @@
 			props: {
 				form: data.scenarioCreateForm,
 				model: data.scenarioModel,
+				scopeFolder: data.risk_assessment.folder,
 				debug: false
 			}
 		};
@@ -77,6 +84,61 @@
 		modalStore.trigger(modal);
 	}
 
+	let syncingToActionsIsLoading = $state(false);
+
+	async function modalConfirmSyncToActions(id: string, action: string): Promise<void> {
+		const riskScenariosSync = await fetch(`/risk-assessments/${page.params.id}/sync-to-actions`, {
+			method: 'POST'
+		}).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Failed to fetch applied controls sync data');
+			}
+		});
+		const schema = z.object({ reset_residual: z.boolean().default(false) });
+		const modalComponent: ModalComponent = {
+			ref: SyncToActionsRiskModal,
+			props: {
+				_form: defaults({ reset_residual: false }, zod(schema)),
+				id,
+				schema,
+				debug: false,
+				URLModel: 'risk-assessments',
+				formAction: action,
+				listProps: {
+					items: riskScenariosSync.changes.map((scenario) =>
+						m.riskScenarioSyncWithChanges({
+							ref_id: scenario.ref_id,
+							name: scenario.name,
+							current_level: scenario.current_level.name,
+							residual_level: scenario.residual_level.name
+						})
+					),
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsRiskAssessmentMessage({
+				count: risk_assessment.risk_scenarios.length //change this
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
+	$effect(() => {
+		if (syncingToActionsIsLoading === true && (form || form?.error))
+			syncingToActionsIsLoading = false;
+	});
+
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
@@ -87,8 +149,10 @@
 			Array.from({ length: parsedRiskMatrix.impact.length }, () => [])
 		);
 		scenarios.forEach((scenario: RiskScenario) => {
-			const probability = scenario[`${risk}_proba`].value;
-			const impact = scenario[`${risk}_impact`].value;
+			const probabilityData = scenario[`${risk}_proba`];
+			const impactData = scenario[`${risk}_impact`];
+			const probability = probabilityData?.value ?? -1;
+			const impact = impactData?.value ?? -1;
 			probability >= 0 && impact >= 0 ? grid[probability][impact].push(scenario) : undefined;
 		});
 		return grid;
@@ -120,6 +184,17 @@
 
 <main class="grow main">
 	<div>
+		{#if risk_assessment.is_locked}
+			<div
+				class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mx-4 mt-4"
+			>
+				<div class="flex items-center">
+					<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+					<span class="font-medium">{m.lockedAssessment()}</span>
+					<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+				</div>
+			</div>
+		{/if}
 		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
@@ -182,7 +257,7 @@
 					>
 				</div>
 				<div class="text-sm" data-testid="description-field-value">
-					{risk_assessment.description ?? '--'}
+					<MarkdownRenderer content={risk_assessment.description} />
 				</div>
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
@@ -193,7 +268,9 @@
 						triggerClasses="btn preset-filled-primary-500 w-full"
 					>
 						{#snippet trigger()}
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							<span data-testid="export-button">
+								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							</span>
 						{/snippet}
 						{#snippet content()}
 							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
@@ -247,6 +324,28 @@
 					<i class="fa-solid fa-copy mr-2"></i>
 					{m.duplicate()}</button
 				>
+				{#if !risk_assessment?.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						onclick={async () => {
+							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
+						}}
+					>
+						<span class="mr-2">
+							{#if syncingToActionsIsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									size="size-6"
+									classes="-ml-2"
+								/>
+							{:else}
+								<i class="fa-solid fa-arrows-rotate mr-2"></i>
+							{/if}
+						</span>
+						{m.syncToAppliedControls()}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -267,15 +366,20 @@
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
 				{fields}
+				disableCreate={risk_assessment.is_locked}
+				disableEdit={risk_assessment.is_locked}
+				disableDelete={risk_assessment.is_locked}
 			>
 				{#snippet addButton()}
-					<button
-						class="btn preset-filled-primary-500 self-end my-auto"
-						onclick={(_) => modalCreateForm()}
-					>
-						<i class="fa-solid fa-plus mr-2 lowercase"></i>
-						{m.addRiskScenario()}
-					</button>
+					{#if !risk_assessment.is_locked}
+						<button
+							class="btn preset-filled-primary-500 self-end my-auto"
+							onclick={(_) => modalCreateForm()}
+						>
+							<i class="fa-solid fa-plus mr-2 lowercase"></i>
+							{m.addRiskScenario()}
+						</button>
+					{/if}
 				{/snippet}
 			</ModelTable>
 		</div>

@@ -4,17 +4,19 @@ urn: urn:intuitem:risk:library:annex-technical-and-methodological-requirements-n
 locale: en
 ref_id: Annex-to-the-Implementing-Regulation-of-NIS2-on-Technical-and-methodological-requirements
 name: NIS2 technical and methodological requirements 2024/2690
-description: ANNEX to the Commission Implementing Regulation laying down rules for
+description: 'ANNEX to the Commission Implementing Regulation laying down rules for
   the application of Directive (EU) 2022/2555 as regards technical and methodological
   requirements of cybersecurity risk-management measures and further specification
   of the cases in which an incident is considered to be significant with regard to
   DNS service providers, TLD name registries, cloud computing service providers, data
   centre service providers, content delivery network providers, managed service providers,
   managed security service providers, providers of online market places, of online
-  search engines and of social networking services platforms, and trust service providers
+  search engines and of social networking services platforms, and trust service providers.
+
+  Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
 copyright: EUROPEAN COMMISSION
-version: 10
-publication_date: 2025-07-11
+version: 11
+publication_date: 2025-07-30
 provider: EUROPEAN COMMISSION
 packager: intuitem
 translations:
@@ -34,7 +36,7 @@ translations:
       s, les fournisseurs de services de s\xE9curit\xE9 g\xE9r\xE9s, ainsi que les\
       \ fournisseurs de places de march\xE9 en ligne, de moteurs de recherche en ligne\
       \ et de plateformes de services de r\xE9seaux sociaux, et les prestataires de\
-      \ services de confiance."
+      \ services de confiance.\nSource : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
     copyright: "COMMISSION EUROP\xC9ENNE"
   es:
     name: "NIS2: Requisitos t\xE9cnicos y metodol\xF3gicos - ANEXO REGLAMENTO DE EJECUCI\xD3\
@@ -42,8 +44,9 @@ translations:
     description: "ANEXO del Reglamento de Ejecuci\xF3n de la Comisi\xF3n por el que\
       \ se establecen -seg\xFAn el art\xEDculo 2- las disposiciones de aplicaci\xF3\
       n de la Directiva (UE) 2022/2555 en lo que respecta a los requisitos t\xE9cnicos\
-      \ y metodol\xF3gicos de las medidas para la gesti\xF3n de riesgos de ciberseguridad.\
-      \ Link: https://eur-lex.europa.eu/legal-content/ES/TXT/HTML/?uri=OJ:L_202402690"
+      \ y metodol\xF3gicos de las medidas para la gesti\xF3n de riesgos de ciberseguridad.\n\
+      Link: https://eur-lex.europa.eu/legal-content/ES/TXT/HTML/?uri=OJ:L_202402690\n\
+      Fuente : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
     copyright: COMISION EUROPEA
   cs:
     name: "NIS2: technick\xE9 a metodick\xE9 po\u017Eadavky 2024/2690"
@@ -59,7 +62,8 @@ translations:
       eb, poskytovatele \u0159\xEDzen\xFDch bezpe\u010Dnostn\xEDch slu\u017Eeb, poskytovatele\
       \ on-line tr\u017Ei\u0161\u0165, internetov\xFDch vyhled\xE1va\u010D\u016F a\
       \ slu\u017Eeb platforem soci\xE1ln\xEDch s\xEDt\xED a poskytovatele slu\u017E\
-      eb vytv\xE1\u0159ej\xEDc\xEDch d\u016Fv\u011Bru. https://eur-lex.europa.eu/legal-content/CS/TXT/HTML/?uri=OJ:L_202402690"
+      eb vytv\xE1\u0159ej\xEDc\xEDch d\u016Fv\u011Bru.\nhttps://eur-lex.europa.eu/legal-content/CS/TXT/HTML/?uri=OJ:L_202402690\n\
+      Zdroj: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
     copyright: "EVROPSK\xC1 KOMISE"
   it:
     name: 'NIS2: Requisiti tecnici e metodologici - ALLEGATO REGOLAMENTO DI ESECUZIONE
@@ -67,14 +71,15 @@ translations:
     description: "ALLEGATO del Regolamento di Esecuzione della Commissione che stabilisce\
       \ - ai sensi dell\u2019articolo 2 - le disposizioni di attuazione della Direttiva\
       \ (UE) 2022/2555 per quanto riguarda i requisiti tecnici e metodologici delle\
-      \ misure per la gestione dei rischi di cybersicurezza. Link: https://eur-lex.europa.eu/legal-content/ES/TXT/HTML/?uri=OJ:L_202402690"
+      \ misure per la gestione dei rischi di cybersicurezza.\nLink: https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=OJ:L_202402690\n\
+      Fonte : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
     copyright: COMMISSIONE EUROPEA
 objects:
   framework:
     urn: urn:intuitem:risk:framework:annex-technical-and-methodological-requirements-nis2
     ref_id: Annex-to-the-Implementing-Regulation-of-NIS2-on-Technical-and-methodological-requirements
     name: NIS2 technical and methodological requirements 2024/2690
-    description: ANNEX to the Commission Implementing Regulation laying down rules
+    description: 'ANNEX to the Commission Implementing Regulation laying down rules
       for the application of Directive (EU) 2022/2555 as regards technical and methodological
       requirements of cybersecurity risk-management measures and further specification
       of the cases in which an incident is considered to be significant with regard
@@ -82,7 +87,9 @@ objects:
       data centre service providers, content delivery network providers, managed service
       providers, managed security service providers, providers of online market places,
       of online search engines and of social networking services platforms, and trust
-      service providers
+      service providers.
+
+      Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
     translations:
       fr:
         name: "NIS2: Exigences techniques et m\xE9thodologiques - ANNEXE R\xC8GLEMENT\
@@ -101,7 +108,7 @@ objects:
           \ de services de s\xE9curit\xE9 g\xE9r\xE9s, ainsi que les fournisseurs\
           \ de places de march\xE9 en ligne, de moteurs de recherche en ligne et de\
           \ plateformes de services de r\xE9seaux sociaux, et les prestataires de\
-          \ services de confiance."
+          \ services de confiance.\nSource : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
       es:
         name: "NIS2: Requisitos t\xE9cnicos y metodol\xF3gicos - ANEXO REGLAMENTO\
           \ DE EJECUCI\xD3N (UE) 2024/2690"
@@ -109,7 +116,8 @@ objects:
           \ que se establecen -seg\xFAn el art\xEDculo 2- las disposiciones de aplicaci\xF3\
           n de la Directiva (UE) 2022/2555 en lo que respecta a los requisitos t\xE9\
           cnicos y metodol\xF3gicos de las medidas para la gesti\xF3n de riesgos de\
-          \ ciberseguridad. Link: https://eur-lex.europa.eu/legal-content/ES/TXT/HTML/?uri=OJ:L_202402690"
+          \ ciberseguridad.\nLink: https://eur-lex.europa.eu/legal-content/ES/TXT/HTML/?uri=OJ:L_202402690\n\
+          Fuente : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
       cs:
         name: "NIS2: technick\xE9 a metodick\xE9 po\u017Eadavky 2024/2690"
         description: "Prov\xE1d\u011Bc\xED na\u0159\xEDzen\xED 2024/2690 kter\xFD\
@@ -125,15 +133,17 @@ objects:
           nostn\xEDch slu\u017Eeb, poskytovatele on-line tr\u017Ei\u0161\u0165, internetov\xFD\
           ch vyhled\xE1va\u010D\u016F a slu\u017Eeb platforem soci\xE1ln\xEDch s\xED\
           t\xED a poskytovatele slu\u017Eeb vytv\xE1\u0159ej\xEDc\xEDch d\u016Fv\u011B\
-          ru. https://eur-lex.europa.eu/legal-content/CS/TXT/HTML/?uri=OJ:L_202402690"
+          ru.\nhttps://eur-lex.europa.eu/legal-content/CS/TXT/HTML/?uri=OJ:L_202402690\n\
+          Zdroj: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
       it:
         name: 'NIS2: Requisiti tecnici e metodologici - ALLEGATO REGOLAMENTO DI ESECUZIONE
           (UE) 2024/2690'
         description: "ALLEGATO del Regolamento di Esecuzione della Commissione che\
           \ stabilisce - ai sensi dell\u2019articolo 2 - le disposizioni di attuazione\
           \ della Direttiva (UE) 2022/2555 per quanto riguarda i requisiti tecnici\
-          \ e metodologici delle misure per la gestione dei rischi di cybersicurezza.\
-          \ Link: https://eur-lex.europa.eu/legal-content/ES/TXT/HTML/?uri=OJ:L_202402690"
+          \ e metodologici delle misure per la gestione dei rischi di cybersicurezza.\n\
+          Link: https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=OJ:L_202402690\n\
+          Fonte : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:1
       assessable: false

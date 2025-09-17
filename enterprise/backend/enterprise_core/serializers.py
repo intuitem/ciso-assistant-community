@@ -5,7 +5,7 @@ from core.serializers import (
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
-from iam.models import Folder, User
+from iam.models import Folder, User, Role
 
 from .models import ClientSettings
 from auditlog.models import LogEntry
@@ -38,6 +38,25 @@ class FolderWriteSerializer(BaseModelSerializer):
                     "errorFolderGraphMustNotContainCycles"
                 )
         return parent_folder
+
+
+class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = serializers.SerializerMethodField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
+
+
+class RoleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Role
+        fields = "__all__"
 
 
 class EditorPermissionMixin:
@@ -115,9 +134,13 @@ class LogEntrySerializer(serializers.ModelSerializer):
     Serializer for the LogEntry model.
     """
 
-    actor = FieldsRelatedField()
+    actor = serializers.SerializerMethodField(method_name="get_actor")
     action = serializers.CharField(source="get_action_display")
     content_type = serializers.SerializerMethodField(method_name="get_content_type")
+    folder = serializers.CharField(source="additional_data.folder", read_only=True)
+
+    def get_actor(self, obj):
+        return obj.additional_data["user_email"] if obj.additional_data else None
 
     def get_content_type(self, obj):
         return obj.content_type.name

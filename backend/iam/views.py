@@ -4,6 +4,7 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
+from django.db import models
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -203,9 +204,22 @@ class CurrentUserView(views.APIView):
                 {"error": "You are not logged in. Please ensure you are logged in."},
                 status=HTTP_401_UNAUTHORIZED,
             )
+
+        # getting only what we need
+        user_groups_data = list(request.user.user_groups.values("name", "builtin"))
+        user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
+
         accessible_domains = RoleAssignment.get_accessible_folders(
             Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
         )
+
+        domain_permissions = RoleAssignment.get_permissions_per_folder(
+            principal=request.user, recursive=True
+        )
+        domain_permissions = {
+            k: list(v) for k, v in domain_permissions.items()
+        }  # this what matters
+
         res_data = {
             "id": request.user.id,
             "email": request.user.email,
@@ -213,16 +227,14 @@ class CurrentUserView(views.APIView):
             "last_name": request.user.last_name,
             "is_active": request.user.is_active,
             "date_joined": request.user.date_joined,
-            "user_groups": request.user.get_user_groups(),
+            "user_groups": user_groups,
             "roles": request.user.get_roles(),
             "permissions": request.user.permissions,
             "is_third_party": request.user.is_third_party,
             "is_admin": request.user.is_admin(),
             "is_local": request.user.is_local,
             "accessible_domains": [str(f) for f in accessible_domains],
-            "domain_permissions": RoleAssignment.get_permissions_per_folder(
-                principal=request.user, recursive=True
-            ),
+            "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
             "preferences": request.user.preferences,
         }

@@ -6,9 +6,9 @@ on:
     branches: ["main"]
     paths:
       - "backend/**"
-# If two events are triggered within a short time in the same PR, cancel the run of the oldest event
+# Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 env:
   GITHUB_WORKFLOW: github_actions
@@ -52,11 +52,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -67,9 +74,9 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
-        run: find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m pytest
+        run: poetry run coverage run -m pytest
       - name: Display coverage report
         working-directory: ${{ env.backend-directory }}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
-        run: coverage report
+        run: poetry run coverage report

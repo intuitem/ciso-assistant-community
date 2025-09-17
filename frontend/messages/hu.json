@@ -190,6 +190,8 @@
 	"importMatrices": "Mátrixok importálása",
 	"importFrameworks": "Keretek importálása",
 	"importMappings": "Mappastruktúra importálása",
+	"importThreats": "Fenyegetések importálása",
+	"importReferenceControls": "Referencia kontrollok importálása",
 	"summary": "Összefoglaló",
 	"composer": "Összeállító",
 	"statistics": "Statisztika",
@@ -959,5 +961,13 @@
 	"matchingScenarios": "Egyező forgatókönyvek",
 	"select": "Kiválasztás",
 	"deselect": "Kijelölés megszüntetése",
-	"fearedEventAssetHelpText": "A félelemkeltő események általában üzleti értékekkel (elsődleges eszközökkel) vannak összekapcsolva. A támogatási eszközök itt is engedélyezettek a rugalmasság érdekében."
+	"fearedEventAssetHelpText": "A félelemkeltő események általában üzleti értékekkel (elsődleges eszközökkel) vannak összekapcsolva. A támogatási eszközök itt is engedélyezettek a rugalmasság érdekében.",
+	"saveAndContinue": "Mentés és folytatás",
+	"nextOccurrenceStatus": "Következő előfordulás állapota",
+	"image": "Kép",
+	"securityObjectives": "Biztonsági tulajdonságok",
+	"securityObjectiveScale": "Biztonsági tulajdonságok skálája",
+	"securityObjectiveScaleHelpText": "Válassza ki a biztonsági tulajdonságok skáláját (alapértelmezés szerint 1-től 4-ig)",
+	"actor": "Szereplő",
+	"action": "Művelet"
 }

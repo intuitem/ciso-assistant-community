@@ -1,0 +1,18 @@
+subject: "CISO Assistant: You have been assigned to '${control_name}'"
+body: |
+  Hello,
+
+  You have been assigned to the following Control:
+
+  - Name: ${control_name}
+  - Description: ${control_description}
+  - Reference ID: ${control_ref_id}
+  - Status: ${control_status}
+  - Priority: ${control_priority}
+  - ETA: ${control_eta}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view and manage this control:
+  ${ciso_assistant_url}
+
+  Thank you.

@@ -17,8 +17,10 @@ export default {
 	threatName: 'Test threat',
 	description: 'Test description',
 	biaName: 'Test BIA',
-	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
+	file: new URL('../utils/test_image.png', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
+	favicon: new URL('../utils/test_favicon.ico', import.meta.url).pathname,
+	logo: new URL('../utils/test_logo.png', import.meta.url).pathname,
 	user: {
 		email: 'user@tests.com',
 		password: 'pass123wordTest',
@@ -221,7 +223,20 @@ export default {
 				'view_killchain',
 				'add_killchain',
 				'change_killchain',
-				'delete_killchain'
+				'delete_killchain',
+				// crq
+				'view_quantitativeriskstudy',
+				'add_quantitativeriskstudy',
+				'change_quantitativeriskstudy',
+				'delete_quantitativeriskstudy',
+				'view_quantitativeriskscenario',
+				'add_quantitativeriskscenario',
+				'change_quantitativeriskscenario',
+				'delete_quantitativeriskscenario',
+				'view_quantitativeriskhypothesis',
+				'add_quantitativeriskhypothesis',
+				'change_quantitativeriskhypothesis',
+				'delete_quantitativeriskhypothesis'
 			]
 		},
 		reader: {
@@ -285,7 +300,11 @@ export default {
 				'view_campaign',
 				'view_elementaryaction',
 				'view_operatingmode',
-				'view_killchain'
+				'view_killchain',
+				// crq
+				'view_quantitativeriskstudy',
+				'view_quantitativeriskscenario',
+				'view_quantitativeriskhypothesis'
 			]
 		},
 		domainManager: {
@@ -487,7 +506,20 @@ export default {
 				'view_killchain',
 				'add_killchain',
 				'change_killchain',
-				'delete_killchain'
+				'delete_killchain',
+				// crq
+				'view_quantitativeriskstudy',
+				'add_quantitativeriskstudy',
+				'change_quantitativeriskstudy',
+				'delete_quantitativeriskstudy',
+				'view_quantitativeriskscenario',
+				'add_quantitativeriskscenario',
+				'change_quantitativeriskscenario',
+				'delete_quantitativeriskscenario',
+				'view_quantitativeriskhypothesis',
+				'add_quantitativeriskhypothesis',
+				'change_quantitativeriskhypothesis',
+				'delete_quantitativeriskhypothesis'
 			]
 		},
 		approver: {
@@ -548,7 +580,11 @@ export default {
 				'view_datatransfer',
 				'view_elementaryaction',
 				'view_operatingmode',
-				'view_killchain'
+				'view_killchain',
+				// crq
+				'view_quantitativeriskstudy',
+				'view_quantitativeriskscenario',
+				'view_quantitativeriskhypothesis'
 			]
 		}
 	},

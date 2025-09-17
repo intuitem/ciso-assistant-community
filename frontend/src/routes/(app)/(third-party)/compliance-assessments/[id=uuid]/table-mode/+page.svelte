@@ -6,6 +6,8 @@
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -324,13 +326,139 @@
 				</div>
 			{/if}
 		</div>
-		<ul data-testid="requirement-assessments">
-			{#each requirementAssessments as requirementAssessment, i}
-				<li class="list-none">
-					<span class="relative flex justify-center py-4">
+		{#each requirementAssessments as requirementAssessment, i}
+			<div class="w-2"></div>
+
+			<span class="relative flex justify-center py-4">
+				<div
+					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
+				></div>
+
+				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
+					{getTitle(requirementAssessment)}
+				</span>
+			</span>
+			<div class="h-2"></div>
+			<div
+				class="flex flex-col items-center justify-center border px-4 py-2 shadow-sm rounded-xl space-y-2"
+			>
+				{#if requirementAssessment.description}
+					<div class="card w-full font-light text-lg p-4 preset-tonal-primary">
+						<h2 class="font-semibold text-base flex flex-row justify-between">
+							<div>
+								<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
+							</div>
+						</h2>
+						<MarkdownRenderer content={requirementAssessment.description} />
+					</div>
+				{/if}
+				{#if requirementAssessment.assessable}
+					{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference.result}
 						<div
-							class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
-						></div>
+							class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
+						>
+							<h2 class="font-semibold text-base flex flex-row justify-between">
+								<div>
+									<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
+								</div>
+								<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
+									{#if !hideSuggestionHashmap[requirementAssessment.id]}
+										<i class="fa-solid fa-eye"></i>
+									{:else}
+										<i class="fa-solid fa-eye-slash"></i>
+									{/if}
+								</button>
+							</h2>
+							{#if !hideSuggestionHashmap[requirementAssessment.id]}
+								{#if data.requirements[i].annotation}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-pencil"></i>
+											{m.annotation()}
+										</p>
+										<div class="py-1">
+											<MarkdownRenderer content={data.requirements[i].annotation} />
+										</div>
+									</div>
+								{/if}
+								{#if data.requirements[i].typical_evidence}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-pencil"></i>
+											{m.typicalEvidence()}
+										</p>
+										<div class="py-1">
+											<MarkdownRenderer content={data.requirements[i].typical_evidence} />
+										</div>
+									</div>
+								{/if}
+								{#if requirementAssessment.mapping_inference.result}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-link"></i>
+											{m.mappingInference()}
+										</p>
+										<span class="text-xs text-gray-500"
+											><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
+										>
+										<ul class="list-disc ml-4">
+											<li>
+												<p>
+													<a
+														class="anchor"
+														href="/requirement-assessments/{requirementAssessment.mapping_inference
+															.source_requirement_assessment.id}"
+													>
+														{requirementAssessment.mapping_inference.source_requirement_assessment
+															.str}
+													</a>
+												</p>
+												<p class="whitespace-pre-line py-1">
+													<span class="italic">{m.coverageColon()}</span>
+													<span class="badge h-fit">
+														{safeTranslate(
+															requirementAssessment.mapping_inference.source_requirement_assessment
+																.coverage
+														)}
+													</span>
+												</p>
+												{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+													<p class="whitespace-pre-line py-1">
+														<span class="italic">{m.scoreSemiColon()}</span>
+														<span class="badge h-fit">
+															{safeTranslate(
+																requirementAssessment.mapping_inference
+																	.source_requirement_assessment.score
+															)}
+														</span>
+													</p>
+												{/if}
+												<p class="whitespace-pre-line py-1">
+													<span class="italic">{m.suggestionColon()}</span>
+													<span
+														class="badge {getClassesText(
+															requirementAssessment.mapping_inference.result
+														)} h-fit"
+														style="background-color: {complianceResultColorMap[
+															requirementAssessment.mapping_inference.result
+														]};"
+													>
+														{safeTranslate(requirementAssessment.mapping_inference.result)}
+													</span>
+												</p>
+												{#if requirementAssessment.mapping_inference.annotation}
+													<p class="whitespace-pre-line py-1">
+														<span class="italic">{m.annotationColon()}</span>
+														{requirementAssessment.mapping_inference.annotation}
+													</p>
+												{/if}
+											</li>
+										</ul>
+									</div>
+								{/if}
+							{/if}
+						</div>
+					{/if}
 
 						<h3 class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
 							{getTitle(requirementAssessment)}
@@ -481,9 +609,113 @@
 												}}
 											/>
 										</div>
-										<div class="flex flex-col items-center w-1/2">
-											<p class="flex items-center font-semibold text-purple-600 italic">
-												{m.result()}
+									{/snippet}
+								</Score>
+								{#if complianceAssessment.show_documentation_score}
+									<Score
+										form={docScoreForms[requirementAssessment.id]}
+										min_score={complianceAssessment.min_score}
+										max_score={complianceAssessment.max_score}
+										scores_definition={data.scores.scores_definition}
+										field="documentation_score"
+										label={m.documentationScore()}
+										isDoc={true}
+										styles="w-full p-1"
+										onChange={(newScore) => {
+											requirementAssessment.documentation_score = newScore;
+											updateScore(requirementAssessment);
+										}}
+										disabled={!requirementAssessment.is_scored ||
+											requirementAssessment.result === 'not_applicable'}
+									/>
+								{/if}
+							{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
+								<div class="flex flex-row items-center space-x-2 w-full">
+									<span>{m.implementationScoreResult()}</span>
+									<ProgressRing
+										strokeWidth="20px"
+										meterStroke={displayScoreColor(
+											requirementAssessment.score,
+											complianceAssessment.max_score
+										)}
+										value={(requirementAssessment.score * 100) / complianceAssessment.max_score}
+										size="size-10"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRing>
+									<span>{m.documentationScoreResult()}</span>
+									<ProgressRing
+										strokeWidth="20px"
+										meterStroke={displayScoreColor(
+											requirementAssessment.documentation_score,
+											complianceAssessment.max_score
+										)}
+										value={(requirementAssessment.documentation_score * 100) /
+											complianceAssessment.max_score}
+										size="size-10"
+									>
+										{requirementAssessment.documentation_score ?? '--'}
+									</ProgressRing>
+								</div>
+							{:else if requirementAssessment.is_scored}
+								<div class="flex flex-row items-center space-x-2 w-full">
+									<span>{m.scoreResult()}</span>
+									<ProgressRing
+										strokeWidth="20px"
+										meterStroke={displayScoreColor(
+											requirementAssessment.score,
+											complianceAssessment.max_score
+										)}
+										value={(requirementAssessment.score * 100) / complianceAssessment.max_score}
+										size="size-10"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRing>
+								</div>
+							{/if}
+							<Accordion
+								value={accordionItems[requirementAssessment.id]}
+								onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
+							>
+								{#if shallow}
+									{#if requirementAssessment.observation}
+										<MarkdownRenderer
+											content={requirementAssessment.observation}
+											class="text-primary-500"
+										/>
+									{:else}
+										<p class="text-gray-400 italic">{m.noObservation()}</p>
+									{/if}
+								{:else}
+									<Accordion.Item value="observation">
+										{#snippet control()}
+											<p class="flex">{m.observation()}</p>
+										{/snippet}
+										{#snippet panel()}
+											<TableMarkdownField
+												bind:value={requirementAssessment.observation}
+												onSave={async (newValue) => {
+													await update(requirementAssessment, 'observation');
+													requirementAssessment.observationBuffer = newValue;
+												}}
+											/>
+										{/snippet}
+									</Accordion.Item>
+								{/if}
+								{#if requirementAssessment.evidences.length === 0 && shallow}
+									<p class="text-gray-400 italic">{m.noEvidences()}</p>
+								{:else}
+									<Accordion.Item value="evidence">
+										{#snippet control()}
+											<p class="flex items-center space-x-2">
+												<span>{m.evidence()}</span>
+												{#key addedEvidence}
+													{#if requirementAssessment.evidences != null}
+														<span class="badge preset-tonal-primary"
+															>{requirementAssessment.evidences.length}</span
+														>
+													{/if}
+												{/key}
 											</p>
 											<RadioGroup
 												possibleOptions={result_options}
