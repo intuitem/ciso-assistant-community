@@ -1,12 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let data;
-	export let names;
-	export let uuids;
 	import { m } from '$paraglide/messages';
+	interface Props {
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		data: any;
+		names: any;
+		uuids: any;
+		title?: string;
+	}
+
+	let {
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		data,
+		names,
+		uuids,
+		title = ''
+	}: Props = $props();
 
 	function truncateString(maxLength: number) {
 		return (name) => (name.length > maxLength ? name.substring(0, maxLength) + '...' : name);
@@ -29,10 +42,9 @@
 		const grid = {
 			left: 150,
 			right: 10,
-			top: 50,
+			top: 80,
 			bottom: 50
 		};
-
 		const seriesNames = [
 			'not assessed',
 			'partially compliant',
@@ -80,9 +92,12 @@
 
 		var option = {
 			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+			title: { text: title },
 			legend: {
 				selectedMode: false,
-				formatter: (name) => getSeriesLabel(name)
+				formatter: (name) => getSeriesLabel(name),
+				top: 35,
+				left: 'center'
 			},
 			grid,
 			xAxis: {
@@ -104,7 +119,7 @@
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: {
-					type: 'shadow'
+					type: 'shadow-sm'
 				},
 				formatter: (params) => {
 					// Find the index of the hovered item and show full name
@@ -123,7 +138,7 @@
 </script>
 
 {#if data.length > 0}
-	<div id={chart_id} class="{width} {height} {classesContainer}" />
+	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
 {:else}
 	<div class="flex justify-center items-center h-full">
 		<div class="font-semibold">

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ciso from '$lib/assets/ciso.svg';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { persisted } from 'svelte-persisted-store';
 
 	const logoB64 = persisted('logo', {
@@ -10,11 +10,15 @@
 		mimeType: ''
 	});
 
-	export let height = 200;
-	export let width = 200;
+	interface Props {
+		height?: number;
+		width?: number;
+	}
 
-	const clientSettings = $page.data.clientSettings;
-	let logo: string;
+	let { height = 200, width = 200 }: Props = $props();
+
+	const clientSettings = page.data.clientSettings;
+	let logo: string = $state();
 
 	onMount(async () => {
 		if (!clientSettings.settings.logo) {
@@ -35,9 +39,9 @@
 
 <div class="flex flex-col items-center">
 	{#if logo}
-		<img {width} {height} src={logo} alt="Ciso-assistant icon" />
+		<img {width} {height} src={logo} alt="Ciso-assistant icon" data-testid="logo-image" />
 	{/if}
 	{#if clientSettings.settings.name}
-		<p class="font-semibold text-center">{clientSettings.settings.name}</p>
+		<p class="font-semibold text-center" data-testid="client-name">{clientSettings.settings.name}</p>
 	{/if}
 </div>

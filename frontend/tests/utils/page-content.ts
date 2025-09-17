@@ -7,6 +7,7 @@ export class PageContent extends BasePage {
 	readonly form: FormContent;
 	readonly itemDetail: PageDetail;
 	readonly addButton: Locator;
+	readonly importButton: Locator;
 	readonly editButton: Locator;
 	readonly searchInput: Locator;
 	readonly deleteModalTitle: Locator;
@@ -31,8 +32,9 @@ export class PageContent extends BasePage {
 				: new FormContent(page, new RegExp(/New /.source + name.source), fields);
 		this.itemDetail = new PageDetail(page, url, this.form, '');
 		this.addButton = this.page.getByTestId('add-button');
+		this.importButton = this.page.getByTestId('import-button');
 		this.editButton = this.page.getByTestId('edit-button');
-		this.searchInput = this.page.getByTestId('search-input');
+		this.searchInput = this.page.getByRole('searchbox').first();
 		this.deleteModalTitle = this.page.getByTestId('modal-title');
 		this.deleteModalConfirmButton = this.page.getByTestId('delete-confirm-button');
 		this.deleteModalCancelButton = this.page.getByTestId('delete-cancel-button');
@@ -40,7 +42,12 @@ export class PageContent extends BasePage {
 		this.deleteModalPromptConfirmText = this.page.getByTestId('delete-prompt-confirm-text');
 	}
 
-	async createItem(values: { [k: string]: any }, dependency?: any) {
+	async createItem(
+		values: { [k: string]: any },
+		dependency?: any,
+		page?: Page,
+		addButtonValue?: string
+	) {
 		if (dependency) {
 			await this.page.goto('/libraries');
 			await this.page.waitForURL('/libraries');
@@ -49,8 +56,17 @@ export class PageContent extends BasePage {
 			await this.goto();
 		}
 
-		await this.addButton.click();
+		// Default to the first add button if no value is provided
+		// addButtonValue is useful when there is multiple tabs with add buttons
+		if (addButtonValue === undefined) {
+			await this.addButton.first().click();
+		} else {
+			await this.addButton.filter({ hasText: addButtonValue }).click();
+		}
 		await this.form.hasTitle();
+		if (page) {
+			await page.waitForLoadState('networkidle');
+		}
 		await this.form.fill(values);
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
@@ -71,7 +87,8 @@ export class PageContent extends BasePage {
 
 	async importLibrary(name: string, urn?: string, language = 'English') {
 		await this.page.waitForTimeout(3000);
-		await this.page.getByTestId('search-input').fill(name);
+		await this.page.getByRole('searchbox').first().clear();
+		await this.page.getByRole('searchbox').first().fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&
 			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
@@ -89,7 +106,8 @@ export class PageContent extends BasePage {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
 				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-				await this.page.getByTestId('search-input').fill(name);
+				await this.page.getByRole('searchbox').first().clear();
+				await this.page.getByRole('searchbox').first().fill(name);
 			}
 			await expect(this.getRow(name)).toBeVisible();
 			return;
@@ -100,7 +118,8 @@ export class PageContent extends BasePage {
 		});
 		await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-		await this.page.getByTestId('search-input').fill(name);
+		await this.page.getByRole('searchbox').first().clear();
+		await this.page.getByRole('searchbox').first().fill(name);
 		await expect(this.getRow(name)).toBeVisible();
 	}
 
@@ -131,7 +150,7 @@ export class PageContent extends BasePage {
 	}
 
 	tab(value: string) {
-		return this.page.getByTestId('tab').filter({ hasText: value });
+		return this.page.getByTestId('tabs-control').filter({ hasText: value });
 	}
 
 	editItemButton(value: string) {

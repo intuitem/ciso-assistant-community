@@ -5,11 +5,21 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Score from '../Score.svelte';
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 </script>
 
 <AutocompleteSelect
@@ -43,6 +53,14 @@
 	optionsEndpoint="assets"
 	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
 	field="assets"
 	cacheLock={cacheLocks['assets']}
 	bind:cachedValue={formDataCache['assets']}

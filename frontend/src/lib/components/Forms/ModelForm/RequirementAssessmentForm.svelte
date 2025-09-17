@@ -1,17 +1,32 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		context: string;
+		object?: any;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		context,
+		object
+	}: Props = $props();
+
+	let isParentLocked = $derived(object?.compliance_assessment?.is_locked || false);
 </script>
 
 {#if context === 'selectEvidences'}
@@ -40,7 +55,7 @@
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}

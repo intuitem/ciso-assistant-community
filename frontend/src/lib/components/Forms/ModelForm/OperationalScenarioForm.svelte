@@ -6,19 +6,32 @@
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+		object?: any; // Optional object for additional data
+	}
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context,
+		object = null // Optional object for additional data
+	}: Props = $props();
 
-	let activeActivity: string | null = null;
-	$page.url.searchParams.forEach((value, key) => {
+	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
+
+	let activeActivity: string | null = $state(null);
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -36,6 +49,14 @@
 	bind:cachedValue={formDataCache['ebios_rm_study']}
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
+/>
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
 />
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
@@ -76,7 +97,7 @@
 			optionsEndpoint="attack-paths?is_selected=true&used=false"
 			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 			field="attack_path"
-			label={m.attackPath()}
+			label={m.attackPath() + ` (${m.strategicScenario()})`}
 		/>
 	{/if}
 </div>
@@ -92,15 +113,17 @@
 	>
 		{m.activityTwo()}
 	</p>
-	<Select
-		{form}
-		options={model.selectOptions['likelihood']}
-		field="likelihood"
-		label={m.likelihood()}
-		cacheLock={cacheLocks['likelihood']}
-		bind:cachedValue={formDataCache['likelihood']}
-		helpText={m.likelihoodHelpText()}
-	/>
+	{#if object.quotation_method === 'manual'}
+		<Select
+			{form}
+			options={model.selectOptions['likelihood']}
+			field="likelihood"
+			label={m.likelihood()}
+			cacheLock={cacheLocks['likelihood']}
+			bind:cachedValue={formDataCache['likelihood']}
+			helpText={m.likelihoodHelpText()}
+		/>
+	{/if}
 	<TextArea
 		{form}
 		field="justification"

@@ -55,6 +55,7 @@ services:
       reverse_proxy /api/iam/sso/redirect/ backend:8000
       reverse_proxy /api/accounts/saml/0/acs/ backend:8000
       reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+      reverse_proxy /api/accounts/oidc/openid_connect/login/callback/ backend:8000
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'

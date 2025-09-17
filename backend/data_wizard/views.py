@@ -12,6 +12,10 @@ from core.models import (
     RequirementAssessment,
     Framework,
     RequirementNode,
+    RiskAssessment,
+    RiskScenario,
+    RiskMatrix,
+    AppliedControl,
 )
 from core.serializers import (
     AssetWriteSerializer,
@@ -22,6 +26,8 @@ from core.serializers import (
     FindingsAssessmentWriteSerializer,
     FindingWriteSerializer,
     UserWriteSerializer,
+    RiskAssessmentWriteSerializer,
+    RiskScenarioWriteSerializer,
 )
 from iam.models import RoleAssignment
 
@@ -56,9 +62,10 @@ class LoadFileView(APIView):
         folder_id = request.META.get("HTTP_X_FOLDER_ID")
         perimeter_id = request.META.get("HTTP_X_PERIMETER_ID")
         framework_id = request.META.get("HTTP_X_FRAMEWORK_ID")
+        matrix_id = request.META.get("HTTP_X_MATRIX_ID")
 
         logger.info(
-            f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}"
+            f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}, matrix: {matrix_id}"
         )
 
         # get viewable and actionable folders, perimeters and frameworks
@@ -69,7 +76,13 @@ class LoadFileView(APIView):
             # Read Excel file into a pandas DataFrame
             df = pd.read_excel(excel_data).fillna("")
             res = self.process_data(
-                request, df, model_type, folder_id, perimeter_id, framework_id
+                request,
+                df,
+                model_type,
+                folder_id,
+                perimeter_id,
+                framework_id,
+                matrix_id,
             )
 
         except Exception as e:
@@ -80,12 +93,19 @@ class LoadFileView(APIView):
             )
 
         return Response(
-            {"message": "File loaded successfully", "results": res},
+            {"message": "File loaded successfully", "results": []},
             status=status.HTTP_200_OK,
         )
 
     def process_data(
-        self, request, dataframe, model_type, folder_id, perimeter_id, framework_id
+        self,
+        request,
+        dataframe,
+        model_type,
+        folder_id,
+        perimeter_id,
+        framework_id,
+        matrix_id=None,
     ):
         records = dataframe.to_dict(orient="records")
         logger.warning("I am here")
@@ -112,6 +132,10 @@ class LoadFileView(APIView):
                 records,
                 folder_id,
                 perimeter_id,
+            )
+        elif model_type == "RiskAssessment":
+            return self._process_risk_assessment(
+                request, records, folder_id, perimeter_id, matrix_id
             )
         else:
             return {
@@ -580,3 +604,354 @@ class LoadFileView(APIView):
 
         # Process the Excel file
         return self.process_excel_file(request, io.BytesIO(file_data))
+
+    def _process_risk_assessment(
+        self, request, records, folder_id, perimeter_id, matrix_id
+    ):
+        """Process risk assessment import with the specified column structure"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        try:
+            # Get the perimeter and its domain
+            perimeter = Perimeter.objects.get(id=perimeter_id)
+            domain = perimeter.folder
+
+            # Get the risk matrix
+            risk_matrix = RiskMatrix.objects.get(id=matrix_id)
+
+            # Generate a timestamp-based name for the risk assessment
+            from datetime import datetime
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            assessment_name = f"Risk_Assessment_{timestamp}"
+
+            # Create the risk assessment
+            assessment_data = {
+                "name": assessment_name,
+                "perimeter": perimeter_id,
+                "risk_matrix": matrix_id,
+                "folder": domain.id,
+                "description": f"Imported risk assessment from Excel on {timestamp}",
+            }
+
+            risk_assessment_serializer = RiskAssessmentWriteSerializer(
+                data=assessment_data, context={"request": request}
+            )
+
+            if not risk_assessment_serializer.is_valid():
+                return {
+                    "successful": 0,
+                    "failed": len(records),
+                    "errors": [
+                        {
+                            "error": "Failed to create risk assessment",
+                            "details": risk_assessment_serializer.errors,
+                        }
+                    ],
+                }
+
+            risk_assessment = risk_assessment_serializer.save()
+            logger.info(
+                f"Created risk assessment: {assessment_name} with ID {risk_assessment.id}"
+            )
+
+            # Build matrix mapping dictionaries
+            matrix_mappings = self._build_matrix_mappings(risk_matrix)
+
+            # Process controls first - collect all unique control names
+            all_controls = set()
+            for record in records:
+                existing_controls = record.get("existing_controls", "").strip()
+                additional_controls = record.get("additional_controls", "").strip()
+
+                if existing_controls:
+                    all_controls.update(
+                        [
+                            ctrl.strip()
+                            for ctrl in existing_controls.split("\n")
+                            if ctrl.strip()
+                        ]
+                    )
+                if additional_controls:
+                    all_controls.update(
+                        [
+                            ctrl.strip()
+                            for ctrl in additional_controls.split("\n")
+                            if ctrl.strip()
+                        ]
+                    )
+
+            # Create or find controls in the domain
+            control_mapping = self._create_or_find_controls(
+                list(all_controls), domain, request
+            )
+
+            # Process each record to create risk scenarios
+            for record in records:
+                try:
+                    scenario_data = self._process_risk_scenario_record(
+                        record,
+                        risk_assessment,
+                        matrix_mappings,
+                        control_mapping,
+                        request,
+                    )
+                    if scenario_data:
+                        results["successful"] += 1
+                    else:
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {
+                                "record": record,
+                                "error": "Failed to create risk scenario",
+                            }
+                        )
+
+                except Exception as e:
+                    logger.warning(f"Error creating risk scenario: {str(e)}")
+                    results["failed"] += 1
+                    results["errors"].append({"record": record, "error": str(e)})
+
+            logger.info(
+                f"Risk Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
+            )
+            return results
+
+        except Perimeter.DoesNotExist:
+            return {
+                "successful": 0,
+                "failed": len(records),
+                "errors": [
+                    {"error": f"Perimeter with ID {perimeter_id} does not exist"}
+                ],
+            }
+        except RiskMatrix.DoesNotExist:
+            return {
+                "successful": 0,
+                "failed": len(records),
+                "errors": [
+                    {"error": f"Risk matrix with ID {matrix_id} does not exist"}
+                ],
+            }
+        except Exception as e:
+            logger.error(f"Error in risk assessment processing: {str(e)}")
+            return {
+                "successful": 0,
+                "failed": len(records),
+                "errors": [{"error": f"Failed to process risk assessment: {str(e)}"}],
+            }
+
+    def _build_matrix_mappings(self, risk_matrix):
+        """Build label-to-value mapping dictionaries for probability and impact"""
+        mappings = {"probability": {}, "impact": {}}
+
+        try:
+            matrix_definition = risk_matrix.json_definition
+
+            # Build probability mapping
+            if "probability" in matrix_definition:
+                for prob_def in matrix_definition["probability"]:
+                    prob_id = prob_def.get("id")
+                    name = prob_def.get("name", "")
+
+                    # Add base name
+                    if name and prob_id is not None:
+                        mappings["probability"][name.lower()] = prob_id
+
+                    # Add translated names
+                    if "translations" in prob_def:
+                        for lang, translation in prob_def["translations"].items():
+                            translated_name = translation.get("name", "")
+                            if translated_name and prob_id is not None:
+                                mappings["probability"][translated_name.lower()] = (
+                                    prob_id
+                                )
+
+            # Build impact mapping
+            if "impact" in matrix_definition:
+                for impact_def in matrix_definition["impact"]:
+                    impact_id = impact_def.get("id")
+                    name = impact_def.get("name", "")
+
+                    # Add base name
+                    if name and impact_id is not None:
+                        mappings["impact"][name.lower()] = impact_id
+
+                    # Add translated names
+                    if "translations" in impact_def:
+                        for lang, translation in impact_def["translations"].items():
+                            translated_name = translation.get("name", "")
+                            if translated_name and impact_id is not None:
+                                mappings["impact"][translated_name.lower()] = impact_id
+
+            # Note: Risk levels are automatically computed by the system
+            # based on probability and impact values, so no need to map them
+
+        except Exception as e:
+            logger.warning(f"Error building matrix mappings: {str(e)}")
+            logger.debug(f"Matrix definition structure: {matrix_definition}")
+
+        return mappings
+
+    def _create_or_find_controls(self, control_names, domain, request):
+        """Create or find controls in the specified domain"""
+        control_mapping = {}
+
+        for control_name in control_names:
+            if not control_name:
+                continue
+
+            # Try to find existing control in the domain
+            existing_control = AppliedControl.objects.filter(
+                name=control_name, folder=domain
+            ).first()
+
+            if existing_control:
+                control_mapping[control_name] = existing_control.id
+            else:
+                # Create new control
+                try:
+                    control_data = {
+                        "name": control_name,
+                        "folder": domain.id,
+                        "description": f"Control imported from risk assessment",
+                        "status": "to_do",
+                    }
+
+                    control_serializer = AppliedControlWriteSerializer(
+                        data=control_data, context={"request": request}
+                    )
+
+                    if control_serializer.is_valid():
+                        control = control_serializer.save()
+                        control_mapping[control_name] = control.id
+                        logger.info(f"Created control: {control_name}")
+                    else:
+                        logger.warning(
+                            f"Failed to create control {control_name}: {control_serializer.errors}"
+                        )
+
+                except Exception as e:
+                    logger.warning(f"Error creating control {control_name}: {str(e)}")
+
+        return control_mapping
+
+    def _process_risk_scenario_record(
+        self, record, risk_assessment, matrix_mappings, control_mapping, request
+    ):
+        """Process a single risk scenario record"""
+        try:
+            # Extract basic fields
+            ref_id = record.get("ref_id", "")
+            name = record.get("name", "")
+            description = record.get("description", "")
+
+            if not name:
+                raise ValueError("Risk scenario name is required")
+
+            # Map risk values using matrix mappings
+            inherent_impact = self._map_risk_value(
+                record.get("inherent_impact", ""), matrix_mappings["impact"]
+            )
+            inherent_proba = self._map_risk_value(
+                record.get("inherent_proba", ""), matrix_mappings["probability"]
+            )
+
+            current_impact = self._map_risk_value(
+                record.get("current_impact", ""), matrix_mappings["impact"]
+            )
+            current_proba = self._map_risk_value(
+                record.get("current_proba", ""), matrix_mappings["probability"]
+            )
+
+            residual_impact = self._map_risk_value(
+                record.get("residual_impact", ""), matrix_mappings["impact"]
+            )
+            residual_proba = self._map_risk_value(
+                record.get("residual_proba", ""), matrix_mappings["probability"]
+            )
+
+            # Prepare risk scenario data
+            # Note: inherent_level, current_level, and residual_level will be computed automatically
+            scenario_data = {
+                "ref_id": ref_id,
+                "name": name,
+                "description": description,
+                "risk_assessment": risk_assessment.id,
+                "inherent_impact": inherent_impact,
+                "inherent_proba": inherent_proba,
+                "current_impact": current_impact,
+                "current_proba": current_proba,
+                "residual_impact": residual_impact,
+                "residual_proba": residual_proba,
+                "existing_controls": record.get("existing_controls", ""),
+            }
+
+            # Create the risk scenario
+            scenario_serializer = RiskScenarioWriteSerializer(
+                data=scenario_data, context={"request": request}
+            )
+
+            if not scenario_serializer.is_valid():
+                logger.warning(
+                    f"Risk scenario validation failed: {scenario_serializer.errors}"
+                )
+                return None
+
+            risk_scenario = scenario_serializer.save()
+
+            # Link existing controls
+            self._link_controls_to_scenario(
+                risk_scenario,
+                record.get("existing_controls", ""),
+                control_mapping,
+                "existing_applied_controls",
+            )
+
+            # Link additional controls
+            self._link_controls_to_scenario(
+                risk_scenario,
+                record.get("additional_controls", ""),
+                control_mapping,
+                "applied_controls",
+            )
+
+            return risk_scenario
+
+        except Exception as e:
+            logger.warning(f"Error processing risk scenario record: {str(e)}")
+            raise e
+
+    def _map_risk_value(self, value, mapping_dict):
+        """Map a risk value label to its numeric value using the mapping dictionary"""
+        if not value or not isinstance(value, str):
+            return -1
+
+        # Try exact match first
+        clean_value = value.strip().lower()
+        if clean_value in mapping_dict:
+            return mapping_dict[clean_value]
+
+        # If no match found, return -1 (undefined)
+        return -1
+
+    def _link_controls_to_scenario(
+        self, risk_scenario, controls_text, control_mapping, field_name
+    ):
+        """Link controls to a risk scenario based on control names"""
+        if not controls_text:
+            return
+
+        control_names = [
+            ctrl.strip() for ctrl in controls_text.split("\n") if ctrl.strip()
+        ]
+        control_ids = []
+
+        for control_name in control_names:
+            if control_name in control_mapping:
+                control_ids.append(control_mapping[control_name])
+
+        if control_ids:
+            # Get the field and set the many-to-many relationship
+            field = getattr(risk_scenario, field_name)
+            field.set(control_ids)

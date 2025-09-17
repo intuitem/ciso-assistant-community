@@ -20,7 +20,7 @@ from django.http import HttpResponse
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
 from core.models import StoredLibrary, LoadedLibrary, Framework
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
 from .helpers import update_translations, update_translations_in_object
@@ -49,7 +49,7 @@ class MultiStringFilter(df.CharFilter):
         return qs
 
 
-class LibraryMixinFilterSet(df.FilterSet):
+class LibraryMixinFilterSet(GenericFilterSet):
     locale = df.MultipleChoiceFilter(
         choices=[(language[0], language[0]) for language in settings.LANGUAGES],
         method="filter_locale",
@@ -360,11 +360,21 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
             )
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        value_set = set(value)
+
+        risk_matrix_keys = {"risk_matrix", "risk_matrices"}
+        requirement_mapping_set_keys = {
+            "requirement_mapping_set",
+            "requirement_mapping_sets",
+        }
+        framework_set = {"framework", "frameworks"}
+
         # For backward compatibility
-        if "risk_matrix" in value:
-            value.append("risk_matrices")
-        if "requirement_mapping_set" in value:
-            value.append("requirement_mapping_sets")
+        for key_set in [risk_matrix_keys, requirement_mapping_set_keys, framework_set]:
+            if value_set & key_set:
+                value_set |= key_set
+
+        value = list(value_set)
         union_qs = Q()
         _value = {
             k: v
@@ -462,7 +472,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
-        if lib.frameworks.count() == 0:
+        if not lib.frameworks.exists():
             return Response(
                 data="This library doesn't contain any framework.",
                 status=HTTP_404_NOT_FOUND,

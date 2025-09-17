@@ -5,18 +5,31 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Score from '../Score.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import type { SuperForm } from 'sveltekit-superforms';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let data: Record<string, any> = {};
+	interface Props {
+		form: SuperForm<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		data?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model = $bindable(),
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		data = {}
+	}: Props = $props();
+
+	const formStore = form.form;
 </script>
 
 <AutocompleteSelect
@@ -46,9 +59,9 @@
 		cacheLock={cacheLocks['framework']}
 		bind:cachedValue={formDataCache['framework']}
 		label={m.framework()}
-		on:change={async (e) => {
-			if (e.detail) {
-				await fetch(`/frameworks/${e.detail}`)
+		onChange={async (e) => {
+			if (e) {
+				await fetch(`/frameworks/${e}`)
 					.then((r) => r.json())
 					.then((r) => {
 						const implementation_groups = r['implementation_groups_definition'] || [];
@@ -81,15 +94,18 @@
 	label={m.entity()}
 	hidden={initialData.entity}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="solutions"
-	field="solutions"
-	cacheLock={cacheLocks['solutions']}
-	bind:cachedValue={formDataCache['solutions']}
-	label={m.solutions()}
-/>
+{#key $formStore?.entity}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="solutions"
+		optionsDetailedUrlParameters={[['provider_entity', $formStore.entity]]}
+		field="solutions"
+		cacheLock={cacheLocks['solutions']}
+		bind:cachedValue={formDataCache['solutions']}
+		label={m.solutions()}
+	/>
+{/key}
 <Score
 	{form}
 	label={m.criticality()}

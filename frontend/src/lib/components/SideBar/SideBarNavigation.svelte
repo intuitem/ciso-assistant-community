@@ -3,14 +3,12 @@
 
 	import SideBarItem from '$lib/components/SideBar/SideBarItem.svelte';
 	import SideBarCategory from '$lib/components/SideBar/SideBarCategory.svelte';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import { page } from '$app/stores';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
+	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { driverInstance } from '$lib/utils/stores';
 
-	export let sideBarVisibleItems: Record<string, boolean>;
-
-	const user = $page.data.user;
+	const user = page.data.user;
 
 	const items = navData.items
 		.map((item) => {
@@ -39,46 +37,67 @@
 		.filter((item) => item.items.length > 0); // Filter out items with no sub-items
 
 	import { lastAccordionItem } from '$lib/utils/stores';
+	interface Props {
+		sideBarVisibleItems: Record<string, boolean>;
+	}
+
+	let { sideBarVisibleItems }: Props = $props();
 
 	function lastAccordionItemOpened(value: string) {
 		lastAccordionItem.set(value);
 	}
 
-	function handleNavClick() {
+	function handleNavClick(item: any) {
+		lastAccordionItemOpened(item.name);
 		setTimeout(() => {
 			$driverInstance?.moveNext();
 		}, 0);
 	}
 </script>
 
-<nav class="flex-grow scrollbar">
+<nav class="grow scrollbar">
 	<Accordion
-		autocollapse
-		spacing="space-y-4"
+		spaceY="space-y-4"
 		regionPanel="space-y-2"
 		caretClosed="-rotate-90"
 		caretOpen=""
+		value={$lastAccordionItem}
+		onValueChange={(e) => ($lastAccordionItem = e.value)}
 	>
+		{#snippet iconOpen()}
+			<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+				<path
+					d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+				/>
+			</svg>
+		{/snippet}
+		{#snippet iconClosed()}
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="-rotate-90"
+				width="14px"
+				height="14px"
+				viewBox="0 0 448 512"
+			>
+				<path
+					d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+				/>
+			</svg>
+		{/snippet}
 		{#each items as item}
-			<!-- This commented code adds Accordion persistency but changes its visual behavior -->
-			<!-- {#if $lastAccordionItem === item.name}
-				<AccordionItem id={item.name} on:click={() => lastAccordionItemOpened(item.name)}  open>
-					<svelte:fragment slot="summary"><SideBarCategory {item} /></svelte:fragment>
-					<svelte:fragment slot="content"><SideBarItem item={item.items} /></svelte:fragment>
-				</AccordionItem>
-			{:else} -->
 			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false}
-				<AccordionItem
+				<Accordion.Item
 					id={item.name.toLowerCase().replace(' ', '-')}
-					on:click={() => lastAccordionItemOpened(item.name)}
-					on:click={handleNavClick}
-					open={$lastAccordionItem === item.name}
+					onClick={() => handleNavClick(item)}
+					value={item.name}
 				>
-					<svelte:fragment slot="summary"><SideBarCategory {item} /></svelte:fragment>
-					<svelte:fragment slot="content"
-						><SideBarItem item={item.items} {sideBarVisibleItems} /></svelte:fragment
-					>
-				</AccordionItem>
+					{#snippet control()}
+						<SideBarCategory {item} />
+					{/snippet}
+					{#snippet panel()}
+						<SideBarItem item={item.items} {sideBarVisibleItems} />
+					{/snippet}
+				</Accordion.Item>
 			{/if}
 		{/each}
 	</Accordion>

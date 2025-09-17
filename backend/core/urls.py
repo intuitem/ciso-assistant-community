@@ -40,7 +40,6 @@ router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
-router.register(r"roles", RoleViewSet, basename="roles")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
 router.register(r"frameworks", FrameworkViewSet, basename="frameworks")
 router.register(r"evidences", EvidenceViewSet, basename="evidences")
@@ -48,6 +47,21 @@ router.register(
     r"compliance-assessments",
     ComplianceAssessmentViewSet,
     basename="compliance-assessments",
+)
+router.register(
+    r"campaigns",
+    CampaignViewSet,
+    basename="campaigns",
+)
+router.register(
+    r"organisation-objectives",
+    OrganisationObjectiveViewSet,
+    basename="organisation-objectives",
+)
+router.register(
+    r"organisation-issues",
+    OrganisationIssueViewSet,
+    basename="organisation-issues",
 )
 router.register(r"requirement-nodes", RequirementViewSet, basename="requirement-nodes")
 router.register(
@@ -68,11 +82,6 @@ router.register(
     basename="filtering-labels",
 )
 router.register(
-    r"qualifications",
-    QualificationViewSet,
-    basename="qualifications",
-)
-router.register(
     r"security-exceptions",
     SecurityExceptionViewSet,
     basename="security-exceptions",
@@ -85,6 +94,7 @@ router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
+router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -108,6 +118,7 @@ urlpatterns = [
     path("ebios-rm/", include("ebios_rm.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
+    path("crq/", include("crq.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
@@ -116,6 +127,9 @@ urlpatterns = [
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "accounts/oidc/", include("iam.sso.oidc.urls")
+    ),  # NOTE: This has to be placed before the allauth urls, otherwise our OIDC login implementation will not be used
     path(
         "accounts/saml/", include("iam.sso.saml.urls")
     ),  # NOTE: This has to be placed before the allauth urls, otherwise our ACS implementation will not be used
@@ -133,7 +147,12 @@ urlpatterns = [
         "compliance-assessments/<uuid:pk>/action-plan/",
         ComplianceAssessmentActionPlanList.as_view(),
     ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/",
+        RiskAssessmentActionPlanList.as_view(),
+    ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
+    path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
 ]
 
 # Additional modules take precedence over the default modules

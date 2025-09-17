@@ -190,6 +190,8 @@
 	"importMatrices": "Importér matricer",
 	"importFrameworks": "Importér rammeværk",
 	"importMappings": "Importér kortlægninger",
+	"importThreats": "Importer trusler",
+	"importReferenceControls": "Importer referenskontroller",
 	"summary": "Resumé",
 	"composer": "Sammensætning",
 	"statistics": "Statistik",
@@ -820,7 +822,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maksimal acceptabel nedetid",
-	"securityObjectives": "Sikkerhedsmål",
 	"disasterRecoveryObjectives": "Mål for katastrofegendannelse",
 	"noExpirationDateSet": "Ingen udløbsdato angivet",
 	"sumpageTotal": "total",
@@ -885,9 +886,7 @@
 	"fixed": "Rettet",
 	"general": "generelt",
 	"generalSettingsDescription": "Konfigurer dine generelle indstillinger her",
-	"securityObjectiveScale": "Skala for sikkerhedsmål",
 	"generalSettingsUpdated": "Generelle indstillinger opdateret",
-	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsmål (1 til 4 som standard)",
 	"labels": "Etiketter",
 	"addLabel": "Tilføj etiket",
 	"labelsHelpText": "Etiketter bruges til at kategorisere og filtrere elementer",
@@ -1010,7 +1009,7 @@
 	"workshopOne": "Workshop 1",
 	"refIdSemiColon": "Reference-ID:",
 	"addFearedEvent": "Tilføj frygtet hændelse",
-	"addEbiosRMstudy": "Tilføj Ebios RM-analyse",
+	"addEbiosRmStudy": "Tilføj Ebios RM-analyse",
 	"noAuthor": "Ingen forfatter tildelt",
 	"noReviewer": "Ingen gennemlæser tildelt",
 	"selectAudit": "Vælg revision",
@@ -1066,7 +1065,7 @@
 	"likelihoodHelpText": "Estimat for sandsynligheden for at en risiko opstår",
 	"studyAssetHelpText": "Primære (forretningsaktiver) og understøttende aktiver relateret til analysens objekt",
 	"fearedEventHelpText": "De frygtede hændelser skal udtrykke forretningens bekymringer",
-	"fearedEventAssetHelpText": "Primært aktiv (forretningsværdi), som påvirkes af den frygtede hændelse",
+	"fearedEventAssetHelpText": "Frygtede hændelser er typisk knyttet til forretningsværdier (primære aktiver). Understøttende aktiver er tilladt her for fleksibilitet.",
 	"fearedEventQualificationHelpText": "Mulige påvirkningskategorier",
 	"fearedEventIsSelectedHelpText": "Valg af den frygtede hændelse til analysen",
 	"riskOriginHelpText": "Element, person, gruppe eller organisation, som potentielt kan generere en risiko",
@@ -1239,5 +1238,16 @@
 				"countPlural=other": "{count} Dage"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Matchende scenarier",
+	"select": "Vælg",
+	"deselect": "Fravælg",
+	"saveAndContinue": "Gem og fortsæt",
+	"nextOccurrenceStatus": "Næste forekomststatus",
+	"image": "Billede",
+	"securityObjectives": "Sikkerhedsegenskaber",
+	"securityObjectiveScale": "Skala for sikkerhedsegenskaber",
+	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsegenskaber (1 til 4 som standard)",
+	"actor": "Aktør",
+	"action": "Handling"
 }
