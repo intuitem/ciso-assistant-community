@@ -1217,6 +1217,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
+    link = serializers.CharField(source="last_revision.link")
 
     class Meta:
         model = Evidence
@@ -1264,14 +1265,15 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         ]:
             m2m_fields[field] = validated_data.pop(field, [])
 
-        evidence = Evidence.objects.create(**validated_data)
+        with transaction.atomic():
+            evidence = Evidence.objects.create(**validated_data)
 
-        for field, value in m2m_fields.items():
-            getattr(evidence, field).set(value)
+            for field, value in m2m_fields.items():
+                getattr(evidence, field).set(value)
 
-        EvidenceRevision.objects.get_or_create(
-            evidence=evidence, defaults={"link": link, "attachment": attachment}
-        )
+            EvidenceRevision.objects.get_or_create(
+                evidence=evidence, defaults={"link": link, "attachment": attachment}
+            )
 
         return evidence
 
