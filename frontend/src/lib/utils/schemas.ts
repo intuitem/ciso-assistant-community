@@ -384,7 +384,10 @@ export const EvidenceSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	owner: z.string().optional().array().optional(),
+	status: z.string().optional().default('missing'),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 
 export const GeneralSettingsSchema = z.object({

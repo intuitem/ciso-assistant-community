@@ -2758,6 +2758,27 @@ class EvidenceRevision(FolderMixin):
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only auto-increment for new instances
+            # Get the highest version number for this specific evidence
+            max_version = EvidenceRevision.objects.filter(
+                evidence=self.evidence
+            ).aggregate(models.Max("version"))["version__max"]
+
+            # Set version to max + 1, or 1 if no revisions exist for this evidence
+            self.version = (max_version or 0) + 1
+
+        # Set folder to match the evidence's folder
+        if hasattr(self.evidence, "get_folder") and self.evidence.get_folder():
+            self.folder = self.evidence.get_folder()
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
+        unique_together = ["evidence", "version"]
+
 
 class Incident(NameDescriptionMixin, FolderMixin):
     class Status(models.TextChoices):

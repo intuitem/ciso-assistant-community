@@ -3,6 +3,7 @@
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -91,4 +92,34 @@
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
 	allowUserOptions="append"
+/>
+
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	disableDoubleDash={true}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
+
+<TextField
+	type="date"
+	{form}
+	field="expiry_date"
+	label={m.expiryDate()}
+	cacheLock={cacheLocks['expiry_date']}
+	bind:cachedValue={formDataCache['expiry_date']}
 />
