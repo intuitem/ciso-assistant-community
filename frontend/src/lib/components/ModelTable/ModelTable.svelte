@@ -76,6 +76,7 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		canSelectObject?: boolean;
+		overrideFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
 		folderId?: string;
 		forcePreventDelete?: boolean;
@@ -123,6 +124,7 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		canSelectObject = false,
+		overrideFilters = {},
 		hideFilters = $bindable(false),
 		folderId = '',
 		forcePreventDelete = false,
@@ -285,17 +287,24 @@
 
 	$effect(() => {
 		for (const field of filteredFields) {
+			const filterValue = filterValues[field];
+			const overrideFilterValue = overrideFilters[field];
+			const finalFilterValue = overrideFilterValue || filterValue;
+
 			handler.filter(
-				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
+				finalFilterValue ? finalFilterValue.map((v: Record<string, any>) => v.value) : [],
 				field
 			);
 			page.url.searchParams.delete(field);
-			if (filterValues[field] && filterValues[field].length > 0) {
-				for (const value of filterValues[field]) {
+			if (finalFilterValue && finalFilterValue.length > 0) {
+				for (const value of finalFilterValue) {
 					page.url.searchParams.append(field, value.value);
 				}
 			}
 		}
+		setTimeout(() => {
+			handler.invalidate();
+		}, 10);
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
