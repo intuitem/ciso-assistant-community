@@ -31,7 +31,6 @@ from django.db.models import (
 )
 from django.db.models.functions import Greatest, Coalesce
 
-
 from collections import defaultdict
 import pytz
 from uuid import UUID
@@ -6390,9 +6389,54 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+class TaskTemplateFilter(GenericFilterSet):
+    next_occurrence_status = df.MultipleChoiceFilter(
+        choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
+    )
+    last_occurrence_status = df.MultipleChoiceFilter(
+        choices=TaskNode.TASK_STATUS_CHOICES, method="filter_last_occurrence_status"
+    )
+
+    class Meta:
+        model = TaskTemplate
+        fields = [
+            "assigned_to",
+            "is_recurrent",
+            "folder",
+            "applied_controls",
+            "last_occurrence_status",
+            "next_occurrence_status",
+        ]
+
+    def filter_last_occurrence_status(self, queryset, name, values):
+        start = timezone.now().date()
+        status_subquery = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=start)
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+
+        return queryset.annotate(last_status=Subquery(status_subquery)).filter(
+            last_status__in=values
+        )
+
+    def filter_next_occurrence_status(self, queryset, name, values):
+        start = timezone.now().date()
+        status_subquery = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__gte=start)
+            .order_by("due_date")
+            .values("status")[:1]
+        )
+
+        return queryset.annotate(next_status=Subquery(status_subquery)).filter(
+            next_status__in=values
+        )
+
+
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+    filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
         qs = super().get_queryset()
