@@ -985,7 +985,7 @@ def get_metrics(user: User, folder_id):
             "on_hold": viewable_controls.filter(status="on_hold").count(),
             "active": viewable_controls.filter(status="active").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
-            "p1": viewable_controls.filter(priority=1, status="on_hold").count(),
+            "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
             "eta_missed": missed_eta_count,
         },
         "risk": {
