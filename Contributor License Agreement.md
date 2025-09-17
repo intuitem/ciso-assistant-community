@@ -62,3 +62,8 @@ You are not required to provide support for Your contributions, except to the ex
 
 You agree to inform intuitem of any facts or circumstances of which you become aware that cause such statements to be inaccurate in any respect.
 
+----------------------
+I have read the CLA Document and I hereby sign the CLA
+
+--------------------------
+
