@@ -2165,7 +2165,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         all_assessed_ids = set(control_id for control_id, _, _, _ in assessed_controls)
         viewable_not_assessed = viewable_controls_set - all_assessed_ids
 
-        print(f"Matrix populated with assessed controls")
+        print("Matrix populated with assessed controls")
         print(f"Viewable but not assessed: {len(viewable_not_assessed)} controls")
         return Response(output)
 
@@ -5191,7 +5191,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             user=request.user,
             object_type=ComplianceAssessment,
         )
-        if not compliance_assessment.id in viewable_objects:
+        if compliance_assessment.id not in viewable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             ref_id = request.data.get("ref_id")
@@ -5308,7 +5308,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": f"Requirement with ref_id {ref_id} not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except ValidationError as e:
+        except ValidationError:
             return Response(
                 {"error": "invalid input provided"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -6290,6 +6290,7 @@ class FindingViewSet(BaseModelViewSet):
         "applied_controls",
         "evidences",
     ]
+    ordering = ["ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
