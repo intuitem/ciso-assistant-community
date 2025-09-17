@@ -1318,6 +1318,14 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
         model = EvidenceRevision
         fields = "__all__"
 
+    def create(self, validated_data):
+        evidence = validated_data["evidence"]
+        max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
+            models.Max("version")
+        )["version__max"]
+        validated_data["version"] = (max_version or 0) + 1
+        return super().create(validated_data)
+
 
 class AttachmentUploadSerializer(serializers.Serializer):
     attachment = serializers.FileField(required=True)

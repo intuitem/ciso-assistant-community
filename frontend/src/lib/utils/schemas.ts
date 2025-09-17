@@ -391,7 +391,7 @@ export const EvidenceSchema = z.object({
 
 export const EvidenceRevisionSchema = z.object({
 	evidence: z.string().uuid(),
-	version: z.number().optional().default(1),
+	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
 		.string()

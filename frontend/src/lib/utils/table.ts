@@ -1213,8 +1213,8 @@ export const listViewFields = {
 		}
 	},
 	'evidence-revisions': {
-		head: ['version', 'evidence', 'file', 'size', 'createdAt'],
-		body: ['version', 'evidence', 'attachment', 'size', 'created_at'],
+		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
+		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}

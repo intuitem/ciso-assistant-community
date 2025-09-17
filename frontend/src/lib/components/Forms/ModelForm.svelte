@@ -674,7 +674,15 @@
 		{:else if URLModel === 'roles'}
 			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'evidence-revisions'}
-			<EvidenceRevisionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+			<EvidenceRevisionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

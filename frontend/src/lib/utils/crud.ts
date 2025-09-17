@@ -6,6 +6,7 @@ import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
 import { type urlModel } from './types';
+import { attachment } from '$paraglide/messages/en';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -548,6 +549,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [
+			{ field: 'evidence', urlModel: 'evidence-revisions' },
 			{
 				field: 'evidences',
 				urlModel: 'applied-controls',
@@ -572,10 +574,21 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
-			{ field: 'evidence', urlModel: 'evidence-revisions' }
+			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true }
 		],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'link' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'expiry_date' }
+		]
 	},
 	'evidence-revisions': {
 		name: 'evidencerevision',
@@ -1589,6 +1602,9 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 export const FIELD_COMPONENT_MAP = {
 	evidences: {
+		attachment: EvidenceFilePreview
+	},
+	'evidence-revisions': {
 		attachment: EvidenceFilePreview
 	},
 	'stored-libraries': {

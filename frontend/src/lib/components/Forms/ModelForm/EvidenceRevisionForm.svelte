@@ -11,6 +11,7 @@
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
+		context: string;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
@@ -23,7 +24,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		object = {}
+		object = {},
+		context
 	}: Props = $props();
 
 	function getFilename(path) {
@@ -42,13 +44,15 @@
 
 <HiddenInput {form} field="evidence" />
 
-<NumberField
-	{form}
-	field="version"
-	label={m.version()}
-	cacheLock={cacheLocks['version']}
-	bind:cachedValue={formDataCache['version']}
-/>
+{#if context === 'edit'}
+	<NumberField
+		{form}
+		field="version"
+		label={m.version()}
+		cacheLock={cacheLocks['version']}
+		bind:cachedValue={formDataCache['version']}
+	/>
+{/if}
 <FileInput
 	{form}
 	allowPaste={true}

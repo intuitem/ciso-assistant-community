@@ -2760,15 +2760,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         return f"{self.evidence.name} v{self.version}"
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Only auto-increment for new instances
-            # Get the highest version number for this specific evidence
-            max_version = EvidenceRevision.objects.filter(
-                evidence=self.evidence
-            ).aggregate(models.Max("version"))["version__max"]
-
-            # Set version to max + 1, or 1 if no revisions exist for this evidence
-            self.version = (max_version or 0) + 1
-
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
             self.folder = self.evidence.folder
