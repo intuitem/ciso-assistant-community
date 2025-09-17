@@ -36,7 +36,6 @@ export const expandedNodesState = persisted('expandedNodes', expandedNodes, {
 export const createModalCache = {
 	_urlModel: '',
 	_cacheToDelete: new Set(),
-	data: {},
 	deleteCache(cacheName: any) {
 		this._cacheToDelete.add(cacheName);
 	},
@@ -54,7 +53,8 @@ export const createModalCache = {
 	setModelName(urlModelFromPage: string) {
 		if (this._urlModel !== urlModelFromPage) this.clear();
 		this._urlModel = urlModelFromPage;
-	}
+	},
+	data: {}
 };
 
 export const driverInstance = writable<Driver | null>(null);

@@ -77,6 +77,8 @@ export const URL_MODEL = [
 	'elementary-actions',
 	'operating-modes',
 	'kill-chains',
+	// qualifications
+	'qualifications',
 	'processings',
 	'processing-natures',
 	'security-exceptions',
@@ -102,19 +104,7 @@ export const URL_MODEL = [
 	'asset-assessments',
 	'asset-class',
 	// campaigns,
-	'campaigns',
-	// iso,
-	'organisation-issues',
-	'organisation-objectives',
-	// crq,
-	'quantitative-risk-studies',
-	'quantitative-risk-scenarios',
-	'quantitative-risk-hypotheses',
-	// terminologies
-	'terminologies',
-	// roles,
-	'roles',
-	'permissions'
+	'campaigns'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
@@ -202,12 +192,6 @@ export interface AggregatedData {
 }
 
 export interface AppliedControlStatus {
-	localLables: string[];
-	labels: any[];
-	values: any[]; // Set these types later on
-}
-
-export interface AppliedControlImpact {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on

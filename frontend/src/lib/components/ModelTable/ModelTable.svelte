@@ -14,7 +14,6 @@
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
-	import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -36,7 +35,6 @@
 	import RowsPerPage from './RowsPerPage.svelte';
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
-	import ThFilter from './ThFilter.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates } from '$lib/utils/stores';
@@ -46,8 +44,6 @@
 		source?: TableSource;
 		interactive?: boolean;
 		search?: boolean;
-		thFilter?: boolean;
-		thFilterFields?: string[];
 		rowsPerPage?: boolean;
 		rowCount?: boolean;
 		pagination?: boolean;
@@ -76,7 +72,6 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		canSelectObject?: boolean;
-		overrideFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
 		folderId?: string;
 		forcePreventDelete?: boolean;
@@ -95,8 +90,6 @@
 		source = { head: [], body: [] },
 		interactive = true,
 		search = true,
-		thFilter = false,
-		thFilterFields = [],
 		rowsPerPage = true,
 		rowCount = true,
 		pagination = true,
@@ -124,7 +117,6 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		canSelectObject = false,
-		overrideFilters = {},
 		hideFilters = $bindable(false),
 		folderId = '',
 		forcePreventDelete = false,
@@ -216,7 +208,7 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = $state(false);
+	let invalidateTable = $state(true);
 
 	$tableHandlers[baseEndpoint] = handler;
 
@@ -269,7 +261,7 @@
 		listViewFields[tableURLModel] &&
 		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
-			: (source?.filters ?? {});
+			: {};
 
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
@@ -287,24 +279,17 @@
 
 	$effect(() => {
 		for (const field of filteredFields) {
-			const filterValue = filterValues[field];
-			const overrideFilterValue = overrideFilters[field];
-			const finalFilterValue = overrideFilterValue || filterValue;
-
 			handler.filter(
-				finalFilterValue ? finalFilterValue.map((v: Record<string, any>) => v.value) : [],
+				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
 				field
 			);
 			page.url.searchParams.delete(field);
-			if (finalFilterValue && finalFilterValue.length > 0) {
-				for (const value of finalFilterValue) {
+			if (filterValues[field] && filterValues[field].length > 0) {
+				for (const value of filterValues[field]) {
 					page.url.searchParams.append(field, value.value);
 				}
 			}
 		}
-		setTimeout(() => {
-			handler.invalidate();
-		}, 10);
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
@@ -395,27 +380,6 @@
 
 	const tail_render = $derived(tail);
 
-	// Multi-value columns that should not be sortable
-	const MULTI_VALUE_COLUMNS = [
-		'owner',
-		'filtering_labels',
-		'threats',
-		'assets',
-		'applied_controls',
-		'existing_applied_controls',
-		'evidences',
-		'qualifications',
-		'user_groups'
-	];
-
-	// Function to check if a column is multi-value and should not be sortable
-	const isMultiValueColumn = (key: string): boolean => {
-		return (
-			MULTI_VALUE_COLUMNS.includes(key) ||
-			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
-		);
-	};
-
 	let openState = $state(false);
 </script>
 
@@ -491,26 +455,13 @@
 			<tr>
 				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
-							>{safeTranslate(heading)}</Th
-						>
+						<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
 					{/if}
 				{/each}
 				{#if displayActions}
 					<th class="{regionHeadCell} select-none text-end"></th>
 				{/if}
 			</tr>
-			{#if thFilter}
-				<tr>
-					{#each Object.entries(tableSource.head) as [key, _]}
-						{#if thFilterFields.includes(key)}
-							<ThFilter {handler} filterBy={key} />
-						{:else}
-							<th></th>
-						{/if}
-					{/each}
-				</tr>
-			{/if}
 		</thead>
 		<ContextMenu.Root>
 			<tbody class="table-body w-full border-b border-b-surface-100-900 {regionBody}">
@@ -537,20 +488,14 @@
 										<td class={regionCell} role="gridcell">
 											{#if component && browser}
 												{@const CellComponent = component}
-												{#if CellComponent === LecChartPreview}
-													{#key `${meta?.id || rowIndex}-${key}`}
-														<CellComponent {meta} cell={value} />
-													{/key}
-												{:else}
-													<CellComponent {meta} cell={value} />
-												{/if}
+												<CellComponent {meta} cell={value} />
 											{:else}
 												<span class="base-font-family whitespace-pre-line break-words">
 													{#if Array.isArray(value)}
 														<ul class="list-disc pl-4 whitespace-normal">
-															{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+															{#each value as val}
 																<li>
-																	{#if val.str && val.id && key !== 'qualifications'}
+																	{#if val.str && val.id}
 																		{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 																		<Anchor href={itemHref} class="anchor" stopPropagation
 																			>{val.str}</Anchor
@@ -602,19 +547,6 @@
 														<span class="ml-9"
 															>{safeTranslate('percentageDisplay', { number: value })}</span
 														>
-													{:else if key === 'translations'}
-														{#if Object.keys(value).length > 0}
-															<div class="flex flex-col gap-2">
-																{#each Object.entries(value) as [lang, translation]}
-																	<div class="flex flex-row gap-2">
-																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
-																	</div>
-																{/each}
-															</div>
-														{:else}
-															--
-														{/if}
 													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
@@ -652,7 +584,7 @@
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
+												editURL={!(row.meta.builtin || row.meta.urn)
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}

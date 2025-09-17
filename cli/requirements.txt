@@ -4,4 +4,3 @@ requests
 click
 pyyaml
 icecream
-dotenv

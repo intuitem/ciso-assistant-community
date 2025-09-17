@@ -77,7 +77,6 @@
 					<button
 						class="btn preset-filled-tertiary-500 h-full"
 						type="button"
-            data-testid="delete-logo-button"
 						onclick={(_) =>
 							modalConfirm(
 								data.settings.id,
@@ -105,7 +104,6 @@
 					<button
 						class="btn preset-filled-tertiary-500 h-full"
 						type="button"
-            data-testid="delete-favicon-button"
 						onclick={(_) =>
 							modalConfirm(
 								data.settings.id,

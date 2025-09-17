@@ -45,7 +45,7 @@ READER_PERMISSIONS_LIST = [
     "view_strategicscenario",
     "view_attackpath",
     "view_operationalscenario",
-    "view_terminology",
+    "view_qualification",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -73,10 +73,6 @@ READER_PERMISSIONS_LIST = [
     "view_elementaryaction",
     "view_operatingmode",
     "view_killchain",
-    # crq
-    "view_quantitativeriskstudy",
-    "view_quantitativeriskscenario",
-    "view_quantitativeriskhypothesis",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -111,7 +107,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_strategicscenario",
     "view_attackpath",
     "view_operationalscenario",
-    "view_terminology",
+    "view_qualification",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -139,10 +135,6 @@ APPROVER_PERMISSIONS_LIST = [
     "view_elementaryaction",
     "view_operatingmode",
     "view_killchain",
-    # crq
-    "view_quantitativeriskstudy",
-    "view_quantitativeriskscenario",
-    "view_quantitativeriskhypothesis",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -248,7 +240,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_terminology",
+    "view_qualification",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -337,19 +329,6 @@ ANALYST_PERMISSIONS_LIST = [
     "add_killchain",
     "change_killchain",
     "delete_killchain",
-    # crq
-    "view_quantitativeriskstudy",
-    "add_quantitativeriskstudy",
-    "change_quantitativeriskstudy",
-    "delete_quantitativeriskstudy",
-    "view_quantitativeriskscenario",
-    "add_quantitativeriskscenario",
-    "change_quantitativeriskscenario",
-    "delete_quantitativeriskscenario",
-    "view_quantitativeriskhypothesis",
-    "add_quantitativeriskhypothesis",
-    "change_quantitativeriskhypothesis",
-    "delete_quantitativeriskhypothesis",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -463,7 +442,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_terminology",
+    "view_qualification",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -512,16 +491,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_campaign",
     "change_campaign",
     "delete_campaign",
-    # objectives,
-    "add_organisationobjective",
-    "view_organisationobjective",
-    "change_organisationobjective",
-    "delete_organisationobjective",
-    # issues,
-    "add_organisationissue",
-    "view_organisationissue",
-    "change_organisationissue",
-    "delete_organisationissue",
     # privacy,
     "add_processing",
     "change_processing",
@@ -565,19 +534,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_killchain",
     "change_killchain",
     "delete_killchain",
-    # crq
-    "view_quantitativeriskstudy",
-    "add_quantitativeriskstudy",
-    "change_quantitativeriskstudy",
-    "delete_quantitativeriskstudy",
-    "view_quantitativeriskscenario",
-    "add_quantitativeriskscenario",
-    "change_quantitativeriskscenario",
-    "delete_quantitativeriskscenario",
-    "view_quantitativeriskhypothesis",
-    "add_quantitativeriskhypothesis",
-    "change_quantitativeriskhypothesis",
-    "delete_quantitativeriskhypothesis",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -585,7 +541,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_user",
     "change_user",
     "delete_user",
+    "add_usergroup",
     "view_usergroup",
+    "change_usergroup",
+    "delete_usergroup",
     "add_event",
     "view_event",
     "change_event",
@@ -733,6 +692,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_killchain",
     "change_killchain",
     "delete_killchain",
+    # qualifications,
+    "view_qualification",
+    "add_qualification",
+    "change_qualification",
+    "delete_qualification",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -811,40 +775,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_campaign",
     "change_campaign",
     "delete_campaign",
-    # objectives,
-    "add_organisationobjective",
-    "view_organisationobjective",
-    "change_organisationobjective",
-    "delete_organisationobjective",
-    # issues,
-    "add_organisationissue",
-    "view_organisationissue",
-    "change_organisationissue",
-    "delete_organisationissue",
-    # crq,
-    "view_quantitativeriskstudy",
-    "add_quantitativeriskstudy",
-    "change_quantitativeriskstudy",
-    "delete_quantitativeriskstudy",
-    "view_quantitativeriskscenario",
-    "add_quantitativeriskscenario",
-    "change_quantitativeriskscenario",
-    "delete_quantitativeriskscenario",
-    "view_quantitativeriskhypothesis",
-    "add_quantitativeriskhypothesis",
-    "change_quantitativeriskhypothesis",
-    "delete_quantitativeriskhypothesis",
-    # terminologies
-    "add_terminology",
-    "view_terminology",
-    "change_terminology",
-    "delete_terminology",
-    # roles,
-    "add_role",
-    "view_role",
-    "change_role",
-    "delete_role",
-    "view_permission",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -867,7 +797,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetClass, Terminology
+    from core.models import Qualification, AssetClass
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -991,7 +921,7 @@ def startup(sender: AppConfig, **kwargs):
 
     # Create default Qualifications
     try:
-        Terminology.create_default_qualifications()
+        Qualification.create_default_qualifications()
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
 
@@ -1006,12 +936,6 @@ def startup(sender: AppConfig, **kwargs):
         AssetClass.create_default_values()
     except Exception as e:
         logger.error("Error creating default AssetClass", exc_info=e)
-
-    # Create default Terminologies
-    try:
-        Terminology.create_default_roto_risk_origins()
-    except Exception as e:
-        logger.error("Error creating default ROTO Risk Origins", exc_info=e)
 
     call_command("storelibraries")
 
@@ -1043,13 +967,9 @@ def startup(sender: AppConfig, **kwargs):
         "ebios_radar_red_zone_radius": 2.5,
         "notifications_enable_mailing": False,
         "interface_agg_scenario_matrix": False,
-        "currency": "€",
-        "daily_rate": 500,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(
-            name="general", defaults={"value": default_settings}
-        )
+        settings, _ = GlobalSettings.objects.get_or_create(name="general")
         current_value = settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")

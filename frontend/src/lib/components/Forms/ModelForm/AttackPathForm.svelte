@@ -2,12 +2,12 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import type { SuperValidated } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
 	import TextArea from '../TextArea.svelte';
 
 	interface Props {
-		form: SuperForm<any>;
+		form: SuperValidated<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -23,8 +23,6 @@
 		initialData = {},
 		additionalInitialData = {}
 	}: Props = $props();
-
-	const formStore = form.form;
 </script>
 
 <AutocompleteSelect
@@ -49,9 +47,7 @@
 	{form}
 	multiple
 	optionsEndpoint="stakeholders"
-	optionsDetailedUrlParameters={$formStore.ebios_rm_study
-		? [['ebios_rm_study', $formStore.ebios_rm_study]]
-		: undefined}
+	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
 	optionsLabelField="str"
 	field="stakeholders"
 	cacheLock={cacheLocks['stakeholders']}

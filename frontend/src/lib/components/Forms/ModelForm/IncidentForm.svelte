@@ -64,7 +64,6 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -98,9 +97,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+	optionsEndpoint="qualifications"
 	field="qualifications"
-	optionsLabelField="translated_name"
 	label={m.qualifications()}
 />
 <TextField

@@ -15,7 +15,7 @@
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
-		annual_cost: 'cost',
+		cost: 'cost',
 		findings_count: 'associated_findings'
 	};
 	const appliedControlsColumns = [
@@ -27,7 +27,7 @@
 		'eta',
 		'expiry_date',
 		'effort',
-		'annual_cost',
+		'cost',
 		'findings_count'
 	];
 
@@ -83,7 +83,7 @@
 				'eta',
 				'expiry_date',
 				'effort',
-				'annual_cost',
+				'cost',
 				'findings_count'
 			]}
 		/>

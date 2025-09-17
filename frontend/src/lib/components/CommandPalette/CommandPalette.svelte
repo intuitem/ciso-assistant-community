@@ -5,7 +5,6 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 
 	let opened = $state(false);
-	let searchInput: HTMLElement | null = $state(null);
 
 	// Generate navigation commands with automatic close
 	const navigationCommands = navigationLinks.map((link) => ({
@@ -29,11 +28,6 @@
 			selected = 0;
 		}
 	});
-	$effect(() => {
-		if (opened) {
-			searchInput?.focus();
-		}
-	});
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (!browser) return;
@@ -50,9 +44,7 @@
 		} else if (e.key === 'ArrowDown') {
 			if (selected === navigationLinks.length - 1) return;
 			selected++;
-			document
-				.querySelector(`[data-cmdk-nav-btn]:nth-of-type(${selected + 1})`)
-				?.scrollIntoView(false);
+			document.querySelector(`[data-cmdk-nav-btn]:nth-of-type(${selected + 1})`)?.scrollIntoView();
 		} else if (e.key === 'ArrowUp') {
 			if (selected === 0) return;
 			selected--;
@@ -68,14 +60,14 @@
 
 {#if opened}
 	<div
-		class="backdrop-blur-xs fixed inset-0 z-[9999] w-full h-full m-auto flex items-center justify-center bg-black/50"
+		class="backdrop-blur-xs fixed inset-0 z-500 w-full h-full m-auto flex items-center justify-center bg-black/50"
 	>
 		<div class="h-auto overflow-hidden flex flex-col max-h-88 w-md rounded-lg">
 			<input
+				autofocus
 				class="w-full bg-white px-4 py-3 border-b border-gray-200 outline-none focus:border-blue-800"
 				type="text"
 				bind:value={searchText}
-				bind:this={searchInput}
 				placeholder="Type a command..."
 			/>
 			{#if filteredNavigationCommands.length > 0}

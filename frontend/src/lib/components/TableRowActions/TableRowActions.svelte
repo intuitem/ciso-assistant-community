@@ -205,29 +205,21 @@
 		{#if displayDelete}
 			{#if URLModel === 'folders'}
 				<button
-					onclick={(e) => {
+					onclick={(_) => {
 						promptModalConfirmDelete(row.meta[identifierField], row);
-						stopPropagation(e);
+						stopPropagation(_);
 					}}
-					onkeydown={(e) => {
-						if (e.key === 'Tab') return;
-						modalConfirmDelete(row.meta.id, row);
-						stopPropagation(e);
-					}}
+					onkeydown={() => promptModalConfirmDelete(row.meta.id, row)}
 					class="cursor-pointer hover:text-primary-500"
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>
 			{:else}
 				<button
-					onclick={(e) => {
+					onclick={(_) => {
 						modalConfirmDelete(row.meta[identifierField], row);
-						stopPropagation(e);
+						stopPropagation(_);
 					}}
-					onkeydown={(e) => {
-						if (e.key === 'Tab') return;
-						modalConfirmDelete(row.meta.id, row);
-						stopPropagation(e);
-					}}
+					onkeydown={() => modalConfirmDelete(row.meta.id, row)}
 					class="cursor-pointer hover:text-primary-500"
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>

@@ -10,10 +10,11 @@
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
+		csf_function: 'csfFunction',
 		eta: 'eta',
-		control_impact: 'controlImpact',
+		expiry_date: 'expiryDate',
 		effort: 'effort',
-		annual_cost: 'cost',
+		cost: 'cost',
 		requirement_assessments: 'matchingRequirements'
 	};
 
@@ -72,10 +73,11 @@
 				'status',
 				'priority',
 				'category',
+				'csf_function',
 				'eta',
-				'control_impact',
+				'expiry_date',
 				'effort',
-				'annual_cost',
+				'cost',
 				'requirement_assessments'
 			]}
 		/>

@@ -29,7 +29,6 @@ export const load: PageServerLoad = async (event) => {
 	const timelineForm = await superValidate(
 		{
 			incident: data.data.id,
-			folder: data.data.folder.id,
 			timestamp: formattedDateTime
 		},
 		zod(timelineSchema),

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -56,7 +55,6 @@
 		multiple
 		optionsEndpoint="user-groups"
 		field="user_groups"
-		pathField="path"
 		cacheLock={cacheLocks['user_groups']}
 		bind:cachedValue={formDataCache['user_groups']}
 		label={m.userGroups()}
@@ -74,13 +72,6 @@
 		helpText={m.keepLocalLoginHelpText()}
 	/>
 {/if}
-<TextArea
-	{form}
-	field="observation"
-	label={m.observation()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
 
 <span class="text-gray-500 pt-5">
 	⚠️ {m.createdUserWillHaveNoRights()}

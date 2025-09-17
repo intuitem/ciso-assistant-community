@@ -33,15 +33,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     """
 
     model = EntityAssessment
-    filterset_fields = [
-        "status",
-        "perimeter",
-        "perimeter__folder",
-        "authors",
-        "entity",
-        "criticality",
-        "conclusion",
-    ]
+    filterset_fields = ["status", "perimeter", "perimeter__folder", "authors", "entity"]
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -141,7 +133,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["provider_entity", "assets", "criticality"]
+    filterset_fields = ["provider_entity", "assets"]
 
     def perform_create(self, serializer):
         serializer.save()
