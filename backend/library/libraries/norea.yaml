@@ -20,17 +20,18 @@ copyright: "The NOREA DORA in Control Framework and Dashboard is licensed under 
   \ changes were made. You may do so in any reasonable manner, but not in any way\
   \ that suggests the licensor endorses you or your use."
 version: 2
-publication_date: 2025-09-15
+publication_date: 2025-09-17
 provider: NOREA
 packager: intuitem
 translations:
   fr:
-    name: NOREA - DORA en Control Framework V3.0
-    description: "NOREA - DORA en Control Framework est un outil pratique con\xE7\
-      u pour aider les organisations \xE0 se conformer \xE0 la loi sur la r\xE9silience\
-      \ op\xE9rationnelle num\xE9rique (DORA). Bien que ce cadre offre des indications\
-      \ pr\xE9cieuses, il est important de noter que les exigences juridiques \xE9\
-      nonc\xE9es dans la DORA elle-m\xEAme restent de premier plan.\nLien : https://www.norea.nl/dora"
+    name: "NOREA - Cadre de ma\xEEtrise DORA V3.0"
+    description: "[Traduction non officielle]\nNOREA - DORA en Control Framework est\
+      \ un outil pratique con\xE7u pour aider les organisations \xE0 se conformer\
+      \ \xE0 la loi sur la r\xE9silience op\xE9rationnelle num\xE9rique (DORA). Bien\
+      \ que ce cadre offre des indications pr\xE9cieuses, il est important de noter\
+      \ que les exigences juridiques \xE9nonc\xE9es dans la DORA elle-m\xEAme restent\
+      \ de premier plan.\nLien : https://www.norea.nl/dora"
     copyright: "NOREA - DORA en Control Framework et le tableau de bord est sous licence\
       \ Creative Commons BY 4.0. Pour plus d\u2019informations :\nhttps://creativecommons.org/licenses/by/4.0/\n\
       Vous \xEAtes libre de :\nPartager \u2014 copier et redistribuer le mat\xE9riel\
@@ -56,13 +57,13 @@ objects:
       Link: https://www.norea.nl/dora'
     translations:
       fr:
-        name: NOREA - DORA en Control Framework V3.0
-        description: "NOREA - DORA en Control Framework est un outil pratique con\xE7\
-          u pour aider les organisations \xE0 se conformer \xE0 la loi sur la r\xE9\
-          silience op\xE9rationnelle num\xE9rique (DORA). Bien que ce cadre offre\
-          \ des indications pr\xE9cieuses, il est important de noter que les exigences\
-          \ juridiques \xE9nonc\xE9es dans la DORA elle-m\xEAme restent de premier\
-          \ plan.\nLien : https://www.norea.nl/dora"
+        name: "NOREA - Cadre de ma\xEEtrise DORA V3.0"
+        description: "[Traduction non officielle]\nNOREA - DORA en Control Framework\
+          \ est un outil pratique con\xE7u pour aider les organisations \xE0 se conformer\
+          \ \xE0 la loi sur la r\xE9silience op\xE9rationnelle num\xE9rique (DORA).\
+          \ Bien que ce cadre offre des indications pr\xE9cieuses, il est important\
+          \ de noter que les exigences juridiques \xE9nonc\xE9es dans la DORA elle-m\xEA\
+          me restent de premier plan.\nLien : https://www.norea.nl/dora"
     min_score: 0
     max_score: 5
     scores_definition:
