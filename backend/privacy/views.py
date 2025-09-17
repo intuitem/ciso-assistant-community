@@ -70,7 +70,7 @@ class PersonalDataViewSet(BaseModelViewSet):
     """
 
     model = PersonalData
-    filterset_fields = ["processing", "category"]
+    filterset_fields = ["processing", "category", "assets"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -169,6 +169,8 @@ def agg_countries():
 
 class ProcessingViewSet(BaseModelViewSet):
     model = Processing
+
+    filterset_fields = ["folder", "nature", "status", "legal_basis"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

@@ -1,11 +1,12 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
     FearedEvent,
     RoTo,
+    RoToQuerySet,
     Stakeholder,
     StrategicScenario,
     AttackPath,
@@ -37,6 +38,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     """
     API endpoint that allows ebios rm studies to be viewed or edited.
     """
+
+    filterset_fields = ["folder"]
 
     model = EbiosRMStudy
 
@@ -142,7 +145,27 @@ class FearedEventViewSet(BaseModelViewSet):
         return Response(choices)
 
 
-class RoToFilter(df.FilterSet):
+class RoToFilter(GenericFilterSet):
+    # Add the custom ordering filter
+    ordering = df.OrderingFilter(
+        fields=(
+            ("created_at", "created_at"),
+            ("updated_at", "updated_at"),
+            ("risk_origin", "risk_origin"),
+            ("motivation", "motivation"),
+            ("resources", "resources"),
+            ("activity", "activity"),
+            (
+                "pertinence",
+                "pertinence",
+            ),
+        ),
+    )
+
+    pertinence = df.MultipleChoiceFilter(
+        choices=RoTo.Pertinence.choices, label="Pertinence"
+    )
+
     class Meta:
         model = RoTo
         fields = [
@@ -151,6 +174,7 @@ class RoToFilter(df.FilterSet):
             "risk_origin",
             "motivation",
             "feared_events",
+            "pertinence",
         ]
 
 
@@ -159,9 +183,10 @@ class RoToViewSet(BaseModelViewSet):
 
     filterset_class = RoToFilter
 
-    @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
-    def risk_origin(self, request):
-        return Response(dict(RoTo.RiskOrigin.choices))
+    def get_queryset(self):
+        """Always return queryset with pertinence annotation"""
+        queryset = super().get_queryset()
+        return queryset.with_pertinence()
 
     @action(detail=False, name="Get motivation choices")
     def motivation(self, request):
@@ -203,7 +228,7 @@ class StrategicScenarioViewSet(BaseModelViewSet):
     }
 
 
-class AttackPathFilter(df.FilterSet):
+class AttackPathFilter(GenericFilterSet):
     used = df.BooleanFilter(method="is_used", label="Used")
 
     def is_used(self, queryset, name, value):
@@ -253,7 +278,7 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         return Response(choices)
 
 
-class ElementaryActionFilter(df.FilterSet):
+class ElementaryActionFilter(GenericFilterSet):
     operating_mode_available_actions = df.ModelChoiceFilter(
         queryset=OperatingMode.objects.all(),
         method="filter_operating_mode_available_actions",

@@ -51,6 +51,7 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -304,6 +305,14 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<TextField
+		{form}
+		field="link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['link']}
+		bind:cachedValue={formDataCache['link']}
 	/>
 </Dropdown>
 <Checkbox {form} field="enabled" label={m.enabled()} />
