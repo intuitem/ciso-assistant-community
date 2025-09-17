@@ -2703,7 +2703,7 @@ class Evidence(
     def filename(self):
         return (
             os.path.basename(self.last_revision.attachment.name)
-            if self.last_revision
+            if self.last_revision and self.last_revision.attachment
             else None
         )
 
