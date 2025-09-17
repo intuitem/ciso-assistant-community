@@ -1,0 +1,556 @@
+urn: urn:intuitem:risk:library:rts-dora-ict-related-incidents-addon-2025-301
+locale: fr
+ref_id: RTS-DORA-ICT-related-incidents-addon-2025-301
+name: RTS on criteria for the classification of ICT-related incidents addon 2025/301
+description: "R\xC8GLEMENT D\xC9L\xC9GU\xC9 (UE) 2025/301 DE LA COMMISSION\ndu 23\_\
+  octobre 2024\ncompl\xE9tant le r\xE8glement (UE)\_2022/2554 du Parlement europ\xE9\
+  en et du Conseil par des normes techniques de r\xE9glementation pr\xE9cisant le\
+  \ contenu et les d\xE9lais pour la notification initiale des incidents majeurs li\xE9\
+  s aux TIC, et pour les rapports interm\xE9diaire et final y aff\xE9rents, et le\
+  \ contenu de la notification volontaire en ce qui concerne les cybermenaces importante"
+copyright: EUROPEAN COMMISSION
+version: 1
+provider: EUROPEAN COMMISSION
+packager: HelloAsso
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:rts-dora-ict-related-incidents-addon-2025-301
+    ref_id: RTS-DORA-ICT-related-incidents-addon-2025-301
+    name: RTS on criteria for the classification of ICT-related incidents addon 2025/301
+    description: "R\xC8GLEMENT D\xC9L\xC9GU\xC9 (UE) 2025/301 DE LA COMMISSION\ndu\
+      \ 23\_octobre 2024\ncompl\xE9tant le r\xE8glement (UE)\_2022/2554 du Parlement\
+      \ europ\xE9en et du Conseil par des normes techniques de r\xE9glementation pr\xE9\
+      cisant le contenu et les d\xE9lais pour la notification initiale des incidents\
+      \ majeurs li\xE9s aux TIC, et pour les rapports interm\xE9diaire et final y\
+      \ aff\xE9rents, et le contenu de la notification volontaire en ce qui concerne\
+      \ les cybermenaces importante"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article-premier
+      assessable: false
+      depth: 1
+      ref_id: Article premier
+      description: "Informations g\xE9n\xE9rales \xE0 fournir dans les notifications\
+        \ initiales et les rapports interm\xE9diaire et final sur les incidents majeurs\
+        \ li\xE9s aux TIC"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article-premier
+      ref_id: '1'
+      description: "Les entit\xE9s financi\xE8res incluent dans la notification initiale,\
+        \ le rapport interm\xE9diaire et le rapport final, vis\xE9s \xE0 l\u2019article\_\
+        19, paragraphe\_4, du r\xE8glement (UE)\_2022/2554, les informations g\xE9\
+        n\xE9rales suivantes:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.a
+      description: "le type de soumission (notification initiale, rapport interm\xE9\
+        diaire ou rapport final);"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.b
+      description: "le nom de l\u2019entit\xE9 financi\xE8re, son code LEI et le type\
+        \ d\u2019entit\xE9 financi\xE8re vis\xE9 \xE0 l\u2019article\_2, paragraphe\_\
+        1, du r\xE8glement (UE)\_2022/2554;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.C
+      description: "le nom et le code d\u2019identification de l\u2019entit\xE9 qui\
+        \ soumet la notification initiale, ou le rapport interm\xE9diaire ou final,\
+        \ pour l\u2019entit\xE9 financi\xE8re;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.d
+      description: "le cas \xE9ch\xE9ant, les noms et codes LEI de toutes les entit\xE9\
+        s financi\xE8res couvertes par la notification initiale agr\xE9g\xE9e ou le\
+        \ rapport interm\xE9diaire ou final;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.e
+      description: "les coordonn\xE9es des personnes charg\xE9es de communiquer avec\
+        \ l\u2019autorit\xE9 comp\xE9tente au sujet de l\u2019incident majeur li\xE9\
+        \ aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.f
+      description: "le cas \xE9ch\xE9ant, l\u2019identification de l\u2019entreprise\
+        \ m\xE8re du groupe auquel l\u2019entit\xE9 financi\xE8re appartient;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:1
+      ref_id: 1.g
+      description: "en cas d\u2019incidence sur la situation mon\xE9taire, la monnaie\
+        \ dans laquelle les montants sont calcul\xE9s."
+    - urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        2"
+      assessable: true
+      depth: 1
+      ref_id: "Article\_2"
+      description: "Informations sp\xE9cifiques \xE0 fournir dans les notifications\
+        \ initiales"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        2"
+      ref_id: '2'
+      description: "Les notifications initiales vis\xE9es \xE0 l\u2019article\_19,\
+        \ paragraphe\_4, point\_a), du r\xE8glement (UE)\_2022/2554 contiennent au\
+        \ moins toutes les informations sp\xE9cifiques suivantes:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.a
+      description: "le code de r\xE9f\xE9rence de l\u2019incident attribu\xE9 par\
+        \ l\u2019entit\xE9 financi\xE8re;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.b
+      description: "la date et l\u2019heure de d\xE9tection de l\u2019incident et\
+        \ sa classification conform\xE9ment \xE0 l\u2019article\_8 du r\xE8glement\
+        \ d\xE9l\xE9gu\xE9 (UE)\_2024/1772 de la Commission\_(7);"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.c
+      description: "une description de l\u2019incident li\xE9 aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.d
+      description: "les crit\xE8res \xE9nonc\xE9s aux articles\_1er\_\xE0 8 du r\xE8\
+        glement d\xE9l\xE9gu\xE9 (UE)\_2024/1772, sur la base desquels l\u2019entit\xE9\
+        \ financi\xE8re a class\xE9 l\u2019incident li\xE9 aux TIC comme majeur;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.e
+      description: "les \xC9tats membres touch\xE9s par l\u2019incident li\xE9 aux\
+        \ TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2;f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2;f
+      description: "des informations sur la mani\xE8re dont l\u2019incident li\xE9\
+        \ aux TIC a \xE9t\xE9 d\xE9tect\xE9;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.g
+      description: "le cas \xE9ch\xE9ant, des informations sur l\u2019origine de l\u2019\
+        incident li\xE9 aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.h
+      description: "des informations indiquant si l\u2019entit\xE9 financi\xE8re a\
+        \ activ\xE9 un plan de continuit\xE9 des activit\xE9s;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.i
+      description: "le cas \xE9ch\xE9ant, des informations sur le reclassement de\
+        \ l\u2019incident li\xE9 aux TIC de majeur \xE0 non majeur;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:2
+      ref_id: 2.j
+      description: "le cas \xE9ch\xE9ant, toute autre information pertinente."
+    - urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        3"
+      assessable: false
+      depth: 1
+      ref_id: "Article\_3"
+      description: "Informations sp\xE9cifiques \xE0 fournir dans les rapports interm\xE9\
+        diaires"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        3"
+      ref_id: '3'
+      description: "Les rapports interm\xE9diaires vis\xE9s \xE0 l\u2019article\_\
+        19, paragraphe\_4, point\_b), du r\xE8glement (UE)\_2022/2554 contiennent\
+        \ au moins toutes les informations sp\xE9cifiques suivantes:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.a
+      description: "le cas \xE9ch\xE9ant, le code de r\xE9f\xE9rence de l\u2019incident\
+        \ attribu\xE9 par l\u2019autorit\xE9 comp\xE9tente;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.b
+      description: "la date et l\u2019heure auxquelles l\u2019incident li\xE9 aux\
+        \ TIC est survenu;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.c
+      description: "le cas \xE9ch\xE9ant, la date et l\u2019heure auxquelles l\u2019\
+        entit\xE9 financi\xE8re a repris ses activit\xE9s r\xE9guli\xE8res;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.d
+      description: "des informations sur la mani\xE8re dont les crit\xE8res \xE9nonc\xE9\
+        s aux articles\_1er\_\xE0 8 du r\xE8glement d\xE9l\xE9gu\xE9 (UE)\_2024/1772\
+        \ ont \xE9t\xE9 remplis, sur la base desquels l\u2019entit\xE9 financi\xE8\
+        re a class\xE9 l\u2019incident li\xE9 aux TIC comme majeur;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.e
+      description: "le type d\u2019incident li\xE9 aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.f
+      description: "le cas \xE9ch\xE9ant, les menaces et les techniques utilis\xE9\
+        es par l\u2019acteur de la menace;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.g
+      description: "les domaines fonctionnels et les processus op\xE9rationnels concern\xE9\
+        s;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.h
+      description: "les composants d\u2019infrastructure concern\xE9s soutenant les\
+        \ processus op\xE9rationnels;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.i
+      description: "l\u2019incidence sur les int\xE9r\xEAts financiers des clients;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.j
+      description: "des informations sur la notification de l\u2019incident li\xE9\
+        \ aux TIC \xE0 d\u2019autres autorit\xE9s;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.k
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.k
+      description: "les actions ou mesures temporaires prises ou pr\xE9vues par l\u2019\
+        entit\xE9 financi\xE8re pour se r\xE9tablir \xE0 la suite de l\u2019incident\
+        \ li\xE9 aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3.l
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:3
+      ref_id: 3.l
+      description: "le cas \xE9ch\xE9ant, des informations sur les indicateurs de\
+        \ compromis."
+    - urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        4"
+      assessable: false
+      depth: 1
+      ref_id: "Article\_4"
+      description: "Informations sp\xE9cifiques \xE0 fournir dans les rapports finaux"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        4"
+      ref_id: '4'
+      description: "Les rapports finaux vis\xE9s \xE0 l\u2019article\_19, paragraphe\_\
+        4, point\_c), du r\xE8glement (UE)\_2022/2554 contiennent toutes les informations\
+        \ sp\xE9cifiques suivantes:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      ref_id: 4.a
+      description: "des informations sur les causes originelles de l\u2019incident\
+        \ li\xE9 aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      ref_id: 4.b
+      description: "les dates et heures auxquelles l\u2019incident li\xE9 aux TIC\
+        \ a \xE9t\xE9 r\xE9solu et la ou les causes originelles ont \xE9t\xE9 trait\xE9\
+        es;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      ref_id: 4.c
+      description: "des informations sur la r\xE9solution de l\u2019incident li\xE9\
+        \ aux TIC;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      ref_id: 4.d
+      description: "le cas \xE9ch\xE9ant, les informations pertinentes pour les autorit\xE9\
+        s de r\xE9solution;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      ref_id: 4.e
+      description: "des informations sur les co\xFBts et pertes directs et indirects\
+        \ d\xE9coulant de l\u2019incident li\xE9 aux TIC et des informations sur les\
+        \ recouvrements financiers;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:4
+      ref_id: 4.f
+      description: "le cas \xE9ch\xE9ant, des informations sur les incidents r\xE9\
+        currents li\xE9s aux TIC."
+    - urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      assessable: false
+      depth: 1
+      ref_id: "Article\_5"
+      description: "D\xE9lais pour la notification initiale et pour les rapports interm\xE9\
+        diaire et final"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      ref_id: '5.1'
+      description: "\_Les entit\xE9s financi\xE8res soumettent la notification initiale\
+        \ et les rapports interm\xE9diaire et final vis\xE9s \xE0 l\u2019article\_\
+        19, paragraphe\_4, points\_a), b) et c), du r\xE8glement (UE)\_2022/2554 dans\
+        \ les d\xE9lais suivants:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1
+      ref_id: 5.1.a
+      description: "pour le rapport initial: le plus t\xF4t possible, mais en tout\
+        \ \xE9tat de cause, dans un d\xE9lai de quatre heures \xE0 compter de la classification\
+        \ de l\u2019incident li\xE9 aux TIC comme majeur et au plus tard 24\_heures\
+        \ \xE0 compter du moment o\xF9 l\u2019entit\xE9 financi\xE8re en a eu connaissance;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1
+      ref_id: 5.1.b
+      description: "pour le rapport interm\xE9diaire: au plus tard dans un d\xE9lai\
+        \ de 72\_heures \xE0 compter de la soumission de la notification initiale,\
+        \ m\xEAme si la situation ou le traitement de l\u2019incident n\u2019ont pas\
+        \ chang\xE9 conform\xE9ment \xE0 l\u2019article\_19, paragraphe\_4, point\_\
+        b), du r\xE8glement (UE)\_2022/2554. Les entit\xE9s financi\xE8res soumettent\
+        \ sans retard injustifi\xE9 un rapport interm\xE9diaire actualis\xE9 et, en\
+        \ tout \xE9tat de cause, lorsque les activit\xE9s r\xE9guli\xE8res ont repris;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.1
+      ref_id: 5.1.c
+      description: "pour le rapport final: au plus tard un mois apr\xE8s la soumission\
+        \ du rapport interm\xE9diaire ou, le cas \xE9ch\xE9ant, apr\xE8s la derni\xE8\
+        re mise \xE0 jour du rapport interm\xE9diaire."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.2
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      ref_id: '5.2'
+      description: "Lorsque l\u2019entit\xE9 financi\xE8re n\u2019a pas class\xE9\
+        \ un incident li\xE9 aux TIC comme majeur dans un d\xE9lai de 24\_heures \xE0\
+        \ compter du moment o\xF9 elle en a eu connaissance, mais qu\u2019elle classe\
+        \ cet incident comme majeur \xE0 un stade ult\xE9rieur, elle soumet la notification\
+        \ initiale dans un d\xE9lai de quatre heures \xE0 compter de la classification\
+        \ de l\u2019incident li\xE9 aux TIC comme majeur."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.3
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      ref_id: '5.3'
+      description: "Les entit\xE9s financi\xE8res qui ne sont pas en mesure de soumettre\
+        \ la notification initiale, le rapport interm\xE9diaire ou le rapport final\
+        \ dans les d\xE9lais fix\xE9s au paragraphe\_1 en informent l\u2019autorit\xE9\
+        \ comp\xE9tente dans les meilleurs d\xE9lais, mais au plus tard dans les d\xE9\
+        lais respectifs pour la soumission de la notification ou du rapport, et en\
+        \ expliquent les raisons."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.4
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      ref_id: '5.4'
+      description: "Lorsque le d\xE9lai de soumission d\u2019une notification initiale,\
+        \ d\u2019un rapport interm\xE9diaire ou d\u2019un rapport final expire un\
+        \ jour de week-end ou un jour f\xE9ri\xE9 dans l\u2019\xC9tat membre de l\u2019\
+        entit\xE9 financi\xE8re d\xE9clarante, l\u2019entit\xE9 financi\xE8re peut\
+        \ soumettre la notification initiale, le rapport interm\xE9diaire ou le rapport\
+        \ final au plus tard \xE0 midi le jour ouvrable suivant."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.5
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      ref_id: '5.5'
+      description: "\_Le paragraphe\_4 ne s\u2019applique pas \xE0 la soumission d\u2019\
+        une notification initiale ou d\u2019un rapport interm\xE9diaire par les \xE9\
+        tablissements de cr\xE9dit, les contreparties centrales, les op\xE9rateurs\
+        \ de plates-formes de n\xE9gociation et d\u2019autres entit\xE9s financi\xE8\
+        res consid\xE9r\xE9es comme des entit\xE9s essentielles ou importantes conform\xE9\
+        ment \xE0 l\u2019article\_3 de la directive (UE)\_2022/2555."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:5.6
+      assessable: true
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        5"
+      ref_id: '5.6'
+      description: "Les autorit\xE9s comp\xE9tentes peuvent d\xE9cider que le paragraphe\_\
+        4 ne s\u2019applique pas \xE0 la soumission d\u2019une notification initiale\
+        \ ou d\u2019un rapport interm\xE9diaire par les entit\xE9s financi\xE8res,\
+        \ autres que celles vis\xE9es au paragraphe\_5, qui sont class\xE9es comme\
+        \ importantes ou pr\xE9sentent un caract\xE8re syst\xE9mique pour le secteur\
+        \ financier au niveau national ou de l\u2019Union. Les autorit\xE9s comp\xE9\
+        tentes notifient leur d\xE9cision aux entit\xE9s financi\xE8res concern\xE9\
+        es. La d\xE9cision de l\u2019autorit\xE9 comp\xE9tente ne s\u2019applique\
+        \ qu\u2019en ce qui concerne les incidents d\xE9clar\xE9s apr\xE8s la date\
+        \ de la notification de la d\xE9cision par l\u2019autorit\xE9 comp\xE9tente\
+        \ aux entit\xE9s financi\xE8res concern\xE9es."
+    - urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        6"
+      assessable: false
+      depth: 1
+      ref_id: "Article\_6"
+      description: Contenu de la notification volontaire des cybermenaces importantes
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        6"
+      ref_id: '6'
+      description: "Le contenu de la notification volontaire en ce qui concerne les\
+        \ cybermenaces importantes vis\xE9e \xE0 l\u2019article\_19, paragraphe\_\
+        2, du r\xE8glement (UE)\_2022/2554 couvre l\u2019ensemble des \xE9l\xE9ments\
+        \ suivants:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.a
+      description: "des informations g\xE9n\xE9rales sur l\u2019entit\xE9 financi\xE8\
+        re notifiante, conform\xE9ment \xE0 l\u2019article\_1er;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.b
+      description: "la date et l\u2019heure de d\xE9tection de la cybermenace importante\
+        \ et de tout autre horodatage pertinent li\xE9 \xE0 cette derni\xE8re;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.c
+      description: une description de la cybermenace importante;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.d
+      description: "des informations sur l\u2019incidence potentielle de la cybermenace\
+        \ importante sur l\u2019entit\xE9 financi\xE8re, ses clients ou ses contreparties\
+        \ financi\xE8res;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.e
+      description: "les crit\xE8res de classification susceptibles d\u2019avoir \xE9\
+        t\xE9 \xE0 l\u2019origine d\u2019un rapport d\u2019incident majeur pr\xE9\
+        vus aux articles\_1er\_\xE0 8 du r\xE8glement d\xE9l\xE9gu\xE9 (UE)\_2024/1772\
+        \ en cas de mat\xE9rialisation de la cybermenace;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.f
+      description: "des informations sur la situation de la cybermenace importante\
+        \ et sur tout changement dans l\u2019activit\xE9 de la menace;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.g
+      description: "le cas \xE9ch\xE9ant, une description des mesures prises par l\u2019\
+        entit\xE9 financi\xE8re pour emp\xEAcher la mat\xE9rialisation des cybermenaces\
+        \ importantes;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.h
+      description: "des informations sur toute notification de la cybermenace importante\
+        \ \xE0 d\u2019autres entit\xE9s ou autorit\xE9s financi\xE8res;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.i
+      description: "le cas \xE9ch\xE9ant, des informations sur les indicateurs de\
+        \ compromis;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:6
+      ref_id: 6.j
+      description: "le cas \xE9ch\xE9ant, toute autre information pertinente."
+    - urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        7"
+      assessable: false
+      depth: 1
+      ref_id: "Article\_7"
+      description: "Entr\xE9e en vigueur"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:7.1
+      assessable: false
+      depth: 2
+      parent_urn: "urn:intuitem:risk:req_node:rts-dora-ict-related-incidents-addon-2025-301:article\_\
+        7"
+      ref_id: '7.1'
+      description: "Le pr\xE9sent r\xE8glement entre en vigueur le vingti\xE8me jour\
+        \ suivant celui de sa publication au\_Journal officiel de l\u2019Union europ\xE9\
+        enne."
