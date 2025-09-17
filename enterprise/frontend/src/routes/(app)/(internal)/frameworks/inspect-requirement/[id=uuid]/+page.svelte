@@ -9,7 +9,6 @@
 	import { page } from '$app/state';
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -64,9 +63,7 @@
 				<span class="text-2xl font-black text-gray-800">{firstAssessment.name}</span>
 			{/if}
 			{#if firstAssessment?.description}
-				<div class="text-gray-600 blockquote">
-          <MarkdownRenderer content={firstAssessment.description}/>
-        </div>
+				<span class="text-gray-600 blockquote">{firstAssessment.description}</span>
 			{/if}
 		</div>
 

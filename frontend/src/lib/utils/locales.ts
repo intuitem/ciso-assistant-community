@@ -74,57 +74,7 @@ export const LOCALE_MAP = {
 	el: {
 		name: 'greek',
 		flag: '🇬🇷'
-	},
-	tr: {
-		name: 'turkish',
-		flag: '🇹🇷'
 	}
-};
-
-export const language: any = {
-	french: m.french(),
-	english: m.english(),
-	arabic: m.arabic(),
-	portuguese: m.portuguese(),
-	spanish: m.spanish(),
-	german: m.german(),
-	dutch: m.dutch(),
-	italian: m.italian(),
-	polish: m.polish(),
-	romanian: m.romanian(),
-	hindi: m.hindi(),
-	urdu: m.urdu(),
-	czech: m.czech(),
-	swedish: m.swedish(),
-	indonesian: m.indonesian(),
-	danish: m.danish(),
-	hungarian: m.hungarian(),
-	ukrainian: m.ukrainian(),
-	greek: m.greek(),
-	turkish: m.turkish()
-};
-
-export const defaultLangLabels = {
-	fr: 'Français',
-	en: 'English',
-	ar: 'العربية',
-	pt: 'Português',
-	es: 'Español',
-	nl: 'Nederlands',
-	de: 'Deutsch',
-	it: 'Italiano',
-	pl: 'Polski',
-	ro: 'Română',
-	hi: 'हिंदी',
-	ur: 'اردو',
-	cs: 'Český',
-	sv: 'Svenska',
-	id: 'Bahasa Indonesia',
-	da: 'Dansk',
-	hu: 'Magyar',
-	uk: 'Українська',
-	el: 'Ελληνικά',
-	tr: 'Türkçe'
 };
 
 export function toCamelCase(str: string) {

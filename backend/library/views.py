@@ -472,7 +472,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
-        if not lib.frameworks.exists():
+        if lib.frameworks.count() == 0:
             return Response(
                 data="This library doesn't contain any framework.",
                 status=HTTP_404_NOT_FOUND,

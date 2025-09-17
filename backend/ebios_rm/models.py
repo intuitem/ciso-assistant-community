@@ -1,27 +1,29 @@
-from auditlog.registry import auditlog
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, When, IntegerField, Q
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+from auditlog.registry import auditlog
+
 
 from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
     AppliedControl,
     Asset,
     ComplianceAssessment,
-    RiskAssessment,
+    Qualification,
     RiskMatrix,
     Threat,
-    Terminology,
+    RiskAssessment,
 )
 from core.validators import (
     JSONSchemaInstanceValidator,
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
+
+from django.core.exceptions import ValidationError
 
 INITIAL_META = {
     "workshops": [
@@ -188,12 +190,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = _("Ebios RM Studies")
         ordering = ["created_at"]
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.quotation_method == "express":
-            for scenario in self.operational_scenarios.all():
-                scenario.update_likelihood_from_operating_modes()
-
     @property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
@@ -265,14 +261,11 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         help_text=_("Assets that are affected by the feared event"),
     )
     qualifications = models.ManyToManyField(
-        Terminology,
-        verbose_name="Qualifications",
-        related_name="feared_events_qualifications",
-        limit_choices_to={
-            "field_path": Terminology.FieldPath.QUALIFICATIONS,
-            "is_visible": True,
-        },
+        Qualification,
         blank=True,
+        verbose_name=_("Qualifications"),
+        related_name="feared_events",
+        help_text=_("Qualifications carried by the feared event"),
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
@@ -322,47 +315,18 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         return FearedEvent.format_gravity(self.gravity, self.parsed_matrix)
 
 
-class RoToQuerySet(models.QuerySet):
-    def with_pertinence(self):
-        """Annotate queryset with pertinence for ordering"""
-        pertinence_annotation = Case(
-            # Handle undefined cases (motivation = 0 or resources = 0)
-            models.When(Q(motivation=0) | models.Q(resources=0), then=0),  # UNDEFINED
-            # Matrix[0][0-3] - motivation=1
-            When(motivation=1, resources=1, then=1),
-            When(motivation=1, resources=2, then=1),
-            When(motivation=1, resources=3, then=2),
-            When(motivation=1, resources=4, then=2),
-            # Matrix[1][0-3] - motivation=2
-            When(motivation=2, resources=1, then=1),
-            When(motivation=2, resources=2, then=2),
-            When(motivation=2, resources=3, then=3),
-            When(motivation=2, resources=4, then=3),
-            # Matrix[2][0-3] - motivation=3
-            When(motivation=3, resources=1, then=2),
-            When(motivation=3, resources=2, then=3),
-            When(motivation=3, resources=3, then=3),
-            When(motivation=3, resources=4, then=4),
-            # Matrix[3][0-3] - motivation=4
-            When(motivation=4, resources=1, then=2),
-            When(motivation=4, resources=2, then=3),
-            When(motivation=4, resources=3, then=4),
-            When(motivation=4, resources=4, then=4),
-            default=0,
-            output_field=IntegerField(),
-        )
-        return self.annotate(pertinence=pertinence_annotation)
-
-
-class RoToManager(models.Manager):
-    def get_queryset(self):
-        return RoToQuerySet(self.model, using=self._db)
-
-    def with_pertinence(self):
-        return self.get_queryset().with_pertinence()
-
-
 class RoTo(AbstractBaseModel, FolderMixin):
+    class RiskOrigin(models.TextChoices):
+        STATE = "state", _("State")
+        ORGANIZED_CRIME = "organized_crime", _("Organized crime")
+        TERRORIST = "terrorist", _("Terrorist")
+        ACTIVIST = "activist", _("Activist")
+        COMPETITOR = "competitor", _("Competitor")
+        AMATEUR = "amateur", _("Amateur")
+        AVENGER = "avenger", _("Avenger")
+        PATHOLOGICAL = "pathological", _("Pathological")
+        OTHER = "other", _("Other")
+
     class Motivation(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
         VERY_LOW = 1, "very_low"
@@ -403,15 +367,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
         blank=True,
     )
 
-    risk_origin = models.ForeignKey(
-        Terminology,
-        on_delete=models.PROTECT,
-        verbose_name=_("Risk origin"),
-        related_name="roto_risk_origins",
-        limit_choices_to={
-            "field_path": Terminology.FieldPath.ROTO_RISK_ORIGIN,
-            "is_visible": True,
-        },
+    risk_origin = models.CharField(
+        max_length=32, verbose_name=_("Risk origin"), choices=RiskOrigin.choices
     )
     target_objective = models.TextField(verbose_name=_("Target objective"))
     motivation = models.PositiveSmallIntegerField(
@@ -435,10 +392,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["ebios_rm_study", "target_objective", "risk_origin"]
 
-    objects = RoToManager()
-
     def __str__(self) -> str:
-        return f"{self.risk_origin.get_name_translated} - {self.target_objective}"
+        return f"{self.get_risk_origin_display()} - {self.target_objective}"
 
     class Meta:
         verbose_name = _("RO/TO couple")
@@ -449,7 +404,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
-    def get_pertinence_display(self):
+    @property
+    def get_pertinence(self):
         PERTINENCE_MATRIX = [
             [1, 1, 2, 2],
             [1, 2, 3, 3],
@@ -810,12 +766,6 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.operational_scenario.folder
         super().save(*args, **kwargs)
-        self.operational_scenario.update_likelihood_from_operating_modes()
-
-    def delete(self, *args, **kwargs):
-        operational_scenario = self.operational_scenario
-        super().delete(*args, **kwargs)
-        operational_scenario.update_likelihood_from_operating_modes()
 
     @property
     def ebios_rm_study(self):
@@ -976,18 +926,33 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             "value": risk_index,
         }
 
-    def update_likelihood_from_operating_modes(self):
-        if self.ebios_rm_study.quotation_method != "express":
+    @receiver([post_save, post_delete], sender=OperatingMode)
+    def update_likelihood_from_operating_modes(sender, instance, **kwargs):
+        if instance.operational_scenario.ebios_rm_study.quotation_method != "express":
             return
 
         max_likelihood = (
-            self.operating_modes.aggregate(max_l=models.Max("likelihood"))["max_l"]
-            if self.operating_modes.exists()
+            instance.operational_scenario.operating_modes.aggregate(
+                max_l=models.Max("likelihood")
+            )["max_l"]
+            if instance.operational_scenario.operating_modes.exists()
             else -1
         )
 
-        self.likelihood = max_likelihood
-        self.save(update_fields=["likelihood"])
+        instance.operational_scenario.likelihood = max_likelihood
+        instance.operational_scenario.save(update_fields=["likelihood"])
+
+    @receiver(post_save, sender=EbiosRMStudy)
+    def update_scenarios_likelihood_on_quotation_method_change(
+        sender, instance, **kwargs
+    ):
+        if instance.quotation_method != "express":
+            return
+
+        for scenario in instance.operational_scenarios.all():
+            scenario.update_likelihood_from_operating_modes(
+                instance=scenario.operating_modes.first()
+            )
 
 
 class KillChain(AbstractBaseModel, FolderMixin):

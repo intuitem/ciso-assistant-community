@@ -52,9 +52,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+	optionsEndpoint="qualifications"
 	field="qualifications"
-	optionsLabelField="translated_name"
 	label={m.qualifications()}
 />
 <Select

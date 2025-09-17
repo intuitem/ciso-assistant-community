@@ -6,7 +6,6 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
@@ -56,13 +55,6 @@
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
-	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
-	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
-	import QuantitativeRiskStudyForm from './ModelForm/QuantitativeRiskStudyForm.svelte';
-	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
-	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
-	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
-	import RoleForm from './ModelForm/RoleForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -160,18 +152,10 @@
 			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
-				const currentCache = createModalCache.data[model.urlModel];
-				if (!currentCache) {
-					createModalCache.data[model.urlModel] = formDataCache;
-				} else {
-					formDataCache = currentCache;
-				}
+				createModalCache.data[model.urlModel] ??= {};
+				formDataCache = createModalCache.data[model.urlModel];
 			}
 		}
-	});
-
-	$effect(() => {
-		createModalCache.data[model.urlModel] = formDataCache;
 	});
 
 	run(() => {
@@ -290,7 +274,7 @@
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
-			<MarkdownField
+			<TextArea
 				{form}
 				field="description"
 				label={m.description()}
@@ -310,7 +294,6 @@
 				{formDataCache}
 				{initialData}
 				{object}
-				{...rest}
 			/>
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
@@ -323,12 +306,11 @@
 				{object}
 				{context}
 				{updated_fields}
-				{...rest}
 			/>
 		{:else if URLModel === 'threats'}
-			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'risk-scenarios'}
-			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 			<AppliedControlsPoliciesForm
 				{form}
@@ -338,10 +320,9 @@
 				{formDataCache}
 				{schema}
 				{initialData}
-				{...rest}
 			/>
 		{:else if URLModel === 'vulnerabilities'}
-			<VulnerabilitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<VulnerabilitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'risk-acceptances'}
 			<RiskAcceptancesForm
 				{form}
@@ -351,12 +332,11 @@
 				{object}
 				{initialData}
 				{$page}
-				{...rest}
 			/>
 		{:else if URLModel === 'reference-controls'}
-			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'evidences'}
-			<EvidencesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
+			<EvidencesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'compliance-assessments'}
 			<ComplianceAssessmentsForm
 				{form}
@@ -366,60 +346,33 @@
 				{initialData}
 				{object}
 				{context}
-				{...rest}
 			/>
 		{:else if URLModel === 'campaigns'}
-			<CampaignForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-				{...rest}
-			/>
+			<CampaignForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'assets'}
-			<AssetsForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{data}
-				{...rest}
-			/>
+			<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 		{:else if URLModel === 'requirement-assessments'}
-			<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'entities'}
-			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'entity-assessments'}
-			<EntityAssessmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{data}
-				{...rest}
-			/>
+			<EntityAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {data} />
 		{:else if URLModel === 'solutions'}
-			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'representatives'}
-			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'frameworks'}
-			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
+			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} />
 		{:else if URLModel === 'users'}
-			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
+			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 		{:else if URLModel === 'sso-settings'}
-			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'general-settings'}
-			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'feature-flags'}
-			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} />
 		{:else if URLModel === 'filtering-labels'}
-			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
+			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 		{:else if URLModel === 'business-impact-analysis'}
 			<BusinessImpactAnalysisForm
 				{form}
@@ -431,18 +384,9 @@
 				{object}
 				{context}
 				{updated_fields}
-				{...rest}
 			/>
 		{:else if URLModel === 'asset-assessments'}
-			<AssetAssessmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
+			<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'escalation-thresholds'}
 			<EscalationThresholdForm
 				{form}
@@ -451,80 +395,31 @@
 				{formDataCache}
 				{context}
 				{initialData}
-				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'purposes'}
-			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
+			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'personal-data'}
-			<PersonalDataForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
+			<PersonalDataForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'data-subjects'}
-			<DataSubjectForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
+			<DataSubjectForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'data-recipients'}
-			<DataRecipientForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
+			<DataRecipientForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'data-contractors'}
-			<DataContractorForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
+			<DataContractorForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'data-transfers'}
-			<DataTransferForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{context}
-				{initialData}
-				{...rest}
-			/>
+			<DataTransferForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'feared-events'}
-			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'ro-to'}
-			<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
+			<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'stakeholders'}
-			<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'strategic-scenarios'}
-			<StrategicScenarioForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
+			<StrategicScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'attack-paths'}
 			<AttackPathForm
 				{form}
@@ -533,7 +428,6 @@
 				{formDataCache}
 				{initialData}
 				{additionalInitialData}
-				{...rest}
 			/>
 		{:else if URLModel === 'operational-scenarios'}
 			<OperationalScenarioForm
@@ -544,32 +438,15 @@
 				{initialData}
 				{context}
 				{object}
-				{...rest}
 			/>
 		{:else if URLModel === 'security-exceptions'}
-			<SecurityExceptionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
+			<SecurityExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'findings'}
-			<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
+			<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'findings-assessments'}
-			<FindingsAssessmentForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
+			<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'incidents'}
-			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
+			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'timeline-entries'}
 			<TimelineEntryForm
 				{form}
@@ -578,30 +455,13 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
-				{...rest}
 			/>
 		{:else if URLModel === 'task-templates'}
-			<TaskTemplateForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
+			<TaskTemplateForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'task-nodes'}
-			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'elementary-actions'}
-			<ElementaryActionForm
-				{form}
-				{model}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{context}
-				{...rest}
-			/>
+			<ElementaryActionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 		{:else if URLModel === 'operating-modes'}
 			<OperatingModeForm
 				{form}
@@ -610,7 +470,6 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
-				{...rest}
 			/>
 		{:else if URLModel === 'kill-chains'}
 			<KillChainForm
@@ -620,49 +479,7 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
-				{...rest}
 			/>
-		{:else if URLModel === 'quantitative-risk-studies'}
-			<QuantitativeRiskStudyForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'quantitative-risk-scenarios'}
-			<QuantitativeRiskScenarioForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'quantitative-risk-hypotheses'}
-			<QuantitativeRiskHypothesisForm
-				{form}
-				{model}
-				{duplicate}
-				{cacheLocks}
-				{formDataCache}
-				{initialData}
-				{object}
-				{context}
-			/>
-		{:else if URLModel === 'organisation-issues'}
-			<OrganisationIssueForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-		{:else if URLModel === 'organisation-objectives'}
-			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-		{:else if URLModel === 'terminologies'}
-			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
-		{:else if URLModel === 'roles'}
-			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

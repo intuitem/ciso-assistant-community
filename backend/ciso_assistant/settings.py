@@ -191,7 +191,6 @@ INSTALLED_APPS = [
     "tprm",
     "privacy",
     "resilience",
-    "crq",
     "core",
     "cal",
     "django_filters",
@@ -382,7 +381,6 @@ LANGUAGES = [
     ("hu", "Hungarian"),
     ("uk", "Ukrainian"),
     ("el", "Greek"),
-    ("tr", "Turkish"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

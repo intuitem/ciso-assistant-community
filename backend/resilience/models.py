@@ -6,7 +6,7 @@ from core.models import (
     Evidence,
     RiskMatrix,
     AbstractBaseModel,
-    Terminology,
+    Qualification,
 )
 from django.db.models import (
     BooleanField,
@@ -185,13 +185,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     point_in_time = IntegerField()  # seconds and manage the display and units on front
     quali_impact = IntegerField(default=-1)  # based on the matrix
     qualifications = models.ManyToManyField(
-        Terminology,
-        verbose_name="Qualifications",
-        related_name="escalation_thresholds_qualifications",
-        limit_choices_to={
-            "field_path": Terminology.FieldPath.QUALIFICATIONS,
-            "is_visible": True,
-        },
+        Qualification,
         blank=True,
     )
     quanti_impact = FloatField(default=0)

@@ -9,13 +9,6 @@ ENTERPRISE_DIR := ../../enterprise/frontend
 RM := rm -rf
 ARTIFACTS := $(BUILD_DIR) node_modules package.json build
 FRONTEND_DIR := $(BUILD_DIR)/frontend
-OS_NAME := $(shell uname -s)
-
-ifeq ($(OS_NAME),Linux)
-	WATCH_TARGET := watch_linux
-else
-	WATCH_TARGET := watch_macos
-endif
 
 .DEFAULT_GOAL := build-enterprise
 
@@ -34,14 +27,10 @@ build-enterprise: pre-build
 	@rsync -av $(FRONTEND_DIR)/node_modules $(ENTERPRISE_DIR)/node_modules
 	@rsync -av $(FRONTEND_DIR)/package.json $(ENTERPRISE_DIR)/package.json
 
-
-pre-tests:
-	@rsync -av --exclude=$(COMMUNITY_DIR)/tests/reports $(COMMUNITY_DIR)/tests/results --exclude=node_modules/  $(COMMUNITY_DIR)/tests $(BUILD_DIR)/frontend/tests
-
 CHANGED_FILES =
 
 # The rule to watch the filesystem for changes
-watch_macos:
+watch:
 	@fswatch --batch-marker='EOF' -xn ./src ../../frontend | while read file event; do \
 		if [ "$$file" = "EOF" ]; then \
 			$(MAKE) copy_files CHANGED_FILES="$$list"; \
@@ -52,15 +41,6 @@ watch_macos:
 				echo "Tracking: $$file $$event"; \
 				list+=("$$file"); \
 			fi; \
-		fi; \
-	done
-
-watch_linux:
-	@inotifywait -m -r -e close_write,create,modify --format '%w%f %e' ./src ../../frontend | while read -r file event; do \
-		basename_file="$$(basename "$$file")"; \
-		if [[ "$$file" != *~ ]] && [[ ! "$$basename_file" =~ ^[0-9]+$$ ]] && [[ ! "$$basename_file" =~ ^\. ]] && ! git check-ignore -q "$$file"; then \
-			echo "Tracking: $$file $$event"; \
-			$(MAKE) copy_files CHANGED_FILES="$$file"; \
 		fi; \
 	done
 
@@ -80,8 +60,7 @@ dev:
 		$(MAKE) pre-build; \
 	fi; \
 	$(PM) -C ${FRONTEND_DIR} run dev & \
-
-	$(MAKE) $(WATCH_TARGET)
+	$(MAKE) watch & \
 	wait;
 
 clean:

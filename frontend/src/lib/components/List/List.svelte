@@ -20,7 +20,7 @@
 	{#if message}
 		<p class="sticky top-0 p-2 {classesMessage}">{message}</p>
 	{/if}
-	<ul class="list-disc ml-8 mr-4 whitespace-break-spaces">
+	<ul class="list-disc ml-8 mr-4">
 		{#each items as item}
 			{#if item instanceof Array}
 				<li>

@@ -37,7 +37,6 @@
 <AutocompleteSelect
 	{form}
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.folder()}
@@ -88,9 +87,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+	optionsEndpoint="qualifications"
 	field="qualifications"
-	optionsLabelField="translated_name"
 	label={m.qualifications()}
 	helpText={m.fearedEventQualificationHelpText()}
 />

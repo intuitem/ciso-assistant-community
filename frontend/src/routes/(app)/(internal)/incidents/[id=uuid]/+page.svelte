@@ -234,9 +234,6 @@
 											{form}
 											multiple
 											optionsEndpoint="evidences"
-											optionsDetailedUrlParameters={[
-												['scope_folder_id', page.data.data?.folder?.id]
-											]}
 											field="evidences"
 											{resetForm}
 											label={m.evidences()}
@@ -245,9 +242,7 @@
 									<button
 										class="btn bg-gray-300 h-11 w-10"
 										onclick={(_) => modalEvidenceCreateForm()}
-										type="button"
-										data-testid="add-button-evidence"
-										><i class="fa-solid fa-plus text-sm"></i></button
+										type="button"><i class="fa-solid fa-plus text-sm"></i></button
 									>
 								</div>
 							{/key}
@@ -269,7 +264,7 @@
 								>
 								<button
 									class="btn preset-filled-primary-500 font-semibold w-full"
-									data-testid="save-button-event"
+									data-testid="save-button"
 									type="submit"
 									onclick={() => {
 										resetForm = true;
@@ -325,10 +320,8 @@
 								>{safeTranslate(meta.entry_type)}</span
 							>
 						</div>
-						<a
-							href={`/${actionsURLModel}/${meta.id}`}
-							class="font-semibold capitalize"
-							data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
+						<a href={`/${actionsURLModel}/${meta.id}`} class="font-semibold capitalize"
+							>{safeTranslate(meta.entry)}</a
 						>
 						<p class="text-xs italic text-gray-500 dark:text-gray-400 whitespace-pre-line">
 							{meta.observation ?? m.noObservation()}

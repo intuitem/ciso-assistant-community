@@ -10,7 +10,6 @@
 	import { m } from '$paraglide/messages';
 	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;
@@ -152,19 +151,6 @@
 	let classesPercentText = $derived((resultColor: string) =>
 		resultColor === '#000000' ? 'text-white' : ''
 	);
-
-	const getBadgeStyles = (answers: any, questions: any) => {
-		const answeredCount = Object.values(answers || {}).filter((answer) => answer !== null).length;
-		const totalCount = Object.keys(questions || {}).length;
-		const backgroundColor =
-			answeredCount === 0 ? '#fca5a5' : answeredCount === totalCount ? '#bbf7d0' : '#fef08a';
-		return {
-			backgroundColor,
-			color: darkenColor(backgroundColor, 0.6),
-			answeredCount,
-			totalCount
-		};
-	};
 </script>
 
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
@@ -184,7 +170,7 @@
 											<span style="font-weight: 600;">{title}</span>
 										{/if}
 										{#if description}
-											<MarkdownRenderer content={description} />
+											<p>{description}</p>
 										{/if}
 									{:else if Object.keys(node.questions).length > 0}
 										<!-- This displays the first question's text -->
@@ -200,7 +186,7 @@
 										<span style="font-weight: 600;">{title}</span>
 									{/if}
 									{#if description}
-										<MarkdownRenderer content={description} />
+										<p>{description}</p>
 									{/if}
 								</Anchor>
 							{/if}
@@ -211,7 +197,7 @@
 								<span style="font-weight: 600;">{title}</span>
 							{/if}
 							{#if description}
-								<MarkdownRenderer content={description} />
+								<p>{description}</p>
 							{/if}
 						</p>
 					{/if}
@@ -231,14 +217,19 @@
 						{/each}
 					{/if}
 					{#if node.questions}
-						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}
-						<span
-							class="badge"
-							style="background-color: {badgeStyles.backgroundColor}; color: {badgeStyles.color}"
-						>
-							{badgeStyles.answeredCount}/{badgeStyles.totalCount}
-							{Object.keys(node.questions).length > 1 ? m.questionPlural() : m.questionSingular()}
-						</span>
+						{#if Object.keys(node.questions).length > 1}
+							<span
+								class="badge"
+								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+								>{Object.keys(node.questions).length} {m.questionPlural()}</span
+							>
+						{:else}
+							<span
+								class="badge"
+								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+								>{Object.keys(node.questions).length} {m.questionSingular()}</span
+							>
+						{/if}
 					{/if}
 				</div>
 			</div>

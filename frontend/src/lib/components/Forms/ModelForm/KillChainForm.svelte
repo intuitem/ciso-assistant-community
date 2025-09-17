@@ -1,12 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import Checkbox from '../Checkbox.svelte';
+	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
-		form: SuperForm<any>;
+		form: SuperValidated<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -20,8 +22,6 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
-
-	const formStore = form.form;
 </script>
 
 <AutocompleteSelect
@@ -46,9 +46,9 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="elementary-actions"
-	optionsDetailedUrlParameters={$formStore.operating_mode
-		? [['operating_mode_available_actions', $formStore.operating_mode]]
-		: undefined}
+	optionsDetailedUrlParameters={[
+		['operating_mode_available_actions', initialData['operating_mode']]
+	]}
 	optionsInfoFields={{
 		fields: [
 			{
@@ -74,9 +74,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="elementary-actions"
-	optionsDetailedUrlParameters={$formStore.operating_mode
-		? [['operating_modes', $formStore.operating_mode]]
-		: undefined}
+	optionsDetailedUrlParameters={[['operating_modes', initialData['operating_mode']]]}
 	optionsInfoFields={{
 		fields: [
 			{

@@ -16,18 +16,8 @@ APPLIED_CONTROL_EFFORT = ("L", "Large")
 APPLIED_CONTROL_EFFORT2 = ("M", "Medium")
 APPLIED_CONTROL_LINK = "https://example.com"
 APPLIED_CONTROL_ETA = "2024-01-01"
-APPLIED_CONTROL_COST = {
-    "currency": "€",
-    "amortization_period": 1,
-    "build": {"fixed_cost": 24.42, "people_days": 0},
-    "run": {"fixed_cost": 0, "people_days": 0},
-}
-APPLIED_CONTROL_COST2 = {
-    "currency": "$",
-    "amortization_period": 2,
-    "build": {"fixed_cost": 25.43, "people_days": 2},
-    "run": {"fixed_cost": 10.50, "people_days": 1},
-}
+APPLIED_CONTROL_COST = 24.42
+APPLIED_CONTROL_COST2 = 25.43
 
 
 @pytest.mark.django_db
@@ -125,7 +115,6 @@ class TestAppliedControlsAuthenticated:
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
-                "is_assigned": False,
             },
             user_group=test.user_group,
         )
@@ -157,7 +146,6 @@ class TestAppliedControlsAuthenticated:
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
-                "is_assigned": False,
             },
             user_group=test.user_group,
             scope=str(test.folder),
@@ -202,7 +190,6 @@ class TestAppliedControlsAuthenticated:
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
-                "is_assigned": False,
             },
             user_group=test.user_group,
         )

@@ -143,19 +143,13 @@
 {/snippet}
 
 <div class="flex flex-row items-center">
-	<div
-		class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto"
-		data-testid="y-label"
-	>
+	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
 		{yAxisLabel}
 	</div>
 
 	<div class="flex flex-col w-full">
 		{#if flipVertical}
-			<div
-				class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
-				data-testid="x-label-flipped"
-			>
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
 				{xAxisLabel}
 			</div>
 		{/if}
@@ -220,10 +214,7 @@
 			{/if}
 		</div>
 		{#if !flipVertical}
-			<div
-				class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
-				data-testid="x-label"
-			>
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
 				{xAxisLabel}
 			</div>
 		{/if}

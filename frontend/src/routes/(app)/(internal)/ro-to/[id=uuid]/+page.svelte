@@ -7,12 +7,10 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-	interface Props {
-		data: PageData;
-	}
-	let { data }: Props = $props();
 
 	const roto = data.data;
+
+	pageTitle.set(roto.risk_origin + ' - ' + roto.target_objective);
 
 	let activeActivity: string | null = $state(null);
 	page.url.searchParams.forEach((value, key) => {
@@ -35,9 +33,11 @@
 
 	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	interface Props {
+		data: PageData;
+	}
 
-	pageTitle.set(data.title);
-
+	let { data }: Props = $props();
 	const model = URL_MODEL_MAP['ro-to'];
 	const canEditObject = (roto): boolean =>
 		canPerformAction({
@@ -86,12 +86,11 @@
 			>
 				{m.ebiosWs2_1()}
 			</h1>
-			<div class="flex flex-row space-x-1 items-center">
+			<div class="flex flex-row space-x-1">
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.riskOrigin()}</span>
-					<span class="font-bold">{safeTranslate(roto.risk_origin)}</span>
+					<span class="font-bold">{safeTranslate(roto.risk_origin)} /</span>
 				</p>
-				<span class="text-gray-500 font-bold text-lg">/</span>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.targetObjective()}</span>
 					<span class="font-bold">{roto.target_objective}</span>

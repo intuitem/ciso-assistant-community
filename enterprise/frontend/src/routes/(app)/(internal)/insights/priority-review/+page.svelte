@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ImpactEffortMatrix from './ImpactEffortMatrix.svelte';
 	import type { PageData } from './$types';
+	import PriorityRadarChart from '$lib/components/Chart/PriorityRadarChart.svelte';
 	interface Props {
 		data: PageData;
 	}
@@ -8,4 +8,8 @@
 	let { data }: Props = $props();
 </script>
 
-<ImpactEffortMatrix data={data.data} />
+<div class="bg-white shadow flex overflow-x-auto">
+	<div class="w-full h-screen">
+		<PriorityRadarChart title="" name="c_priority" data={data.data} />
+	</div>
+</div>

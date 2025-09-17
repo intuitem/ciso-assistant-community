@@ -21,7 +21,6 @@
 		oninput={() => {
 			const debounceTimeout = setTimeout(() => {
 				handler.filter(value, filterBy);
-				handler.invalidate();
 			}, 300);
 			return () => clearTimeout(debounceTimeout);
 		}}
