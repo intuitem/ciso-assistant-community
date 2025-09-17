@@ -63,6 +63,7 @@
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
+	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -663,6 +664,8 @@
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'roles'}
 			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'evidence-revisions'}
+			<EvidenceRevisionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

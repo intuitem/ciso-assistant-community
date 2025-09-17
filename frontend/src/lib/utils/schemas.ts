@@ -1,7 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -388,6 +387,19 @@ export const EvidenceSchema = z.object({
 	owner: z.string().optional().array().optional(),
 	status: z.string().optional().default('missing'),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
+export const EvidenceRevisionSchema = z.object({
+	evidence: z.string().uuid(),
+	version: z.number().optional().default(1),
+	attachment: z.any().optional().nullable(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
 });
 
 export const GeneralSettingsSchema = z.object({
@@ -1094,6 +1106,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
+	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,

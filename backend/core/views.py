@@ -4677,6 +4677,61 @@ class EvidenceViewSet(BaseModelViewSet):
         return Response(dict(Evidence.Status.choices))
 
 
+class EvidenceRevisionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows evidence revisions to be viewed or edited.
+    """
+
+    model = EvidenceRevision
+    filterset_fields = ["evidence"]
+    ordering = ["-version"]
+    
+    @action(methods=["get"], detail=True)
+    def attachment(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, EvidenceRevision
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            evidence = self.get_object()
+            if not evidence.attachment or not evidence.attachment.storage.exists(
+                evidence.attachment.name
+            ):
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            if request.method == "GET":
+                content_type = mimetypes.guess_type(evidence.filename())[0]
+                response = HttpResponse(
+                    evidence.attachment,
+                    content_type=content_type,
+                    headers={
+                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        return response
+
+    @action(methods=["post"], detail=True)
+    def delete_attachment(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, EvidenceRevision
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            evidence = self.get_object()
+            if evidence.attachment:
+                evidence.attachment.delete()
+                response = Response(status=status.HTTP_200_OK)
+        return response
+
+
 class UploadAttachmentView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = AttachmentUploadSerializer
@@ -4684,7 +4739,7 @@ class UploadAttachmentView(APIView):
     def post(self, request, *args, **kwargs):
         if request.data:
             try:
-                evidence = Evidence.objects.get(id=kwargs["pk"])
+                evidence = EvidenceRevision.objects.get(id=kwargs["pk"])
                 attachment = request.FILES["file"]
                 if not evidence.attachment and attachment.name != "undefined":
                     evidence.attachment = attachment

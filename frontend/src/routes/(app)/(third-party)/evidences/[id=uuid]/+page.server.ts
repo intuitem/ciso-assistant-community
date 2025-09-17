@@ -9,6 +9,9 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
+import {
+	nestedDeleteFormAction
+} from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
 	return await loadDetail({ event, model: getModelInfo('evidences'), id: event.params.id });
@@ -36,5 +39,8 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 		setFlash({ type: 'success', message: m.attachmentDeleted() }, event);
 		return redirect(302, `/${urlmodel}/${id}`);
+	},
+	delete: async (event) => {
+		return nestedDeleteFormAction({ event });
 	}
 };

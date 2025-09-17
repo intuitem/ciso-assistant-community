@@ -572,9 +572,21 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
+			{ field: 'evidence', urlModel: 'evidence-revisions' }
 		],
 		selectFields: [{ field: 'status' }]
+	},
+	'evidence-revisions': {
+		name: 'evidencerevision',
+		localName: 'evidenceRevision',
+		localNamePlural: 'evidenceRevisions',
+		verboseName: 'Evidence revision',
+		verboseNamePlural: 'Evidence revisions',
+		fileFields: ['attachment'],
+		foreignKeyFields: [
+			{ field: 'evidence', urlModel: 'evidences' }
+		]
 	},
 	'compliance-assessments': {
 		name: 'complianceassessment',

@@ -43,6 +43,7 @@ router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
 router.register(r"frameworks", FrameworkViewSet, basename="frameworks")
 router.register(r"evidences", EvidenceViewSet, basename="evidences")
+router.register(r"evidence-revisions", EvidenceRevisionViewSet, basename="evidence-revisions")
 router.register(
     r"compliance-assessments",
     ComplianceAssessmentViewSet,
@@ -121,7 +122,7 @@ urlpatterns = [
     path("crq/", include("crq.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
-    path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
+    path("evidence-revisions/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
     path("agg_data/", get_agg_data, name="get_agg_data"),

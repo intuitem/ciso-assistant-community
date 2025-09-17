@@ -1271,6 +1271,22 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class EvidenceRevisionReadSerializer(BaseModelSerializer):
+    attachment = serializers.CharField(source="filename")
+    size = serializers.CharField(source="get_size")
+
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+
+class EvidenceRevisionWriteSerializer(BaseModelSerializer):
+    
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+
 class AttachmentUploadSerializer(serializers.Serializer):
     attachment = serializers.FileField(required=True)
 

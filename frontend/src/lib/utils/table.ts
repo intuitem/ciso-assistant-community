@@ -1212,6 +1212,13 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'evidence-revisions': {
+		head: ['version', 'evidence', 'file', 'size', 'createdAt'],
+		body: ['version', 'evidence', 'attachment', 'size', 'created_at'],
+		filters: {
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
