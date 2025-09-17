@@ -6,6 +6,7 @@ import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
 import { type urlModel } from './types';
+import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -1581,10 +1582,12 @@ export const FIELD_COMPONENT_MAP = {
 	},
 	'stored-libraries': {
 		locales: LanguageDisplay,
+		objects_meta: LibraryOverview,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'loaded-libraries': {
 		locales: LanguageDisplay,
+		objects_meta: LibraryOverview,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'user-groups': {
