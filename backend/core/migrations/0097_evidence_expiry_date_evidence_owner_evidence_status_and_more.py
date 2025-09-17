@@ -9,47 +9,113 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0096_appliedcontrol_cost_to_json'),
-        ('iam', '0014_user_observation'),
+        ("core", "0096_appliedcontrol_cost_to_json"),
+        ("iam", "0014_user_observation"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='evidence',
-            name='expiry_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Expiry date'),
+            model_name="evidence",
+            name="expiry_date",
+            field=models.DateField(blank=True, null=True, verbose_name="Expiry date"),
         ),
         migrations.AddField(
-            model_name='evidence',
-            name='owner',
-            field=models.ManyToManyField(blank=True, to=settings.AUTH_USER_MODEL, verbose_name='Owner'),
+            model_name="evidence",
+            name="owner",
+            field=models.ManyToManyField(
+                blank=True, to=settings.AUTH_USER_MODEL, verbose_name="Owner"
+            ),
         ),
         migrations.AddField(
-            model_name='evidence',
-            name='status',
-            field=models.CharField(choices=[('missing', 'Missing'), ('in_review', 'In review'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('expired', 'Expired')], default='missing', max_length=20),
+            model_name="evidence",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("missing", "Missing"),
+                    ("in_review", "In review"),
+                    ("approved", "Approved"),
+                    ("rejected", "Rejected"),
+                    ("expired", "Expired"),
+                ],
+                default="missing",
+                max_length=20,
+            ),
         ),
         migrations.CreateModel(
-            name='EvidenceRevision',
+            name="EvidenceRevision",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('version', models.IntegerField(default=1, verbose_name='version number')),
-                ('attachment', models.FileField(blank=True, null=True, upload_to='', validators=[core.validators.validate_file_size, core.validators.validate_file_name], verbose_name='Attachment')),
-                ('link', models.URLField(blank=True, max_length=2048, null=True, verbose_name='Link')),
-                ('observation', models.TextField(blank=True, null=True, verbose_name='Observation')),
-                ('evidence', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='revision', to='core.evidence')),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                (
+                    "version",
+                    models.IntegerField(default=1, verbose_name="version number"),
+                ),
+                (
+                    "attachment",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="",
+                        validators=[
+                            core.validators.validate_file_size,
+                            core.validators.validate_file_name,
+                        ],
+                        verbose_name="Attachment",
+                    ),
+                ),
+                (
+                    "link",
+                    models.URLField(
+                        blank=True, max_length=2048, null=True, verbose_name="Link"
+                    ),
+                ),
+                (
+                    "observation",
+                    models.TextField(blank=True, null=True, verbose_name="Observation"),
+                ),
+                (
+                    "evidence",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="revision",
+                        to="core.evidence",
+                    ),
+                ),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Evidence Revision',
-                'verbose_name_plural': 'Evidence Revisions',
-                'unique_together': {('evidence', 'version')},
+                "verbose_name": "Evidence Revision",
+                "verbose_name_plural": "Evidence Revisions",
+                "unique_together": {("evidence", "version")},
             },
         ),
     ]

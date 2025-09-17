@@ -1274,6 +1274,9 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
 class EvidenceRevisionReadSerializer(BaseModelSerializer):
     attachment = serializers.CharField(source="filename")
     size = serializers.CharField(source="get_size")
+    evidence = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    str = serializers.CharField(source="__str__")
 
     class Meta:
         model = EvidenceRevision
@@ -1281,7 +1284,6 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
 
 
 class EvidenceRevisionWriteSerializer(BaseModelSerializer):
-    
     class Meta:
         model = EvidenceRevision
         fields = "__all__"

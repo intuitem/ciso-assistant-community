@@ -34,13 +34,13 @@
 			ref: ConfirmModal,
 			props: {
 				_form: defaults(
-					{ id, urlmodel: 'evidences' },
+					{ id, urlmodel: 'evidence-revisions' },
 					zod(z.object({ id: z.string(), urlmodel: z.string() }))
 				),
 				schema: zod(z.object({ id: z.string(), urlmodel: z.string() })),
 				id: id,
 				debug: false,
-				URLModel: getModelInfo('evidences').urlModel,
+				URLModel: getModelInfo('evidence-revisions').urlModel,
 				formAction: action
 			}
 		};
@@ -94,6 +94,16 @@
 					data-testid="attachment-download-button"
 					><i class="fa-solid fa-download mr-2"></i> {m.download()}</Anchor
 				>
+				{#if canEditObject}
+					<button
+						onclick={(_) => {
+							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment');
+						}}
+						onkeydown={(_) =>
+							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment')}
+						class="btn preset-filled-tertiary-500 h-full"><i class="fa-solid fa-trash"></i></button
+					>
+				{/if}
 			</div>
 		</div>
 		{#if attachment}

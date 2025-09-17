@@ -399,7 +399,7 @@ export const EvidenceRevisionSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	observation: z.string().optional().nullable(),
+	observation: z.string().optional().nullable()
 });
 
 export const GeneralSettingsSchema = z.object({

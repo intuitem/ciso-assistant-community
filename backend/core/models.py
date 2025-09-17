@@ -2699,6 +2699,13 @@ class Evidence(
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
 
+    @property
+    def last_revision(self):
+        return (
+            EvidenceRevision.objects.filter(evidence=self).order_by("-version").first()
+            or None
+        )
+
     def get_folder(self):
         if self.applied_controls:
             return self.applied_controls.first().folder
@@ -2708,15 +2715,23 @@ class Evidence(
             return None
 
     def filename(self):
-        return os.path.basename(self.attachment.name)
+        return (
+            os.path.basename(self.last_revision.attachment.name)
+            if self.last_revision
+            else None
+        )
 
     def get_size(self):
-        if not self.attachment or not self.attachment.storage.exists(
-            self.attachment.name
+        if (
+            not self.last_revision
+            or not self.last_revision.attachment
+            or not self.last_revision.attachment.storage.exists(
+                self.last_revision.attachment.name
+            )
         ):
             return None
         # get the attachment size with the correct unit
-        size = self.attachment.size
+        size = self.last_revision.attachment.size
         if size < 1024:
             return f"{size} B"
         elif size < 1024 * 1024:
@@ -2724,16 +2739,11 @@ class Evidence(
         else:
             return f"{size / 1024 / 1024:.1f} MB"
 
-    def delete(self, *args, **kwargs):
-        if self.attachment:
-            self.attachment.delete()
-        super().delete(*args, **kwargs)
-
     @property
     def attachment_hash(self):
-        if not self.attachment:
+        if not self.last_revision.attachment:
             return None
-        return hashlib.sha256(self.attachment.read()).hexdigest()
+        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
 
 
 class EvidenceRevision(AbstractBaseModel, FolderMixin):
@@ -2759,6 +2769,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
     is_published = models.BooleanField(_("published"), default=True)
 
+    def __str__(self):
+        return f"{self.evidence.name} v{self.version}"
+
     def save(self, *args, **kwargs):
         if not self.pk:  # Only auto-increment for new instances
             # Get the highest version number for this specific evidence
@@ -2774,7 +2787,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             self.folder = self.evidence.get_folder()
 
         super().save(*args, **kwargs)
-    
+
     def filename(self):
         return os.path.basename(self.attachment.name)
 

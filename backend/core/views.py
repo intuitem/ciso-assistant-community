@@ -4639,37 +4639,25 @@ class EvidenceViewSet(BaseModelViewSet):
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
-            if not evidence.attachment or not evidence.attachment.storage.exists(
-                evidence.attachment.name
+            if (
+                not evidence.last_revision.attachment
+                or not evidence.last_revision.attachment.storage.exists(
+                    evidence.last_revision.attachment.name
+                )
             ):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if request.method == "GET":
-                content_type = mimetypes.guess_type(evidence.filename())[0]
+                content_type = mimetypes.guess_type(evidence.last_revision.filename())[
+                    0
+                ]
                 response = HttpResponse(
-                    evidence.attachment,
+                    evidence.last_revision.attachment,
                     content_type=content_type,
                     headers={
-                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                        "Content-Disposition": f"attachment; filename={evidence.last_revision.filename()}"
                     },
                     status=status.HTTP_200_OK,
                 )
-        return response
-
-    @action(methods=["post"], detail=True)
-    def delete_attachment(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            evidence = self.get_object()
-            if evidence.attachment:
-                evidence.attachment.delete()
-                response = Response(status=status.HTTP_200_OK)
         return response
 
     @action(detail=False, name="Get status choices")
@@ -4685,7 +4673,7 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     model = EvidenceRevision
     filterset_fields = ["evidence"]
     ordering = ["-version"]
-    
+
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
         (

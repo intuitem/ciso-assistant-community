@@ -2,7 +2,7 @@
 	import HiddenInput from '../HiddenInput.svelte';
 	import FileInput from '../FileInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-    import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -41,7 +41,6 @@
 </script>
 
 <HiddenInput {form} field="evidence" />
-
 
 <NumberField
 	{form}
@@ -85,9 +84,9 @@
 	bind:cachedValue={formDataCache['link']}
 />
 <TextArea
-    {form}
-    field="observation"
-    label={m.observation()}
-    cacheLock={cacheLocks['observation']}
-    bind:cachedValue={formDataCache['observation']}
+	{form}
+	field="observation"
+	label={m.observation()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
 />

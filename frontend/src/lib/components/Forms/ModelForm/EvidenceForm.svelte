@@ -14,6 +14,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		context: string;
 		object?: any;
 	}
 
@@ -23,7 +24,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		object = {}
+		object = {},
+		context
 	}: Props = $props();
 
 	function getFilename(path) {
@@ -46,16 +48,18 @@
 <HiddenInput {form} field="findings_assessments" />
 <HiddenInput {form} field="timeline_entries" />
 
-<FileInput
-	{form}
-	allowPaste={true}
-	helpText={object.attachment
-		? `${m.attachmentWarningText()}: ${getFilename(object.attachment)}`
-		: m.attachmentHelpText()}
-	field="attachment"
-	label={m.attachment()}
-	allowedExtensions={'*'}
-/>
+{#if context !== 'edit'}
+	<FileInput
+		{form}
+		allowPaste={true}
+		helpText={object.attachment
+			? `${m.attachmentWarningText()}: ${getFilename(object.attachment)}`
+			: m.attachmentHelpText()}
+		field="attachment"
+		label={m.attachment()}
+		allowedExtensions={'*'}
+	/>
+{/if}
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}
@@ -72,15 +76,16 @@
 {:else}
 	<HiddenInput {form} field="folder" />
 {/if}
-<TextField
-	{form}
-	field="link"
-	label={m.link()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['link']}
-	bind:cachedValue={formDataCache['link']}
-/>
-
+{#if context !== 'edit'}
+	<TextField
+		{form}
+		field="link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['link']}
+		bind:cachedValue={formDataCache['link']}
+	/>
+{/if}
 <AutocompleteSelect
 	multiple
 	{form}

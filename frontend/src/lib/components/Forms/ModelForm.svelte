@@ -357,7 +357,16 @@
 		{:else if URLModel === 'reference-controls'}
 			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'evidences'}
-			<EvidencesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
+			<EvidencesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'compliance-assessments'}
 			<ComplianceAssessmentsForm
 				{form}

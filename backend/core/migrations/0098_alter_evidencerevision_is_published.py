@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0097_evidence_expiry_date_evidence_owner_evidence_status_and_more'),
+        ("core", "0097_evidence_expiry_date_evidence_owner_evidence_status_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='evidencerevision',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="evidencerevision",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
     ]
