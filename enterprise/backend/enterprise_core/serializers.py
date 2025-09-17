@@ -183,6 +183,10 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
             "privacy",
             "experimental",
             "inherent_risk",
+            "organisation_objectives",
+            "organisation_issues",
+            "quantitative_risk_studies",
+            "terminologies",
             "publish",
         ]
         read_only_fields = ["name"]
