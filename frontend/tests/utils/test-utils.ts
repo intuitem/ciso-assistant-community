@@ -597,7 +597,7 @@ export class TestContent {
 					// csf_function: vars.referenceControl2.csf_function
 				}
 			},
-			ebiosRMPage: {
+			ebiosRmStudyPage: {
 				displayName: 'Ebios RM',
 				modelName: 'ebiosrm',
 				dependency: vars.matrix,
