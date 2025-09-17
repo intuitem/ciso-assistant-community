@@ -4622,6 +4622,9 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "owner",
+        "status",
+        "expiry_date",
     ]
 
     @action(methods=["get"], detail=True)
@@ -4668,6 +4671,10 @@ class EvidenceViewSet(BaseModelViewSet):
                 evidence.attachment.delete()
                 response = Response(status=status.HTTP_200_OK)
         return response
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Evidence.Status.choices))
 
 
 class UploadAttachmentView(APIView):

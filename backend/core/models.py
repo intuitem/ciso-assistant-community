@@ -2653,6 +2653,13 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 class Evidence(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
+    class Status(models.TextChoices):
+        MISSING = "missing", "Missing"
+        IN_REVIEW = "in_review", "In review"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        EXPIRED = "expired", "Expired"
+
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
         #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
@@ -2671,6 +2678,21 @@ class Evidence(
     )
     is_published = models.BooleanField(_("published"), default=True)
 
+    owner = models.ManyToManyField(
+        User,
+        verbose_name="Owner",
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.MISSING,
+    )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     fields_to_check = ["name"]
 
     class Meta:
@@ -2712,6 +2734,29 @@ class Evidence(
         if not self.attachment:
             return None
         return hashlib.sha256(self.attachment.read()).hexdigest()
+
+
+class EvidenceRevision(FolderMixin):
+    evidence = models.ForeignKey(
+        Evidence, on_delete=models.CASCADE, related_name="revision"
+    )
+    version = models.IntegerField(
+        default=1,
+        verbose_name=_("version number"),
+    )
+    attachment = models.FileField(
+        blank=True,
+        null=True,
+        verbose_name=_("Attachment"),
+        validators=[validate_file_size, validate_file_name],
+    )
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
 
 class Incident(NameDescriptionMixin, FolderMixin):
