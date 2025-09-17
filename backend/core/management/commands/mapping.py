@@ -6,6 +6,7 @@ import uuid
 import time
 from typing import Dict, Tuple, List, Optional
 import json
+import zlib
 
 NUM_FRAMEWORKS = 1000
 NUM_MAPPINGS = 100
@@ -15,9 +16,23 @@ NUM_PIVOTS = 10
 class MappingEngine:
 
     def __init__(self):
-        self.all_rms: Dict[Tuple[str, str], dict] = {}
+        # Values are compressed (zlib) JSON bytes of the RMS object.
+        self.all_rms: Dict[Tuple[str, str], bytes] = {}
         self.framework_mappings: Dict[str, List[str]] = defaultdict(list)
         self.direct_mappings: set[Tuple[str, str]] = set()
+
+    # --- Compression helpers ---
+    def _compress_rms(self, obj: dict) -> bytes:
+        return zlib.compress(json.dumps(obj, separators=(",", ":")).encode("utf-8"))
+
+    def _decompress_rms(self, data: bytes) -> dict:
+        return json.loads(zlib.decompress(data).decode("utf-8"))
+
+    def get_rms(self, index: Tuple[str, str]) -> Optional[dict]:
+        data = self.all_rms.get(index)
+        if data is None:
+            return None
+        return self._decompress_rms(data)
 
     def load_rms_data(self) -> None:
         """
@@ -33,7 +48,7 @@ class MappingEngine:
                     obj = content["requirement_mapping_set"]
                     index = (obj["source_framework_urn"], obj["target_framework_urn"])
                     obj["library_urn"] = library_urn
-                    self.all_rms[index] = obj
+                    self.all_rms[index] = self._compress_rms(obj)
 
                 if "requirement_mapping_sets" in content:
                     for obj in content["requirement_mapping_sets"]:
@@ -42,12 +57,11 @@ class MappingEngine:
                             obj["target_framework_urn"],
                         )
                         obj["library_urn"] = library_urn
-                        self.all_rms[index] = obj
+                        self.all_rms[index] = self._compress_rms(obj)
 
         for src, tgt in self.all_rms:
             self.framework_mappings[src].append(tgt)
             self.direct_mappings.add((src, tgt))
-
 
     def all_paths_between(
         self, source_urn: str, dest_urn: str, max_depth: Optional[int] = None
@@ -82,7 +96,6 @@ class MappingEngine:
                 queue.append((path + [neighbor], visited | {neighbor}))
 
         return shortest_paths
-
 
     def all_paths_from(self, source_urn, max_depth=None):
         """
@@ -158,7 +171,7 @@ class MappingEngine:
             tmp_urn = source_urn
 
             for urn in path[1:]:
-                rms = self.all_rms.get((tmp_urn, urn))
+                rms = self.get_rms((tmp_urn, urn))
                 if not rms:
                     break
                 tmp_results = self.map_audit_results(tmp_results, rms)
@@ -193,7 +206,12 @@ class MappingEngine:
 
 
 def sizeof_json(obj) -> int:
-    """Returns the size of a JSON-encoded object in bytes."""
+    """
+    Returns the size of a JSON-encoded object in bytes.
+    If obj is already bytes (compressed), return its length directly.
+    """
+    if isinstance(obj, (bytes, bytearray, memoryview)):
+        return len(obj)
     return len(json.dumps(obj).encode("utf-8"))
 
 
@@ -213,9 +231,9 @@ class Command(BaseCommand):
             help="Profondeur maximale des chemins à explorer (optionnel)",
         )
 
-    def generate_test_data(self) -> Dict[Tuple[str, str], dict]:
+    def generate_test_data(self) -> Dict[Tuple[str, str], bytes]:
         random.seed(42)  # Fixed seed for reproducibility
-        all_rms = {}
+        all_rms: Dict[Tuple[str, str], bytes] = {}
         non_pivot_frameworks = [
             f"urn:framework:{i}" for i in range(NUM_FRAMEWORKS - NUM_PIVOTS)
         ]
@@ -225,12 +243,15 @@ class Command(BaseCommand):
         for _ in range(NUM_MAPPINGS):
             source, target = random.sample(non_pivot_frameworks, 2)
             urn = f"urn:rms:{uuid.uuid4()}"
-            all_rms[(source, target)] = {
+            obj = {
                 "urn": urn,
                 "library_urn": "urn:library:test",
                 "source_framework_urn": source,
                 "target_framework_urn": target,
             }
+            all_rms[(source, target)] = zlib.compress(
+                json.dumps(obj, separators=(",", ":")).encode("utf-8")
+            )
 
         # 2. pivots have mapping to 60% of other frameworks
         for pivot in pivots:
@@ -239,12 +260,15 @@ class Command(BaseCommand):
             )
             for target in targets:
                 urn = f"urn:rms:{uuid.uuid4()}"
-                all_rms[(pivot, target)] = {
+                obj = {
                     "urn": urn,
                     "library_urn": "urn:library:test",
                     "source_framework_urn": pivot,
                     "target_framework_urn": target,
                 }
+                all_rms[(pivot, target)] = zlib.compress(
+                    json.dumps(obj, separators=(",", ":")).encode("utf-8")
+                )
 
         return all_rms
 
