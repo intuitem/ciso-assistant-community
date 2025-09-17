@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { tableHandlers } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 
 	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
@@ -12,9 +11,8 @@
 	let { data }: Props = $props();
 
 	let selectedCell: { impact: number; effort: number } | null = $state(null);
-	let selectedItems: any[] = $state([]);
+	let overrideFilters: {[key: string]: any[]} = $state({control_impact: [], effort: []})
 
-	let modelTableEndpoint = $state('/applied-controls');
 	let modelTableKey = $state(0); // Force re-render when incremented
 
 	function handleCellClick(rowIndex: number, colIndex: number) {
@@ -23,13 +21,12 @@
 		const items = data[rowIndex][colIndex];
 
 		selectedCell = { impact, effort };
-		selectedItems = items;
 
-		// Update the ModelTable endpoint reactively
 		const effortLabel = EFFORT_REVERSE_MAP[effort];
-		modelTableEndpoint = `/applied-controls?control_impact=${impact}&effort=${effortLabel}`;
-
-		$tableHandlers?.['/applied-controls'].invalidate();
+		overrideFilters = {
+			control_impact: [{ value: impact }],
+			effort: [{ value: effortLabel }]
+		};
 
 		modelTableKey++; // Force ModelTable to refresh
 	}
@@ -46,9 +43,7 @@
 
 	function resetFilters() {
 		selectedCell = null;
-		selectedItems = [];
-		modelTableEndpoint = '/applied-controls';
-		$tableHandlers?.['/applied-controls'].invalidate();
+		overrideFilters = {control_impact: [], effort: []};
 		modelTableKey++;
 	}
 </script>
@@ -165,9 +160,9 @@
 				},
 				body: []
 			}}
+			{overrideFilters}
 			hideFilters={true}
 			URLModel="applied-controls"
-			baseEndpoint={modelTableEndpoint}
 		/>
 	{/key}
 </div>
