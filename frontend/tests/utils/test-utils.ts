@@ -597,19 +597,6 @@ export class TestContent {
 					// csf_function: vars.referenceControl2.csf_function
 				}
 			},
-			ebiosRmStudyPage: {
-				displayName: 'Ebios RM',
-				modelName: 'ebiosrm',
-				dependency: vars.matrix,
-				build: {
-					name: vars.ebiosRMName,
-					folder: vars.folderName,
-					risk_matrix: vars.matrix.displayName
-				},
-				editParams: {
-					name: ''
-				}
-			},
 			complianceAssessmentsPage: {
 				displayName: 'Audits',
 				modelName: 'complianceassessment',
