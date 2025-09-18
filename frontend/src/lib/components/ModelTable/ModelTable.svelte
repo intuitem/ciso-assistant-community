@@ -2,11 +2,11 @@
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { run } from 'svelte/legacy';
 
-	import { goto as _goto, afterNavigate } from '$app/navigation';
+	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
+	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount } from 'svelte';
@@ -25,7 +25,7 @@
 	import type { urlModel } from '$lib/utils/types.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { type SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -335,7 +335,7 @@
 		}
 	});
 
-	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
+	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
 	let canCreateObject = $derived(
 		model
 			? page.params.id
@@ -524,7 +524,7 @@
 							>
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
-										{@const component = field_component_map[key]}
+										{@const component = fieldComponentMap[key]}
 										<td class={regionCell} role="gridcell">
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -636,7 +636,7 @@
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
-											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
+											{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
 											{@const actionsURLModel = URLModel}
 											<TableRowActions
 												deleteForm={disableDelete ? null : deleteForm}
