@@ -6366,8 +6366,17 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        findings_assessment = FindingsAssessment.objects.get(id=pk)
-        findings = Finding.objects.filter(findings_assessment=pk).order_by("ref_id")
+        findings_assessment = (
+            FindingsAssessment.objects.select_related("folder")
+            .prefetch_related("owner", "authors", "reviewers")
+            .get(id=pk)
+        )
+        findings = (
+            Finding.objects.filter(findings_assessment_id=pk)
+            .select_related("folder")
+            .prefetch_related("owner", "applied_controls", "evidences")
+            .order_by("ref_id")
+        )
 
         # Calculate closed and open findings counts
         closed_statuses = [
@@ -6464,8 +6473,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += "\n"
 
         response = HttpResponse(md_content, content_type="text/markdown")
+        safe_name = slugify(findings_assessment.name) or "findings_assessment"
         response["Content-Disposition"] = (
-            f'attachment; filename="{findings_assessment.name}_findings.md"'
+            f'attachment; filename="{safe_name}_findings.md"'
         )
         return response
 
@@ -6479,8 +6489,17 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        findings_assessment = FindingsAssessment.objects.get(id=pk)
-        findings = Finding.objects.filter(findings_assessment=pk).order_by("ref_id")
+        findings_assessment = (
+            FindingsAssessment.objects.select_related("folder")
+            .prefetch_related("owner", "authors", "reviewers")
+            .get(id=pk)
+        )
+        findings = (
+            Finding.objects.filter(findings_assessment_id=pk)
+            .select_related("folder")
+            .prefetch_related("owner", "applied_controls", "evidences")
+            .order_by("ref_id")
+        )
         metrics = findings_assessment.get_findings_metrics()
 
         # Calculate closed and open findings counts
@@ -6530,8 +6549,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         html = render_to_string("core/findings_assessment_pdf.html", context)
         pdf_file = HTML(string=html).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
+        safe_name = slugify(findings_assessment.name) or "findings_assessment"
         response["Content-Disposition"] = (
-            f'attachment; filename="{findings_assessment.name}_findings.pdf"'
+            f'attachment; filename="{safe_name}_findings.pdf"'
         )
         return response
 
