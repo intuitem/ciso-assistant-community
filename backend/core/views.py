@@ -3193,7 +3193,7 @@ class FolderViewSet(BaseModelViewSet):
                                     "evidence-revisions",
                                     f"{revision.evidence_id}_v{revision.version}_"
                                     f"{os.path.basename(revision.attachment.name)}",
-                                 ),
+                                ),
                                 file_content,
                             )
 
