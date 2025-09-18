@@ -8,8 +8,8 @@ def migrate_evidence_data_to_revisions(apps, schema_editor):
     Migrate existing Evidence attachment and link data to EvidenceRevision
     BEFORE removing the fields from Evidence
     """
-    Evidence = apps.get_model('core', 'Evidence')
-    EvidenceRevision = apps.get_model('core', 'EvidenceRevision')
+    Evidence = apps.get_model("core", "Evidence")
+    EvidenceRevision = apps.get_model("core", "EvidenceRevision")
 
     migrated_count = 0
     created_count = 0
@@ -17,8 +17,8 @@ def migrate_evidence_data_to_revisions(apps, schema_editor):
     # Process all Evidence objects
     for evidence in Evidence.objects.all():
         # Get attachment and link from the Evidence object
-        attachment = getattr(evidence, 'attachment', None)
-        link = getattr(evidence, 'link', None)
+        attachment = getattr(evidence, "attachment", None)
+        link = getattr(evidence, "link", None)
 
         # Check if this evidence already has a revision
         existing_revision = EvidenceRevision.objects.filter(evidence=evidence).first()
@@ -44,18 +44,22 @@ def migrate_evidence_data_to_revisions(apps, schema_editor):
                     version=1,
                     attachment=attachment,
                     link=link,
-                    folder=evidence.folder
+                    folder=evidence.folder,
                 )
                 created_count += 1
 
-    print(f"Migration complete: Updated {migrated_count} existing revisions, created {created_count} new revisions")
+    print(
+        f"Migration complete: Updated {migrated_count} existing revisions, created {created_count} new revisions"
+    )
 
 
 def reverse_migrate_evidence_data(apps, schema_editor):
     """
     Reverse migration - this is mainly for reference since we can't restore the fields
     """
-    print("Reverse migration: Evidence attachment/link fields would need to be restored first")
+    print(
+        "Reverse migration: Evidence attachment/link fields would need to be restored first"
+    )
 
 
 class Migration(migrations.Migration):

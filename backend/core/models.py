@@ -2654,6 +2654,7 @@ class Evidence(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
     class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
         MISSING = "missing", "Missing"
         IN_REVIEW = "in_review", "In review"
         APPROVED = "approved", "Approved"
@@ -2670,7 +2671,7 @@ class Evidence(
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.MISSING,
+        default=Status.DRAFT,
     )
     expiry_date = models.DateField(
         blank=True,

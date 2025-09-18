@@ -385,7 +385,7 @@ export const EvidenceSchema = z.object({
 		.optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	owner: z.string().optional().array().optional(),
-	status: z.string().optional().default('missing'),
+	status: z.string().optional().default('draft'),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 
