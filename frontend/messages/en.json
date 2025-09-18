@@ -2202,5 +2202,6 @@
 	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance",
 	"evidenceRevisions": "Revisions",
 	"addEvidenceRevision": "Add Revision",
-	"associatedEvidenceRevisions": "Associated revisions"
+	"associatedEvidenceRevisions": "Associated revisions",
+	"missing": "Missing"
 }
