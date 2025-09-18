@@ -11,9 +11,6 @@ def migrate_evidence_data_to_revisions(apps, schema_editor):
     Evidence = apps.get_model("core", "Evidence")
     EvidenceRevision = apps.get_model("core", "EvidenceRevision")
 
-    migrated_count = 0
-    created_count = 0
-
     # Process all Evidence objects
     for evidence in Evidence.objects.all():
         # Get attachment and link from the Evidence object
@@ -21,46 +18,14 @@ def migrate_evidence_data_to_revisions(apps, schema_editor):
         link = getattr(evidence, "link", None)
 
         # Check if this evidence already has a revision
-        existing_revision = EvidenceRevision.objects.filter(evidence=evidence).first()
-
-        if existing_revision:
-            # Update existing revision with attachment/link if it doesn't have them
-            updated = False
-            if attachment and not existing_revision.attachment:
-                existing_revision.attachment = attachment
-                updated = True
-            if link and not existing_revision.link:
-                existing_revision.link = link
-                updated = True
-
-            if updated:
-                existing_revision.save()
-                migrated_count += 1
-        else:
-            # Create new revision with the data (only if there's attachment or link)
-            if attachment or link:
-                EvidenceRevision.objects.create(
-                    evidence=evidence,
-                    version=1,
-                    attachment=attachment,
-                    link=link,
-                    folder=evidence.folder,
-                )
-                created_count += 1
-
-    print(
-        f"Migration complete: Updated {migrated_count} existing revisions, created {created_count} new revisions"
-    )
-
-
-def reverse_migrate_evidence_data(apps, schema_editor):
-    """
-    Reverse migration - this is mainly for reference since we can't restore the fields
-    """
-    print(
-        "Reverse migration: Evidence attachment/link fields would need to be restored first"
-    )
-
+        if attachment or link:
+            EvidenceRevision.objects.create(
+                evidence=evidence,
+                version=1,
+                attachment=attachment,
+                link=link,
+                folder=evidence.folder,
+            )
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -70,8 +35,7 @@ class Migration(migrations.Migration):
     operations = [
         # Migrate data from Evidence to EvidenceRevision
         migrations.RunPython(
-            migrate_evidence_data_to_revisions,
-            reverse_migrate_evidence_data,
+            migrate_evidence_data_to_revisions
         ),
         # Remove old fields from Evidence model
         migrations.RemoveField(
