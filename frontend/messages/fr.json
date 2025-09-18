@@ -2134,5 +2134,8 @@
 	"securityObjectives": "Propriétés de sécurité",
 	"securityObjectiveScale": "Échelle des propriétés de sécurité",
 	"securityObjectiveScaleHelpText": "Choisissez votre échelle pour les propriétés de sécurité (1 à 4 par défaut)",
+	"evidenceRevisions": "Révisions",
+	"addEvidenceRevision": "Nouvelle révision",
+	"associatedEvidenceRevisions": "Versions associées",
 	"missing": "Manquant"
 }
