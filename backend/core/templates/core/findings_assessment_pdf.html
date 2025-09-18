@@ -138,8 +138,8 @@
                 <tr class="border-b">
                     <td class="border p-2 text-sm">{{ finding.ref_id|default:"N/A" }}</td>
                     <td class="border p-2 text-sm">{{ finding.name }}</td>
-                    <td class="border p-2 text-sm">{{ finding.get_severity_display }}</td>
-                    <td class="border p-2 text-sm">{{ finding.get_status_display }}</td>
+                    <td class="border p-2 text-sm capitalize">{{ finding.get_severity_display }}</td>
+                    <td class="border p-2 text-sm capitalize">{{ finding.get_status_display }}</td>
                     <td class="border p-2 text-sm">{{ finding.observation|default:"N/A"|truncatechars:100 }}</td>
                 </tr>
                 {% endfor %}
@@ -165,7 +165,7 @@
                     <h3 class="text-lg font-semibold">{{ finding.ref_id|default:"N/A" }} - {{ finding.name }}</h3>
                 </div>
                 <div class="w-1/4 text-right">
-                    <span class="text-sm font-medium">{{ finding.get_severity_display }} | {{ finding.get_status_display }}</span>
+                    <span class="text-sm font-medium capitalize">{{ finding.get_severity_display }} | {{ finding.get_status_display }}</span>
                 </div>
             </div>
 
