@@ -103,7 +103,7 @@ if __name__ == "__main__":
         help="Base locale to compare against (default: en).",
     )
     parser.add_argument(
-        "-target", "--target",
+        "-t", "--target",
         type=str,
         default=None,
         help="Target locale to compare against (optional, default all locales).",
