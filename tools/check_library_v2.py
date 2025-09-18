@@ -1785,17 +1785,33 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbo
     if "assessable" not in df.columns:
         raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
 
-    # Additional rule: for non-empty rows, at least one of "ref_id" or "name" must be filled
+    # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
     for idx, row in df.iterrows():
         if row.dropna().empty:
             continue  # skip completely empty rows
 
-        ref_id = str(row.get("ref_id", "")).strip()
-        name = str(row.get("name", "")).strip()
+        ref_id = row.get("ref_id", "")
+        if pd.isna(ref_id):
+            ref_id = ""
+        else:
+            ref_id = str(ref_id).strip()
 
-        if not ref_id and not name:
+        name = row.get("name", "")
+        if pd.isna(name):
+            name = ""
+        else:
+            name = str(name).strip()
+            
+        description = row.get("description", "")
+        if pd.isna(description):
+            description = ""
+        else:
+            description = str(description).strip()
+
+
+        if not ref_id and not name and not description:
             raise ValueError(
-                f"({fct_name}) [{sheet_name}] Row #{idx + 2}: Invalid row: Both \"ref_id\" and \"name\" are empty"
+                f"({fct_name}) [{sheet_name}] Row #{idx + 2}: Invalid row: \"ref_id\", \"name\" and \"description\" are empty"
                 "\n> 💡 Tip: At least one of them must be filled."
             )
 
