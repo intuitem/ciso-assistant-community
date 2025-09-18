@@ -3170,9 +3170,9 @@ class FolderViewSet(BaseModelViewSet):
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
             if include_attachments:
-                evidences = objects.get("evidencerevision", EvidenceRevision.objects.none()).filter(
-                    attachment__isnull=False
-                )
+                evidences = objects.get(
+                    "evidencerevision", EvidenceRevision.objects.none()
+                ).filter(attachment__isnull=False)
                 logger.info(
                     "Processing evidence attachments",
                     total_evidences=evidences.count(),
@@ -3752,7 +3752,7 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["owner_ids"] = get_mapped_ids(
                     _fields.pop("owner", []), link_dump_database_ids
                 )
-            
+
             case "evidencerevision":
                 _fields.pop("size", None)
                 _fields.pop("attachment_hash", None)

@@ -27,6 +27,7 @@ def migrate_evidence_data_to_revisions(apps, schema_editor):
                 folder=evidence.folder,
             )
 
+
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0097_evidence_lifecycle_schema"),
@@ -34,9 +35,7 @@ class Migration(migrations.Migration):
 
     operations = [
         # Migrate data from Evidence to EvidenceRevision
-        migrations.RunPython(
-            migrate_evidence_data_to_revisions
-        ),
+        migrations.RunPython(migrate_evidence_data_to_revisions),
         # Remove old fields from Evidence model
         migrations.RemoveField(
             model_name="evidence",

@@ -458,10 +458,9 @@ def get_domain_export_objects(domain: Folder):
         | Q(applied_controls__in=applied_controls)
         | Q(requirement_assessments__in=requirement_assessments)
     ).distinct()
-    
+
     evidence_revisions = EvidenceRevision.objects.filter(
-        Q(folder__in=folders)
-        | Q(evidence__in=evidences)
+        Q(folder__in=folders) | Q(evidence__in=evidences)
     )
 
     loaded_libraries = LoadedLibrary.objects.filter(
