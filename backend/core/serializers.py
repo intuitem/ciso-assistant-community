@@ -1339,7 +1339,7 @@ class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
     attachment_hash = serializers.CharField(read_only=True)
 
     class Meta:
-        model = Evidence
+        model = EvidenceRevision
         fields = [
             "folder",
             "evidence",
