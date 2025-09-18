@@ -1143,7 +1143,7 @@ export const listViewFields = {
 			'isActive',
 			'keep_local_login',
 			'is_third_party',
-			'has_mfa_enabled'
+			'hasMfaEnabled'
 		],
 		body: [
 			'email',
