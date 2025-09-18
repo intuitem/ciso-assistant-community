@@ -1290,9 +1290,6 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    attachment = serializers.CharField(allow_blank=True)
-    size = serializers.CharField(source="get_size", read_only=True)
-    attachment_hash = serializers.CharField(read_only=True)
 
     class Meta:
         model = Evidence
@@ -1300,11 +1297,8 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "folder",
             "name",
             "description",
-            "attachment",
             "created_at",
             "updated_at",
-            "size",
-            "attachment_hash",
             "owner",
             "status",
             "expiry_date",
@@ -1335,6 +1329,29 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
         )["version__max"]
         validated_data["version"] = (max_version or 0) + 1
         return super().create(validated_data)
+
+
+class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidence = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField(allow_blank=True)
+    size = serializers.CharField(source="get_size", read_only=True)
+    attachment_hash = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Evidence
+        fields = [
+            "folder",
+            "evidence",
+            "observation",
+            "version",
+            "attachment",
+            "link",
+            "created_at",
+            "updated_at",
+            "size",
+            "attachment_hash",
+        ]
 
 
 class AttachmentUploadSerializer(serializers.Serializer):
