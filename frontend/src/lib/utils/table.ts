@@ -1142,7 +1142,8 @@ export const listViewFields = {
 			'userGroups',
 			'isActive',
 			'keep_local_login',
-			'is_third_party'
+			'is_third_party',
+			'has_mfa_enabled'
 		],
 		body: [
 			'email',
@@ -1151,7 +1152,8 @@ export const listViewFields = {
 			'user_groups',
 			'is_active',
 			'keep_local_login',
-			'is_third_party'
+			'is_third_party',
+			'has_mfa_enabled'
 		],
 		filters: {
 			is_active: USER_IS_ACTIVE_FILTER,
