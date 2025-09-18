@@ -3170,28 +3170,30 @@ class FolderViewSet(BaseModelViewSet):
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
             if include_attachments:
-                evidences = objects.get(
+                revisions = objects.get(
                     "evidencerevision", EvidenceRevision.objects.none()
                 ).filter(attachment__isnull=False)
                 logger.info(
                     "Processing evidence attachments",
-                    total_evidences=evidences.count(),
+                    total_revisions=revisions.count(),
                     domain_id=instance.id,
                 )
 
-                for evidence in evidences:
-                    if evidence.attachment and default_storage.exists(
-                        evidence.attachment.name
+                for revision in revisions:
+                    if revision.attachment and default_storage.exists(
+                        revision.attachment.name
                     ):
                         # Read file directly into memory
-                        with default_storage.open(evidence.attachment.name) as file:
+                        with default_storage.open(revision.attachment.name) as file:
                             file_content = file.read()
                             # Write the file content directly to the zip
                             zipf.writestr(
                                 os.path.join(
                                     "attachments",
-                                    os.path.basename(evidence.attachment.name),
-                                ),
+                                    "evidence-revisions",
+                                    f"{revision.evidence_id}_v{revision.version}_"
+                                    f"{os.path.basename(revision.attachment.name)}",
+                                 ),
                                 file_content,
                             )
 
