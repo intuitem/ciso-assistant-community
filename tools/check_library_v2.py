@@ -23,6 +23,7 @@ The script exits with code 1 and displays an error message if validation fails.
 import os
 import re
 import sys
+import yaml
 import inspect
 import argparse
 from enum import Enum
@@ -127,11 +128,61 @@ class SheetTypes(Enum):
     META = "_meta"
     CONTENT = "_content"
 
+class YAMLSectionTypes(Enum):
+    THREATS = "threats"
+    REFERENCE_CONTROLS = "reference_controls"
 
 
 # ─────────────────────────────────────────────────────────────
 # MISC
 # ─────────────────────────────────────────────────────────────
+
+def check_file_validity(files: List[str] | str, filetype_name: str, valid_file_extensions: Tuple[str] = None, file_context: str = None):
+    
+    fct_name = get_current_fct_name()
+    
+    if type(files) == str:
+        files = [files]
+
+    for f in files:
+        if not os.path.exists(f):
+            raise ValueError(f"({fct_name}) {(f'[{file_context}] ' if file_context else "")}\"{f}\" doesn't exist")
+
+        if not os.path.isfile(f):
+            raise ValueError(f"({fct_name}) {(f'[{file_context}] ' if file_context else "")}\"{f}\" isn't a file")
+
+        if valid_file_extensions and not os.path.basename(f).endswith(valid_file_extensions):
+            raise ValueError(
+                f"({fct_name}) {(f'[{file_context}] ' if file_context else "")}\"{f}\" isn't a valid {filetype_name} file"
+                f"\n> 💡 Valid {filetype_name} file formats : " + ", ".join(f"{f}" for f in valid_file_extensions)
+            )
+
+
+# > Useful for "get_yaml_section_from_files()".
+# As the base_urn of "threats" and "reference_controls" isn't written directly in the YAML file,
+# it'll be deduced by comparing 2 "threats" (or "reference_controls") URNs.
+# If there's only 1 element in the "threats" (or "reference_controls") list, it'll return "None".
+# It'll also return "None" if nothing matches between the first 2 elements in the list.
+def __calculate_base_urn(items):
+    if len(items) < 2:
+        return None
+
+    urn1 = items[0].get("urn", "")
+    urn2 = items[1].get("urn", "")
+
+    # Find common prefix by parts (split by ':')
+    parts1 = urn1.split(":")
+    parts2 = urn2.split(":")
+
+    common_parts = []
+    for p1, p2 in zip(parts1, parts2):
+        if p1 == p2:
+            common_parts.append(p1)
+        else:
+            break
+
+    return ":".join(common_parts) if common_parts else None
+
 
 # Get the name of the calling function
 def get_current_fct_name():
@@ -280,7 +331,7 @@ def print_sheet_validation(sheet_name: str, verbose: bool = False, ctx: ConsoleC
 
 
 # Global Checks ("type" value is checked by default)
-def validate_meta_sheet(df, sheet_name: str, expected_keys:List[str], expected_type: str, context: str):
+def validate_meta_sheet(df, sheet_name: str, expected_keys:List[str], expected_type: MetaTypes, context: str):
     
     # Validate all required keys (excluding "type" which is handled separately)
     
@@ -307,8 +358,8 @@ def validate_meta_sheet(df, sheet_name: str, expected_keys:List[str], expected_t
     if pd.isna(type_value) or str(type_value).strip() == "":
         raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Key \"type\" is present but has no value")
 
-    if str(type_value).strip() != expected_type:
-        raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Invalid type \"{type_value}\". Expected \"{expected_type}\"")
+    if str(type_value).strip() != expected_type.value:
+        raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Invalid type \"{type_value}\". Expected \"{expected_type.value}\"")
     
 
 def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
@@ -395,10 +446,10 @@ def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: s
 
 # [META] Library {OK}
 def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "library"
+
     fct_name = get_current_fct_name()
     
+    expected_type = MetaTypes.LIBRARY
     expected_keys = [
         "urn", "version", "locale", "ref_id", "name",
         "description", "copyright", "provider", "packager"
@@ -444,9 +495,10 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
 # [META] Framework {OK}
 def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "framework"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.FRAMEWORK
     expected_keys = [
         "urn", "ref_id", "name", "description", "base_urn"
     ]
@@ -531,9 +583,10 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
 
 # [META] Threats {OK}
 def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "threats"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.THREATS
     expected_keys = ["base_urn"]
     # No optional keys
 
@@ -552,9 +605,10 @@ def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
 # [META] Reference Controls {OK}
 def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "reference_controls"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.REFERENCE_CONTROLS
     expected_keys = ["base_urn"]
     # No optional keys
 
@@ -573,9 +627,10 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
 
 # [META] Risk Matrix {OK}
 def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "risk_matrix"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.RISK_MATRIX
     expected_keys = ["urn", "ref_id", "name", "description"]
     # No optional keys
 
@@ -599,9 +654,10 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
 
 # [META] Implementation Groups {OK}
 def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "implementation_groups"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.IMPLEMENTATION_GROUPS
     expected_keys = ["name"]
     # No optional keys
     
@@ -618,9 +674,10 @@ def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbo
 
 # [META] Mappings {OK}
 def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: ConsoleContext = None):
-    
-    expected_type = "requirement_mapping_set"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.REQUIREMENT_MAPPING_SET
     expected_keys = [
         "urn", "ref_id",
         "name", "description",
@@ -669,9 +726,10 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
 
 # [META] Scores {OK}
 def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "scores"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.SCORES
     expected_keys = ["name"]
     # No optional keys
     
@@ -688,9 +746,10 @@ def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fals
 
 # [META] Answers {OK}
 def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "answers"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.ANSWERS
     expected_keys = ["name"]
     # No optional keys
     
@@ -707,9 +766,10 @@ def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fal
 
 # [META] URN Prefix {OK}
 def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-    
-    expected_type = "urn_prefix"
+
     fct_name = get_current_fct_name()
+
+    expected_type = MetaTypes.URN_PREFIX
     # No "expected_keys" because only  "type" is required
     # No optional keys
     
@@ -1519,8 +1579,7 @@ def _framework_validate_question_answer_alignment(df: pd.DataFrame, sheet_name: 
 
 
 # Validate that all URNs in the column use defined prefix_ids and reference existing ref_ids when required
-# TODO : Check "ref_id" for external references (by importing a YAML file)
-def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
 
@@ -1702,6 +1761,8 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
         prefix_value, _ = urn_prefix_map[prefix_id]
 
         # Get the actual content sheet name based on the column type
+        content_sheet = None
+
         if column_name == "threats":
             content_sheet = prefix_to_threats_content_sheet.get(prefix_value)
         else:  # reference_controls
@@ -1717,11 +1778,12 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
                 f"({fct_name}) [{current_sheet_name}] Referenced content sheet \"{content_sheet}\" not found in workbook"
             )
 
+        # Get reference sheet
         content_df = pd.DataFrame(wb[content_sheet].values)
         content_df.columns = content_df.iloc[0]
         content_df = content_df.drop(index=0).reset_index(drop=True)
 
-        # Only check "ref_id" column
+        # Only check "ref_id" column of the reference sheet
         if "ref_id" not in content_df.columns:
             raise ValueError(
                 f"({fct_name}) [{current_sheet_name}] Sheet \"{content_sheet}\" has no \"ref_id\" column"
@@ -1729,32 +1791,263 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
 
         valid_ref_ids = set(content_df["ref_id"].astype(str).str.strip())
 
+        verification_errors = []
+
+        # Check Ref. IDs validity
         for idx, value in df[column_name].dropna().astype(str).items():
             elements = re.split(r"[\n,]", value)
             for i, raw in enumerate(elements, start=1):
                 raw = raw.strip()
                 if not raw:
                     continue
+                # Only process elements that start with the expected prefix (e.g. "1:REF")
                 if not raw.startswith(prefix_id + ":"):
                     continue
-                urn_id = raw.split(":", 1)[1].strip()
-                if urn_id not in valid_ref_ids:
-                    raise ValueError(
-                        f"({fct_name}) [{current_sheet_name}] Row #{idx + 2} - Invalid ref_id \"{urn_id}\" (element #{i}) with prefix \"{prefix_id}\" in column \"{column_name}\".\n"
-                        f"> 💡 Tip: This ID must exist in the sheet \"{content_sheet}\" in column \"ref_id\"."
-                    )
 
-    if verbose:
-        msg = f'💬 ℹ️  [INFO] ({fct_name}) [{current_sheet_name}] Column \"{column_name}\" contains valid URN references'
+                # Extract the REF part after the first ":"
+                urn_id = raw.split(":", 1)[1].strip()
+
+                # Check if it exists in the ref_ids from reference sheet
+                if urn_id not in valid_ref_ids:
+                    verification_errors.append((idx, i, urn_id, prefix_id))
+
+        # Print all errors and exit
+        if verification_errors:
+            msgs = []
+            for idx, i, urn_id, prefix_id in verification_errors:
+                msgs.append(f"   - Row #{idx + 2} (element #{i}) -> ref_id \"{urn_id}\" with prefix \"{prefix_id}\" ({prefix_id}:{urn_id})")
+
+            msgs.append(f"> 💡 Tip: These IDs must exist in the sheet \"{content_sheet}\" in column \"ref_id\".")
+            raise ValueError(f"({fct_name}) [{current_sheet_name}] Invalid internal references found in column \"{column_name}\":\n" + "\n".join(msgs))
+        
+    # ───────────────────────────────────────────────────────────────
+    # 6th Part: Validate that external URN values exist in ref_id column only
+    # ───────────────────────────────────────────────────────────────
+
+    if column_name == "threats":
+        external_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_external_threats}
+    else:  # reference_controls
+        external_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_external_ref_ctrl}
+
+    yaml_section_type = None
+    if column_name == "threats":
+        yaml_section_type = YAMLSectionTypes.THREATS
+    else:  # reference_controls
+        yaml_section_type = YAMLSectionTypes.REFERENCE_CONTROLS
+
+
+    yaml_external_references_retrieved = False
+    yaml_references_from_files = None
+
+    # Get references in YAML files
+    if external_prefix_ids:
+
+        # If there are external references in the Excel file, but no YAML files containing external references are given as argument
+        if not external_refs:
+            msg = (
+                f"⚠️  [WARNING] ({fct_name}) [{current_sheet_name}] No YAML files provided as external references to check external references in column \"{column_name}\" (URN Prefix concerned: " + ", ".join(f"\"{f}\"" for f in external_prefix_ids) + ")\n" 
+                f"> ❌ Unable to check for external \"{yaml_section_type.value}\" !\n"
+                f"> 💡 Tip: Provide the right YAML file(s) as argument, corresponding to the external references, that contain a \"{yaml_section_type.value}\" section"
+            )
+            print(msg)
+            if ctx:
+                ctx.add_sheet_warning_msg(current_sheet_name, msg)
+
+        # Else if there are external references in the Excel file, and YAML file(s) containing external references is(are) given as argument
+        else:
+            yaml_references_from_files = get_yaml_section_from_files(external_refs, yaml_section_type, current_sheet_name, verbose, ctx)
+
+            if yaml_references_from_files:
+                yaml_external_references_retrieved = True
+            if not yaml_references_from_files:
+                msg = (
+                    f"⚠️  [WARNING] ({fct_name}) [{current_sheet_name}] None of the YAML files provided as external references contain a \"{yaml_section_type.value}\" section (URN prefixes requiring verification of external references: " + ", ".join(f"\"{f}\"" for f in external_prefix_ids) + ")\n"
+                    f"> ❌ Unable to check for external \"{yaml_section_type.value}\" !\n"
+                    f"> 💡 Tip: Make sure the YAML file(s) you provided as argument actually contain a \"{yaml_section_type.value}\" section."
+                )
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_warning_msg(current_sheet_name, msg)
+
+
+    # Not checked reference list
+    not_checked_prefix_id = []
+
+    # Check external references
+    if yaml_references_from_files:
+        
+        for prefix_id in external_prefix_ids:
+            prefix_value, _ = urn_prefix_map[prefix_id]
+            
+            yaml_filename = ""
+            
+            # Search for the "prefix_value" in "yaml_references_from_files" and get the corresponding Ref. IDs of the section
+            base_urn_with_ref_ids = {}      # { base_urn: { ref_id: name, ... } }
+
+            for filename, file_sections in yaml_references_from_files.items():
+                if prefix_value in file_sections:
+                    base_urn_with_ref_ids = {prefix_value: file_sections[prefix_value]}
+                    yaml_filename = filename
+                    break
+
+
+            # If "yaml_references_from_files" doesn't have the searched "prefix_value"
+            if prefix_value not in base_urn_with_ref_ids.keys():
+                msg = (
+                    f"⚠️  [WARNING] ({fct_name}) [{current_sheet_name}] None of the YAML files provided as external references contain references for the URN Prefix \"{prefix_id}\" ({prefix_value}) (Column \"{column_name}\")\n"
+                    f"> 💡 Tip: Specify the right YAML file as an argument to check external \"{yaml_section_type.value}\""
+                )
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_warning_msg(current_sheet_name, msg)
+
+                # Add the non checked "prefix_value" to the unchecked element list
+                not_checked_prefix_id.append(prefix_value)
+
+                continue
+                
+            # Validation of Ref. IDs against the external reference extracted from YAML
+            yaml_ref_ids_map = base_urn_with_ref_ids.get(prefix_value, {})  # mapping ref_id -> name | { ref_id1: name1, ... }
+            valid_ref_ids = set(yaml_ref_ids_map.keys())                    # (ref_id1, ref_id2, ref_id3, ...)
+            verification_errors = []
+
+            for idx, value in df[column_name].dropna().astype(str).items():
+                elements = re.split(r"[\n,]", value)
+                for i, raw in enumerate(elements, start=1):
+                    raw = raw.strip()
+                    if not raw:
+                        continue
+                    # Only process elements that start with the expected prefix (e.g. "1:REF")
+                    if not raw.startswith(prefix_id + ":"):
+                        continue
+
+                    # Extract the REF part after the first ":"
+                    urn_id = raw.split(":", 1)[1].strip()
+
+                    # Check if it exists in the ref_ids from YAML
+                    if urn_id not in valid_ref_ids:
+                        verification_errors.append((idx, i, urn_id, prefix_id))
+
+
+            # Print all errors and exit
+            if verification_errors:
+                msgs = []
+                for idx, i, urn_id, prefix_id in verification_errors:
+                    msgs.append(f"   - Row #{idx + 2} (element #{i}) -> ref_id \"{urn_id}\" with prefix \"{prefix_id}\" ({prefix_id}:{urn_id})")
+
+                msgs.append(f"> 💡 Tip: These Ref. IDs must exist in the YAML file \"{yaml_filename}\" provided as external references (in the \"{yaml_section_type.value}\" section of the YAML file).")
+                raise ValueError(f"({fct_name}) [{current_sheet_name}] Invalid external references found in column \"{column_name}\":\n" + "\n".join(msgs))
+
+
+    # If there are no external reference to check [OR] (there are external references to check [AND] the YAML files contains element of the section we're working on [AND] NOT a single external reference wasn't check)
+    if not external_prefix_ids or (external_prefix_ids and yaml_external_references_retrieved and not not_checked_prefix_id):
+        if verbose:
+            msg = f'💬 ℹ️  [INFO] ({fct_name}) [{current_sheet_name}] Column \"{column_name}\" contains valid URN references'
+            print(msg)
+            if ctx:
+                ctx.add_sheet_verbose_msg(current_sheet_name, msg)
+    else:
+        msg = (
+            f"⚠️  [WARNING] ({fct_name}) [{current_sheet_name}] Column \"{column_name}\" contains valid *internal* URN references. However, something went wrong while checking one or all of the external elements for \"{yaml_section_type.value}\" !\n"
+            f"> 💡 Tip: Read the warnings above to understand the problem."
+        )
         print(msg)
         if ctx:
-            ctx.add_sheet_verbose_msg(current_sheet_name, msg)
+            ctx.add_sheet_warning_msg(current_sheet_name, msg)
 
 
 
-# [CONTENT] Framework
-# {ALMOST OK} TODO : Finish "_framework_validate_framework_column_urns()"
-def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+# Get the "threats" or "reference_controls" section from a YAML Framework file passed as argument
+def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSectionTypes, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None) -> Dict:
+        
+    fct_name = get_current_fct_name()
+
+    if type(yaml_files) == str:
+        yaml_files = [yaml_files]
+
+    extracted_sections = {}
+    """
+    - Object structure :
+    {
+        file: {
+            section_urn : {  
+                element_ref_id1: name1
+                element_ref_id2: name2
+                ...
+            }
+        }
+    }
+    """
+    
+    for file in yaml_files:
+
+        # Attempt to load YAML file, raise an error if file is missing or YAML is invalid
+        try:
+            with open(file, 'r', encoding='utf-8') as f:
+                data = yaml.safe_load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"({fct_name}) [{current_sheet_name}] YAML file not found: \"{file}\"")
+        except yaml.YAMLError as e:
+            raise ValueError(f"({fct_name}) [{current_sheet_name}] Error parsing YAML file \"{file}\": {e}")
+
+
+        # Search for the element we want
+        for obj_key, obj_value in data.get("objects", {}).items():
+            
+            # --- [Section] reference_controls [OR] threats ---
+            if (
+                (section_type == YAMLSectionTypes.REFERENCE_CONTROLS and obj_key == "reference_controls")
+                or (section_type == YAMLSectionTypes.THREATS and obj_key == "threats")
+            ):
+
+                # Calculate base_urn
+                base_urn = __calculate_base_urn(obj_value)
+                
+                # If the "base_urn" couldn't be defined, skip
+                if not base_urn:
+                    if verbose:
+                        msg = (
+                            f"💬 ℹ️  [INFO] ({fct_name}) [{current_sheet_name}] URN of section \"{section_type.value}\" of the YAML file \"{file}\" couldn't be defined.\n"
+                            f"> 💡 Tip: This is probably because the \"{section_type.value}\" section of the file contains only 1 element (2 elements are required to determine the \"base_urn\" of the \"{section_type.value}\" section in the YAML file)"
+                        )
+                        print(msg)
+                        if ctx:
+                            ctx.add_sheet_verbose_msg(current_sheet_name, msg)
+
+                    break
+                
+                element_obj = {
+                    base_urn: {}
+                }
+                
+                # Store Ref. IDs, associated with their names
+                for ref_ctrl in obj_value:
+                    ref_id = ref_ctrl.get("ref_id")
+                    name = ref_ctrl.get("name")
+                    if ref_id:  # on ignore si pas de ref_id
+                        element_obj[base_urn][ref_id] = name
+
+                if file not in extracted_sections:
+                    extracted_sections[file] = {}
+                extracted_sections[file].update(element_obj)
+                    
+                break
+
+
+        # If the file doesn't contains the requested section
+        if file not in extracted_sections.keys():
+            if verbose:
+                msg = (f"💬 ℹ️  [INFO] ({fct_name}) [{current_sheet_name}] The YAML file \"{file}\" contains no \"{section_type.value}\" section.")
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_verbose_msg(current_sheet_name, msg)
+
+    return extracted_sections
+
+
+
+# [CONTENT] Framework {OK}
+def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
     required_columns = ["depth"]  # "assessable" isn't there because it can be empty
@@ -1830,7 +2123,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbo
         if column in df.columns:
             non_empty_values = df[column].dropna().astype(str).map(str.strip)
             if not non_empty_values[non_empty_values != ""].empty:
-                _framework_validate_framework_column_urns(wb, df, column, sheet_name, verbose, ctx)
+                _framework_validate_framework_column_urns(wb, df, column, sheet_name, external_refs, verbose, ctx)
 
     # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
     _framework_validate_question_answer_alignment(df, sheet_name, fct_name, verbose, ctx)
@@ -2195,12 +2488,12 @@ def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = 
         raise ValueError(f"({fct_name}) [{sheet_name}] Unknown meta type \"{type_value}\"")
 
 
-def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding_meta_type: str, verbose: bool = False, ctx: ConsoleContext = None):
+def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding_meta_type: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     
     if corresponding_meta_type == MetaTypes.FRAMEWORK.value:
-        validate_framework_content(wb, df, sheet_name, verbose, ctx)
+        validate_framework_content(wb, df, sheet_name, external_refs, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.THREATS.value:
         validate_threats_content(df, sheet_name, verbose, ctx)
     elif corresponding_meta_type == MetaTypes.REFERENCE_CONTROLS.value:
@@ -2225,9 +2518,18 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
 # MAIN VALIDATION FUNCTION
 # ─────────────────────────────────────────────────────────────
 
-def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContext = None):
-    
+def validate_excel_structure(filepath, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
+
     fct_name = get_current_fct_name()
+
+    # Check provided YAML external reference
+    if external_refs:
+        check_file_validity(external_refs, "YAML", (".yaml", "yml"), "External Reference")
+
+    # Check Excel file
+    check_file_validity(filepath, "Excel", (".xlsx", ".xlsm", ".xltx", ".xltm"))
+
+
     print(f"⌛ Parsing \"{os.path.basename(filepath)}\"...")
     
     if not ctx:
@@ -2279,7 +2581,7 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
     # Handle "_content" sheets
     for sheet_name, df in content_sheets.items():
         base_name = re.sub(r'_content$', '', sheet_name)
-        dispatch_content_validation(wb, df, sheet_name, meta_types[base_name], verbose, ctx)
+        dispatch_content_validation(wb, df, sheet_name, meta_types[base_name], external_refs, verbose, ctx)
 
     # Warn about ignored sheets
     for sheet_name in ignored_sheets:
@@ -2304,15 +2606,28 @@ def validate_excel_structure(filepath, verbose: bool = False, ctx: ConsoleContex
 # ─────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate Excel file structure (v2 format)")
-    parser.add_argument("filepath", help="Path to Excel file to validate")
+    parser = argparse.ArgumentParser(description="Validate Excel file structure (v2 format)", formatter_class=argparse.RawTextHelpFormatter,)
+    parser.add_argument("filepath", help="Path to Excel file to validate.")
+    parser.add_argument(
+        "-e", "--external-refs",
+        type=str,
+        help="YAML files containing external references mentioned in the library.\n"
+        "Use it to check the following columns if necessary : \"threats\", \"reference_controls\".\n"
+        "Separate external references with commas (e.g., ./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml)",
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.")
     args = parser.parse_args()
-    
+
+
+    external_refs = []
+    if args.external_refs:
+        external_refs = args.external_refs.split(",")        
+
+
     ctx = ConsoleContext()
-    
+
     try:
-        validate_excel_structure(args.filepath, args.verbose, ctx)
+        validate_excel_structure(args.filepath, external_refs, args.verbose, ctx)
     except Exception as e:
         print(f"❌ [FATAL ERROR] {e}")
         sys.exit(1)
