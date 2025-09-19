@@ -2135,5 +2135,6 @@
 	"image": "Image",
 	"securityObjectives": "Propriétés de sécurité",
 	"securityObjectiveScale": "Échelle des propriétés de sécurité",
-	"securityObjectiveScaleHelpText": "Choisissez votre échelle pour les propriétés de sécurité (1 à 4 par défaut)"
+	"securityObjectiveScaleHelpText": "Choisissez votre échelle pour les propriétés de sécurité (1 à 4 par défaut)",
+	"hasMfaEnabled": "MFA activée"
 }
