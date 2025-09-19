@@ -282,6 +282,7 @@
 	"asCSV": "as CSV",
 	"asXLSX": "as Excel",
 	"asWord": "as Word",
+	"asMarkdown": "as Markdown",
 	"draft": "Draft",
 	"riskMatrixView": "Risk matrix view",
 	"currentInMatrixView": "Current",
@@ -2200,5 +2201,6 @@
 	"quantRiskPriorityHelpText": "Useful for analyst to force an order on the exec summary",
 	"lossThreshold": "Loss threshold",
 	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance",
-	"hasMfaEnabled": "MFA enabled"
+	"hasMfaEnabled": "MFA enabled",
+	"libraryOverview": "{objectType}: {count}"
 }
