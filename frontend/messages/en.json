@@ -2202,5 +2202,6 @@
 	"quantRiskPriorityHelpText": "Useful for analyst to force an order on the exec summary",
 	"lossThreshold": "Loss threshold",
 	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance",
+	"hasMfaEnabled": "MFA enabled",
 	"libraryOverview": "{objectType}: {count}"
 }
