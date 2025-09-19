@@ -828,6 +828,10 @@ class AssetViewSet(BaseModelViewSet):
             )
             N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
@@ -845,8 +849,23 @@ class AssetViewSet(BaseModelViewSet):
             nodes_idx[asset_key] = N
             N += 1
 
+        # Add links between domains (folders) based on parent-child relationships
+        for domain in Folder.objects.filter(id__in=viewable_folders):
+            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                links.append(
+                    {
+                        "source": nodes_idx[domain.parent_folder.name],
+                        "target": nodes_idx[domain.name],
+                        "value": "contains",
+                    }
+                )
+
         # Add links between assets and their domains
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             asset_key = f"{asset.folder.name}/{asset.name}"
             links.append(
                 {
@@ -858,8 +877,19 @@ class AssetViewSet(BaseModelViewSet):
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             asset_key = f"{asset.folder.name}/{asset.name}"
             for relationship in asset.parent_assets.all():
+                # Only include relationship if both assets and their folders are viewable
+                if (
+                    relationship.id not in viewable_assets
+                    or relationship.folder.id not in viewable_folders
+                ):
+                    continue
+
                 relationship_key = f"{relationship.folder.name}/{relationship.name}"
                 links.append(
                     {
