@@ -15,7 +15,6 @@
 
 	let { data, form }: Props = $props();
 	let exportPopupOpen = $state(false);
-
 </script>
 
 {#if data.data?.is_locked}
