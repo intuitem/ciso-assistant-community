@@ -1253,8 +1253,8 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=User.objects.all(), required=False
     )
-    attachment = serializers.FileField(write_only=True, required=False)
-    link = serializers.URLField(write_only=True, required=False)
+    attachment = serializers.FileField(required=False)
+    link = serializers.URLField(required=False)
 
     class Meta:
         model = Evidence
@@ -1264,28 +1264,30 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
 
-        m2m_fields = {}
-        for field in [
-            "applied_controls",
-            "requirement_assessments",
-            "findings",
-            "findings_assessments",
-            "timeline_entries",
-            "owner",
-        ]:
-            m2m_fields[field] = validated_data.pop(field, [])
+        evidence = super().create(validated_data)
 
-        with transaction.atomic():
-            evidence = Evidence.objects.create(**validated_data)
-
-            for field, value in m2m_fields.items():
-                getattr(evidence, field).set(value)
-
-            EvidenceRevision.objects.get_or_create(
-                evidence=evidence, defaults={"link": link, "attachment": attachment}
-            )
+        EvidenceRevision.objects.get_or_create(
+            evidence=evidence, defaults={"link": link, "attachment": attachment}
+        )
 
         return evidence
+
+    def to_representation(self, instance):
+        """Include link and attachment from the latest revision in the response"""
+        data = super().to_representation(instance)
+
+        # Add revision fields to the response
+        latest_revision = instance.last_revision
+        if latest_revision:
+            data["link"] = latest_revision.link
+            data["attachment"] = (
+                latest_revision.attachment.url if latest_revision.attachment else None
+            )
+        else:
+            data["link"] = None
+            data["attachment"] = None
+
+        return data
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
