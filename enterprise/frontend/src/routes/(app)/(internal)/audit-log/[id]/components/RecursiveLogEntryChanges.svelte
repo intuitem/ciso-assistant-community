@@ -122,9 +122,9 @@
 					}
 
 					acc[key] = {
-          // Normalize empty values happens after trying to parse JSON so it won't skip created entries that have an empty value
-          // (on creation logs, the before will always be set to 'None'. If the after is 'None' too and you normalize first, it will skip)
-          // (same for deletion logs, where the after will always be 'None')
+						// Normalize empty values happens after trying to parse JSON so it won't skip created entries that have an empty value
+						// (on creation logs, the before will always be set to 'None'. If the after is 'None' too and you normalize first, it will skip)
+						// (same for deletion logs, where the after will always be 'None')
 						before: normalizeEmptyValue(processedBefore),
 						after: normalizeEmptyValue(processedAfter)
 					};
@@ -163,7 +163,7 @@
 									action: log.action
 								}}
 								<dd class="pl-4">
-                  <svelte:self log={subLog} level={level + 1} />
+									<svelte:self log={subLog} level={level + 1} />
 								</dd>
 							{/each}
 						</div>
