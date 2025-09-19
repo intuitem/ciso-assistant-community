@@ -63,7 +63,7 @@
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		optionsEndpoint="folders"
 		field="folder"
 		pathField="path"
 		cacheLock={cacheLocks['folder']}

@@ -43,6 +43,7 @@
 </script>
 
 <HiddenInput {form} field="evidence" />
+<HiddenInput {form} field="folder" />
 
 {#if context === 'edit'}
 	<NumberField
