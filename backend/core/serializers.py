@@ -966,6 +966,7 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(many=True)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -980,6 +981,7 @@ class UserReadSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "observation",
+            "has_mfa_enabled",
         ]
 
 
