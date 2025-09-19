@@ -1821,7 +1821,7 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
             raise ValueError(f"({fct_name}) [{current_sheet_name}] Invalid internal references found in column \"{column_name}\":\n" + "\n".join(msgs))
         
     # ───────────────────────────────────────────────────────────────
-    # 6th Part: Validate that external URN values exist in ref_id column only
+    # 6th Part: Validate that external URN values exist in external references from YAML files only
     # ───────────────────────────────────────────────────────────────
 
     if column_name == "threats":
