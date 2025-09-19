@@ -47,6 +47,7 @@ test('ebios rm study', async ({
 	ebiosRmStudyPage,
 	complianceAssessmentsPage,
 	appliedControlsPage,
+	riskAssessmentsPage,
 	page
 }) => {
 	test.setTimeout(900_000);
@@ -587,10 +588,10 @@ test('ebios rm study', async ({
 
 	await test.step('workshop 5', async () => {
 		await page.getByRole('button', { name: ' Step 1 Generate the risk' }).click();
-		await page.getByTestId('form-input-name').click();
-		await page.getByTestId('form-input-name').fill('generated risk assessment 1');
-		await page.getByTestId('form-input-perimeter').getByRole('textbox').click();
-		await page.getByRole('option', { name: `${vars.folderName}/${vars.perimeterName}` }).click();
+		await riskAssessmentsPage.form.fill({
+			name: 'test-risk-assessment-ebios-rm',
+			perimeter: `${vars.folderName}/${vars.perimeterName}`
+		});
 		await page.getByTestId('save-button').click();
 		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await page

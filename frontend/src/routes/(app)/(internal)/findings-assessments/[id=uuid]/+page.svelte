@@ -6,12 +6,16 @@
 	import { m } from '$paraglide/messages';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
+
 	interface Props {
 		data: PageData;
 		form: ActionData;
 	}
 
 	let { data, form }: Props = $props();
+	let exportPopupOpen = $state(false);
+
 </script>
 
 {#if data.data?.is_locked}
@@ -28,6 +32,38 @@
 <DetailView {data} disableCreate={data.data?.is_locked} disableDelete={data.data?.is_locked}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
+			<Popover
+				open={exportPopupOpen}
+				onOpenChange={(e) => (exportPopupOpen = e.open)}
+				positioning={{ placement: 'bottom' }}
+				triggerBase="btn preset-filled-primary-500 w-full"
+				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+				zIndex="1000"
+			>
+				{#snippet trigger()}
+					<span data-testid="export-button">
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</span>
+				{/snippet}
+				{#snippet content()}
+					<div>
+						<p class="block px-4 py-2 text-sm text-gray-800">{m.findingsAssessment()}</p>
+						<a
+							href="/findings-assessments/{data.data.id}/export/xlsx"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asXLSX()}</a
+						>
+						<a
+							href="/findings-assessments/{data.data.id}/export/md"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+							>... {m.asMarkdown()}</a
+						>
+						<a
+							href="/findings-assessments/{data.data.id}/export/pdf"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+						>
+					</div>
+				{/snippet}
+			</Popover>
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
 				class="btn preset-filled-primary-500 h-fit"
