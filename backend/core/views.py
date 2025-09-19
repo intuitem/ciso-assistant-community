@@ -4714,14 +4714,14 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     @action(methods=["post"], detail=True)
     def delete_attachment(self, request, pk):
         (
-            object_ids_view,
             _,
             _,
+            object_ids_delete,
         ) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, EvidenceRevision
         )
         response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
+        if UUID(pk) in object_ids_delete:
             evidence = self.get_object()
             if evidence.attachment:
                 evidence.attachment.delete()
