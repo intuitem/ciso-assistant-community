@@ -281,6 +281,7 @@
 	"asCSV": "en CSV",
 	"asXLSX": "en Excel",
 	"asWord": "en Word",
+	"asMarkdown": "en Markdown",
 	"draft": "Brouillon",
 	"riskMatrixView": "Vue matricielle",
 	"currentInMatrixView": "Courante",
