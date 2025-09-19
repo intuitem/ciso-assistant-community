@@ -965,7 +965,7 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 
 class UserReadSerializer(BaseModelSerializer):
-    user_groups = FieldsRelatedField(many=True)
+    user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
 
     class Meta:
         model = User
