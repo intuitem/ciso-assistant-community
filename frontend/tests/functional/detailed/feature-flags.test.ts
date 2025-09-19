@@ -5,8 +5,7 @@ import { TestContent } from '../../utils/test-utils.js';
 const vars = TestContent.generateTestVars();
 
 const toggleFeatureFlag = async (page: Page, flagTestId: string, enable: boolean) => {
-	await page.getByTestId('accordion-item-extra').click();
-	await page.getByTestId('accordion-item-settings').click();
+	await page.goto('/settings');
 	await expect(page).toHaveURL('/settings');
 	await page.getByText(/^ Feature flags$/).click();
 
