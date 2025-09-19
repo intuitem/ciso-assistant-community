@@ -14,7 +14,7 @@ description: 'Commission Delegated Regulation (EU) 2025/301 of 23 October 2024 s
   Lien : https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R0301'
 copyright: EUROPEAN COMMISSION
 version: 1
-publication_date: 2025-09-17
+publication_date: 2025-09-19
 provider: EUROPEAN COMMISSION
 packager: intuitem
 translations:
@@ -266,25 +266,26 @@ objects:
       depth: 1
       name: Article 1
       description: General information to be provided in initial notifications and
-        intermediate and final reports on major ICT-
+        intermediate and final reports on major ICT-related incidents
       translations:
         fr:
           name: Article premier
           description: "Informations g\xE9n\xE9rales \xE0 fournir dans les notifications\
-            \ initiales et les rapports interm\xE9diaire et final sur les"
+            \ initiales et les rapports interm\xE9diaire et final sur les incidents\
+            \ majeurs li\xE9s aux TIC"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting_official:article-1:1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting_official:article-1
-      description: 'related incidents Financial entities shall include in the initial
-        notification, the intermediate report, and the final report, as referred to
-        in Article 19(4) of Regulation (EU) 2022/2554, the following general information:'
+      description: 'Financial entities shall include in the initial notification,
+        the intermediate report, and the final report, as referred to in Article 19(4)
+        of Regulation (EU) 2022/2554, the following general information:'
       translations:
         fr:
-          description: "incidents majeurs li\xE9s aux TIC Les entit\xE9s financi\xE8\
-            res incluent dans la notification initiale, le rapport interm\xE9diaire\
-            \ et le rapport final, vis\xE9s \xE0 l\u2019article 19, paragraphe 4,\
-            \ du r\xE8glement (UE) 2022/2554, les informations g\xE9n\xE9rales suivantes:"
+          description: "Les entit\xE9s financi\xE8res incluent dans la notification\
+            \ initiale, le rapport interm\xE9diaire et le rapport final, vis\xE9s\
+            \ \xE0 l\u2019article 19, paragraphe 4, du r\xE8glement (UE) 2022/2554,\
+            \ les informations g\xE9n\xE9rales suivantes:"
     - urn: urn:intuitem:risk:req_node:rts-dora-incident-reporting_official:1.a
       assessable: true
       depth: 3
