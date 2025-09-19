@@ -746,17 +746,6 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ASSET_CLASS_FILTER: ListViewFilterConfig = {
-	//still broken
-	component: AutocompleteSelect,
-	props: {
-		label: 'assetClass',
-		optionsEndpoint: 'asset-class',
-		optionsLabelField: 'full_path',
-		optionsValueField: 'id',
-		multiple: false
-	}
-};
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -768,6 +757,7 @@ const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value'
 	}
 };
+
 const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -779,6 +769,7 @@ const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value'
 	}
 };
+
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -813,6 +804,7 @@ const OWNER_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+
 const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -820,6 +812,30 @@ const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'email',
 		optionsValueField: 'id',
 		optionsEndpoint: 'findings/owner',
+		multiple: true
+	}
+};
+
+const LAST_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'last_occurrence_status',
+		optionsEndpoint: 'task-templates/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const NEXT_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'next_occurrence_status',
+		optionsEndpoint: 'task-templates/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -1142,7 +1158,8 @@ export const listViewFields = {
 			'userGroups',
 			'isActive',
 			'keep_local_login',
-			'is_third_party'
+			'is_third_party',
+			'hasMfaEnabled'
 		],
 		body: [
 			'email',
@@ -1151,7 +1168,8 @@ export const listViewFields = {
 			'user_groups',
 			'is_active',
 			'keep_local_login',
-			'is_third_party'
+			'is_third_party',
+			'has_mfa_enabled'
 		],
 		filters: {
 			is_active: USER_IS_ACTIVE_FILTER,
@@ -1226,11 +1244,19 @@ export const listViewFields = {
 	},
 	libraries: {
 		head: ['provider', 'name', 'description', 'language', 'overview'],
-		body: ['provider', 'name', 'description', 'locales', 'overview']
+		body: ['provider', 'name', 'description', 'locales', 'objects_meta']
 	},
 	'stored-libraries': {
 		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: ['provider', 'ref_id', 'name', 'description', 'locales', 'overview', 'publication_date'],
+		body: [
+			'provider',
+			'ref_id',
+			'name',
+			'description',
+			'locales',
+			'objects_meta',
+			'publication_date'
+		],
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
@@ -1240,7 +1266,15 @@ export const listViewFields = {
 	},
 	'loaded-libraries': {
 		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: ['provider', 'ref_id', 'name', 'description', 'locales', 'overview', 'publication_date'],
+		body: [
+			'provider',
+			'ref_id',
+			'name',
+			'description',
+			'locales',
+			'objects_meta',
+			'publication_date'
+		],
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
@@ -1670,7 +1704,9 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			is_recurrent: IS_RECURRENT_FILTER
+			is_recurrent: IS_RECURRENT_FILTER,
+			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
+			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER
 		}
 	},
 	'task-nodes': {
