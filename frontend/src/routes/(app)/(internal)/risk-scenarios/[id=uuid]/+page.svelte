@@ -160,6 +160,12 @@
 					<p class="text-sm font-semibold text-gray-400">{m.name()}</p>
 					<p class="font-semibold">{data.scenario.name}</p>
 				</div>
+				<div>
+					<p class="text-sm font-semibold text-gray-400">{m.owner()}</p>
+					{#each data.scenario.owner as owner}
+						<p class="text-sm"><a href="/users/{owner.id}" class="anchor">{owner.str}</a></p>
+					{/each}
+				</div>
 			</span>
 			<div>
 				<p class="text-sm font-semibold text-gray-400">{m.description()}</p>

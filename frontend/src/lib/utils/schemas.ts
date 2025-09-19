@@ -149,9 +149,9 @@ export const RiskScenarioSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
-	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	ref_id: z.string().max(100).optional()
+	ref_id: z.string().max(100).optional(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const AppliedControlSchema = z.object({
