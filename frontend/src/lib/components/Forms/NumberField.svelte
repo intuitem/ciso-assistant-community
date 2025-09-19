@@ -8,7 +8,11 @@
 	interface Props {
 		class?: string;
 		label?: string | undefined;
-		step?: number;
+		// There is no min parameter as it could prevent a user from rewritting its value
+		// e.g. If max=20 and the want to edit its "30" into "25" he will erase "0" from "30" which will lead to "3" which will be considered less than 20 and therefore blocked, the min should be handled by zod schemas.
+		max?: number;
+		allowNegative?: boolean;
+		floatPrecision?: number;
 		field: string;
 		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
 		helpText?: string | undefined;
@@ -18,13 +22,16 @@
 		hidden?: boolean;
 		disabled?: boolean;
 		required?: boolean;
+		commaSupported?: boolean;
 		[key: string]: any;
 	}
 
 	let {
 		class: _class = '',
 		label = $bindable(),
-		step = 1,
+		max = Infinity,
+		allowNegative = false,
+		floatPrecision = 0,
 		field,
 		valuePath = field,
 		helpText = undefined,
@@ -37,6 +44,7 @@
 		hidden = false,
 		disabled = false,
 		required = false,
+		commaSupported = false,
 		...rest
 	}: Props = $props();
 
@@ -56,6 +64,30 @@
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
 	});
+
+	let stringifiedValueRegex =
+		floatPrecision > 0
+			? new RegExp(`^${allowNegative ? '\\-?' : ''}[0-9]((\\.|,)([0-9]{1,${floatPrecision}})?)?$`)
+			: new RegExp(`^${allowNegative ? '\\-?' : ''}[0-9]+$`);
+	let stringifiedValue = $state(`${$value === undefined ? '' : $value}`);
+
+	function normalizeStringifiedNumber(stringifiedNumber: string): string {
+		return stringifiedNumber.replace(',', '.');
+	}
+
+	if (commaSupported) {
+		$effect(() => {
+			if (stringifiedValue) {
+				const normalizedStringifiedValue = normalizeStringifiedNumber(stringifiedValue);
+				const newValue = Number(normalizedStringifiedValue);
+				if (!Number.isNaN(newValue)) {
+					value.set(newValue);
+				} else {
+					console.error(`Failed to parse string '${normalizedStringifiedValue}' to a number.`);
+				}
+			}
+		});
+	}
 
 	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
 	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
@@ -81,20 +113,65 @@
 		{/if}
 	</div>
 	<div class="control">
-		<input
-			type="number"
-			{step}
-			class="{'input ' + _class} {classesTextField($errors)}"
-			data-testid="form-input-{field.replaceAll('_', '-')}"
-			name={field}
-			aria-invalid={$errors ? 'true' : undefined}
-			placeholder=""
-			bind:value={$value}
-			{...$constraints}
-			{...rest}
-			{disabled}
-			{required}
-		/>
+		{#if commaSupported}
+			<input
+				type="text"
+				class="{'input ' + _class} {classesTextField($errors)}"
+				data-testid="form-input-{field.replaceAll('_', '-')}"
+				name={field}
+				aria-invalid={$errors ? 'true' : undefined}
+				placeholder=""
+				bind:value={stringifiedValue}
+				onbeforeinput={(e) => {
+					if (e.inputType === 'deleteContentBackward') return;
+
+					const targetElem = e.target as HTMLInputElement;
+					const selectionStart = targetElem.selectionStart;
+					const selectionEnd = targetElem.selectionEnd;
+
+					if (selectionStart === null || selectionEnd === null) {
+						console.error(
+							`Failed to get selection data: selectionStart=${selectionStart} selectionEnd=${selectionEnd}`
+						);
+						return;
+					}
+
+					const currentText = targetElem.value;
+					const newText =
+						currentText.slice(0, selectionStart) + e.data + currentText.slice(selectionEnd);
+
+					if (!newText || (allowNegative && newText === '-')) return;
+
+					const newNumber = Number(normalizeStringifiedNumber(newText));
+
+					if (Number.isNaN(newNumber) || newNumber > max) {
+						e.preventDefault();
+					}
+					if (!stringifiedValueRegex.test(newText)) {
+						e.preventDefault();
+					}
+				}}
+				{...$constraints}
+				{...rest}
+				{disabled}
+				{required}
+			/>
+		{:else}
+			<!-- { step }-->
+			<input
+				type="number"
+				class="{'input ' + _class} {classesTextField($errors)}"
+				data-testid="form-input-{field.replaceAll('_', '-')}"
+				name={field}
+				aria-invalid={$errors ? 'true' : undefined}
+				placeholder=""
+				bind:value={$value}
+				{...$constraints}
+				{...rest}
+				{disabled}
+				{required}
+			/>
+		{/if}
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>
