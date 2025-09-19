@@ -10,7 +10,6 @@ export const load = async ({ fetch, locals }) => {
 			return null;
 		});
 
-	console.log('res', res);
 	return {
 		currentUser: res,
 		title: m.myProfile()

@@ -48,7 +48,9 @@
 
 	// Determine if domain selection should be disabled
 	let isDomainDisabled = $derived(
-		selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment' || selectedModel === 'RiskAssessment'
+		selectedModel === 'ComplianceAssessment' ||
+			selectedModel === 'FindingsAssessment' ||
+			selectedModel === 'RiskAssessment'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');

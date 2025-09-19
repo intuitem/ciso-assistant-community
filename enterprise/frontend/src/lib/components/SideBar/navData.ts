@@ -110,9 +110,7 @@ export const navData = {
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/roles',
-					permissions: [
-						'add_role',
-					]
+					permissions: ['add_role']
 				},
 				{
 					name: 'roleAssignments',
