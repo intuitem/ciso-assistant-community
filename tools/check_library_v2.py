@@ -12,8 +12,13 @@ Usage:
     python check_library_v2.py file.xlsx [--verbose]
 
 Arguments:
-    file.xlsx    Path to the Excel file to validate.
-    --verbose    Optional flag to display additional information and validation feedback.
+    file.xlsx               Path to the Excel file to validate.
+
+    -e, --external-refs     [Optional] YAML files containing external references mentioned in the library.
+                            Use it to check the following columns if necessary : "threats", "reference_controls".
+                            Separate external references with commas (e.g., ./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml)
+
+    --verbose               [Optional] Display additional information and validation feedback.
 
 The script exits with code 1 and displays an error message if validation fails.
 """

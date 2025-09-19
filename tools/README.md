@@ -71,10 +71,11 @@ python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
 
 Usage: 
 ```bash
-python check_library_v2.py your_library_file.xlsx [--verbose]
+python check_library_v2.py your_library_file.xlsx [-e|--external-refs ./ref1.yaml,ref2.yaml,...] [--verbose]
 ```
 
 Arguments:
+- **`-e, --external-refs`**: YAML files containing external references mentioned in the library. Use it to check the following columns if necessary : `threats`, `reference_controls`. Separate external references with commas (e.g., `./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml`)
 - **`--verbose`**: Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.
 
 
