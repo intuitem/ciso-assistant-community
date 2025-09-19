@@ -1,6 +1,12 @@
 from django.urls import include, path
 
-from .views import LicenseStatusView, get_build, LogEntryViewSet, PermissionViewSet, RoleViewSet
+from .views import (
+    LicenseStatusView,
+    get_build,
+    LogEntryViewSet,
+    PermissionViewSet,
+    RoleViewSet,
+)
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
