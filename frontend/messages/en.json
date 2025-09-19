@@ -20,6 +20,7 @@
 	"ukrainian": "Ukrainian",
 	"greek": "Greek",
 	"turkish": "Turkish",
+	"croatian": "Croatian",
 	"addThreat": "Add threat",
 	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
@@ -282,6 +283,7 @@
 	"asCSV": "as CSV",
 	"asXLSX": "as Excel",
 	"asWord": "as Word",
+	"asMarkdown": "as Markdown",
 	"draft": "Draft",
 	"riskMatrixView": "Risk matrix view",
 	"currentInMatrixView": "Current",
@@ -1248,7 +1250,6 @@
 	"workshopOne": "Workshop 1",
 	"refIdSemiColon": "Refence ID:",
 	"addFearedEvent": "Add feared event",
-	"addEbiosRmStudy": "Add Ebios RM Study",
 	"noAuthor": "No author assigned",
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
@@ -2007,7 +2008,7 @@
 	"changeAttackpath": "Edit attack path",
 	"deleteAttackpath": "Delete attack path",
 	"viewAttackpath": "View attack path",
-	"addEbiosrmstudy": "Add EBIOS RM study",
+	"addEbiosRmStudy": "Add EBIOS RM study",
 	"changeEbiosrmstudy": "Edit EBIOS RM study",
 	"deleteEbiosrmstudy": "Delete EBIOS RM study",
 	"viewEbiosrmstudy": "View EBIOS RM study",
@@ -2199,5 +2200,7 @@
 	"isSelectedHelpText": "Decide if it should be passed to the study",
 	"quantRiskPriorityHelpText": "Useful for analyst to force an order on the exec summary",
 	"lossThreshold": "Loss threshold",
-	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance"
+	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance",
+	"hasMfaEnabled": "MFA enabled",
+	"libraryOverview": "{objectType}: {count}"
 }
