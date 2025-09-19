@@ -2199,5 +2199,6 @@
 	"isSelectedHelpText": "Decide if it should be passed to the study",
 	"quantRiskPriorityHelpText": "Useful for analyst to force an order on the exec summary",
 	"lossThreshold": "Loss threshold",
-	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance"
+	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance",
+	"libraryOverview": "{objectType}: {count}"
 }
