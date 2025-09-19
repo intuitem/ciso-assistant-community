@@ -26,7 +26,10 @@ class Migration(migrations.Migration):
             model_name="evidence",
             name="owner",
             field=models.ManyToManyField(
-                blank=True, to=settings.AUTH_USER_MODEL, verbose_name="Owner"
+                blank=True,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Owner",
+                related_name="evidences",
             ),
         ),
         migrations.AddField(

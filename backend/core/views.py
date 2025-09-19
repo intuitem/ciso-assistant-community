@@ -4636,6 +4636,15 @@ class EvidenceViewSet(BaseModelViewSet):
         "expiry_date",
     ]
 
+    @action(detail=False, name="Get all evidences owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(evidences__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
+
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
         (

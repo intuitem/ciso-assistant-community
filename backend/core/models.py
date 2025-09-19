@@ -2666,6 +2666,7 @@ class Evidence(
     owner = models.ManyToManyField(
         User,
         verbose_name="Owner",
+        related_name="evidences",
         blank=True,
     )
     status = models.CharField(
@@ -2727,7 +2728,7 @@ class Evidence(
 
     @property
     def attachment_hash(self):
-        if not self.last_revision.attachment:
+        if not self.last_revision or not self.last_revision.attachment:
             return None
         return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
 

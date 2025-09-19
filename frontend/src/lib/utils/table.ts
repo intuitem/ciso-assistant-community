@@ -908,6 +908,29 @@ const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'evidences/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'evidences/owner',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -1227,7 +1250,9 @@ export const listViewFields = {
 		body: ['name', 'attachment', 'size', 'description', 'folder', 'status', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			status: EVIDENCE_STATUS_FILTER,
+			owner: EVIDENCE_OWNER_FILTER
 		}
 	},
 	'evidence-revisions': {
