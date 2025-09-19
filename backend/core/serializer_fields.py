@@ -82,13 +82,17 @@ class FieldsRelatedField(serializers.RelatedField):
             return None  # or some other default value as appropriate
 
 
-class PathField(serializers.Field):
+class PathField(serializers.SerializerMethodField):
     """
     A custom serializer field to represent a path from a list of objects.
 
     This field takes a list of objects (e.g., folders) and
     serializes them into a list of dictionaries, each containing the
     object's ID and its string representation.
+
+    > [!IMPORTANT]
+    > This subclasses serializers.SerializerMethodField, therefore
+    > there MUST be a method on the serializer class with the name 'get_<field_name>'
     """
 
     def to_representation(self, value):
