@@ -1219,11 +1219,19 @@ export const listViewFields = {
 	},
 	libraries: {
 		head: ['provider', 'name', 'description', 'language', 'overview'],
-		body: ['provider', 'name', 'description', 'locales', 'overview']
+		body: ['provider', 'name', 'description', 'locales', 'objects_meta']
 	},
 	'stored-libraries': {
 		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: ['provider', 'ref_id', 'name', 'description', 'locales', 'overview', 'publication_date'],
+		body: [
+			'provider',
+			'ref_id',
+			'name',
+			'description',
+			'locales',
+			'objects_meta',
+			'publication_date'
+		],
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
@@ -1233,7 +1241,15 @@ export const listViewFields = {
 	},
 	'loaded-libraries': {
 		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: ['provider', 'ref_id', 'name', 'description', 'locales', 'overview', 'publication_date'],
+		body: [
+			'provider',
+			'ref_id',
+			'name',
+			'description',
+			'locales',
+			'objects_meta',
+			'publication_date'
+		],
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
