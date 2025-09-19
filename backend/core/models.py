@@ -2685,9 +2685,8 @@ class Evidence(
         verbose_name_plural = _("Evidences")
 
     def save(self, *args, **kwargs):
-        for revision in EvidenceRevision.objects.filter(evidence=self):
-            revision.is_published = self.is_published
         super().save(*args, **kwargs)
+        self.revisions.update(is_published=self.is_published)
 
     @property
     def last_revision(self):
