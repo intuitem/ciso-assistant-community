@@ -1274,6 +1274,15 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
         return evidence
 
+    def update(self, instance, validated_data):
+        # Handle properly owner field cleaning
+        owners = validated_data.get("owner", None)
+        instance = super().update(instance, validated_data)
+        if not owners:
+            instance.owner.set([])
+
+        return instance
+
     def to_representation(self, instance):
         """Include link and attachment from the latest revision in the response"""
         data = super().to_representation(instance)
