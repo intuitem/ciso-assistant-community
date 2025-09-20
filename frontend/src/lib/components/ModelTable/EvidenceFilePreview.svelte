@@ -20,7 +20,10 @@
 	let attachment: Attachment | undefined = $state();
 
 	const fetchAttachment = async () => {
-		const res = await fetch(`/evidences/${meta.id}/attachment`);
+		console.log(meta);
+		const res = await fetch(
+			`/${meta.evidence ? 'evidence-revisions' : 'evidences'}/${meta.id}/attachment`
+		);
 		const blob = await res.blob();
 		return {
 			type: blob.type,

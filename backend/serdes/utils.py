@@ -15,6 +15,7 @@ from core.models import (
     Asset,
     AppliedControl,
     Evidence,
+    EvidenceRevision,
     Framework,
     Perimeter,
     RiskAssessment,
@@ -45,6 +46,7 @@ from core.serializers import (
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
     EvidenceImportExportSerializer,
+    EvidenceRevisionImportExportSerializer,
     PerimeterImportExportSerializer,
     RiskAssessmentImportExportSerializer,
     RiskScenarioImportExportSerializer,
@@ -149,6 +151,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
+        EvidenceRevision: EvidenceRevisionImportExportSerializer,
         Perimeter: PerimeterImportExportSerializer,
         RiskAssessment: RiskAssessmentImportExportSerializer,
         RiskScenario: RiskScenarioImportExportSerializer,
@@ -456,6 +459,10 @@ def get_domain_export_objects(domain: Folder):
         | Q(requirement_assessments__in=requirement_assessments)
     ).distinct()
 
+    evidence_revisions = EvidenceRevision.objects.filter(
+        Q(folder__in=folders) | Q(evidence__in=evidences)
+    )
+
     loaded_libraries = LoadedLibrary.objects.filter(
         Q(folder__in=folders)
         | Q(threats__in=threats)
@@ -485,6 +492,7 @@ def get_domain_export_objects(domain: Folder):
         "appliedcontrol": applied_controls,
         "entity": entities,
         "evidence": evidences,
+        "evidencerevision": evidence_revisions,
         "perimeter": perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
