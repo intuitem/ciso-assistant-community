@@ -17,6 +17,7 @@ READER_PERMISSIONS_LIST = [
     "view_entity",
     "view_entityassessment",
     "view_evidence",
+    "view_evidencerevision",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -98,6 +99,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_requirementassessment",
     "view_requirementnode",
     "view_evidence",
+    "view_evidencerevision",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -350,6 +352,10 @@ ANALYST_PERMISSIONS_LIST = [
     "add_quantitativeriskhypothesis",
     "change_quantitativeriskhypothesis",
     "delete_quantitativeriskhypothesis",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -578,6 +584,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_quantitativeriskhypothesis",
     "change_quantitativeriskhypothesis",
     "delete_quantitativeriskhypothesis",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -649,10 +659,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    # evidence
     "add_evidence",
     "view_evidence",
     "change_evidence",
     "delete_evidence",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
     "add_framework",
     "view_framework",
     "delete_framework",
@@ -855,6 +870,10 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "add_evidence",
     "change_evidence",
     "delete_evidence",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
     "view_folder",
 ]
 
