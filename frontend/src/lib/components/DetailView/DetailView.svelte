@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -29,6 +30,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import BaseModal from '../Modals/BaseModal.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -202,6 +207,31 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalPublishUnpublish(): void {
+		const modalComponent: ModalComponent = {
+			ref: BaseModal,
+			props: {
+				children: publishUnpublishModal
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: data.data.is_published ? m.unpublish() : m.publish(),
+			body: data.data.is_published
+				? m.unpublishConfirmMessage({
+						object_type: safeTranslate(data.model.localNamePlural).toLowerCase(),
+						folder: data.data?.folder?.str
+					})
+				: m.publishConfirmMessage({
+						object_type: safeTranslate(data.model.localNamePlural).toLowerCase(),
+						folder: data.data?.folder?.str
+					})
+		};
+		modalStore.trigger(modal);
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -236,7 +266,53 @@
 	}
 
 	let openStateRA = $state(false);
+
+	const _form = () => {
+		return superForm(defaults({}, zod(z.object({ is_published: z.boolean() }))), {
+			validators: zod(z.object({ is_published: z.boolean() })),
+			dataType: 'json',
+			invalidateAll: true,
+			applyAction: true,
+			resetForm: true,
+			taintedMessage: false,
+			validationMethod: 'auto'
+		});
+	};
 </script>
+
+{#snippet publishUnpublishModal()}
+	<div class="flex w-full justify-end gap-2">
+		<button
+			class="btn bg-gray-400 text-white"
+			data-testid="cancel-button"
+			type="button"
+			onclick={() => modalStore.close()}>{m.cancel()}</button
+		>
+		<SuperForm {_form} action="?/publish" validators={z.object({ is_published: z.boolean() })}>
+			{#if data.data.is_published === true}
+				<input type="hidden" name="is_published" value={false} />
+				<button
+					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					data-testid="form-unpublish-button"
+					type="submit"
+				>
+					<i class="fa-solid fa-lock mr-2"></i>
+					{m.unpublish()}</button
+				>
+			{:else}
+				<input type="hidden" name="is_published" value={true} />
+				<button
+					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					data-testid="form-publish-button"
+					type="submit"
+				>
+					<i class="fa-solid fa-globe mr-2"></i>
+					{m.publish()}</button
+				>
+			{/if}
+		</SuperForm>
+	</div>
+{/snippet}
 
 <div class="flex flex-col space-y-2">
 	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
@@ -551,6 +627,27 @@
 					>
 						<i class="fa-solid fa-copy mr-2"></i>
 						{m.duplicate()}</button
+					>
+				{/if}
+			{/if}
+			{#if page?.data?.featureflags?.publish}
+				{#if data.data.is_published === true}
+					<button
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						data-testid="unpublish-button"
+						onclick={modalPublishUnpublish}
+					>
+						<i class="fa-solid fa-lock mr-2"></i>
+						{m.unpublish()}</button
+					>
+				{:else}
+					<button
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						data-testid="publish-button"
+						onclick={modalPublishUnpublish}
+					>
+						<i class="fa-solid fa-globe mr-2"></i>
+						{m.publish()}</button
 					>
 				{/if}
 			{/if}

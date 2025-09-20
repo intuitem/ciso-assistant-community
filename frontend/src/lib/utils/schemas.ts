@@ -433,6 +433,7 @@ export const FeatureFlagsSchema = z.object({
 	privacy: z.boolean().optional(),
 	experimental: z.boolean().optional(),
 	inherent_risk: z.boolean().optional(),
+	publish: z.boolean().optional(),
 	organisation_objectives: z.boolean().optional(),
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
