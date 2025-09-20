@@ -3,6 +3,7 @@
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -13,6 +14,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		context: string;
 		object?: any;
 	}
 
@@ -22,7 +24,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		object = {}
+		object = {},
+		context
 	}: Props = $props();
 
 	function getFilename(path) {
@@ -45,20 +48,22 @@
 <HiddenInput {form} field="findings_assessments" />
 <HiddenInput {form} field="timeline_entries" />
 
-<FileInput
-	{form}
-	allowPaste={true}
-	helpText={object.attachment
-		? `${m.attachmentWarningText()}: ${getFilename(object.attachment)}`
-		: m.attachmentHelpText()}
-	field="attachment"
-	label={m.attachment()}
-	allowedExtensions={'*'}
-/>
+{#if context !== 'edit'}
+	<FileInput
+		{form}
+		allowPaste={true}
+		helpText={object.attachment
+			? `${m.attachmentWarningText()}: ${getFilename(object.attachment)}`
+			: m.attachmentHelpText()}
+		field="attachment"
+		label={m.attachment()}
+		allowedExtensions={'*'}
+	/>
+{/if}
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		optionsEndpoint="folders"
 		field="folder"
 		pathField="path"
 		cacheLock={cacheLocks['folder']}
@@ -71,15 +76,16 @@
 {:else}
 	<HiddenInput {form} field="folder" />
 {/if}
-<TextField
-	{form}
-	field="link"
-	label={m.link()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['link']}
-	bind:cachedValue={formDataCache['link']}
-/>
-
+{#if context !== 'edit'}
+	<TextField
+		{form}
+		field="link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['link']}
+		bind:cachedValue={formDataCache['link']}
+	/>
+{/if}
 <AutocompleteSelect
 	multiple
 	{form}
@@ -91,4 +97,34 @@
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
 	allowUserOptions="append"
+/>
+
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	disableDoubleDash={true}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
+
+<TextField
+	type="date"
+	{form}
+	field="expiry_date"
+	label={m.expiryDate()}
+	cacheLock={cacheLocks['expiry_date']}
+	bind:cachedValue={formDataCache['expiry_date']}
 />

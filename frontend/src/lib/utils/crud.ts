@@ -545,9 +545,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'findings', urlModel: 'findings' },
-			{ field: 'findings_assessments', urlModel: 'findings-assessments' }
+			{ field: 'findings_assessments', urlModel: 'findings-assessments' },
+			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [
+			{ field: 'evidence', urlModel: 'evidence-revisions' },
 			{
 				field: 'evidences',
 				urlModel: 'applied-controls',
@@ -573,7 +575,29 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'link' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'expiry_date' }
 		]
+	},
+	'evidence-revisions': {
+		name: 'evidencerevision',
+		localName: 'evidenceRevision',
+		localNamePlural: 'evidenceRevisions',
+		verboseName: 'Evidence revision',
+		verboseNamePlural: 'Evidence revisions',
+		fileFields: ['attachment'],
+		foreignKeyFields: [{ field: 'evidence', urlModel: 'evidences' }]
 	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
@@ -1578,6 +1602,9 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 export const FIELD_COMPONENT_MAP = {
 	evidences: {
+		attachment: EvidenceFilePreview
+	},
+	'evidence-revisions': {
 		attachment: EvidenceFilePreview
 	},
 	'stored-libraries': {
