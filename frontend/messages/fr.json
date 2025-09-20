@@ -1701,7 +1701,7 @@
 	"deselect": "Désélectionner",
 	"associatedCampaigns": "Campagnes associées",
 	"serverURL": "URL serveur",
-	"oidcConfiguration": "openid-configuration",
+	"oidcConfiguration": "Configuration OpenID",
 	"tokenAuthMethod": "Méthode d’authentification par token",
 	"oauthPKCEEnabled": "OAuth PKCE activé",
 	"suggestedParentheses": "(suggéré)",
