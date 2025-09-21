@@ -578,6 +578,7 @@ Set DJANGO_DEBUG=False for security reason.
 18. UK: Ukrainian
 19. EL: Greek
 20. TR: Turkish
+21. HR: Croatian
 
 ## Contributors 🤝
 
