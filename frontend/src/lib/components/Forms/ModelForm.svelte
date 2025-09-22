@@ -63,6 +63,7 @@
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
+	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -356,7 +357,16 @@
 		{:else if URLModel === 'reference-controls'}
 			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'evidences'}
-			<EvidencesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
+			<EvidencesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'compliance-assessments'}
 			<ComplianceAssessmentsForm
 				{form}
@@ -663,6 +673,16 @@
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'roles'}
 			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'evidence-revisions'}
+			<EvidenceRevisionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

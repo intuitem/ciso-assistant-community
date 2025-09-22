@@ -16,6 +16,7 @@ from core.models import (
     AppliedControl,
     ReferenceControl,
     Evidence,
+    EvidenceRevision,
     RiskAcceptance,
     Asset,
     Threat,
@@ -37,9 +38,7 @@ SAMPLE_640x480_JPG = BASE_DIR / "app_tests" / "sample_640x480.jpg"
 
 @pytest.mark.django_db
 class TestEvidence:
-    pytestmark = pytest.mark.django_db
-
-    def test_evidence_parameters(self):
+    def test_evidence_parameters_with_revision(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -48,25 +47,31 @@ class TestEvidence:
             description="test applied control description",
             folder=folder,
         )
+
+        evidence = Evidence.objects.create(
+            name="test evidence",
+            description="test evidence description",
+            folder=folder,
+        )
+        evidence.applied_controls.add(applied_control)
+
+        # Create a revision with an attachment
         with open(SAMPLE_640x480_JPG, "rb") as f:
-            evidence = Evidence.objects.create(
-                name="test evidence",
-                description="test evidence description",
+            revision = EvidenceRevision.objects.create(
+                evidence=evidence,
+                version=1,
                 attachment=SimpleUploadedFile(SAMPLE_640x480_JPG.name, f.read()),
-                folder=folder,
             )
-            evidence.applied_controls.add(applied_control)  # pyright: ignore[reportAttributeAccessIssue]
 
         assert evidence.name == "test evidence"
         assert evidence.description == "test evidence description"
-        assert list(evidence.applied_controls.all()) == [applied_control]  # pyright: ignore[reportAttributeAccessIssue]
-        assert evidence.attachment.name.startswith(
-            SAMPLE_640x480_JPG.name.split(".")[0]
-        )
-        assert evidence.attachment.name.endswith(".jpg")
-        assert evidence.attachment.size == 81533
+        assert list(evidence.applied_controls.all()) == [applied_control]
+        assert evidence.last_revision == revision
+        assert evidence.filename() == SAMPLE_640x480_JPG.name
+        assert evidence.get_size().endswith("KB") or evidence.get_size().endswith("MB")
+        assert evidence.attachment_hash is not None
 
-    def test_evidence_with_no_attachment(self):
+    def test_evidence_with_no_revision(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -75,13 +80,19 @@ class TestEvidence:
             description="test applied control description",
             folder=folder,
         )
+
         evidence = Evidence.objects.create(
             folder=folder,
             name="test evidence",
             description="test evidence description",
         )
-        evidence.applied_controls.add(applied_control)  # pyright: ignore[reportAttributeAccessIssue]
-        assert not evidence.attachment
+        evidence.applied_controls.add(applied_control)
+
+        # No revision
+        assert evidence.last_revision is None
+        assert evidence.filename() is None
+        assert evidence.get_size() is None
+        assert evidence.attachment_hash is None
 
 
 @pytest.mark.django_db

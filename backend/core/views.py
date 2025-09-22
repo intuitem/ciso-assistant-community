@@ -828,6 +828,10 @@ class AssetViewSet(BaseModelViewSet):
             )
             N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
@@ -845,8 +849,23 @@ class AssetViewSet(BaseModelViewSet):
             nodes_idx[asset_key] = N
             N += 1
 
+        # Add links between domains (folders) based on parent-child relationships
+        for domain in Folder.objects.filter(id__in=viewable_folders):
+            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                links.append(
+                    {
+                        "source": nodes_idx[domain.parent_folder.name],
+                        "target": nodes_idx[domain.name],
+                        "value": "contains",
+                    }
+                )
+
         # Add links between assets and their domains
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             asset_key = f"{asset.folder.name}/{asset.name}"
             links.append(
                 {
@@ -858,8 +877,19 @@ class AssetViewSet(BaseModelViewSet):
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             asset_key = f"{asset.folder.name}/{asset.name}"
             for relationship in asset.parent_assets.all():
+                # Only include relationship if both assets and their folders are viewable
+                if (
+                    relationship.id not in viewable_assets
+                    or relationship.folder.id not in viewable_folders
+                ):
+                    continue
+
                 relationship_key = f"{relationship.folder.name}/{relationship.name}"
                 links.append(
                     {
@@ -3169,27 +3199,29 @@ class FolderViewSet(BaseModelViewSet):
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
             if include_attachments:
-                evidences = objects.get("evidence", Evidence.objects.none()).filter(
-                    attachment__isnull=False
-                )
+                revisions = objects.get(
+                    "evidencerevision", EvidenceRevision.objects.none()
+                ).filter(attachment__isnull=False)
                 logger.info(
                     "Processing evidence attachments",
-                    total_evidences=evidences.count(),
+                    total_revisions=revisions.count(),
                     domain_id=instance.id,
                 )
 
-                for evidence in evidences:
-                    if evidence.attachment and default_storage.exists(
-                        evidence.attachment.name
+                for revision in revisions:
+                    if revision.attachment and default_storage.exists(
+                        revision.attachment.name
                     ):
                         # Read file directly into memory
-                        with default_storage.open(evidence.attachment.name) as file:
+                        with default_storage.open(revision.attachment.name) as file:
                             file_content = file.read()
                             # Write the file content directly to the zip
                             zipf.writestr(
                                 os.path.join(
                                     "attachments",
-                                    os.path.basename(evidence.attachment.name),
+                                    "evidence-revisions",
+                                    f"{revision.evidence_id}_v{revision.version}_"
+                                    f"{os.path.basename(revision.attachment.name)}",
                                 ),
                                 file_content,
                             )
@@ -3748,8 +3780,16 @@ class FolderViewSet(BaseModelViewSet):
                 ).first()
 
             case "evidence":
+                many_to_many_map_ids["owner_ids"] = get_mapped_ids(
+                    _fields.pop("owner", []), link_dump_database_ids
+                )
+
+            case "evidencerevision":
                 _fields.pop("size", None)
                 _fields.pop("attachment_hash", None)
+                _fields["evidence"] = Evidence.objects.get(
+                    id=link_dump_database_ids.get(_fields["evidence"])
+                )
 
             case "requirementassessment":
                 logger.debug("Looking for requirement", urn=_fields.get("requirement"))
@@ -4621,7 +4661,19 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "owner",
+        "status",
+        "expiry_date",
     ]
+
+    @action(detail=False, name="Get all evidences owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(evidences__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -4631,6 +4683,53 @@ class EvidenceViewSet(BaseModelViewSet):
             _,
         ) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Evidence
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            evidence = self.get_object()
+            if (
+                not evidence.last_revision.attachment
+                or not evidence.last_revision.attachment.storage.exists(
+                    evidence.last_revision.attachment.name
+                )
+            ):
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            if request.method == "GET":
+                content_type = mimetypes.guess_type(evidence.last_revision.filename())[
+                    0
+                ]
+                response = HttpResponse(
+                    evidence.last_revision.attachment,
+                    content_type=content_type,
+                    headers={
+                        "Content-Disposition": f"attachment; filename={evidence.last_revision.filename()}"
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        return response
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Evidence.Status.choices))
+
+
+class EvidenceRevisionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows evidence revisions to be viewed or edited.
+    """
+
+    model = EvidenceRevision
+    filterset_fields = ["evidence"]
+    ordering = ["-version"]
+
+    @action(methods=["get"], detail=True)
+    def attachment(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, EvidenceRevision
         )
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
@@ -4654,14 +4753,14 @@ class EvidenceViewSet(BaseModelViewSet):
     @action(methods=["post"], detail=True)
     def delete_attachment(self, request, pk):
         (
-            object_ids_view,
             _,
             _,
+            object_ids_delete,
         ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
+            Folder.get_root_folder(), request.user, EvidenceRevision
         )
         response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
+        if UUID(pk) in object_ids_delete:
             evidence = self.get_object()
             if evidence.attachment:
                 evidence.attachment.delete()
@@ -4674,22 +4773,35 @@ class UploadAttachmentView(APIView):
     serializer_class = AttachmentUploadSerializer
 
     def post(self, request, *args, **kwargs):
-        if request.data:
+        pk = kwargs["pk"]
+        revision = None
+        evidence = None
+
+        try:
+            revision = EvidenceRevision.objects.get(pk=pk)
+            evidence = revision.evidence
+        except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(id=kwargs["pk"])
-                attachment = request.FILES["file"]
-                if not evidence.attachment and attachment.name != "undefined":
-                    evidence.attachment = attachment
-                elif (
-                    evidence.attachment and attachment.name != "undefined"
-                ) and evidence.attachment != attachment:
-                    evidence.attachment.delete()
-                    evidence.attachment = attachment
-                evidence.save()
-                return Response(status=status.HTTP_200_OK)
-            except Exception:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+                evidence = Evidence.objects.get(pk=pk)
+            except Evidence.DoesNotExist:
+                return Response(
+                    {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+
+        if revision is None:
+            revision = evidence.revisions.order_by(
+                "-version"
+            ).first() or EvidenceRevision.objects.create(evidence=evidence)
+
+        attachment = request.FILES.get("file")
+        if attachment and attachment.name != "undefined":
+            if not revision.attachment or revision.attachment != attachment:
+                if revision.attachment:
+                    revision.attachment.delete()
+                revision.attachment = attachment
+                revision.save()
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class QuickStartView(APIView):
