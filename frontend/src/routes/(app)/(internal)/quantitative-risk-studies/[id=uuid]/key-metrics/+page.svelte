@@ -98,7 +98,7 @@
 					}
 				}
 			},
-			width: 200,
+			flexgrow: 2,
 			sort: true
 		},
 		{
@@ -117,37 +117,37 @@
 					}
 				}
 			},
-			width: 100,
+			flexgrow: 1,
 			sort: true
 		},
 		{
 			id: 'ale_formatted',
 			header: { text: 'ALE' },
-			width: 120,
+			flexgrow: 1,
 			sort: true
 		},
 		{
 			id: 'var_95_formatted',
 			header: { text: 'VaR 95%' },
-			width: 120,
+			flexgrow: 1,
 			sort: true
 		},
 		{
 			id: 'var_99_formatted',
 			header: { text: 'VaR 99%' },
-			width: 120,
+			flexgrow: 1,
 			sort: true
 		},
 		{
 			id: 'var_999_formatted',
 			header: { text: 'VaR 99.9%' },
-			width: 120,
+			flexgrow: 1,
 			sort: true
 		},
 		{
 			id: 'probability_formatted',
 			header: { text: 'P(>Threshold)' },
-			width: 130,
+			flexgrow: 1,
 			sort: true
 		}
 	];
@@ -166,7 +166,7 @@
 		</div>
 		<button
 			class="btn variant-ghost-surface"
-			on:click={() => goto(`/quantitative-risk-studies/${page.params.id}`)}
+			on:click={() => goto(`/quantitative-risk-studies/${$page.params.id}`)}
 		>
 			<i class="fa-solid fa-arrow-left mr-2"></i>
 			Back to Study
@@ -230,7 +230,6 @@
 								{columns}
 								headerHeight={40}
 								rowHeight={45}
-								sizes={{ width: "100%", height: "100%" }}
 							/>
 						</Willow>
 					</div>
