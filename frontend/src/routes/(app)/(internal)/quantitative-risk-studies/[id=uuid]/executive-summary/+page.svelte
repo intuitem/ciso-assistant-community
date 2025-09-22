@@ -320,22 +320,22 @@
 											{#if scenario.existing_controls && scenario.existing_controls.length > 0}
 												<div>
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
-														<i class="fa-solid fa-shield-halved mr-1 text-blue-600"></i>Existing
+														<i class="fa-solid fa-shield-halved mr-1 text-green-600"></i>Existing
 														Controls ({scenario.existing_controls.length})
 													</h4>
 													<div class="space-y-2">
 														{#each scenario.existing_controls as control}
 															<div
-																class="flex items-center justify-between p-2 bg-blue-50 rounded text-sm"
+																class="flex items-center justify-between p-2 bg-green-50 rounded text-sm"
 															>
 																<div class="flex-1">
-																	<span class="font-medium text-blue-900">{control.name}</span>
+																	<span class="font-medium text-green-900">{control.name}</span>
 																	{#if control.category}
-																		<span class="text-blue-600"> • {control.category}</span>
+																		<span class="text-green-600"> • {control.category}</span>
 																	{/if}
 																</div>
 																<span
-																	class="px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded capitalize"
+																	class="px-2 py-1 bg-green-200 text-green-800 text-xs rounded capitalize"
 																>
 																	{safeTranslate(control.status)}
 																</span>
@@ -348,27 +348,27 @@
 											{#if scenario.additional_controls && scenario.additional_controls.length > 0}
 												<div>
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
-														<i class="fa-solid fa-plus-circle mr-1 text-green-600"></i>Additional
+														<i class="fa-solid fa-plus-circle mr-1 text-blue-600"></i>Additional
 														Controls ({scenario.additional_controls.length})
 													</h4>
 													<div class="space-y-2">
 														{#each scenario.additional_controls as control}
 															<div
-																class="flex items-center justify-between p-2 bg-green-50 rounded text-sm"
+																class="flex items-center justify-between p-2 bg-blue-50 rounded text-sm"
 															>
 																<div class="flex-1">
-																	<span class="font-medium text-green-900">{control.name}</span>
+																	<span class="font-medium text-blue-900">{control.name}</span>
 																	{#if control.category}
-																		<span class="text-green-600"> • {control.category}</span>
+																		<span class="text-blue-600"> • {control.category}</span>
 																	{/if}
 																	{#if control.annual_cost && control.annual_cost > 0}
-																		<div class="text-xs text-green-700 mt-1">
+																		<div class="text-xs text-blue-700 mt-1">
 																			Cost: {summaryData.currency}{control.annual_cost.toLocaleString()}/year
 																		</div>
 																	{/if}
 																</div>
 																<span
-																	class="px-2 py-1 bg-green-200 text-green-800 text-xs rounded capitalize"
+																	class="px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded capitalize"
 																>
 																	{safeTranslate(control.status)}
 																</span>
