@@ -14,11 +14,11 @@ Usage:
 Arguments:
     file.xlsx               Path to the Excel file to validate.
 
-    -e, --external-refs     [Optional] YAML files containing external references mentioned in the library.
+    -e, --external-refs     YAML files containing external references mentioned in the library.
                             Use it to check the following columns if necessary : "threats", "reference_controls".
                             Separate external references with commas (e.g., ./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml)
-
-    --verbose               [Optional] Display additional information and validation feedback.
+    -b, --bulk              Enable bulk mode to process all .xlsx files in a directory.
+    --verbose               Display additional information and validation feedback.
 
 The script exits with code 1 and displays an error message if validation fails.
 """
@@ -32,6 +32,7 @@ import yaml
 import inspect
 import argparse
 from enum import Enum
+from pathlib import Path
 from collections import Counter
 from typing import Dict, List, Tuple
 
@@ -1326,10 +1327,10 @@ def _req_map_set_validate_unique_mappings(df, sheet_name: str, context: str = No
     if not duplicates.empty:
         duplicate_rows = duplicates.index + 2  # 1-based row index (+ header)
         duplicate_pairs = duplicates.drop_duplicates().values.tolist()
-        quoted_pairs = ' ; '.join(f'["{s}", "{t}"]' for s, t in duplicate_pairs)
+        quoted_pairs = '\n   - '.join(f'["{s}", "{t}"]' for s, t in duplicate_pairs)
 
         msg = (
-            f"({context}) [{sheet_name}] Duplicate mapping(s) found for [source_node_id + target_node_id] pair(s): {quoted_pairs}"
+            f"({context}) [{sheet_name}] Duplicate mapping(s) found for [source_node_id + target_node_id] pair(s):\n   - {quoted_pairs}"
             f"\n> Rows: {', '.join(map(str, duplicate_rows))}"
         )
 
@@ -2203,6 +2204,15 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
+
+    msg = (
+        f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] In this script, Matrix content sheet verification is partially implemented."
+        f"> 💡 Tip: Matrix verification will be improved in a future update."
+    )
+    print(msg)
+    if ctx:
+        ctx.add_sheet_warning_msg(sheet_name, msg)
+
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
@@ -2612,7 +2622,11 @@ def validate_excel_structure(filepath, external_refs: List[str] = None, verbose:
 
 def main():
     parser = argparse.ArgumentParser(description="Validate Excel file structure (v2 format)", formatter_class=argparse.RawTextHelpFormatter,)
-    parser.add_argument("filepath", help="Path to Excel file to validate.")
+    parser.add_argument(
+        "file_input",
+        help="Path to Excel file to validate."
+    )
+
     parser.add_argument(
         "-e", "--external-refs",
         type=str,
@@ -2620,22 +2634,157 @@ def main():
         "Use it to check the following columns if necessary : \"threats\", \"reference_controls\".\n"
         "Separate external references with commas (e.g., ./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml)",
     )
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.")
+
+    parser.add_argument(
+        "-b",
+        "--bulk",
+        action="store_true",
+        help="Enable bulk mode to process all Excel files in a directory.",
+    )
+
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji."
+    )
+
     args = parser.parse_args()
 
 
+    # Store YAML external references filenames in a list 
     external_refs = []
     if args.external_refs:
         external_refs = args.external_refs.split(",")        
 
 
-    ctx = ConsoleContext()
+    # If "enable_ctx == True", the "ConsoleContext" object will be enabled and returned by the function
+    enable_ctx = True
+    err = False
+    
+    # --- BULK CHECK ------------------------------------------------------------
+    if args.bulk:
+        _, err = bulk_check(args, external_refs, enable_ctx)
+
+    # --- SINGLE FILE CHECK -----------------------------------------------------
+    else:
+        _, err =  single_file_check(args, external_refs, enable_ctx)
+
+
+    if err:
+        sys.exit(1)
+    else:
+        sys.exit(0)
+
+
+
+def bulk_check(args, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[Dict[str, ConsoleContext], List[str]]:
+    
+    ctxs: Dict[str, ConsoleContext] = {}   # List of all contexts
+    """
+    {
+        file1: ctx1,
+        file2: ctx2,
+        ...
+    }
+    """
+    
+    input_path = Path(args.file_input)
+    if not input_path.is_dir():
+        print("❌ [ERROR] Bulk mode requires a directory as input")
+        sys.exit(1)
+
+
+    error_files = []  # Collect names of files that failed
+    
+    # Find all Excel files in the input directory (temp Excel files starting with "~$" are excluded)
+    valid_exts = {".xlsx", ".xlsm", ".xltx", ".xltm"}       # Excel Extensions allowed
+    excel_files = [
+        f for f in input_path.iterdir()
+        if f.suffix.lower() in valid_exts and not f.name.startswith("~$")
+    ]
+
+    if not excel_files:
+        print(f'❌ [ERROR] No Excel files found in directory: "{input_path}". Abort...')
+        sys.exit(1)
+
+    for i, file in enumerate(excel_files):
+        
+        temp_ctx = None
+        
+        if enable_ctx:
+            temp_ctx = ConsoleContext()
+        
+        try:
+            if i > 0:
+                print("\n-------------------------------------------------------------------\n")
+            print(f'▶️  Processing file [{i + 1}/{len(excel_files)}]: "{file}"')
+            validate_excel_structure(str(file), external_refs, args.verbose, temp_ctx)
+        except Exception as e:
+            print(f'❌ [ERROR] Failed to process "{file.name}":\n🛑 {e}')
+            error_files.append(file.name)
+
+
+        if enable_ctx:
+            ctxs[file.name] = temp_ctx
+
+
+    # Summary at the end of bulk processing
+    print("\n###################################################################\n")
+    print("📋 Bulk mode completed!")
+
+
+    warning_files = []
+
+    # Check files with at least 1 warning
+    for file, ctx in ctxs.items():
+        if ctx.count_all_warnings() > 0: warning_files.append(file)
+
+
+    # Print files that got at least 1 warning
+    if warning_files:
+        print(f"⚠️  The following file{'s' if len(error_files) > 1 else ''} encountered at least 1 warning:")
+
+        for f in warning_files:
+            print(f"   - {f}")
+
+
+    # Print files that encounter an error
+    if error_files:
+        print(f"❌ The following file{'s' if len(error_files) > 1 else ''} failed to process:")
+
+        for f in error_files:
+            print(f"   - {f}")
+
+
+    if warning_files or error_files: 
+        if not args.verbose:
+            print('💡 Tip: Use "--verbose" to display hidden messages. This can help to understand certain errors.')
+    else:
+        print("✅ All files processed successfully!")
+
+
+    return ctxs, error_files
+
+
+def single_file_check(args, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[ConsoleContext, bool]:
+    
+    ctx = None
+    error_encountered = False
+    
+    if enable_ctx:
+        ctx = ConsoleContext()
 
     try:
-        validate_excel_structure(args.filepath, external_refs, args.verbose, ctx)
+        validate_excel_structure(args.file_input, external_refs, args.verbose, ctx)
+        if not args.verbose:
+                print("💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
     except Exception as e:
         print(f"❌ [FATAL ERROR] {e}")
-        sys.exit(1)
+        if not args.verbose:
+                print("💡 Tip: Use \"--verbose\" to display hidden messages. This can help to understand certain errors.")
+        error_encountered = True
+
+    return ctx, error_encountered
 
 
 if __name__ == "__main__":
