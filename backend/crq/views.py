@@ -726,6 +726,23 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 }
                 scenario_info["residual_level"] = residual_data
 
+                # Get treatment controls (added applied controls) with ETA dates for timeline animation
+                treatment_controls = []
+                for control in residual_hypothesis.added_applied_controls.all():
+                    treatment_controls.append(
+                        {
+                            "id": str(control.id),
+                            "name": control.name,
+                            "eta": control.eta.isoformat() if control.eta else None,
+                            "status": control.status,
+                            "effort": control.effort,
+                        }
+                    )
+
+                # Sort by ETA date (earliest first, null ETAs last)
+                treatment_controls.sort(key=lambda x: (x["eta"] is None, x["eta"]))
+                scenario_info["treatment_controls"] = treatment_controls
+
             scenarios_data.append(scenario_info)
 
         return Response(

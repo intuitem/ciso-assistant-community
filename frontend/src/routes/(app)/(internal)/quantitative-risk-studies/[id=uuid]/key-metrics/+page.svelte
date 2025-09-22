@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { Grid, Willow } from 'wx-svelte-grid';
+	import ALETimelineRaceChart from '$lib/components/Chart/ALETimelineRaceChart.svelte';
 
 	interface Props {
 		data: PageData;
@@ -91,6 +92,34 @@
 		});
 
 		return gridData;
+	}
+
+	// Prepare data for ALE timeline race chart
+	function prepareTimelineChartData(keyMetricsData: any) {
+		if (!keyMetricsData?.scenarios) return [];
+
+		return keyMetricsData.scenarios
+			.filter((scenario: any) => {
+				// Include scenarios that have at least current ALE data
+				const hasCurrentALE =
+					scenario.current_level &&
+					scenario.current_level.ale !== null &&
+					scenario.current_level.ale !== undefined;
+				const hasResidualALE =
+					scenario.residual_level &&
+					scenario.residual_level.ale !== null &&
+					scenario.residual_level.ale !== undefined;
+
+				// At minimum, we need current ALE. If no residual ALE, we'll use current ALE as fallback
+				return hasCurrentALE;
+			})
+			.map((scenario: any) => ({
+				id: scenario.id,
+				name: scenario.name,
+				currentALE: scenario.current_level?.ale || 0,
+				residualALE: scenario.residual_level?.ale || scenario.current_level?.ale || 0,
+				treatmentControls: scenario.treatment_controls || []
+			}));
 	}
 
 	// Define grid columns with sorting and built-in filtering
@@ -221,6 +250,59 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- ALE Timeline Race Chart -->
+			{@const timelineChartData = prepareTimelineChartData(keyMetricsData)}
+			{#if timelineChartData.length > 0}
+				<div class="mb-8">
+					<ALETimelineRaceChart
+						scenarios={timelineChartData}
+						currency={keyMetricsData.currency}
+						title="ALE Evolution Timeline - Risk Reduction Through Treatment Implementation"
+						height="h-auto"
+						autoPlay={false}
+						animationSpeed={1500}
+					/>
+				</div>
+			{:else}
+				<!-- Debug information when chart doesn't show -->
+				<div class="mb-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+					<h3 class="text-lg font-semibold text-yellow-800 mb-2">
+						<i class="fa-solid fa-info-circle mr-2"></i>
+						ALE Timeline Chart Debug Info
+					</h3>
+					<div class="text-sm text-yellow-700 space-y-1">
+						<p><strong>Total scenarios:</strong> {keyMetricsData?.scenarios?.length || 0}</p>
+						<p>
+							<strong>Scenarios with current_level:</strong>
+							{keyMetricsData?.scenarios?.filter((s) => s.current_level)?.length || 0}
+						</p>
+						<p>
+							<strong>Scenarios with residual_level:</strong>
+							{keyMetricsData?.scenarios?.filter((s) => s.residual_level)?.length || 0}
+						</p>
+						<p>
+							<strong>Scenarios with both levels:</strong>
+							{keyMetricsData?.scenarios?.filter((s) => s.current_level && s.residual_level)
+								?.length || 0}
+						</p>
+						<p>
+							<strong>Scenarios with treatment controls:</strong>
+							{keyMetricsData?.scenarios?.filter(
+								(s) => s.treatment_controls && s.treatment_controls.length > 0
+							)?.length || 0}
+						</p>
+						<details class="mt-2">
+							<summary class="cursor-pointer font-medium">View raw scenario data</summary>
+							<pre class="mt-2 p-2 bg-yellow-100 rounded text-xs overflow-auto">{JSON.stringify(
+									keyMetricsData?.scenarios,
+									null,
+									2
+								)}</pre>
+						</details>
+					</div>
+				</div>
+			{/if}
 
 			<!-- Scenarios Grid -->
 			<div class="bg-white rounded-lg shadow-sm overflow-hidden">

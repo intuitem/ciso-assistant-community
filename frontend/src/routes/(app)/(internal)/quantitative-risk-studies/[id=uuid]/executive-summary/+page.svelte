@@ -326,19 +326,35 @@
 													<div class="space-y-2">
 														{#each scenario.existing_controls as control}
 															<div
-																class="flex items-center justify-between p-2 bg-green-50 rounded text-sm"
+																class="flex items-center justify-between p-2 bg-green-50 rounded text-sm hover:bg-green-100 transition-colors"
 															>
 																<div class="flex-1">
-																	<span class="font-medium text-green-900">{control.name}</span>
+																	<Anchor
+																		href="/applied-controls/{control.id}"
+																		class="font-medium text-green-900 hover:text-green-700 cursor-pointer hover:underline"
+																		breadcrumbAction="push"
+																	>
+																		{control.name}
+																	</Anchor>
 																	{#if control.category}
 																		<span class="text-green-600"> • {control.category}</span>
 																	{/if}
 																</div>
-																<span
-																	class="px-2 py-1 bg-green-200 text-green-800 text-xs rounded capitalize"
-																>
-																	{safeTranslate(control.status)}
-																</span>
+																<div class="flex items-center space-x-2">
+																	<span
+																		class="px-2 py-1 bg-green-200 text-green-800 text-xs rounded capitalize"
+																	>
+																		{safeTranslate(control.status)}
+																	</span>
+																	<Anchor
+																		href="/applied-controls/{control.id}"
+																		class="text-green-600 hover:text-green-800 p-1"
+																		breadcrumbAction="push"
+																		title="View control details"
+																	>
+																		<i class="fa-solid fa-external-link text-xs"></i>
+																	</Anchor>
+																</div>
 															</div>
 														{/each}
 													</div>
@@ -354,10 +370,16 @@
 													<div class="space-y-2">
 														{#each scenario.additional_controls as control}
 															<div
-																class="flex items-center justify-between p-2 bg-blue-50 rounded text-sm"
+																class="flex items-center justify-between p-2 bg-blue-50 rounded text-sm hover:bg-blue-100 transition-colors"
 															>
 																<div class="flex-1">
-																	<span class="font-medium text-blue-900">{control.name}</span>
+																	<Anchor
+																		href="/applied-controls/{control.id}"
+																		class="font-medium text-blue-900 hover:text-blue-700 cursor-pointer hover:underline"
+																		breadcrumbAction="push"
+																	>
+																		{control.name}
+																	</Anchor>
 																	{#if control.category}
 																		<span class="text-blue-600"> • {control.category}</span>
 																	{/if}
@@ -367,11 +389,21 @@
 																		</div>
 																	{/if}
 																</div>
-																<span
-																	class="px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded capitalize"
-																>
-																	{safeTranslate(control.status)}
-																</span>
+																<div class="flex items-center space-x-2">
+																	<span
+																		class="px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded capitalize"
+																	>
+																		{safeTranslate(control.status)}
+																	</span>
+																	<Anchor
+																		href="/applied-controls/{control.id}"
+																		class="text-blue-600 hover:text-blue-800 p-1"
+																		breadcrumbAction="push"
+																		title="View control details"
+																	>
+																		<i class="fa-solid fa-external-link text-xs"></i>
+																	</Anchor>
+																</div>
 															</div>
 														{/each}
 													</div>
