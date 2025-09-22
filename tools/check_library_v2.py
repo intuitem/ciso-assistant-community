@@ -2570,6 +2570,12 @@ def validate_excel_structure(filepath, external_refs: List[str] = None, verbose:
         else:
             ignored_sheets.append(sheet_name)
 
+    if not "library_meta" in meta_sheets:
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] No \"library_meta\" sheet found."
+            f"\n> 💡 Tip: Ensure your Excel file \"{file_name}\" is in v2 format."
+        )
+
     # Handle "_meta" sheets
     for sheet_name, df in meta_sheets.items():
 
