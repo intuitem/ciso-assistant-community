@@ -66,6 +66,9 @@ importers:
       svelte-persisted-store:
         specifier: ^0.12.0
         version: 0.12.0(svelte@5.34.8)
+      wx-svelte-grid:
+        specifier: ^2.3.0
+        version: 2.3.0
     devDependencies:
       '@inlang/paraglide-js':
         specifier: ^2.1.0
@@ -1167,6 +1170,36 @@ packages:
     resolution: {integrity: sha512-r4y+LsiB37V5hzpQo+BM10PaCsp7YlZ0YcZzQP1OCkPlYXmUAFy2VvDKaFRpD8IeNPKug2u4iFm/laDEbs03dg==}
     peerDependencies:
       storybook: ^8.2.0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
+
+  '@svar-ui/core-locales@2.3.1':
+    resolution: {integrity: sha512-wv1oWjNVUoG2s3E0TOFvDVAv29WrSzfsS4bjsop9sFF7VAUIJ7wGGGkTbJcBTJZvAuKNFm10/mY1jV253cPXfQ==}
+
+  '@svar-ui/grid-data-provider@2.3.0':
+    resolution: {integrity: sha512-vaEgpKbmAj2OKoMF/Y782R4J2NMrq5FZuZR3Quvbj+BlmFb9I3j653IXeyt+vdy0nb73Z2FK95fyRo83h9s0uQ==}
+
+  '@svar-ui/grid-locales@2.3.0':
+    resolution: {integrity: sha512-ES2vxPfsKjXImEepsO6nZKiKktV8BrUOvn07COyNPwPwvGJBxdiG6p5EdhsxmhK9Sz1phEMxNJr04v/GWnV00Q==}
+
+  '@svar-ui/grid-store@2.3.0':
+    resolution: {integrity: sha512-nYe7Hs8Vf41pZE677ax0XJK41lQMsswah4/rxEOzLEtQudALJJUi6ZFUHxdTj68pUfP+A/NK5TQPtcubxgzOJQ==}
+
+  '@svar-ui/lib-data-provider@1.7.1':
+    resolution: {integrity: sha512-5Bi9ywngcMTKpGtan0s7q8ivd84Bp0ZnRP+5bLZg6oiRB7YMyN5D5X+apc3CWDAnG4zZn3en4YwS2qc/aHIIuQ==}
+
+  '@svar-ui/lib-dom@0.9.2':
+    resolution: {integrity: sha512-U/+2dPuO4GvCxPfyA20XP+cn/5NqJjobS/ZvwTUj1UVMycnIkFRVukboV58LviP5mLJw4o/k1vAgank7sfBEpA==}
+
+  '@svar-ui/lib-state@1.9.6':
+    resolution: {integrity: sha512-twoHa8wZvzdxtES68s6Wnp4Xi1WivScNaFFK6sJ6WDgqVYOzJw0ZhVVrdwHQgieLITTKl/DYh/U3nuqtMetKYw==}
+
+  '@svar-ui/lib-svelte@0.5.2':
+    resolution: {integrity: sha512-i+hHMT3zctaGbRpyMDREt9im7YfLpvGwFYvH1ntEp/kYAwUrR/sxMJlEEKIid+Yg2EeMUstGxmYQbkWoMpPG7A==}
+
+  '@svar-ui/svelte-core@2.3.1':
+    resolution: {integrity: sha512-5ZrEcNX62UtQeB6GlpV15PRwiG7PvUYRdFR+tBjfXJr6Tw/xy1VN9VdwuV/1wXhgE+SSfnyUrJALfrAhGmfNIw==}
+
+  '@svar-ui/svelte-menu@2.3.0':
+    resolution: {integrity: sha512-dquniwPcQXdirXKwI9cLMhAxt0u6Hwf7w+2JSFuYMXBUNJJ4m3ZPfK6cZUzhdzKsveZFalPx6wHwE4OvcD0CBA==}
 
   '@svelte-put/copy@3.0.2':
     resolution: {integrity: sha512-BVD464jVZabcVy8yOJ2GpYmNaemysLSLL+bm9/mjFrMDvpNL7Iz6hWMjwRCYQxMODDm5tmi+zoDOynDAZ9ltdQ==}
@@ -4091,6 +4124,9 @@ packages:
       utf-8-validate:
         optional: true
 
+  wx-svelte-grid@2.3.0:
+    resolution: {integrity: sha512-SZ4OLsspKQrff1VsNO7jkDw3J9S94qQXOPPtguSIKmOC3hh0UjiXxa+SBAqUyTu728tO/2AFx/eecHQ3+iIysA==}
+
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
@@ -5088,6 +5124,41 @@ snapshots:
   '@storybook/theming@8.6.14(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
       storybook: 8.6.14(prettier@3.6.1)
+
+  '@svar-ui/core-locales@2.3.1': {}
+
+  '@svar-ui/grid-data-provider@2.3.0':
+    dependencies:
+      '@svar-ui/lib-data-provider': 1.7.1
+
+  '@svar-ui/grid-locales@2.3.0': {}
+
+  '@svar-ui/grid-store@2.3.0':
+    dependencies:
+      '@svar-ui/lib-state': 1.9.6
+
+  '@svar-ui/lib-data-provider@1.7.1':
+    dependencies:
+      '@svar-ui/lib-state': 1.9.6
+
+  '@svar-ui/lib-dom@0.9.2': {}
+
+  '@svar-ui/lib-state@1.9.6': {}
+
+  '@svar-ui/lib-svelte@0.5.2':
+    dependencies:
+      '@svar-ui/lib-state': 1.9.6
+
+  '@svar-ui/svelte-core@2.3.1':
+    dependencies:
+      '@svar-ui/core-locales': 2.3.1
+      '@svar-ui/lib-dom': 0.9.2
+      '@svar-ui/lib-svelte': 0.5.2
+
+  '@svar-ui/svelte-menu@2.3.0':
+    dependencies:
+      '@svar-ui/lib-dom': 0.9.2
+      '@svar-ui/svelte-core': 2.3.1
 
   '@svelte-put/copy@3.0.2(svelte@5.34.8)':
     dependencies:
@@ -8329,6 +8400,17 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.18.2: {}
+
+  wx-svelte-grid@2.3.0:
+    dependencies:
+      '@svar-ui/grid-data-provider': 2.3.0
+      '@svar-ui/grid-locales': 2.3.0
+      '@svar-ui/grid-store': 2.3.0
+      '@svar-ui/lib-dom': 0.9.2
+      '@svar-ui/lib-state': 1.9.6
+      '@svar-ui/lib-svelte': 0.5.2
+      '@svar-ui/svelte-core': 2.3.1
+      '@svar-ui/svelte-menu': 2.3.0
 
   xml-name-validator@5.0.0: {}
 
