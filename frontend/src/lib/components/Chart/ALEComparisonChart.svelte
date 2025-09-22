@@ -31,10 +31,10 @@
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		// Prepare data for the chart
-		const scenarioNames = scenarios.map(s => s.name);
-		const currentALEData = scenarios.map(s => s.currentALE || 0);
-		const residualALEData = scenarios.map(s => s.residualALE || 0);
-		const treatmentCostData = scenarios.map(s => -(s.treatmentCost || 0)); // Negative for below zero
+		const scenarioNames = scenarios.map((s) => s.name);
+		const currentALEData = scenarios.map((s) => s.currentALE || 0);
+		const residualALEData = scenarios.map((s) => s.residualALE || 0);
+		const treatmentCostData = scenarios.map((s) => -(s.treatmentCost || 0)); // Negative for below zero
 
 		// Custom formatter for currency values
 		const formatCurrency = (value: number) => {
@@ -54,7 +54,7 @@
 				axisPointer: {
 					type: 'shadow'
 				},
-				formatter: function(params: any) {
+				formatter: function (params: any) {
 					let result = `<div><strong>${params[0].axisValue}</strong></div>`;
 					params.forEach((param: any) => {
 						const value = Math.abs(param.value);

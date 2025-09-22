@@ -10,7 +10,6 @@
 
 	let { data }: Props = $props();
 
-
 	// Function to format currency values
 	function formatCurrency(value: number | null, currency: string): string {
 		if (value === null || value === undefined) return 'N/A';
@@ -51,9 +50,14 @@
 					var_99: scenario.current_level.var_99,
 					var_99_formatted: formatCurrency(scenario.current_level.var_99, keyMetricsData.currency),
 					var_999: scenario.current_level.var_999,
-					var_999_formatted: formatCurrency(scenario.current_level.var_999, keyMetricsData.currency),
+					var_999_formatted: formatCurrency(
+						scenario.current_level.var_999,
+						keyMetricsData.currency
+					),
 					probability: scenario.current_level.proba_of_exceeding_threshold,
-					probability_formatted: formatProbability(scenario.current_level.proba_of_exceeding_threshold),
+					probability_formatted: formatProbability(
+						scenario.current_level.proba_of_exceeding_threshold
+					),
 					scenario_id: scenario.id,
 					level_type: 'current'
 				});
@@ -72,9 +76,14 @@
 					var_99: scenario.residual_level.var_99,
 					var_99_formatted: formatCurrency(scenario.residual_level.var_99, keyMetricsData.currency),
 					var_999: scenario.residual_level.var_999,
-					var_999_formatted: formatCurrency(scenario.residual_level.var_999, keyMetricsData.currency),
+					var_999_formatted: formatCurrency(
+						scenario.residual_level.var_999,
+						keyMetricsData.currency
+					),
 					probability: scenario.residual_level.proba_of_exceeding_threshold,
-					probability_formatted: formatProbability(scenario.residual_level.proba_of_exceeding_threshold),
+					probability_formatted: formatProbability(
+						scenario.residual_level.proba_of_exceeding_threshold
+					),
 					scenario_id: scenario.id,
 					level_type: 'residual'
 				});
@@ -83,7 +92,6 @@
 
 		return gridData;
 	}
-
 
 	// Define grid columns with sorting and built-in filtering
 	const columns = [
@@ -218,9 +226,11 @@
 			<div class="bg-white rounded-lg shadow-sm overflow-hidden">
 				<div class="px-6 py-4 border-b border-gray-200">
 					<h2 class="text-xl font-semibold text-gray-900">Risk Scenarios Analysis</h2>
-					<p class="text-sm text-gray-600 mt-1">Detailed metrics for each risk scenario - click column headers to sort, use filter controls in Scenario and Level columns</p>
+					<p class="text-sm text-gray-600 mt-1">
+						Detailed metrics for each risk scenario - click column headers to sort, use filter
+						controls in Scenario and Level columns
+					</p>
 				</div>
-
 
 				<div class="p-4">
 					<div style="height: 500px; width: 100%;">

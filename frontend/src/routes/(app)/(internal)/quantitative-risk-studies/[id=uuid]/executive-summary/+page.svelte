@@ -22,7 +22,7 @@
 </svelte:head>
 
 <main class="p-6 space-y-6">
-	{#await Promise.all([data.stream.executiveSummary, data.stream.combinedLec, data.stream.aleComparison])}
+	{#await Promise.all( [data.stream.executiveSummary, data.stream.combinedLec, data.stream.aleComparison] )}
 		<!-- Breadcrumb loading state -->
 		<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 			<p class="font-semibold text-lg">Loading...</p>
@@ -537,15 +537,21 @@
 							</div>
 							<div>
 								<div class="font-semibold text-gray-700">With Current ALE</div>
-								<div class="text-lg font-bold text-red-600">{aleComparisonData.scenarios_with_current_ale}</div>
+								<div class="text-lg font-bold text-red-600">
+									{aleComparisonData.scenarios_with_current_ale}
+								</div>
 							</div>
 							<div>
 								<div class="font-semibold text-gray-700">With Residual ALE</div>
-								<div class="text-lg font-bold text-green-600">{aleComparisonData.scenarios_with_residual_ale}</div>
+								<div class="text-lg font-bold text-green-600">
+									{aleComparisonData.scenarios_with_residual_ale}
+								</div>
 							</div>
 							<div>
 								<div class="font-semibold text-gray-700">With Treatment Cost</div>
-								<div class="text-lg font-bold text-blue-600">{aleComparisonData.scenarios_with_treatment_cost}</div>
+								<div class="text-lg font-bold text-blue-600">
+									{aleComparisonData.scenarios_with_treatment_cost}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -553,7 +559,9 @@
 					<div class="text-center py-8">
 						<i class="fa-solid fa-chart-column text-4xl text-gray-400 mb-4"></i>
 						<h3 class="text-lg font-semibold text-gray-600 mb-2">No ALE Data Available</h3>
-						<p class="text-gray-500">Run simulations on your scenarios to generate ALE comparison data.</p>
+						<p class="text-gray-500">
+							Run simulations on your scenarios to generate ALE comparison data.
+						</p>
 					</div>
 				{/if}
 			{:catch error}
