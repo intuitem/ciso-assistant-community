@@ -966,6 +966,7 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(many=True)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -980,6 +981,7 @@ class UserReadSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "observation",
+            "has_mfa_enabled",
         ]
 
 
@@ -1209,12 +1211,25 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 
 class EvidenceReadSerializer(BaseModelSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
-    attachment = serializers.CharField(source="filename")
+    attachment = serializers.SerializerMethodField()
     size = serializers.CharField(source="get_size")
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    owner = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
+    link = serializers.SerializerMethodField()
+
+    def get_attachment(self, obj):
+        last_revision = obj.last_revision
+        if last_revision and last_revision.attachment:
+            return last_revision.attachment.url
+        return None
+
+    def get_link(self, obj):
+        last_revision = obj.last_revision
+        return last_revision.link if last_revision else None
 
     class Meta:
         model = Evidence
@@ -1237,17 +1252,57 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
     )
+    owner = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), required=False
+    )
+    attachment = serializers.FileField(required=False)
+    link = serializers.URLField(required=False)
 
     class Meta:
         model = Evidence
-        fields = "__all__"
+        exclude = ["is_published"]
+
+    def create(self, validated_data):
+        attachment = validated_data.pop("attachment", None)
+        link = validated_data.pop("link", None)
+
+        evidence = super().create(validated_data)
+
+        EvidenceRevision.objects.get_or_create(
+            evidence=evidence, defaults={"link": link, "attachment": attachment}
+        )
+
+        return evidence
+
+    def update(self, instance, validated_data):
+        # Handle properly owner field cleaning
+        owners = validated_data.get("owner", None)
+        instance = super().update(instance, validated_data)
+        if not owners:
+            instance.owner.set([])
+
+        return instance
+
+    def to_representation(self, instance):
+        """Include link and attachment from the latest revision in the response"""
+        data = super().to_representation(instance)
+
+        # Add revision fields to the response
+        latest_revision = instance.last_revision
+        if latest_revision:
+            data["link"] = latest_revision.link
+            data["attachment"] = (
+                latest_revision.attachment.url if latest_revision.attachment else None
+            )
+        else:
+            data["link"] = None
+            data["attachment"] = None
+
+        return data
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    attachment = serializers.CharField(allow_blank=True)
-    size = serializers.CharField(source="get_size", read_only=True)
-    attachment_hash = serializers.CharField(read_only=True)
 
     class Meta:
         model = Evidence
@@ -1255,7 +1310,56 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "folder",
             "name",
             "description",
+            "created_at",
+            "updated_at",
+            "owner",
+            "status",
+            "expiry_date",
+        ]
+
+
+class EvidenceRevisionReadSerializer(BaseModelSerializer):
+    attachment = serializers.CharField(source="filename")
+    size = serializers.CharField(source="get_size")
+    evidence = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    str = serializers.CharField(source="__str__")
+
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+
+class EvidenceRevisionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+    def create(self, validated_data):
+        evidence = validated_data["evidence"]
+        max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
+            models.Max("version")
+        )["version__max"]
+        validated_data["version"] = (max_version or 0) + 1
+        return super().create(validated_data)
+
+
+class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidence = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField(allow_blank=True)
+    size = serializers.CharField(source="get_size", read_only=True)
+    attachment_hash = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = EvidenceRevision
+        fields = [
+            "folder",
+            "evidence",
+            "observation",
+            "version",
             "attachment",
+            "link",
             "created_at",
             "updated_at",
             "size",

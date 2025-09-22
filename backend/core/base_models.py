@@ -53,7 +53,15 @@ class AbstractBaseModel(models.Model):
                 model_field = self._meta.get_field(field)
 
                 # Use the appropriate lookup based on the field type
-                if isinstance(model_field, models.ForeignKey):
+                if isinstance(
+                    model_field,
+                    (
+                        models.ForeignKey,
+                        models.IntegerField,
+                        models.FloatField,
+                        models.BooleanField,
+                    ),
+                ):
                     filters[f"{field}__exact"] = field_value
                 else:
                     filters[f"{field}__iexact"] = field_value

@@ -2653,29 +2653,45 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 class Evidence(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
-    # TODO: Manage file upload to S3/MiniO
-    attachment = models.FileField(
-        #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
-        blank=True,
-        null=True,
-        help_text=_("Attachment for evidence (eg. screenshot, log file, etc.)"),
-        verbose_name=_("Attachment"),
-        validators=[validate_file_size, validate_file_name],
-    )
-    link = models.URLField(
-        blank=True,
-        null=True,
-        max_length=2048,
-        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
-        verbose_name=_("Link"),
-    )
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        MISSING = "missing", "Missing"
+        IN_REVIEW = "in_review", "In review"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        EXPIRED = "expired", "Expired"
+
     is_published = models.BooleanField(_("published"), default=True)
 
+    owner = models.ManyToManyField(
+        User,
+        verbose_name="Owner",
+        related_name="evidences",
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+    )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.revisions.update(is_published=self.is_published)
+
+    @property
+    def last_revision(self):
+        return self.revisions.order_by("-version").first() or None
 
     def get_folder(self):
         if self.applied_controls:
@@ -2684,6 +2700,74 @@ class Evidence(
             return self.requirement_assessments.first().folder
         else:
             return None
+
+    def filename(self):
+        return (
+            os.path.basename(self.last_revision.attachment.name)
+            if self.last_revision and self.last_revision.attachment
+            else None
+        )
+
+    def get_size(self):
+        if (
+            not self.last_revision
+            or not self.last_revision.attachment
+            or not self.last_revision.attachment.storage.exists(
+                self.last_revision.attachment.name
+            )
+        ):
+            return None
+        # get the attachment size with the correct unit
+        size = self.last_revision.attachment.size
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1024 * 1024:
+            return f"{size / 1024:.1f} KB"
+        else:
+            return f"{size / 1024 / 1024:.1f} MB"
+
+    @property
+    def attachment_hash(self):
+        if not self.last_revision or not self.last_revision.attachment:
+            return None
+        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
+
+
+class EvidenceRevision(AbstractBaseModel, FolderMixin):
+    evidence = models.ForeignKey(
+        Evidence, on_delete=models.CASCADE, related_name="revisions"
+    )
+    version = models.IntegerField(
+        default=1,
+        verbose_name=_("version number"),
+    )
+    attachment = models.FileField(
+        blank=True,
+        null=True,
+        verbose_name=_("Attachment"),
+        validators=[validate_file_size, validate_file_name],
+    )
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    fields_to_check = ["evidence", "version"]
+
+    def __str__(self):
+        return f"{self.evidence.name} v{self.version}"
+
+    def save(self, *args, **kwargs):
+        # Set folder to match the evidence's folder
+        if hasattr(self.evidence, "folder") and self.evidence.folder:
+            self.folder = self.evidence.folder
+
+        self.is_published = self.evidence.is_published
+
+        super().save(*args, **kwargs)
 
     def filename(self):
         return os.path.basename(self.attachment.name)
@@ -2702,16 +2786,9 @@ class Evidence(
         else:
             return f"{size / 1024 / 1024:.1f} MB"
 
-    def delete(self, *args, **kwargs):
-        if self.attachment:
-            self.attachment.delete()
-        super().delete(*args, **kwargs)
-
-    @property
-    def attachment_hash(self):
-        if not self.attachment:
-            return None
-        return hashlib.sha256(self.attachment.read()).hexdigest()
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin):
