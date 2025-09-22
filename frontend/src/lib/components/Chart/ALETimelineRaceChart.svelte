@@ -82,10 +82,7 @@
 
 	// Prepare timeline data with frames for each treatment implementation
 	const prepareTimelineData = () => {
-		console.log('prepareTimelineData called with scenarios:', scenarios);
-
 		if (!scenarios || scenarios.length === 0) {
-			console.log('No scenarios provided');
 			return [];
 		}
 
@@ -95,24 +92,15 @@
 
 		let hasAnyTreatmentControls = false;
 		scenarios.forEach((scenario) => {
-			console.log(
-				'Processing scenario:',
-				scenario.name,
-				'treatmentControls:',
-				scenario.treatmentControls
-			);
 			if (scenario.treatmentControls && scenario.treatmentControls.length > 0) {
 				hasAnyTreatmentControls = true;
 				scenario.treatmentControls.forEach((control) => {
-					console.log('Processing control:', control.name, 'eta:', control.eta);
 					if (control.eta) {
 						allDates.add(control.eta);
 					}
 				});
 			}
 		});
-
-		console.log('All dates collected:', Array.from(allDates));
 
 		const sortedDates = Array.from(allDates).sort((a, b) => {
 			if (a === 'current') return -1;
@@ -128,8 +116,6 @@
 			// Insert an intermediate frame to show progression
 			sortedDates.splice(-1, 0, 'intermediate');
 		}
-
-		console.log('Sorted dates:', sortedDates);
 
 		// Generate frames
 		const frames: any[] = [];
@@ -196,7 +182,6 @@
 			});
 		});
 
-		console.log('Generated frames:', frames);
 		return frames;
 	};
 

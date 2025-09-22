@@ -11,6 +11,18 @@
 
 	let { data }: Props = $props();
 
+	// Column visibility state management
+	let columnVisibility = $state({
+		scenario: true,
+		level: true,
+		ale: true,
+		var_95: true,
+		var_99: true,
+		var_999: true,
+		probability: true
+	});
+	let showColumnControls = $state(false);
+
 	// Function to format currency values
 	function formatCurrency(value: number | null, currency: string): string {
 		if (value === null || value === undefined) return 'N/A';
@@ -122,8 +134,19 @@
 			}));
 	}
 
-	// Define grid columns with sorting and built-in filtering
-	const columns = [
+	// Helper functions for column formatting
+	const formatCurrencyForGrid = (value: any, currency: string = '€') => {
+		if (value === null || value === undefined) return 'N/A';
+		return formatCurrency(value, currency);
+	};
+
+	const formatProbabilityForGrid = (value: any) => {
+		if (value === null || value === undefined) return 'N/A';
+		return formatProbability(value);
+	};
+
+	// Define all available grid columns with sorting and built-in filtering
+	const getAllColumns = (currency: string = '€') => [
 		{
 			id: 'scenario',
 			header: {
@@ -136,7 +159,8 @@
 				}
 			},
 			flexgrow: 2,
-			sort: true
+			sort: true,
+			displayName: 'Scenario'
 		},
 		{
 			id: 'level',
@@ -155,46 +179,100 @@
 				}
 			},
 			flexgrow: 1,
-			sort: true
+			sort: true,
+			displayName: 'Level'
 		},
 		{
-			id: 'ale_formatted',
+			id: 'ale',
 			header: { text: 'ALE' },
 			flexgrow: 1,
-			sort: true
+			sort: true,
+			displayName: 'ALE',
+			format: (value) => formatCurrencyForGrid(value, currency)
 		},
 		{
-			id: 'var_95_formatted',
+			id: 'var_95',
 			header: { text: 'VaR 95%' },
 			flexgrow: 1,
-			sort: true
+			sort: true,
+			displayName: 'VaR 95%',
+			format: (value) => formatCurrencyForGrid(value, currency)
 		},
 		{
-			id: 'var_99_formatted',
+			id: 'var_99',
 			header: { text: 'VaR 99%' },
 			flexgrow: 1,
-			sort: true
+			sort: true,
+			displayName: 'VaR 99%',
+			format: (value) => formatCurrencyForGrid(value, currency)
 		},
 		{
-			id: 'var_999_formatted',
+			id: 'var_999',
 			header: { text: 'VaR 99.9%' },
 			flexgrow: 1,
-			sort: true
+			sort: true,
+			displayName: 'VaR 99.9%',
+			format: (value) => formatCurrencyForGrid(value, currency)
 		},
 		{
-			id: 'probability_formatted',
+			id: 'probability',
 			header: { text: 'P(>Threshold)' },
 			flexgrow: 1,
-			sort: true
+			sort: true,
+			displayName: 'P(>Threshold)',
+			format: (value) => formatProbabilityForGrid(value)
 		}
 	];
+
+	// Create reactive columns and get all columns list
+	const allColumns = $derived.by(() => getAllColumns('€')); // We'll update currency later when we have the data
+
+	// Filter columns based on visibility settings
+	const visibleColumns = $derived(
+		allColumns.filter(column => columnVisibility[column.id as keyof typeof columnVisibility])
+	);
+
+	// Functions for column management
+	function toggleAllColumns(show: boolean) {
+		if (!show && getVisibleColumnsCount() <= 1) {
+			// Prevent hiding all columns - keep at least one visible
+			return;
+		}
+
+		Object.keys(columnVisibility).forEach(key => {
+			columnVisibility[key as keyof typeof columnVisibility] = show;
+		});
+	}
+
+	function toggleColumn(columnId: string, checked: boolean) {
+		if (!checked && getVisibleColumnsCount() <= 1) {
+			// Prevent hiding the last visible column
+			return;
+		}
+		columnVisibility[columnId as keyof typeof columnVisibility] = checked;
+	}
+
+	function getVisibleColumnsCount() {
+		return Object.values(columnVisibility).filter(Boolean).length;
+	}
+
+	// Close column controls when clicking outside
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as Element;
+		const dropdown = target.closest('.column-controls-dropdown');
+		const button = target.closest('.column-controls-button');
+
+		if (!dropdown && !button && showColumnControls) {
+			showColumnControls = false;
+		}
+	}
 </script>
 
 <svelte:head>
 	<title>Key Metrics - Quantitative Risk Study</title>
 </svelte:head>
 
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8" on:click={handleClickOutside}>
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-8">
 		<div>
@@ -307,11 +385,80 @@
 			<!-- Scenarios Grid -->
 			<div class="bg-white rounded-lg shadow-sm overflow-hidden">
 				<div class="px-6 py-4 border-b border-gray-200">
-					<h2 class="text-xl font-semibold text-gray-900">Risk Scenarios Analysis</h2>
-					<p class="text-sm text-gray-600 mt-1">
-						Detailed metrics for each risk scenario - click column headers to sort, use filter
-						controls in Scenario and Level columns
-					</p>
+					<div class="flex justify-between items-start">
+						<div>
+							<h2 class="text-xl font-semibold text-gray-900">Risk Scenarios Analysis</h2>
+							<p class="text-sm text-gray-600 mt-1">
+								Detailed metrics for each risk scenario - click column headers to sort, use filter
+								controls in Scenario and Level columns
+							</p>
+						</div>
+						<div class="flex items-center space-x-2">
+							<span class="text-sm text-gray-500">
+								{getVisibleColumnsCount()} of {allColumns.length} columns
+							</span>
+							<div class="relative">
+								<button
+									class="btn btn-sm variant-ghost-surface column-controls-button"
+									on:click={() => (showColumnControls = !showColumnControls)}
+									title="Show/Hide Columns"
+								>
+									<i class="fa-solid fa-columns text-sm mr-1"></i>
+									Columns
+								</button>
+
+								{#if showColumnControls}
+									<div class="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown">
+										<div class="flex justify-between items-center mb-3">
+											<h4 class="font-medium text-gray-900">Show/Hide Columns</h4>
+											<button
+												class="text-gray-400 hover:text-gray-600"
+												on:click={() => (showColumnControls = false)}
+											>
+												<i class="fa-solid fa-times"></i>
+											</button>
+										</div>
+
+										<div class="flex gap-2 mb-3">
+											<button
+												class="btn btn-sm variant-ghost-primary"
+												on:click={() => toggleAllColumns(true)}
+												disabled={getVisibleColumnsCount() === allColumns.length}
+											>
+												Show All
+											</button>
+											<button
+												class="btn btn-sm variant-ghost-error"
+												on:click={() => toggleAllColumns(false)}
+												disabled={getVisibleColumnsCount() <= 1}
+											>
+												Hide All
+											</button>
+										</div>
+
+										<div class="space-y-2 max-h-64 overflow-y-auto">
+											{#each allColumns as column}
+												{@const isLastVisible = getVisibleColumnsCount() === 1 && columnVisibility[column.id]}
+												<label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded {isLastVisible ? 'opacity-50' : ''}">
+													<input
+														type="checkbox"
+														checked={columnVisibility[column.id]}
+														on:change={(e) => toggleColumn(column.id, e.target?.checked || false)}
+														disabled={isLastVisible}
+														class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50"
+													/>
+													<span class="text-sm text-gray-700">{column.displayName}</span>
+													{#if isLastVisible}
+														<span class="text-xs text-gray-400">(required)</span>
+													{/if}
+												</label>
+											{/each}
+										</div>
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<div class="p-4">
@@ -319,7 +466,7 @@
 						<Willow>
 							<Grid
 								data={prepareGridData(keyMetricsData)}
-								{columns}
+								columns={visibleColumns}
 								headerHeight={40}
 								rowHeight={45}
 							/>
