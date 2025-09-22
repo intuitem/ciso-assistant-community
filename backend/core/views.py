@@ -5333,18 +5333,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             new_audit: ComplianceAssessment = serializer.save()
             new_audit.create_requirement_assessments(baseline)
 
-            duplicate_applied_controls = (
-                new_audit.folder != baseline.folder
-                and new_audit.folder not in baseline.folder.get_parent_folders()
-            )
-            duplicated_applied_controls: dict[str, AppliedControl] = {}
-
             if baseline and baseline.framework == new_audit.framework:
                 new_audit.show_documentation_score = baseline.show_documentation_score
                 new_audit.save()
 
             # Handle different framework case
             elif baseline and baseline.framework != new_audit.framework:
+                duplicate_applied_controls = (
+                    new_audit.folder != baseline.folder
+                    and new_audit.folder not in baseline.folder.get_parent_folders()
+                )
+                duplicated_applied_controls: dict[str, AppliedControl] = {}
+
                 # Fetch mapping set and prefetch related data
                 mapping_set = RequirementMappingSet.objects.select_related(
                     "source_framework", "target_framework"
