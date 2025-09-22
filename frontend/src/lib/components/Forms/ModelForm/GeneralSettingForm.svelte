@@ -52,20 +52,6 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
-	<Accordion.Item value="interface">
-		{#snippet control()}
-			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
-		{/snippet}
-		{#snippet panel()}
-			<div class="p-4">
-				<Checkbox
-					{form}
-					field="interface_agg_scenario_matrix"
-					label={m.settingsAggregateMatrix()}
-				/>
-			</div>
-		{/snippet}
-	</Accordion.Item>
 	<Accordion.Item value="assets">
 		{#snippet control()}
 			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
@@ -89,7 +75,12 @@
 		{#snippet panel()}
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
-					<Checkbox
+				<Checkbox
+					{form}
+					field="interface_agg_scenario_matrix"
+					label={m.settingsAggregateMatrix()}
+				/>
+				<Checkbox
 						{form}
 						field="risk_matrix_swap_axes"
 						label={m.settingsRiskMatrixSwapAxes()}
