@@ -10,6 +10,7 @@
 
 	let { data }: Props = $props();
 
+
 	// Function to format currency values
 	function formatCurrency(value: number | null, currency: string): string {
 		if (value === null || value === undefined) return 'N/A';
@@ -83,49 +84,69 @@
 		return gridData;
 	}
 
-	// Define grid columns with sorting
+
+	// Define grid columns with sorting and built-in filtering
 	const columns = [
 		{
 			id: 'scenario',
-			header: 'Scenario',
+			header: {
+				text: 'Scenario',
+				filter: {
+					type: 'text',
+					config: {
+						placeholder: 'Filter by scenario name...'
+					}
+				}
+			},
 			width: 200,
-			sort: true,
-			filter: true
+			sort: true
 		},
 		{
 			id: 'level',
-			header: 'Level',
+			header: {
+				text: 'Level',
+				filter: {
+					type: 'richselect',
+					config: {
+						placeholder: 'Filter by level...',
+						options: [
+							{ id: '', label: 'All Levels' },
+							{ id: 'Current', label: 'Current' },
+							{ id: 'Residual', label: 'Residual' }
+						]
+					}
+				}
+			},
 			width: 100,
-			sort: true,
-			filter: true
+			sort: true
 		},
 		{
 			id: 'ale_formatted',
-			header: 'ALE',
+			header: { text: 'ALE' },
 			width: 120,
 			sort: true
 		},
 		{
 			id: 'var_95_formatted',
-			header: 'VaR 95%',
+			header: { text: 'VaR 95%' },
 			width: 120,
 			sort: true
 		},
 		{
 			id: 'var_99_formatted',
-			header: 'VaR 99%',
+			header: { text: 'VaR 99%' },
 			width: 120,
 			sort: true
 		},
 		{
 			id: 'var_999_formatted',
-			header: 'VaR 99.9%',
+			header: { text: 'VaR 99.9%' },
 			width: 120,
 			sort: true
 		},
 		{
 			id: 'probability_formatted',
-			header: 'P(>Threshold)',
+			header: { text: 'P(>Threshold)' },
 			width: 130,
 			sort: true
 		}
@@ -197,8 +218,9 @@
 			<div class="bg-white rounded-lg shadow-sm overflow-hidden">
 				<div class="px-6 py-4 border-b border-gray-200">
 					<h2 class="text-xl font-semibold text-gray-900">Risk Scenarios Analysis</h2>
-					<p class="text-sm text-gray-600 mt-1">Detailed metrics for each risk scenario (sortable)</p>
+					<p class="text-sm text-gray-600 mt-1">Detailed metrics for each risk scenario - click column headers to sort, use filter controls in Scenario and Level columns</p>
 				</div>
+
 
 				<div class="p-4">
 					<div style="height: 500px; width: 100%;">
