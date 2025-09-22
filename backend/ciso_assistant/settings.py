@@ -390,6 +390,8 @@ PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 LOCALE_PATHS = (os.path.join(PROJECT_PATH, "../locale"),)
 
+ENFORCE_TRAILING_SLASH = os.environ.get("ENFORCE_TRAILING_SLASH", "True") == "True"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
