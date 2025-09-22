@@ -37,12 +37,15 @@
 		data: PageData;
 	}
 
-	let { data }: Props = $props();	
+	let { data }: Props = $props();
 </script>
 
 <div class="flex flex-col bg-white card shadow-lg p-4 space-y-4">
 	<div class="flex flex-row items-center justify-between">
-		<h1 class="text-xl font-semibold">{data.currentUser.first_name} {data.currentUser.last_name}</h1>
+		<h1 class="text-xl font-semibold">
+			{data.currentUser.first_name}
+			{data.currentUser.last_name}
+		</h1>
 		<div>
 			{#if user.is_local}
 				<Anchor href="my-profile/change-password" class="btn preset-filled-primary-500 h-fit"
