@@ -23,24 +23,59 @@
 	});
 	let showColumnControls = $state(false);
 
-	// Function to format currency values
+	// Enhanced function to format currency values with better rounding and units
 	function formatCurrency(value: number | null, currency: string): string {
 		if (value === null || value === undefined) return 'N/A';
-		if (value >= 1000000000) {
-			return `${currency}${(value / 1000000000).toFixed(1)}B`;
-		} else if (value >= 1000000) {
-			return `${currency}${(value / 1000000).toFixed(1)}M`;
-		} else if (value >= 1000) {
-			return `${currency}${(value / 1000).toFixed(0)}K`;
+
+		const absValue = Math.abs(value);
+
+		if (absValue >= 1000000000) {
+			// Billions: 1-2 decimal places
+			const billions = value / 1000000000;
+			return `${currency}${billions.toFixed(billions >= 10 ? 1 : 2)}B`;
+		} else if (absValue >= 1000000) {
+			// Millions: 1-2 decimal places
+			const millions = value / 1000000;
+			return `${currency}${millions.toFixed(millions >= 10 ? 1 : 2)}M`;
+		} else if (absValue >= 10000) {
+			// Tens of thousands: round to nearest K
+			const thousands = value / 1000;
+			return `${currency}${Math.round(thousands)}K`;
+		} else if (absValue >= 1000) {
+			// Thousands: 1 decimal place for precision
+			const thousands = value / 1000;
+			return `${currency}${thousands.toFixed(1)}K`;
+		} else if (absValue >= 100) {
+			// Hundreds: no decimals
+			return `${currency}${Math.round(value)}`;
 		} else {
-			return `${currency}${value.toLocaleString()}`;
+			// Under 100: 1-2 decimal places
+			return `${currency}${value.toFixed(value >= 10 ? 1 : 2)}`;
 		}
 	}
 
-	// Function to format probability as percentage
+	// Enhanced function to format probability as percentage with appropriate precision
 	function formatProbability(value: number | null): string {
 		if (value === null || value === undefined) return 'N/A';
-		return `${(value * 100).toFixed(2)}%`;
+
+		const percentage = value * 100;
+
+		if (percentage >= 10) {
+			// 10% and above: 1 decimal place
+			return `${percentage.toFixed(1)}%`;
+		} else if (percentage >= 1) {
+			// 1-10%: 2 decimal places
+			return `${percentage.toFixed(2)}%`;
+		} else if (percentage >= 0.1) {
+			// 0.1-1%: 3 decimal places
+			return `${percentage.toFixed(3)}%`;
+		} else if (percentage > 0) {
+			// Very small percentages: 4 decimal places or scientific notation
+			return percentage < 0.001 ? `${percentage.toExponential(2)}%` : `${percentage.toFixed(4)}%`;
+		} else {
+			// Zero
+			return '0%';
+		}
 	}
 
 	// Prepare grid data from scenarios (flat structure)
@@ -57,20 +92,10 @@
 					scenario: scenario.name,
 					level: 'Current',
 					ale: scenario.current_level.ale,
-					ale_formatted: formatCurrency(scenario.current_level.ale, keyMetricsData.currency),
 					var_95: scenario.current_level.var_95,
-					var_95_formatted: formatCurrency(scenario.current_level.var_95, keyMetricsData.currency),
 					var_99: scenario.current_level.var_99,
-					var_99_formatted: formatCurrency(scenario.current_level.var_99, keyMetricsData.currency),
 					var_999: scenario.current_level.var_999,
-					var_999_formatted: formatCurrency(
-						scenario.current_level.var_999,
-						keyMetricsData.currency
-					),
 					probability: scenario.current_level.proba_of_exceeding_threshold,
-					probability_formatted: formatProbability(
-						scenario.current_level.proba_of_exceeding_threshold
-					),
 					scenario_id: scenario.id,
 					level_type: 'current'
 				});
@@ -83,20 +108,10 @@
 					scenario: scenario.name,
 					level: 'Residual',
 					ale: scenario.residual_level.ale,
-					ale_formatted: formatCurrency(scenario.residual_level.ale, keyMetricsData.currency),
 					var_95: scenario.residual_level.var_95,
-					var_95_formatted: formatCurrency(scenario.residual_level.var_95, keyMetricsData.currency),
 					var_99: scenario.residual_level.var_99,
-					var_99_formatted: formatCurrency(scenario.residual_level.var_99, keyMetricsData.currency),
 					var_999: scenario.residual_level.var_999,
-					var_999_formatted: formatCurrency(
-						scenario.residual_level.var_999,
-						keyMetricsData.currency
-					),
 					probability: scenario.residual_level.proba_of_exceeding_threshold,
-					probability_formatted: formatProbability(
-						scenario.residual_level.proba_of_exceeding_threshold
-					),
 					scenario_id: scenario.id,
 					level_type: 'residual'
 				});
@@ -187,40 +202,40 @@
 			header: { text: 'ALE' },
 			flexgrow: 1,
 			sort: true,
-			displayName: 'ALE',
-			format: (value) => formatCurrencyForGrid(value, currency)
+			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
+			displayName: 'ALE'
 		},
 		{
 			id: 'var_95',
 			header: { text: 'VaR 95%' },
 			flexgrow: 1,
 			sort: true,
-			displayName: 'VaR 95%',
-			format: (value) => formatCurrencyForGrid(value, currency)
+			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
+			displayName: 'VaR 95%'
 		},
 		{
 			id: 'var_99',
 			header: { text: 'VaR 99%' },
 			flexgrow: 1,
 			sort: true,
-			displayName: 'VaR 99%',
-			format: (value) => formatCurrencyForGrid(value, currency)
+			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
+			displayName: 'VaR 99%'
 		},
 		{
 			id: 'var_999',
 			header: { text: 'VaR 99.9%' },
 			flexgrow: 1,
 			sort: true,
-			displayName: 'VaR 99.9%',
-			format: (value) => formatCurrencyForGrid(value, currency)
+			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
+			displayName: 'VaR 99.9%'
 		},
 		{
 			id: 'probability',
 			header: { text: 'P(>Threshold)' },
 			flexgrow: 1,
 			sort: true,
-			displayName: 'P(>Threshold)',
-			format: (value) => formatProbabilityForGrid(value)
+			template: (value: any, row: any, col: any) => formatProbability(value),
+			displayName: 'P(>Threshold)'
 		}
 	];
 
