@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { Grid, Willow } from 'wx-svelte-grid';
 
 	interface Props {
 		data: PageData;
@@ -28,6 +29,107 @@
 		if (value === null || value === undefined) return 'N/A';
 		return `${(value * 100).toFixed(2)}%`;
 	}
+
+	// Prepare grid data from scenarios (flat structure)
+	function prepareGridData(keyMetricsData: any) {
+		if (!keyMetricsData?.scenarios) return [];
+
+		const gridData: any[] = [];
+
+		keyMetricsData.scenarios.forEach((scenario: any, index: number) => {
+			// Add current level row if exists
+			if (scenario.current_level) {
+				gridData.push({
+					id: `${scenario.id}-current`,
+					scenario: scenario.name,
+					level: 'Current',
+					ale: scenario.current_level.ale,
+					ale_formatted: formatCurrency(scenario.current_level.ale, keyMetricsData.currency),
+					var_95: scenario.current_level.var_95,
+					var_95_formatted: formatCurrency(scenario.current_level.var_95, keyMetricsData.currency),
+					var_99: scenario.current_level.var_99,
+					var_99_formatted: formatCurrency(scenario.current_level.var_99, keyMetricsData.currency),
+					var_999: scenario.current_level.var_999,
+					var_999_formatted: formatCurrency(scenario.current_level.var_999, keyMetricsData.currency),
+					probability: scenario.current_level.proba_of_exceeding_threshold,
+					probability_formatted: formatProbability(scenario.current_level.proba_of_exceeding_threshold),
+					scenario_id: scenario.id,
+					level_type: 'current'
+				});
+			}
+
+			// Add residual level row if exists
+			if (scenario.residual_level) {
+				gridData.push({
+					id: `${scenario.id}-residual`,
+					scenario: scenario.name,
+					level: 'Residual',
+					ale: scenario.residual_level.ale,
+					ale_formatted: formatCurrency(scenario.residual_level.ale, keyMetricsData.currency),
+					var_95: scenario.residual_level.var_95,
+					var_95_formatted: formatCurrency(scenario.residual_level.var_95, keyMetricsData.currency),
+					var_99: scenario.residual_level.var_99,
+					var_99_formatted: formatCurrency(scenario.residual_level.var_99, keyMetricsData.currency),
+					var_999: scenario.residual_level.var_999,
+					var_999_formatted: formatCurrency(scenario.residual_level.var_999, keyMetricsData.currency),
+					probability: scenario.residual_level.proba_of_exceeding_threshold,
+					probability_formatted: formatProbability(scenario.residual_level.proba_of_exceeding_threshold),
+					scenario_id: scenario.id,
+					level_type: 'residual'
+				});
+			}
+		});
+
+		return gridData;
+	}
+
+	// Define grid columns with sorting
+	const columns = [
+		{
+			id: 'scenario',
+			header: 'Scenario',
+			width: 200,
+			sort: true,
+			filter: true
+		},
+		{
+			id: 'level',
+			header: 'Level',
+			width: 100,
+			sort: true,
+			filter: true
+		},
+		{
+			id: 'ale_formatted',
+			header: 'ALE',
+			width: 120,
+			sort: true
+		},
+		{
+			id: 'var_95_formatted',
+			header: 'VaR 95%',
+			width: 120,
+			sort: true
+		},
+		{
+			id: 'var_99_formatted',
+			header: 'VaR 99%',
+			width: 120,
+			sort: true
+		},
+		{
+			id: 'var_999_formatted',
+			header: 'VaR 99.9%',
+			width: 120,
+			sort: true
+		},
+		{
+			id: 'probability_formatted',
+			header: 'P(>Threshold)',
+			width: 130,
+			sort: true
+		}
+	];
 </script>
 
 <svelte:head>
@@ -91,131 +193,25 @@
 				</div>
 			</div>
 
-			<!-- Scenarios Table -->
+			<!-- Scenarios Grid -->
 			<div class="bg-white rounded-lg shadow-sm overflow-hidden">
 				<div class="px-6 py-4 border-b border-gray-200">
 					<h2 class="text-xl font-semibold text-gray-900">Risk Scenarios Analysis</h2>
-					<p class="text-sm text-gray-600 mt-1">Detailed metrics for each risk scenario</p>
+					<p class="text-sm text-gray-600 mt-1">Detailed metrics for each risk scenario (sortable)</p>
 				</div>
 
-				<div class="overflow-x-auto">
-					<table class="min-w-full divide-y divide-gray-200">
-						<thead class="bg-gray-50">
-							<tr>
-								<th
-									class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									Scenario
-								</th>
-								<th
-									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									Level
-								</th>
-								<th
-									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									ALE
-								</th>
-								<th
-									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									VaR 95%
-								</th>
-								<th
-									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									VaR 99%
-								</th>
-								<th
-									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									VaR 99.9%
-								</th>
-								<th
-									class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-								>
-									P(>Threshold)
-								</th>
-							</tr>
-						</thead>
-						<tbody class="bg-white divide-y divide-gray-200">
-							{#each keyMetricsData.scenarios as scenario}
-								<!-- Current Level Row -->
-								{#if scenario.current_level}
-									<tr class="hover:bg-gray-50">
-										<td class="px-6 py-4 whitespace-nowrap">
-											<div class="text-sm font-medium text-gray-900">{scenario.name}</div>
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center">
-											<span
-												class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-											>
-												Current
-											</span>
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.current_level.ale, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.current_level.var_95, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.current_level.var_99, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.current_level.var_999, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatProbability(scenario.current_level.proba_of_exceeding_threshold)}
-										</td>
-									</tr>
-								{/if}
-
-								<!-- Residual Level Row -->
-								{#if scenario.residual_level}
-									<tr class="hover:bg-gray-50">
-										<td class="px-6 py-4 whitespace-nowrap">
-											{#if !scenario.current_level}
-												<div class="text-sm font-medium text-gray-900">{scenario.name}</div>
-											{/if}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center">
-											<span
-												class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-											>
-												Residual
-											</span>
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.residual_level.ale, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.residual_level.var_95, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.residual_level.var_99, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatCurrency(scenario.residual_level.var_999, keyMetricsData.currency)}
-										</td>
-										<td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-											{formatProbability(scenario.residual_level.proba_of_exceeding_threshold)}
-										</td>
-									</tr>
-								{/if}
-
-								<!-- Divider between scenarios -->
-								{#if scenario !== keyMetricsData.scenarios[keyMetricsData.scenarios.length - 1]}
-									<tr>
-										<td colspan="7" class="px-6 py-1">
-											<div class="border-b border-gray-100"></div>
-										</td>
-									</tr>
-								{/if}
-							{/each}
-						</tbody>
-					</table>
+				<div class="p-4">
+					<div style="height: 500px; width: 100%;">
+						<Willow>
+							<Grid
+								data={prepareGridData(keyMetricsData)}
+								{columns}
+								headerHeight={40}
+								rowHeight={45}
+								sizes={{ width: "100%", height: "100%" }}
+							/>
+						</Willow>
+					</div>
 				</div>
 			</div>
 
