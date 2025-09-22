@@ -1472,7 +1472,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             ).order_by("ref_id")
             for scenario in context:
                 scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[scenario.strength_of_knowledge]["name"]
-                print(f"scenario sok = {scenario.strength_of_knowledge}")
             general_settings = GlobalSettings.objects.filter(name="general").first()
             swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
             flip_vertical = general_settings.value.get(
