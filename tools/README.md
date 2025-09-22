@@ -76,6 +76,7 @@ python check_library_v2.py your_library_file.xlsx [-e|--external-refs ./ref1.yam
 
 Arguments:
 - **`-e, --external-refs`**: YAML files containing external references mentioned in the library. Use it to check the following columns if necessary : `threats`, `reference_controls`. Separate external references with commas (e.g., `./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml`)
+- **`-b, --bulk`**: Enable bulk mode to process all Excel files in a directory.
 - **`--verbose`**: Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.
 
 

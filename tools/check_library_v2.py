@@ -17,7 +17,7 @@ Arguments:
     -e, --external-refs     YAML files containing external references mentioned in the library.
                             Use it to check the following columns if necessary : "threats", "reference_controls".
                             Separate external references with commas (e.g., ./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml)
-    -b, --bulk              Enable bulk mode to process all .xlsx files in a directory.
+    -b, --bulk              Enable bulk mode to process all Excel files in a directory.
     --verbose               Display additional information and validation feedback.
 
 The script exits with code 1 and displays an error message if validation fails.
