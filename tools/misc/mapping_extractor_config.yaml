@@ -1,0 +1,31 @@
+# =============================================================================
+# Configuration file for Mapping Extractor v0.2
+# -----------------------------------------------------------------------------
+# Required fields:
+#   - source_file           : Path to the Excel file to process
+#   - source_sheet          : Name of the worksheet to read
+#   - source_id_column      : Name of the column used for source identifiers
+#   - target_column_names   : List of column names to extract as target mappings
+#
+# Optional fields (uncomment to use):
+#   - header_row            : 1-based row number containing column headers in the Excel sheet
+#   - rows_to_ignore        : List of row numbers (1-based) to skip
+#   - destination_file      : Name of the output Excel file (default: part_mapping.xlsx)
+#   - destination_sheet     : Name of the sheet where mappings will be saved (default: mappings)
+# =============================================================================
+
+
+# === Required fields ===
+source_file: "../excel/cisco/Cisco-CCFv3-Public.xlsx"
+source_sheet: "CCF V3"
+source_id_column: "Control Reference"
+target_column_names:
+  - "SOC TSC Common Criteria 2022"
+  - "SOC TSC Availability 2022"
+  - "SOC TSC Confidentiality 2022"
+
+# === Optional fields ===
+header_row: 5
+rows_to_ignore: [6, 367]
+destination_file: "output_mapping.xlsx"
+destination_sheet: "MyMappings"

@@ -1,16 +1,39 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let title = '';
-	export let name = '';
+	import { safeTranslate } from '$lib/utils/i18n';
+
 	interface treeType {
 		name: string;
+		id: string;
 		children: any[];
 	}
-	export let tree: treeType[];
+	interface Props {
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		name?: string;
+		tree: treeType[];
+	}
+
+	let {
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		title = '',
+		name = '',
+		tree
+	}: Props = $props();
+
+	tree = tree.map((item) => ({
+		...item,
+		name: safeTranslate(item.id),
+		children: item.children?.map((child) => ({
+			...child,
+			name: safeTranslate(child.id)
+		}))
+	}));
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {
@@ -76,5 +99,5 @@
 		<span class="text-center text-gray-600">{m.noDataAvailable()}</span>
 	</div>
 {:else}
-	<div id={chart_id} class="{width} {height} {classesContainer}" />
+	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
 {/if}

@@ -6,19 +6,30 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+	}
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context
+	}: Props = $props();
 
-	let activeActivity: string | null = null;
-	$page.url.searchParams.forEach((value, key) => {
+	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
+
+	let activeActivity: string | null = $state(null);
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -37,6 +48,14 @@
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
 />
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 		? 'border-2 border-primary-500'
@@ -49,9 +68,10 @@
 	>
 		{m.activityOne()}
 	</p>
-	<Select
+	<AutocompleteSelect
 		{form}
-		options={model.selectOptions['risk-origin']}
+		optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+		optionsLabelField="translated_name"
 		field="risk_origin"
 		label={m.riskOrigin()}
 		cacheLock={cacheLocks['risk_origin']}

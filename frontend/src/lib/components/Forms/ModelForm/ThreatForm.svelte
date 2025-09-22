@@ -6,17 +6,28 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 </script>
 
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -50,6 +61,7 @@
 	optionsEndpoint="filtering-labels"
 	optionsLabelField="label"
 	field="filtering_labels"
+	translateOptions={false}
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
 	allowUserOptions="append"

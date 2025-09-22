@@ -51,6 +51,12 @@ export function unsafeTranslate(
 		if (typeof key === 'boolean') {
 			return key ? '✅' : '❌';
 		}
+		if (key === 'YES') {
+			return '✅';
+		}
+		if (key === 'NO') {
+			return '❌';
+		}
 		if (typeof key === 'string' && key.includes('->')) {
 			const parts = key.split('->');
 			if (parts.length === 2) {

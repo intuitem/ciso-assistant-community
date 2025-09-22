@@ -1,14 +1,24 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
-	export let items = [];
-	export let groups = undefined;
-	export let options = {};
-	export let height = '400px';
-	export let width = '100%';
+	interface Props {
+		items?: any;
+		groups?: any;
+		options?: any;
+		height?: string;
+		width?: string;
+	}
 
-	let container;
+	let {
+		items = [],
+		groups = undefined,
+		options = {},
+		height = '400px',
+		width = '100%'
+	}: Props = $props();
+
+	let container = $state();
 	let timeline;
 
 	onMount(() => {

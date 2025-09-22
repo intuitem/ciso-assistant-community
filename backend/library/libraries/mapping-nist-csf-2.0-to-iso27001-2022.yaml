@@ -1,0 +1,2087 @@
+urn: urn:intuitem:risk:library:mapping-nist-csf-2.0-to-iso27001-2022
+locale: en
+ref_id: mapping-nist-csf-2.0-to-iso27001-2022
+name: NIST-CSF-2.0 -> ISO/IEC 27001:2022
+description: Mapping from NIST CSF v2.0 to International standard ISO/IEC 27001:2022
+copyright: NIST
+version: 1
+publication_date: 2025-06-13
+provider: NIST
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:nist-csf-2.0
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:nist-csf-2.0-to-iso27001-2022
+    ref_id: mapping-nist-csf-2.0-to-iso27001-2022
+    name: NIST-CSF-2.0 -> ISO/IEC 27001:2022
+    description: Mapping from NIST CSF v2.0 to International standard ISO/IEC 27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:nist-csf-2.0-to-iso27001-2022-revert
+    ref_id: mapping-nist-csf-2.0-to-iso27001-2022-revert
+    name: NIST-CSF-2.0 -> ISO/IEC 27001:2022
+    description: Mapping from NIST CSF v2.0 to International standard ISO/IEC 27001:2022
+    target_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04
+      relationship: intersect

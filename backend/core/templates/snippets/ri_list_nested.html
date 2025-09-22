@@ -52,6 +52,13 @@
     >
       {% trans "Threats" %}
     </th>
+    {% if feature_flags.inherent_risk %}
+    <th
+      class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+    >
+      {% trans "Inherent risk level" %}
+    </th>
+    {% endif %}
     <th
       class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
     >
@@ -101,6 +108,16 @@
         <p class="whitespace-no-wrap">{{ threat.get_name_translated }}</p>
         {% empty %} -- {% endfor %}
       </td>
+      {% if feature_flags.inherent_risk %}
+      <td class="px-4 py-5 border-b border-gray-200 text-sm">
+        <p
+          class="flex justify-center whitespace-no-wrap rounded"
+          style="background-color: {{ scenario.get_inherent_risk.hexcolor }}"
+        >
+          {{ scenario.get_inherent_risk.name }}
+        </p>
+      </td>
+      {% endif %}
       <td class="px-4 py-5 border-b border-gray-200 text-sm">
         <ul class="list-disc space-y-4 ml-4">
           {% for measure in scenario.existing_applied_controls.all %}

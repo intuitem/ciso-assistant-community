@@ -1,23 +1,38 @@
 <script lang="ts">
-	import Select from '../Select.svelte';
-	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '../TextField.svelte';
-	import TextArea from '../TextArea.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import Select from '../Select.svelte';
+	import TextArea from '../TextArea.svelte';
+	import TextField from '../TextField.svelte';
+	import HiddenInput from '../HiddenInput.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let context: string;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperForm<any>;
+		model: ModelInfo;
+		context: string;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		context,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, 'entry_type');
+
+	const formStore = form.form;
 </script>
 
+<HiddenInput {form} field="folder" />
 {#if context != 'edit'}
 	<AutocompleteSelect
 		{form}
@@ -67,6 +82,9 @@
 	{form}
 	multiple
 	optionsEndpoint="evidences"
+	optionsDetailedUrlParameters={$formStore.folder
+		? [['scope_folder_id', $formStore.folder]]
+		: undefined}
 	field="evidences"
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}

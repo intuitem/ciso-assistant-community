@@ -9,7 +9,7 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
-    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    <a href="https://intuitem.releasedhub.com/ciso-assistant-public/roadmap/d738f2fd">Roadmap</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
@@ -29,6 +29,8 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
+<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
@@ -51,23 +53,25 @@ We’re constantly evolving with input from users and customers. Like an octopus
 
 ---
 
+## Features
+
+![Current features](features.png)
+
+Upcoming features are listed on the roadmap.
+
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
+
+---
+
 ## Core Concepts
 
-Here’s a snapshot of the fundamental building blocks in CISO Assistant:
+Here’s an extract of some of the building blocks in CISO Assistant to illustrate the decoupling concept that encourages reusability:
 
 ![Core Objects](core_objects.png)
 
 For full details, check the [data model documentation](documentation/architecture/data-model.md).
 
----
 
-## Features
-
-Explore the full range of features and capabilities:
-
-![Features Overview](features.png)
-
-CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
 
 ---
 
@@ -127,7 +131,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2022 🌐
+1. ISO 27001:2013 & 27001:2022 🌐
 2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
@@ -203,8 +207,10 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
-77. Vehicle Cyber Security Audit (VCS) v1.1 🚘
+77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
+79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
+80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
 
 ### Community contributions
 
@@ -230,6 +236,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 20. Guides des mécanismes cryptographiques 🇫🇷
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
+23. NIST 800-82 (OT) - appendix 🏭🤖
 
 <br/>
 
@@ -246,7 +253,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
-- NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
@@ -256,11 +262,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
 
-Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
+Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library_v2.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting YAML file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
-There is also a tool to facilitate the creation of mappings, called `prepare_mapping.py` that will create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
+There is also a tool to facilitate the creation of mappings, called `prepare_mapping_v2.py` that will create an Excel file based on two framework libraries in YAML. Once properly filled, this Excel file can be processed by the `convert_library_v2.py` tool to get the resulting mapping library.
 
 ## Community
 
@@ -358,7 +364,7 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# CISO Assistant will use filesystem storage backend bu default.
+# CISO Assistant will use filesystem storage backend by default.
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -425,7 +431,7 @@ pre-commit install
 
 - Choose your s3 provider or try s3 feature with miniO with this command:
   - `docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=XXX" -e "MINIO_ROOT_PASSWORD=XXX" quay.io/minio/minio server /data --console-address ":9001"`
-- You can now check your bucket on http://localhost:9001
+- You can now check your bucket on <http://localhost:9001>
   - Fill the login with the credentials you filled on the docker run env variables
 - Export in the backend directory all the env variables asked about S3
   - You can see the list above in the recommanded variables
@@ -552,23 +558,27 @@ Set DJANGO_DEBUG=False for security reason.
 
 ## Supported languages 🌐
 
-- FR: French
-- EN: English
-- AR: Arabic
-- PT: Portuguese
-- ES: Spanish
-- DE: German
-- NL: Dutch
-- IT: Italian
-- PL: Polish
-- RO: Romanian
-- HI: Hindi
-- UR: Urdu
-- CS: Czech
-- SV: Swedish
-- ID: Indonesian
-- DA: Danish
-- HU: Hungarian
+1. FR: French
+2. EN: English
+3. AR: Arabic
+4. PT: Portuguese
+5. ES: Spanish
+6. DE: German
+7. NL: Dutch
+8. IT: Italian
+9. PL: Polish
+10. RO: Romanian
+11. HI: Hindi
+12. UR: Urdu
+13. CS: Czech
+14. SV: Swedish
+15. ID: Indonesian
+16. DA: Danish
+17. HU: Hungarian
+18. UK: Ukrainian
+19. EL: Greek
+20. TR: Turkish
+21. HR: Croatian
 
 ## Contributors 🤝
 

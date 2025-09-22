@@ -2,8 +2,12 @@
 	import { onMount } from 'svelte';
 	import Gantt from 'frappe-gantt';
 
-	export let tasks;
-	export let lang = 'en';
+	interface Props {
+		tasks: any;
+		lang?: string;
+	}
+
+	let { tasks, lang = 'en' }: Props = $props();
 	let mounted = false;
 
 	let gantt;

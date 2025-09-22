@@ -16,6 +16,7 @@
 	"swedish": "Svedese",
 	"indonesian": "Indonesiano",
 	"danish": "Danese",
+	"croatian": "Croato",
 	"addThreat": "Aggiungi minaccia",
 	"addVulnerability": "Aggiungi vulnerabilità",
 	"addReferenceControl": "Aggiungi controllo di riferimento",
@@ -190,6 +191,8 @@
 	"importMatrices": "Importa matrici",
 	"importFrameworks": "Importa framework",
 	"importMappings": "Importa mappature",
+	"importThreats": "Importa minacce",
+	"importReferenceControls": "Importa controlli di riferimento",
 	"summary": "Riepilogo",
 	"composer": "Compositore",
 	"statistics": "Statistiche",
@@ -821,7 +824,6 @@
 	"rpoHelpText": "Recovery Point Objective (punto di ripristino)",
 	"mtd": "MTD",
 	"mtdHelpText": "Tempo massimo di inattività tollerabile",
-	"securityObjectives": "Obiettivi di sicurezza",
 	"disasterRecoveryObjectives": "Obiettivi di Disaster Recovery",
 	"noExpirationDateSet": "Nessuna data di scadenza impostata",
 	"sumpageTotal": "totale",
@@ -886,9 +888,7 @@
 	"fixed": "Risolto",
 	"general": "generale",
 	"generalSettingsDescription": "Configura qui le tue impostazioni generali",
-	"securityObjectiveScale": "Scala obiettivi di sicurezza",
 	"generalSettingsUpdated": "Impostazioni generali aggiornate",
-	"securityObjectiveScaleHelpText": "Scegli la scala dei tuoi obiettivi di sicurezza (1-4 di default)",
 	"labels": "Etichette",
 	"addLabel": "Aggiungi etichetta",
 	"labelsHelpText": "Le etichette servono per categorizzare e filtrare gli elementi",
@@ -1055,7 +1055,7 @@
 	"workshopOne": "Workshop 1",
 	"refIdSemiColon": "ID di riferimento:",
 	"addFearedEvent": "Aggiungi evento temuto",
-	"addEbiosRMstudy": "Aggiungi studio Ebios RM",
+	"addEbiosRmStudy": "Aggiungi studio Ebios RM",
 	"noAuthor": "Nessun autore assegnato",
 	"noReviewer": "Nessun revisore assegnato",
 	"selectAudit": "Seleziona audit",
@@ -1111,7 +1111,7 @@
 	"likelihoodHelpText": "Stima della probabilità che un rischio si verifichi",
 	"studyAssetHelpText": "Asset primari (business) e di supporto correlati all'oggetto in studio",
 	"fearedEventHelpText": "Gli eventi temuti devono rappresentare le preoccupazioni del business",
-	"fearedEventAssetHelpText": "Asset primario (valore di business) colpito dall'evento temuto",
+	"fearedEventAssetHelpText": "Gli eventi temuti sono generalmente collegati ai valori aziendali (asset primari). Gli asset di supporto sono consentiti qui per maggiore flessibilità.",
 	"fearedEventQualificationHelpText": "Categorie di impatto possibili",
 	"fearedEventIsSelectedHelpText": "Seleziona l'evento temuto per lo studio",
 	"riskOriginHelpText": "Elemento, persona o organizzazione potenzialmente in grado di generare un rischio",
@@ -1304,6 +1304,7 @@
 	"mappingSuggested": "Mappatura suggerita",
 	"mappingSuggestedHelpText": "Suggerimenti di mappatura basati sui framework caricati",
 	"mappingSuggestionTeasing": "Le mappature sono ora suggerite! Puoi usare i filtri per esplorare i suggerimenti basati sui framework caricati.",
+	"associatedFindingsAssessments": "Follow-up associati",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -1333,5 +1334,16 @@
 				"countPlural=other": "{count} Giorni"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Scenari corrispondenti",
+	"select": "Seleziona",
+	"deselect": "Deseleziona",
+	"saveAndContinue": "Salva e continua",
+	"nextOccurrenceStatus": "Stato prossima occorrenza",
+	"image": "Immagine",
+	"securityObjectives": "Proprietà di sicurezza",
+	"securityObjectiveScale": "Scala proprietà di sicurezza",
+	"securityObjectiveScaleHelpText": "Scegli la scala per le proprietà di sicurezza (1 a 4 di default)",
+	"actor": "Attore",
+	"action": "Azione"
 }

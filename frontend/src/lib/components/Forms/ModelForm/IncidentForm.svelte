@@ -7,14 +7,30 @@
 	import * as m from '$paraglide/messages.js';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let duplicate: boolean = false;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let schema: any = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		duplicate?: boolean;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		schema?: any;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		duplicate = false,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		schema = {},
+		initialData = {}
+	}: Props = $props();
 	const disableDoubleDash = true;
+
+	let currentDateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+		.toISOString()
+		.slice(0, 19);
 </script>
 
 <TextField
@@ -30,6 +46,7 @@
 	{form}
 	field="reported_at"
 	label={m.reportedAt()}
+	value={currentDateTime}
 	cacheLock={cacheLocks['reported_at']}
 	bind:cachedValue={formDataCache['reported_at']}
 />
@@ -47,6 +64,7 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -80,8 +98,9 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="qualifications"
+	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
+	optionsLabelField="translated_name"
 	label={m.qualifications()}
 />
 <TextField
@@ -99,6 +118,14 @@
 		optionsEndpoint="assets"
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		field="assets"
 		label={m.assets()}
 	/>

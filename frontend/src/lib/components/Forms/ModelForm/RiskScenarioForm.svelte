@@ -5,13 +5,29 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		updated_fields?: Set<string>;
+		[key: string]: any;
+		object?: any;
+	}
 
-	export let updated_fields: Set<string> = new Set();
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		updated_fields = new Set(),
+		object,
+		...rest
+	}: Props = $props();
+
+	let isParentLocked = $derived(object?.risk_assessment?.is_locked || false);
 
 	async function fetchDefaultRefId(riskAssessmentId: string) {
 		try {
@@ -31,6 +47,8 @@
 			console.error('Error fetching default ref_id:', error);
 		}
 	}
+
+	const scopeFolder = $derived(rest?.scopeFolder || { id: '' });
 </script>
 
 <AutocompleteSelect
@@ -43,9 +61,9 @@
 	bind:cachedValue={formDataCache['risk_assessment']}
 	label={m.riskAssessment()}
 	hidden={initialData.risk_assessment}
-	on:change={async (e) => {
-		if (e.detail) {
-			await fetchDefaultRefId(e.detail);
+	onChange={async (e) => {
+		if (e) {
+			await fetchDefaultRefId(e);
 		}
 	}}
 />
@@ -63,6 +81,17 @@
 	multiple
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsDetailedUrlParameters={[
+		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
+	]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
 	optionsLabelField="auto"
 	field="assets"
 	cacheLock={cacheLocks['assets']}
@@ -74,6 +103,9 @@
 	multiple
 	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsDetailedUrlParameters={[
+		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
+	]}
 	optionsLabelField="auto"
 	field="threats"
 	cacheLock={cacheLocks['threats']}

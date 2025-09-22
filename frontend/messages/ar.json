@@ -16,6 +16,7 @@
 	"swedish": "السويدية",
 	"indonesian": "الإندونيسية",
 	"danish": "دانماركي",
+	"croatian": "الكرواتية",
 	"addThreat": "أضف تهديدًا",
 	"addVulnerability": "إضافة الضعف",
 	"addReferenceControl": "أضف تحكمًا مرجعيًا",
@@ -189,6 +190,8 @@
 	"importMatrices": "استيراد المصفوفات",
 	"importFrameworks": "استيراد الأطر",
 	"importMappings": "استيراد المخططات",
+	"importThreats": "استيراد تهديدات",
+	"importReferenceControls": "استيراد تحكمات مرجعية",
 	"summary": "الملخص",
 	"composer": "الملحن",
 	"statistics": "الإحصائيات",
@@ -893,6 +896,7 @@
 	"mappingSuggested": "تم اقتراح رسم الخرائط",
 	"mappingSuggestedHelpText": "اقتراحات رسم الخرائط بناءً على الأطر المحملة",
 	"mappingSuggestionTeasing": "تم اقتراح خرائط! يمكنك استخدام المرشحات لاستكشاف الاقتراحات بناءً على الأطر المحملة.",
+	"associatedFindingsAssessments": "التقييمات المرتبطة",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -922,5 +926,17 @@
 				"countPlural=other": "أيام {count}"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "السيناريوهات المطابقة",
+	"select": "تحديد",
+	"deselect": "إلغاء التحديد",
+	"fearedEventAssetHelpText": "الأحداث المخيفة عادة ما تكون مرتبطة بقيم الأعمال (الأصول الأساسية). يُسمح بالأصول الداعمة هنا من أجل المرونة",
+	"saveAndContinue": "حفظ ومتابعة",
+	"nextOccurrenceStatus": "حالة الحدوث التالية",
+	"image": "صورة",
+	"securityObjectives": "خصائص الأمان",
+	"securityObjectiveScale": "مقياس خصائص الأمان",
+	"securityObjectiveScaleHelpText": "اختر مقياسك لخصائص الأمان (1 إلى 4 بشكل افتراضي)",
+	"actor": "فاعل",
+	"action": "إجراء"
 }

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import type { PageData } from './$types';
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const mapping_sets = data.data.results;
 </script>
 

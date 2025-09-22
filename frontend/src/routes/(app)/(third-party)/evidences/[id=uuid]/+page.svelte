@@ -1,11 +1,10 @@
 <script lang="ts">
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
@@ -13,8 +12,13 @@
 	import { z } from 'zod';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { getModalStore } from '$lib/components/Modals/stores';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	interface Attachment {
 		type: string;
@@ -22,7 +26,7 @@
 		fileExists: boolean;
 	}
 
-	let attachment: Attachment | undefined = undefined;
+	let attachment: Attachment | undefined = $state(undefined);
 	const modalStore: ModalStore = getModalStore();
 
 	function modalConfirm(id: string, name: string, action: string): void {
@@ -63,16 +67,7 @@
 		attachment = data.data.attachment ? await fetchAttachment() : undefined;
 	});
 
-	const user = $page.data.user;
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: data.model.name,
-		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
-	});
+	const user = page.data.user;
 </script>
 
 <DetailView {data} />
@@ -86,20 +81,10 @@
 			<div class="space-x-2">
 				<Anchor
 					href={`./${data.data.id}/attachment`}
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 					data-testid="attachment-download-button"
-					><i class="fa-solid fa-download mr-2" /> {m.download()}</Anchor
+					><i class="fa-solid fa-download mr-2"></i> {m.download()}</Anchor
 				>
-				{#if canEditObject}
-					<button
-						on:click={(_) => {
-							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment');
-						}}
-						on:keydown={(_) =>
-							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment')}
-						class="btn variant-filled-tertiary h-full"><i class="fa-solid fa-trash" /></button
-					>
-				{/if}
 			</div>
 		</div>
 		{#if attachment}

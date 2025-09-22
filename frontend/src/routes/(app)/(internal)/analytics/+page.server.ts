@@ -57,16 +57,28 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const risks_count_per_level: {
 		current: Record<string, any>[];
 		residual: Record<string, any>[];
+		inherent?: Record<string, any>[];
 	} = await req_get_risks_count_per_level.json().then((res) => res.results);
 
 	const threats_count = await fetch(`${BASE_API_URL}/threats/threats_count/`).then((res) =>
 		res.json()
 	);
 
+	const qualifications_count = await fetch(
+		`${BASE_API_URL}/risk-scenarios/qualifications_count/`
+	).then((res) => res.json());
+
 	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
 	const risk_assessments = await req_risk_assessments.json();
 
 	const composerForm = await superValidate(zod(composerSchema));
+
+	const complianceAnalytics = await fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
+		.then((res) => res.json())
+		.catch((error) => {
+			console.error('Failed to fetch compliance analytics:', error);
+			return {};
+		});
 
 	return {
 		composerForm,
@@ -77,8 +89,10 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		riskScenariosPerStatus,
 		risks_count_per_level,
 		threats_count,
+		qualifications_count,
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
+		complianceAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {

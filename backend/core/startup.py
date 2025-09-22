@@ -17,6 +17,7 @@ READER_PERMISSIONS_LIST = [
     "view_entity",
     "view_entityassessment",
     "view_evidence",
+    "view_evidencerevision",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -45,7 +46,7 @@ READER_PERMISSIONS_LIST = [
     "view_strategicscenario",
     "view_attackpath",
     "view_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -58,6 +59,25 @@ READER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    # privacy,
+    "view_processing",
+    "view_processingnature",
+    "view_purpose",
+    "view_personaldata",
+    "view_datasubject",
+    "view_datarecipient",
+    "view_datacontractor",
+    "view_datatransfer",
+    # campaigns,
+    "view_campaign",
+    # operating modes
+    "view_elementaryaction",
+    "view_operatingmode",
+    "view_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -79,6 +99,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_requirementassessment",
     "view_requirementnode",
     "view_evidence",
+    "view_evidencerevision",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -92,7 +113,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_strategicscenario",
     "view_attackpath",
     "view_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -105,6 +126,25 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    # campaigns,
+    "view_campaign",
+    # privacy,
+    "view_processing",
+    "view_processingnature",
+    "view_purpose",
+    "view_personaldata",
+    "view_datasubject",
+    "view_datarecipient",
+    "view_datacontractor",
+    "view_datatransfer",
+    # operating modes
+    "view_elementaryaction",
+    "view_operatingmode",
+    "view_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -210,7 +250,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -254,6 +294,68 @@ ANALYST_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "view_campaign",
+    # privacy,
+    "add_processing",
+    "change_processing",
+    "view_processing",
+    "delete_processing",
+    "view_processingnature",
+    "add_purpose",
+    "change_purpose",
+    "view_purpose",
+    "delete_purpose",
+    "add_personaldata",
+    "change_personaldata",
+    "view_personaldata",
+    "delete_personaldata",
+    "add_datasubject",
+    "change_datasubject",
+    "view_datasubject",
+    "delete_datasubject",
+    "add_datarecipient",
+    "change_datarecipient",
+    "view_datarecipient",
+    "delete_datarecipient",
+    "add_datacontractor",
+    "change_datacontractor",
+    "view_datacontractor",
+    "delete_datacontractor",
+    "add_datatransfer",
+    "change_datatransfer",
+    "view_datatransfer",
+    "delete_datatransfer",
+    # operating modes
+    "view_elementaryaction",
+    "add_elementaryaction",
+    "change_elementaryaction",
+    "delete_elementaryaction",
+    "view_operatingmode",
+    "add_operatingmode",
+    "change_operatingmode",
+    "delete_operatingmode",
+    "view_killchain",
+    "add_killchain",
+    "change_killchain",
+    "delete_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "add_quantitativeriskstudy",
+    "change_quantitativeriskstudy",
+    "delete_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "add_quantitativeriskscenario",
+    "change_quantitativeriskscenario",
+    "delete_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
+    "add_quantitativeriskhypothesis",
+    "change_quantitativeriskhypothesis",
+    "delete_quantitativeriskhypothesis",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -367,7 +469,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_qualification",
+    "view_terminology",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -411,6 +513,81 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
+    # objectives,
+    "add_organisationobjective",
+    "view_organisationobjective",
+    "change_organisationobjective",
+    "delete_organisationobjective",
+    # issues,
+    "add_organisationissue",
+    "view_organisationissue",
+    "change_organisationissue",
+    "delete_organisationissue",
+    # privacy,
+    "add_processing",
+    "change_processing",
+    "view_processing",
+    "delete_processing",
+    "view_processingnature",
+    "add_purpose",
+    "change_purpose",
+    "view_purpose",
+    "delete_purpose",
+    "add_personaldata",
+    "change_personaldata",
+    "view_personaldata",
+    "delete_personaldata",
+    "add_datasubject",
+    "change_datasubject",
+    "view_datasubject",
+    "delete_datasubject",
+    "add_datarecipient",
+    "change_datarecipient",
+    "view_datarecipient",
+    "delete_datarecipient",
+    "add_datacontractor",
+    "change_datacontractor",
+    "view_datacontractor",
+    "delete_datacontractor",
+    "add_datatransfer",
+    "change_datatransfer",
+    "view_datatransfer",
+    "delete_datatransfer",
+    # operating modes
+    "view_elementaryaction",
+    "add_elementaryaction",
+    "change_elementaryaction",
+    "delete_elementaryaction",
+    "view_operatingmode",
+    "add_operatingmode",
+    "change_operatingmode",
+    "delete_operatingmode",
+    "view_killchain",
+    "add_killchain",
+    "change_killchain",
+    "delete_killchain",
+    # crq
+    "view_quantitativeriskstudy",
+    "add_quantitativeriskstudy",
+    "change_quantitativeriskstudy",
+    "delete_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "add_quantitativeriskscenario",
+    "change_quantitativeriskscenario",
+    "delete_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
+    "add_quantitativeriskhypothesis",
+    "change_quantitativeriskhypothesis",
+    "delete_quantitativeriskhypothesis",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -418,10 +595,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_user",
     "change_user",
     "delete_user",
-    "add_usergroup",
     "view_usergroup",
-    "change_usergroup",
-    "delete_usergroup",
     "add_event",
     "view_event",
     "change_event",
@@ -485,10 +659,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    # evidence
     "add_evidence",
     "view_evidence",
     "change_evidence",
     "delete_evidence",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
     "add_framework",
     "view_framework",
     "delete_framework",
@@ -557,10 +736,18 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
-    "view_qualification",
-    "add_qualification",
-    "change_qualification",
-    "delete_qualification",
+    "view_elementaryaction",
+    "add_elementaryaction",
+    "change_elementaryaction",
+    "delete_elementaryaction",
+    "view_operatingmode",
+    "add_operatingmode",
+    "change_operatingmode",
+    "delete_operatingmode",
+    "view_killchain",
+    "add_killchain",
+    "change_killchain",
+    "delete_killchain",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -634,6 +821,45 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    # campaigns,
+    "add_campaign",
+    "view_campaign",
+    "change_campaign",
+    "delete_campaign",
+    # objectives,
+    "add_organisationobjective",
+    "view_organisationobjective",
+    "change_organisationobjective",
+    "delete_organisationobjective",
+    # issues,
+    "add_organisationissue",
+    "view_organisationissue",
+    "change_organisationissue",
+    "delete_organisationissue",
+    # crq,
+    "view_quantitativeriskstudy",
+    "add_quantitativeriskstudy",
+    "change_quantitativeriskstudy",
+    "delete_quantitativeriskstudy",
+    "view_quantitativeriskscenario",
+    "add_quantitativeriskscenario",
+    "change_quantitativeriskscenario",
+    "delete_quantitativeriskscenario",
+    "view_quantitativeriskhypothesis",
+    "add_quantitativeriskhypothesis",
+    "change_quantitativeriskhypothesis",
+    "delete_quantitativeriskhypothesis",
+    # terminologies
+    "add_terminology",
+    "view_terminology",
+    "change_terminology",
+    "delete_terminology",
+    # roles,
+    "add_role",
+    "view_role",
+    "change_role",
+    "delete_role",
+    "view_permission",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -644,6 +870,10 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "add_evidence",
     "change_evidence",
     "delete_evidence",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
     "view_folder",
 ]
 
@@ -656,7 +886,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import Qualification, AssetClass
+    from core.models import AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -780,7 +1010,7 @@ def startup(sender: AppConfig, **kwargs):
 
     # Create default Qualifications
     try:
-        Qualification.create_default_qualifications()
+        Terminology.create_default_qualifications()
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
 
@@ -795,6 +1025,12 @@ def startup(sender: AppConfig, **kwargs):
         AssetClass.create_default_values()
     except Exception as e:
         logger.error("Error creating default AssetClass", exc_info=e)
+
+    # Create default Terminologies
+    try:
+        Terminology.create_default_roto_risk_origins()
+    except Exception as e:
+        logger.error("Error creating default ROTO Risk Origins", exc_info=e)
 
     call_command("storelibraries")
 
@@ -826,9 +1062,13 @@ def startup(sender: AppConfig, **kwargs):
         "ebios_radar_red_zone_radius": 2.5,
         "notifications_enable_mailing": False,
         "interface_agg_scenario_matrix": False,
+        "currency": "€",
+        "daily_rate": 500,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings, _ = GlobalSettings.objects.get_or_create(
+            name="general", defaults={"value": default_settings}
+        )
         current_value = settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")

@@ -3,7 +3,11 @@
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
-	export let form: SuperValidated<any>;
+	interface Props {
+		form: SuperValidated<any>;
+	}
+
+	let { form }: Props = $props();
 
 	// Config for feature flags
 	const featureFlagFields = [
@@ -19,7 +23,12 @@
 		{ field: 'compliance', label: m.compliance() },
 		{ field: 'tprm', label: m.thirdParty() },
 		{ field: 'privacy', label: m.privacy() },
-		{ field: 'experimental', label: m.experimental() }
+		{ field: 'experimental', label: m.experimental() },
+		{ field: 'inherent_risk', label: m.inherentRisk() },
+		{ field: 'organisation_objectives', label: m.organisationObjectives() },
+		{ field: 'organisation_issues', label: m.organisationIssues() },
+		{ field: 'quantitative_risk_studies', label: m.quantitativeRiskStudies() },
+		{ field: 'terminologies', label: m.terminologies() }
 	];
 </script>
 

@@ -1,17 +1,29 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { page } from '$app/stores';
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let shape: any = {};
-	export let context: string;
+	import { page } from '$app/state';
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		shape?: any;
+		context: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		shape = {},
+		context
+	}: Props = $props();
 </script>
 
 <TextField
@@ -44,6 +56,7 @@
 		multiple
 		optionsEndpoint="user-groups"
 		field="user_groups"
+		pathField="path"
 		cacheLock={cacheLocks['user_groups']}
 		bind:cachedValue={formDataCache['user_groups']}
 		label={m.userGroups()}
@@ -61,6 +74,13 @@
 		helpText={m.keepLocalLoginHelpText()}
 	/>
 {/if}
+<TextArea
+	{form}
+	field="observation"
+	label={m.observation()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
 
 <span class="text-gray-500 pt-5">
 	⚠️ {m.createdUserWillHaveNoRights()}

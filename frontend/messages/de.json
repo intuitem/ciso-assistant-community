@@ -16,6 +16,7 @@
 	"swedish": "Schwedisch",
 	"indonesian": "Indonesisch",
 	"danish": "dänisch",
+	"croatian": "Kroatisch",
 	"addThreat": "Bedrohung hinzufügen",
 	"addVulnerability": "Schwachstellen hinzufügen",
 	"addReferenceControl": "Referenzkontrolle hinzufügen",
@@ -190,6 +191,8 @@
 	"importMatrices": "Matrizen importieren",
 	"importFrameworks": "Frameworks importieren",
 	"importMappings": "Zuordnungen importieren",
+	"importThreats": "Bedrohungen importieren",
+	"importReferenceControls": "Referenzkontrollen importieren",
 	"summary": "Zusammenfassung",
 	"composer": "Komponist",
 	"statistics": "Statistiken",
@@ -930,6 +933,7 @@
 	"mappingSuggested": "Vorgeschlagene Zuordnung",
 	"mappingSuggestedHelpText": "Vorschläge zur Zuordnung basierend auf geladenen Frameworks",
 	"mappingSuggestionTeasing": "Zuordnungen werden nun vorgeschlagen! Sie können die Filter verwenden, um Vorschläge basierend auf geladenen Frameworks zu erkunden.",
+	"associatedFindingsAssessments": "Zugeordnete Nachverfolgungen",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -959,5 +963,17 @@
 				"countPlural=other": "{count} Tage"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Übereinstimmende Szenarien",
+	"select": "Auswählen",
+	"deselect": "Abwählen",
+	"fearedEventAssetHelpText": "Angstereignisse sind in der Regel mit Geschäftswerten (primäre Vermögenswerte) verknüpft. Unterstützende Vermögenswerte sind hier aus Flexibilitätsgründen erlaubt.",
+	"saveAndContinue": "Speichern und fortfahren",
+	"nextOccurrenceStatus": "Nächster Status der nächsten Vorkommens",
+	"image": "Bild",
+	"securityObjectives": "Sicherheitsmerkmale",
+	"securityObjectiveScale": "Skala für Sicherheitsmerkmale",
+	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)",
+	"actor": "Akteur",
+	"action": "Aktion"
 }

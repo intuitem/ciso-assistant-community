@@ -16,6 +16,7 @@
 	"swedish": "Sueco",
 	"indonesian": "indonésio",
 	"danish": "dinamarquês",
+	"croatian": "croata",
 	"addThreat": "Adicionar ameaça",
 	"addVulnerability": "Adicionar vulnerabilidade",
 	"addReferenceControl": "Adicionar controle de referência",
@@ -190,6 +191,8 @@
 	"importMatrices": "Importar matrizes",
 	"importFrameworks": "Importar frameworks",
 	"importMappings": "Mapeamentos de importação",
+	"importThreats": "Importar ameaças",
+	"importReferenceControls": "Importar controles de referência",
 	"summary": "Resumo",
 	"composer": "Compositor",
 	"statistics": "Estatísticas",
@@ -923,6 +926,7 @@
 	"mappingSuggested": "Mapeamento sugerido",
 	"mappingSuggestedHelpText": "Sugestões de mapeamento com base em frameworks carregados",
 	"mappingSuggestionTeasing": "Os mapeamentos agora são sugeridos! Você pode usar os filtros para explorar sugestões com base em frameworks carregados.",
+	"associatedFindingsAssessments": "Acompanhamentos associados",
 	"hourCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -952,5 +956,17 @@
 				"countPlural=other": "{count} Dias"
 			}
 		}
-	]
+	],
+	"matchingScenarios": "Cenários correspondentes",
+	"select": "Selecionar",
+	"deselect": "Desmarcar",
+	"fearedEventAssetHelpText": "Os eventos temidos são geralmente vinculados a valores empresariais (ativos primários). Ativos de suporte são permitidos aqui para flexibilidade.",
+	"saveAndContinue": "Salvar e continuar",
+	"nextOccurrenceStatus": "Próximo status de ocorrência",
+	"image": "Imagem",
+	"securityObjectives": "Propriedades de segurança",
+	"securityObjectiveScale": "Escala de propriedades de segurança",
+	"securityObjectiveScaleHelpText": "Escolha sua escala para propriedades de segurança (1 a 4 por padrão)",
+	"actor": "Ator",
+	"action": "Ação"
 }

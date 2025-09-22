@@ -4,21 +4,16 @@
 	import Greetings from './Greetings.svelte';
 	import FormCard from './FormCard.svelte';
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
 </script>
 
 <div class="lg:relative h-screen w-screen bg-slate-200">
-	<div
-		class="invisible lg:visible absolute top-5 left-1/2 transform -translate-x-1/2 top-5 left-5 transform-none"
-	>
-		<div class="flex justify-center justify-start flex-row max-w-48 space-x-4 pb-3">
-			{#if !data.clientSettings.settings.name}
-				<Logo />
-			{/if}
-		</div>
-	</div>
-	<div class="lg:invisible pt-5 flex justify-center">
+	<div class="lg:absolute top-5 lg:left-5 flex justify-center">
 		<div class="flex justify-center flex-row max-w-48 space-x-4 pb-3">
 			{#if !data.clientSettings.settings.name}
 				<Logo />

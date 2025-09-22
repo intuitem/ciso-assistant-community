@@ -80,7 +80,7 @@ export class PageDetail extends BasePage {
 					} else if (key === 'ref_id') {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
-							.toHaveText('Reference ID');
+							.toHaveText('ID');
 					} else if (key === 'owners') {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
@@ -173,7 +173,7 @@ export class PageDetail extends BasePage {
 				.getByTestId('tree-item')
 				.filter({ has: content, hasNotText: path.length != 0 ? path.at(-1) : undefined })
 				.getByTestId('tree-item-lead')
-				.getByTestId('progress-radial'),
+				.getByTestId('progress-ring-svg'),
 			default: this.page.getByTestId('tree-item').filter({ hasText: new RegExp(`^${value}\n*.*`) })
 		};
 	}
