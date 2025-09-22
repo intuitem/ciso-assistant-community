@@ -36,10 +36,28 @@ export const load: PageServerLoad = async (event) => {
 		}
 	};
 
+	// Load ALE comparison data asynchronously
+	const getAleComparison = async () => {
+		try {
+			const url = `${BASE_API_URL}/crq/quantitative-risk-studies/${id}/ale-comparison/`;
+			const response = await event.fetch(url);
+			if (!response.ok) {
+				throw new Error(
+					`Failed to fetch ALE comparison: ${response.status} ${response.statusText}`
+				);
+			}
+			return await response.json();
+		} catch (error) {
+			console.error('Failed to fetch ALE comparison data:', error);
+			return null;
+		}
+	};
+
 	return {
 		stream: {
 			executiveSummary: getExecutiveSummary(),
-			combinedLec: getCombinedLec()
+			combinedLec: getCombinedLec(),
+			aleComparison: getAleComparison()
 		}
 	};
 };
