@@ -177,5 +177,28 @@ export const actions: Actions = {
 		setFlash({ type: 'success', message: m.featureFlagSettingsUpdated() }, event);
 
 		return { form };
+	},
+	generateSamlKeys: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = SSOSettingsSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/accounts/saml/0/generate-keys/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST'
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return 'error';
+
+		setFlash({ type: 'success', message: m.samlKeysGenerated() }, event);
+
+		return { form };
 	}
 };

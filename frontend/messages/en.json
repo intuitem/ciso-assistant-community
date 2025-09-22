@@ -2207,5 +2207,7 @@
 	"evidenceRevisions": "Revisions",
 	"addEvidenceRevision": "Add Revision",
 	"associatedEvidenceRevisions": "Associated versions",
-	"privateKey": "Private Key"
+	"privateKey": "Private Key",
+	"generateDots": "Generate...",
+	"samlKeysGenerated": "Saml keys generated. Please refresh the page."
 }

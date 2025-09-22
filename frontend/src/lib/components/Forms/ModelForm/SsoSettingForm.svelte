@@ -10,6 +10,9 @@
 	import { m } from '$paraglide/messages';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { invalidateAll } from '$app/navigation';
+	import { enhance } from '$app/forms';
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -37,6 +40,31 @@
 
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
+
+	let isGenerating = $state(false);
+
+	const handleGenerateKeys = ({ cancel }) => {
+		// Prevent submission if conditions aren't met
+		if (!data.is_enabled || !data.authn_request_signed) {
+			cancel();
+			return;
+		}
+
+		isGenerating = true;
+
+		return async ({ result, update }) => {
+			isGenerating = false;
+
+			if (result.type === 'success') {
+				// Refresh the page data to show new keys
+				await invalidateAll();
+			} else if (result.type === 'error') {
+				console.error('Failed to generate keys:', result.error);
+			}
+
+			await update();
+		};
+	};
 </script>
 
 <Accordion
@@ -256,12 +284,6 @@
 					label={m.allowSingleLabelDomains()}
 					disabled={!data.is_enabled}
 				/>
-				<Checkbox
-					{form}
-					field="authn_request_signed"
-					label={m.authnRequestSigned()}
-					disabled={!data.is_enabled}
-				/>
 				<TextField
 					{form}
 					field="digest_algorithm"
@@ -353,22 +375,46 @@
 					label={m.wantNameIDEncrypted()}
 					disabled={!data.is_enabled}
 				/>
-				<TextArea
+				<Checkbox
 					{form}
-					field="sp_x509cert"
-					label={m.x509Cert()}
+					field="authn_request_signed"
+					label={m.authnRequestSigned()}
 					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['sp_x509cert']}
-					bind:cachedValue={formDataCache['sp_x509cert']}
 				/>
-				<TextArea
-					{form}
-					field="sp_private_key"
-					label={m.privateKey()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['sp_private_key']}
-					bind:cachedValue={formDataCache['sp_private_key']}
-				/>
+				<div class="w-full p-4 flex flex-col gap-4 border rounded-md mt-1">
+					<div class="flex flex-row gap-4">
+						<form
+							id="generateSamlKeys"
+							method="post"
+							action="?/generateSamlKeys"
+							use:enhance={handleGenerateKeys}
+						></form>
+						<button
+							form="generateSamlKeys"
+							type="submit"
+							disabled={!data.is_enabled || !data.authn_request_signed}
+							class="btn preset-filled">{m.generateDots()}</button
+						>
+					</div>
+					<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextArea
+							{form}
+							field="sp_x509cert"
+							label={m.x509Cert()}
+							disabled={!data.is_enabled || !data.authn_request_signed}
+							cacheLock={cacheLocks['sp_x509cert']}
+							bind:cachedValue={formDataCache['sp_x509cert']}
+						/>
+						<TextArea
+							{form}
+							field="sp_private_key"
+							label={m.privateKey()}
+							disabled={!data.is_enabled || !data.authn_request_signed}
+							cacheLock={cacheLocks['sp_private_key']}
+							bind:cachedValue={formDataCache['sp_private_key']}
+						/>
+					</div>
+				</div>
 			{/snippet}
 		</Accordion.Item>
 	{/if}

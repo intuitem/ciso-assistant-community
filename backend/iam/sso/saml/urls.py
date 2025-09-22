@@ -21,8 +21,8 @@ urlpatterns = [
                 path(
                     "generate-keys/",
                     views.GenerateSAMLKeyView.as_view(),
-                    name="generate_saml_keys"
-                )
+                    name="generate_saml_keys",
+                ),
             ]
         ),
     )

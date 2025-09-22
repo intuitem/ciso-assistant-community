@@ -223,6 +223,7 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         allow_blank=True,
         allow_null=True,
         source="settings.advanced.private_key",
+        write_only=True,
     )
     oidc_has_secret = serializers.SerializerMethodField()
 
@@ -239,10 +240,21 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        # Use stored secret if no secret is transmitted
+        # Use stored secret and sp_private_key if no transmitted
         validated_data["secret"] = validated_data.get(
             "secret", settings_object.value.get("secret", "")
         )
+        validated_data["settings"]["advanced"]["private_key"] = (
+            validated_data.get("settings", {})
+            .get("advanced", {})
+            .get(
+                "private_key",
+                settings_object.value.get("settings", {})
+                .get("advanced", {})
+                .get("private_key", ""),
+            )
+        )
+
         validated_data["provider_id"] = validated_data.get("provider", "n/a")
         if "settings" not in validated_data:
             validated_data["settings"] = {}
