@@ -75,12 +75,12 @@
 		{#snippet panel()}
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
-				<Checkbox
-					{form}
-					field="interface_agg_scenario_matrix"
-					label={m.settingsAggregateMatrix()}
-				/>
-				<Checkbox
+					<Checkbox
+						{form}
+						field="interface_agg_scenario_matrix"
+						label={m.settingsAggregateMatrix()}
+					/>
+					<Checkbox
 						{form}
 						field="risk_matrix_swap_axes"
 						label={m.settingsRiskMatrixSwapAxes()}
