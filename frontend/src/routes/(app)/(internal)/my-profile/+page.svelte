@@ -37,9 +37,7 @@
 		data: PageData;
 	}
 
-	let { data }: Props = $props();
-	console.log("data", data)
-	
+	let { data }: Props = $props();	
 </script>
 
 <div class="flex flex-col bg-white card shadow-lg p-4 space-y-4">
