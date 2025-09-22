@@ -747,6 +747,80 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, name="ALE Comparison Chart Data", url_path="ale-comparison")
+    def ale_comparison(self, request, pk=None):
+        """
+        Returns data for ALE comparison chart showing:
+        - Current ALE (positive values)
+        - Residual ALE (positive values)
+        - Treatment cost (negative values) for each scenario
+        """
+        study: QuantitativeRiskStudy = self.get_object()
+
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        scenarios_data = []
+
+        # Process each scenario in the study
+        for scenario in study.risk_scenarios.all():
+            # Get current ALE
+            current_ale = scenario.current_ale
+
+            # Get residual ALE from selected residual hypothesis
+            residual_ale = scenario.residual_ale
+
+            # Get treatment cost from selected residual hypothesis
+            treatment_cost = None
+            selected_residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+            if selected_residual_hypothesis:
+                treatment_cost = selected_residual_hypothesis.treatment_cost
+
+            scenarios_data.append(
+                {
+                    "name": scenario.name,
+                    "currentALE": round(current_ale)
+                    if current_ale is not None
+                    else None,
+                    "residualALE": round(residual_ale)
+                    if residual_ale is not None
+                    else None,
+                    "treatmentCost": round(treatment_cost)
+                    if treatment_cost is not None
+                    else None,
+                }
+            )
+
+        # Sort scenarios by current ALE (descending, with None values at the end)
+        scenarios_data.sort(
+            key=lambda x: x["currentALE"] if x["currentALE"] is not None else -1,
+            reverse=True,
+        )
+
+        return Response(
+            {
+                "study_id": str(study.id),
+                "study_name": study.name,
+                "currency": currency,
+                "scenarios": scenarios_data,
+                "total_scenarios": len(scenarios_data),
+                "scenarios_with_current_ale": sum(
+                    1 for s in scenarios_data if s["currentALE"] is not None
+                ),
+                "scenarios_with_residual_ale": sum(
+                    1 for s in scenarios_data if s["residualALE"] is not None
+                ),
+                "scenarios_with_treatment_cost": sum(
+                    1 for s in scenarios_data if s["treatmentCost"] is not None
+                ),
+            }
+        )
+
     @action(detail=True, methods=["post"], url_path="retrigger-all-simulations")
     def retrigger_all_simulations(self, request, pk=None):
         """

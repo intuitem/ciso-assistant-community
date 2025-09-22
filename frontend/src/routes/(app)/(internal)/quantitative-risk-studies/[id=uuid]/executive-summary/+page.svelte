@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
 	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
+	import ALEComparisonChart from '$lib/components/Chart/ALEComparisonChart.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -13,6 +14,7 @@
 	}
 
 	let { data }: Props = $props();
+	let showAleBreakdownModal = $state(false);
 </script>
 
 <svelte:head>
@@ -20,7 +22,7 @@
 </svelte:head>
 
 <main class="p-6 space-y-6">
-	{#await Promise.all([data.stream.executiveSummary, data.stream.combinedLec])}
+	{#await Promise.all([data.stream.executiveSummary, data.stream.combinedLec, data.stream.aleComparison])}
 		<!-- Breadcrumb loading state -->
 		<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 			<p class="font-semibold text-lg">Loading...</p>
@@ -31,7 +33,7 @@
 				<p class="mt-4 text-gray-600">Loading executive summary...</p>
 			</div>
 		</div>
-	{:then [summaryData, combinedLecData]}
+	{:then [summaryData, combinedLecData, aleComparisonData]}
 		{#if summaryData}
 			<!-- Breadcrumb -->
 
@@ -136,7 +138,19 @@
 
 				<div class="bg-white rounded-lg p-6 shadow-sm">
 					<div class="flex justify-between items-center mb-4">
-						<h2 class="text-xl font-semibold">Portfolio risk profile</h2>
+						<div class="flex items-center gap-3">
+							<h2 class="text-xl font-semibold">Portfolio risk profile</h2>
+							{#if aleComparisonData?.scenarios && aleComparisonData.scenarios.length > 0}
+								<button
+									onclick={() => (showAleBreakdownModal = true)}
+									class="text-sm text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+									title="View ALE breakdown by scenario"
+								>
+									<i class="fa-solid fa-chart-column"></i>
+									Breakdown
+								</button>
+							{/if}
+						</div>
 						<div class="text-sm text-gray-600">
 							Current: {combinedLecData.scenarios_with_current_data} / {combinedLecData.total_scenarios}
 							{#if combinedLecData.scenarios_with_residual_data}
@@ -476,3 +490,79 @@
 		</div>
 	{/await}
 </main>
+
+<!-- ALE Breakdown Modal -->
+{#if showAleBreakdownModal}
+	<div
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) showAleBreakdownModal = false;
+		}}
+	>
+		<div class="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-auto">
+			<div class="flex justify-between items-center mb-4">
+				<h2 class="text-xl font-semibold">Loss breakdown by Scenario</h2>
+				<button
+					onclick={() => (showAleBreakdownModal = false)}
+					class="text-gray-500 hover:text-gray-700 text-2xl"
+				>
+					×
+				</button>
+			</div>
+
+			{#await data.stream.aleComparison}
+				<div class="flex items-center justify-center h-64">
+					<div class="text-center">
+						<LoadingSpinner />
+						<p class="mt-4 text-gray-600">Loading ALE comparison data...</p>
+					</div>
+				</div>
+			{:then aleComparisonData}
+				{#if aleComparisonData?.scenarios && aleComparisonData.scenarios.length > 0}
+					<div class="mb-4">
+						<ALEComparisonChart
+							scenarios={aleComparisonData.scenarios}
+							title="ALE vs Treatment Cost by Scenario"
+							height="h-96"
+							width="w-full"
+						/>
+					</div>
+
+					<!-- Summary statistics -->
+					<div class="bg-gray-50 rounded-lg p-4 text-sm">
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+							<div>
+								<div class="font-semibold text-gray-700">Total Scenarios</div>
+								<div class="text-lg font-bold">{aleComparisonData.total_scenarios}</div>
+							</div>
+							<div>
+								<div class="font-semibold text-gray-700">With Current ALE</div>
+								<div class="text-lg font-bold text-red-600">{aleComparisonData.scenarios_with_current_ale}</div>
+							</div>
+							<div>
+								<div class="font-semibold text-gray-700">With Residual ALE</div>
+								<div class="text-lg font-bold text-green-600">{aleComparisonData.scenarios_with_residual_ale}</div>
+							</div>
+							<div>
+								<div class="font-semibold text-gray-700">With Treatment Cost</div>
+								<div class="text-lg font-bold text-blue-600">{aleComparisonData.scenarios_with_treatment_cost}</div>
+							</div>
+						</div>
+					</div>
+				{:else}
+					<div class="text-center py-8">
+						<i class="fa-solid fa-chart-column text-4xl text-gray-400 mb-4"></i>
+						<h3 class="text-lg font-semibold text-gray-600 mb-2">No ALE Data Available</h3>
+						<p class="text-gray-500">Run simulations on your scenarios to generate ALE comparison data.</p>
+					</div>
+				{/if}
+			{:catch error}
+				<div class="text-center py-8">
+					<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+					<h3 class="text-lg font-semibold text-gray-600 mb-2">Error Loading Data</h3>
+					<p class="text-gray-500">Failed to load ALE comparison data.</p>
+				</div>
+			{/await}
+		</div>
+	</div>
+{/if}
