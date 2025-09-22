@@ -2,11 +2,13 @@ from rest_framework.routers import DefaultRouter
 
 
 class RouterFactory:
-    def __init__(self, enforce_trailing_slash: bool) -> None:
-        self.enforce_trailing_slash = enforce_trailing_slash
+    def __init__(
+        self,
+    ) -> None:
+        pass
 
-    def get_router(self) -> DefaultRouter:
-        if self.enforce_trailing_slash:
+    def create_router(self, enforce_trailing_slash: bool) -> DefaultRouter:
+        if enforce_trailing_slash:
             return DefaultRouter()
         return OptionalSlashRouter()
 
