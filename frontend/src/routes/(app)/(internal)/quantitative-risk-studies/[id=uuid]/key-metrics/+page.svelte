@@ -244,7 +244,7 @@
 
 	// Filter columns based on visibility settings
 	const visibleColumns = $derived(
-		allColumns.filter(column => columnVisibility[column.id as keyof typeof columnVisibility])
+		allColumns.filter((column) => columnVisibility[column.id as keyof typeof columnVisibility])
 	);
 
 	// Functions for column management
@@ -254,7 +254,7 @@
 			return;
 		}
 
-		Object.keys(columnVisibility).forEach(key => {
+		Object.keys(columnVisibility).forEach((key) => {
 			columnVisibility[key as keyof typeof columnVisibility] = show;
 		});
 	}
@@ -423,7 +423,9 @@
 								</button>
 
 								{#if showColumnControls}
-									<div class="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown">
+									<div
+										class="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown"
+									>
 										<div class="flex justify-between items-center mb-3">
 											<h4 class="font-medium text-gray-900">Show/Hide Columns</h4>
 											<button
@@ -453,8 +455,13 @@
 
 										<div class="space-y-2 max-h-64 overflow-y-auto">
 											{#each allColumns as column}
-												{@const isLastVisible = getVisibleColumnsCount() === 1 && columnVisibility[column.id]}
-												<label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded {isLastVisible ? 'opacity-50' : ''}">
+												{@const isLastVisible =
+													getVisibleColumnsCount() === 1 && columnVisibility[column.id]}
+												<label
+													class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded {isLastVisible
+														? 'opacity-50'
+														: ''}"
+												>
 													<input
 														type="checkbox"
 														checked={columnVisibility[column.id]}
