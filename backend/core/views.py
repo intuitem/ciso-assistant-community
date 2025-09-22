@@ -1402,6 +1402,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "residual_proba",
                 "residual_risk",
                 "treatment",
+                "strength_of_knowledge",
             ]
             if ff_is_enabled("inherent_risk"):
                 # insert inherent_risk just before existing_controls
@@ -1436,6 +1437,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     scenario.get_residual_proba()["name"],
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
+                    RiskScenario.DEFAULT_SOK_OPTIONS[scenario.strength_of_knowledge]["name"],
                 ]
                 if ff_is_enabled("inherent_risk"):
                     row.insert(
