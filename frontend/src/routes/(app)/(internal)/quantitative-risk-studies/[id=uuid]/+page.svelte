@@ -39,21 +39,21 @@
 				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}
+				<i class="fa-solid fa-heart-pulse mr-2 capitalize"></i>{m.actionPlan()}
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/executive-summary`}
-				class="btn preset-filled-secondary-500 h-fit"
+				class="btn bg-emerald-500 hover:bg-emerald-600 text-white h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-chart-line mr-2"></i>Executive Summary
+				<i class="fa-solid fa-chart-line mr-2"></i>Executive summary
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/key-metrics`}
-				class="btn bg-teal-400 text-white h-fit"
+				class="btn bg-amber-500 hover:bg-amber-600 text-white h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-chart-simple mr-2"></i>Key Metrics
+				<i class="fa-solid fa-chart-simple mr-2"></i>Key metrics
 			</Anchor>
 			<form
 				method="POST"
@@ -131,7 +131,7 @@
 			>
 				<button
 					type="submit"
-					class="btn bg-purple-500 text-white h-fit"
+					class="btn bg-violet-500 hover:bg-violet-600 text-white h-fit disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={retriggerIsLoading}
 					title="Retrigger all simulations for this study including hypotheses, portfolio data, and risk tolerance curve"
 				>
@@ -147,7 +147,7 @@
 							<i class="fa-solid fa-arrows-rotate"></i>
 						{/if}
 					</span>
-					Retrigger All Simulations
+					Retrigger all simulations
 				</button>
 			</form>
 		</div>
