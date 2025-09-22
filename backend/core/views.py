@@ -5330,15 +5330,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         with transaction.atomic():
-            instance: ComplianceAssessment = serializer.save()
-            instance.create_requirement_assessments(baseline)
+            new_audit: ComplianceAssessment = serializer.save()
+            new_audit.create_requirement_assessments(baseline)
 
-            if baseline and baseline.framework == instance.framework:
-                instance.show_documentation_score = baseline.show_documentation_score
-                instance.save()
+            duplicate_applied_controls = (
+                new_audit.folder != baseline.folder
+                and new_audit.folder not in baseline.folder.get_parent_folders()
+            )
+            duplicated_applied_controls: dict[str, AppliedControl] = {}
+
+            if baseline and baseline.framework == new_audit.framework:
+                new_audit.show_documentation_score = baseline.show_documentation_score
+                new_audit.save()
 
             # Handle different framework case
-            elif baseline and baseline.framework != instance.framework:
+            elif baseline and baseline.framework != new_audit.framework:
                 # Fetch mapping set and prefetch related data
                 mapping_set = RequirementMappingSet.objects.select_related(
                     "source_framework", "target_framework"
@@ -5348,8 +5354,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 # Compute results and get all affected requirement assessments
-                computed_assessments = instance.compute_requirement_assessments_results(
-                    mapping_set, baseline
+                computed_assessments = (
+                    new_audit.compute_requirement_assessments_results(
+                        mapping_set, baseline
+                    )
                 )
 
                 # Collect all source requirement assessment IDs
@@ -5394,14 +5402,69 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     RequirementAssessment.objects.bulk_update(updates, ["observation"])
 
                 # Handle M2M relationships in bulk
-                for assessment, evidences, controls in m2m_operations:
+                for assessment, evidences, applied_controls in m2m_operations:
                     assessment.evidences.add(*[ev.id for ev in evidences])
-                    assessment.applied_controls.add(*[ac.id for ac in controls])
+
+                    if duplicate_applied_controls:
+                        new_applied_controls = []
+                        for applied_control in applied_controls:
+                            if (
+                                duplicated_applied_control
+                                := duplicated_applied_controls.get(applied_control.id)
+                            ) is None:
+                                duplicated_applied_control_data = {
+                                    field.name: getattr(applied_control, field.name)
+                                    for field in applied_control._meta.fields
+                                    if field.name
+                                    not in ["id", "pk", "created_at", "updated_at"]
+                                }
+                                duplicated_applied_control_data["folder"] = (
+                                    new_audit.folder
+                                )
+
+                                duplicated_applied_control, created = (
+                                    AppliedControl.objects.update_or_create(
+                                        defaults=duplicated_applied_control_data,
+                                        name=applied_control.name,
+                                        folder=new_audit.folder,
+                                    )
+                                )
+                                if created:
+                                    for field_name in [
+                                        "assets",
+                                        "evidences",
+                                        "filtering_labels",
+                                        "security_exceptions",
+                                        "objectives",
+                                    ]:
+                                        duplicate_related_objects(
+                                            applied_control,
+                                            duplicated_applied_control,
+                                            new_audit.folder,
+                                            field_name,
+                                        )
+
+                                duplicated_applied_control.owner.set(
+                                    applied_control.owner.all()
+                                )
+                                duplicated_applied_control.save()
+
+                                duplicated_applied_controls[applied_control.id] = (
+                                    duplicated_applied_control
+                                )
+                            new_applied_controls.append(duplicated_applied_control)
+                        assessment.applied_controls.add(
+                            *(ac.id for ac in new_applied_controls)
+                        )
+                    else:
+                        assessment.applied_controls.add(
+                            *(ac.id for ac in applied_controls)
+                        )
 
             # Handle applied controls creation
             if create_applied_controls:
                 # Prefetch all requirement assessments with their suggestions
-                assessments = instance.requirement_assessments.all().prefetch_related(
+                assessments = new_audit.requirement_assessments.all().prefetch_related(
                     "requirement__reference_controls"
                 )
 
