@@ -17,7 +17,7 @@ Write-Output "Waiting for CISO Assistant backend to be ready..."
 do {
     $backendReady = $false
     try {
-        $result = docker compose exec -T backend curl -f http://localhost:8000/api/build/ 2>$null
+        $result = docker compose exec -T backend curl -f http://localhost:8000/api/build 2>$null
         if ($LASTEXITCODE -eq 0) {
             $backendReady = $true
         }

@@ -17,7 +17,7 @@ echo "Initializing the database. This can take up to 2 minutes, please wait.."
 docker compose -f ./docker-compose.yml up -d
 
 echo "Waiting for CISO Assistant backend to be ready..."
-until docker compose -f ./docker-compose.yml exec -T backend curl -f http://localhost:8000/api/build/ >/dev/null 2>&1; do
+until docker compose -f ./docker-compose.yml exec -T backend curl -f http://localhost:8000/api/build >/dev/null 2>&1; do
   echo "Backend is not ready - waiting 10s..."
   sleep 10
 done
