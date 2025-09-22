@@ -18,6 +18,11 @@ urlpatterns = [
                     views.FinishACSView.as_view(),
                     name="saml_finish_acs",
                 ),
+                path(
+                    "generate-keys/",
+                    views.GenerateSAMLKeyView.as_view(),
+                    name="generate_saml_keys"
+                )
             ]
         ),
     )

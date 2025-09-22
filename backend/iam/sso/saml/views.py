@@ -25,7 +25,7 @@ from django.http.response import Http404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
-from rest_framework.views import csrf_exempt
+from rest_framework.views import csrf_exempt, APIView
 
 from iam.models import User
 from iam.sso.errors import AuthError
@@ -192,3 +192,79 @@ class FinishACSView(SAMLViewMixin, View):
                     email_object.save()
                     logger.info("Email verified", user=user)
             return HttpResponseRedirect(next_url)
+
+
+from core.permissions import IsAdministrator   # ou une permission plus adaptée
+from rest_framework.response import Response
+from rest_framework import status
+
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from datetime import datetime, timedelta
+import json
+from global_settings.models import GlobalSettings
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GenerateSAMLKeyView(SAMLViewMixin, APIView):
+    """
+    Endpoint to generate a key pair (private key + self-signed X.509 certificate).
+    Accessible only to admins (to be adapted as needed).
+    """
+    permission_classes = [IsAdministrator]
+
+    def post(self, request, organization_slug):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            data = {}
+        cn = data.get("common_name", "saml-sp.example.com")
+        days = int(data.get("days", 365))
+
+        # RSA key generation
+        key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+        )
+
+        # Self-signed certificate generation
+        subject = issuer = x509.Name([
+            x509.NameAttribute(NameOID.COMMON_NAME, cn),
+        ])
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(issuer)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.utcnow())
+            .not_valid_after(datetime.utcnow() + timedelta(days=days))
+            .sign(private_key=key, algorithm=hashes.SHA256())
+        )
+
+        private_key_pem = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption(),  # protect if needed
+        )
+
+        cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+        
+        provider = self.get_provider(organization_slug)
+        # Retrieves the 'advanced' dictionary, or creates it if it doesn't exist
+        advanced_settings = provider.app.settings.get("advanced", {})
+        advanced_settings["private_key"] = private_key_pem.decode("utf-8")
+        advanced_settings["x509cert"] = cert_pem.decode("utf-8")
+
+        # Re-injects the dict into the application configuration
+        settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        settings.value["settings"]["advanced"] = advanced_settings
+        settings.save()
+
+        return Response(
+            {
+                "message": f"Key and certificate saved in advanced settings of SP {organization_slug}"
+            },
+            status=status.HTTP_201_CREATED,
+        )
