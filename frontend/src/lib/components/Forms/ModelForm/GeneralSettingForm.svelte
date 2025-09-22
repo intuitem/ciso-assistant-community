@@ -30,7 +30,7 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications','financial']);
+	let openAccordionItems = $state(['notifications', 'financial']);
 </script>
 
 <Accordion
