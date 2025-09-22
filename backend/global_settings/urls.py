@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.urls import include, path
-from rest_framework import routers
 
+from core.routers import RouterFactory
 from iam.sso.views import SSOSettingsViewSet
 
 from .views import (
@@ -12,7 +13,10 @@ from .views import (
 from .routers import DefaultSettingsRouter
 
 
-router = routers.DefaultRouter()
+router_factory = RouterFactory()
+router = router_factory.create_router(
+    enforce_trailing_slash=settings.ENFORCE_TRAILING_SLASH
+)
 router.register(r"global", GlobalSettingsViewSet, basename="global-settings")
 
 settings_router = DefaultSettingsRouter()

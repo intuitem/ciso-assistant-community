@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.urls import include, path
-from rest_framework import routers
 
+from core.routers import RouterFactory
 from ebios_rm.views import (
     EbiosRMStudyViewSet,
     FearedEventViewSet,
@@ -14,7 +15,10 @@ from ebios_rm.views import (
     KillChainViewSet,
 )
 
-router = routers.DefaultRouter()
+router_factory = RouterFactory()
+router = router_factory.create_router(
+    enforce_trailing_slash=settings.ENFORCE_TRAILING_SLASH
+)
 
 router.register(r"studies", EbiosRMStudyViewSet, basename="studies")
 router.register(r"feared-events", FearedEventViewSet, basename="feared-events")

@@ -1,4 +1,5 @@
 from .views import *
+from .routers import RouterFactory
 from tprm.views import (
     EntityViewSet,
     RepresentativeViewSet,
@@ -10,12 +11,15 @@ import importlib
 
 
 from django.urls import include, path
-from rest_framework import routers
 
 from ciso_assistant.settings import DEBUG
 from django.conf import settings
 
-router = routers.DefaultRouter()
+router_factory = RouterFactory()
+router = router_factory.create_router(
+    enforce_trailing_slash=settings.ENFORCE_TRAILING_SLASH
+)
+
 router.register(r"folders", FolderViewSet, basename="folders")
 router.register(r"entities", EntityViewSet, basename="entities")
 router.register(
