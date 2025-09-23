@@ -2117,6 +2117,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
         raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
+    empty_id_name_desc_rows = []
     invalid_ref_ids = []
 
     for idx, row in df.iterrows():
@@ -2143,16 +2144,23 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
 
         if not ref_id and not name and not description:
-            raise ValueError(
-                f"({fct_name}) [{sheet_name}] Row #{idx + 2}: Invalid row: \"ref_id\", \"name\" and \"description\" are empty"
-                "\n> 💡 Tip: At least one of them must be filled."
-            )
+            empty_id_name_desc_rows.append(idx)
 
+        # Check Ref. IDs
         if ref_id:
             try:
                 validate_ref_id_with_spaces(ref_id, fct_name, idx)
             except Exception as e:
                 invalid_ref_ids.append((ref_id, idx))
+
+
+    # If any, returns an error and print rows with empty Ref. ID, Name and Description 
+    if empty_id_name_desc_rows:
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Invalid rows: \"ref_id\", \"name\" and \"description\" are empty :\n   - "
+            + "\n   - ".join(f'Row #{idx + 2}' for idx in empty_id_name_desc_rows)
+            + "\n> 💡 Tip: For each row, at least one of the values must be filled."
+        )
 
     # If any, returns an error and print invalid Ref. IDs
     if invalid_ref_ids:
