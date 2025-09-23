@@ -238,6 +238,16 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         model = SSOSettings
         exclude = ["value"]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        # remove nested private_key if present
+        advanced = data.get("settings", {}).get("advanced", {})
+        if "private_key" in advanced:
+            advanced.pop("private_key")
+
+        return data
+
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
