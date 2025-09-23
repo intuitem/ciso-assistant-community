@@ -253,7 +253,7 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
         private_key_pem = key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption(),  # protect if needed
+            encryption_algorithm=serialization.NoEncryption(),
         )
 
         cert_pem = cert.public_bytes(serialization.Encoding.PEM)
