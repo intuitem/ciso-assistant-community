@@ -148,4 +148,13 @@
 		bind:cachedValue={formDataCache['owners']}
 		label={m.owners()}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="entities"
+		field="entities"
+		cacheLock={cacheLocks['entities']}
+		bind:cachedValue={formDataCache['entities']}
+		label={m.entities()}
+	/>
 </Dropdown>

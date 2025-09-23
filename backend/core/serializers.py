@@ -2001,6 +2001,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
