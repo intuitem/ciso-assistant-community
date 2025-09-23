@@ -796,6 +796,9 @@ def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: Co
 # Global Checks
 def validate_content_sheet(df, sheet_name: str, required_columns: List[str], context: str):
     
+    required_values_missing = []
+    invalid_ref_ids = []
+    
     if required_columns:
         # Check that all required columns are present
         for col in required_columns:
@@ -810,10 +813,26 @@ def validate_content_sheet(df, sheet_name: str, required_columns: List[str], con
                     continue  # Skip completely empty rows
 
                 if pd.isna(value) or str(value).strip() == "":
-                    raise ValueError(f"({context}) [{sheet_name}] Row #{idx + 2}: required value missing in column \"{col}\"")
+                    required_values_missing.append(idx)
+                    # raise ValueError(f"({context}) [{sheet_name}] Row #{idx + 2}: Required value missing in column \"{col}\"")
 
                 if col in ["ref_id", "id"]:
-                    validate_ref_id(value, context, idx)
+                    try:
+                        validate_ref_id(value, context, idx)
+                    except Exception as e:
+                        invalid_ref_ids.append((value, idx))
+            
+            if required_values_missing:
+                raise ValueError(
+                    f"({context}) [{sheet_name}] Required values missing in column \"{col}\":\n   - "
+                    + "\n   - ".join(f'Row #{idx + 2}' for idx in required_values_missing)
+                )
+            
+            if invalid_ref_ids:
+                raise ValueError(
+                    f"({context}) [{sheet_name}] Invalid Ref. IDs found. Only alphanumeric characters, '-', '_', and '.' are allowed :\n   - "
+                    + "\n   - ".join(f'Row #{idx + 2}: {value}' for value, idx in invalid_ref_ids)
+                )
 
 
 def validate_optional_columns_content_sheet(df, sheet_name: str, optional_columns: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
@@ -2085,6 +2104,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
         raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
+    invalid_ref_ids = []
+
     for idx, row in df.iterrows():
         if row.dropna().empty:
             continue  # skip completely empty rows
@@ -2115,7 +2136,18 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
             )
 
         if ref_id:
-            validate_ref_id_with_spaces(ref_id, fct_name, idx)
+            try:
+                validate_ref_id_with_spaces(ref_id, fct_name, idx)
+            except Exception as e:
+                invalid_ref_ids.append((ref_id, idx))
+
+    # If any, returns an error and print invalid Ref. IDs
+    if invalid_ref_ids:
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Invalid Ref. IDs found. Only alphanumeric characters, '-', '_', ' ', and '.' are allowed :\n   - "
+            + "\n   - ".join(f'Row #{idx + 2}: {value}' for value, idx in invalid_ref_ids)
+        )
+
 
     # Validate columns that reference other sheets (only if they contain non-empty values)
     for column in ["implementation_groups", "answer"]:
@@ -2144,7 +2176,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["ref_id"]
+    required_columns = ["ref_id", "name"]
     optional_columns = ["description", "annotation"]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
@@ -2163,7 +2195,7 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
 def validate_reference_controls_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["ref_id"]
+    required_columns = ["ref_id", "name"]
     optional_columns = ["description", "category", "csf_function", "annotation"]
 
     # Special values
@@ -2642,8 +2674,7 @@ def main():
     )
 
     parser.add_argument(
-        "-b",
-        "--bulk",
+        "-b", "--bulk",
         action="store_true",
         help="Enable bulk mode to process all Excel files in a directory.",
     )
@@ -2673,7 +2704,7 @@ def main():
 
     # --- SINGLE FILE CHECK -----------------------------------------------------
     else:
-        _, err =  single_file_check(args, external_refs, enable_ctx)
+        _, err = single_file_check(args, external_refs, enable_ctx)
 
 
     if err:
