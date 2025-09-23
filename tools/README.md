@@ -69,7 +69,12 @@ python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
 
 ### > `check_library_v2.py`
 
-Usage: 
+Usage (simplified): 
+```bash
+python check_library_v2.py your_library_file.xlsx [--verbose]
+```
+
+Usage (advanced):
 ```bash
 python check_library_v2.py your_library_file.xlsx [-e|--external-refs ./ref1.yaml,ref2.yaml,...] [--verbose]
 ```
