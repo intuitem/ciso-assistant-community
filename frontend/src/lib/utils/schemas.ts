@@ -931,7 +931,8 @@ export const IncidentSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().uuid().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional(),
+	entities: z.string().uuid().optional().array().optional()
 });
 
 export const TimelineEntrySchema = z.object({
