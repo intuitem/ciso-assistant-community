@@ -1583,6 +1583,7 @@ export const listViewFields = {
 			'detection',
 			'folder',
 			'qualifications',
+			'entities',
 			'updated_at'
 		],
 		body: [
@@ -1593,11 +1594,13 @@ export const listViewFields = {
 			'detection',
 			'folder',
 			'qualifications',
+			'entities',
 			'updated_at'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
+			entities: ENTITY_FILTER,
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
 			severity: INCIDENT_SEVERITY_FILTER

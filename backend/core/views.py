@@ -6711,6 +6711,7 @@ class IncidentViewSet(BaseModelViewSet):
         "qualifications",
         "detection",
         "owners",
+        "entities",
     ]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
