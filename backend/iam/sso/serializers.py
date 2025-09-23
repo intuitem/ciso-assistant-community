@@ -222,6 +222,7 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         required=False,
         allow_blank=True,
         allow_null=True,
+        trim_whitespace=False,
         source="settings.advanced.private_key",
         write_only=True,
     )

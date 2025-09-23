@@ -9,7 +9,8 @@ from django.views import View
 
 # === Third-party packages ===
 import structlog
-from rest_framework.views import APIView, csrf_exempt
+from rest_framework.views import APIView
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -210,7 +211,6 @@ class FinishACSView(SAMLViewMixin, View):
             return HttpResponseRedirect(next_url)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class GenerateSAMLKeyView(SAMLViewMixin, APIView):
     """
     Endpoint to generate a key pair (private key + self-signed X.509 certificate).
