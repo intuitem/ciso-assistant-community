@@ -346,6 +346,7 @@
 				<Checkbox
 					{form}
 					field="want_assertion_signed"
+					hidden
 					label={m.wantAssertionSigned()}
 					disabled={!data.is_enabled}
 				/>
