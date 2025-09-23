@@ -179,26 +179,14 @@ export const actions: Actions = {
 		return { form };
 	},
 	generateSamlKeys: async (event) => {
-		const formData = await event.request.formData();
-
-		if (!formData) {
-			return fail(400, { form: null });
-		}
-
-		const schema = SSOSettingsSchema;
-		const form = await superValidate(formData, zod(schema));
-		const endpoint = `${BASE_API_URL}/accounts/saml/0/generate-keys/`;
-
-		const requestInitOptions: RequestInit = {
+		const response = await event.fetch(`${BASE_API_URL}/accounts/saml/0/generate-keys/`, {
 			method: 'POST'
-		};
+		});
 
-		const response = await event.fetch(endpoint, requestInitOptions);
+		if (!response.ok) return fail(500, { error: 'Generation failed' });
 
-		if (!response.ok) return 'error';
+		const { cert } = await response.json();
 
-		setFlash({ type: 'success', message: m.samlKeysGenerated() }, event);
-
-		return { form };
+		return { generatedKeys: { cert } };
 	}
 };

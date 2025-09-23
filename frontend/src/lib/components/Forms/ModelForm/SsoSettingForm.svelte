@@ -44,22 +44,17 @@
 	let isGenerating = $state(false);
 
 	const handleGenerateKeys = ({ cancel }) => {
-		// Prevent submission if conditions aren't met
 		if (!data.is_enabled || !data.authn_request_signed) {
 			cancel();
 			return;
 		}
-
 		isGenerating = true;
 
 		return async ({ result, update }) => {
 			isGenerating = false;
 
-			if (result.type === 'success') {
-				// Refresh the page data to show new keys
-				await invalidateAll();
-			} else if (result.type === 'error') {
-				console.error('Failed to generate keys:', result.error);
+			if (result.type === 'success' && result.data?.generatedKeys?.cert) {
+				$formStore.sp_x509cert = result.data.generatedKeys.cert;
 			}
 
 			await update();

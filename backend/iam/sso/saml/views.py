@@ -271,7 +271,8 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
 
         return Response(
             {
-                "message": f"Key and certificate saved in advanced settings of SP {organization_slug}"
+                "message": f"Key and certificate saved in advanced settings of SP {organization_slug}",
+                "cert": cert_pem.decode("utf-8"),
             },
             status=status.HTTP_201_CREATED,
         )
