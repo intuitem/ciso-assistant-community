@@ -818,9 +818,9 @@ def validate_content_sheet(df, sheet_name: str, required_columns: List[str], con
 
                 if col in ["ref_id", "id"]:
                     try:
-                        validate_ref_id(value, context, idx)
+                        validate_ref_id(str(value), context, idx)
                     except Exception as e:
-                        invalid_ref_ids.append((value, idx))
+                        invalid_ref_ids.append((str(value), idx))
             
             if required_values_missing:
                 raise ValueError(
@@ -1018,16 +1018,22 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
             if not values:
                 continue  # skip empty sheets
 
-            df_fw = pd.DataFrame(values[1:], columns=values[0])  # use header
+            # Convert each cells as raw text (or "None" if empty)
+            # Line added to avoid the problem were numbers (like "1") are converted into floats (1.0)
+            header = [str(c).strip() if c is not None else None for c in values[0]]
+            rows = [[str(c).strip() if c is not None else None for c in row] for row in values[1:]]
+            
+            df_fw = pd.DataFrame(rows, columns=header)  # use header
 
             if target_column not in df_fw.columns:
                 continue
 
-            for cell in df_fw[target_column]:
+            for cell in df_fw[target_column].dropna().astype(str):
                 if pd.isna(cell):
                     continue
 
                 entries = [entry.strip() for entry in str(cell).split("\n") if entry.strip()]
+
                 if _id in entries:
                     found = True
                     break  # No need to keep looking in this sheet
@@ -1040,8 +1046,8 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
 
     if unused_ids:
         msg = (
-            f"⚠️  [WARNING] ({context}) [{sheet_name}] The following ID(s) from column \"{id_column}\" are not used in any framework sheet: "
-            f"{', '.join(f'\"{x}\"' for x in unused_ids)}\n"
+            f"⚠️  [WARNING] ({context}) [{sheet_name}] The following ID(s) from column \"{id_column}\" are not used in any framework sheet:\n   - "
+            f"{'\n   - '.join(f'{x}' for x in unused_ids)}\n"
             "> 💡 Tip: Use these IDs in a framework sheet, or remove them if not needed."
         )
         print(msg)
@@ -1549,15 +1555,22 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
         raise ValueError(f"({context}) [{current_sheet_name}] Referenced sheet \"{ref_content_sheet}\" does not contain required column \"{ref_column}\"")
 
     valid_values = set(ref_df[ref_column].dropna().astype(str).map(str.strip))
-    
+
+
+    invalid_values = []
+
     for idx, value in df[column_name].dropna().astype(str).items():
         items = [v.strip() for v in value.split(separator) if v.strip()]
         for i, item in enumerate(items, start=1):
             if item not in valid_values:
-                raise ValueError(
-                    f"({context}) [{current_sheet_name}] Row #{idx + 2} - Invalid value \"{item}\" (element #{i}) in column \"{column_name}\".\n"
-                    f"> 💡 Tip: Make sure this value exists in column \"{ref_column}\" of the referenced sheet \"{ref_content_sheet}\"."
-                )
+                invalid_values.append((idx, item, i))
+
+    if invalid_values:
+        raise ValueError(
+            f"({context}) [{current_sheet_name}] Invalid values in column \"{column_name}\" :\n   - "
+            + "\n   - ".join(f'Row #{idx + 2} (element #{i}) -> {item}' for idx, item, i in invalid_values)
+            + f"\n> 💡 Tip: Make sure these values exist in column \"{ref_column}\" of the referenced sheet \"{ref_content_sheet}\"."
+        )
 
     if verbose:
         msg = f'💬 ℹ️  [INFO] ({context}) [{current_sheet_name}] Column \"{column_name}\" has valid values'
@@ -2594,10 +2607,10 @@ def validate_excel_structure(filepath, external_refs: List[str] = None, verbose:
     # Sort sheets
     for sheet_name in wb.sheetnames:
         if sheet_name.endswith("_meta"):
-            df = pd.read_excel(filepath, sheet_name=sheet_name, header=None)
+            df = pd.read_excel(filepath, sheet_name=sheet_name, header=None, dtype=str, keep_default_na=False)
             meta_sheets[sheet_name] = df
         elif sheet_name.endswith("_content"):
-            df = pd.read_excel(filepath, sheet_name=sheet_name, header=0)
+            df = pd.read_excel(filepath, sheet_name=sheet_name, header=0, dtype=str, keep_default_na=False)
             content_sheets[sheet_name] = df
         else:
             ignored_sheets.append(sheet_name)
