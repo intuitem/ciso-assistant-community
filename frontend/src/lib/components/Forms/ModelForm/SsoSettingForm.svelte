@@ -373,6 +373,7 @@
 				<Checkbox
 					{form}
 					field="authn_request_signed"
+					helpText={m.samlAuthnRequestSignedHelpText()}
 					label={m.authnRequestSigned()}
 					disabled={!data.is_enabled}
 				/>
@@ -396,6 +397,7 @@
 							{form}
 							field="sp_x509cert"
 							label={m.x509Cert()}
+							helpText={m.samlCertificateHelpText()}
 							disabled={!data.is_enabled || !data.authn_request_signed}
 							cacheLock={cacheLocks['sp_x509cert']}
 							bind:cachedValue={formDataCache['sp_x509cert']}
@@ -404,6 +406,7 @@
 							{form}
 							field="sp_private_key"
 							label={m.privateKey()}
+							helpText={m.samlPrivateKeyHelpText()}
 							disabled={!data.is_enabled || !data.authn_request_signed}
 							cacheLock={cacheLocks['sp_private_key']}
 							bind:cachedValue={formDataCache['sp_private_key']}

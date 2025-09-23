@@ -187,6 +187,8 @@ export const actions: Actions = {
 
 		const { cert } = await response.json();
 
+		setFlash({ type: 'success', message: m.samlKeysGenerated() }, event);
+
 		return { generatedKeys: { cert } };
 	}
 };
