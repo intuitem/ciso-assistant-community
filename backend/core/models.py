@@ -29,6 +29,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+
 from library.helpers import (
     get_referential_translation,
     update_translations,
@@ -2869,6 +2870,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         blank=True,
         max_length=2048,
         verbose_name=_("Link"),
+    )
+    # note: made this syntax to avoid circular dependencies
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="incidents",
+        verbose_name="Entities",
+        blank=True,
     )
 
     is_published = models.BooleanField(_("published"), default=True)
