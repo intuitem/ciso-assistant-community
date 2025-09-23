@@ -20,3 +20,4 @@ charts/custom-values.yaml
 charts/ciso-assistant-next/custom.yaml
 .history/
 __pycache__
+.idea

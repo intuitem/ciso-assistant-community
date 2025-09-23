@@ -933,8 +933,8 @@ const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parentDomain'],
-		body: ['name', 'description', 'parent_folder']
+		head: ['ref_id', 'name', 'description', 'parentDomain'],
+		body: ['ref_id', 'name', 'description', 'parent_folder']
 	},
 	perimeters: {
 		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
