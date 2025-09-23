@@ -23,6 +23,11 @@ urlpatterns = [
                     views.GenerateSAMLKeyView.as_view(),
                     name="generate_saml_keys",
                 ),
+                path(
+                    "download-cert/",
+                    views.DownloadSAMLPublicCertView.as_view(),
+                    name="download_saml_cert",
+                ),
             ]
         ),
     )

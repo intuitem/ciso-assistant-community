@@ -1,7 +1,7 @@
 # === Python standard library ===
 import json
 from datetime import datetime, timedelta
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.http.response import Http404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -276,3 +276,19 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class DownloadSAMLPublicCertView(SAMLViewMixin, APIView):
+    permission_classes = [IsAdministrator]
+
+    def get(self, request, organization_slug):
+        provider = self.get_provider(organization_slug)
+        cert_pem = provider.app.settings.get("advanced", {}).get("x509cert")
+        if not cert_pem:
+            return HttpResponse(status=404)
+
+        response = HttpResponse(cert_pem, content_type="application/x-pem-file")
+        response["Content-Disposition"] = (
+            'attachment; filename="ciso-saml-public-cert.pem"'
+        )
+        return response

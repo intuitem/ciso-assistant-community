@@ -10,8 +10,8 @@
 	import { m } from '$paraglide/messages';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { invalidateAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -378,19 +378,23 @@
 					disabled={!data.is_enabled}
 				/>
 				<div class="w-full p-4 flex flex-col gap-4 border rounded-md mt-1">
-					<div class="flex flex-row gap-4">
-						<form
-							id="generateSamlKeys"
-							method="post"
-							action="?/generateSamlKeys"
-							use:enhance={handleGenerateKeys}
-						></form>
-						<button
-							form="generateSamlKeys"
-							type="submit"
-							disabled={!data.is_enabled || !data.authn_request_signed}
-							class="btn preset-filled">{m.generateDots()}</button
-						>
+					<div class="flex flex-row gap-4 items-center">
+						<form method="post" action="?/generateSamlKeys" use:enhance={handleGenerateKeys}>
+							<button
+								type="submit"
+								disabled={!data.is_enabled || !data.authn_request_signed}
+								class="btn preset-filled-secondary-500">{m.generateDots()}</button
+							>
+						</form>
+						{#if data.is_enabled && data.authn_request_signed}
+							<Anchor
+								href="settings/saml/download-cert"
+								class="anchor text-secondary-500"
+								disabled={!data.is_enabled || !data.authn_request_signed}
+							>
+								{m.downloadCertificate()}
+							</Anchor>
+						{/if}
 					</div>
 					<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextArea
