@@ -109,7 +109,7 @@
 		regionHead = '',
 		regionHeadCell = 'uppercase bg-white text-gray-700',
 		regionBody = 'bg-white',
-		regionCell = 'max-w-[65ch] text-ellipsis',
+		regionCell = 'max-w-[65ch] max-h-[8em] overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
@@ -513,14 +513,12 @@
 			{/if}
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="table-body w-full border-b border-b-surface-100-900 {regionBody}">
+			<tbody class="w-full border-b border-b-surface-100-900 {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
 					<ContextMenu.Trigger asChild>
 						{#snippet children({ builder })}
 							<tr
-								use:builder.action
-								{...builder}
 								onclick={(e) => {
 									onRowClick(e, rowIndex);
 								}}
@@ -534,109 +532,111 @@
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
 										{@const component = fieldComponentMap[key]}
-										<td class={regionCell} role="gridcell">
-											{#if component && browser}
-												{@const CellComponent = component}
-												{#if CellComponent === LecChartPreview}
-													{#key `${meta?.id || rowIndex}-${key}`}
-														<CellComponent {meta} cell={value} />
-													{/key}
-												{:else}
-													<CellComponent {meta} cell={value} />
-												{/if}
-											{:else}
-												<span class="base-font-family whitespace-pre-line break-words">
-													{#if Array.isArray(value)}
-														<ul class="list-disc pl-4 whitespace-normal">
-															{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
-																<li>
-																	{#if val.str && val.id && key !== 'qualifications'}
-																		{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
-																		<Anchor href={itemHref} class="anchor" stopPropagation
-																			>{val.str}</Anchor
-																		>
-																	{:else if val.str}
-																		{safeTranslate(val.str)}
-																	{:else if unsafeTranslate(val.split(':')[0])}
-																		<span class="text"
-																			>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																			{val.split(':')[1]}</span
-																		>
-																	{:else}
-																		{val ?? '-'}
-																	{/if}
-																</li>
-															{/each}
-														</ul>
-													{:else if value && value.str}
-														{#if value.id}
-															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-															{#if key === 'ro_to_couple'}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-																		'-'
-																	)[1]}</Anchor
-																>
-															{:else}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																	>{value.str}</Anchor
-																>
-															{/if}
-														{:else}
-															{value.str ?? '-'}
-														{/if}
-													{:else if value && value.hexcolor}
-														<p
-															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																value.hexcolor
-															)}"
-															style="background-color: {value.hexcolor}"
-														>
-															{safeTranslate(value.name ?? value.str) ?? '-'}
-														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
-														{formatDateOrDateTime(value, getLocale())}
-													{:else if [true, false].includes(value)}
-														<span class="ml-4">{safeTranslate(value ?? '-')}</span>
-													{:else if key === 'progress'}
-														<span class="ml-9"
-															>{safeTranslate('percentageDisplay', { number: value })}</span
-														>
-													{:else if key === 'translations'}
-														{#if Object.keys(value).length > 0}
-															<div class="flex flex-col gap-2">
-																{#each Object.entries(value) as [lang, translation]}
-																	<div class="flex flex-row gap-2">
-																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
-																	</div>
-																{/each}
-															</div>
-														{:else}
-															--
-														{/if}
-													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
-														<div class="flex items-center space-x-2">
-															<span>{safeTranslate(value ?? '-')}</span>
-															<span
-																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
-															>
-																{m.accept()}
-															</span>
-														</div>
-													{:else if key === 'icon_fa_class'}
-														<i class="text-lg fa {value}"></i>
+										<td role="gridcell">
+											<div class={regionCell}>
+												{#if component && browser}
+													{@const CellComponent = component}
+													{#if CellComponent === LecChartPreview}
+														{#key `${meta?.id || rowIndex}-${key}`}
+															<CellComponent {meta} cell={value} />
+														{/key}
 													{:else}
-														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{#if value?.length > 300}
-															{safeTranslate(value ?? '-').slice(0, 300)}...
-														{:else}
-															{safeTranslate(value ?? '-')}
-														{/if}
+														<CellComponent {meta} cell={value} />
 													{/if}
-													{@render badge?.(key, row)}
-												</span>
-											{/if}
+												{:else}
+													<span class="base-font-family whitespace-pre-line break-words">
+														{#if Array.isArray(value)}
+															<ul class="list-disc pl-4 whitespace-normal">
+																{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+																	<li>
+																		{#if val.str && val.id && key !== 'qualifications'}
+																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																			<Anchor href={itemHref} class="anchor" stopPropagation
+																				>{val.str}</Anchor
+																			>
+																		{:else if val.str}
+																			{safeTranslate(val.str)}
+																		{:else if unsafeTranslate(val.split(':')[0])}
+																			<span class="text"
+																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																				{val.split(':')[1]}</span
+																			>
+																		{:else}
+																			{val ?? '-'}
+																		{/if}
+																	</li>
+																{/each}
+															</ul>
+														{:else if value && value.str}
+															{#if value.id}
+																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+																{#if key === 'ro_to_couple'}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+																			'-'
+																		)[1]}</Anchor
+																	>
+																{:else}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{value.str}</Anchor
+																	>
+																{/if}
+															{:else}
+																{value.str ?? '-'}
+															{/if}
+														{:else if value && value.hexcolor}
+															<p
+																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																	value.hexcolor
+																)}"
+																style="background-color: {value.hexcolor}"
+															>
+																{safeTranslate(value.name ?? value.str) ?? '-'}
+															</p>
+														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
+															{formatDateOrDateTime(value, getLocale())}
+														{:else if [true, false].includes(value)}
+															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+														{:else if key === 'progress'}
+															<span class="ml-9"
+																>{safeTranslate('percentageDisplay', { number: value })}</span
+															>
+														{:else if key === 'translations'}
+															{#if Object.keys(value).length > 0}
+																<div class="flex flex-col gap-2">
+																	{#each Object.entries(value) as [lang, translation]}
+																		<div class="flex flex-row gap-2">
+																			<strong>{lang}:</strong>
+																			<span>{safeTranslate(translation)}</span>
+																		</div>
+																	{/each}
+																</div>
+															{:else}
+																--
+															{/if}
+														{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+															<div class="flex items-center space-x-2">
+																<span>{safeTranslate(value ?? '-')}</span>
+																<span
+																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																>
+																	{m.accept()}
+																</span>
+															</div>
+														{:else if key === 'icon_fa_class'}
+															<i class="text-lg fa {value}"></i>
+														{:else}
+															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+															{#if value?.length > 300}
+																{safeTranslate(value ?? '-').slice(0, 300)}...
+															{:else}
+																{safeTranslate(value ?? '-')}
+															{/if}
+														{/if}
+														{@render badge?.(key, row)}
+													</span>
+												{/if}
+											</div>
 										</td>
 									{/if}
 								{/each}
