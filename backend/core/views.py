@@ -1432,6 +1432,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "residual_proba",
                 "residual_risk",
                 "treatment",
+                "strength_of_knowledge",
             ]
             if ff_is_enabled("inherent_risk"):
                 # insert inherent_risk just before existing_controls
@@ -1466,6 +1467,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     scenario.get_residual_proba()["name"],
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
+                    RiskScenario.DEFAULT_SOK_OPTIONS[scenario.strength_of_knowledge][
+                        "name"
+                    ],
                 ]
                 if ff_is_enabled("inherent_risk"):
                     row.insert(
@@ -1498,6 +1502,10 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             context = RiskScenario.objects.filter(
                 risk_assessment=risk_assessment
             ).order_by("ref_id")
+            for scenario in context:
+                scenario.strength_of_knowledge = RiskScenario.DEFAULT_SOK_OPTIONS[
+                    scenario.strength_of_knowledge
+                ]["name"]
             general_settings = GlobalSettings.objects.filter(name="general").first()
             swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
             flip_vertical = general_settings.value.get(
