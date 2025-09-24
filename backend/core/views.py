@@ -2469,6 +2469,79 @@ class ComplianceAssessmentActionPlanList(ActionPlanList):
         ).distinct()
 
 
+class ComplianceAssessmentEvidenceList(generics.ListAPIView):
+    serializer_class = ComplianceAssessmentEvidenceSerializer
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "owner": ["exact"],
+        "name": ["icontains"],
+        "expiry_date": ["exact", "lte", "gte"],
+        "created_at": ["exact", "lte", "gte"],
+        "updated_at": ["exact", "lte", "gte"],
+    }
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "status", "updated_at", "expiry_date"]
+    ordering = ["name"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"pk": self.kwargs["pk"]})
+        return context
+
+    def get_queryset(self):
+        from django.db.models import Q
+
+        compliance_assessment_pk = self.kwargs["pk"]
+
+        # Check permissions for compliance assessment
+        (viewable_compliance_assessments, _, _) = (
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, ComplianceAssessment
+            )
+        )
+        if compliance_assessment_pk not in viewable_compliance_assessments:
+            return Evidence.objects.none()
+
+        # Check permissions for evidences
+        (viewable_evidences, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Evidence
+        )
+
+        compliance_assessment = ComplianceAssessment.objects.get(
+            id=compliance_assessment_pk
+        )
+
+        # Get all requirement assessments for this compliance assessment
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related("evidences", "applied_controls__evidences")
+
+        # Collect evidence IDs from both direct and indirect relationships
+        evidence_ids = set()
+
+        # Direct evidences from requirement assessments
+        for req_assessment in requirement_assessments:
+            for evidence in req_assessment.evidences.all():
+                if evidence.id in viewable_evidences:
+                    evidence_ids.add(evidence.id)
+
+        # Indirect evidences through applied controls
+        for req_assessment in requirement_assessments:
+            for applied_control in req_assessment.applied_controls.all():
+                for evidence in applied_control.evidences.all():
+                    if evidence.id in viewable_evidences:
+                        evidence_ids.add(evidence.id)
+
+        return Evidence.objects.filter(id__in=evidence_ids).distinct()
+
+
 class RiskAssessmentActionPlanList(ActionPlanList):
     serializer_class = RiskAssessmentActionPlanSerializer
 

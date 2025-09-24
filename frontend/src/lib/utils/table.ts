@@ -1247,8 +1247,8 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'description', 'folder', 'status', 'labels'],
-		body: ['name', 'attachment', 'size', 'description', 'folder', 'status', 'filtering_labels'],
+		head: ['name', 'file', 'size', 'description', 'folder', 'status', 'labels', 'lastUpdate', 'expiryDate', 'owner', 'relationships'],
+		body: ['name', 'attachment', 'size', 'description', 'folder', 'status', 'filtering_labels', 'last_update', 'expiry_date', 'owner', 'link_info'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
