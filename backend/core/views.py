@@ -4712,20 +4712,6 @@ class EvidenceViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Evidence.Status.choices))
 
-    @action(
-        detail=True, methods=["patch"], name="Update evidence status", url_path="status"
-    )
-    def update_status(self, request, pk):
-        evidence = self.get_object()
-        new_status = request.data.get("status")
-        if new_status not in [choice[0] for choice in Evidence.Status.choices]:
-            return Response(
-                {"error": "Invalid status value"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        evidence.status = new_status
-        evidence.save()
-        return Response({"status": evidence.status})
-
 
 class EvidenceRevisionViewSet(BaseModelViewSet):
     """

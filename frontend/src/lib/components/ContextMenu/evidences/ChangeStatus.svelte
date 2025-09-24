@@ -43,11 +43,11 @@
 			});
 			handler.invalidate();
 		} catch (error) {
+			console.error('Error changing status:', error);
 			flash.set({
 				type: 'error',
-				message: m.errorUpdatingObject({ object: m.evidence().toLowerCase() })
+				message: `Error updating evidence: ${error.message}`
 			});
-			console.error('Error changing status:', error);
 		}
 	}
 </script>
