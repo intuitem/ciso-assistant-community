@@ -557,7 +557,7 @@
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 				<Anchor
-					href={`${page.url.pathname}/evidences`}
+					href={`${page.url.pathname}/evidences-list`}
 					class="btn preset-filled-secondary-500 h-fit"
 					breadcrumbAction="push"
 					><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
