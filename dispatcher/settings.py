@@ -50,6 +50,7 @@ def load_env_config():
         "kafka": {
             "use_auth": os.getenv("KAFKA_USE_AUTH") == "True" or None,
             "sasl_mechanism": os.getenv("KAFKA_SASL_MECHANISM"),
+            "security_protocol": os.getenv("KAFKA_SECURITY_PROTOCOL"),
             "sasl_plain_username": os.getenv("KAFKA_USERNAME"),
             "sasl_plain_password": os.getenv("KAFKA_PASSWORD"),
         },
@@ -181,12 +182,21 @@ def init_config(y, interactive):
             "Which SASL mechanism does your Kafka broker use?",
             type=click.Choice(
                 [
-                    "PLAIN",
                     "SCRAM-SHA-256",
                     "SCRAM-SHA-512",
+                    "PLAIN",
                 ]
             ),
-            default="PLAIN",
+            default="SCRAM-SHA-256",
+        )
+        kafka_security_protocol = click.prompt(
+            "Which security protocol does your Kafka broker use?",
+            type=click.Choice(
+                [
+                    "SASL_SSL",
+                    "SASL_PLAINTEXT",
+                ]
+            ),
         )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
@@ -223,6 +233,7 @@ def init_config(y, interactive):
                 "sasl_mechanism": kafka_sasl_mechanism,
                 "sasl_plain_username": kafka_username,
                 "sasl_plain_password": kafka_password,
+                "security_protocol": kafka_security_protocol,
             },
             "auto_renew_session": auto_renew_session,
             "bootstrap_servers": bootstrap_servers,
@@ -273,6 +284,9 @@ AUTO_RENEW_SESSION = config.get("auto_renew_session", False)
 BOOTSTRAP_SERVERS = config.get("bootstrap_servers", "localhost:9092")
 KAFKA_USE_AUTH = config.get("kafka", {}).get("use_auth", False)
 KAFKA_SASL_MECHANISM = config.get("kafka", {}).get("sasl_mechanism", "PLAIN")
+KAFKA_SECURITY_PROTOCOL = config.get("kafka", {}).get(
+    "security_protocol", "SASL_PLAINTEXT"
+)
 KAFKA_USERNAME = config.get("kafka", {}).get("sasl_plain_username", "")
 KAFKA_PASSWORD = config.get("kafka", {}).get("sasl_plain_password", "")
 ERRORS_TOPIC = config.get("errors_topic", "errors")

@@ -50,7 +50,7 @@ def build_kafka_config(use_auth: bool = settings.KAFKA_USE_AUTH) -> dict:
             )
             cfg.update(
                 {
-                    "security_protocol": "SASL_SSL",
+                    "security_protocol": settings.KAFKA_SECURITY_PROTOCOL.upper(),
                     "sasl_mechanism": settings.KAFKA_SASL_MECHANISM.upper(),
                     "sasl_plain_username": settings.KAFKA_USERNAME,
                     "sasl_plain_password": settings.KAFKA_PASSWORD,
@@ -66,4 +66,5 @@ def build_kafka_config(use_auth: bool = settings.KAFKA_USE_AUTH) -> dict:
                 f"Unsupported SASL mechanism: {settings.KAFKA_SASL_MECHANISM}"
             )
 
+    logger.debug(f"Kafka config: {cfg}")
     return cfg
