@@ -33,6 +33,18 @@ const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 		});
 	}
 
+	function updateCrumb(hrefPattern: RegExp, updatedCrumb: Breadcrumb) {
+		breadcrumbs.update((crumbs) => {
+			for (let i = 0; i < crumbs.length; i++) {
+				const crumb = crumbs[i];
+				if (hrefPattern.test(crumb.href ?? '')) {
+					crumbs[i] = { ...crumb, ...updatedCrumb };
+				}
+			}
+			return crumbs;
+		});
+	}
+
 	function replace(crumb: Breadcrumb[]) {
 		breadcrumbs.update(() => {
 			return mergeCrumbs([homeCrumb, ...crumb]);
@@ -48,6 +60,7 @@ const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 	return {
 		...breadcrumbs,
 		push,
+		updateCrumb,
 		replace,
 		slice
 	};
