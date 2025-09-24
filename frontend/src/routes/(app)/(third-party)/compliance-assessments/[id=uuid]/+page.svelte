@@ -556,6 +556,12 @@
 					breadcrumbAction="push"
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
+				<Anchor
+					href={`${page.url.pathname}/evidences`}
+					class="btn preset-filled-secondary-500 h-fit"
+					breadcrumbAction="push"
+					><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
+				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>
 			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}

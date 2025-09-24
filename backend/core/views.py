@@ -5808,6 +5808,126 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         analytics_data = get_compliance_analytics(request.user, folder_id)
         return Response(analytics_data, status=status.HTTP_200_OK)
 
+    @action(
+        detail=True, name="Get compliance assessment evidences", url_path="evidences"
+    )
+    def evidences(self, request, pk):
+        """
+        Returns all evidences associated with this compliance assessment,
+        both directly and indirectly through applied controls.
+        """
+        from django.db.models import Q
+
+        # Check permissions for compliance assessment
+        (viewable_compliance_assessments, _, _) = (
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, ComplianceAssessment
+            )
+        )
+
+        if UUID(pk) not in viewable_compliance_assessments:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Check permissions for evidences
+        (viewable_evidences, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )
+
+        compliance_assessment = self.get_object()
+
+        # Get all requirement assessments for this compliance assessment
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related("evidences", "applied_controls__evidences")
+
+        # Collect evidences with their relationship info
+        evidences_data = {}
+
+        # Direct evidences from requirement assessments
+        for req_assessment in requirement_assessments:
+            for evidence in req_assessment.evidences.all():
+                # Check if user can view this evidence
+                if evidence.id not in viewable_evidences:
+                    continue
+
+                if evidence.id not in evidences_data:
+                    evidences_data[evidence.id] = {
+                        "evidence": evidence,
+                        "direct_links": [],
+                        "indirect_links": [],
+                    }
+                evidences_data[evidence.id]["direct_links"].append(
+                    {
+                        "requirement_assessment_id": str(req_assessment.id),
+                        "requirement_assessment_name": str(
+                            req_assessment.requirement.safe_display_str
+                        ),
+                    }
+                )
+
+        # Indirect evidences through applied controls
+        for req_assessment in requirement_assessments:
+            for applied_control in req_assessment.applied_controls.all():
+                for evidence in applied_control.evidences.all():
+                    # Check if user can view this evidence
+                    if evidence.id not in viewable_evidences:
+                        continue
+
+                    if evidence.id not in evidences_data:
+                        evidences_data[evidence.id] = {
+                            "evidence": evidence,
+                            "direct_links": [],
+                            "indirect_links": [],
+                        }
+                    evidences_data[evidence.id]["indirect_links"].append(
+                        {
+                            "requirement_assessment_id": str(req_assessment.id),
+                            "requirement_assessment_name": str(
+                                req_assessment.requirement.safe_display_str
+                            ),
+                            "applied_control_id": str(applied_control.id),
+                            "applied_control_name": applied_control.name,
+                        }
+                    )
+
+        # Format the response
+        result = []
+        for evidence_id, data in evidences_data.items():
+            evidence = data["evidence"]
+
+            # Create link info
+            link_info = {
+                "type": "direct" if data["direct_links"] else "indirect",
+                "direct_links": data["direct_links"],
+                "indirect_links": data["indirect_links"],
+            }
+
+            result.append(
+                {
+                    "id": str(evidence.id),
+                    "name": evidence.name,
+                    "status": evidence.get_status_display(),
+                    "last_update": evidence.updated_at.isoformat()
+                    if evidence.updated_at
+                    else None,
+                    "expiry_date": evidence.expiry_date.isoformat()
+                    if evidence.expiry_date
+                    else None,
+                    "owner": [
+                        {"id": str(user.id), "str": user.get_full_name() or user.email}
+                        for user in evidence.owner.all()
+                    ],
+                    "link_info": link_info,
+                }
+            )
+
+        # Sort by name
+        result.sort(key=lambda x: x["name"])
+
+        return Response(result)
+
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
