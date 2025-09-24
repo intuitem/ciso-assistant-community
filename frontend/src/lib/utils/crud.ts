@@ -583,8 +583,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner' },
 			{ field: 'status' },
 			{ field: 'link' },
-			{ field: 'created_at' },
-			{ field: 'updated_at' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'expiry_date' }

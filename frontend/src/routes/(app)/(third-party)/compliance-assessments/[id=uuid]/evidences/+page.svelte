@@ -8,10 +8,10 @@
 	const evidencesHead = {
 		name: 'name',
 		status: 'status',
-		last_update: 'lastUpdate',
+		last_update: 'updatedAt',
 		expiry_date: 'expiryDate',
 		owner: 'owner',
-		relationships: 'relationships'
+		requirement_assessments: 'matchingRequirements'
 	};
 
 	const evidences: TableSource = {
@@ -71,7 +71,7 @@
 				'last_update',
 				'expiry_date',
 				'owner',
-				'relationships'
+				'requirement_assessments'
 			]}
 		/>
 	</div>

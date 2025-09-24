@@ -2257,9 +2257,9 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     size = serializers.CharField(source="get_size")
     last_update = serializers.DateTimeField(source="updated_at")
-    relationships = serializers.SerializerMethodField()
+    requirement_assessments = serializers.SerializerMethodField()
 
-    def get_relationships(self, obj):
+    def get_requirement_assessments(self, obj):
         pk = self.context.get("pk")
         if pk is None:
             return {"direct_links": [], "indirect_links": []}
@@ -2299,11 +2299,28 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
                         }
                     )
 
-        return {
-            "type": "direct" if direct_links else "indirect",
-            "direct_links": direct_links,
-            "indirect_links": indirect_links,
-        }
+        # Return a simplified format similar to action-plan
+        all_links = []
+
+        # Add direct links
+        for link in direct_links:
+            all_links.append(
+                {
+                    "str": link["requirement_assessment_name"],
+                    "id": link["requirement_assessment_id"],
+                }
+            )
+
+        # Add indirect links
+        for link in indirect_links:
+            all_links.append(
+                {
+                    "str": f"{link['requirement_assessment_name']} (via {link['applied_control_name'][:15]}...)",
+                    "id": link["requirement_assessment_id"],
+                }
+            )
+
+        return all_links
 
     class Meta:
         model = Evidence
@@ -2316,5 +2333,5 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
             "owner",
             "folder",
             "size",
-            "relationships",
+            "requirement_assessments",
         ]
