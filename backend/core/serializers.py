@@ -1772,6 +1772,17 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     owners = FieldsRelatedField(many=True)
     approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
+    associated_objects_count = serializers.SerializerMethodField()
+
+    def get_associated_objects_count(self, obj):
+        """Calculate objects count dynamically"""
+        return (
+            obj.assets.count()
+            + obj.applied_controls.count()
+            + obj.vulnerabilities.count()
+            + obj.risk_scenarios.count()
+            + obj.requirement_assessments.count()
+        )
 
     class Meta:
         model = SecurityException

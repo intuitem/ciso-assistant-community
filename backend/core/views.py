@@ -6281,6 +6281,15 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
 
+    def get_queryset(self):
+        return SecurityException.objects.prefetch_related(
+            "assets",
+            "applied_controls",
+            "vulnerabilities",
+            "risk_scenarios",
+            "requirement_assessments",
+        )
+
 
 class FindingsAssessmentViewSet(BaseModelViewSet):
     model = FindingsAssessment
