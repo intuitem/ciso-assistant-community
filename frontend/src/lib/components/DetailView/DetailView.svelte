@@ -305,7 +305,10 @@
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value], index}
 						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index > MAX_ROWS && !expandedTable ? 'hidden': ''}"
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >
+								MAX_ROWS && !expandedTable
+								? 'hidden'
+								: ''}"
 						>
 							<dt
 								class="font-medium text-gray-900"
@@ -456,11 +459,15 @@
 					{/each}
 				</dl>
 			</div>
-			{#if  Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
-			<button onclick={() => expandedTable = !expandedTable} class="m-5 text-blue-800">
-				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
-				{expandedTable ? safeTranslate("viewLess") : safeTranslate("viewMore")}
-			</button>
+			{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+				<button
+					onclick={() => (expandedTable = !expandedTable)}
+					class="m-5 text-blue-800"
+					aria-expanded={expandedTable}
+				>
+					<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
+					{expandedTable ? m.viewLess() : m.viewMore()}
+				</button>
 			{/if}
 			<!-- Right side - Widgets area (only if widgets exist) -->
 			{#if hasWidgets}
@@ -566,7 +573,6 @@
 		</div>
 	</div>
 </div>
-
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
