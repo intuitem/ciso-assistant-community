@@ -26,7 +26,6 @@
 			page.data.name ??
 			getBreadcrumbTitle() ??
 			getUrlModelTitle();
-
 		return safeTranslate(title);
 	}
 
