@@ -222,7 +222,18 @@
 	});
 
 	let isLoading = $state(false);
-	const { form: formData } = _form;
+	let previousFormErrors = $derived('');
+	const { form: formData, errors } = _form;
+
+	errors.subscribe((newErrors) => {
+		const errorCount = Object.values(newErrors).reduce((acc, error) => (acc += error ? 1 : 0), 0);
+		const stringifiedErrors = JSON.stringify([Date.now(), newErrors]);
+
+		if (errorCount && stringifiedErrors !== previousFormErrors) {
+			isLoading = false;
+			previousFormErrors = stringifiedErrors;
+		}
+	});
 </script>
 
 {#if missingConstraints.length > 0}
