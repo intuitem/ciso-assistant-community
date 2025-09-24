@@ -16,6 +16,7 @@
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	let { data } = $props();
+
 	let loading = $state({ form: false, library: '' });
 	const showRisks = true;
 

@@ -8,5 +8,5 @@ export const load = (async ({ fetch, params }) => {
 
 	const res = await fetch(endpoint);
 	const quantitative_risk_study = await res.json();
-	return { URLModel, quantitative_risk_study, title: 'Action Plan' };
+	return { URLModel, quantitative_risk_study };
 }) satisfies PageServerLoad;

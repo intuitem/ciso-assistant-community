@@ -15,7 +15,6 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 				console.error('Error fetching tree:', error);
 				return {};
 			}),
-		library,
-		title: library.name
+		library
 	};
 };

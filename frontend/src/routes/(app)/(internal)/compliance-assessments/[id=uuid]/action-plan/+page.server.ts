@@ -8,5 +8,5 @@ export const load = (async ({ fetch, params }) => {
 
 	const res = await fetch(endpoint);
 	const compliance_assessment = await res.json();
-	return { URLModel, compliance_assessment, title: 'Action Plan' };
+	return { URLModel, compliance_assessment };
 }) satisfies PageServerLoad;
