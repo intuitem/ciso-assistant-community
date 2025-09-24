@@ -18,7 +18,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields } from '$lib/utils/table';
@@ -169,6 +169,7 @@
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
+
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
 			label:
 				rowMetaData.str ??
@@ -300,6 +301,12 @@
 				for (const value of finalFilterValue) {
 					page.url.searchParams.append(field, value.value);
 				}
+			}
+
+			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
+			const fullPath = page.url.pathname + page.url.search;
+			if (hrefPattern.test(fullPath)) {
+				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 			}
 		}
 		setTimeout(() => {
@@ -744,7 +751,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} />
+			<Pagination {handler} {URLModel} />
 		{/if}
 	</footer>
 </div>

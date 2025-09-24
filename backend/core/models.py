@@ -29,6 +29,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+
 from library.helpers import (
     get_referential_translation,
     update_translations,
@@ -2870,6 +2871,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         max_length=2048,
         verbose_name=_("Link"),
     )
+    # note: made this syntax to avoid circular dependencies
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="incidents",
+        verbose_name="Entities",
+        blank=True,
+    )
 
     is_published = models.BooleanField(_("published"), default=True)
 
@@ -4958,28 +4966,35 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on evidence:
-        _evidences = serializers.serialize(
-            "json",
-            Evidence.objects.filter(
-                applied_controls__in=AppliedControl.objects.filter(
-                    requirement_assessments__compliance_assessment=self
-                )
-            ).order_by("created_at"),
-        )
-        evidences = [x["fields"] for x in json.loads(_evidences)]
-        for i in range(len(evidences)):
-            evidences[i]["id"] = json.loads(_evidences)[i]["pk"]
-        for evidence in evidences:
-            if not evidence["attachment"]:
+        evidence_objects = Evidence.objects.filter(
+            applied_controls__in=AppliedControl.objects.filter(
+                requirement_assessments__compliance_assessment=self
+            )
+        ).order_by("created_at")
+
+        for evidence_obj in evidence_objects:
+            # Check if evidence has any revisions with attachments or links
+            has_attachment = evidence_obj.revisions.filter(
+                models.Q(attachment__isnull=False) & ~models.Q(attachment="")
+            ).exists()
+            has_link = evidence_obj.revisions.filter(
+                models.Q(link__isnull=False) & ~models.Q(link="")
+            ).exists()
+
+            if not has_attachment and not has_link:
+                evidence_dict = json.loads(
+                    serializers.serialize("json", [evidence_obj])
+                )[0]["fields"]
+                evidence_dict["id"] = evidence_obj.id
                 warnings_lst.append(
                     {
-                        "msg": _("{}: Evidence has no file uploaded").format(
-                            evidence["name"]
+                        "msg": _("{}: Evidence has no file or link uploaded").format(
+                            evidence_obj.name
                         ),
                         "msgid": "evidenceNoFile",
-                        "link": f"evidences/{evidence['id']}",
+                        "link": f"evidences/{evidence_obj.id}",
                         "obj_type": "evidence",
-                        "object": evidence,
+                        "object": evidence_dict,
                     }
                 )
 
