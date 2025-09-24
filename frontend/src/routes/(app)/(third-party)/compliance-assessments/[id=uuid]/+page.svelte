@@ -559,8 +559,7 @@
 				<Anchor
 					href={`${page.url.pathname}/evidences-list`}
 					class="btn preset-filled-secondary-500 h-fit"
-					breadcrumbAction="push"
-					><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
+					breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>

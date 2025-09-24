@@ -65,14 +65,7 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'name', direction: 'asc' }}
 			baseEndpoint="/compliance-assessments/{page.params.id}/evidences-list"
-			fields={[
-				'name',
-				'status',
-				'last_update',
-				'expiry_date',
-				'owner',
-				'requirement_assessments'
-			]}
+			fields={['name', 'status', 'last_update', 'expiry_date', 'owner', 'requirement_assessments']}
 		/>
 	</div>
 </div>
