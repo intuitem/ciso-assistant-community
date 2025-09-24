@@ -39,7 +39,7 @@ COMPATIBILITY_MODES = {
     0: f"[v{SCRIPT_VERSION}] (DEFAULT) Don't use any Compatibility Mode",
     1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
     2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)",
-    3: "[< v2++] Handling of the new \"fix_count\" column in order to ADD or SUBTRACT from the counter (replace \"skip_count\"). Fixed the URN writing issue when \"skip_count\" was true and a \"ref_id\" was defined.",
+    3: "[< v2++] Updated version of \"[< v2]\". Handling of the new \"fix_count\" column in order to ADD or SUBTRACT from the counter (replace \"skip_count\"). Fixed the URN writing issue when \"skip_count\" was true and a \"ref_id\" was defined.",
     # Future modes can be added here with an integer key and description
 }
 
@@ -872,7 +872,8 @@ def create_library(
                         urn = f"{base_urn}:{ref_id_urn}"
                     elif (
                         compat_mode == 3
-                    ):  # Use legacy URN fallback logic (for requirements without ref_id)
+                    ):  # Updated version of "[< v2]" (Compat Mode 1). Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count").
+                        # Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.
                         
                         try:
                             fix_count = int(data.get("fix_count", ""))
