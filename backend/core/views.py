@@ -6282,12 +6282,16 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         return Response(dict(SecurityException.Status.choices))
 
     def get_queryset(self):
-        return SecurityException.objects.prefetch_related(
-            "assets",
-            "applied_controls",
-            "vulnerabilities",
-            "risk_scenarios",
-            "requirement_assessments",
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "assets",
+                "applied_controls",
+                "vulnerabilities",
+                "risk_scenarios",
+                "requirement_assessments",
+            )
         )
 
 
