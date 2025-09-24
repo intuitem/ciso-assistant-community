@@ -1,7 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -384,7 +383,24 @@ export const EvidenceSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	owner: z.string().optional().array().optional(),
+	status: z.string().optional().default('draft'),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
+export const EvidenceRevisionSchema = z.object({
+	folder: z.string().uuid(),
+	evidence: z.string().uuid(),
+	version: z.number().optional(),
+	attachment: z.any().optional().nullable(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const GeneralSettingsSchema = z.object({
@@ -915,7 +931,8 @@ export const IncidentSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().uuid().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional(),
+	entities: z.string().uuid().optional().array().optional()
 });
 
 export const TimelineEntrySchema = z.object({
@@ -1091,6 +1108,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
+	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,

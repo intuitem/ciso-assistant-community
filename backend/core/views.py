@@ -31,7 +31,6 @@ from django.db.models import (
 )
 from django.db.models.functions import Greatest, Coalesce
 
-
 from collections import defaultdict
 import pytz
 from uuid import UUID
@@ -829,6 +828,10 @@ class AssetViewSet(BaseModelViewSet):
             )
             N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
@@ -846,8 +849,23 @@ class AssetViewSet(BaseModelViewSet):
             nodes_idx[asset_key] = N
             N += 1
 
+        # Add links between domains (folders) based on parent-child relationships
+        for domain in Folder.objects.filter(id__in=viewable_folders):
+            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                links.append(
+                    {
+                        "source": nodes_idx[domain.parent_folder.name],
+                        "target": nodes_idx[domain.name],
+                        "value": "contains",
+                    }
+                )
+
         # Add links between assets and their domains
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             asset_key = f"{asset.folder.name}/{asset.name}"
             links.append(
                 {
@@ -859,8 +877,19 @@ class AssetViewSet(BaseModelViewSet):
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
+            # Only include assets whose folders are also viewable to avoid KeyError
+            if asset.folder.id not in viewable_folders:
+                continue
+
             asset_key = f"{asset.folder.name}/{asset.name}"
             for relationship in asset.parent_assets.all():
+                # Only include relationship if both assets and their folders are viewable
+                if (
+                    relationship.id not in viewable_assets
+                    or relationship.folder.id not in viewable_folders
+                ):
+                    continue
+
                 relationship_key = f"{relationship.folder.name}/{relationship.name}"
                 links.append(
                     {
@@ -3170,27 +3199,29 @@ class FolderViewSet(BaseModelViewSet):
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
             if include_attachments:
-                evidences = objects.get("evidence", Evidence.objects.none()).filter(
-                    attachment__isnull=False
-                )
+                revisions = objects.get(
+                    "evidencerevision", EvidenceRevision.objects.none()
+                ).filter(attachment__isnull=False)
                 logger.info(
                     "Processing evidence attachments",
-                    total_evidences=evidences.count(),
+                    total_revisions=revisions.count(),
                     domain_id=instance.id,
                 )
 
-                for evidence in evidences:
-                    if evidence.attachment and default_storage.exists(
-                        evidence.attachment.name
+                for revision in revisions:
+                    if revision.attachment and default_storage.exists(
+                        revision.attachment.name
                     ):
                         # Read file directly into memory
-                        with default_storage.open(evidence.attachment.name) as file:
+                        with default_storage.open(revision.attachment.name) as file:
                             file_content = file.read()
                             # Write the file content directly to the zip
                             zipf.writestr(
                                 os.path.join(
                                     "attachments",
-                                    os.path.basename(evidence.attachment.name),
+                                    "evidence-revisions",
+                                    f"{revision.evidence_id}_v{revision.version}_"
+                                    f"{os.path.basename(revision.attachment.name)}",
                                 ),
                                 file_content,
                             )
@@ -3749,8 +3780,16 @@ class FolderViewSet(BaseModelViewSet):
                 ).first()
 
             case "evidence":
+                many_to_many_map_ids["owner_ids"] = get_mapped_ids(
+                    _fields.pop("owner", []), link_dump_database_ids
+                )
+
+            case "evidencerevision":
                 _fields.pop("size", None)
                 _fields.pop("attachment_hash", None)
+                _fields["evidence"] = Evidence.objects.get(
+                    id=link_dump_database_ids.get(_fields["evidence"])
+                )
 
             case "requirementassessment":
                 logger.debug("Looking for requirement", urn=_fields.get("requirement"))
@@ -4622,7 +4661,19 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "owner",
+        "status",
+        "expiry_date",
     ]
+
+    @action(detail=False, name="Get all evidences owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(evidences__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -4632,6 +4683,53 @@ class EvidenceViewSet(BaseModelViewSet):
             _,
         ) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Evidence
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            evidence = self.get_object()
+            if (
+                not evidence.last_revision.attachment
+                or not evidence.last_revision.attachment.storage.exists(
+                    evidence.last_revision.attachment.name
+                )
+            ):
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            if request.method == "GET":
+                content_type = mimetypes.guess_type(evidence.last_revision.filename())[
+                    0
+                ]
+                response = HttpResponse(
+                    evidence.last_revision.attachment,
+                    content_type=content_type,
+                    headers={
+                        "Content-Disposition": f"attachment; filename={evidence.last_revision.filename()}"
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        return response
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Evidence.Status.choices))
+
+
+class EvidenceRevisionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows evidence revisions to be viewed or edited.
+    """
+
+    model = EvidenceRevision
+    filterset_fields = ["evidence"]
+    ordering = ["-version"]
+
+    @action(methods=["get"], detail=True)
+    def attachment(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, EvidenceRevision
         )
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
@@ -4655,14 +4753,14 @@ class EvidenceViewSet(BaseModelViewSet):
     @action(methods=["post"], detail=True)
     def delete_attachment(self, request, pk):
         (
-            object_ids_view,
             _,
             _,
+            object_ids_delete,
         ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
+            Folder.get_root_folder(), request.user, EvidenceRevision
         )
         response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
+        if UUID(pk) in object_ids_delete:
             evidence = self.get_object()
             if evidence.attachment:
                 evidence.attachment.delete()
@@ -4675,22 +4773,35 @@ class UploadAttachmentView(APIView):
     serializer_class = AttachmentUploadSerializer
 
     def post(self, request, *args, **kwargs):
-        if request.data:
+        pk = kwargs["pk"]
+        revision = None
+        evidence = None
+
+        try:
+            revision = EvidenceRevision.objects.get(pk=pk)
+            evidence = revision.evidence
+        except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(id=kwargs["pk"])
-                attachment = request.FILES["file"]
-                if not evidence.attachment and attachment.name != "undefined":
-                    evidence.attachment = attachment
-                elif (
-                    evidence.attachment and attachment.name != "undefined"
-                ) and evidence.attachment != attachment:
-                    evidence.attachment.delete()
-                    evidence.attachment = attachment
-                evidence.save()
-                return Response(status=status.HTTP_200_OK)
-            except Exception:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+                evidence = Evidence.objects.get(pk=pk)
+            except Evidence.DoesNotExist:
+                return Response(
+                    {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+
+        if revision is None:
+            revision = evidence.revisions.order_by(
+                "-version"
+            ).first() or EvidenceRevision.objects.create(evidence=evidence)
+
+        attachment = request.FILES.get("file")
+        if attachment and attachment.name != "undefined":
+            if not revision.attachment or revision.attachment != attachment:
+                if revision.attachment:
+                    revision.attachment.delete()
+                revision.attachment = attachment
+                revision.save()
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class QuickStartView(APIView):
@@ -6340,6 +6451,284 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         return Response(formatted_metrics)
 
+    @action(detail=True, methods=["get"], name="Findings Assessment as Excel")
+    def xlsx(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, FindingsAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        findings_assessment = FindingsAssessment.objects.get(id=pk)
+        findings = Finding.objects.filter(findings_assessment=pk).order_by("ref_id")
+
+        # Prepare data for Excel export
+        entries = []
+        for finding in findings:
+            entry = {
+                "ref_id": finding.ref_id,
+                "name": finding.name,
+                "description": finding.description,
+                "status": finding.get_status_display(),
+                "severity": finding.get_severity_display(),
+                "folder": finding.folder.name if finding.folder else "",
+                "owner": ", ".join([user.email for user in finding.owner.all()]),
+                "applied_controls": "\n".join(
+                    [
+                        f"{ac.name} [{ac.get_status_display().lower()}]"
+                        for ac in finding.applied_controls.all()
+                    ]
+                ),
+                "evidences": "\n".join([ev.name for ev in finding.evidences.all()]),
+                "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                if finding.created_at
+                else "",
+                "eta": finding.eta.strftime("%Y-%m-%d") if finding.eta else "",
+                "due_date": finding.due_date.strftime("%Y-%m-%d")
+                if finding.due_date
+                else "",
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        # Create ExcelWriter with openpyxl engine
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False, sheet_name="Findings")
+
+            # Get the worksheet
+            worksheet = writer.sheets["Findings"]
+
+            # Apply text wrapping to columns with line breaks
+            wrap_columns = ["name", "description", "applied_controls", "evidences"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            # Adjust column widths
+            for idx, col in enumerate(df.columns):
+                column_width = 40 if col in wrap_columns else 20
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{findings_assessment.name}_findings.xlsx"'
+        )
+        return response
+
+    @action(detail=True, methods=["get"], name="Findings Assessment as Markdown")
+    def md(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, FindingsAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        findings_assessment = (
+            FindingsAssessment.objects.select_related("folder")
+            .prefetch_related("owner", "authors", "reviewers")
+            .get(id=pk)
+        )
+        findings = (
+            Finding.objects.filter(findings_assessment_id=pk)
+            .select_related("folder")
+            .prefetch_related("owner", "applied_controls", "evidences")
+            .order_by("ref_id")
+        )
+
+        # Calculate closed and open findings counts
+        closed_statuses = [
+            Finding.Status.DISMISSED,
+            Finding.Status.MITIGATED,
+            Finding.Status.RESOLVED,
+            Finding.Status.DEPRECATED,
+        ]
+        open_statuses = [
+            Finding.Status.UNDEFINED,
+            Finding.Status.IDENTIFIED,
+            Finding.Status.CONFIRMED,
+            Finding.Status.ASSIGNED,
+            Finding.Status.IN_PROGRESS,
+        ]
+
+        closed_findings_count = findings.filter(status__in=closed_statuses).count()
+        open_findings_count = findings.filter(status__in=open_statuses).count()
+
+        # Generate Markdown content
+        md_content = f"# {findings_assessment.name}\n\n"
+
+        # Assessment metadata
+        md_content += "## Assessment Information\n\n"
+        md_content += f"- **Name**: {findings_assessment.name}\n"
+        md_content += f"- **Reference ID**: {findings_assessment.ref_id or 'N/A'}\n"
+        md_content += f"- **Description**: {findings_assessment.description or 'N/A'}\n"
+        md_content += f"- **Category**: {findings_assessment.get_category_display()}\n"
+        md_content += f"- **Status**: {findings_assessment.get_status_display()}\n"
+        md_content += f"- **Folder**: {findings_assessment.folder.name if findings_assessment.folder else 'N/A'}\n"
+        if findings_assessment.owner.exists():
+            md_content += f"- **Owners**: {', '.join([user.email for user in findings_assessment.owner.all()])}\n"
+        if findings_assessment.authors.exists():
+            md_content += f"- **Authors**: {', '.join([user.email for user in findings_assessment.authors.all()])}\n"
+        if findings_assessment.reviewers.exists():
+            md_content += f"- **Reviewers**: {', '.join([user.email for user in findings_assessment.reviewers.all()])}\n"
+        md_content += f"- **Created**: {findings_assessment.created_at.strftime('%Y-%m-%d %H:%M:%S') if findings_assessment.created_at else 'N/A'}\n\n"
+
+        # Metrics summary
+        metrics = findings_assessment.get_findings_metrics()
+        md_content += "## Summary\n\n"
+        md_content += "| Metric | Count |\n"
+        md_content += "|--------|-------|\n"
+        md_content += f"| Total Findings | {metrics['total_count']} |\n"
+        md_content += f"| Closed Findings | {closed_findings_count} |\n"
+        md_content += f"| Open Findings | {open_findings_count} |\n\n"
+
+        # Severity distribution
+        if metrics["severity_distribution"]:
+            md_content += "### Severity Distribution\n\n"
+            md_content += "| Severity | Count |\n"
+            md_content += "|----------|-------|\n"
+            for severity, count in metrics["severity_distribution"].items():
+                if count > 0:
+                    md_content += f"| {severity.capitalize()} | {count} |\n"
+            md_content += "\n"
+
+        # Status distribution
+        if metrics["status_distribution"]:
+            md_content += "### Status Distribution\n\n"
+            md_content += "| Status | Count |\n"
+            md_content += "|--------|-------|\n"
+            status_choices = dict(Finding.Status.choices)
+            for status, count in metrics["status_distribution"].items():
+                if count > 0:
+                    status_display = status_choices.get(
+                        status, status.replace("_", " ").title()
+                    )
+                    md_content += f"| {status_display} | {count} |\n"
+            md_content += "\n"
+
+        # Findings details
+        md_content += "## Findings\n\n"
+        for finding in findings:
+            md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
+            md_content += f"- **Status**: {finding.get_status_display()}\n"
+            md_content += f"- **Severity**: {finding.get_severity_display()}\n"
+            md_content += f"- **Description**: {finding.description or 'N/A'}\n"
+            md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
+            if finding.owner.exists():
+                md_content += f"- **Owner**: {', '.join([user.email for user in finding.owner.all()])}\n"
+            if finding.applied_controls.exists():
+                md_content += "- **Applied Controls**:\n"
+                for ac in finding.applied_controls.all():
+                    md_content += f"  - {ac.name} [{ac.get_status_display().lower()}]\n"
+            if finding.evidences.exists():
+                md_content += f"- **Evidences**: {', '.join([ev.name for ev in finding.evidences.all()])}\n"
+            if finding.eta:
+                md_content += f"- **ETA**: {finding.eta.strftime('%Y-%m-%d')}\n"
+            if finding.due_date:
+                md_content += (
+                    f"- **Due Date**: {finding.due_date.strftime('%Y-%m-%d')}\n"
+                )
+            md_content += "\n"
+
+        response = HttpResponse(md_content, content_type="text/markdown")
+        safe_name = slugify(findings_assessment.name) or "findings_assessment"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_findings.md"'
+        )
+        return response
+
+    @action(detail=True, methods=["get"], name="Findings Assessment as PDF")
+    def pdf(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, FindingsAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        findings_assessment = (
+            FindingsAssessment.objects.select_related("folder")
+            .prefetch_related("owner", "authors", "reviewers")
+            .get(id=pk)
+        )
+        findings = (
+            Finding.objects.filter(findings_assessment_id=pk)
+            .select_related("folder")
+            .prefetch_related("owner", "applied_controls", "evidences")
+            .order_by("ref_id")
+        )
+        metrics = findings_assessment.get_findings_metrics()
+
+        # Calculate closed and open findings counts
+        closed_statuses = [
+            Finding.Status.DISMISSED,
+            Finding.Status.MITIGATED,
+            Finding.Status.RESOLVED,
+            Finding.Status.DEPRECATED,
+        ]
+        open_statuses = [
+            Finding.Status.UNDEFINED,
+            Finding.Status.IDENTIFIED,
+            Finding.Status.CONFIRMED,
+            Finding.Status.ASSIGNED,
+            Finding.Status.IN_PROGRESS,
+        ]
+
+        closed_findings_count = findings.filter(status__in=closed_statuses).count()
+        open_findings_count = findings.filter(status__in=open_statuses).count()
+
+        # Process status distribution with display names
+        status_choices = dict(Finding.Status.choices)
+        processed_status_distribution = []
+        for status, count in metrics["status_distribution"].items():
+            if count > 0:
+                display_name = status_choices.get(
+                    status, status.replace("_", " ").title()
+                )
+                processed_status_distribution.append(
+                    {"status": status, "display_name": display_name, "count": count}
+                )
+
+        context = {
+            "findings_assessment": findings_assessment,
+            "findings": findings,
+            "metrics": metrics,
+            "total_findings": metrics["total_count"],
+            "closed_findings_count": closed_findings_count,
+            "open_findings_count": open_findings_count,
+            "unresolved_important": metrics["unresolved_important_count"],
+            "severity_distribution": metrics["severity_distribution"],
+            "status_distribution": metrics["status_distribution"],
+            "processed_status_distribution": processed_status_distribution,
+            "finding_status_choices": dict(Finding.Status.choices),
+        }
+
+        html = render_to_string("core/findings_assessment_pdf.html", context)
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        safe_name = slugify(findings_assessment.name) or "findings_assessment"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_findings.pdf"'
+        )
+        return response
+
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
@@ -6385,6 +6774,7 @@ class IncidentViewSet(BaseModelViewSet):
         "qualifications",
         "detection",
         "owners",
+        "entities",
     ]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -6453,9 +6843,54 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+class TaskTemplateFilter(GenericFilterSet):
+    next_occurrence_status = df.MultipleChoiceFilter(
+        choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
+    )
+    last_occurrence_status = df.MultipleChoiceFilter(
+        choices=TaskNode.TASK_STATUS_CHOICES, method="filter_last_occurrence_status"
+    )
+
+    class Meta:
+        model = TaskTemplate
+        fields = [
+            "assigned_to",
+            "is_recurrent",
+            "folder",
+            "applied_controls",
+            "last_occurrence_status",
+            "next_occurrence_status",
+        ]
+
+    def filter_last_occurrence_status(self, queryset, name, values):
+        start = timezone.now().date()
+        status_subquery = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=start)
+            .order_by("-due_date")
+            .values("status")[:1]
+        )
+
+        return queryset.annotate(last_status=Subquery(status_subquery)).filter(
+            last_status__in=values
+        )
+
+    def filter_next_occurrence_status(self, queryset, name, values):
+        start = timezone.now().date()
+        status_subquery = (
+            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__gte=start)
+            .order_by("due_date")
+            .values("status")[:1]
+        )
+
+        return queryset.annotate(next_status=Subquery(status_subquery)).filter(
+            next_status__in=values
+        )
+
+
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+    filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
         qs = super().get_queryset()

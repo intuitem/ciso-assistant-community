@@ -6,6 +6,7 @@ import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
 import { type urlModel } from './types';
+import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -544,9 +545,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'findings', urlModel: 'findings' },
-			{ field: 'findings_assessments', urlModel: 'findings-assessments' }
+			{ field: 'findings_assessments', urlModel: 'findings-assessments' },
+			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [
+			{ field: 'evidence', urlModel: 'evidence-revisions' },
 			{
 				field: 'evidences',
 				urlModel: 'applied-controls',
@@ -572,7 +575,29 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'link' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'expiry_date' }
 		]
+	},
+	'evidence-revisions': {
+		name: 'evidencerevision',
+		localName: 'evidenceRevision',
+		localNamePlural: 'evidenceRevisions',
+		verboseName: 'Evidence revision',
+		verboseNamePlural: 'Evidence revisions',
+		fileFields: ['attachment'],
+		foreignKeyFields: [{ field: 'evidence', urlModel: 'evidences' }]
 	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
@@ -1267,7 +1292,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'qualifications', urlModel: 'terminologies' }
+			{ field: 'qualifications', urlModel: 'terminologies' },
+			{ field: 'entities', urlModel: 'entities' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [
@@ -1579,12 +1605,17 @@ export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
+	'evidence-revisions': {
+		attachment: EvidenceFilePreview
+	},
 	'stored-libraries': {
 		locales: LanguageDisplay,
+		objects_meta: LibraryOverview,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'loaded-libraries': {
 		locales: LanguageDisplay,
+		objects_meta: LibraryOverview,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'user-groups': {
