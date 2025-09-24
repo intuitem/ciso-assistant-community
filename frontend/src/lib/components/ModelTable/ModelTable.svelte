@@ -551,7 +551,10 @@
 														<CellComponent {meta} cell={value} />
 													{/if}
 												{:else}
-													<div class="base-font-family whitespace-pre-line break-words">
+													<div
+														data-testid="model-table-td-array-elem"
+														class="base-font-family whitespace-pre-line break-words"
+													>
 														{#if Array.isArray(value)}
 															<ul class="list-disc pl-4 whitespace-normal">
 																{#each [...value].sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
