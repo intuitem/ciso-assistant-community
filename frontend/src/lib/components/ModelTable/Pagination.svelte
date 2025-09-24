@@ -4,11 +4,13 @@
 	import { m } from '$paraglide/messages';
 	import { afterNavigate } from '$app/navigation';
 	import { tableStates } from '$lib/utils/stores';
+	import { breadcrumbs } from '$lib/utils/breadcrumbs';
 	interface Props {
 		handler: DataHandler;
+		URLModel: string;
 	}
 
-	let { handler }: Props = $props();
+	let { handler, URLModel }: Props = $props();
 
 	const pageNumber = handler.getPageNumber();
 	const rowsPerPage = handler.getRowsPerPage();
@@ -22,6 +24,11 @@
 			rowsPerPage: $rowsPerPage as number
 		};
 		page.url.searchParams.set('page', $pageNumber.toString());
+		const fullPath = page.url.pathname + page.url.search;
+		const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
+		if (hrefPattern.test(fullPath)) {
+			breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
+		}
 		handler.invalidate();
 	};
 
