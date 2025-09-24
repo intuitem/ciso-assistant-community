@@ -1,3 +1,6 @@
+convert_library_version: 'v2 ; Compat Mode: [3] {[< v2++] Handling of the new "fix_count"
+  column in order to ADD or SUBTRACT from the counter (replace "skip_count"). Fixed
+  the URN writing issue when "skip_count" was true and a "ref_id" was defined.}'
 urn: urn:intuitem:risk:library:gdpr
 locale: en
 ref_id: GDPR
@@ -10,7 +13,7 @@ description: 'REGULATION (EU) 2016/679 OF THE EUROPEAN PARLIAMENT AND OF THE COU
   https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:02016R0679-20160504'
 copyright: European Union law
 version: 1
-publication_date: 2024-07-12
+publication_date: 2025-09-24
 provider: EU
 packager: intuitem
 objects:
@@ -301,7 +304,7 @@ objects:
         threats to public security, so that the processing of personal data for those
         other purposes, in so far as it is within the scope of Union law, falls within
         the scope of this Regulation.
-    - urn: urn:intuitem:risk:req_node:gdpr:node22
+    - urn: urn:intuitem:risk:req_node:gdpr:node20
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
@@ -368,7 +371,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 23
-      description: ' In order to ensure that natural persons are not deprived of the
+      description: In order to ensure that natural persons are not deprived of the
         protection to which they are entitled under this Regulation, the processing
         of personal data of data subjects who are in the Union by a controller or
         a processor not established in the Union should be subject to this Regulation
@@ -378,7 +381,7 @@ objects:
         to data subjects who are in the Union, it should be ascertained whether it
         is apparent that the controller or processor envisages offering services to
         data subjects in one or more Member States in the Union. Whereas the mere
-        accessibility of the controller''s, processor''s or an intermediary''s website
+        accessibility of the controller's, processor's or an intermediary's website
         in the Union, of an email address or of other contact details, or the use
         of a language generally used in the third country where the controller is
         established, is insufficient to ascertain such intention, factors such as
@@ -386,7 +389,7 @@ objects:
         with the possibility of ordering goods and services in that other language,
         or the mentioning of customers or users who are in the Union, may make it
         apparent that the controller envisages offering goods or services to data
-        subjects in the Union.'
+        subjects in the Union.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-24
       assessable: false
       depth: 2
@@ -539,7 +542,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 35
-      description: ' Personal data concerning health should include all data pertaining
+      description: Personal data concerning health should include all data pertaining
         to the health status of a data subject which reveal information relating to
         the past, current or future physical or mental health status of the data subject.
         This includes information about the natural person collected in the course
@@ -552,7 +555,7 @@ objects:
         for example, a disease, disability, disease risk, medical history, clinical
         treatment or the physiological or biomedical state of the data subject independent
         of its source, for example from a physician or other health professional,
-        a hospital, a medical device or an in vitro diagnostic test.'
+        a hospital, a medical device or an in vitro diagnostic test.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-36
       assessable: false
       depth: 2
@@ -843,7 +846,7 @@ objects:
         the consequences of the intended further processing for data subjects; and
         the existence of appropriate safeguards in both the original and intended
         further processing operations.'
-    - urn: urn:intuitem:risk:req_node:gdpr:node54
+    - urn: urn:intuitem:risk:req_node:gdpr:node52
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
@@ -977,11 +980,11 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 56
-      description: ' Where in the course of electoral activities, the operation of
-        the democratic system in a Member State requires that political parties compile
-        personal data on people''s political opinions, the processing of such data
+      description: Where in the course of electoral activities, the operation of the
+        democratic system in a Member State requires that political parties compile
+        personal data on people's political opinions, the processing of such data
         may be permitted for reasons of public interest, provided that appropriate
-        safeguards are established.'
+        safeguards are established.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-57
       assessable: false
       depth: 2
@@ -1256,7 +1259,7 @@ objects:
         \ his or her point of view, to obtain an explanation of the decision reached\
         \ after such assessment and to challenge the decision. Such measure should\
         \ not concern a child."
-    - urn: urn:intuitem:risk:req_node:gdpr:node76
+    - urn: urn:intuitem:risk:req_node:gdpr:node74
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
@@ -1749,10 +1752,10 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 100
-      description: ' In order to enhance transparency and compliance with this Regulation,
+      description: In order to enhance transparency and compliance with this Regulation,
         the establishment of certification mechanisms and data protection seals and
         marks should be encouraged, allowing data subjects to quickly assess the level
-        of data protection of relevant products and services.'
+        of data protection of relevant products and services.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-101
       assessable: false
       depth: 2
@@ -1882,7 +1885,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 108
-      description: ' In the absence of an adequacy decision, the controller or processor
+      description: In the absence of an adequacy decision, the controller or processor
         should take measures to compensate for the lack of data protection in a third
         country by way of appropriate safeguards for the data subject. Such appropriate
         safeguards may consist of making use of binding corporate rules, standard
@@ -1902,7 +1905,7 @@ objects:
         arrangements, such as a memorandum of understanding, providing for enforceable
         and effective rights for data subjects. Authorisation by the competent supervisory
         authority should be obtained when the safeguards are provided for in administrative
-        arrangements that are not legally binding.'
+        arrangements that are not legally binding.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-109
       assessable: false
       depth: 2
@@ -2091,10 +2094,11 @@ objects:
         cooperation with other supervisory authorities throughout the Union. Each
         supervisory authority should have a separate, public annual budget, which
         may be part of the overall state or national budget.
-    - urn: urn:intuitem:risk:req_node:gdpr:node126
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-121
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
+      ref_id: Recital 121
       description: The general conditions for the member or members of the supervisory
         authority should be laid down by law in each Member State and should in particular
         provide that those members are to be appointed, by means of a transparent
@@ -2109,12 +2113,12 @@ objects:
         by the supervisory authority or an independent body established by Member
         State law, which should be subject to the exclusive direction of the member
         or members of the supervisory authority.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-121
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-122
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 121
-      description: ' Each supervisory authority should be competent on the territory
+      ref_id: Recital 122
+      description: Each supervisory authority should be competent on the territory
         of its own Member State to exercise the powers and to perform the tasks conferred
         on it in accordance with this Regulation. This should cover in particular
         the processing in the context of the activities of an establishment of the
@@ -2126,12 +2130,12 @@ objects:
         include handling complaints lodged by a data subject, conducting investigations
         on the application of this Regulation and promoting public awareness of the
         risks, rules, safeguards and rights in relation to the processing of personal
-        data.'
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-122
+        data.
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-123
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 122
+      ref_id: Recital 123
       description: The supervisory authorities should monitor the application of the
         provisions pursuant to this Regulation and contribute to its consistent application
         throughout the Union, in order to protect natural persons in relation to the
@@ -2140,11 +2144,11 @@ objects:
         should cooperate with each other and with the Commission, without the need
         for any agreement between Member States on the provision of mutual assistance
         or on such cooperation.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-123
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-124
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 123
+      ref_id: Recital 124
       description: Where the processing of personal data takes place in the context
         of the activities of an establishment of a controller or a processor in the
         Union and the controller or processor is established in more than one Member
@@ -2165,11 +2169,11 @@ objects:
         the criteria to be taken into account in order to ascertain whether the processing
         in question substantially affects data subjects in more than one Member State
         and on what constitutes a relevant and reasoned objection.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-124
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-125
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 124
+      ref_id: Recital 125
       description: The lead authority should be competent to adopt binding decisions
         regarding measures applying the powers conferred on it in accordance with
         this Regulation. In its capacity as lead authority, the supervisory authority
@@ -2177,11 +2181,11 @@ objects:
         in the decision-making process. Where the decision is to reject the complaint
         by the data subject in whole or in part, that decision should be adopted by
         the supervisory authority with which the complaint has been lodged.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-125
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-126
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 125
+      ref_id: Recital 126
       description: The decision should be agreed jointly by the lead supervisory authority
         and the supervisory authorities concerned and should be directed towards the
         main or single establishment of the controller or processor and be binding
@@ -2190,11 +2194,11 @@ objects:
         of the decision notified by the lead supervisory authority to the main establishment
         of the controller or processor as regards the processing activities in the
         Union.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-126
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-127
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 126
+      ref_id: Recital 127
       description: "Each supervisory authority not acting as the lead supervisory\
         \ authority should be competent to handle local cases where the controller\
         \ or processor is established in more than one Member State, but the subject\
@@ -2217,22 +2221,22 @@ objects:
         \ it should have the possibility to submit a draft for a decision, of which\
         \ the lead supervisory authority should take utmost account when preparing\
         \ its draft decision in that one-stop-shop mechanism."
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-127
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-128
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 127
+      ref_id: Recital 128
       description: The rules on the lead supervisory authority and the one-stop-shop
         mechanism should not apply where the processing is carried out by public authorities
         or private bodies in the public interest. In such cases the only supervisory
         authority competent to exercise the powers conferred to it in accordance with
         this Regulation should be the supervisory authority of the Member State where
         the public authority or private body is established.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-128
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-129
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 128
+      ref_id: Recital 129
       description: In order to ensure consistent monitoring and enforcement of this
         Regulation throughout the Union, the supervisory authorities should have in
         each Member State the same tasks and effective powers, including powers of
@@ -2263,11 +2267,11 @@ objects:
         law. The adoption of a legally binding decision implies that it may give rise
         to judicial review in the Member State of the supervisory authority that adopted
         the decision.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-129
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-130
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 129
+      ref_id: Recital 130
       description: Where the supervisory authority with which the complaint has been
         lodged is not the lead supervisory authority, the lead supervisory authority
         should closely cooperate with the supervisory authority with which the complaint
@@ -2278,11 +2282,11 @@ objects:
         the supervisory authority with which the complaint has been lodged and which
         should remain competent to carry out any investigation on the territory of
         its own Member State in liaison with the competent supervisory authority.
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-130
+    - urn: urn:intuitem:risk:req_node:gdpr:recital-131
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 130
+      ref_id: Recital 131
       description: 'Where another supervisory authority should act as a lead supervisory
         authority for the processing activities of the controller or processor but
         the concrete subject matter of a complaint or the possible infringement concerns
@@ -2300,26 +2304,15 @@ objects:
         in the territory of the Member State of the supervisory authority; or processing
         that has to be assessed taking into account relevant legal obligations under
         Member State law.'
-    - urn: urn:intuitem:risk:req_node:gdpr:recital-131
-      assessable: false
-      depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
-      ref_id: Recital 131
-      description: Awareness-raising activities by supervisory authorities addressed
-        to the public should include specific measures directed at controllers and
-        processors, including micro, small and medium-sized enterprises, as well as
-        natural persons in particular in the educational context.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-132
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 132
-      description: The supervisory authorities should assist each other in performing
-        their tasks and provide mutual assistance, so as to ensure the consistent
-        application and enforcement of this Regulation in the internal market. A supervisory
-        authority requesting mutual assistance may adopt a provisional measure if
-        it receives no response to a request for mutual assistance within one month
-        of the receipt of that request by the other supervisory authority.
+      description: Awareness-raising activities by supervisory authorities addressed
+        to the public should include specific measures directed at controllers and
+        processors, including micro, small and medium-sized enterprises, as well as
+        natural persons in particular in the educational context.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-133
       assessable: false
       depth: 2
@@ -2495,7 +2488,7 @@ objects:
         State's procedural law. Those courts should exercise full jurisdiction, which
         should include jurisdiction to examine all questions of fact and law relevant
         to the dispute before them.
-    - urn: urn:intuitem:risk:req_node:gdpr:node150
+    - urn: urn:intuitem:risk:req_node:gdpr:node147
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
@@ -2899,8 +2892,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:gdpr:preambule
       ref_id: Recital 166
-      description: ' In order to fulfil the objectives of this Regulation, namely
-        to protect the fundamental rights and freedoms of natural persons and in particular
+      description: In order to fulfil the objectives of this Regulation, namely to
+        protect the fundamental rights and freedoms of natural persons and in particular
         their right to the protection of personal data and to ensure the free movement
         of personal data within the Union, the power to adopt acts in accordance with
         Article 290 TFEU should be delegated to the Commission. In particular, delegated
@@ -2910,7 +2903,7 @@ objects:
         carry out appropriate consultations during its preparatory work, including
         at expert level. The Commission, when preparing and drawing-up delegated acts,
         should ensure a simultaneous, timely and appropriate transmission of relevant
-        documents to the European Parliament and to the Council.'
+        documents to the European Parliament and to the Council.
     - urn: urn:intuitem:risk:req_node:gdpr:recital-167
       assessable: false
       depth: 2
@@ -3162,7 +3155,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:node202
       ref_id: '4.1'
-      description: " \u2018personal data\u2019 means any information relating to an\
+      description: "\u2018personal data\u2019 means any information relating to an\
         \ identified or identifiable natural person (\u2018data subject\u2019); an\
         \ identifiable natural person is one who can be identified, directly or indirectly,\
         \ in particular by reference to an identifier such as a name, an identification\
@@ -3372,7 +3365,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:node202
       ref_id: '4.21'
-      description: " \u2018supervisory authority\u2019 means an independent public\
+      description: "\u2018supervisory authority\u2019 means an independent public\
         \ authority which is established by a Member State pursuant to Article 51;"
     - urn: urn:intuitem:risk:req_node:gdpr:4.22
       assessable: false
@@ -3539,7 +3532,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-5
       ref_id: '5.2'
-      description: " The controller shall be responsible for, and be able to demonstrate\
+      description: "The controller shall be responsible for, and be able to demonstrate\
         \ compliance with, paragraph 1 (\u2018accountability\u2019)."
     - urn: urn:intuitem:risk:req_node:gdpr:article-6
       assessable: false
@@ -3660,14 +3653,13 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:6.3
       ref_id: '6.4'
-      description: ' Where the processing for a purpose other than that for which
-        the personal data have been collected is not based on the data subject''s
-        consent or on a Union or Member State law which constitutes a necessary and
-        proportionate measure in a democratic society to safeguard the objectives
-        referred to in Article 23(1), the controller shall, in order to ascertain
-        whether processing for another purpose is compatible with the purpose for
-        which the personal data are initially collected, take into account, inter
-        alia:'
+      description: 'Where the processing for a purpose other than that for which the
+        personal data have been collected is not based on the data subject''s consent
+        or on a Union or Member State law which constitutes a necessary and proportionate
+        measure in a democratic society to safeguard the objectives referred to in
+        Article 23(1), the controller shall, in order to ascertain whether processing
+        for another purpose is compatible with the purpose for which the personal
+        data are initially collected, take into account, inter alia:'
     - urn: urn:intuitem:risk:req_node:gdpr:6.4.a
       assessable: true
       depth: 5
@@ -3748,10 +3740,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-7
       ref_id: '7.4'
-      description: ' When assessing whether consent is freely given, utmost account
+      description: When assessing whether consent is freely given, utmost account
         shall be taken of whether, inter alia, the performance of a contract, including
         the provision of a service, is conditional on consent to the processing of
-        personal data that is not necessary for the performance of that contract.'
+        personal data that is not necessary for the performance of that contract.
       annotation: To present each purpose separately and obtain specific consent for
         each one
     - urn: urn:intuitem:risk:req_node:gdpr:article-8
@@ -3844,9 +3836,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:9.2
       ref_id: 9.2.c
-      description: ' processing is necessary to protect the vital interests of the
-        data subject or of another natural person where the data subject is physically
-        or legally incapable of giving consent;'
+      description: processing is necessary to protect the vital interests of the data
+        subject or of another natural person where the data subject is physically
+        or legally incapable of giving consent;
     - urn: urn:intuitem:risk:req_node:gdpr:9.2.d
       assessable: true
       depth: 4
@@ -3965,11 +3957,11 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-11
       ref_id: '11.1'
-      description: ' If the purposes for which a controller processes personal data
+      description: If the purposes for which a controller processes personal data
         do not or do no longer require the identification of a data subject by the
         controller, the controller shall not be obliged to maintain, acquire or process
         additional information in order to identify the data subject for the sole
-        purpose of complying with this Regulation.'
+        purpose of complying with this Regulation.
     - urn: urn:intuitem:risk:req_node:gdpr:11.2
       assessable: true
       depth: 3
@@ -4042,11 +4034,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-12
       ref_id: '12.4'
-      description: ' If the controller does not take action on the request of the
-        data subject, the controller shall inform the data subject without delay and
-        at the latest within one month of receipt of the request of the reasons for
-        not taking action and on the possibility of lodging a complaint with a supervisory
-        authority and seeking a judicial remedy.'
+      description: If the controller does not take action on the request of the data
+        subject, the controller shall inform the data subject without delay and at
+        the latest within one month of receipt of the request of the reasons for not
+        taking action and on the possibility of lodging a complaint with a supervisory
+        authority and seeking a judicial remedy.
     - urn: urn:intuitem:risk:req_node:gdpr:12.5
       assessable: true
       depth: 4
@@ -4070,7 +4062,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:12.5
       ref_id: 12.5.b
-      description: ' refuse to act on the request.'
+      description: refuse to act on the request.
     - urn: urn:intuitem:risk:req_node:gdpr:node306
       assessable: true
       depth: 4
@@ -4091,11 +4083,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-12
       ref_id: '12.7'
-      description: ' The information to be provided to data subjects pursuant to Articles
+      description: The information to be provided to data subjects pursuant to Articles
         13 and 14 may be provided in combination with standardised icons in order
         to give in an easily visible, intelligible and clearly legible manner a meaningful
         overview of the intended processing. Where the icons are presented electronically
-        they shall be machine-readable.'
+        they shall be machine-readable.
     - urn: urn:intuitem:risk:req_node:gdpr:12.8
       assessable: false
       depth: 4
@@ -4137,7 +4129,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:13.1
       ref_id: 13.1.b
-      description: ' the contact details of the data protection officer, where applicable;'
+      description: the contact details of the data protection officer, where applicable;
     - urn: urn:intuitem:risk:req_node:gdpr:13.1.c
       assessable: true
       depth: 5
@@ -4150,8 +4142,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:13.1
       ref_id: 13.1.d
-      description: ' where the processing is based on point (f) of Article 6(1), the
-        legitimate interests pursued by the controller or by a third party;'
+      description: where the processing is based on point (f) of Article 6(1), the
+        legitimate interests pursued by the controller or by a third party;
     - urn: urn:intuitem:risk:req_node:gdpr:13.1.e
       assessable: true
       depth: 5
@@ -4233,11 +4225,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-13
       ref_id: '13.3'
-      description: ' Where the controller intends to further process the personal
-        data for a purpose other than that for which the personal data were collected,
+      description: Where the controller intends to further process the personal data
+        for a purpose other than that for which the personal data were collected,
         the controller shall provide the data subject prior to that further processing
         with information on that other purpose and with any relevant further information
-        as referred to in paragraph 2.'
+        as referred to in paragraph 2.
     - urn: urn:intuitem:risk:req_node:gdpr:13.4
       assessable: false
       depth: 4
@@ -4348,7 +4340,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:14.2
       ref_id: 14.2.e
-      description: ' the right to lodge a complaint with a supervisory authority;'
+      description: the right to lodge a complaint with a supervisory authority;
     - urn: urn:intuitem:risk:req_node:gdpr:14.2.f
       assessable: true
       depth: 5
@@ -4361,16 +4353,16 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:14.2
       ref_id: 14.2.g
-      description: ' the existence of automated decision-making, including profiling,
+      description: the existence of automated decision-making, including profiling,
         referred to in Article 22(1) and (4) and, at least in those cases, meaningful
         information about the logic involved, as well as the significance and the
-        envisaged consequences of such processing for the data subject.'
+        envisaged consequences of such processing for the data subject.
     - urn: urn:intuitem:risk:req_node:gdpr:14.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-14
       ref_id: '14.3'
-      description: ' The controller shall provide the information referred to in paragraphs
+      description: 'The controller shall provide the information referred to in paragraphs
         1 and 2:'
     - urn: urn:intuitem:risk:req_node:gdpr:14.3.a
       assessable: true
@@ -4444,9 +4436,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:14.5
       ref_id: 14.5.d
-      description: ' where the personal data must remain confidential subject to an
+      description: where the personal data must remain confidential subject to an
         obligation of professional secrecy regulated by Union or Member State law,
-        including a statutory obligation of secrecy.'
+        including a statutory obligation of secrecy.
     - urn: urn:intuitem:risk:req_node:gdpr:article-15
       assessable: false
       depth: 3
@@ -4490,8 +4482,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:15.1
       ref_id: 15.1.d
-      description: ' where possible, the envisaged period for which the personal data
-        will be stored, or, if not possible, the criteria used to determine that period;'
+      description: where possible, the envisaged period for which the personal data
+        will be stored, or, if not possible, the criteria used to determine that period;
     - urn: urn:intuitem:risk:req_node:gdpr:15.1.e
       assessable: true
       depth: 5
@@ -4600,9 +4592,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:17.1
       ref_id: 17.1.b
-      description: ' the data subject withdraws consent on which the processing is
-        based according to point (a) of Article 6(1), or point (a) of Article 9(2),
-        and where there is no other legal ground for the processing;'
+      description: the data subject withdraws consent on which the processing is based
+        according to point (a) of Article 6(1), or point (a) of Article 9(2), and
+        where there is no other legal ground for the processing;
       annotation: Set up a follow-up procedure to inform other controllers processing
         the data subject to the erasure request, as it is the duty of the data controller.
     - urn: urn:intuitem:risk:req_node:gdpr:17.1.c
@@ -4710,7 +4702,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-18
       ref_id: '18.1'
-      description: ' The data subject shall have the right to obtain from the controller
+      description: 'The data subject shall have the right to obtain from the controller
         restriction of processing where one of the following applies:'
       annotation: The controller must comply with the data restriction request.
     - urn: urn:intuitem:risk:req_node:gdpr:18.1.a
@@ -4759,9 +4751,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-18
       ref_id: '18.3'
-      description: ' A data subject who has obtained restriction of processing pursuant
+      description: A data subject who has obtained restriction of processing pursuant
         to paragraph 1 shall be informed by the controller before the restriction
-        of processing is lifted.'
+        of processing is lifted.
     - urn: urn:intuitem:risk:req_node:gdpr:article-19
       assessable: false
       depth: 3
@@ -4814,9 +4806,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-20
       ref_id: '20.2'
-      description: ' In exercising his or her right to data portability pursuant to
+      description: In exercising his or her right to data portability pursuant to
         paragraph 1, the data subject shall have the right to have the personal data
-        transmitted directly from one controller to another, where technically feasible.'
+        transmitted directly from one controller to another, where technically feasible.
     - urn: urn:intuitem:risk:req_node:gdpr:20.3
       assessable: true
       depth: 4
@@ -4961,10 +4953,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-22
       ref_id: '22.4'
-      description: ' Decisions referred to in paragraph 2 shall not be based on special
+      description: Decisions referred to in paragraph 2 shall not be based on special
         categories of personal data referred to in Article 9(1), unless point (a)
         or (g) of Article 9(2) applies and suitable measures to safeguard the data
-        subject''s rights and freedoms and legitimate interests are in place.'
+        subject's rights and freedoms and legitimate interests are in place.
     - urn: urn:intuitem:risk:req_node:gdpr:node418
       assessable: false
       depth: 2
@@ -5094,15 +5086,14 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:23.2
       ref_id: 23.2.e
-      description: ' the specification of the controller or categories of controllers;'
+      description: the specification of the controller or categories of controllers;
     - urn: urn:intuitem:risk:req_node:gdpr:23.2.f
       assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:23.2
       ref_id: 23.2.f
-      description: ' the storage periods and the applicable safeguards taking into
-        account the nature, scope and purposes of the processing or categories of
-        processing;'
+      description: the storage periods and the applicable safeguards taking into account
+        the nature, scope and purposes of the processing or categories of processing;
     - urn: urn:intuitem:risk:req_node:gdpr:23.2.g
       assessable: false
       depth: 5
@@ -5114,8 +5105,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:23.2
       ref_id: 23.2.h
-      description: ' the right of data subjects to be informed about the restriction,
-        unless that may be prejudicial to the purpose of the restriction.'
+      description: the right of data subjects to be informed about the restriction,
+        unless that may be prejudicial to the purpose of the restriction.
     - urn: urn:intuitem:risk:req_node:gdpr:chapter-iv
       assessable: false
       depth: 1
@@ -5205,9 +5196,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-25
       ref_id: '25.3'
-      description: ' An approved certification mechanism pursuant to Article 42 may
+      description: An approved certification mechanism pursuant to Article 42 may
         be used as an element to demonstrate compliance with the requirements set
-        out in paragraphs 1 and 2 of this Article.'
+        out in paragraphs 1 and 2 of this Article.
     - urn: urn:intuitem:risk:req_node:gdpr:article-26
       assessable: false
       depth: 3
@@ -5338,11 +5329,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-28
       ref_id: '28.2'
-      description: ' The processor shall not engage another processor without prior
+      description: The processor shall not engage another processor without prior
         specific or general written authorisation of the controller. In the case of
         general written authorisation, the processor shall inform the controller of
         any intended changes concerning the addition or replacement of other processors,
-        thereby giving the controller the opportunity to object to such changes.'
+        thereby giving the controller the opportunity to object to such changes.
     - urn: urn:intuitem:risk:req_node:gdpr:28.3
       assessable: true
       depth: 4
@@ -5460,12 +5451,12 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-28
       ref_id: '28.6'
-      description: ' Without prejudice to an individual contract between the controller
+      description: Without prejudice to an individual contract between the controller
         and the processor, the contract or the other legal act referred to in paragraphs
         3 and 4 of this Article may be based, in whole or in part, on standard contractual
         clauses referred to in paragraphs 7 and 8 of this Article, including when
         they are part of a certification granted to the controller or processor pursuant
-        to Articles 42 and 43.'
+        to Articles 42 and 43.
     - urn: urn:intuitem:risk:req_node:gdpr:28.7
       assessable: true
       depth: 4
@@ -5551,9 +5542,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:30.1
       ref_id: 30.1.d
-      description: ' the categories of recipients to whom the personal data have been
+      description: the categories of recipients to whom the personal data have been
         or will be disclosed including recipients in third countries or international
-        organisations;'
+        organisations;
     - urn: urn:intuitem:risk:req_node:gdpr:30.1.e
       assessable: true
       depth: 5
@@ -5576,8 +5567,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:30.1
       ref_id: 30.1.g
-      description: ' where possible, a general description of the technical and organisational
-        security measures referred to in Article 32(1).'
+      description: where possible, a general description of the technical and organisational
+        security measures referred to in Article 32(1).
     - urn: urn:intuitem:risk:req_node:gdpr:30.2
       assessable: true
       depth: 4
@@ -5600,7 +5591,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:30.2
       ref_id: 30.2.b
-      description: ' the categories of processing carried out on behalf of each controller;'
+      description: the categories of processing carried out on behalf of each controller;
     - urn: urn:intuitem:risk:req_node:gdpr:30.2.c
       assessable: true
       depth: 5
@@ -5788,7 +5779,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:33.3
       ref_id: 33.3.c
-      description: ' describe the likely consequences of the personal data breach;'
+      description: describe the likely consequences of the personal data breach;
     - urn: urn:intuitem:risk:req_node:gdpr:33.3.d
       assessable: true
       depth: 5
@@ -5819,6 +5810,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:node503
       ref_id: Article 34
+      description: Communication of a personal data breach to the data subject
     - urn: urn:intuitem:risk:req_node:gdpr:34.1
       assessable: true
       depth: 4
@@ -5858,9 +5850,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:34.3
       ref_id: 34.3.b
-      description: ' the controller has taken subsequent measures which ensure that
+      description: the controller has taken subsequent measures which ensure that
         the high risk to the rights and freedoms of data subjects referred to in paragraph
-        1 is no longer likely to materialise;'
+        1 is no longer likely to materialise;
     - urn: urn:intuitem:risk:req_node:gdpr:34.3.c
       assessable: true
       depth: 5
@@ -5965,12 +5957,12 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-35
       ref_id: '35.6'
-      description: ' Prior to the adoption of the lists referred to in paragraphs
-        4 and 5, the competent supervisory authority shall apply the consistency mechanism
+      description: Prior to the adoption of the lists referred to in paragraphs 4
+        and 5, the competent supervisory authority shall apply the consistency mechanism
         referred to in Article 63 where such lists involve processing activities which
         are related to the offering of goods or services to data subjects or to the
         monitoring of their behaviour in several Member States, or may substantially
-        affect the free movement of personal data within the Union.'
+        affect the free movement of personal data within the Union.
     - urn: urn:intuitem:risk:req_node:gdpr:35.7
       assessable: false
       depth: 4
@@ -5990,8 +5982,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:35.7
       ref_id: 35.7.b
-      description: ' an assessment of the necessity and proportionality of the processing
-        operations in relation to the purposes;'
+      description: an assessment of the necessity and proportionality of the processing
+        operations in relation to the purposes;
     - urn: urn:intuitem:risk:req_node:gdpr:35.7.c
       assessable: true
       depth: 5
@@ -6004,10 +5996,10 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:35.7
       ref_id: 35.7.d
-      description: ' the measures envisaged to address the risks, including safeguards,
+      description: the measures envisaged to address the risks, including safeguards,
         security measures and mechanisms to ensure the protection of personal data
         and to demonstrate compliance with this Regulation taking into account the
-        rights and legitimate interests of data subjects and other persons concerned.'
+        rights and legitimate interests of data subjects and other persons concerned.
     - urn: urn:intuitem:risk:req_node:gdpr:35.8
       assessable: true
       depth: 4
@@ -6045,9 +6037,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-35
       ref_id: '35.11'
-      description: ' Where necessary, the controller shall carry out a review to assess
+      description: Where necessary, the controller shall carry out a review to assess
         if processing is performed in accordance with the data protection impact assessment
-        at least when there is a change of the risk represented by processing operations.'
+        at least when there is a change of the risk represented by processing operations.
     - urn: urn:intuitem:risk:req_node:gdpr:article-36
       assessable: false
       depth: 3
@@ -6107,8 +6099,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:36.3
       ref_id: 36.3.c
-      description: ' the measures and safeguards provided to protect the rights and
-        freedoms of data subjects pursuant to this Regulation;'
+      description: the measures and safeguards provided to protect the rights and
+        freedoms of data subjects pursuant to this Regulation;
     - urn: urn:intuitem:risk:req_node:gdpr:36.3.d
       assessable: true
       depth: 5
@@ -6120,8 +6112,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:36.3
       ref_id: 36.3.e
-      description: ' the data protection impact assessment provided for in Article
-        35; and'
+      description: the data protection impact assessment provided for in Article 35;
+        and
     - urn: urn:intuitem:risk:req_node:gdpr:36.3.f
       assessable: true
       depth: 5
@@ -6179,10 +6171,10 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:37.1
       ref_id: 37.1.b
-      description: ' the core activities of the controller or the processor consist
+      description: the core activities of the controller or the processor consist
         of processing operations which, by virtue of their nature, their scope and/or
         their purposes, require regular and systematic monitoring of data subjects
-        on a large scale; or'
+        on a large scale; or
     - urn: urn:intuitem:risk:req_node:gdpr:37.1.c
       assessable: true
       depth: 5
@@ -6204,10 +6196,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-37
       ref_id: '37.3'
-      description: ' Where the controller or the processor is a public authority or
+      description: Where the controller or the processor is a public authority or
         body, a single data protection officer may be designated for several such
         authorities or bodies, taking account of their organisational structure and
-        size.'
+        size.
     - urn: urn:intuitem:risk:req_node:gdpr:37.4
       assessable: true
       depth: 4
@@ -6279,9 +6271,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-38
       ref_id: '38.4'
-      description: ' Data subjects may contact the data protection officer with regard
+      description: Data subjects may contact the data protection officer with regard
         to all issues related to processing of their personal data and to the exercise
-        of their rights under this Regulation.'
+        of their rights under this Regulation.
     - urn: urn:intuitem:risk:req_node:gdpr:38.5
       assessable: false
       depth: 4
@@ -6394,7 +6386,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:40.2
       ref_id: 40.2.a
-      description: ' fair and transparent processing;'
+      description: fair and transparent processing;
     - urn: urn:intuitem:risk:req_node:gdpr:40.2.b
       assessable: true
       depth: 5
@@ -6418,7 +6410,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:40.2
       ref_id: 40.2.e
-      description: ' the information provided to the public and to data subjects;'
+      description: the information provided to the public and to data subjects;
     - urn: urn:intuitem:risk:req_node:gdpr:40.2.f
       assessable: true
       depth: 5
@@ -6452,8 +6444,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:40.2
       ref_id: 40.2.j
-      description: ' the transfer of personal data to third countries or international
-        organisations; or'
+      description: the transfer of personal data to third countries or international
+        organisations; or
     - urn: urn:intuitem:risk:req_node:gdpr:40.2.k
       assessable: true
       depth: 5
@@ -6617,10 +6609,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-41
       ref_id: '41.3'
-      description: ' The competent supervisory authority shall submit the draft requirements
+      description: The competent supervisory authority shall submit the draft requirements
         for accreditation of a body as referred to in paragraph 1 of this Article
         to the Board pursuant to the consistency mechanism referred to in Article
-        63.'
+        63.
     - urn: urn:intuitem:risk:req_node:gdpr:41.4
       assessable: false
       depth: 4
@@ -6735,9 +6727,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-42
       ref_id: '42.8'
-      description: ' The Board shall collate all certification mechanisms and data
-        protection seals and marks in a register and shall make them publicly available
-        by any appropriate means.'
+      description: The Board shall collate all certification mechanisms and data protection
+        seals and marks in a register and shall make them publicly available by any
+        appropriate means.
     - urn: urn:intuitem:risk:req_node:gdpr:article-43
       assessable: false
       depth: 3
@@ -6808,11 +6800,11 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:43.2
       ref_id: 43.2.d
-      description: ' established procedures and structures to handle complaints about
+      description: established procedures and structures to handle complaints about
         infringements of the certification or the manner in which the certification
         has been, or is being, implemented by the controller or processor, and to
         make those procedures and structures transparent to data subjects and the
-        public; and'
+        public; and
     - urn: urn:intuitem:risk:req_node:gdpr:43.2.e
       assessable: false
       depth: 5
@@ -6993,18 +6985,18 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-45
       ref_id: '45.3'
-      description: ' The Commission, after assessing the adequacy of the level of
-        protection, may decide, by means of implementing act, that a third country,
-        a territory or one or more specified sectors within a third country, or an
-        international organisation ensures an adequate level of protection within
-        the meaning of paragraph 2 of this Article. The implementing act shall provide
-        for a mechanism for a periodic review, at least every four years, which shall
-        take into account all relevant developments in the third country or international
-        organisation. The implementing act shall specify its territorial and sectoral
-        application and, where applicable, identify the supervisory authority or authorities
-        referred to in point (b) of paragraph 2 of this Article. The implementing
-        act shall be adopted in accordance with the examination procedure referred
-        to in Article 93(2).'
+      description: The Commission, after assessing the adequacy of the level of protection,
+        may decide, by means of implementing act, that a third country, a territory
+        or one or more specified sectors within a third country, or an international
+        organisation ensures an adequate level of protection within the meaning of
+        paragraph 2 of this Article. The implementing act shall provide for a mechanism
+        for a periodic review, at least every four years, which shall take into account
+        all relevant developments in the third country or international organisation.
+        The implementing act shall specify its territorial and sectoral application
+        and, where applicable, identify the supervisory authority or authorities referred
+        to in point (b) of paragraph 2 of this Article. The implementing act shall
+        be adopted in accordance with the examination procedure referred to in Article
+        93(2).
     - urn: urn:intuitem:risk:req_node:gdpr:45.4
       assessable: false
       depth: 3
@@ -7097,22 +7089,22 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-46
       ref_id: '46.2'
-      description: ' The appropriate safeguards referred to in paragraph 1 may be
-        provided for, without requiring any specific authorisation from a supervisory
-        authority, by:'
+      description: 'The appropriate safeguards referred to in paragraph 1 may be provided
+        for, without requiring any specific authorisation from a supervisory authority,
+        by:'
     - urn: urn:intuitem:risk:req_node:gdpr:46.2.a
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:46.2
       ref_id: 46.2.a
-      description: ' a legally binding and enforceable instrument between public authorities
-        or bodies;'
+      description: a legally binding and enforceable instrument between public authorities
+        or bodies;
     - urn: urn:intuitem:risk:req_node:gdpr:46.2.b
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:46.2
       ref_id: 46.2.b
-      description: ' binding corporate rules in accordance with Article 47;'
+      description: binding corporate rules in accordance with Article 47;
     - urn: urn:intuitem:risk:req_node:gdpr:46.2.c
       assessable: true
       depth: 4
@@ -7142,10 +7134,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:46.2
       ref_id: 46.2.f
-      description: ' an approved certification mechanism pursuant to Article 42 together
+      description: an approved certification mechanism pursuant to Article 42 together
         with binding and enforceable commitments of the controller or processor in
         the third country to apply the appropriate safeguards, including as regards
-        data subjects'' rights.'
+        data subjects' rights.
     - urn: urn:intuitem:risk:req_node:gdpr:46.3
       assessable: true
       depth: 3
@@ -7301,11 +7293,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:47.2
       ref_id: 47.2.h
-      description: ' the tasks of any data protection officer designated in accordance
+      description: the tasks of any data protection officer designated in accordance
         with Article 37 or any other person or entity in charge of the monitoring
         compliance with the binding corporate rules within the group of undertakings,
         or group of enterprises engaged in a joint economic activity, as well as monitoring
-        training and complaint-handling;'
+        training and complaint-handling;
     - urn: urn:intuitem:risk:req_node:gdpr:47.2.i
       assessable: false
       depth: 4
@@ -7338,11 +7330,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:47.2
       ref_id: 47.2.l
-      description: ' the cooperation mechanism with the supervisory authority to ensure
+      description: the cooperation mechanism with the supervisory authority to ensure
         compliance by any member of the group of undertakings, or group of enterprises
         engaged in a joint economic activity, in particular by making available to
         the supervisory authority the results of verifications of the measures referred
-        to in point (j);'
+        to in point (j);
     - urn: urn:intuitem:risk:req_node:gdpr:47.2.m
       assessable: false
       depth: 4
@@ -7397,7 +7389,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-49
       ref_id: '49.1'
-      description: ' In the absence of an adequacy decision pursuant to Article 45(3),
+      description: 'In the absence of an adequacy decision pursuant to Article 45(3),
         or of appropriate safeguards pursuant to Article 46, including binding corporate
         rules, a transfer or a set of transfers of personal data to a third country
         or an international organisation shall take place only on one of the following
@@ -7765,8 +7757,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:54.1
       ref_id: 54.1.c
-      description: ' the rules and procedures for the appointment of the member or
-        members of each supervisory authority;'
+      description: the rules and procedures for the appointment of the member or members
+        of each supervisory authority;
     - urn: urn:intuitem:risk:req_node:gdpr:54.1.d
       assessable: false
       depth: 5
@@ -7938,10 +7930,10 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:57.1
       ref_id: 57.1.c
-      description: ' advise, in accordance with Member State law, the national parliament,
+      description: advise, in accordance with Member State law, the national parliament,
         the government, and other institutions and bodies on legislative and administrative
-        measures relating to the protection of natural persons'' rights and freedoms
-        with regard to processing;'
+        measures relating to the protection of natural persons' rights and freedoms
+        with regard to processing;
     - urn: urn:intuitem:risk:req_node:gdpr:57.1.d
       assessable: false
       depth: 5
@@ -7973,9 +7965,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:57.1
       ref_id: 57.1.g
-      description: ' cooperate with, including sharing information and provide mutual
+      description: cooperate with, including sharing information and provide mutual
         assistance to, other supervisory authorities with a view to ensuring the consistency
-        of application and enforcement of this Regulation;'
+        of application and enforcement of this Regulation;
     - urn: urn:intuitem:risk:req_node:gdpr:57.1.h
       assessable: false
       depth: 5
@@ -8011,8 +8003,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:57.1
       ref_id: 57.1.l
-      description: ' give advice on the processing operations referred to in Article
-        36(2);'
+      description: give advice on the processing operations referred to in Article
+        36(2);
     - urn: urn:intuitem:risk:req_node:gdpr:57.1.m
       assessable: false
       depth: 5
@@ -8056,8 +8048,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:57.1
       ref_id: 57.1.r
-      description: ' authorise contractual clauses and provisions referred to in Article
-        46(3);'
+      description: authorise contractual clauses and provisions referred to in Article
+        46(3);
     - urn: urn:intuitem:risk:req_node:gdpr:57.1.s
       assessable: false
       depth: 5
@@ -8142,8 +8134,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.1
       ref_id: 58.1.c
-      description: ' to carry out a review on certifications issued pursuant to Article
-        42(7);'
+      description: to carry out a review on certifications issued pursuant to Article
+        42(7);
     - urn: urn:intuitem:risk:req_node:gdpr:58.1.d
       assessable: false
       depth: 5
@@ -8156,9 +8148,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.1
       ref_id: 58.1.e
-      description: ' to obtain, from the controller and the processor, access to all
+      description: to obtain, from the controller and the processor, access to all
         personal data and to all information necessary for the performance of its
-        tasks;'
+        tasks;
     - urn: urn:intuitem:risk:req_node:gdpr:58.1.f
       assessable: false
       depth: 5
@@ -8222,10 +8214,10 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.2
       ref_id: 58.2.g
-      description: ' to order the rectification or erasure of personal data or restriction
+      description: to order the rectification or erasure of personal data or restriction
         of processing pursuant to Articles 16, 17 and 18 and the notification of such
         actions to recipients to whom the personal data have been disclosed pursuant
-        to Article 17(2) and Article 19;'
+        to Article 17(2) and Article 19;
     - urn: urn:intuitem:risk:req_node:gdpr:58.2.h
       assessable: false
       depth: 5
@@ -8262,8 +8254,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.3
       ref_id: 58.3.a
-      description: ' to advise the controller in accordance with the prior consultation
-        procedure referred to in Article 36;'
+      description: to advise the controller in accordance with the prior consultation
+        procedure referred to in Article 36;
     - urn: urn:intuitem:risk:req_node:gdpr:58.3.b
       assessable: false
       depth: 5
@@ -8285,8 +8277,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.3
       ref_id: 58.3.d
-      description: ' to issue an opinion and approve draft codes of conduct pursuant
-        to Article 40(5);'
+      description: to issue an opinion and approve draft codes of conduct pursuant
+        to Article 40(5);
     - urn: urn:intuitem:risk:req_node:gdpr:58.3.e
       assessable: false
       depth: 5
@@ -8312,8 +8304,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.3
       ref_id: 58.3.h
-      description: ' to authorise contractual clauses referred to in point (a) of
-        Article 46(3);'
+      description: to authorise contractual clauses referred to in point (a) of Article
+        46(3);
     - urn: urn:intuitem:risk:req_node:gdpr:58.3.i
       assessable: false
       depth: 5
@@ -8326,7 +8318,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:58.3
       ref_id: 58.3.j
-      description: ' to approve binding corporate rules pursuant to Article 47.'
+      description: to approve binding corporate rules pursuant to Article 47.
     - urn: urn:intuitem:risk:req_node:gdpr:58.4
       assessable: false
       depth: 4
@@ -8464,10 +8456,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-60
       ref_id: '60.8'
-      description: ' By derogation from paragraph 7, where a complaint is dismissed
+      description: By derogation from paragraph 7, where a complaint is dismissed
         or rejected, the supervisory authority with which the complaint was lodged
         shall adopt the decision and notify it to the complainant and shall inform
-        the controller thereof.'
+        the controller thereof.
     - urn: urn:intuitem:risk:req_node:gdpr:60.9
       assessable: false
       depth: 4
@@ -8754,9 +8746,9 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:64.1
       ref_id: 64.1.b
-      description: ' concerns a matter pursuant to Article 40(7) whether a draft code
+      description: concerns a matter pursuant to Article 40(7) whether a draft code
         of conduct or an amendment or extension to a code of conduct complies with
-        this Regulation;'
+        this Regulation;
     - urn: urn:intuitem:risk:req_node:gdpr:64.1.c
       assessable: false
       depth: 5
@@ -8777,15 +8769,15 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:64.1
       ref_id: 64.1.e
-      description: ' aims to authorise contractual clauses referred to in point (a)
-        of Article 46(3); or'
+      description: aims to authorise contractual clauses referred to in point (a)
+        of Article 46(3); or
     - urn: urn:intuitem:risk:req_node:gdpr:64.1.f
       assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:64.1
       ref_id: 64.1.f
-      description: ' aims to approve binding corporate rules within the meaning of
-        Article 47.'
+      description: aims to approve binding corporate rules within the meaning of Article
+        47.
     - urn: urn:intuitem:risk:req_node:gdpr:64.2
       assessable: false
       depth: 4
@@ -8826,8 +8818,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-64
       ref_id: '64.5'
-      description: ' The Chair of the Board shall, without undue, delay inform by
-        electronic means:'
+      description: 'The Chair of the Board shall, without undue, delay inform by electronic
+        means:'
     - urn: urn:intuitem:risk:req_node:gdpr:64.5.a
       assessable: false
       depth: 5
@@ -8857,11 +8849,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-64
       ref_id: '64.7'
-      description: ' The competent supervisory authority referred to in paragraph
-        1 shall take utmost account of the opinion of the Board and shall, within
-        two weeks after receiving the opinion, communicate to the Chair of the Board
-        by electronic means whether it will maintain or amend its draft decision and,
-        if any, the amended draft decision, using a standardised format.'
+      description: The competent supervisory authority referred to in paragraph 1
+        shall take utmost account of the opinion of the Board and shall, within two
+        weeks after receiving the opinion, communicate to the Chair of the Board by
+        electronic means whether it will maintain or amend its draft decision and,
+        if any, the amended draft decision, using a standardised format.
     - urn: urn:intuitem:risk:req_node:gdpr:64.8
       assessable: false
       depth: 4
@@ -8909,11 +8901,10 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:65.1
       ref_id: 65.1.c
-      description: ' where a competent supervisory authority does not request the
-        opinion of the Board in the cases referred to in Article 64(1), or does not
-        follow the opinion of the Board issued under Article 64. In that case, any
-        supervisory authority concerned or the Commission may communicate the matter
-        to the Board.'
+      description: where a competent supervisory authority does not request the opinion
+        of the Board in the cases referred to in Article 64(1), or does not follow
+        the opinion of the Board issued under Article 64. In that case, any supervisory
+        authority concerned or the Commission may communicate the matter to the Board.
     - urn: urn:intuitem:risk:req_node:gdpr:65.2
       assessable: false
       depth: 4
@@ -9220,10 +9211,10 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:70.1
       ref_id: 70.1.j
-      description: ' issue guidelines, recommendations and best practices in accordance
+      description: issue guidelines, recommendations and best practices in accordance
         with point (e) of this paragraph for the purpose of further specifying the
         criteria and requirements for the personal data transfers on the basis of
-        Article 49(1);'
+        Article 49(1);
     - urn: urn:intuitem:risk:req_node:gdpr:70.1.k
       assessable: false
       depth: 5
@@ -9457,8 +9448,8 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:74.1
       ref_id: 74.1.b
-      description: ' to notify decisions adopted by the Board pursuant to Article
-        65 to the lead supervisory authority and the supervisory authorities concerned;'
+      description: to notify decisions adopted by the Board pursuant to Article 65
+        to the lead supervisory authority and the supervisory authorities concerned;
     - urn: urn:intuitem:risk:req_node:gdpr:74.1.c
       assessable: false
       depth: 5
@@ -9485,8 +9476,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-75
       ref_id: '75.1'
-      description: ' The Board shall have a secretariat, which shall be provided by
-        the European Data Protection Supervisor.'
+      description: The Board shall have a secretariat, which shall be provided by
+        the European Data Protection Supervisor.
     - urn: urn:intuitem:risk:req_node:gdpr:75.2
       assessable: false
       depth: 4
@@ -9531,20 +9522,20 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:75.6
       ref_id: 75.6.a
-      description: ' the day-to-day business of the Board;'
+      description: the day-to-day business of the Board;
     - urn: urn:intuitem:risk:req_node:gdpr:75.6.b
       assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:75.6
       ref_id: 75.6.b
-      description: ' communication between the members of the Board, its Chair and
-        the Commission;'
+      description: communication between the members of the Board, its Chair and the
+        Commission;
     - urn: urn:intuitem:risk:req_node:gdpr:75.6.c
       assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:gdpr:75.6
       ref_id: 75.6.c
-      description: ' communication with other institutions and the public;'
+      description: communication with other institutions and the public;
     - urn: urn:intuitem:risk:req_node:gdpr:75.6.d
       assessable: false
       depth: 5
@@ -9805,12 +9796,12 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:gdpr:article-82
       ref_id: '82.5'
-      description: ' Where a controller or processor has, in accordance with paragraph
+      description: Where a controller or processor has, in accordance with paragraph
         4, paid full compensation for the damage suffered, that controller or processor
         shall be entitled to claim back from the other controllers or processors involved
         in the same processing that part of the compensation corresponding to their
         part of responsibility for the damage, in accordance with the conditions set
-        out in paragraph 2.'
+        out in paragraph 2.
     - urn: urn:intuitem:risk:req_node:gdpr:82.6
       assessable: false
       depth: 3
@@ -9857,42 +9848,42 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.2
       ref_id: 83.2.b
-      description: ' the intentional or negligent character of the infringement;'
+      description: the intentional or negligent character of the infringement;
     - urn: urn:intuitem:risk:req_node:gdpr:83.2.c
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.2
       ref_id: 83.2.c
-      description: ' any action taken by the controller or processor to mitigate the
-        damage suffered by data subjects;'
+      description: any action taken by the controller or processor to mitigate the
+        damage suffered by data subjects;
     - urn: urn:intuitem:risk:req_node:gdpr:83.2.d
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.2
       ref_id: 83.2.d
-      description: ' the degree of responsibility of the controller or processor taking
+      description: the degree of responsibility of the controller or processor taking
         into account technical and organisational measures implemented by them pursuant
-        to Articles 25 and 32;'
+        to Articles 25 and 32;
     - urn: urn:intuitem:risk:req_node:gdpr:83.2.e
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.2
       ref_id: 83.2.e
-      description: ' any relevant previous infringements by the controller or processor;'
+      description: any relevant previous infringements by the controller or processor;
     - urn: urn:intuitem:risk:req_node:gdpr:83.2.f
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.2
       ref_id: 83.2.f
-      description: ' the degree of cooperation with the supervisory authority, in
-        order to remedy the infringement and mitigate the possible adverse effects
-        of the infringement;'
+      description: the degree of cooperation with the supervisory authority, in order
+        to remedy the infringement and mitigate the possible adverse effects of the
+        infringement;
     - urn: urn:intuitem:risk:req_node:gdpr:83.2.g
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.2
       ref_id: 83.2.g
-      description: ' the categories of personal data affected by the infringement;'
+      description: the categories of personal data affected by the infringement;
     - urn: urn:intuitem:risk:req_node:gdpr:83.2.h
       assessable: false
       depth: 4
@@ -9983,7 +9974,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:83.5
       ref_id: 83.5.b
-      description: ' the data subjects'' rights pursuant to Articles 12 to 22;'
+      description: the data subjects' rights pursuant to Articles 12 to 22;
     - urn: urn:intuitem:risk:req_node:gdpr:83.5.c
       assessable: false
       depth: 4
@@ -10482,7 +10473,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:gdpr:97.2
       ref_id: 97.2.b
-      description: ' Chapter VII on cooperation and consistency.'
+      description: Chapter VII on cooperation and consistency.
     - urn: urn:intuitem:risk:req_node:gdpr:97.3
       assessable: false
       depth: 3
