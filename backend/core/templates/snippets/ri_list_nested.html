@@ -84,6 +84,11 @@
     >
       {% trans "Suggested measures" %}
     </th>
+    <th
+      class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+    >
+      {% trans "Strength of knowledge" %}
+    </th>
   </thead>
   <tbody>
     {% for scenario in scenarios %}
@@ -162,6 +167,9 @@
           </li>
           {% endfor %}
         </ul>
+      </td>
+      <td class="px-4 py-5 border-b border-gray-200 text-sm">
+        {{ scenario.strength_of_knowledge }}
       </td>
     </tr>
     {% empty %}
