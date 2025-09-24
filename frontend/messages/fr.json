@@ -57,6 +57,8 @@
 	"home": "Accueil",
 	"edit": "Modifier",
 	"view": "Voir",
+	"viewMore": "Voir plus",
+	"viewLess": "Voir moins",
 	"changePassword": "Changer le mot de passe",
 	"overview": "Vue d'ensemble",
 	"context": "Contexte",
