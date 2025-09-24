@@ -109,7 +109,7 @@
 		regionHead = '',
 		regionHeadCell = 'uppercase bg-white text-gray-700',
 		regionBody = 'bg-white',
-		regionCell = 'max-w-[65ch] max-h-[8em] overflow-y-auto',
+		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
