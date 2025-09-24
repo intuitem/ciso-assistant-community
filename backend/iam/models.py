@@ -6,7 +6,7 @@ from typing import Any, List, Self, Tuple, Generator
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -44,6 +44,15 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
+from allauth.mfa.models import Authenticator
+
+ALLOWED_PERMISSION_APPS = (
+    "core",
+    "ebios_rm",
+    "tprm",
+    "privacy",
+    "resilience",
+)
 
 
 def _get_root_folder():
@@ -238,6 +247,21 @@ class Folder(NameDescriptionMixin):
             ra4.perimeter_folders.add(folder)
             # Clear the cache after a new folder is created - purposely clearing everything
 
+            # Create a UG and RA for each non-builtin role (idempotent)
+            with transaction.atomic():
+                for role in Role.objects.filter(builtin=False):
+                    ug, _ = UserGroup.objects.get_or_create(
+                        name=role.name, folder=folder, defaults={"builtin": False}
+                    )
+                    ra, created = RoleAssignment.objects.get_or_create(
+                        user_group=ug,
+                        role=role,
+                        folder=Folder.get_root_folder(),
+                        defaults={"builtin": False, "is_recursive": True},
+                    )
+                    # Ensure perimeter folder link exists
+                    ra.perimeter_folders.add(folder)
+
 
 class FolderMixin(models.Model):
     """
@@ -293,7 +317,7 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def __str__(self) -> str:
         if self.builtin:
             return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
+        return f"{self.folder.name} - {self.name}"
 
     def get_name_display(self) -> str:
         return self.name
@@ -301,7 +325,9 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def get_localization_dict(self) -> dict:
         return {
             "folder": self.folder.name,
-            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
+            if self.builtin
+            else self.name,
         }
 
     @property
@@ -654,6 +680,13 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             if user.is_editor and not user.is_third_party
         ]
 
+    def has_mfa_enabled(self) -> bool:
+        """
+        Check if the user has Multi-Factor Authentication (MFA) enabled.
+        Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
+        """
+        return Authenticator.objects.filter(user=self).exists()
+
 
 class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""
@@ -669,6 +702,8 @@ class Role(NameDescriptionMixin, FolderMixin):
         if self.builtin:
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
+
+    fields_to_check = ["name"]
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -791,15 +826,26 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Also retrieve published objects in view
         """
         class_name = object_type.__name__.lower()
-        permission_view = Permission.objects.get(codename="view_" + class_name)
-        permission_change = Permission.objects.get(codename="change_" + class_name)
-        permission_delete = Permission.objects.get(codename="delete_" + class_name)
+        permissions_map = {
+            p.codename: p
+            for p in Permission.objects.filter(
+                codename__in=[
+                    f"view_{class_name}",
+                    f"change_{class_name}",
+                    f"delete_{class_name}",
+                    "view_folder",
+                ]
+            )
+        }
+        permission_view = permissions_map[f"view_{class_name}"]
+        permission_change = permissions_map[f"change_{class_name}"]
+        permission_delete = permissions_map[f"delete_{class_name}"]
         permissions = set([permission_view, permission_change, permission_delete])
         result_view = set()
         result_change = set()
         result_delete = set()
 
-        ref_permission = Permission.objects.get(codename="view_folder")
+        ref_permission = permissions_map["view_folder"]
         perimeter = {folder} | set(folder.get_sub_folders())
         # Process role assignments
         role_assignments = [
@@ -838,6 +884,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
                 objects_ids = [f.id]
+            elif class_name == "permission":
+                # Permissions have no folder, so we don't filter them, we just rely on view_permission
+                objects_ids = Permission.objects.filter(
+                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                ).values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")
             if permission_view in result_folders[f]:
@@ -874,22 +925,43 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
-        assignments = list(principal.roleassignment_set.all())
+        assignments = list(
+            principal.roleassignment_set.select_related("role").prefetch_related(
+                "role__permissions", "perimeter_folders"
+            )
+        )
         if hasattr(principal, "user_groups"):
             for user_group in principal.user_groups.all():
-                assignments += list(user_group.roleassignment_set.all())
-        assignments += list(principal.roleassignment_set.all())
+                assignments += list(
+                    user_group.roleassignment_set.select_related(
+                        "role"
+                    ).prefetch_related("role__permissions", "perimeter_folders")
+                )
         return assignments
 
     @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        for ra in RoleAssignment.get_role_assignments(principal):
-            for p in ra.role.permissions.all():
-                permission_dict = {p.codename: {"str": str(p)}}
-                permissions.update(permission_dict)
 
+        # Build the filter query based on principal type
+        if isinstance(principal, UserGroup):
+            # If principal is a UserGroup, only look for role assignments to that group
+            query_filter = models.Q(user_group=principal)
+        else:
+            # If principal is a User, look for direct assignments and assignments via user groups
+            query_filter = models.Q(user=principal)
+            if hasattr(principal, "user_groups"):
+                query_filter |= models.Q(user_group__in=principal.user_groups.all())
+
+        permission_rows = (
+            RoleAssignment.objects.filter(query_filter)
+            .values_list("role__permissions__codename", "role__permissions__name")
+            .distinct()
+        )
+        for codename, name in permission_rows:
+            if codename:
+                permissions[codename] = {"str": name}
         return permissions
 
     @staticmethod

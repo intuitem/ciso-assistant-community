@@ -73,6 +73,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	const composerForm = await superValidate(zod(composerSchema));
 
+	const complianceAnalytics = await fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
+		.then((res) => res.json())
+		.catch((error) => {
+			console.error('Failed to fetch compliance analytics:', error);
+			return {};
+		});
+
 	return {
 		composerForm,
 		usedRiskMatrices,
@@ -85,6 +92,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		qualifications_count,
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
+		complianceAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {

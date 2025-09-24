@@ -364,7 +364,7 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# CISO Assistant will use filesystem storage backend bu default.
+# CISO Assistant will use filesystem storage backend by default.
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -578,6 +578,7 @@ Set DJANGO_DEBUG=False for security reason.
 18. UK: Ukrainian
 19. EL: Greek
 20. TR: Turkish
+21. HR: Croatian
 
 ## Contributors 🤝
 

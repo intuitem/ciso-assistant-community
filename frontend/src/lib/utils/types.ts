@@ -51,6 +51,7 @@ export const URL_MODEL = [
 	'role-assignments',
 	'compliance-assessments',
 	'evidences',
+	'evidence-revisions',
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
@@ -77,8 +78,6 @@ export const URL_MODEL = [
 	'elementary-actions',
 	'operating-modes',
 	'kill-chains',
-	// qualifications
-	'qualifications',
 	'processings',
 	'processing-natures',
 	'security-exceptions',
@@ -107,10 +106,23 @@ export const URL_MODEL = [
 	'campaigns',
 	// iso,
 	'organisation-issues',
-	'organisation-objectives'
+	'organisation-objectives',
+	// crq,
+	'quantitative-risk-studies',
+	'quantitative-risk-scenarios',
+	'quantitative-risk-hypotheses',
+	// terminologies
+	'terminologies',
+	// roles,
+	'roles',
+	'permissions'
 ] as const;
 
-export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+export const THIRD_PARTY_URL_MODEL = [
+	'compliance-assessments',
+	'evidences',
+	'evidence-revisions'
+] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
 

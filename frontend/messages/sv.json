@@ -16,6 +16,7 @@
 	"swedish": "Svenska",
 	"indonesian": "indonesiska",
 	"danish": "danska",
+	"croatian": "kroatiska",
 	"addThreat": "Lägg till hot",
 	"addVulnerability": "Lägg till sårbarhet",
 	"addReferenceControl": "Lägg till referenskontroll",
@@ -952,5 +953,13 @@
 	"matchingScenarios": "Matchande scenarier",
 	"select": "Välj",
 	"deselect": "Avmarkera",
-	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet."
+	"fearedEventAssetHelpText": "Rädsla för händelser är vanligtvis länkade till företagsvärden (primära tillgångar). Stödjande tillgångar är tillåtna här för flexibilitet.",
+	"saveAndContinue": "Spara och fortsätt",
+	"nextOccurrenceStatus": "Status för nästa förekomst",
+	"image": "Bild",
+	"securityObjectives": "Säkerhetsmål",
+	"securityObjectiveScale": "Skala för säkerhetsmål",
+	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)",
+	"actor": "Aktör",
+	"action": "Åtgärd"
 }

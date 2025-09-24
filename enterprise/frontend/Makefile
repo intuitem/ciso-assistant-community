@@ -34,6 +34,10 @@ build-enterprise: pre-build
 	@rsync -av $(FRONTEND_DIR)/node_modules $(ENTERPRISE_DIR)/node_modules
 	@rsync -av $(FRONTEND_DIR)/package.json $(ENTERPRISE_DIR)/package.json
 
+
+pre-tests:
+	@rsync -av --exclude=$(COMMUNITY_DIR)/tests/reports $(COMMUNITY_DIR)/tests/results --exclude=node_modules/  $(COMMUNITY_DIR)/tests $(BUILD_DIR)/frontend/tests
+
 CHANGED_FILES =
 
 # The rule to watch the filesystem for changes

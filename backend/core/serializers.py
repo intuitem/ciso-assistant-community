@@ -4,6 +4,7 @@ from typing import Any
 import structlog
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -16,6 +17,7 @@ from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from global_settings.utils import ff_is_enabled
 from iam.models import *
+from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -87,7 +89,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
         can_create_in_folder = RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
-                codename=f"add_{self.Meta.model._meta.model_name}"
+                codename=f"add_{self.Meta.model._meta.model_name}",
+                content_type__app_label=self.Meta.model._meta.app_label,
+                content_type__model=self.Meta.model._meta.model_name,
             ),
             folder=folder,
         )
@@ -103,6 +107,20 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except ValidationError as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
+
+    def get_path(self, obj):
+        """
+        Gets the pre-calculated folder path for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use the pre-calculated path data if available
+            return optimized_data.get("paths", {}).get(obj.id, [])
+
+        # Fallback for single object serialization (e.g., retrieve endpoint)
+        # We manually serialize the folder objects to match the new optimized output
+        folders = obj.get_folder_full_path()
+        return [{"id": f.id, "name": f.name} for f in folders]
 
     class Meta:
         model: models.Model
@@ -378,23 +396,55 @@ class AssetWriteSerializer(BaseModelSerializer):
 
 
 class AssetReadSerializer(AssetWriteSerializer):
-    path = PathField(source="get_folder_full_path", read_only=True)
+    path = serializers.SerializerMethodField()
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
-    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
-    security_objectives = serializers.JSONField(
-        source="get_security_objectives_display"
-    )
-    disaster_recovery_objectives = serializers.JSONField(
-        source="get_disaster_recovery_objectives_display"
-    )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
-
     asset_class = FieldsRelatedField(["name"])
+
+    children_assets = serializers.SerializerMethodField()
+    security_objectives = serializers.SerializerMethodField()
+    disaster_recovery_objectives = serializers.SerializerMethodField()
+
+    def get_children_assets(self, obj):
+        """
+        Gets pre-calculated descendant IDs for list views, with a fallback for detail views.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            # Use pre-calculated data if available
+            return optimized_data.get("descendants", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.children_assets.annotate(str=F("name")).values("id", "str")
+
+    def get_security_objectives(self, obj):
+        """
+        Gets pre-calculated security objectives for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("security_objectives", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_security_objectives_display()
+
+    def get_disaster_recovery_objectives(self, obj):
+        """
+        Gets pre-calculated disaster recovery objectives for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("disaster_recovery_objectives", {}).get(
+                obj.id, []
+            )
+
+        # Fallback for single object serialization
+        return obj.get_disaster_recovery_objectives_display()
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
@@ -532,11 +582,9 @@ class ThreatImportExportSerializer(BaseModelSerializer):
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
-    FLAGGED_FIELDS = {
-        "inherent_proba": "inherent_risk",
-        "inherent_impact": "inherent_risk",
-        "inherent_level": "inherent_risk",
-    }
+    # Note: Inherent risk fields are always accepted for writing,
+    # but only displayed when inherent_risk feature flag is enabled
+    FLAGGED_FIELDS = {}
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
@@ -567,6 +615,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     version = serializers.StringRelatedField(source="risk_assessment.version")
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(many=True)
 
     treatment = serializers.CharField()
 
@@ -600,6 +649,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         slug_field="pk", read_only=True, many=True
     )
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    qualifications = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = RiskScenario
@@ -634,6 +686,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
+    cost = serializers.JSONField(required=False, allow_null=True)
 
     def create(self, validated_data: Any):
         owner_data = validated_data.get("owner", [])
@@ -710,7 +763,12 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
-    cost = serializers.FloatField()
+    cost = serializers.JSONField()
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
+    currency = serializers.SerializerMethodField()
+    annual_cost_display = serializers.SerializerMethodField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     assets = FieldsRelatedField(many=True)
 
@@ -725,6 +783,18 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if not obj.eta:
             return None
         return time_state(obj.eta.isoformat())
+
+    def get_currency(self, obj):
+        if not obj.cost:
+            return "€"  # Default currency
+        return obj.cost.get("currency", "€")
+
+    def get_annual_cost_display(self, obj):
+        annual_cost = obj.annual_cost
+        if annual_cost == 0:
+            return ""
+        currency = self.get_currency(obj)
+        return f"{annual_cost:,.2f} {currency}"
 
 
 class ActionPlanSerializer(BaseModelSerializer):
@@ -741,7 +811,10 @@ class ActionPlanSerializer(BaseModelSerializer):
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     status = serializers.CharField(source="get_status_display")
-    cost = serializers.FloatField()
+    cost = serializers.JSONField()
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
@@ -893,6 +966,7 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(many=True)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -907,6 +981,7 @@ class UserReadSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "observation",
+            "has_mfa_enabled",
         ]
 
 
@@ -937,7 +1012,11 @@ class UserWriteSerializer(BaseModelSerializer):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
-            perm=Permission.objects.get(codename="add_user"),
+            perm=Permission.objects.get(
+                codename="add_user",
+                content_type__app_label=User._meta.app_label,
+                content_type__model=User._meta.model_name,
+            ),
             folder=Folder.get_root_folder(),
         ):
             raise PermissionDenied(
@@ -983,6 +1062,7 @@ class UserWriteSerializer(BaseModelSerializer):
 
 
 class UserGroupReadSerializer(BaseModelSerializer):
+    path = PathField(source="get_folder_full_path", read_only=True)
     name = serializers.CharField(source="__str__")
     localization_dict = serializers.JSONField(source="get_localization_dict")
     folder = FieldsRelatedField()
@@ -998,16 +1078,23 @@ class UserGroupWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class RoleReadSerializer(BaseModelSerializer):
+class PermissionReadSerializer(BaseModelSerializer):
+    content_type = FieldsRelatedField(fields=["app_label", "model"])
+
     class Meta:
-        model = Role
+        model = Permission
         fields = "__all__"
 
 
-class RoleWriteSerializer(BaseModelSerializer):
+class PermissionWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Role
+        model = Permission
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.read_only = True
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
@@ -1124,12 +1211,25 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 
 class EvidenceReadSerializer(BaseModelSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
-    attachment = serializers.CharField(source="filename")
+    attachment = serializers.SerializerMethodField()
     size = serializers.CharField(source="get_size")
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    owner = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
+    link = serializers.SerializerMethodField()
+
+    def get_attachment(self, obj):
+        last_revision = obj.last_revision
+        if last_revision and last_revision.attachment:
+            return last_revision.attachment.url
+        return None
+
+    def get_link(self, obj):
+        last_revision = obj.last_revision
+        return last_revision.link if last_revision else None
 
     class Meta:
         model = Evidence
@@ -1152,17 +1252,57 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
     )
+    owner = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), required=False
+    )
+    attachment = serializers.FileField(required=False)
+    link = serializers.URLField(required=False)
 
     class Meta:
         model = Evidence
-        fields = "__all__"
+        exclude = ["is_published"]
+
+    def create(self, validated_data):
+        attachment = validated_data.pop("attachment", None)
+        link = validated_data.pop("link", None)
+
+        evidence = super().create(validated_data)
+
+        EvidenceRevision.objects.get_or_create(
+            evidence=evidence, defaults={"link": link, "attachment": attachment}
+        )
+
+        return evidence
+
+    def update(self, instance, validated_data):
+        # Handle properly owner field cleaning
+        owners = validated_data.get("owner", None)
+        instance = super().update(instance, validated_data)
+        if not owners:
+            instance.owner.set([])
+
+        return instance
+
+    def to_representation(self, instance):
+        """Include link and attachment from the latest revision in the response"""
+        data = super().to_representation(instance)
+
+        # Add revision fields to the response
+        latest_revision = instance.last_revision
+        if latest_revision:
+            data["link"] = latest_revision.link
+            data["attachment"] = (
+                latest_revision.attachment.url if latest_revision.attachment else None
+            )
+        else:
+            data["link"] = None
+            data["attachment"] = None
+
+        return data
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    attachment = serializers.CharField(allow_blank=True)
-    size = serializers.CharField(source="get_size", read_only=True)
-    attachment_hash = serializers.CharField(read_only=True)
 
     class Meta:
         model = Evidence
@@ -1170,7 +1310,56 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "folder",
             "name",
             "description",
+            "created_at",
+            "updated_at",
+            "owner",
+            "status",
+            "expiry_date",
+        ]
+
+
+class EvidenceRevisionReadSerializer(BaseModelSerializer):
+    attachment = serializers.CharField(source="filename")
+    size = serializers.CharField(source="get_size")
+    evidence = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    str = serializers.CharField(source="__str__")
+
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+
+class EvidenceRevisionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+    def create(self, validated_data):
+        evidence = validated_data["evidence"]
+        max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
+            models.Max("version")
+        )["version__max"]
+        validated_data["version"] = (max_version or 0) + 1
+        return super().create(validated_data)
+
+
+class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidence = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField(allow_blank=True)
+    size = serializers.CharField(source="get_size", read_only=True)
+    attachment_hash = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = EvidenceRevision
+        fields = [
+            "folder",
+            "evidence",
+            "observation",
+            "version",
             "attachment",
+            "link",
             "created_at",
             "updated_at",
             "size",
@@ -1278,7 +1467,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField(source="get_progress")
+    progress = serializers.ReadOnlyField()
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
 
@@ -1564,16 +1753,6 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class QualificationReadSerializer(ReferentialSerializer):
-    class Meta:
-        model = Qualification
-        exclude = ["translations"]
-
-
-class QualificationWriteSerializer(QualificationReadSerializer):
-    pass
-
-
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
@@ -1821,7 +2000,8 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
-    qualifications = FieldsRelatedField(["name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
@@ -1846,8 +2026,13 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
 
-    next_occurrence = serializers.DateField(read_only=True)
-    last_occurrence_status = serializers.CharField(read_only=True)
+    next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
+    last_occurrence_status = serializers.ReadOnlyField(
+        source="get_last_occurrence_status"
+    )
+    next_occurrence_status = serializers.ReadOnlyField(
+        source="get_next_occurrence_status"
+    )
 
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()
@@ -2045,3 +2230,20 @@ class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
         exclude = ["task_template"]
+
+
+class TerminologyReadSerializer(BaseModelSerializer):
+    field_path = serializers.CharField(source="get_field_path_display", read_only=True)
+    translated_name = serializers.CharField(source="get_name_translated")
+
+    class Meta:
+        model = Terminology
+        exclude = ["folder"]
+
+
+class TerminologyWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Terminology
+        exclude = ["folder", "is_published"]
