@@ -259,6 +259,23 @@
 		focusedIndex = index;
 		scrollToSection(id);
 	}
+
+    function highlightSegments(title: string, query: string): { text: string; match: boolean }[] {
+	if (!query) return [{ text: title, match: false }];
+	const lowerTitle = title.toLowerCase();
+	const lowerQuery = query.toLowerCase();
+	const segments: { text: string; match: boolean }[] = [];
+	let start = 0;
+	let idx = lowerTitle.indexOf(lowerQuery, start);
+	while (idx !== -1) {
+		if (idx > start) segments.push({ text: title.slice(start, idx), match: false });
+		segments.push({ text: title.slice(idx, idx + query.length), match: true });
+		start = idx + query.length;
+		idx = lowerTitle.indexOf(lowerQuery, start);
+	}
+	if (start < title.length) segments.push({ text: title.slice(start), match: false });
+	return segments;
+}
 </script>
 
 {#if isVisible && items.length > 0}
@@ -352,15 +369,18 @@
 										tabindex={focusedIndex === index ? 0 : -1}
 									>
 										<span class="truncate block" title={item.title}>
-											{#if searchQuery}
-												{@html item.title.replace(
-													new RegExp(`(${searchQuery})`, 'gi'),
-													'<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
-												)}
-											{:else}
-												{item.title}
-											{/if}
-										</span>
+                                            {#if searchQuery}
+                                                {#each highlightSegments(item.title, searchQuery) as seg}
+                                                    {#if seg.match}
+                                                        <mark class="bg-yellow-200 px-1 rounded">{seg.text}</mark>
+                                                    {:else}
+                                                        {seg.text}
+                                                    {/if}
+                                                {/each}
+                                            {:else}
+                                                {item.title}
+                                            {/if}
+                                        </span>
 									</button>
 								</li>
 							{/each}
