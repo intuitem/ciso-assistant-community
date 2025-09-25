@@ -5656,16 +5656,22 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             try:
                 with zipfile.ZipFile(temp_file, "w") as zipf:
                     for evidence in evidences:
-                        if evidence.attachment and default_storage.exists(
-                            evidence.attachment.name
+                        if (
+                            evidence.last_revision
+                            and evidence.last_revision.attachment
+                            and default_storage.exists(
+                                evidence.last_revision.attachment.name
+                            )
                         ):
                             with default_storage.open(
-                                evidence.attachment.name
+                                evidence.last_revision.attachment.name
                             ) as attachment_file:
                                 zipf.writestr(
                                     os.path.join(
                                         "evidences",
-                                        os.path.basename(evidence.attachment.name),
+                                        os.path.basename(
+                                            evidence.last_revision.attachment.name
+                                        ),
                                     ),
                                     attachment_file.read(),
                                 )
