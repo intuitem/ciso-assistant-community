@@ -46,14 +46,17 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
 		await expect(page.getByTestId('toast')).not.toBeVisible();
 
-		await page.getByRole('gridcell', { name: 'New' }).locator('span').waitFor({ state: 'visible' });
+		await page
+			.getByRole('gridcell', { name: 'New' })
+			.getByTestId('model-table-td-array-elem')
+			.waitFor({ state: 'visible' });
 		await page
 			.getByRole('gridcell', { name: 'Minor' })
-			.locator('span')
+			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 		await page
 			.getByRole('gridcell', { name: 'Internal' })
-			.locator('span')
+			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 	});
 
