@@ -5,9 +5,10 @@ import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
-import { type urlModel } from './types';
+import { listViewFields } from './table';
+import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
-
+import MarkdownDescription from '$lib/components/ModelTable/MarkdownDescription.svelte';
 type GetOptionsParams = {
 	objects: any[];
 	suggestions?: any[];
@@ -1601,7 +1602,7 @@ export const URL_MODEL_MAP: ModelMap = {
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
-export const FIELD_COMPONENT_MAP = {
+const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
@@ -1625,6 +1626,16 @@ export const FIELD_COMPONENT_MAP = {
 		lec_data: LecChartPreview
 	}
 };
+
+export function getFieldComponentMap(URLModel: string) {
+	const fieldComponentMap = FIELD_COMPONENT_MAP[URLModel] ?? {};
+	const listViewConfig = listViewFields[URLModel] ?? { body: [] };
+
+	if (listViewConfig.body.findIndex((field) => field === 'description') >= 0) {
+		fieldComponentMap.description = MarkdownDescription;
+	}
+	return fieldComponentMap;
+}
 
 // Il faut afficher le tag "draft" pour la column name !
 

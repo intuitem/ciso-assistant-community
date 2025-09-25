@@ -1790,13 +1790,13 @@ export const contextMenuActions = {
 	'operational-scenarios': [{ component: SelectObject, props: {} }]
 };
 
-export const getListViewFields = ({
+export function getListViewFields({
 	key,
 	featureFlags = {}
 }: {
 	key: string;
 	featureFlags: Record<string, boolean>;
-}) => {
+}) {
 	if (!Object.keys(listViewFields).includes(key)) {
 		return { head: [], body: [] };
 	}
@@ -1825,12 +1825,4 @@ export const getListViewFields = ({
 		head,
 		body
 	};
-};
-
-function insertField(fields: string[], fieldToInsert: string, afterField: string): string[] {
-	const index = fields.indexOf(afterField);
-	if (index === -1) return fields;
-	const clone = [...fields];
-	clone.splice(index + 1, 0, fieldToInsert);
-	return clone;
 }
