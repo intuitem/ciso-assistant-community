@@ -36,8 +36,8 @@ class RedirectToProviderView(APIView):
                 next_url=next_url,
                 headless=True,
             )
-        except:
-            logger.error("Cannot perform redirection, Check your IdP URLs")
+        except Exception as e:
+            logger.error("SSO redirection failed", provider=provider.id, error=str(e))
             return render_authentication_error(request, provider, error="failedSSO")
 
 
