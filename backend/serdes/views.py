@@ -1,7 +1,6 @@
 import gzip
 import io
 import json
-from multiprocessing import Value
 import sys
 from datetime import datetime
 
