@@ -983,6 +983,7 @@ class UserReadSerializer(BaseModelSerializer):
             "observation",
             "has_mfa_enabled",
             "expiry_date",
+            "is_superuser",
         ]
 
 
