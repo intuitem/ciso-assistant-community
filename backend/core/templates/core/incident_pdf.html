@@ -1,0 +1,362 @@
+{% extends 'core/base_pdf.html' %}
+
+{% block content %}
+<style>
+@page {
+    size: legal portrait;
+    margin: 0.5cm;
+    @bottom-right {
+        content: "Incident ID: {{ incident.id }}";
+        font-size: 8px;
+        color: #666;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-10 {
+    margin-bottom: 2.5rem;
+}
+
+.mt-3 {
+    margin-top: 0.75rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.ms-4 {
+    margin-left: 1rem;
+}
+
+.ml-2 {
+    margin-left: 0.5rem;
+}
+
+.ml-5 {
+    margin-left: 1.25rem;
+}
+
+.mr-1 {
+    margin-right: 0.25rem;
+}
+
+.-start-1 {
+    left: -0.5rem;
+}
+
+.text-gray-600 {
+    color: rgb(75, 85, 99);
+}
+
+.text-gray-500 {
+    color: rgb(107, 114, 128);
+}
+
+.text-blue-800 {
+    color: rgb(30, 64, 175);
+}
+
+.bg-blue-100 {
+    color: rgb(30, 64, 175);
+    background-color: rgb(219, 234, 254);
+}
+
+.bg-orange-100 {
+    background-color: rgb(254, 215, 170);
+}
+
+.text-orange-800 {
+    color: rgb(154, 52, 18);
+}
+
+.bg-purple-100 {
+    background-color: rgb(243, 232, 255);
+}
+
+.text-purple-800 {
+    color: rgb(107, 33, 168);
+}
+
+.bg-blue-50 {
+    background-color: rgb(239, 246, 255);
+}
+
+.bg-green-50 {
+    background-color: rgb(240, 253, 244);
+}
+
+.text-green-800 {
+    color: rgb(22, 101, 52);
+}
+
+.border-l-4 {
+    border-left-width: 4px;
+}
+
+.border-blue-500 {
+    border-color: rgb(59, 130, 246);
+}
+
+.border-green-500 {
+    border-color: rgb(34, 197, 94);
+}
+
+.border-gray-500 {
+    border-color: rgb(107, 114, 128);
+}
+
+.border-primary-500 {
+    border-color: rgb(59, 130, 246);
+}
+
+.border-primary-700 {
+    border-color: rgb(29, 78, 216);
+}
+
+.border-primary-900 {
+    border-color: rgb(30, 58, 138);
+}
+
+.bg-primary-500 {
+    background-color: rgb(59, 130, 246);
+}
+
+.bg-primary-700 {
+    background-color: rgb(29, 78, 216);
+}
+
+.w-3 {
+    width: 0.75rem;
+}
+
+.h-3 {
+    height: 0.75rem;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.border-white {
+    border-color: rgb(255, 255, 255);
+}
+
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.border-s {
+    border-left: 1px solid;
+}
+
+.text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.w-1/4 {
+    width: 25%;
+}
+
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flex-wrap span {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+</style>
+<div class="main m-4">
+    <h1 class="font-bold">{% if incident.ref_id %}{{ incident.ref_id }}: {% endif %}{{ incident.name }}</h1>
+    <h2 class="text-sm text-gray-500 mb-6">Incident Report</h2>
+
+    <!-- Incident Information -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
+        <div class="flex flex-row">
+            <div class="w-1/2">
+                <p><strong>Severity:</strong> {{ incident.get_severity_display }}</p>
+                <p><strong>Status:</strong> {{ incident.get_status_display }}</p>
+                <p><strong>Detection:</strong> {{ incident.get_detection_display|default:"N/A" }}</p>
+                <p><strong>Domain:</strong> {{ incident.folder.name|default:"N/A" }}</p>
+                {% if incident.qualifications.exists %}
+                <p><strong>Qualifications:</strong> {% for qualification in incident.qualifications.all %}{{ qualification.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                {% endif %}
+            </div>
+            <div class="w-1/2">
+                {% if incident.owners.exists %}
+                <p><strong>Owners:</strong> {% for owner in incident.owners.all %}{{ owner.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="mt-3">
+            <p><strong>Reported On:</strong> {{ incident.created_at|date:"Y-m-d H:i:s"|default:"N/A" }}</p>
+            <p><strong>Last Updated:</strong> {{ incident.updated_at|date:"Y-m-d H:i:s"|default:"N/A" }}</p>
+        </div>
+    </div>
+
+    <!-- Incident Description -->
+    {% if incident.description %}
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-4">
+        <h2 class="text-lg font-semibold mb-3 text-green-800">Description</h2>
+        <p class="text-sm">{{ incident.description|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Related Entities -->
+    {% if incident.entities.exists %}
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h2 class="text-lg font-semibold mb-3">Related Entities</h2>
+        <div class="flex-wrap">
+            {% for entity in incident.entities.all %}
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1">{{ entity.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Related Information -->
+    {% if incident.assets.exists or incident.threats.exists %}
+    <div class="flex flex-row mb-4">
+        <!-- Affected Assets -->
+        {% if incident.assets.exists %}
+        <div class="w-1/2 mr-2">
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-3">Affected Assets</h3>
+                <div class="flex-wrap">
+                    {% for asset in incident.assets.all %}
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1">{{ asset.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Related Threats -->
+        {% if incident.threats.exists %}
+        <div class="w-1/2 ml-2">
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-3">Related Threats</h3>
+                <div class="flex-wrap">
+                    {% for threat in incident.threats.all %}
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1">{{ threat.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Timeline Details -->
+    {% if timeline_entries %}
+    <div class="page-break"></div>
+    <div class="bg-white">
+        <h2 class="text-lg font-semibold mb-3">Incident Timeline</h2>
+        <div class="text-sm text-gray-600 mb-4">Events are listed in chronological order. Time is indicated in UTC.</div>
+
+        {% for entry in timeline_entries %}
+        <div class="bg-gray-50 p-4 rounded-lg mb-4 border-l-4 {% if entry.entry_type == 'detection' %}border-blue-500{% elif entry.entry_type == 'mitigation' %}border-green-500{% else %}border-gray-500{% endif %}">
+            {% if entry.entry_type == 'severity_changed' %}
+            <div class="mb-2">
+                <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">Severity Changed</span>
+            </div>
+            {% elif entry.entry_type == 'status_changed' %}
+            <div class="mb-2">
+                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Status Changed</span>
+            </div>
+            {% endif %}
+            <div class="flex flex-row mb-3">
+                <div class="w-3/4">
+                    <h3 class="text-base font-semibold">{{ entry.entry }}</h3>
+                </div>
+                <div class="w-1/4 text-right">
+                    <p class="text-sm font-medium">{{ entry.timestamp|date:"Y-m-d H:i:s" }}</p>
+                    {% if entry.author %}
+                    <p class="text-xs text-gray-500">by {{ entry.author.email }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if entry.observation %}
+            <div class="mb-3">
+                <p class="text-sm text-gray-600">{{ entry.observation|linebreaks }}</p>
+            </div>
+            {% endif %}
+
+            {% if entry.evidences.exists %}
+            <div class="mb-3">
+                <p class="text-sm font-medium">Associated Evidence:</p>
+                <ul class="text-sm text-gray-600 list-disc ml-5">
+                    {% for evidence in entry.evidences.all %}
+                    <li>{{ evidence.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <p class="text-center text-gray-500">No timeline events found for this incident.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
