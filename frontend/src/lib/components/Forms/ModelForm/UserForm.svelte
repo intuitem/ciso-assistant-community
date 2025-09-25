@@ -74,7 +74,7 @@
 		helpText={m.keepLocalLoginHelpText()}
 	/>
 {/if}
-{#if shape.expiry_date}
+{#if shape.expiry_date && !page.data.object?.is_superuser}
 	<TextField
 		type="date"
 		{form}

@@ -1005,6 +1005,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_local",
             "observation",
             "expiry_date",
+            "is_superuser",
         ]
 
     def validate_email(self, email):
