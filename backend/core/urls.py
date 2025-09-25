@@ -160,6 +160,10 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/evidences-list/",
+        ComplianceAssessmentEvidenceList.as_view(),
+    ),
+    path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
     ),
