@@ -482,6 +482,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     observation = models.TextField(
         null=True, blank=True, verbose_name="Notes about a user"
     )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
