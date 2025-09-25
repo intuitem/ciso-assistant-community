@@ -223,7 +223,6 @@
 								return obj.str;
 							})
 						: [];
-				path.pop(); // remove duplicate last part if it exists
 
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
