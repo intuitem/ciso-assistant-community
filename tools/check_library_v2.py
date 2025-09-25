@@ -1117,7 +1117,7 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
                 if pd.isna(cell):
                     continue
 
-                entries = [entry.strip() for entry in str(cell).split("\n") if entry.strip()]
+                entries = [entry.strip() for entry in re.split(r'[,\n]', str(cell)) if entry.strip()]
 
                 if _id in entries:
                     found = True
