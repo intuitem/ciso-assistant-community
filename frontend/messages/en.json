@@ -2206,5 +2206,12 @@
 	"libraryOverview": "{objectType}: {count}",
 	"evidenceRevisions": "Revisions",
 	"addEvidenceRevision": "Add Revision",
-	"associatedEvidenceRevisions": "Associated versions"
+	"associatedEvidenceRevisions": "Associated versions",
+	"tableOfContents": "Table of Contents",
+	"showTableOfContents": "Show Table of Contents",
+	"hideTableOfContents": "Hide Table of Contents",
+	"jumpToSection": "Jump to section",
+	"searchSections": "Search sections...",
+	"clearSearch": "Clear search",
+	"noResultsFound": "No sections found"
 }

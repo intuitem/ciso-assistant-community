@@ -2139,5 +2139,12 @@
 	"hasMfaEnabled": "MFA activée",
 	"evidenceRevisions": "Révisions",
 	"addEvidenceRevision": "Nouvelle révision",
-	"associatedEvidenceRevisions": "Versions associées"
+	"associatedEvidenceRevisions": "Versions associées",
+	"tableOfContents": "Table des matières",
+	"showTableOfContents": "Afficher la table des matières",
+	"hideTableOfContents": "Masquer la table des matières",
+	"jumpToSection": "Aller à la section",
+	"searchSections": "Rechercher des sections...",
+	"clearSearch": "Effacer la recherche",
+	"noResultsFound": "Aucune section trouvée"
 }
