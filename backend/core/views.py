@@ -395,16 +395,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
-                path.append(
-                    {
-                        "str": str(folder),
-                        "id": folder.id,
-                        "parent_id": folder.parent_folder.id
-                        if folder.parent_folder
-                        else None,
-                    }
-                )
                 if folder.parent_folder:
+                    path.append(
+                        {
+                            "str": str(folder),
+                            "id": folder.id,
+                            "parent_id": folder.parent_folder.id,
+                        }
+                    )
                     queue.append(folder.parent_folder.id)
             path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
