@@ -566,8 +566,8 @@
 	"successfullyRejectedObject": "The {object} object has been successfully rejected",
 	"successfullyRevokedObject": "The {object} object has been successfully revoked",
 	"successfullyImportedObject": "The {object} object has been successfully imported",
-	"userHasNoRights": ". This user has no rights, remember to edit their user groups",
-	"createdUserWillHaveNoRights": "This user will have no rights after creation; remember to edit their user groups",
+	"userHasNoRights": ". This user has no default permissions. Remember to edit their user groups",
+	"createdUserWillHaveNoRights": "Users have no default permission; remember to edit their user groups",
 	"anErrorOccurred": "An error has occurred",
 	"attachmentDeleted": "The attachment has been successfully deleted",
 	"librarySuccessfullyLoaded": "The library has been successfully loaded",
@@ -1446,7 +1446,7 @@
 	"infrastructure": "Infrastructure",
 	"build": "Build",
 	"compliantRequirementsSemiColon": "Compliant requirements:",
-	"requirementsProgressionSemiColon": "Requirements progression:",
+	"requirementsProgressionSemiColon": "Requirements progress:",
 	"noRequirementFound": "No requirement assessment found",
 	"noAuditForTheFramework": "There is no audit using this framework",
 	"multipleChoice": "Multiple choice",
@@ -2206,5 +2206,6 @@
 	"libraryOverview": "{objectType}: {count}",
 	"evidenceRevisions": "Revisions",
 	"addEvidenceRevision": "Add Revision",
-	"associatedEvidenceRevisions": "Associated versions"
+	"associatedEvidenceRevisions": "Associated versions",
+	"userExpiryHelpText": "User will be disabled after this date. Super users are not affected."
 }

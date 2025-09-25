@@ -80,6 +80,7 @@
 		{form}
 		field="expiry_date"
 		label={m.expiryDate()}
+		helpText={m.userExpiryHelpText()}
 		cacheLock={cacheLocks['expiry_date']}
 		bind:cachedValue={formDataCache['expiry_date']}
 	/>
