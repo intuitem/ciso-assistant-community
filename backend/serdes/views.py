@@ -197,12 +197,13 @@ class LoadBackupView(APIView):
             if backup_version is not None or schema_version is not None:
                 break
 
-
         try:
             schema_version_int = int(schema_version)
             compare_schema_versions(schema_version_int, backup_version)
             if backup_version != VERSION:
-                raise ValueError("The version of the current instance and the one that generated the backup are not the same.")
+                raise ValueError(
+                    "The version of the current instance and the one that generated the backup are not the same."
+                )
         except (ValueError, TypeError) as e:
             logger.error(
                 "Invalid schema version format",
