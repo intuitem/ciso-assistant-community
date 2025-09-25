@@ -2970,6 +2970,7 @@ class UserFilter(GenericFilterSet):
             "keep_local_login",
             "is_approver",
             "is_third_party",
+            "expiry_date",
         ]
 
 
