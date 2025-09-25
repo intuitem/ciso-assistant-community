@@ -74,6 +74,16 @@
 		helpText={m.keepLocalLoginHelpText()}
 	/>
 {/if}
+{#if shape.expiry_date}
+	<TextField
+		type="date"
+		{form}
+		field="expiry_date"
+		label={m.expiryDate()}
+		cacheLock={cacheLocks['expiry_date']}
+		bind:cachedValue={formDataCache['expiry_date']}
+	/>
+{/if}
 <TextArea
 	{form}
 	field="observation"

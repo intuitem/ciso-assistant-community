@@ -982,6 +982,7 @@ class UserReadSerializer(BaseModelSerializer):
             "is_third_party",
             "observation",
             "has_mfa_enabled",
+            "expiry_date",
         ]
 
 
@@ -1002,6 +1003,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_third_party",
             "is_local",
             "observation",
+            "expiry_date",
         ]
 
     def validate_email(self, email):
