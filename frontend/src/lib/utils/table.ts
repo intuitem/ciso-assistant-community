@@ -1536,7 +1536,7 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'domain',
-			'associatedEntitiesCount'
+			'associatedObjectsCount'
 		],
 		body: [
 			'ref_id',
