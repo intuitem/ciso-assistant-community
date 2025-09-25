@@ -889,7 +889,7 @@ def create_library(
                             # Else if no "ref_id", use the custom node version
                             else:
                                 ref_id_urn = f"node{counter + counter_fix}"
-                                print(ref_id_urn)                                
+
                         else:
                             # Adds the ability to use the "urn_id" column despite compatibility mode set to "3"
                             if data.get("urn_id") and data.get("urn_id").strip():
