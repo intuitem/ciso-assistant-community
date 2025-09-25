@@ -3,8 +3,14 @@
 {% block content %}
 <style>
 @page {
-    size: A4 portrait;
+    size: legal portrait;
     margin: 0.5cm;
+    @bottom-right {
+        content: "Incident ID: {{ incident.id }}";
+        font-size: 8px;
+        color: #666;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
 }
 
 .mb-2 {
@@ -70,6 +76,34 @@
 .bg-blue-100 {
     color: rgb(30, 64, 175);
     background-color: rgb(219, 234, 254);
+}
+
+.bg-orange-100 {
+    background-color: rgb(254, 215, 170);
+}
+
+.text-orange-800 {
+    color: rgb(154, 52, 18);
+}
+
+.bg-purple-100 {
+    background-color: rgb(243, 232, 255);
+}
+
+.text-purple-800 {
+    color: rgb(107, 33, 168);
+}
+
+.bg-blue-50 {
+    background-color: rgb(239, 246, 255);
+}
+
+.bg-green-50 {
+    background-color: rgb(240, 253, 244);
+}
+
+.text-green-800 {
+    color: rgb(22, 101, 52);
 }
 
 .border-l-4 {
@@ -185,29 +219,31 @@
     font-size: 0.75rem;
     line-height: 1rem;
 }
+
+.text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
 </style>
 <div class="main m-4">
-    <h1 class="text-xl font-bold mb-2">{% if incident.ref_id %}{{ incident.ref_id }}: {% endif %}{{ incident.name }}</h1>
-    <h2 class="text-lg text-gray-600 mb-6">Incident Report</h2>
+    <h1 class="font-bold">{% if incident.ref_id %}{{ incident.ref_id }}: {% endif %}{{ incident.name }}</h1>
+    <h2 class="text-sm text-gray-500 mb-6">Incident Report</h2>
 
     <!-- Incident Information -->
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
         <div class="flex flex-row">
             <div class="w-1/2">
                 <p><strong>Severity:</strong> {{ incident.get_severity_display }}</p>
                 <p><strong>Status:</strong> {{ incident.get_status_display }}</p>
                 <p><strong>Detection:</strong> {{ incident.get_detection_display|default:"N/A" }}</p>
                 <p><strong>Domain:</strong> {{ incident.folder.name|default:"N/A" }}</p>
+                {% if incident.qualifications.exists %}
+                <p><strong>Qualifications:</strong> {% for qualification in incident.qualifications.all %}{{ qualification.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                {% endif %}
             </div>
             <div class="w-1/2">
                 {% if incident.owners.exists %}
                 <p><strong>Owners:</strong> {% for owner in incident.owners.all %}{{ owner.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-                {% endif %}
-                {% if incident.entities.exists %}
-                <p><strong>Related Entities:</strong> {% for entity in incident.entities.all %}{{ entity.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-                {% endif %}
-                {% if incident.assets.exists %}
-                <p><strong>Affected Assets:</strong> {{ incident.assets.count }}</p>
                 {% endif %}
                 {% if incident.threats.exists %}
                 <p><strong>Related Threats:</strong> {{ incident.threats.count }}</p>
@@ -222,9 +258,21 @@
 
     <!-- Incident Description -->
     {% if incident.description %}
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-        <h2 class="text-lg font-semibold mb-3">Description</h2>
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-4">
+        <h2 class="text-lg font-semibold mb-3 text-green-800">Description</h2>
         <p class="text-sm">{{ incident.description|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Related Entities -->
+    {% if incident.entities.exists %}
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h2 class="text-lg font-semibold mb-3">Related Entities</h2>
+        <div class="flex-wrap">
+            {% for entity in incident.entities.all %}
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1">{{ entity.name }}</span>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 
@@ -277,10 +325,19 @@
     <div class="page-break"></div>
     <div class="bg-white">
         <h2 class="text-lg font-semibold mb-3">Incident Timeline</h2>
-        <div class="text-sm text-gray-600 mb-4">Timeline events are listed in chronological order</div>
+        <div class="text-sm text-gray-600 mb-4">Events are listed in chronological order. Time is indicated in UTC.</div>
 
         {% for entry in timeline_entries %}
         <div class="bg-gray-50 p-4 rounded-lg mb-4 border-l-4 {% if entry.entry_type == 'detection' %}border-blue-500{% elif entry.entry_type == 'mitigation' %}border-green-500{% else %}border-gray-500{% endif %}">
+            {% if entry.entry_type == 'severity_changed' %}
+            <div class="mb-2">
+                <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">Severity Changed</span>
+            </div>
+            {% elif entry.entry_type == 'status_changed' %}
+            <div class="mb-2">
+                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Status Changed</span>
+            </div>
+            {% endif %}
             <div class="flex flex-row mb-3">
                 <div class="w-3/4">
                     <h3 class="text-base font-semibold">{{ entry.entry }}</h3>
@@ -295,7 +352,6 @@
 
             {% if entry.observation %}
             <div class="mb-3">
-                <p class="text-sm font-medium">Observation:</p>
                 <p class="text-sm text-gray-600">{{ entry.observation|linebreaks }}</p>
             </div>
             {% endif %}
