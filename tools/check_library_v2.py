@@ -138,6 +138,39 @@ class YAMLSectionTypes(Enum):
     THREATS = "threats"
     REFERENCE_CONTROLS = "reference_controls"
 
+# URN Format : urn:<packager>:risk:<object>:<ref_id>
+class URNObjects(Enum):
+    URN_BEGGINING = "urn"
+    URN_3RD_WORD = "risk"   # Because the format is urn:<packager>:risk:<object>:<ref_id>
+
+    LIBRARY = "library"
+    FRAMEWORK = "framework"
+    THREAT = "threat"
+    REFERENCE_CONTROL = "function"
+    MATRIX = "matrix"
+    REQ_MAPPING_SET = "req_mapping_set"
+    REQ_NODE = "req_node"
+
+# CAREFULL : "ANY_VALUE_INDICATOR", "PACKAGER_INDICATOR" and "ID_INDICATOR" are only used in the code to indicate that the user can put any value in a specific location
+class URNMetadataFormat(Enum):
+    ANY_VALUE_INDICATOR = "<any>"
+    PACKAGER_INDICATOR = "<packager>"
+    ID_INDICATOR = "<ref_id_or_something_else>"
+
+    LIBRARY_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.LIBRARY.value}:{ID_INDICATOR}"
+
+    FRAMEWORK_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.FRAMEWORK.value}:{ID_INDICATOR}"
+    FRAMEWORK_BASE_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.REQ_NODE.value}:{ID_INDICATOR}"
+
+    MAPPING_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.REQ_MAPPING_SET.value}:{ID_INDICATOR}"
+    MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN = FRAMEWORK_URN
+    MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN = FRAMEWORK_BASE_URN
+
+    THREATS_BASE_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.THREAT.value}:{ID_INDICATOR}"
+
+    REFERENCE_CONTROLS_BASE_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.REFERENCE_CONTROL.value}:{ID_INDICATOR}"
+
+    MATRIX_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.MATRIX.value}:{ID_INDICATOR}"
 
 # ─────────────────────────────────────────────────────────────
 # MISC
@@ -274,18 +307,43 @@ def get_non_empty_column_values(df: pd.DataFrame, column_name: str) -> List[str]
 # VALIDATE UTILS
 # ─────────────────────────────────────────────────────────────
 
-def validate_urn(urn: str, context: str = None, row = None):
+# Check URN format in a [META] sheet
+def validate_urn_type(urn: str, urn_type: URNMetadataFormat, context: str, row: str | int = None):
+
+    split_urn = urn.split(":")
+    split_urn_type = urn_type.value.split(":")
+    
+    INDICATORS = [
+        URNMetadataFormat.ANY_VALUE_INDICATOR.value,
+        URNMetadataFormat.PACKAGER_INDICATOR.value,
+        URNMetadataFormat.ID_INDICATOR.value
+    ]
+
+    for idx, urn_type_part in enumerate(split_urn_type):
+        
+        # If we can put anything, skip
+        if urn_type_part in INDICATORS:
+            continue
+        
+        if urn_type_part != split_urn[idx]:
+            raise ValueError(
+                f"({context if context else 'validate_urn'}){' Row #'+str(row)+':' if row else ""} Invalid URN format \"{urn}\" (Invalid element #{idx+1})"
+                f"\n> 💡 Tip: Make sure the URN follows this format: {urn_type.value}"
+            )
+    
+
+def validate_urn(urn: str, context: str = None, row: str | int = None):
     pattern = r"^urn:([a-z0-9._-]+:)*[a-z0-9._-]+$"
     if not re.fullmatch(pattern, urn):
-        raise ValueError(f"({context if context else 'validate_urn'}) {'Row #'+str(row)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_urn'}){' Row #'+str(row)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed. URNs must begin with \"urn:\"")
 
 def validate_ref_id(ref_id: str, context: str = None, row = None):
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
-        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_ref_id'}){' Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
 
 def validate_ref_id_with_spaces(ref_id: str, context: str = None, row = None):
     if not re.fullmatch(r"[a-zA-Z0-9._\- ]+", ref_id):
-        raise ValueError(f"({context if context else 'validate_ref_id'}) {'Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
+        raise ValueError(f"({context if context else 'validate_ref_id'}){' Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
 
 def validate_sheet_name(sheet_name: str, context: str = None):
     if not (sheet_name.endswith("_meta") or sheet_name.endswith("_content")):
@@ -296,7 +354,7 @@ def is_valid_locale(locale_str):
 
 def validate_no_spaces(value: str, value_name: str, context: str = None, row: int = None):
     if " " in str(value):
-        raise ValueError(f"({context if context else 'validate_no_spaces'}) {'Row #' + str(row) + ':' if row is not None else ''} Invalid value for \"{value_name}\": Spaces are not allowed (got \"{value}\")")
+        raise ValueError(f"({context if context else 'validate_no_spaces'}){' Row #' + str(row) + ':' if row is not None else ''} Invalid value for \"{value_name}\": Spaces are not allowed (got \"{value}\")")
 
 def print_sheet_validation(sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
         
@@ -469,6 +527,7 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
     urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
     validate_urn(urn_value, fct_name, urn_row)
+    validate_urn_type(urn_value, URNMetadataFormat.LIBRARY_URN, fct_name, urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
@@ -520,11 +579,13 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
     urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1
     validate_urn(urn_value, fct_name, urn_row)
+    validate_urn_type(urn_value, URNMetadataFormat.FRAMEWORK_URN, fct_name, urn_row)
 
     # base_urn
     base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
     base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
     validate_urn(base_urn_value, fct_name, base_urn_row)
+    validate_urn_type(base_urn_value, URNMetadataFormat.FRAMEWORK_BASE_URN, fct_name, base_urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
@@ -602,6 +663,7 @@ def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
     base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
     validate_urn(base_urn_value, fct_name, base_urn_row)
+    validate_urn_type(base_urn_value, URNMetadataFormat.THREATS_BASE_URN, fct_name, base_urn_row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -624,6 +686,7 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
     base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
     base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
     validate_urn(base_urn_value, fct_name, base_urn_row)
+    validate_urn_type(base_urn_value, URNMetadataFormat.REFERENCE_CONTROLS_BASE_URN, fct_name, base_urn_row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -646,6 +709,7 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
     urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
     validate_urn(urn_value, fct_name, urn_row)
+    validate_urn_type(urn_value, URNMetadataFormat.MATRIX_URN, fct_name, urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
@@ -693,13 +757,34 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
         "target_node_base_urn"
     ]
     # No optional keys
-    
+
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     # URN
     urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
     urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
     validate_urn(urn_value, fct_name, urn_row)
+    validate_urn_type(urn_value, URNMetadataFormat.MAPPING_URN, fct_name, urn_row)
+
+    # source_framework_urn
+    source_framework_urn_value = df[df.iloc[:, 0] == "source_framework_urn"].iloc[0, 1]
+    source_framework_urn_row = df[df.iloc[:, 0] == "source_framework_urn"].index[0] + 1 
+    validate_urn_type(source_framework_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN, fct_name, source_framework_urn_row)
+
+    # target_framework_urn
+    target_framework_urn_value = df[df.iloc[:, 0] == "target_framework_urn"].iloc[0, 1]
+    target_framework_urn_row = df[df.iloc[:, 0] == "target_framework_urn"].index[0] + 1 
+    validate_urn_type(target_framework_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN, fct_name, target_framework_urn_row)
+
+    # source_node_base_urn
+    source_node_base_urn_value = df[df.iloc[:, 0] == "source_node_base_urn"].iloc[0, 1]
+    source_node_base_urn_row = df[df.iloc[:, 0] == "source_node_base_urn"].index[0] + 1 
+    validate_urn_type(source_node_base_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN, fct_name, source_node_base_urn_row)
+
+    # target_node_base_urn
+    target_node_base_urn_value = df[df.iloc[:, 0] == "target_node_base_urn"].iloc[0, 1]
+    target_node_base_urn_row = df[df.iloc[:, 0] == "target_node_base_urn"].index[0] + 1 
+    validate_urn_type(target_node_base_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN, fct_name, target_node_base_urn_row)
 
     # ref_id
     ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
@@ -2243,7 +2328,7 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
 def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["type", "id", "color", "abbreviation", "name", "description", "grid"]
+    required_columns = ["type", "id", "abbreviation", "name", "description"]
     # No optional columns
 
     # Special values
@@ -2260,7 +2345,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
 
     msg = (
         f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] In this script, Matrix content sheet verification is partially implemented."
-        f"> 💡 Tip: Matrix verification will be improved in a future update."
+        f"\n> 💡 Tip: Matrix verification will be improved in a future update."
     )
     print(msg)
     if ctx:
