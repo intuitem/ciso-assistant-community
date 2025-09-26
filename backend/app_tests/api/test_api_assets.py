@@ -149,6 +149,7 @@ class TestAssetsAuthenticated:
                 "parent_assets": [{"id": str(root_asset.id), "str": root_asset.name}],
             },
             base_count=1,
+            item_search_field="name",
             user_group=test.user_group,
             scope=str(test.folder),
         )
