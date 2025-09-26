@@ -414,10 +414,8 @@ class RightRequest(NameDescriptionFolderMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
-    assignee = models.ForeignKey(
+    owner = models.ManyToManyField(
         User,
-        on_delete=models.SET_NULL,
-        null=True,
         blank=True,
         related_name="assigned_right_requests",
     )

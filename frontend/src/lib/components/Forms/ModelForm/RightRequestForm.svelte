@@ -37,11 +37,12 @@
 
 <AutocompleteSelect
 	{form}
-	field="assignee"
-	optionsEndpoint="users"
+	multiple
+	optionsEndpoint="users?is_third_party=false"
 	optionsLabelField="email"
-	cacheLock={cacheLocks['assignee']}
-	bind:cachedValue={formDataCache['assignee']}
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
 />
 

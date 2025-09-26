@@ -149,7 +149,7 @@ class RightRequestWriteSerializer(BaseModelSerializer):
 
 class RightRequestReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    assignee = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
 
     class Meta:

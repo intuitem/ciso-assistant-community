@@ -645,7 +645,7 @@ export const rightRequestSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
-	assignee: z.string().optional(),
+	owner: z.string().uuid().optional().array().optional(),
 	requested_on: z
 		.string()
 		.min(1)

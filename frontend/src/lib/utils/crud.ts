@@ -885,7 +885,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'request_type' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'assignee', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'processings', urlModel: 'processings', endpointUrl: 'processings' }
 		],
 		detailViewFields: [
@@ -893,7 +893,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'ref_id' },
-			{ field: 'assignee' },
+			{ field: 'owner' },
 			{ field: 'requested_on', type: 'date' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'request_type' },

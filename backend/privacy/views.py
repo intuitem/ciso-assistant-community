@@ -215,7 +215,7 @@ class RightRequestViewSet(BaseModelViewSet):
     """
 
     model = RightRequest
-    filterset_fields = ["assignee", "request_type", "status", "processings"]
+    filterset_fields = ["owner", "request_type", "status", "processings", "folder"]
 
     @action(detail=False, name="Get request type choices")
     def request_type(self, request):
