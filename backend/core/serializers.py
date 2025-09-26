@@ -1776,6 +1776,31 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     owners = FieldsRelatedField(many=True)
     approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
+    associated_objects_count = serializers.SerializerMethodField()
+
+    def get_associated_objects_count(self, obj):
+        """Prefer annotated or prefetched counts to avoid extra DB queries."""
+        annotated = getattr(obj, "associated_objects_count", None)
+        if annotated is not None:
+            return annotated
+        try:
+            # Uses prefetch cache when available (no extra queries)
+            return (
+                len(obj.assets.all())
+                + len(obj.applied_controls.all())
+                + len(obj.vulnerabilities.all())
+                + len(obj.risk_scenarios.all())
+                + len(obj.requirement_assessments.all())
+            )
+        except Exception:
+            # Fallback: perform DB counts
+            return (
+                obj.assets.count()
+                + obj.applied_controls.count()
+                + obj.vulnerabilities.count()
+                + obj.risk_scenarios.count()
+                + obj.requirement_assessments.count()
+            )
 
     class Meta:
         model = SecurityException

@@ -1574,8 +1574,24 @@ export const listViewFields = {
 		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
-		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
-		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'severity',
+			'status',
+			'expiration_date',
+			'domain',
+			'associatedObjectsCount'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'severity',
+			'status',
+			'expiration_date',
+			'folder',
+			'associated_objects_count'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
