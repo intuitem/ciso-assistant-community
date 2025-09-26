@@ -2155,6 +2155,13 @@
 	"evidenceRevisions": "Révisions",
 	"addEvidenceRevision": "Nouvelle révision",
 	"associatedEvidenceRevisions": "Versions associées",
+	"tableOfContents": "Table des matières",
+	"showTableOfContents": "Afficher la table des matières",
+	"hideTableOfContents": "Masquer la table des matières",
+	"jumpToSection": "Aller à la section",
+	"searchSections": "Rechercher des sections...",
+	"clearSearch": "Effacer la recherche",
+	"noResultsFound": "Aucune section trouvée",
 	"userExpiryHelpText": "L'utilisateur sera désactivé après cette date. Les super utilisateurs ne sont pas concernés.",
 	"isSuperuser": "Est super utilisateur"
 }
