@@ -74,7 +74,7 @@ for _, row in df.iterrows():
         rows.append({
             "assessable": "",
             "depth": 1,
-            "ref_id": "",
+            "ref_id": str(row.get("SCF #", "")).split("-")[0],
             "name": current_domain,
             "description": "",
             "annotation": "",
