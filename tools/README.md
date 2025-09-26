@@ -170,6 +170,7 @@ The `v2` format is more rigorous and general than the legacy `v1` format. Here a
 - When referencing `threats` or `reference_controls`, a prefix from `urn_prefix` shall be used followed by a semicolon and the `ref_id` of the object. This provides the corresponding urn.
 
 (*) denotes mandatory fields.
+(+) denotes advanced user fields.
 
 ### library_meta
 
@@ -214,7 +215,9 @@ The `_content` tab for a `framework` object contains the following columns:
 - annotation
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
-- urn_id: this is reserved for specific compatibility issues to force the urn calculation
+- urn_id (+): this is reserved for specific compatibility issues to force the urn calculation
+- skip_count (+): trick to fix a referential without changing the URNs (subtract `1` from the counter) [Works with Compatibility mode `1` in `convert_library_v2.py`]
+- fix_count (+): negative or positive integer. Better version of `skip_count`  (adds the integer to the counter) [Works with Compatibility mode `3` in `convert_library_v2.py`]
 
 ### Risk matrices
 
