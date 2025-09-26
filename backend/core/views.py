@@ -6378,12 +6378,14 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
+            .select_related("folder")
             .prefetch_related(
                 "assets",
                 "applied_controls",
                 "vulnerabilities",
                 "risk_scenarios",
                 "requirement_assessments",
+                "owners",
             )
         )
 
@@ -6400,6 +6402,18 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "perimeter")
+            .prefetch_related(
+                "evidences",
+                "authors",
+                "owner",
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -6787,6 +6801,14 @@ class FindingViewSet(BaseModelViewSet):
     ]
     ordering = ["ref_id"]
 
+    def get_queryset(self) -> models.query.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "findings_assessment")
+            .prefetch_related("filtering_labels", "applied_controls", "evidences")
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -7015,6 +7037,14 @@ class TimelineEntryViewSet(BaseModelViewSet):
     filterset_fields = ["incident"]
     search_fields = ["entry", "entry_type"]
     ordering = ["-timestamp"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "incident", "author")
+            .prefetch_related("evidences")
+        )
 
     @action(detail=False, name="Get entry type choices")
     def entry_type(self, request):
