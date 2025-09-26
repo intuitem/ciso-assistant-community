@@ -659,6 +659,7 @@ class AssetViewSet(BaseModelViewSet):
     model = Asset
     filterset_class = AssetFilter
     search_fields = ["name", "description", "ref_id"]
+    ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
         return (
