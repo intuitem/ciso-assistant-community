@@ -7,6 +7,7 @@ import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
+from django.db.models import Q, F
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -197,6 +198,54 @@ class Folder(NameDescriptionMixin):
 
         # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
         return None
+
+    def get_user_permissions(self) -> dict[str, list[str]]:
+        """
+        For a given folder, retrieves all users with permissions on it
+        and returns a dictionary mapping each user's email to a list of their
+        permission codenames.
+
+        This function correctly handles permissions that are:
+        - Assigned directly to a user.
+        - Assigned to a user group the user belongs to.
+        - Inherited from parent folders via recursive role assignments.
+        """
+        folder_path_ids = [self.id] + [f.id for f in self.get_parent_folders()]
+
+        role_assignment_filter = Q(is_recursive=False, perimeter_folders=self) | Q(
+            is_recursive=True, perimeter_folders__id__in=folder_path_ids
+        )
+
+        direct_perms_qs = (
+            RoleAssignment.objects.filter(role_assignment_filter, user__isnull=False)
+            .values(email=F("user__email"), permission=F("role__permissions__codename"))
+            .order_by()
+        )
+
+        # Query for permissions granted to users via groups.
+        # The ORM traverses the UserGroup -> User relationship.
+        group_perms_qs = (
+            RoleAssignment.objects.filter(
+                role_assignment_filter, user_group__isnull=False
+            )
+            .values(
+                email=F("user_group__user__email"),
+                permission=F("role__permissions__codename"),
+            )
+            .order_by()
+        )
+
+        # Combine both querysets into a single one.
+        all_permissions_qs = direct_perms_qs.union(group_perms_qs)
+
+        user_permissions = defaultdict(list)
+        for item in all_permissions_qs:
+            # Filter out nulls that can occur if a role has no permissions
+            # or a group has no users.
+            if item.get("email") and item.get("permission"):
+                user_permissions[item["email"]].append(item["permission"])
+
+        return dict(user_permissions)
 
     @staticmethod
     def create_default_ug_and_ra(folder: Self):

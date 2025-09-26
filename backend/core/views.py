@@ -3157,6 +3157,11 @@ class FolderViewSet(BaseModelViewSet):
 
         return Response({"name": "Global", "children": folders_list})
 
+    @action(detail=True, methods=["get"])
+    def users(self, request, pk):
+        instance = self.model.objects.get(id=pk)
+        return Response(instance.get_user_permissions())
+
     @action(detail=False, methods=["get"])
     def ids(self, request):
         my_map = dict()
