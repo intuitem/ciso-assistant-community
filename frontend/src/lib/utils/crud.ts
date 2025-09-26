@@ -844,6 +844,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
+			{ field: 'processings', urlModel: 'right-requests' },
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',
@@ -873,6 +874,35 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processingNatures',
 		verboseName: 'processing nature',
 		verboseNamePlural: 'processing natures'
+	},
+	'right-requests': {
+		endpointUrl: 'privacy/right-requests',
+		name: 'rightrequest',
+		localName: 'rightRequest',
+		localNamePlural: 'rightRequests',
+		verboseName: 'right request',
+		verboseNamePlural: 'right requests',
+		selectFields: [{ field: 'request_type' }, { field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'assignee', urlModel: 'users' },
+			{ field: 'processings', urlModel: 'processings', endpointUrl: 'processings' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'assignee' },
+			{ field: 'requested_on', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'request_type' },
+			{ field: 'status' },
+			{ field: 'observation' },
+			{ field: 'processings' },
+			{ field: 'folder' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
 	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',

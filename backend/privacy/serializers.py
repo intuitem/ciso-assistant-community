@@ -9,6 +9,7 @@ from .models import (
     DataContractor,
     DataTransfer,
     Processing,
+    RightRequest,
 )
 
 
@@ -137,3 +138,20 @@ class ProcessingNatureReadSerializer(ReferentialSerializer):
 
 class ProcessingNatureWriteSerializer(ProcessingNatureReadSerializer):
     pass
+
+
+# RightRequest Serializers
+class RightRequestWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RightRequest
+        fields = "__all__"
+
+
+class RightRequestReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assignee = FieldsRelatedField()
+    processings = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RightRequest
+        fields = "__all__"
