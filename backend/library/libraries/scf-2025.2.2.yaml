@@ -25,22 +25,22 @@ objects:
     scores_definition:
     - score: 0
       name: Not Performed
-      description: None
+      description: null
     - score: 1
       name: Performed Informally
-      description: None
+      description: null
     - score: 2
       name: Planned & Tracked
-      description: None
+      description: null
     - score: 3
       name: Well Defined
-      description: None
+      description: null
     - score: 4
       name: Quantitatively Controlled
-      description: None
+      description: null
     - score: 5
       name: Continuously Improving
-      description: None
+      description: null
     implementation_groups_definition:
     - ref_id: tier1
       name: Tier 1 - Strategic
