@@ -17,6 +17,7 @@ from .models import (
     DataContractor,
     DataTransfer,
     Processing,
+    RightRequest,
     LEGAL_BASIS_CHOICES,
 )
 
@@ -186,13 +187,11 @@ class ProcessingViewSet(BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        # <Card icon="fa-solid fa-circle-exclamation" text="Incidents" count={data.data.privacy_incidents} />
-
-        incidents = 123
         pd_categories = PersonalData.get_categories_count()
         total_categories = len(pd_categories)
         processings_count = Processing.objects.all().count()
         recipients_count = DataRecipient.objects.all().count()
+        open_right_requests_count = RightRequest.objects.exclude(status="done").count()
         return Response(
             {
                 "countries": agg_countries(),
@@ -200,6 +199,7 @@ class ProcessingViewSet(BaseModelViewSet):
                 "recipients_count": recipients_count,
                 "pd_categories": pd_categories,
                 "pd_cat_count": total_categories,
+                "open_right_requests_count": open_right_requests_count,
             }
         )
 
@@ -207,3 +207,20 @@ class ProcessingViewSet(BaseModelViewSet):
 class ProcessingNatureViewSet(BaseModelViewSet):
     model = ProcessingNature
     search_fields = ["name"]
+
+
+class RightRequestViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows right requests to be viewed or edited.
+    """
+
+    model = RightRequest
+    filterset_fields = ["owner", "request_type", "status", "processings", "folder"]
+
+    @action(detail=False, name="Get request type choices")
+    def request_type(self, request):
+        return Response(dict(RightRequest.REQUEST_TYPE_CHOICES))
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(RightRequest.STATUS_CHOICES))

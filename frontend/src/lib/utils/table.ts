@@ -1394,6 +1394,50 @@ export const listViewFields = {
 			legal_basis: PROCESSING_LEGAL_BASIS_FILTER
 		}
 	},
+	'right-requests': {
+		head: ['refId', 'name', 'requestType', 'status', 'owner', 'requestedOn', 'dueDate', 'folder'],
+		body: [
+			'ref_id',
+			'name',
+			'request_type',
+			'status',
+			'owner',
+			'requested_on',
+			'due_date',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			request_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/request_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'requestType',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					multiple: true
+				}
+			},
+			processings: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings',
+					label: 'processings',
+					multiple: true
+				}
+			}
+		}
+	},
 	purposes: {
 		head: ['name', 'description', 'processing'],
 		body: ['name', 'description', 'processing'],
@@ -1645,8 +1689,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-issues': {
-		head: ['name', 'category', 'origin', 'domain'],
-		body: ['name', 'category', 'origin', 'folder'],
+		head: ['refId', 'name', 'category', 'origin', 'domain'],
+		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
@@ -1730,6 +1774,7 @@ export const listViewFields = {
 	},
 	'task-templates': {
 		head: [
+			'refId',
 			'name',
 			'is_recurrent',
 			'assigned_to',
@@ -1739,6 +1784,7 @@ export const listViewFields = {
 			'folder'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'is_recurrent',
 			'assigned_to',
