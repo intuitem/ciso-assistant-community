@@ -178,26 +178,34 @@ def init_config(y, interactive):
                 "Enter your Kafka password",
                 hide_input=True,
             )
-        kafka_sasl_mechanism = click.prompt(
-            "Which SASL mechanism does your Kafka broker use?",
-            type=click.Choice(
-                [
-                    "SCRAM-SHA-256",
-                    "SCRAM-SHA-512",
-                    "PLAIN",
-                ]
-            ),
-            default="SCRAM-SHA-256",
-        )
-        kafka_security_protocol = click.prompt(
-            "Which security protocol does your Kafka broker use?",
-            type=click.Choice(
-                [
-                    "SASL_SSL",
-                    "SASL_PLAINTEXT",
-                ]
-            ),
-        )
+            kafka_sasl_mechanism = click.prompt(
+                "Which SASL mechanism does your Kafka broker use?",
+                type=click.Choice(
+                    [
+                        "SCRAM-SHA-256",
+                        "SCRAM-SHA-512",
+                        "PLAIN",
+                    ]
+                ),
+                default="SCRAM-SHA-256",
+            )
+            kafka_security_protocol = click.prompt(
+                "Which security protocol does your Kafka broker use?",
+                type=click.Choice(
+                    [
+                        "SASL_SSL",
+                        "SASL_PLAINTEXT",
+                    ]
+                ),
+            )
+        else:
+            sp_choices = ["SSL", "PLAINTEXT"]
+            sp_default = os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+            kafka_security_protocol = click.prompt(
+                "Which security protocol does your Kafka broker use?",
+                type=click.Choice(sp_choices),
+                default=sp_default,
+            )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
             default=os.getenv("ERRORS_TOPIC", "errors"),
