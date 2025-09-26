@@ -39,6 +39,7 @@ COMPATIBILITY_MODES = {
     0: f"[v{SCRIPT_VERSION}] (DEFAULT) Don't use any Compatibility Mode",
     1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
     2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)",
+    3: "[< v2++] Updated version of \"[< v2]\". Handling of the new \"fix_count\" column in order to ADD or SUBTRACT from the counter (replace \"skip_count\"). Fixed the URN writing issue when \"skip_count\" was true and a \"ref_id\" was defined.",
     # Future modes can be added here with an integer key and description
 }
 
@@ -869,6 +870,39 @@ def create_library(
                                 )
 
                         urn = f"{base_urn}:{ref_id_urn}"
+                    elif (
+                        compat_mode == 3
+                    ):  # Updated version of "[< v2]" (Compat Mode 1). Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count").
+                        # Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.
+                        
+                        try:
+                            fix_count = int(data.get("fix_count", ""))
+                        except Exception as e:
+                            fix_count = None
+
+                        if fix_count:
+                            counter_fix += fix_count
+                            
+                            # If "ref_id" is already defined, use the defined "ref_id"
+                            if data.get("urn_id") and data.get("urn_id").strip():
+                                ref_id_urn = data.get('urn_id').strip()
+                            # Else if no "ref_id", use the custom node version
+                            else:
+                                ref_id_urn = f"node{counter + counter_fix}"
+
+                        else:
+                            # Adds the ability to use the "urn_id" column despite compatibility mode set to "3"
+                            if data.get("urn_id") and data.get("urn_id").strip():
+                                ref_id_urn = data.get("urn_id").strip()
+                            else:
+                                ref_id_urn = (
+                                    ref_id.lower().replace(" ", "-")
+                                    if ref_id
+                                    else f"node{counter + counter_fix}"
+                                )
+
+                        urn = f"{base_urn}:{ref_id_urn}"
+
                     else:  # If compat mode = {0,2}
                         if data.get("urn_id") and data.get("urn_id").strip():
                             urn = f"{base_urn}:{data.get('urn_id').strip()}"

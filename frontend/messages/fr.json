@@ -537,8 +537,8 @@
 	"successfullyRejectedObject": "L'objet {object} a été rejeté avec succès",
 	"successfullyRevokedObject": "L'objet {object} a été révoqué avec succès",
 	"successfullyImportedObject": "L'objet {object} a été importé avec succès",
-	"userHasNoRights": ". Il n'a aucune permissions, pensez à éditer ses groupes utilisateurs",
-	"createdUserWillHaveNoRights": "Cet utilisateur n'aura aucune permission, pensez à éditer ses groupes utilisateurs après sa création",
+	"userHasNoRights": ". Il n'a aucune permissions par défaut. Pensez à éditer ses groupes utilisateurs",
+	"createdUserWillHaveNoRights": "Les utilisateurs n'ont aucune permission par défaut. Pensez à éditer les groupes après la création",
 	"anErrorOccurred": "Une erreur est survenue",
 	"attachmentDeleted": "La pièce jointe a été supprimée avec succès",
 	"librarySuccessfullyLoaded": "La bibliothèque a été chargée avec succès",
@@ -2146,5 +2146,7 @@
 	"jumpToSection": "Aller à la section",
 	"searchSections": "Rechercher des sections...",
 	"clearSearch": "Effacer la recherche",
-	"noResultsFound": "Aucune section trouvée"
+	"noResultsFound": "Aucune section trouvée",
+	"userExpiryHelpText": "L'utilisateur sera désactivé après cette date. Les super utilisateurs ne sont pas concernés.",
+	"isSuperuser": "Est super utilisateur"
 }

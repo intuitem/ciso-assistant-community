@@ -982,6 +982,8 @@ class UserReadSerializer(BaseModelSerializer):
             "is_third_party",
             "observation",
             "has_mfa_enabled",
+            "expiry_date",
+            "is_superuser",
         ]
 
 
@@ -1002,6 +1004,8 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_third_party",
             "is_local",
             "observation",
+            "expiry_date",
+            "is_superuser",
         ]
 
     def validate_email(self, email):
@@ -2247,3 +2251,91 @@ class TerminologyWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Terminology
         exclude = ["folder", "is_published"]
+
+
+class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
+    """Serializer for evidences in the context of compliance assessments"""
+
+    folder = FieldsRelatedField()
+    status = serializers.CharField(source="get_status_display")
+    owner = FieldsRelatedField(many=True)
+    size = serializers.CharField(source="get_size")
+    last_update = serializers.DateTimeField(source="updated_at")
+    requirement_assessments = serializers.SerializerMethodField()
+
+    def get_requirement_assessments(self, obj):
+        pk = self.context.get("pk")
+        if pk is None:
+            return {"direct_links": [], "indirect_links": []}
+
+        # Get requirement assessments for this compliance assessment
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=pk
+        ).prefetch_related("applied_controls")
+
+        direct_links = []
+        indirect_links = []
+
+        # Direct links - evidence is directly linked to requirement assessment
+        for req_assessment in requirement_assessments:
+            if obj in req_assessment.evidences.all():
+                direct_links.append(
+                    {
+                        "requirement_assessment_id": str(req_assessment.id),
+                        "requirement_assessment_name": str(
+                            req_assessment.requirement.safe_display_str
+                        ),
+                    }
+                )
+
+        # Indirect links - evidence is linked through applied controls
+        for req_assessment in requirement_assessments:
+            for applied_control in req_assessment.applied_controls.all():
+                if obj in applied_control.evidences.all():
+                    indirect_links.append(
+                        {
+                            "requirement_assessment_id": str(req_assessment.id),
+                            "requirement_assessment_name": str(
+                                req_assessment.requirement.safe_display_str
+                            ),
+                            "applied_control_id": str(applied_control.id),
+                            "applied_control_name": applied_control.name,
+                        }
+                    )
+
+        # Return a simplified format similar to action-plan
+        all_links = []
+
+        # Add direct links
+        for link in direct_links:
+            all_links.append(
+                {
+                    "str": link["requirement_assessment_name"],
+                    "id": link["requirement_assessment_id"],
+                }
+            )
+
+        # Add indirect links
+        for link in indirect_links:
+            all_links.append(
+                {
+                    "str": f"{link['requirement_assessment_name']} (via {link['applied_control_name'][:15]}...)",
+                    "id": link["requirement_assessment_id"],
+                }
+            )
+
+        return all_links
+
+    class Meta:
+        model = Evidence
+        fields = [
+            "id",
+            "name",
+            "status",
+            "last_update",
+            "expiry_date",
+            "owner",
+            "folder",
+            "size",
+            "requirement_assessments",
+        ]
