@@ -4905,7 +4905,7 @@ class QuickStartView(APIView):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health", "issues"]
+    filterset_fields = ["folder", "status", "health", "issues", "assigned_to"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
