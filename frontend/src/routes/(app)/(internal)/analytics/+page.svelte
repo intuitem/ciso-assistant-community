@@ -7,25 +7,24 @@
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
+	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
+	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
+	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import ComposerSelect from './ComposerSelect.svelte';
-	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import CounterCard from './CounterCard.svelte';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
-
-	const risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
@@ -98,185 +97,169 @@
 							<LoadingSpinner />
 						</div>
 					{:then metrics}
-						<section id="summary" class=" grid grid-cols-6 gap-2">
-							<Card
-								count={metrics.controls.total}
-								label={m.sumpageTotal()}
-								href="/applied-controls/"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								emphasis={true}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.controls.active}
-								label={m.sumpageActive()}
-								href="/applied-controls/?status=active"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.controls.deprecated}
-								label={m.sumpageDeprecated()}
-								href="/applied-controls/?status=deprecated"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.controls.to_do}
-								label={m.sumpageToDo()}
-								href="/applied-controls/?status=to_do"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<div class="h-80 col-span-6 lg:col-span-2 row-span-2 bg-white">
-								<NightingaleChart name="nightingale" values={metrics.csf_functions} />
-							</div>
-							<Card
-								count={metrics.controls.in_progress}
-								label={m.sumpageInProgress()}
-								href="/applied-controls/?status=in_progress"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.controls.on_hold}
-								label={m.sumpageOnHold()}
-								href="/applied-controls/?status=on_hold"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.controls.p1}
-								label={m.sumpageP1()}
-								href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								emphasis={true}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.controls.eta_missed}
-								label={m.sumpageEtaMissed()}
-								href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
-									.toISOString()
-									.split('T')[0]}"
-								icon="fa-solid fa-shield-halved"
-								section={m.sumpageSectionControls()}
-								emphasis={true}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<div class="col-span-6 lg:col-span-4 row-span-4 bg-white h-96">
-								<StackedBarsNormalized
-									names={metrics.audits_stats.names}
-									data={metrics.audits_stats.data}
-									uuids={metrics.audits_stats.uuids}
-								/>
-							</div>
-							<!---->
-							<Card
-								count={metrics.compliance.used_frameworks}
-								label={m.usedFrameworks()}
-								href="/frameworks/"
-								icon="fa-solid fa-list-check"
-								section={m.sumpageSectionCompliance()}
-								emphasis={true}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<div></div>
-							<Card
-								count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
-								label={m.sumpageActiveAudits()}
-								href="/compliance-assessments/"
-								icon="fa-solid fa-list-check"
-								section={m.sumpageSectionCompliance()}
-								emphasis={true}
-								customClass="col-span-3 lg:col-span-1"
-							/>
+						<section id="summary" class="space-y-6">
+							<!-- Controls + CSF Functions Row -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Controls Section (3/5 of width) -->
+								<div class="xl:col-span-3">
+									<CardGroup title={m.sumpageSectionControls()} icon="fa-solid fa-shield-halved">
+										<SimpleCard
+											count={metrics.controls.total}
+											label={m.sumpageTotal()}
+											href="/applied-controls/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={metrics.controls.active}
+											label={m.sumpageActive()}
+											href="/applied-controls/?status=active"
+										/>
+										<SimpleCard
+											count={metrics.controls.deprecated}
+											label={m.sumpageDeprecated()}
+											href="/applied-controls/?status=deprecated"
+										/>
+										<SimpleCard
+											count={metrics.controls.to_do}
+											label={m.sumpageToDo()}
+											href="/applied-controls/?status=to_do"
+										/>
+										<SimpleCard
+											count={metrics.controls.in_progress}
+											label={m.sumpageInProgress()}
+											href="/applied-controls/?status=in_progress"
+										/>
+										<SimpleCard
+											count={metrics.controls.on_hold}
+											label={m.sumpageOnHold()}
+											href="/applied-controls/?status=on_hold"
+										/>
+										<SimpleCard
+											count={metrics.controls.p1}
+											label={m.sumpageP1()}
+											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={metrics.controls.eta_missed}
+											label={m.sumpageEtaMissed()}
+											href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
+												.toISOString()
+												.split('T')[0]}"
+											emphasis={true}
+										/>
+									</CardGroup>
+								</div>
 
-							<Card
-								count="{metrics.compliance.progress_avg}%"
-								label={m.sumpageAvgProgress()}
-								href="/compliance-assessments/"
-								icon="fa-solid fa-list-check"
-								section={m.sumpageSectionCompliance()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.compliance.non_compliant_items}
-								label={m.sumpageNonCompliantItems()}
-								href="#"
-								icon="fa-solid fa-list-check"
-								section={m.sumpageSectionCompliance()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.compliance.evidences}
-								label={m.sumpageEvidences()}
-								href="/evidences/"
-								icon="fa-solid fa-list-check"
-								section={m.sumpageSectionCompliance()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<div class=""></div>
-							<div class=""></div>
-							<!---->
-							<div class="col-span-6 lg:col-span-2 row-span-2 h-80 bg-white">
-								<HalfDonutChart
-									name="current_h"
-									title={m.sumpageTitleCurrentRisks()}
-									values={data.risks_count_per_level.current}
-									colors={data.risks_count_per_level.current.map((object) => object.color)}
-								/>
+								<!-- CSF Functions Chart (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+										<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+									</div>
+								</div>
 							</div>
-							<Card
-								count={metrics.risk.assessments}
-								label={m.sumpageAssessments()}
-								href="/risk-assessments/"
-								emphasis={true}
-								icon="fa-solid fa-biohazard"
-								section={m.sumpageSectionRisk()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<Card
-								count={metrics.risk.scenarios}
-								label={m.sumpageScenarios()}
-								href="/risk-scenarios/"
-								icon="fa-solid fa-biohazard"
-								section={m.sumpageSectionRisk()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<div class="col-span-6 lg:col-span-2 row-span-2 h-80 bg-white">
-								<HalfDonutChart
-									name="residual_h"
-									title={m.sumpageTitleResidualRisks()}
-									values={data.risks_count_per_level.residual}
-									colors={data.risks_count_per_level.residual.map((object) => object.color)}
-								/>
+							<!-- Compliance + Audits Chart Row -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Compliance Section (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<CardGroup
+										title={m.sumpageSectionCompliance()}
+										icon="fa-solid fa-list-check"
+										maxColumns={3}
+									>
+										<SimpleCard
+											count={metrics.compliance.used_frameworks}
+											label={m.usedFrameworks()}
+											href="/frameworks/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
+											label={m.sumpageActiveAudits()}
+											href="/compliance-assessments/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count="{metrics.compliance.progress_avg}%"
+											label={m.sumpageAvgProgress()}
+											href="/compliance-assessments/"
+										/>
+										<SimpleCard
+											count={metrics.compliance.non_compliant_items}
+											label={m.sumpageNonCompliantItems()}
+											href="#"
+										/>
+										<SimpleCard
+											count={metrics.compliance.evidences}
+											label={m.sumpageEvidences()}
+											href="/evidences/"
+										/>
+									</CardGroup>
+								</div>
+
+								<!-- Audits Chart (3/5 of width) -->
+								<div class="xl:col-span-3">
+									<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
+										<StackedBarsNormalized
+											names={metrics.audits_stats.names}
+											data={metrics.audits_stats.data}
+											uuids={metrics.audits_stats.uuids}
+											title={m.recentlyUpdatedAudits()}
+										/>
+									</div>
+								</div>
 							</div>
-							<Card
-								count={metrics.risk.threats}
-								label={m.sumpageMappedThreats()}
-								href="/analytics?tab=risk"
-								icon="fa-solid fa-biohazard"
-								section={m.sumpageSectionRisk()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<!---->
-							<Card
-								count={metrics.risk.acceptances}
-								label={m.sumpageRiskAccepted()}
-								href="/risk-acceptances"
-								icon="fa-solid fa-biohazard"
-								section={m.sumpageSectionRisk()}
-								customClass="col-span-3 lg:col-span-1"
-							/>
-							<div class=""></div>
+							<!-- Risk Section + Charts Row -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Risk Cards (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<CardGroup title={m.sumpageSectionRisk()} icon="fa-solid fa-biohazard">
+										<SimpleCard
+											count={metrics.risk.assessments}
+											label={m.sumpageAssessments()}
+											href="/risk-assessments/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={metrics.risk.scenarios}
+											label={m.sumpageScenarios()}
+											href="/risk-scenarios/"
+										/>
+										<SimpleCard
+											count={metrics.risk.threats}
+											label={m.sumpageMappedThreats()}
+											href="/analytics?tab=risk"
+										/>
+										<SimpleCard
+											count={metrics.risk.acceptances}
+											label={m.sumpageRiskAccepted()}
+											href="/risk-acceptances"
+										/>
+									</CardGroup>
+								</div>
+
+								<!-- Risk Charts (3/5 of width) -->
+								<div class="xl:col-span-3">
+									<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+											<HalfDonutChart
+												name="current_h"
+												title={m.sumpageTitleCurrentRisks()}
+												values={data.risks_count_per_level.current}
+												colors={data.risks_count_per_level.current.map((object) => object.color)}
+											/>
+										</div>
+										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+											<HalfDonutChart
+												name="residual_h"
+												title={m.sumpageTitleResidualRisks()}
+												values={data.risks_count_per_level.residual}
+												colors={data.risks_count_per_level.residual.map((object) => object.color)}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
 						</section>
 					{:catch error}
 						<div class="col-span-3 lg:col-span-1">
@@ -459,21 +442,50 @@
 					<!-- Risk tab -->
 
 					<section>
-						{#if data.threats_count.results.labels.length > 0}
-							<div class=" h-96 my-2">
-								<RadarChart
-									name="threatRadar"
-									title={m.threatRadarChart()}
-									labels={data.threats_count.results.labels}
-									values={data.threats_count.results.values}
-								/>
-							</div>
-						{:else}
-							<div class="py-4 flex items-center justify-center">
-								<p class="">{m.noThreatsMapped()}</p>
-							</div>
-						{/if}
+						<div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-96 my-2">
+							{#if data.threats_count.results.labels.length > 0}
+								<div class="flex-1 card p-4 bg-white">
+									<RadarChart
+										name="threatRadar"
+										title={m.threatRadarChart()}
+										labels={data.threats_count.results.labels}
+										values={data.threats_count.results.values}
+									/>
+								</div>
+							{:else}
+								<div class="flex-1 card p-4 bg-white flex items-center justify-center">
+									<p class="">{m.noThreatsMapped()}</p>
+								</div>
+							{/if}
+							{#if data.qualifications_count.results.labels.length > 0}
+								<div class="flex-1 card p-4 bg-white">
+									<BarChart
+										name="qualificationsBar"
+										title={m.qualificationsChartTitle()}
+										labels={localizeChartLabels(data.qualifications_count.results.labels)}
+										values={data.qualifications_count.results.values}
+										horizontal={true}
+									/>
+								</div>
+							{:else}
+								<div class="flex-1 card p-4 bg-white flex items-center justify-center">
+									<p class="">No qualifications found on risk scenarios</p>
+								</div>
+							{/if}
+						</div>
 						<div class="flex flex-wrap lg:flex-nowrap">
+							{#if page.data?.featureflags?.inherent_risk}
+								<div class="h-96 flex-col grow lg:flex-1">
+									<span class="text-sm font-semibold">{m.inherentRiskLevelPerScenario()}</span>
+
+									<DonutChart
+										s_label={m.inherentRisk()}
+										name="inherent_risk_level"
+										values={data.risks_count_per_level.inherent}
+										colors={data.risks_count_per_level.inherent?.map((object) => object.color)}
+									/>
+								</div>
+							{/if}
 							<div class="h-96 flex-col grow lg:flex-1">
 								<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
@@ -481,7 +493,7 @@
 									s_label={cur_rsk_label}
 									name="current_risk_level"
 									values={data.risks_count_per_level.current}
-									colors={data.risks_count_per_level.current.map((object) => object.color)}
+									colors={data.risks_count_per_level.current?.map((object) => object.color)}
 								/>
 							</div>
 							<div class="h-96 flex-col grow lg:flex-1">
@@ -491,7 +503,7 @@
 									s_label={rsd_rsk_label}
 									name="residual_risk_level"
 									values={data.risks_count_per_level.residual}
-									colors={data.risks_count_per_level.residual.map((object) => object.color)}
+									colors={data.risks_count_per_level.residual?.map((object) => object.color)}
 								/>
 							</div>
 						</div>
@@ -506,10 +518,172 @@
 					</section>
 				</Tabs.Panel>
 				<Tabs.Panel value="compliance">
-					<span class="text-xl font-extrabold"
-						><a href="/recap" class="hover:text-purple-500">{m.sectionMoved()}</a></span
-					>
-					<div class="flex flex-col space-y-2"></div>
+					<section class="space-y-6">
+						<div class="flex justify-between items-center mb-6">
+							<h2 class="text-xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
+							<a
+								href="/recap"
+								class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors"
+							>
+								{m.viewDetailedRecap()}
+								<i class="fas fa-arrow-right text-xs"></i>
+							</a>
+						</div>
+
+						{#if data.complianceAnalytics && Object.keys(data.complianceAnalytics).length > 0}
+							<div class="space-y-6">
+								{#each Object.entries(data.complianceAnalytics) as [frameworkName, frameworkData]}
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+										<!-- Framework Header -->
+										<div
+											class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"
+										>
+											<div class="flex justify-between items-center">
+												<div class="flex items-center gap-3">
+													<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+													<h3 class="text-lg font-semibold text-gray-900">{frameworkName}</h3>
+												</div>
+												<div class="flex items-center gap-2">
+													<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
+													<div
+														class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm"
+													>
+														<div class="w-32 bg-gray-200 rounded-full h-1.5">
+															<div
+																class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
+																style="width: {frameworkData.framework_average}%"
+															></div>
+														</div>
+														<span class="font-semibold text-blue-600 text-sm min-w-[2.5rem]">
+															{frameworkData.framework_average}%
+														</span>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Domains -->
+										<div class="p-6 space-y-5">
+											{#each frameworkData.domains as domain}
+												<div class="relative">
+													<!-- Domain Header -->
+													<div
+														class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
+													>
+														<div class="flex items-center gap-2">
+															<i class="fas fa-folder text-amber-500 text-sm"></i>
+															<h4 class="font-medium text-gray-800">{domain.domain}</h4>
+														</div>
+														<div class="flex items-center gap-2">
+															<span class="text-xs text-gray-500">{m.averageProgress()}:</span>
+															<div class="flex items-center gap-2">
+																<div class="w-8 bg-gray-200 rounded-full h-1">
+																	<div
+																		class="bg-gradient-to-r from-amber-400 to-orange-500 h-1 rounded-full transition-all duration-300"
+																		style="width: {domain.domain_average}%"
+																	></div>
+																</div>
+																<span class="font-medium text-amber-600 text-xs">
+																	{domain.domain_average}%
+																</span>
+															</div>
+														</div>
+													</div>
+
+													<!-- Assessments Grid -->
+													<div class="grid gap-3">
+														{#each domain.assessments as assessment}
+															<div
+																class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+															>
+																<div class="flex justify-between items-start gap-4">
+																	<div class="flex-1 min-w-0">
+																		<div class="font-medium text-gray-900 mb-1 truncate">
+																			{assessment.assessment_name}
+																		</div>
+																		<div class="flex items-center gap-3 text-xs text-gray-500">
+																			<div class="flex items-center gap-1">
+																				<i class="fas fa-cubes text-gray-400"></i>
+																				<span>{assessment.perimeter}</span>
+																			</div>
+																			<div class="flex items-center gap-1">
+																				<div
+																					class="w-2 h-2 rounded-full {assessment.status === 'done'
+																						? 'bg-green-400'
+																						: assessment.status === 'in_progress'
+																							? 'bg-blue-400'
+																							: assessment.status === 'in_review'
+																								? 'bg-yellow-400'
+																								: 'bg-gray-400'}"
+																				></div>
+																				<span class="capitalize"
+																					>{assessment.status?.replace('_', ' ') ||
+																						'No status'}</span
+																				>
+																			</div>
+																		</div>
+																	</div>
+																	<div class="flex items-center gap-3">
+																		<!-- Progress Bar -->
+																		<div class="flex items-center gap-2">
+																			<div class="w-20 bg-gray-200 rounded-full h-2">
+																				<div
+																					class="h-2 rounded-full transition-all duration-500 {assessment.progress >=
+																					80
+																						? 'bg-gradient-to-r from-green-400 to-emerald-500'
+																						: assessment.progress >= 50
+																							? 'bg-gradient-to-r from-blue-400 to-cyan-500'
+																							: assessment.progress >= 25
+																								? 'bg-gradient-to-r from-yellow-400 to-orange-500'
+																								: 'bg-gradient-to-r from-red-400 to-pink-500'}"
+																					style="width: {assessment.progress}%"
+																				></div>
+																			</div>
+																			<span
+																				class="font-semibold text-sm min-w-[3rem] text-right {assessment.progress >=
+																				80
+																					? 'text-green-600'
+																					: assessment.progress >= 50
+																						? 'text-blue-600'
+																						: assessment.progress >= 25
+																							? 'text-orange-600'
+																							: 'text-red-600'}"
+																			>
+																				{assessment.progress}%
+																			</span>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														{/each}
+													</div>
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/each}
+							</div>
+						{:else}
+							<div
+								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+							>
+								<div class="text-gray-400 mb-4">
+									<i class="fas fa-chart-bar text-6xl"></i>
+								</div>
+								<div class="text-gray-600">
+									<p class="text-xl font-semibold mb-2">{m.noComplianceData()}</p>
+									<p class="text-sm text-gray-500">{m.createComplianceAssessment()}</p>
+								</div>
+								<a
+									href="/compliance-assessments"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								>
+									<i class="fas fa-plus text-sm"></i>
+									Create Assessment
+								</a>
+							</div>
+						{/if}
+					</section>
 				</Tabs.Panel>
 			</div>
 		{/key}

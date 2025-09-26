@@ -2,6 +2,7 @@
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { getOptions } from '$lib/utils/crud';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;
@@ -11,7 +12,7 @@
 		reference_controls?: Record<string, unknown>[];
 		children: Record<string, unknown>[];
 		assessable: boolean;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -65,7 +66,7 @@
 	<span class="whitespace-pre-line" style="font-weight: 300;">
 		{#if node.assessable}
 			<Anchor
-				href={`inspect-requirement/${node.id}`}
+				href={`/frameworks/inspect-requirement/${node.id}`}
 				label={title}
 				class="text-primary-500 hover:text-primary-700"
 			>
@@ -75,7 +76,7 @@
 							<span style="font-weight: 600;">{title}</span>
 						{/if}
 						{#if description}
-							<p>{description}</p>
+							<MarkdownRenderer content={description} />
 						{/if}
 					{:else if Object.keys(node.questions).length > 0}
 						<!-- This displays the first question's text -->
@@ -90,7 +91,7 @@
 						<span style="font-weight: 600;">{title}</span>
 					{/if}
 					{#if description}
-						<p>{description}</p>
+						<MarkdownRenderer content={description} />
 					{/if}
 				{:else if Object.keys(node.questions).length > 0}
 					<!-- This displays the first question's text -->

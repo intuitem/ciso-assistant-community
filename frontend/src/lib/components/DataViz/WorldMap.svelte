@@ -8,7 +8,7 @@
 
 	const tooltipTriggers = {
 		[TopoJSONMap.selectors.feature]: (d) =>
-			`${d.properties.name}: ${d.data.count ? d.data.count : 'no data'}`
+			`${d.properties.name}: ${d.data?.count ? d.data?.count : 'no data'}`
 	};
 </script>
 

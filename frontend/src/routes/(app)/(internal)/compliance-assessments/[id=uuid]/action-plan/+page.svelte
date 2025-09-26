@@ -10,12 +10,11 @@
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
-		csf_function: 'csfFunction',
 		eta: 'eta',
-		expiry_date: 'expiryDate',
+		control_impact: 'controlImpact',
 		effort: 'effort',
-		cost: 'cost',
-		'requirements-assessments': 'matchingRequirements'
+		annual_cost: 'cost',
+		requirement_assessments: 'matchingRequirements'
 	};
 
 	const appliedControls: TableSource = {
@@ -73,11 +72,10 @@
 				'status',
 				'priority',
 				'category',
-				'csf_function',
 				'eta',
-				'expiry_date',
+				'control_impact',
 				'effort',
-				'cost',
+				'annual_cost',
 				'requirement_assessments'
 			]}
 		/>

@@ -9,6 +9,7 @@
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { tableHandlers } from '$lib/utils/stores';
 
 	let { data, ...rest } = $props();
 
@@ -109,6 +110,10 @@
 					setTimeout(() => {
 						fileResetSignal = false;
 					}, 10);
+					// invalidate to show arrow update button
+					Object.values($tableHandlers).forEach((handler) => {
+						handler.invalidate();
+					});
 				}}
 				{...rest}
 			>

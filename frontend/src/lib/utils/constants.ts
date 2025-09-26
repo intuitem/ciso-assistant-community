@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/public';
+import { m } from '$paraglide/messages';
 
 export const BASE_API_URL = `${
 	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
@@ -87,7 +88,9 @@ export const LOCALE_DISPLAY_MAP = {
 	id: '🇮🇩 Bahasa Indonesia',
 	da: '🇩🇰 Dansk',
 	uk: '🇺🇦 Українська',
-	el: '🇬🇷 Ελληνικά'
+	el: '🇬🇷 Ελληνικά',
+	tr: '🇹🇷 Türkçe',
+	hr: '🇭🇷 Hrvatski'
 };
 
 export const ISO_8601_REGEX =

@@ -3,6 +3,7 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
+	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -13,6 +14,13 @@
 		value: string | number;
 		suggested?: boolean;
 		translatedLabel?: string;
+		path?: string[];
+		infoString?: {
+			string: string;
+			position: 'suffix' | 'prefix';
+			classes?: string;
+		};
+		contentType?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -39,6 +47,17 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
+		optionsInfoFields?: {
+			fields: {
+				field: string; // Field name in the object
+				path?: string; // Optional, used for nested fields};
+				translate?: boolean; // Optional, used for translating the field
+				display?: (value: any) => string;
+			}[];
+			position?: 'suffix' | 'prefix'; // Default: 'suffix'
+			separator?: string; // Default: ' '
+			classes?: string; // Optional, used for custom styling
+		};
 		pathField?: string;
 		optionsSuggestions?: any[];
 		optionsSelf?: any;
@@ -47,7 +66,6 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
-		disabled?: boolean;
 		mount?: (value: any) => void;
 	}
 
@@ -73,6 +91,12 @@
 		optionsValueField = 'id',
 		browserCache = 'default',
 		optionsExtraFields = [],
+		optionsInfoFields = {
+			fields: [],
+			position: 'suffix',
+			separator: ' ',
+			classes: 'text-surface-500'
+		},
 		pathField = '',
 		optionsSuggestions = [],
 		optionsSelf = null,
@@ -86,6 +110,20 @@
 		cachedValue = $bindable(),
 		mount = () => null
 	}: Props = $props();
+
+	if (translateOptions) {
+		options = options.map((option) => {
+			return {
+				...option,
+				translatedLabel:
+					safeTranslate(option.label) !== option.label
+						? safeTranslate(option.label)
+						: safeTranslate(option.value) !== option.value
+							? safeTranslate(option.value)
+							: option.label
+			};
+		});
+	}
 
 	let optionHashmap: Record<string, Option> = {};
 	let _disabled = $state(disabled);
@@ -186,6 +224,24 @@
 							})
 						: [];
 
+				const infoFields = optionsInfoFields.fields
+					.map((f) => {
+						const value = getNestedValue(object, f.field, f.path);
+						return f.display ? f.display(value) : f.translate ? safeTranslate(value) : value;
+					})
+					.filter(Boolean);
+
+				let infoString: { string: string; position: 'suffix' | 'prefix' } | undefined = undefined;
+				if (infoFields.length > 0) {
+					const separator = optionsInfoFields.separator || ' ';
+					const position = optionsInfoFields.position || 'suffix';
+					infoString = {
+						string: infoFields.join(separator),
+						position: position,
+						...optionsInfoFields
+					};
+				}
+
 				const fullLabel = `${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
 
 				return {
@@ -196,7 +252,9 @@
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
 					),
 					translatedLabel: safeTranslate(fullLabel),
-					path
+					path,
+					infoString,
+					contentType: object?.content_type || ''
 				};
 			})
 			.filter(
@@ -207,6 +265,14 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
+				// Sort folder by path
+				if (a.contentType && b.contentType) {
+					const aPath = a.path.join('') + a.label;
+					const bPath = b.path.join('') + b.label;
+					const alphaCompare = aPath.localeCompare(bPath);
+					return alphaCompare !== 0 ? alphaCompare : aPath.length - bPath.length;
+				}
+
 				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
@@ -215,19 +281,6 @@
 		if (field) return obj[path]?.[field];
 		return path.split('.').reduce((o, p) => (o || {})[p], obj);
 	}
-
-	// Get the search key from an option object or the option itself
-	// if it's a string or number
-	export const getSearchTarget = (opt: Option) => {
-		if (opt instanceof Object) {
-			if (opt.label === undefined) {
-				const opt_str = JSON.stringify(opt);
-				console.error(`MultiSelect option ${opt_str} is an object but has no label key`);
-			}
-			return opt?.path ? [...opt.path, opt.label].join('') : opt.label;
-		}
-		return `${opt}`;
-	};
 
 	onMount(async () => {
 		await fetchOptions();
@@ -247,7 +300,7 @@
 		}
 	});
 
-	function handleSelectChange() {
+	async function handleSelectChange() {
 		if (allowUserOptions && selectedValues.length > 0) {
 			for (const val of selectedValues) {
 				if (!options.some((opt) => opt.value === val)) {
@@ -258,7 +311,7 @@
 		}
 
 		// change($value);
-		$effect(async () => await onChange($value));
+		await onChange($value);
 		// dispatch('cache', selected);
 	}
 
@@ -317,6 +370,25 @@
 			updateMissingConstraint(field, false);
 		}
 	});
+
+	const searchTargetMap = $derived(new Map(options.map((opt) => [opt, getSearchTarget(opt)])));
+
+	const fastFilter = (opt: Option, searchText: string) => {
+		if (!searchText) {
+			return true;
+		}
+
+		const target = searchTargetMap.get(opt) || '';
+
+		const normalizedSearch = normalizeSearchString(searchText);
+		const searchTerms = normalizedSearch.split(' ').filter(Boolean);
+
+		if (searchTerms.length === 0) {
+			return true;
+		}
+
+		return searchTerms.every((term) => target.includes(term));
+	};
 </script>
 
 <div class={baseClass} {hidden}>
@@ -353,6 +425,7 @@
 		{:else if $value}
 			<input type="hidden" name={field} value={$value} />
 		{/if}
+
 		<MultiSelect
 			bind:selected
 			{options}
@@ -362,12 +435,14 @@
 			{allowUserOptions}
 			duplicates={false}
 			key={JSON.stringify}
-			filterFunc={(opt, searchText) => {
-				if (!searchText) return true;
-				return `${getSearchTarget(opt)}`.toLowerCase().includes(searchText.toLowerCase());
-			}}
+			filterFunc={fastFilter}
 		>
 			{#snippet option({ option })}
+				{#if option.infoString?.position === 'prefix'}
+					<span class="text-xs {option.infoString.classes}">
+						{option.infoString.string}
+					</span>
+				{/if}
 				{#if option.path}
 					<span>
 						{#each option.path as item}
@@ -377,10 +452,7 @@
 						{/each}
 					</span>
 				{/if}
-				{#if option.suggested}
-					<span class="text-primary-600">{option.label}</span>
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{:else if translateOptions && option}
+				{#if translateOptions && option}
 					{#if field === 'ro_to_couple'}
 						{@const [firstPart, ...restParts] = option.label.split(' - ')}
 						{safeTranslate(firstPart)} - {restParts.join(' - ')}
@@ -390,8 +462,19 @@
 				{:else}
 					{option.label || option}
 				{/if}
+				{#if option.infoString?.position === 'suffix'}
+					<span class="text-xs {option.infoString.classes}">
+						{option.infoString.string}
+					</span>
+				{/if}
+				{#if option.suggested}
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+				{/if}
 			{/snippet}
 			{#snippet selectedItem({ option })}
+				{#if option.infoString?.position === 'prefix'}
+					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+				{/if}
 				{#if option.path}
 					<span>
 						{#each option.path as item, idx}
@@ -404,10 +487,7 @@
 						{/each}
 					</span>
 				{/if}
-				{#if option.suggested}
-					<span class="text-primary-600">{option.label}</span>
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{:else if translateOptions && option}
+				{#if translateOptions && option}
 					{#if field === 'ro_to_couple'}
 						{@const [firstPart, ...restParts] = option.label.split(' - ')}
 						{safeTranslate(firstPart)} - {restParts.join(' - ')}
@@ -417,14 +497,21 @@
 				{:else}
 					{option.label || option}
 				{/if}
+				{#if option.infoString?.position === 'suffix'}
+					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+				{/if}
+				{#if option.suggested}
+					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+				{/if}
 			{/snippet}
 		</MultiSelect>
 		{#if isLoading}
 			<svg
-				class="animate-spin h-5 w-5 text-primary-500"
+				class="animate-spin h-5 w-5 text-primary-500 loading-spinner"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
+				data-testid="loading-spinner"
 			>
 				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 				></circle>

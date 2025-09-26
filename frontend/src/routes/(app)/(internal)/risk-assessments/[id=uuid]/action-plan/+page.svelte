@@ -15,8 +15,8 @@
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
-		cost: 'cost',
-		'risk-scenarios': 'matchingScenarios'
+		annual_cost: 'cost',
+		risk_scenarios: 'matchingScenarios'
 	};
 
 	const appliedControls: TableSource = {
@@ -69,7 +69,7 @@
 				'eta',
 				'expiry_date',
 				'effort',
-				'cost',
+				'annual_cost',
 				'risk_scenarios'
 			]}
 		/>

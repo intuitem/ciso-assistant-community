@@ -61,13 +61,13 @@ export const load = (async ({ fetch }) => {
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
 		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
-		body: tableSourceMapper(storedLibraries.results, listViewFields['stored-libraries'].body)
+		body: []
 	};
 
 	const loadedLibrariesTable = {
 		head: makeHeadData('loaded-libraries'),
 		meta: { urlmodel: 'loaded-libraries', ...loadedLibraries },
-		body: tableSourceMapper(loadedLibraries.results, listViewFields['loaded-libraries'].body)
+		body: []
 	};
 
 	const schema = z.object({ id: z.string() });

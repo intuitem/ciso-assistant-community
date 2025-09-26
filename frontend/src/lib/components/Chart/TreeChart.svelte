@@ -34,31 +34,35 @@
 				trigger: 'item',
 				triggerOn: 'mousemove'
 			},
-			color: ['#625FFF'],
 			title: { text: title },
 			series: [
 				{
 					type: 'tree',
 					roam: true,
-					orient: 'vertical',
 					data: [tree],
-					symbol: 'square',
-					symbolSize: 30,
-					initialTreeDepth: 1,
+					top: '10%',
+					left: '5%',
+					bottom: '10%',
+					right: '20%',
+					symbolSize: 14,
+					symbol: 'roundRect',
 					label: {
+						backgroundColor: '#fff',
 						position: 'left',
 						verticalAlign: 'middle',
 						align: 'right',
-						fontSize: 13
+						fontSize: 14
 					},
-
 					leaves: {
 						label: {
 							position: 'right',
 							verticalAlign: 'middle',
-							align: 'right'
+							align: 'left'
 						}
 					},
+					edgeShape: 'polyline',
+					edgeForkPosition: '70%',
+					initialTreeDepth: 2,
 
 					emphasis: {
 						focus: 'descendant'

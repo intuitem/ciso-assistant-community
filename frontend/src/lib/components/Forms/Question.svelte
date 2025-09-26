@@ -32,6 +32,17 @@
 
 	let internalAnswers = $state(value ? $value : initialValue);
 
+	let questionBuffers = $state<Record<string, string>>({});
+
+	// Initialize buffers for text questions
+	$effect(() => {
+		Object.entries(questions).forEach(([urn, question]) => {
+			if (question.type === 'text' && !(urn in questionBuffers)) {
+				questionBuffers[urn] = internalAnswers[urn] || '';
+			}
+		});
+	});
+
 	$effect(() => {
 		if (value) {
 			$value = internalAnswers;
@@ -49,6 +60,15 @@
 		} else {
 			internalAnswers[urn] = [...internalAnswers[urn], optionUrn];
 		}
+	}
+
+	function saveTextAnswer(urn: string) {
+		internalAnswers[urn] = questionBuffers[urn];
+		onChange(urn, internalAnswers[urn]);
+	}
+
+	function resetTextAnswer(urn: string) {
+		questionBuffers[urn] = internalAnswers[urn] || '';
 	}
 </script>
 
@@ -74,7 +94,7 @@
 								</p>
 							{/if}
 						{/each}
-					{:else if question.choices.find((choice) => choice.urn === internalAnswers[urn])}
+					{:else if question.choices?.find((choice) => choice.urn === internalAnswers[urn])}
 						<p class="text-primary-500 font-semibold">
 							{question.choices.find((choice) => choice.urn === internalAnswers[urn]).value}
 						</p>
@@ -116,10 +136,39 @@
 						placeholder=""
 						class="input {_class}"
 						bind:value={internalAnswers[urn]}
+						onchange={(e) => onChange(urn, internalAnswers[urn])}
 					/>
 				{:else if question.type === 'text'}
-					<textarea placeholder="" class="input w-full {_class}" bind:value={internalAnswers[urn]}
-					></textarea>
+					{#if form}
+						<textarea placeholder="" class="input w-full {_class}" bind:value={internalAnswers[urn]}
+						></textarea>
+					{:else}
+						<div>
+							<textarea
+								placeholder=""
+								class="input w-full {_class}"
+								bind:value={questionBuffers[urn]}
+							></textarea>
+							{#if questionBuffers[urn] !== (internalAnswers[urn] || '')}
+								<button
+									class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
+									onclick={() => saveTextAnswer(urn)}
+									type="button"
+									aria-label="Save observation"
+								>
+									<i class="fa-solid fa-check opacity-70"></i>
+								</button>
+								<button
+									class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
+									onclick={() => resetTextAnswer(urn)}
+									type="button"
+									aria-label="Reset observation"
+								>
+									<i class="fa-solid fa-xmark opacity-70"></i>
+								</button>
+							{/if}
+						</div>
+					{/if}
 				{/if}
 			</li>
 		{/each}

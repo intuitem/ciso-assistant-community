@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
+
 	interface treeType {
 		name: string;
+		id: string;
 		children: any[];
 	}
 	interface Props {
@@ -22,6 +25,15 @@
 		name = '',
 		tree
 	}: Props = $props();
+
+	tree = tree.map((item) => ({
+		...item,
+		name: safeTranslate(item.id),
+		children: item.children?.map((child) => ({
+			...child,
+			name: safeTranslate(child.id)
+		}))
+	}));
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {

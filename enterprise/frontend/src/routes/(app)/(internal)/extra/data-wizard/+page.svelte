@@ -48,10 +48,14 @@
 
 	// Determine if domain selection should be disabled
 	let isDomainDisabled = $derived(
-		selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment'
+		selectedModel === 'ComplianceAssessment' ||
+			selectedModel === 'FindingsAssessment' ||
+			selectedModel === 'RiskAssessment'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
+
+	let isMatrixDisabled = $derived(selectedModel !== 'RiskAssessment');
 
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(
@@ -71,7 +75,9 @@
 	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
-				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}</h4>
+				<h4 class="h4 font-bold">
+					<i class="fa-solid fa-file-excel mr-2"></i>{m.dataWizardLoadExcelData()}
+				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
@@ -120,7 +126,8 @@
 								</p>
 							{:else}
 								<p class="font-medium text-gray-900">
-									<span class="text-blue-600">{m.clickToUpload()}</span> {m.orDragAndDrop()}
+									<span class="text-blue-600">{m.clickToUpload()}</span>
+									{m.orDragAndDrop()}
 								</p>
 								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
 							{/if}
@@ -241,6 +248,7 @@
 						>
 							<div>
 								<p class="text-gray-700">{m.findingsAssessment()}</p>
+								<p class="text-gray-500 text-xs">{m.dataWizardFindingsAssessmentDescription()}</p>
 							</div>
 
 							<input
@@ -248,6 +256,27 @@
 								name="model"
 								value="FindingsAssessment"
 								id="FindingsAssessment"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="RiskAssessment"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.riskAssessment()}</p>
+								<p class="text-gray-500 text-xs">{m.dataWizardRiskAssessmentDescription()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="RiskAssessment"
+								id="RiskAssessment"
 								class="size-5 border-gray-300 text-blue-500"
 								bind:group={selectedModel}
 							/>
@@ -298,6 +327,20 @@
 						<option value={framework.id}>{framework.name}</option>
 					{/each}
 				</select>
+
+				<label for="matrix" class="block text-sm font-medium text-gray-900"
+					>{m.dataWizardSelectRiskMatrix()}</label
+				>
+				<select
+					id="matrix"
+					name="matrix"
+					disabled={isMatrixDisabled}
+					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+				>
+					{#each data.data.risk_matrices || [] as matrix}
+						<option value={matrix.id}>{matrix.name}</option>
+					{/each}
+				</select>
 			</div>
 			<div class="flex py-4">
 				<button
@@ -309,7 +352,7 @@
 		</form>
 	</div>
 	<div class="col-span-2 p-4">
-    {m.dataWizardParsingResults()}
+		{m.dataWizardParsingResults()}
 		{#if formSubmitted}
 			<div class="col-span-full mb-4">
 				{#if form?.success}

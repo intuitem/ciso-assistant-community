@@ -25,13 +25,13 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
+<!-- <TextField -->
+<!-- 	{form} -->
+<!-- 	field="ref_id" -->
+<!-- 	label={m.refId()} -->
+<!-- 	cacheLock={cacheLocks['ref_id']} -->
+<!-- 	bind:cachedValue={formDataCache['ref_id']} -->
+<!-- /> -->
 
 <AutocompleteSelect
 	{form}
@@ -54,13 +54,13 @@
 	options={model.selectOptions['legal_basis']}
 	cacheLock={cacheLocks['legal_basis']}
 	bind:cachedValue={formDataCache['legal_basis']}
-	translateOptions={true}
 	label={m.legalBasis()}
 />
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -72,6 +72,7 @@
 	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
 	optionsLabelField="label"
+	translateOptions={false}
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
@@ -84,6 +85,24 @@
 	label={m.dpiaRequired()}
 	cacheLock={cacheLocks['dpia_required']}
 	bind:cachedValue={formDataCache['dpia_required']}
+/>
+<TextField
+	{form}
+	field="dpia_reference"
+	label={m.dpiaReference()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['dpia_reference']}
+	bind:cachedValue={formDataCache['dpia_reference']}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="applied-controls"
+	optionsExtraFields={[['folder', 'str']]}
+	field="associated_controls"
+	cacheLock={cacheLocks['associated_controls']}
+	bind:cachedValue={formDataCache['associated_controls']}
+	label={m.associatedAppliedControls()}
 />
 <!-- author = models.ForeignKey( -->
 <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->

@@ -29,8 +29,10 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'ref_id',
 		'name',
 		'threats',
+		'inherentLevel',
 		'existingControls',
 		'currentLevel',
+		'withinTolerance',
 		'extraAppliedControls',
 		'residualLevel'
 	];
@@ -39,8 +41,10 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'ref_id',
 		'name',
 		'threats',
+		'inherent_level',
 		'existing_applied_controls',
 		'current_level',
+		'within_tolerance',
 		'applied_controls',
 		'residual_level'
 	];

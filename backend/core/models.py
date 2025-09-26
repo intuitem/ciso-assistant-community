@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Self, Union, List
 import statistics
 
+from django.utils import timezone
 from icecream import ic
 from auditlog.registry import auditlog
 
@@ -28,6 +29,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+
 from library.helpers import (
     get_referential_translation,
     update_translations,
@@ -43,7 +45,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
-from collections import defaultdict
+from collections import defaultdict, deque
 
 logger = get_logger(__name__)
 
@@ -868,22 +870,22 @@ class LoadedLibrary(LibraryMixin):
     @property
     def _objects(self):
         res = {}
-        if self.frameworks.count() > 0:
+        if self.frameworks.exists():
             res["framework"] = update_translations_in_object(
                 model_to_dict(self.frameworks.first())
             )
             res["framework"].update(self.frameworks.first().library_entry)
-        if self.threats.count() > 0:
+        if self.threats.exists():
             res["threats"] = [
                 update_translations_in_object(model_to_dict(threat))
                 for threat in self.threats.all()
             ]
-        if self.reference_controls.count() > 0:
+        if self.reference_controls.exists():
             res["reference_controls"] = [
                 update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
-        if self.risk_matrices.count() > 0:
+        if self.risk_matrices.exists():
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
             res["risk_matrix"]["probability"] = update_translations(matrix.probability)
@@ -958,6 +960,240 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
+class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    """
+    Model to store custom terminology for the application
+    """
+
+    class FieldPath(models.TextChoices):
+        ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+        QUALIFICATIONS = "qualifications", "qualifications"
+
+    DEFAULT_ROTO_RISK_ORIGINS = [
+        {
+            "name": "state",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "organized_crime",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "terrorist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "activist",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "competitor",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "amateur",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "avenger",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "pathological",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_QUALIFICATIONS = [
+        {
+            "name": "confidentiality",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "integrity",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "availability",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "proof",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "authenticity",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "privacy",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "safety",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "reputation",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "operational",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "legal",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "financial",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "governance",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "missions_and_organizational_services",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "human",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "material",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "environmental",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "image",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        {
+            "name": "trust",
+            "builtin": True,
+            "field_path": FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+    ]
+
+    field_path = models.CharField(
+        max_length=100,
+        verbose_name=_("Field path"),
+        choices=FieldPath.choices,
+    )
+    builtin = models.BooleanField(
+        default=False,
+        verbose_name=_("Built-in"),
+        help_text=_("Indicates if the terminology is built-in and cannot be modified"),
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Visible"),
+        help_text=_("Indicates if the terminology is visible in the UI"),
+    )
+    translations = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name=_("Translations"),
+        help_text=_("JSON field to store translations for different languages"),
+    )
+
+    fields_to_check = ["name", "field_path"]
+
+    @classmethod
+    def create_default_roto_risk_origins(cls):
+        for risk_origin in cls.DEFAULT_ROTO_RISK_ORIGINS:
+            Terminology.objects.update_or_create(
+                name=risk_origin["name"],
+                field_path=risk_origin["field_path"],
+                defaults=risk_origin,
+            )
+
+    @classmethod
+    def create_default_qualifications(cls):
+        for qualification in cls.DEFAULT_QUALIFICATIONS:
+            Terminology.objects.update_or_create(
+                name=qualification["name"],
+                field_path=qualification["field_path"],
+                defaults=qualification,
+            )
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translation = translations.get(get_language(), "")
+        return locale_translation.capitalize() or self.name.capitalize()
+
+    def __str__(self) -> str:
+        return (
+            self.get_name_translated.capitalize()
+            if self.get_name_translated
+            else self.name.capitalize()
+        )
+
+
 class Threat(
     ReferentialObjectMixin,
     I18nObjectMixin,
@@ -984,7 +1220,7 @@ class Threat(
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() > 0:
+        if self.requirements.exists():
             return False
         return True
 
@@ -1050,7 +1286,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() or self.appliedcontrol_set.count() > 0:
+        if self.requirements.exists() or self.appliedcontrol_set.exists():
             return False
         return True
 
@@ -1181,7 +1417,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         """
         Returns True if the framework can be deleted
         """
-        if self.compliance_assessment_set.count() > 0:
+        if self.compliance_assessment_set.exists():
             return False
         return True
 
@@ -1302,6 +1538,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             "description": parent_requirement.description,
         }
 
+    @property
+    def safe_display_str(self):
+        fallback_ref = ":".join(self.urn.split(":")[5:])
+        return self.display_short if self.display_short else fallback_ref
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -1410,150 +1651,6 @@ class RequirementMapping(models.Model):
         return RequirementMapping.Coverage.PARTIAL
 
 
-class Qualification(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
-    DEFAULT_QUALIFICATIONS = [
-        {
-            "abbreviation": "C",
-            "qualification_ordering": 1,
-            "security_objective_ordering": 1,
-            "name": "Confidentiality",
-            "urn": "urn:intuitem:risk:qualification:confidentiality",
-        },
-        {
-            "abbreviation": "I",
-            "qualification_ordering": 2,
-            "security_objective_ordering": 2,
-            "name": "Integrity",
-            "urn": "urn:intuitem:risk:qualification:integrity",
-        },
-        {
-            "abbreviation": "A",
-            "qualification_ordering": 3,
-            "security_objective_ordering": 3,
-            "name": "Availability",
-            "urn": "urn:intuitem:risk:qualification:availability",
-        },
-        {
-            "abbreviation": "P",
-            "qualification_ordering": 4,
-            "security_objective_ordering": 4,
-            "name": "Proof",
-            "urn": "urn:intuitem:risk:qualification:proof",
-        },
-        {
-            "abbreviation": "Aut",
-            "qualification_ordering": 5,
-            "security_objective_ordering": 5,
-            "name": "Authenticity",
-            "urn": "urn:intuitem:risk:qualification:authenticity",
-        },
-        {
-            "abbreviation": "Priv",
-            "qualification_ordering": 6,
-            "security_objective_ordering": 6,
-            "name": "Privacy",
-            "urn": "urn:intuitem:risk:qualification:privacy",
-        },
-        {
-            "abbreviation": "Safe",
-            "qualification_ordering": 7,
-            "security_objective_ordering": 7,
-            "name": "Safety",
-            "urn": "urn:intuitem:risk:qualification:safety",
-        },
-        {
-            "abbreviation": "Rep",
-            "qualification_ordering": 8,
-            "name": "Reputation",
-            "urn": "urn:intuitem:risk:qualification:reputation",
-        },
-        {
-            "abbreviation": "Ope",
-            "qualification_ordering": 9,
-            "name": "Operational",
-            "urn": "urn:intuitem:risk:qualification:operational",
-        },
-        {
-            "abbreviation": "Leg",
-            "qualification_ordering": 10,
-            "name": "Legal",
-            "urn": "urn:intuitem:risk:qualification:legal",
-        },
-        {
-            "abbreviation": "Fin",
-            "qualification_ordering": 11,
-            "name": "Financial",
-            "urn": "urn:intuitem:risk:qualification:financial",
-        },
-        {
-            "abbreviation": "Gov",
-            "qualification_ordering": 12,
-            "name": "Governance",
-            "urn": "urn:intuitem:risk:qualification:governance",
-        },
-        {
-            "abbreviation": "Mis",
-            "qualification_ordering": 13,
-            "name": "Missions and Organizational Services",
-            "urn": "urn:intuitem:risk:qualification:missions",
-        },
-        {
-            "abbreviation": "Hum",
-            "qualification_ordering": 14,
-            "name": "Human",
-            "urn": "urn:intuitem:risk:qualification:human",
-        },
-        {
-            "abbreviation": "Mat",
-            "qualification_ordering": 15,
-            "name": "Material",
-            "urn": "urn:intuitem:risk:qualification:material",
-        },
-        {
-            "abbreviation": "Env",
-            "qualification_ordering": 16,
-            "name": "Environmental",
-            "urn": "urn:intuitem:risk:qualification:environmental",
-        },
-        {
-            "abbreviation": "Img",
-            "qualification_ordering": 17,
-            "name": "Image",
-            "urn": "urn:intuitem:risk:qualification:image",
-        },
-        {
-            "abbreviation": "Tru",
-            "qualification_ordering": 18,
-            "name": "Trust",
-            "urn": "urn:intuitem:risk:qualification:trust",
-        },
-    ]
-
-    abbreviation = models.CharField(
-        max_length=20, null=True, blank=True, verbose_name=_("Abbreviation")
-    )
-    qualification_ordering = models.PositiveSmallIntegerField(
-        verbose_name=_("Ordering"), default=0
-    )
-    security_objective_ordering = models.PositiveSmallIntegerField(
-        verbose_name=_("Security objective ordering"), default=0
-    )
-
-    class Meta:
-        verbose_name = _("Qualification")
-        verbose_name_plural = _("Qualifications")
-        ordering = ["qualification_ordering"]
-
-    @classmethod
-    def create_default_qualifications(cls):
-        for qualification in cls.DEFAULT_QUALIFICATIONS:
-            Qualification.objects.update_or_create(
-                urn=qualification["urn"],
-                defaults=qualification,
-                create_defaults=qualification,
-            )
-
-
 ########################### Domain objects #########################
 
 
@@ -1575,6 +1672,11 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         default="in_design",
         choices=PRJ_LC_STATUS,
         verbose_name=_("Status"),
+    )
+    default_assignee = models.ManyToManyField(
+        User,
+        verbose_name="Default assignee",
+        blank=True,
     )
     fields_to_check = ["name"]
 
@@ -1753,7 +1855,11 @@ class Asset(
         max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_("type")
     )
     parent_assets = models.ManyToManyField(
-        "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
+        "self",
+        blank=True,
+        verbose_name=_("parent assets"),
+        symmetrical=False,
+        related_name="child_assets",
     )
     reference_link = models.URLField(
         null=True,
@@ -1797,6 +1903,7 @@ class Asset(
         "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -1822,27 +1929,211 @@ class Asset(
         return self.type == Asset.Type.SUPPORT
 
     def ancestors_plus_self(self) -> set[Self]:
-        result = {self}
-        for x in self.parent_assets.all():
-            result.update(x.ancestors_plus_self())
-        return set(result)
+        """
+        Returns a set containing the asset itself and all its ancestors using a
+        constant number of queries (2).
+        """
+        all_links = self.__class__.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+        child_to_parents_map = {}
+        for child_id, parent_id in all_links:
+            if child_id not in child_to_parents_map:
+                child_to_parents_map[child_id] = set()
+            child_to_parents_map[child_id].add(parent_id)
+        ancestor_ids = {self.pk}
+        queue = deque([self.pk])  # NOTE: using deque rather than list for O(1) pops
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in ancestor_ids:
+                    ancestor_ids.add(parent_id)
+                    queue.append(parent_id)
+        return set(self.__class__.objects.filter(pk__in=ancestor_ids))
 
     def get_children(self):
-        return Asset.objects.filter(parent_assets=self)
+        return self.child_assets.all()
 
     def get_descendants(self) -> set[Self]:
-        children = self.get_children()
-        sub_children = set()
-        for child in children:
-            sub_children.add(child)
-            sub_children.update(child.get_descendants())
-        return sub_children
+        """
+        Returns a set of all descendant assets using a constant number of
+        queries (2).
+        """
+        all_links = self.__class__.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            if parent_id not in parent_to_children_map:
+                parent_to_children_map[parent_id] = set()
+            parent_to_children_map[parent_id].add(child_id)
+        descendant_ids = set()
+        visited_ids = {
+            self.pk
+        }  # NOTE: keeping track of visited ids as a guardrail in the unlikely event of cycles in the assets graph
+        queue = deque([self.pk])  # NOTE: using deque rather than list for O(1) pops
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_ids:
+                    visited_ids.add(child_id)
+                    descendant_ids.add(child_id)
+                    queue.append(child_id)
+        return set(self.__class__.objects.filter(pk__in=descendant_ids))
 
     @property
     def children_assets(self):
         descendants = self.get_descendants()
         descendant_ids = [d.id for d in descendants]
         return Asset.objects.filter(id__in=descendant_ids).exclude(id=self.id)
+
+    @classmethod
+    def _prefetch_graph_data(cls, initial_assets: list) -> dict:
+        """
+        Finds all ancestors and descendants of the initial assets using a constant
+        number of database queries (3), ideal for deep or complex hierarchies.
+
+        This method pre-fetches all parent-child links into memory to build a
+        complete graph, then traverses it without any further database calls to
+        identify the relevant subgraph.
+        """
+        if not initial_assets:
+            return {"child_to_parents": {}, "parent_to_children": {}}
+
+        # First query: fetch all parent-child relationships in the entire table
+        all_links = cls.parent_assets.through.objects.values_list(
+            "from_asset_id", "to_asset_id"
+        )
+
+        # Build in-memory maps of the entire graph
+        child_to_parents_map = {}
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            child_to_parents_map.setdefault(child_id, set()).add(parent_id)
+            parent_to_children_map.setdefault(parent_id, set()).add(child_id)
+
+        # find all relevant IDs (ancestors and descendants).
+        initial_ids = {asset.id for asset in initial_assets}
+        all_relevant_ids = set(initial_ids)
+
+        # find all ancestors
+        queue = deque(initial_ids)
+        visited_ancestors = set(initial_ids)
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in visited_ancestors:
+                    visited_ancestors.add(parent_id)
+                    all_relevant_ids.add(parent_id)
+                    queue.append(parent_id)
+
+        # find all descendants
+        queue = deque(initial_ids)
+        visited_descendants = set(initial_ids)
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_descendants:
+                    visited_descendants.add(child_id)
+                    all_relevant_ids.add(child_id)
+                    queue.append(child_id)
+
+        # Second query: fetch all the actual assets
+        asset_map = {a.id: a for a in cls.objects.filter(id__in=all_relevant_ids)}
+
+        # Third query: fetch only the links connecting the relevant assets
+        # This ensures we only build the subgraph we care about.
+        relevant_links = cls.parent_assets.through.objects.filter(
+            from_asset_id__in=all_relevant_ids, to_asset_id__in=all_relevant_ids
+        ).values_list("from_asset_id", "to_asset_id")
+
+        # Build the final object maps for in-memory traversal by the caller
+        obj_child_to_parents = {}
+        obj_parent_to_children = {}
+        for child_id, parent_id in relevant_links:
+            child_obj = asset_map.get(child_id)
+            parent_obj = asset_map.get(parent_id)
+            if child_obj and parent_obj:
+                obj_child_to_parents.setdefault(child_obj, set()).add(parent_obj)
+                obj_parent_to_children.setdefault(parent_obj, set()).add(child_obj)
+
+        return {
+            "child_to_parents": obj_child_to_parents,
+            "parent_to_children": obj_parent_to_children,
+        }
+
+    @classmethod
+    def _get_all_descendants(cls, start_asset, parent_to_children: dict) -> set:
+        """Performs an in-memory BFS to find all descendants."""
+        descendants = set()
+        queue = deque([start_asset])
+        visited = {start_asset}
+        while queue:
+            current = queue.popleft()
+            for child in parent_to_children.get(current, set()):
+                if child not in visited:
+                    visited.add(child)
+                    descendants.add(child)
+                    queue.append(child)
+        return descendants
+
+    @classmethod
+    def _get_all_ancestors(cls, start_asset, child_to_parents: dict) -> set:
+        """Performs an in-memory BFS to find all ancestors."""
+        ancestors = set()
+        queue = deque([start_asset])
+        visited = {start_asset}
+        while queue:
+            current = queue.popleft()
+            for parent in child_to_parents.get(current, set()):
+                if parent not in visited:
+                    visited.add(parent)
+                    ancestors.add(parent)
+                    queue.append(parent)
+        return ancestors
+
+    @classmethod
+    def _aggregate_security_objectives(cls, primary_ancestors: set) -> dict:
+        """Aggregates security objectives from primary ancestors (highest value wins)."""
+        agg_obj = {}
+        for asset in primary_ancestors:
+            objectives = asset.security_objectives.get("objectives", {})
+            for key, content in objectives.items():
+                if not content.get("is_enabled", False):
+                    continue
+
+                value = content.get("value", 0)
+                if key not in agg_obj or value > agg_obj[key].get("value", 0):
+                    agg_obj[key] = content.copy()
+        return agg_obj
+
+    @classmethod
+    def _aggregate_dro_objectives(cls, primary_ancestors: set) -> dict:
+        """Aggregates DRO objectives from primary ancestors (lowest value wins)."""
+        agg_obj = {}
+        for asset in primary_ancestors:
+            objectives = asset.disaster_recovery_objectives.get("objectives", {})
+            for key, content in objectives.items():
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                current_value = agg_obj.get(key, {}).get("value")
+                if current_value is None or value < current_value:
+                    agg_obj[key] = content.copy()
+        return agg_obj
+
+    @classmethod
+    def _get_security_objective_scale(cls) -> str:
+        """Fetches the global setting for the security objective scale."""
+        settings = GlobalSettings.objects.filter(name="general").first()
+        if settings:
+            return settings.value.get("security_objective_scale", "1-4")
+        return "1-4"
 
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
@@ -2320,7 +2611,27 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                         ],
                     },
                 ],
-            }
+            },
+            {
+                "name": "assetClassFacilities",
+                "description": "Facilities",
+                "children": [
+                    {
+                        "name": "assetClassPhysicalAccessPoint",
+                    },
+                    {
+                        "name": "assetClassArchivesRoom",
+                    },
+                    {
+                        "name": "assetClassPrimaryBuilding",
+                    },
+                    {
+                        "name": "assetClassPhysicalSecuritySystem",
+                    },
+                    {"name": "assetClassSafetySystem"},
+                    {"name": "assetClassExternalFacilities"},
+                ],
+            },
         ]
 
         AssetClass.create_hierarchy(cis_hierarchy)
@@ -2343,29 +2654,45 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 class Evidence(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
-    # TODO: Manage file upload to S3/MiniO
-    attachment = models.FileField(
-        #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
-        blank=True,
-        null=True,
-        help_text=_("Attachment for evidence (eg. screenshot, log file, etc.)"),
-        verbose_name=_("Attachment"),
-        validators=[validate_file_size, validate_file_name],
-    )
-    link = models.URLField(
-        blank=True,
-        null=True,
-        max_length=2048,
-        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
-        verbose_name=_("Link"),
-    )
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        MISSING = "missing", "Missing"
+        IN_REVIEW = "in_review", "In review"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        EXPIRED = "expired", "Expired"
+
     is_published = models.BooleanField(_("published"), default=True)
 
+    owner = models.ManyToManyField(
+        User,
+        verbose_name="Owner",
+        related_name="evidences",
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+    )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.revisions.update(is_published=self.is_published)
+
+    @property
+    def last_revision(self):
+        return self.revisions.order_by("-version").first() or None
 
     def get_folder(self):
         if self.applied_controls:
@@ -2374,6 +2701,74 @@ class Evidence(
             return self.requirement_assessments.first().folder
         else:
             return None
+
+    def filename(self):
+        return (
+            os.path.basename(self.last_revision.attachment.name)
+            if self.last_revision and self.last_revision.attachment
+            else None
+        )
+
+    def get_size(self):
+        if (
+            not self.last_revision
+            or not self.last_revision.attachment
+            or not self.last_revision.attachment.storage.exists(
+                self.last_revision.attachment.name
+            )
+        ):
+            return None
+        # get the attachment size with the correct unit
+        size = self.last_revision.attachment.size
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1024 * 1024:
+            return f"{size / 1024:.1f} KB"
+        else:
+            return f"{size / 1024 / 1024:.1f} MB"
+
+    @property
+    def attachment_hash(self):
+        if not self.last_revision or not self.last_revision.attachment:
+            return None
+        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
+
+
+class EvidenceRevision(AbstractBaseModel, FolderMixin):
+    evidence = models.ForeignKey(
+        Evidence, on_delete=models.CASCADE, related_name="revisions"
+    )
+    version = models.IntegerField(
+        default=1,
+        verbose_name=_("version number"),
+    )
+    attachment = models.FileField(
+        blank=True,
+        null=True,
+        verbose_name=_("Attachment"),
+        validators=[validate_file_size, validate_file_name],
+    )
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    fields_to_check = ["evidence", "version"]
+
+    def __str__(self):
+        return f"{self.evidence.name} v{self.version}"
+
+    def save(self, *args, **kwargs):
+        # Set folder to match the evidence's folder
+        if hasattr(self.evidence, "folder") and self.evidence.folder:
+            self.folder = self.evidence.folder
+
+        self.is_published = self.evidence.is_published
+
+        super().save(*args, **kwargs)
 
     def filename(self):
         return os.path.basename(self.attachment.name)
@@ -2392,16 +2787,9 @@ class Evidence(
         else:
             return f"{size / 1024 / 1024:.1f} MB"
 
-    def delete(self, *args, **kwargs):
-        if self.attachment:
-            self.attachment.delete()
-        super().delete(*args, **kwargs)
-
-    @property
-    def attachment_hash(self):
-        if not self.attachment:
-            return None
-        return hashlib.sha256(self.attachment.read()).hexdigest()
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin):
@@ -2456,9 +2844,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
     qualifications = models.ManyToManyField(
-        Qualification,
-        related_name="incidents",
+        Terminology,
         verbose_name="Qualifications",
+        related_name="incidents_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
         blank=True,
     )
 
@@ -2478,6 +2870,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         blank=True,
         max_length=2048,
         verbose_name=_("Link"),
+    )
+    # note: made this syntax to avoid circular dependencies
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="incidents",
+        verbose_name="Entities",
+        blank=True,
     )
 
     is_published = models.BooleanField(_("published"), default=True)
@@ -2547,9 +2946,17 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         if self.timestamp > now():
             raise ValidationError("Timestamp cannot be in the future.")
-        if not self.folder and self.incident:
-            self.folder = self.incident.folder
+        self.folder = self.incident.folder
         super().save(*args, **kwargs)
+
+
+def _get_default_applied_control_cost():
+    return {
+        "currency": "€",
+        "amortization_period": 1,
+        "build": {"fixed_cost": 0, "people_days": 0},
+        "run": {"fixed_cost": 0, "people_days": 0},
+    }
 
 
 class AppliedControl(
@@ -2680,10 +3087,45 @@ class AppliedControl(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 
-    cost = models.FloatField(
+    cost = models.JSONField(
         null=True,
-        help_text=_("Cost of the measure (using globally-chosen currency)"),
+        blank=True,
+        default=_get_default_applied_control_cost,
+        help_text=_("Detailed cost structure including build and run costs"),
         verbose_name=_("Cost"),
+        validators=[
+            JSONSchemaInstanceValidator(
+                {
+                    "type": "object",
+                    "properties": {
+                        "currency": {"type": "string"},
+                        "amortization_period": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 1,
+                        },
+                        "build": {
+                            "type": "object",
+                            "properties": {
+                                "fixed_cost": {"type": "number", "minimum": 0},
+                                "people_days": {"type": "number", "minimum": 0},
+                            },
+                            "additionalProperties": False,
+                        },
+                        "run": {
+                            "type": "object",
+                            "properties": {
+                                "fixed_cost": {"type": "number", "minimum": 0},
+                                "people_days": {"type": "number", "minimum": 0},
+                            },
+                            "additionalProperties": False,
+                        },
+                    },
+                    "additionalProperties": False,
+                }
+            )
+        ],
     )
     progress_field = models.IntegerField(
         default=0,
@@ -2700,6 +3142,14 @@ class AppliedControl(
         related_name="applied_controls",
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    objectives = models.ManyToManyField(
+        "OrganisationObjective",
+        blank=True,
+        verbose_name=_("Objectives"),
+        related_name="applied_controls",
+    )
 
     fields_to_check = ["name"]
 
@@ -2732,12 +3182,89 @@ class AppliedControl(
         return self.name
 
     @property
+    def is_assigned(self):
+        return self.owner.exists()
+
+    @property
     def mid(self):
         return f"M.{self.scoped_id(scope=AppliedControl.objects.filter(folder=self.folder))}"
 
     @property
     def csv_value(self):
         return f"[{self.status}] {self.name}" if self.status else self.name
+
+    @property
+    def annual_cost(self):
+        """Returns the annualized cost as a numeric value"""
+        if not self.cost:
+            return 0
+
+        build_cost = self.cost.get("build", {})
+        run_cost = self.cost.get("run", {})
+        amortization_period = self.cost.get("amortization_period", 1)
+
+        # Get daily rate from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = (
+            general_settings.value.get("daily_rate", 500) if general_settings else 500
+        )
+
+        # Calculate annual cost
+        annual_cost = 0
+
+        # Amortized build costs
+        build_fixed = build_cost.get("fixed_cost", 0)
+        build_people = build_cost.get("people_days", 0)
+        if build_fixed > 0:
+            annual_cost += build_fixed / amortization_period
+        if build_people > 0:
+            annual_cost += (build_people * daily_rate) / amortization_period
+
+        # Annual run costs
+        run_fixed = run_cost.get("fixed_cost", 0)
+        run_people = run_cost.get("people_days", 0)
+        if run_fixed > 0:
+            annual_cost += run_fixed
+        if run_people > 0:
+            annual_cost += run_people * daily_rate
+
+        return annual_cost
+
+    @property
+    def display_cost(self):
+        """Returns a human-readable cost display string"""
+        if not self.cost:
+            return ""
+
+        currency = self.cost.get("currency", "")
+        parts = []
+
+        build_cost = self.cost.get("build", {})
+        run_cost = self.cost.get("run", {})
+
+        if build_cost:
+            build_fixed = build_cost.get("fixed_cost", 0)
+            build_people = build_cost.get("people_days", 0)
+            if build_fixed > 0 or build_people > 0:
+                build_parts = []
+                if build_fixed > 0:
+                    build_parts.append(f"{build_fixed}{currency}")
+                if build_people > 0:
+                    build_parts.append(f"{build_people} people days")
+                parts.append(f"Build: {', '.join(build_parts)}")
+
+        if run_cost:
+            run_fixed = run_cost.get("fixed_cost", 0)
+            run_people = run_cost.get("people_days", 0)
+            if run_fixed > 0 or run_people > 0:
+                run_parts = []
+                if run_fixed > 0:
+                    run_parts.append(f"{run_fixed}{currency}")
+                if run_people > 0:
+                    run_parts.append(f"{run_people} people days")
+                parts.append(f"Run: {', '.join(run_parts)}")
+
+        return " | ".join(parts) if parts else ""
 
     def get_ranking_score(self):
         value = 0
@@ -2776,7 +3303,7 @@ class AppliedControl(
         return reqs + scenarios + sh_actions
 
     def has_evidences(self):
-        return self.evidences.count() > 0
+        return self.evidences.exists()
 
     def eta_missed(self):
         return (
@@ -2790,6 +3317,129 @@ class AppliedControl(
         days_remaining = (self.eta - date.today()).days
 
         return max(-1, days_remaining)
+
+
+class OrganisationIssue(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Category(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        POLITICAL = "political", "Political"
+        ECONOMIC = "economic", "Economic"
+        SOCIAL = "social", "Social"
+        TECHNOLOGY = "technology", "Technology"
+        LEGAL = (
+            "legal",
+            "Legal",
+        )
+        ENVIRONMENTAL = "environmental", "Environmental"
+        ORGANISATION_STRUCTURE = "organisationStructure", "Organisation Structure"
+        HUMAN_RESOURCES = "humanResources", "Human resources"
+        INTERNAL_PROCESSES = "internalProcesses", "Internal processes"
+        FINANCIAL_CAPACITY = "financialCapacity", "Financial capacity"
+        COMPANY_CULTURE = "companyCulture", "Company culture / communication"
+
+    class Origin(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        INTERNAL = "internal", "Internal"
+        EXTERNAL = "external", "External"
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=Category.choices,
+        max_length=32,
+        default=Category.UNDEFINED,
+        blank=True,
+    )
+    origin = models.CharField(
+        verbose_name=_("Origin"),
+        choices=Origin.choices,
+        max_length=32,
+        default=Origin.UNDEFINED,
+        blank=True,
+    )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Issue")
+        verbose_name_plural = _("Issues")
+
+
+class OrganisationObjective(
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        IN_PROGRESS = "in_progress", "In progress"
+        ACHIEVED = "achieved", "Achieved"
+        DEGRADED = "degraded", "Degraded"
+        DEPRECATED = "deprecated", "Deprecated"
+
+    class Health(models.TextChoices):
+        UNDEFINED = "--", "Undefined"
+        ON_TRACK = "on_track", "On track"
+        AT_RISK = "at_risk", "At risk"
+        OFF_TRACK = "off_track", "Off track"
+
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    issues = models.ManyToManyField(
+        OrganisationIssue,
+        blank=True,
+        verbose_name="issues",
+        related_name="objectives",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name="asset",
+    )
+    tasks = models.ManyToManyField(
+        "TaskTemplate",
+        blank=True,
+        verbose_name="Issue",
+        related_name="objectives",
+    )
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    health = models.CharField(
+        max_length=100,
+        choices=Health.choices,
+        default=Health.UNDEFINED,
+        verbose_name=_("Health"),
+    )
+    eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Objective")
+        verbose_name_plural = _("Objectives")
 
 
 class PolicyManager(models.Manager):
@@ -2934,6 +3584,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    is_locked = models.BooleanField(
+        default=False,
+        null=True,
+        verbose_name=_("Is locked"),
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -2951,6 +3606,9 @@ class RiskAssessment(Assessment):
         on_delete=models.PROTECT,
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
+    )
+    risk_tolerance = models.SmallIntegerField(
+        default=-1, verbose_name=_("Risk tolerance")
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -2996,6 +3654,17 @@ class RiskAssessment(Assessment):
             )
         return output
 
+    def sync_to_applied_controls(self, reset_residual=False, dry_run: bool = False):
+        scenarios: list[RiskScenario] = list(self.risk_scenarios.all())
+        changed_scenarios = list()
+        for scenario in scenarios:
+            cur = scenario.sync_to_applied_controls(
+                reset_residual=reset_residual, dry_run=dry_run
+            )
+            if len(cur) > 0:
+                changed_scenarios.append(scenario)
+        return changed_scenarios
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
@@ -3008,6 +3677,13 @@ class RiskAssessment(Assessment):
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
         scenario_count = count
         return scenario_count
+
+    @classmethod
+    def get_status_choices(cls) -> list[tuple[str, str]]:
+        """Returns the status choices with an additional empty choice at the end for null status"""
+        choices = list(RiskAssessment.Status.choices)
+        choices.append(("--", "--"))
+        return choices
 
     def quality_check(self) -> dict:
         errors_lst = list()
@@ -3293,20 +3969,6 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
-    QUALIFICATIONS = [
-        ("Confidentiality", _("Confidentiality")),
-        ("Integrity", _("Integrity")),
-        ("Availability", _("Availability")),
-        ("Proof", _("Proof")),
-        ("Authenticity", _("Authenticity")),
-        ("Privacy", _("Privacy")),
-        ("Safety", _("Safety")),
-        ("Reputation", _("Reputation")),
-        ("Operational", _("Operational")),
-        ("Legal", _("Legal")),
-        ("Financial", _("Financial")),
-    ]
-
     DEFAULT_SOK_OPTIONS = {
         -1: {
             "name": _("--"),
@@ -3390,6 +4052,21 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Owner"),
         related_name="risk_scenarios",
     )
+    # inherent
+    inherent_proba = models.SmallIntegerField(
+        default=-1, verbose_name=_("inherent probability")
+    )
+    inherent_impact = models.SmallIntegerField(
+        default=-1, verbose_name=_("inherent impact")
+    )
+    inherent_level = models.SmallIntegerField(
+        default=-1,
+        verbose_name=_("inherent level"),
+        help_text=_(
+            "The risk level if no measures are applied. Automatically updated on Save, based on the chosen risk matrix"
+        ),
+    )
+
     # current
     current_proba = models.SmallIntegerField(
         default=-1, verbose_name=_("Current probability")
@@ -3431,7 +4108,16 @@ class RiskScenario(NameDescriptionMixin):
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
 
-    qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
+    qualifications = models.ManyToManyField(
+        Terminology,
+        verbose_name="Qualifications",
+        related_name="risk_scenarios_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
+        blank=True,
+    )
 
     strength_of_knowledge = models.IntegerField(
         default=-1,
@@ -3458,6 +4144,13 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
+    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+        return self.risk_assessment.get_folder_full_path(include_root=include_root)
+
+    @property
+    def is_locked(self) -> bool:
+        return self.risk_assessment.is_locked
+
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
@@ -3474,105 +4167,123 @@ class RiskScenario(NameDescriptionMixin):
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
-    def get_current_risk(self):
-        if self.current_level < 0:
-            return {
+    @property
+    def within_tolerance(self):
+        tolerance = self.risk_assessment.risk_tolerance
+        if tolerance >= 0:
+            if self.current_level <= tolerance:
+                return "YES"
+            else:
+                return "NO"
+        return "--"
+
+    def _get_risk_data(self, value: int, data_key: str):
+        """
+        A generic helper method to retrieve and format risk-related data.
+
+        Args:
+            value (int): The risk level, impact, or probability value.
+            data_key (str): The key to access in the risk matrix ('risk', 'impact', or 'probability').
+        """
+        # Handle the "not rated" case
+        if value < 0:
+            not_rated_response = {
                 "abbreviation": "--",
                 "name": "--",
                 "description": "not rated",
-                "hexcolor": "#A9A9A9",
                 "value": -1,
             }
+            # Add hexcolor only for the main risk level
+            if data_key == "risk":
+                not_rated_response["hexcolor"] = "#A9A9A9"
+            return not_rated_response
+
+        # Handle the rated case
         risk_matrix = self.get_matrix()
-        current_risk = {
-            **risk_matrix["risk"][self.current_level],
-            "value": self.current_level,
+        data = {
+            **risk_matrix[data_key][value],
+            "value": value,
         }
-        update_translations_in_object(current_risk)
-        return current_risk
+
+        # Apply translations only for the main risk level
+        if data_key == "risk":
+            update_translations_in_object(data)
+
+        return data
+
+    # --- Inherent Methods ---
+    def get_inherent_risk(self):
+        return self._get_risk_data(self.inherent_level, "risk")
+
+    def get_inherent_impact(self):
+        return self._get_risk_data(self.inherent_impact, "impact")
+
+    def get_inherent_proba(self):
+        return self._get_risk_data(self.inherent_proba, "probability")
+
+    # --- Current Methods ---
+    def get_current_risk(self):
+        return self._get_risk_data(self.current_level, "risk")
 
     def get_current_impact(self):
-        if self.current_impact < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["impact"][self.current_impact],
-            "value": self.current_impact,
-        }
+        return self._get_risk_data(self.current_impact, "impact")
 
     def get_current_proba(self):
-        if self.current_proba < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["probability"][self.current_proba],
-            "value": self.current_proba,
-        }
+        return self._get_risk_data(self.current_proba, "probability")
 
+    # --- Residual Methods ---
     def get_residual_risk(self):
-        if self.residual_level < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "hexcolor": "#A9A9A9",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        residual_risk = {
-            **risk_matrix["risk"][self.residual_level],
-            "value": self.residual_level,
-        }
-        update_translations_in_object(residual_risk)
-        return residual_risk
+        return self._get_risk_data(self.residual_level, "risk")
 
     def get_residual_impact(self):
-        if self.residual_impact < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["impact"][self.residual_impact],
-            "value": self.residual_impact,
-        }
+        return self._get_risk_data(self.residual_impact, "impact")
 
     def get_residual_proba(self):
-        if self.residual_proba < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-            }
-        risk_matrix = self.get_matrix()
-        return {
-            **risk_matrix["probability"][self.residual_proba],
-            "value": self.residual_proba,
-        }
+        return self._get_risk_data(self.residual_proba, "probability")
 
     def get_strength_of_knowledge(self):
         if self.strength_of_knowledge < 0:
             return self.DEFAULT_SOK_OPTIONS[-1]
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
+    def sync_to_applied_controls(self, reset_residual=False, dry_run=True):
+        """
+        If all extra controls are active, move them to existing controls and reset the residual assessment.
+
+        Params:
+            dry_run (bool): if True, do not actually perform the operation, just return the list of controls that would be moved.
+        """
+        extra_controls = list(self.applied_controls.all())
+        if not extra_controls:
+            return []
+        if not all(
+            [ac.status == AppliedControl.Status.ACTIVE for ac in extra_controls]
+        ):
+            return []
+        if not dry_run:
+            with transaction.atomic():
+                self.current_impact = self.residual_impact
+                self.current_proba = self.residual_proba
+                self.existing_applied_controls.add(*extra_controls)
+                self.applied_controls.clear()
+                if reset_residual:
+                    self.residual_impact = -1
+                    self.residual_proba = -1
+                self.save()
+        return extra_controls
+
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def save(self, *args, **kwargs):
+        if self.inherent_proba >= 0 and self.inherent_impact >= 0:
+            self.inherent_level = risk_scoring(
+                self.inherent_proba,
+                self.inherent_impact,
+                self.risk_assessment.risk_matrix,
+            )
+        else:
+            self.inherent_level = -1
         if self.current_proba >= 0 and self.current_impact >= 0:
             self.current_level = risk_scoring(
                 self.current_proba,
@@ -3626,7 +4337,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = "Campaigns"
 
     def metrics(self):
-        if ComplianceAssessment.objects.filter(campaign=self).count() == 0:
+        if not ComplianceAssessment.objects.filter(campaign=self).exists():
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
             [
@@ -3852,7 +4563,7 @@ class ComplianceAssessment(Assessment):
                 new_result = infer_result(ac)
                 if ra.result != new_result:
                     changes[str(ra.id)] = {
-                        "str": str(ra),
+                        "str": str(ra.requirement.safe_display_str),
                         "current": ra.result,
                         "new": new_result,
                     }
@@ -3868,7 +4579,7 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
+            .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
@@ -4255,28 +4966,35 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on evidence:
-        _evidences = serializers.serialize(
-            "json",
-            Evidence.objects.filter(
-                applied_controls__in=AppliedControl.objects.filter(
-                    requirement_assessments__compliance_assessment=self
-                )
-            ).order_by("created_at"),
-        )
-        evidences = [x["fields"] for x in json.loads(_evidences)]
-        for i in range(len(evidences)):
-            evidences[i]["id"] = json.loads(_evidences)[i]["pk"]
-        for evidence in evidences:
-            if not evidence["attachment"]:
+        evidence_objects = Evidence.objects.filter(
+            applied_controls__in=AppliedControl.objects.filter(
+                requirement_assessments__compliance_assessment=self
+            )
+        ).order_by("created_at")
+
+        for evidence_obj in evidence_objects:
+            # Check if evidence has any revisions with attachments or links
+            has_attachment = evidence_obj.revisions.filter(
+                models.Q(attachment__isnull=False) & ~models.Q(attachment="")
+            ).exists()
+            has_link = evidence_obj.revisions.filter(
+                models.Q(link__isnull=False) & ~models.Q(link="")
+            ).exists()
+
+            if not has_attachment and not has_link:
+                evidence_dict = json.loads(
+                    serializers.serialize("json", [evidence_obj])
+                )[0]["fields"]
+                evidence_dict["id"] = evidence_obj.id
                 warnings_lst.append(
                     {
-                        "msg": _("{}: Evidence has no file uploaded").format(
-                            evidence["name"]
+                        "msg": _("{}: Evidence has no file or link uploaded").format(
+                            evidence_obj.name
                         ),
                         "msgid": "evidenceNoFile",
-                        "link": f"evidences/{evidence['id']}",
+                        "link": f"evidences/{evidence_obj.id}",
                         "obj_type": "evidence",
-                        "object": evidence,
+                        "object": evidence_dict,
                     }
                 )
 
@@ -4512,6 +5230,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             "description",
         )
 
+    @property
+    def is_locked(self) -> bool:
+        return self.compliance_assessment.is_locked
+
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
     ) -> dict | None:
@@ -4552,15 +5274,19 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         applied_controls: list[AppliedControl] = []
         for reference_control in self.requirement.reference_controls.all():
             try:
-                _name = (
-                    reference_control.get_name_translated or reference_control.ref_id
-                )
                 applied_control, created = AppliedControl.objects.get_or_create(
-                    name=_name,
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
+                    defaults={
+                        "name": reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        "ref_id": reference_control.ref_id
+                        if not reference_control.get_name_translated
+                        else None,
+                    },
                 )
+
                 if (
                     reference_control.description
                     and applied_control.description is None
@@ -4597,6 +5323,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
+
+        self.compliance_assessment.updated_at = timezone.now()
+        self.compliance_assessment.save(update_fields=["updated_at"])
+
         self.compliance_assessment.upsert_daily_metrics()
 
 
@@ -4749,9 +5479,15 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         verbose_name=_("Evidences"),
     )
 
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
     class Meta:
         verbose_name = _("Finding")
         verbose_name_plural = _("Findings")
+
+    @property
+    def is_locked(self) -> bool:
+        return self.findings_assessment.is_locked
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
@@ -4973,21 +5709,54 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         related_name="task_templates",
     )
 
-    @property
-    def next_occurrence(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__gte=today
-        ).order_by("due_date")
-        return task_nodes.first().due_date if task_nodes.exists() else None
+    link = models.URLField(
+        blank=True,
+        null=True,
+        max_length=2048,
+        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
+        verbose_name=_("Link"),
+    )
 
-    @property
-    def last_occurrence_status(self):
-        today = datetime.today().date()
-        task_nodes = TaskNode.objects.filter(
-            task_template=self, due_date__lte=today
-        ).order_by("-due_date")
-        return task_nodes[0].status if task_nodes.exists() else None
+    def _get_task_node_value(self, field, date_filter=None, order_by=None):
+        queryset = TaskNode.objects.filter(task_template=self)
+        if date_filter:
+            queryset = queryset.filter(**date_filter)
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        return queryset.values_list(field, flat=True).first()
+
+    def get_next_occurrence(self):
+        annotated = getattr(self, "next_occurrence", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("due_date")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "due_date", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
+
+    def get_last_occurrence_status(self):
+        if not self.is_recurrent:
+            return None
+        annotated = getattr(self, "last_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__lt": today}, order_by="-due_date"
+        )
+
+    def get_next_occurrence_status(self):
+        annotated = getattr(self, "next_occurrence_status", None)
+        if annotated is not None:
+            return annotated
+        if not self.is_recurrent:
+            return self._get_task_node_value("status")
+        today = timezone.localdate()
+        return self._get_task_node_value(
+            "status", date_filter={"due_date__gte": today}, order_by="due_date"
+        )
 
     class Meta:
         verbose_name = "Task template"

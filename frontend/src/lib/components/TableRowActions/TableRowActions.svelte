@@ -77,7 +77,7 @@
 		const name =
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
-				: (row.name ?? Object.values(row)[0]);
+				: (row.name ?? row.meta.str ?? Object.values(row)[0]);
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name })
@@ -182,6 +182,16 @@
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor
 			>
 		{/if}
+		{#if URLModel === 'operating-modes'}
+			<Anchor
+				breadcrumbAction="push"
+				label={m.graph()}
+				href={`/operating-modes/${row.meta.id}/graph/`}
+				stopPropagation
+				class="unstyled cursor-pointer hover:text-primary-500"
+				data-testid="tablerow-edit-button"><i class="fa-solid fa-project-diagram"></i></Anchor
+			>
+		{/if}
 		{#if displayEdit}
 			<Anchor
 				breadcrumbAction="push"
@@ -195,21 +205,29 @@
 		{#if displayDelete}
 			{#if URLModel === 'folders'}
 				<button
-					onclick={(_) => {
+					onclick={(e) => {
 						promptModalConfirmDelete(row.meta[identifierField], row);
-						stopPropagation(_);
+						stopPropagation(e);
 					}}
-					onkeydown={() => promptModalConfirmDelete(row.meta.id, row)}
+					onkeydown={(e) => {
+						if (e.key === 'Tab') return;
+						modalConfirmDelete(row.meta.id, row);
+						stopPropagation(e);
+					}}
 					class="cursor-pointer hover:text-primary-500"
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>
 			{:else}
 				<button
-					onclick={(_) => {
+					onclick={(e) => {
 						modalConfirmDelete(row.meta[identifierField], row);
-						stopPropagation(_);
+						stopPropagation(e);
 					}}
-					onkeydown={() => modalConfirmDelete(row.meta.id, row)}
+					onkeydown={(e) => {
+						if (e.key === 'Tab') return;
+						modalConfirmDelete(row.meta.id, row);
+						stopPropagation(e);
+					}}
 					class="cursor-pointer hover:text-primary-500"
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>

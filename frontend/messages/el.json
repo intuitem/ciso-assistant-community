@@ -19,6 +19,7 @@
 	"hungarian": "Ουγγρικά",
 	"ukrainian": "Ουκρανικά",
 	"greek": "Ελληνικά",
+	"croatian": "κροατικά",
 	"addThreat": "Προσθήκη απειλής",
 	"addVulnerability": "Προσθήκη ευπάθειας",
 	"addReferenceControl": "Προσθήκη πρότυπου ελέγχου",
@@ -858,7 +859,6 @@
 	"rpoHelpText": "Recovery Point Objective",
 	"mtd": "MTD",
 	"mtdHelpText": "Maximum Tolerable Downtime",
-	"securityObjectives": "Στόχοι ασφάλειας",
 	"disasterRecoveryObjectives": "Στόχοι αποκατάστασης καταστροφών",
 	"noExpirationDateSet": "Δεν έχει οριστεί ημερομηνία λήξης",
 	"sumpageTotal": "σύνολο",
@@ -923,9 +923,7 @@
 	"fixed": "Διορθωμένο",
 	"general": "γενικά",
 	"generalSettingsDescription": "Ρυθμίστε τις γενικές ρυθμίσεις εδώ.",
-	"securityObjectiveScale": "Κλίμακα στόχων ασφάλειας",
 	"generalSettingsUpdated": "Οι γενικές ρυθμίσεις ενημερώθηκαν",
-	"securityObjectiveScaleHelpText": "Επιλέξτε την κλίμακα (1‑4 προεπιλογή) για τους στόχους ασφάλειας",
 	"labels": "Ετικέτες",
 	"addLabel": "Προσθήκη ετικέτας",
 	"labelsHelpText": "Οι ετικέτες βοηθούν στην κατηγοριοποίηση και στο φιλτράρισμα αντικειμένων.",
@@ -1235,7 +1233,7 @@
 	"workshopOne": "Εργαστήριο 1",
 	"refIdSemiColon": "ID αναφοράς:",
 	"addFearedEvent": "Προσθήκη φοβούμενου γεγονότος",
-	"addEbiosRMstudy": "Προσθήκη μελέτης Ebios RM",
+	"addEbiosRmStudy": "Προσθήκη μελέτης Ebios RM",
 	"noAuthor": "Χωρίς συντάκτη",
 	"noReviewer": "Χωρίς αναθεωρητή",
 	"selectAudit": "Επιλογή ελέγχου",
@@ -1638,9 +1636,16 @@
 	"errorCreatingPersonalAccessToken": "Σφάλμα δημιουργίας διακριτικού πρόσβασης.",
 	"errorMaxPatAmountExceeded": "Υπέρβαση μέγιστου πλήθους διακριτικών για τον χρήστη.",
 	"associatedFindingsAssessments": "Συνδεδεμένες παρακολουθήσεις",
-	"hourCount": "Εμφανίζονται δυναμικά (δείτε plural rules)",
-	"minuteCount": "Εμφανίζονται δυναμικά",
-	"dayCount": "Εμφανίζονται δυναμικά",
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Ώρα",
+				"countPlural=other": "{count} Ώρες"
+			}
+		}
+	],
 	"suggestedParentheses": "(προτεινόμενο)",
 	"matchingScenarios": "Αντιστοιχούμενα σενάρια",
 	"clickToUpload": "Κλικ για μεταφόρτωση",
@@ -1656,5 +1661,11 @@
 	"dataWizardSelectFramework": "Επιλέξτε Πλαίσιο",
 	"dataWizardParsingResults": "Αποτελέσματα ανάλυσης:",
 	"dataWizardTemplatesAndGuidelines": "Πρότυπα και οδηγίες",
-	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel"
+	"dataWizardLoadExcelData": "Φόρτωση δεδομένων Excel",
+	"saveAndContinue": "Αποθήκευση και συνέχιση",
+	"nextOccurrenceStatus": "Κατάσταση επόμενης εμφάνισης",
+	"image": "Εικόνα",
+	"securityObjectives": "Ασφαλή ιδιότητες",
+	"securityObjectiveScale": "Κλίμακα ασφαλών ιδιοτήτων",
+	"securityObjectiveScaleHelpText": "Επιλέξτε την κλίμακα σας για τις ασφαλείς ιδιότητες (1 έως 4 από προεπιλογή)"
 }

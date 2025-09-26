@@ -16,7 +16,6 @@
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	let { data } = $props();
-
 	let loading = $state({ form: false, library: '' });
 	const showRisks = true;
 
@@ -190,7 +189,7 @@
 				interactive={false}
 			/>
 			{#each riskMatricesPreview(riskMatrices) as riskMatrix}
-				<RiskMatrix {riskMatrix} {showRisks} wrapperClass="mt-8" />
+				<RiskMatrix {riskMatrix} showLegend={showRisks} wrapperClass="mt-8" />
 			{/each}
 		</Dropdown>
 	{/if}

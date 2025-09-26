@@ -37,6 +37,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		data: PageData;
@@ -179,10 +180,44 @@
 				? data.data.id
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
+
+	let exportPopupOpen = $state(false);
 </script>
 
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
+		{#snippet actions()}
+			<div class="flex flex-col space-y-2">
+				<Popover
+					open={exportPopupOpen}
+					onOpenChange={(e) => (exportPopupOpen = e.open)}
+					positioning={{ placement: 'bottom' }}
+					triggerBase="btn preset-filled-primary-500 w-full"
+					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					zIndex="1000"
+				>
+					{#snippet trigger()}
+						<span data-testid="export-button">
+							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+						</span>
+					{/snippet}
+					{#snippet content()}
+						<div>
+							<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
+							<a
+								href="/incidents/{data.data.id}/export/md"
+								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+								>... {m.asMarkdown()}</a
+							>
+							<a
+								href="/incidents/{data.data.id}/export/pdf"
+								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+							>
+						</div>
+					{/snippet}
+				</Popover>
+			</div>
+		{/snippet}
 		{#snippet widgets()}
 			<div
 				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
@@ -234,6 +269,9 @@
 											{form}
 											multiple
 											optionsEndpoint="evidences"
+											optionsDetailedUrlParameters={[
+												['scope_folder_id', page.data.data?.folder?.id]
+											]}
 											field="evidences"
 											{resetForm}
 											label={m.evidences()}
@@ -242,7 +280,9 @@
 									<button
 										class="btn bg-gray-300 h-11 w-10"
 										onclick={(_) => modalEvidenceCreateForm()}
-										type="button"><i class="fa-solid fa-plus text-sm"></i></button
+										type="button"
+										data-testid="add-button-evidence"
+										><i class="fa-solid fa-plus text-sm"></i></button
 									>
 								</div>
 							{/key}
@@ -264,7 +304,7 @@
 								>
 								<button
 									class="btn preset-filled-primary-500 font-semibold w-full"
-									data-testid="save-button"
+									data-testid="save-button-event"
 									type="submit"
 									onclick={() => {
 										resetForm = true;
@@ -320,8 +360,10 @@
 								>{safeTranslate(meta.entry_type)}</span
 							>
 						</div>
-						<a href={`/${actionsURLModel}/${meta.id}`} class="font-semibold capitalize"
-							>{safeTranslate(meta.entry)}</a
+						<a
+							href={`/${actionsURLModel}/${meta.id}`}
+							class="font-semibold capitalize"
+							data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
 						>
 						<p class="text-xs italic text-gray-500 dark:text-gray-400 whitespace-pre-line">
 							{meta.observation ?? m.noObservation()}

@@ -34,6 +34,7 @@
 		form: SuperForm<AnyZodObject>;
 		options?: Option[];
 		[key: string]: any;
+		translateOptions?: boolean;
 	}
 
 	let {
@@ -52,6 +53,7 @@
 		color_map = {},
 		form,
 		options = [],
+		translateOptions = true,
 		...rest
 	}: Props = $props();
 
@@ -102,8 +104,15 @@
 				<option value={defaultValue} selected>--</option>
 			{/if}
 			{#each options || [] as option}
+				{@const camelKey = toCamelCase(option.value)}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
+					{#if !translateOptions}
+						{option.label}
+					{:else if camelKey !== 'm' && m[camelKey]}
+						{safeTranslate(option.value)}
+					{:else}
+						{safeTranslate(option.label)}
+					{/if}
 				</option>
 			{/each}
 		</select>

@@ -46,8 +46,8 @@
 		{
 			framework: 'urn:intuitem:risk:library:iso27001-2022',
 			risk_matrix: 'urn:intuitem:risk:library:critical_risk_matrix_5x5',
-			audit_name: `Quick start audit ${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}`,
-			risk_assessment_name: `Quick start risk assessment ${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}`
+			audit_name: `Quick start audit ${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`,
+			risk_assessment_name: `Quick start risk assessment ${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
 		},
 		zod(quickStartSchema)
 	);

@@ -3,10 +3,12 @@ from django.utils.formats import date_format
 
 import magic
 import structlog
-from core.views import BaseModelViewSet
 from core.permissions import IsAdministrator
-from django.conf import settings
-from iam.models import User
+from django.db import models, transaction
+from django.db.models import CharField, Value, Case, When
+from django.db.models.functions import Lower, Cast
+import django_filters as df
+from django.contrib.auth.models import Permission
 from rest_framework import status
 from rest_framework.decorators import (
     action,
@@ -23,12 +25,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.conf import settings
 
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from core.utils import MAIN_ENTITY_DEFAULT_NAME
-from iam.models import User
+from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
 
-from iam.models import RoleAssignment
 from tprm.models import Folder
 from uuid import UUID
 
@@ -101,7 +102,10 @@ class ClientSettingsViewSet(BaseModelViewSet):
     @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def logo(self, request):
         instance = ClientSettings.objects.get()
-        if not instance.logo:
+        show_data = (
+            instance.show_images_unauthenticated or request.user.is_authenticated
+        )
+        if not (instance.logo and show_data):
             return Response(
                 {"error": "No logo uploaded"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -109,11 +113,13 @@ class ClientSettingsViewSet(BaseModelViewSet):
             {"data": instance.logo_base64, "mime_type": instance.logo_mime_type}
         )
 
-    @permission_classes((AllowAny,))
-    @action(methods=["get"], detail=False)
+    @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def favicon(self, request):
         instance = ClientSettings.objects.get()
-        if not instance.favicon:
+        show_data = (
+            instance.show_images_unauthenticated or request.user.is_authenticated
+        )
+        if not (instance.favicon and show_data):
             return Response(
                 {"error": "No favicon uploaded"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -247,6 +253,100 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+class RoleViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows roles to be viewed or edited
+    """
+
+    model = Role
+    ordering = ["builtin", "name"]
+
+    def perform_create(self, serializer):
+        """
+        Create per-folder UserGroups and RoleAssignments for the new role.
+        """
+        role = serializer.save()
+        role.permissions.add(
+            Permission.objects.get(
+                codename="view_folder",
+                content_type__app_label="iam",
+                content_type__model="folder",
+            )
+        )
+        with transaction.atomic():
+            for folder in Folder.objects.exclude(content_type="EN"):
+                ug, _ = UserGroup.objects.get_or_create(
+                    folder=folder, name=role.name, defaults={"builtin": False}
+                )
+                ra = RoleAssignment.objects.create(
+                    folder=Folder.get_root_folder(),
+                    role=role,
+                    user_group=ug,
+                    is_recursive=True,
+                )
+                ra.perimeter_folders.add(folder)
+
+    def perform_update(self, serializer):
+        """
+        Update the user groups associated with the role
+        """
+        role = serializer.save()
+        role.permissions.add(
+            Permission.objects.get(
+                codename="view_folder",
+                content_type__app_label="iam",
+                content_type__model="folder",
+            )
+        )
+        ug_ids = (
+            RoleAssignment.objects.filter(
+                role=role, user_group__isnull=False, user_group__builtin=False
+            )
+            .values_list("user_group_id", flat=True)
+            .distinct()
+        )
+        if ug_ids:
+            UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
+
+    def perform_destroy(self, instance):
+        """
+        Delete only user groups tied to this role’s assignments, atomically.
+        """
+        with transaction.atomic():
+            ras_qs = RoleAssignment.objects.select_related("user_group").filter(
+                role=instance
+            )
+            ug_ids = list(
+                ras_qs.exclude(user_group__isnull=True).values_list(
+                    "user_group_id", flat=True
+                )
+            )
+            # Remove this role's assignments first
+            ras_qs.delete()
+            if ug_ids:
+                # Delete only non-builtin groups that are now orphaned (no remaining RAs)
+                orphan_ug_ids = list(
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=False)
+                    .annotate(ra_count=models.Count("roleassignment"))
+                    .filter(ra_count=0)
+                    .values_list("id", flat=True)
+                )
+                if orphan_ug_ids:
+                    UserGroup.objects.filter(id__in=orphan_ug_ids).delete()
+            super().perform_destroy(instance)
+
+
+class PermissionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows permissions to be viewed or edited.
+    """
+
+    model = Permission
+    ordering = ["codename"]
+    filterset_fields = ["codename", "content_type"]
+    search_fields = ["codename", "name"]
+
+
 def get_disk_usage():
     try:
         path = Path(settings.BASE_DIR) / "db"
@@ -315,6 +415,28 @@ def get_build(request):
     )
 
 
+class LogEntryFilterSet(GenericFilterSet):
+    actor = df.CharFilter(field_name="actor__email", lookup_expr="icontains")
+    folder = df.CharFilter(
+        field_name="additional_data__folder", lookup_expr="icontains"
+    )
+    content_type = df.CharFilter(method="filter_content_type_model")
+
+    class Meta:
+        model = LogEntry
+        fields = {
+            "actor": ["exact"],
+            "content_type": ["exact"],
+            "action": ["exact"],
+        }
+
+    def filter_content_type_model(self, queryset, name, value):
+        if not value:
+            return queryset
+        normalized = value.replace(" ", "").lower()
+        return queryset.filter(content_type__model__icontains=normalized)
+
+
 class LogEntryViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
@@ -331,9 +453,22 @@ class LogEntryViewSet(
         "actor__email",
         "actor__first_name",
         "actor__last_name",
+        "changes",  # allows to search for last_login (for example)
+        "additional_data__folder",
     ]
-    filterset_fields = ["action", "actor", "content_type__model"]
+    filterset_class = LogEntryFilterSet
 
     permission_classes = (IsAdministrator,)
     serializer_class = LogEntrySerializer
-    queryset = LogEntry.objects.all()
+
+    def get_queryset(self):
+        return LogEntry.objects.all().annotate(
+            folder=Lower(
+                Case(
+                    When(additional_data__isnull=True, then=Value("")),
+                    When(additional_data__folder=None, then=Value("")),
+                    default=Cast("additional_data__folder", CharField()),
+                    output_field=CharField(),
+                )
+            ),
+        )

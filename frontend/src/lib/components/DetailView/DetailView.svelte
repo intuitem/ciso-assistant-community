@@ -20,7 +20,8 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
-	import { listViewFields } from '$lib/utils/table';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
 		getModalStore,
@@ -31,7 +32,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
+	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str', 'path'];
 
 	interface Props {
 		data: any;
@@ -42,6 +43,8 @@
 		dateFieldsToFormat?: string[];
 		widgets?: import('svelte').Snippet;
 		actions?: import('svelte').Snippet;
+		disableCreate?: boolean;
+		disableDelete?: boolean;
 	}
 
 	let {
@@ -65,7 +68,9 @@
 			'start_date'
 		],
 		widgets,
-		actions
+		actions,
+		disableCreate = false,
+		disableDelete = false
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
@@ -75,13 +80,18 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
-	if (data.model?.detailViewFields) {
-		data.data = Object.fromEntries(
-			Object.entries(data.data).filter(
-				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
-			)
-		);
-	}
+	let filteredData = $derived(
+		data.model?.detailViewFields
+			? Object.fromEntries(
+					Object.entries(data.data).filter(
+						([key, _]) =>
+							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+					)
+				)
+			: data.data
+	);
+
+	let hasWidgets = $derived(!!widgets);
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -205,10 +215,11 @@
 
 	let displayEditButton = $derived(function () {
 		return (
-			canEditObject &&
-			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn &&
-			!data.data.builtin
+			(canEditObject &&
+				!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+				!data.data.urn &&
+				!data.data.builtin) ||
+			data?.urlModel === 'terminologies'
 		);
 	});
 
@@ -279,13 +290,17 @@
 		</div>
 	{/if}
 
-	<!-- Main content area - modified to use flex layout -->
+	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
-		<div class="flex flex-row flex-wrap gap-4">
-			<!-- Left side - Details (now takes half width) -->
-			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
+		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
+			<!-- Left side - Details (conditional width) -->
+			<div
+				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+					? 'flex-1 min-w-[300px]'
+					: 'w-full'}"
+			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4"
 						>
@@ -347,12 +362,25 @@
 												{:else}
 													--
 												{/if}
+											{:else if key === 'translations'}
+												{#if Object.keys(value).length > 0}
+													<div class="flex flex-col gap-2">
+														{#each Object.entries(value) as [lang, translation]}
+															<div class="flex flex-row gap-2">
+																<strong>{lang}:</strong>
+																<span>{safeTranslate(translation)}</span>
+															</div>
+														{/each}
+													</div>
+												{:else}
+													--
+												{/if}
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value as val}
+														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id}
+																{#if val.str && val.id && key !== 'qualifications'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
@@ -399,12 +427,17 @@
 											{:else if value === 'P4'}
 												<li class="fa-solid fa-flag text-gray-500"></li>
 												{m.p4()}
+											{:else if key === 'icon'}
+												<i class="text-lg fa {data.data.icon_fa_class}"></i>
+												{safeTranslate((value.str || value.name) ?? value)}
 											{:else if isURL(value) && !value.startsWith('urn')}
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
+											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
+												<MarkdownRenderer content={value} />
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
@@ -421,13 +454,15 @@
 				</dl>
 			</div>
 
-			<!-- Right side - New widgets and metrics area -->
-			<div class="flex-1 min-w-[300px] flex flex-col">
-				<!-- New slot for widgets and metrics -->
-				<div class="h-full">
-					{@render widgets?.()}
+			<!-- Right side - Widgets area (only if widgets exist) -->
+			{#if hasWidgets}
+				<div class="flex-1 min-w-[300px] flex flex-col">
+					<!-- Slot for widgets and metrics -->
+					<div class="h-full">
+						{@render widgets?.()}
+					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
 
 		<!-- Bottom row for action buttons -->
@@ -549,13 +584,16 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+							{@const fieldsToUse = getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
 									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
 									source={model.table}
-									disableCreate={model.disableCreate}
-									disableDelete={model.disableDelete}
+									disableCreate={disableCreate || model.disableCreate}
+									disableDelete={disableDelete || model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
@@ -563,6 +601,7 @@
 									{#snippet addButton()}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
+											data-testid="add-button"
 											onclick={(_) => modalCreateForm(model)}
 											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 												'add-' + model.info.localName

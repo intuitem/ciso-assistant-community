@@ -16,6 +16,7 @@
 	"swedish": "švédský",
 	"indonesian": "indonéština",
 	"danish": "dánština",
+	"croatian": "chorvatština",
 	"addThreat": "Přidat hrozbu",
 	"addVulnerability": "Přidat zranitelnost",
 	"addReferenceControl": "Přidat referenční kontrolu",
@@ -190,6 +191,8 @@
 	"importMatrices": "Import matic",
 	"importFrameworks": "Import rámců",
 	"importMappings": "Import mapování",
+	"importThreats": "Import hrozeb",
+	"importReferenceControls": "Import referenčních kontrol",
 	"summary": "Souhrn",
 	"composer": "Správa závislostí",
 	"statistics": "Statistiky",
@@ -944,5 +947,16 @@
 			}
 		}
 	],
-	"matchingScenarios": "Shodné scénáře"
+	"matchingScenarios": "Shodné scénáře",
+	"select": "Vybrat",
+	"deselect": "Zrušit výběr",
+	"fearedEventAssetHelpText": "Strašné události jsou obvykle spojeny s obchodními hodnotami (primární aktiva). Podporná aktiva jsou zde povolena pro větší flexibilitu.",
+	"saveAndContinue": "Uložit a pokračovat",
+	"image": "Image",
+	"securityObjectives": "Bezpečnostní cíle",
+	"nextOccurrenceStatus": "Stav dalšího výskytu",
+	"securityObjectiveScale": "Měřítko bezpečnostních vlastností",
+	"securityObjectiveScaleHelpText": "Vyberte měřítko pro bezpečnostní vlastnosti (1 až 4 výchozí)",
+	"actor": "Aktér",
+	"action": "Akce"
 }

@@ -11,6 +11,7 @@
 </script>
 
 <DetailView {data} />
+
 {#if data.model.name == 'requirementmappingset'}
 	<div class="card my-4 p-4 bg-white">
 		<span class="bg-purple-700 text-white px-2 py-1 rounded-sm text-sm font-semibold">beta</span><a

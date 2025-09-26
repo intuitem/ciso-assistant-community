@@ -41,6 +41,7 @@
 />
 <AutocompleteSelect
 	{form}
+	translateOptions={false}
 	field="country"
 	options={model.selectOptions['country']}
 	cacheLock={cacheLocks['country']}
