@@ -13,6 +13,8 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_swap_axes",
     "risk_matrix_flip_vertical",
     "risk_matrix_labels",
+    "currency",
+    "daily_rate",
 ]
 
 
@@ -38,12 +40,55 @@ class GlobalSettingsSerializer(serializers.ModelSerializer):
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
+        # Track old currency value for potential propagation
+        old_currency = instance.value.get("currency") if instance.value else None
+
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
             setattr(instance, "value", validated_data["value"])
+
+        # Get new currency value
+        new_currency = validated_data["value"].get("currency")
+
         instance.save()
+
+        # If currency has changed, propagate to AppliedControl records
+        if old_currency != new_currency and new_currency:
+            self._update_applied_control_currencies(old_currency, new_currency)
+
         return instance
+
+    def _update_applied_control_currencies(self, old_currency, new_currency):
+        """Update currency in all AppliedControl cost structures"""
+        from core.models import AppliedControl
+
+        updated_count = 0
+
+        # Get all AppliedControl records that have cost data
+        for control in AppliedControl.objects.filter(cost__isnull=False):
+            if isinstance(control.cost, dict):
+                current_currency = control.cost.get("currency")
+
+                # Update if:
+                # 1. Control's currency matches the old global currency, OR
+                # 2. Old global currency was None (first time setting global currency), OR
+                # 3. Control has no currency set
+                should_update = (
+                    current_currency == old_currency
+                    or old_currency is None
+                    or current_currency is None
+                )
+
+                if should_update:
+                    control.cost["currency"] = new_currency
+                    control.save(update_fields=["cost"])
+                    updated_count += 1
+
+        print(
+            f"Updated currency from '{old_currency}' to '{new_currency}' "
+            f"in {updated_count} AppliedControl records"
+        )
 
     class Meta:
         model = GlobalSettings
@@ -100,6 +145,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     organisation_issues = serializers.BooleanField(
         source="value.organisation_issues", required=False, default=True
     )
+    quantitative_risk_studies = serializers.BooleanField(
+        source="value.quantitative_risk_studies", required=False, default=True
+    )
     terminologies = serializers.BooleanField(
         source="value.terminologies", required=False, default=True
     )
@@ -123,6 +171,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "inherent_risk",
             "organisation_objectives",
             "organisation_issues",
+            "quantitative_risk_studies",
             "terminologies",
         ]
         read_only_fields = ["name"]

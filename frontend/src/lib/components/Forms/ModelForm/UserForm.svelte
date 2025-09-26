@@ -56,6 +56,7 @@
 		multiple
 		optionsEndpoint="user-groups"
 		field="user_groups"
+		pathField="path"
 		cacheLock={cacheLocks['user_groups']}
 		bind:cachedValue={formDataCache['user_groups']}
 		label={m.userGroups()}
@@ -71,6 +72,17 @@
 		field="keep_local_login"
 		label={m.keepLocalLogin()}
 		helpText={m.keepLocalLoginHelpText()}
+	/>
+{/if}
+{#if shape.expiry_date && !page.data.object?.is_superuser}
+	<TextField
+		type="date"
+		{form}
+		field="expiry_date"
+		label={m.expiryDate()}
+		helpText={m.userExpiryHelpText()}
+		cacheLock={cacheLocks['expiry_date']}
+		bind:cachedValue={formDataCache['expiry_date']}
 	/>
 {/if}
 <TextArea

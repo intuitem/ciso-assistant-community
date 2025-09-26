@@ -2,7 +2,7 @@
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { getOptions } from '$lib/utils/crud';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;
@@ -76,7 +76,7 @@
 							<span style="font-weight: 600;">{title}</span>
 						{/if}
 						{#if description}
-						  <MarkdownRenderer content={description} />
+							<MarkdownRenderer content={description} />
 						{/if}
 					{:else if Object.keys(node.questions).length > 0}
 						<!-- This displays the first question's text -->

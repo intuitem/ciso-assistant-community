@@ -448,12 +448,12 @@
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg space-y-2">
 		<div>
-			<p class="text-sm font-semibold text-gray-400">{m.qualification()}</p>
+			<p class="text-sm font-semibold text-gray-400">{m.qualifications()}</p>
 			<p>
 				<span class="font-semibold">
-					{#each data.scenario.qualifications as qualification, i}
+					{#each data.scenario.qualifications.sort( (a, b) => safeTranslate(a.str).localeCompare(safeTranslate(b.str)) ) as qualification, i}
 						{#if i > 0},{/if}
-						{safeTranslate(qualification) || m.undefined()}
+						{safeTranslate(qualification.str) || m.undefined()}
 					{/each}
 				</span>
 			</p>

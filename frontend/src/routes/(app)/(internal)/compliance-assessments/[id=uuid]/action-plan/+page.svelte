@@ -13,7 +13,7 @@
 		eta: 'eta',
 		control_impact: 'controlImpact',
 		effort: 'effort',
-		cost: 'cost',
+		annual_cost: 'cost',
 		requirement_assessments: 'matchingRequirements'
 	};
 
@@ -75,7 +75,7 @@
 				'eta',
 				'control_impact',
 				'effort',
-				'cost',
+				'annual_cost',
 				'requirement_assessments'
 			]}
 		/>

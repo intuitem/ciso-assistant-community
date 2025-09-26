@@ -1,7 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -142,7 +141,7 @@ export const RiskScenarioSchema = z.object({
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
 	treatment: z.string().optional(),
-	qualifications: z.string().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
 	strength_of_knowledge: z.number().default(-1).optional(),
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
@@ -175,7 +174,24 @@ export const AppliedControlSchema = z.object({
 		.optional(),
 	effort: z.string().optional().nullable(),
 	control_impact: z.number().optional().nullable(),
-	cost: z.number().multipleOf(0.000001).optional().nullable(),
+	cost: z
+		.object({
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+			amortization_period: z.number().min(1).max(50).default(1),
+			build: z
+				.object({
+					fixed_cost: z.number().min(0).default(0),
+					people_days: z.number().min(0).default(0)
+				})
+				.default({ fixed_cost: 0, people_days: 0 }),
+			run: z
+				.object({
+					fixed_cost: z.number().min(0).default(0),
+					people_days: z.number().min(0).default(0)
+				})
+				.default({ fixed_cost: 0, people_days: 0 })
+		})
+		.optional(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
@@ -289,12 +305,42 @@ export const UserEditSchema = z.object({
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	expiry_date: z
+		.union([z.literal('').transform(() => null), z.string().date()])
+		.nullish()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined values
+				const expiryDate = new Date(val);
+				const today = new Date();
+				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
+				return expiryDate >= today;
+			},
+			{
+				message: 'Expiry date cannot be in the past'
+			}
+		)
 });
 
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	expiry_date: z
+		.union([z.literal('').transform(() => null), z.string().date()])
+		.nullish()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined values
+				const expiryDate = new Date(val);
+				const today = new Date();
+				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
+				return expiryDate >= today;
+			},
+			{
+				message: 'Expiry date cannot be in the past'
+			}
+		)
 });
 
 export const ChangePasswordSchema = z.object({
@@ -367,7 +413,24 @@ export const EvidenceSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	owner: z.string().optional().array().optional(),
+	status: z.string().optional().default('draft'),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
+export const EvidenceRevisionSchema = z.object({
+	folder: z.string().uuid(),
+	evidence: z.string().uuid(),
+	version: z.number().optional(),
+	attachment: z.any().optional().nullable(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const GeneralSettingsSchema = z.object({
@@ -380,7 +443,9 @@ export const GeneralSettingsSchema = z.object({
 	interface_agg_scenario_matrix: z.boolean().optional(),
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
-	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional()
+	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+	daily_rate: z.number().default(500).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -400,6 +465,7 @@ export const FeatureFlagsSchema = z.object({
 	inherent_risk: z.boolean().optional(),
 	organisation_objectives: z.boolean().optional(),
 	organisation_issues: z.boolean().optional(),
+	quantitative_risk_studies: z.boolean().optional(),
 	terminologies: z.boolean().optional()
 });
 
@@ -656,6 +722,86 @@ export const organisationIssueSchema = z.object({
 	origin: z.string().optional(),
 	assets: z.string().uuid().optional().array().optional()
 });
+
+export const quantitativeRiskStudySchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	status: z.string().optional().nullable(),
+	distribution_model: z.string().optional().default('lognormal_ci90'),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	risk_tolerance: z
+		.object({
+			points: z
+				.object({
+					point1: z
+						.object({
+							probability: z.number().min(0.01).max(0.99).optional(),
+							acceptable_loss: z.number().min(1).optional()
+						})
+						.default({ probability: 0.99 })
+						.optional(),
+					point2: z
+						.object({
+							probability: z.number().min(0.01).max(0.99).optional(),
+							acceptable_loss: z.number().min(1).optional()
+						})
+						.optional()
+				})
+				.optional(),
+			curve_data: z
+				.object({
+					loss_values: z.array(z.number()).optional(),
+					probability_values: z.array(z.number()).optional()
+				})
+				.optional()
+		})
+		.optional(),
+	// .default({
+	// 	points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
+	// }),
+	loss_threshold: z.number().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
+});
+
+export const quantitativeRiskScenarioSchema = z.object({
+	...NameDescriptionMixin,
+	quantitative_risk_study: z.string().uuid(),
+	assets: z.string().uuid().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional(),
+	priority: z.number().optional().nullable(),
+	status: z.string().optional().default('draft'),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
+	threats: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable(),
+	is_selected: z.boolean().default(true),
+	ref_id: z.string().optional()
+});
+
+export const quantitativeRiskHypothesisSchema = z.object({
+	...NameDescriptionMixin,
+	quantitative_risk_scenario: z.string().uuid(),
+	existing_applied_controls: z.string().uuid().optional().array().optional(),
+	added_applied_controls: z.string().uuid().optional().array().optional(),
+	removed_applied_controls: z.string().uuid().optional().array().optional(),
+	risk_stage: z.string().optional().default('residual'),
+	ref_id: z.string().optional(),
+	is_selected: z.boolean().default(true),
+	probability: z.coerce.number().min(0).max(1).optional(),
+	impact: z
+		.object({
+			distribution: z.string().default('LOGNORMAL-CI90'),
+			lb: z.coerce.number().min(0).optional(),
+			ub: z.coerce.number().min(0).optional()
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -680,7 +826,7 @@ export const fearedEventsSchema = z.object({
 	ebios_rm_study: z.string(),
 	folder: z.string(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional()
 });
 
 export const roToSchema = z.object({
@@ -815,7 +961,8 @@ export const IncidentSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().uuid().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional(),
+	entities: z.string().uuid().optional().array().optional()
 });
 
 export const TimelineEntrySchema = z.object({
@@ -991,6 +1138,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
+	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
@@ -1030,6 +1178,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'kill-chains': KillChainSchema,
 	'organisation-objectives': organisationObjectiveSchema,
 	'organisation-issues': organisationIssueSchema,
+	'quantitative-risk-studies': quantitativeRiskStudySchema,
+	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
+	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
 	roles: RoleSchema
 };

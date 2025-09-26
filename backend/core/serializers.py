@@ -615,6 +615,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     version = serializers.StringRelatedField(source="risk_assessment.version")
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(many=True)
 
     treatment = serializers.CharField()
 
@@ -648,6 +649,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         slug_field="pk", read_only=True, many=True
     )
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    qualifications = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = RiskScenario
@@ -682,6 +686,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
+    cost = serializers.JSONField(required=False, allow_null=True)
 
     def create(self, validated_data: Any):
         owner_data = validated_data.get("owner", [])
@@ -758,7 +763,12 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
-    cost = serializers.FloatField()
+    cost = serializers.JSONField()
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
+    currency = serializers.SerializerMethodField()
+    annual_cost_display = serializers.SerializerMethodField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     assets = FieldsRelatedField(many=True)
 
@@ -773,6 +783,18 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if not obj.eta:
             return None
         return time_state(obj.eta.isoformat())
+
+    def get_currency(self, obj):
+        if not obj.cost:
+            return "€"  # Default currency
+        return obj.cost.get("currency", "€")
+
+    def get_annual_cost_display(self, obj):
+        annual_cost = obj.annual_cost
+        if annual_cost == 0:
+            return ""
+        currency = self.get_currency(obj)
+        return f"{annual_cost:,.2f} {currency}"
 
 
 class ActionPlanSerializer(BaseModelSerializer):
@@ -789,7 +811,10 @@ class ActionPlanSerializer(BaseModelSerializer):
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     status = serializers.CharField(source="get_status_display")
-    cost = serializers.FloatField()
+    cost = serializers.JSONField()
+    annual_cost = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
@@ -941,6 +966,7 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(many=True)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -955,6 +981,9 @@ class UserReadSerializer(BaseModelSerializer):
             "keep_local_login",
             "is_third_party",
             "observation",
+            "has_mfa_enabled",
+            "expiry_date",
+            "is_superuser",
         ]
 
 
@@ -975,6 +1004,8 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_third_party",
             "is_local",
             "observation",
+            "expiry_date",
+            "is_superuser",
         ]
 
     def validate_email(self, email):
@@ -1035,6 +1066,7 @@ class UserWriteSerializer(BaseModelSerializer):
 
 
 class UserGroupReadSerializer(BaseModelSerializer):
+    path = PathField(source="get_folder_full_path", read_only=True)
     name = serializers.CharField(source="__str__")
     localization_dict = serializers.JSONField(source="get_localization_dict")
     folder = FieldsRelatedField()
@@ -1183,12 +1215,25 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 
 class EvidenceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    attachment = serializers.CharField(source="filename")
+    attachment = serializers.SerializerMethodField()
     size = serializers.CharField(source="get_size")
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    owner = FieldsRelatedField(many=True)
+    status = serializers.CharField(source="get_status_display")
+    link = serializers.SerializerMethodField()
+
+    def get_attachment(self, obj):
+        last_revision = obj.last_revision
+        if last_revision and last_revision.attachment:
+            return last_revision.attachment.url
+        return None
+
+    def get_link(self, obj):
+        last_revision = obj.last_revision
+        return last_revision.link if last_revision else None
 
     class Meta:
         model = Evidence
@@ -1211,17 +1256,57 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
     )
+    owner = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), required=False
+    )
+    attachment = serializers.FileField(required=False)
+    link = serializers.URLField(required=False)
 
     class Meta:
         model = Evidence
-        fields = "__all__"
+        exclude = ["is_published"]
+
+    def create(self, validated_data):
+        attachment = validated_data.pop("attachment", None)
+        link = validated_data.pop("link", None)
+
+        evidence = super().create(validated_data)
+
+        EvidenceRevision.objects.get_or_create(
+            evidence=evidence, defaults={"link": link, "attachment": attachment}
+        )
+
+        return evidence
+
+    def update(self, instance, validated_data):
+        # Handle properly owner field cleaning
+        owners = validated_data.get("owner", None)
+        instance = super().update(instance, validated_data)
+        if not owners:
+            instance.owner.set([])
+
+        return instance
+
+    def to_representation(self, instance):
+        """Include link and attachment from the latest revision in the response"""
+        data = super().to_representation(instance)
+
+        # Add revision fields to the response
+        latest_revision = instance.last_revision
+        if latest_revision:
+            data["link"] = latest_revision.link
+            data["attachment"] = (
+                latest_revision.attachment.url if latest_revision.attachment else None
+            )
+        else:
+            data["link"] = None
+            data["attachment"] = None
+
+        return data
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    attachment = serializers.CharField(allow_blank=True)
-    size = serializers.CharField(source="get_size", read_only=True)
-    attachment_hash = serializers.CharField(read_only=True)
 
     class Meta:
         model = Evidence
@@ -1229,7 +1314,56 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "folder",
             "name",
             "description",
+            "created_at",
+            "updated_at",
+            "owner",
+            "status",
+            "expiry_date",
+        ]
+
+
+class EvidenceRevisionReadSerializer(BaseModelSerializer):
+    attachment = serializers.CharField(source="filename")
+    size = serializers.CharField(source="get_size")
+    evidence = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    str = serializers.CharField(source="__str__")
+
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+
+class EvidenceRevisionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = EvidenceRevision
+        fields = "__all__"
+
+    def create(self, validated_data):
+        evidence = validated_data["evidence"]
+        max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
+            models.Max("version")
+        )["version__max"]
+        validated_data["version"] = (max_version or 0) + 1
+        return super().create(validated_data)
+
+
+class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidence = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField(allow_blank=True)
+    size = serializers.CharField(source="get_size", read_only=True)
+    attachment_hash = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = EvidenceRevision
+        fields = [
+            "folder",
+            "evidence",
+            "observation",
+            "version",
             "attachment",
+            "link",
             "created_at",
             "updated_at",
             "size",
@@ -1623,16 +1757,6 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class QualificationReadSerializer(ReferentialSerializer):
-    class Meta:
-        model = Qualification
-        exclude = ["translations"]
-
-
-class QualificationWriteSerializer(QualificationReadSerializer):
-    pass
-
-
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
@@ -1652,6 +1776,31 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     owners = FieldsRelatedField(many=True)
     approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
+    associated_objects_count = serializers.SerializerMethodField()
+
+    def get_associated_objects_count(self, obj):
+        """Prefer annotated or prefetched counts to avoid extra DB queries."""
+        annotated = getattr(obj, "associated_objects_count", None)
+        if annotated is not None:
+            return annotated
+        try:
+            # Uses prefetch cache when available (no extra queries)
+            return (
+                len(obj.assets.all())
+                + len(obj.applied_controls.all())
+                + len(obj.vulnerabilities.all())
+                + len(obj.risk_scenarios.all())
+                + len(obj.requirement_assessments.all())
+            )
+        except Exception:
+            # Fallback: perform DB counts
+            return (
+                obj.assets.count()
+                + obj.applied_controls.count()
+                + obj.vulnerabilities.count()
+                + obj.risk_scenarios.count()
+                + obj.requirement_assessments.count()
+            )
 
     class Meta:
         model = SecurityException
@@ -1880,7 +2029,8 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
-    qualifications = FieldsRelatedField(["name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
@@ -2121,6 +2271,96 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published", "builtin"]
+        exclude = ["folder", "is_published"]
+
+
+class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
+    """Serializer for evidences in the context of compliance assessments"""
+
+    folder = FieldsRelatedField()
+    status = serializers.CharField(source="get_status_display")
+    owner = FieldsRelatedField(many=True)
+    size = serializers.CharField(source="get_size")
+    last_update = serializers.DateTimeField(source="updated_at")
+    requirement_assessments = serializers.SerializerMethodField()
+
+    def get_requirement_assessments(self, obj):
+        pk = self.context.get("pk")
+        if pk is None:
+            return {"direct_links": [], "indirect_links": []}
+
+        # Get requirement assessments for this compliance assessment
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=pk
+        ).prefetch_related("applied_controls")
+
+        direct_links = []
+        indirect_links = []
+
+        # Direct links - evidence is directly linked to requirement assessment
+        for req_assessment in requirement_assessments:
+            if obj in req_assessment.evidences.all():
+                direct_links.append(
+                    {
+                        "requirement_assessment_id": str(req_assessment.id),
+                        "requirement_assessment_name": str(
+                            req_assessment.requirement.safe_display_str
+                        ),
+                    }
+                )
+
+        # Indirect links - evidence is linked through applied controls
+        for req_assessment in requirement_assessments:
+            for applied_control in req_assessment.applied_controls.all():
+                if obj in applied_control.evidences.all():
+                    indirect_links.append(
+                        {
+                            "requirement_assessment_id": str(req_assessment.id),
+                            "requirement_assessment_name": str(
+                                req_assessment.requirement.safe_display_str
+                            ),
+                            "applied_control_id": str(applied_control.id),
+                            "applied_control_name": applied_control.name,
+                        }
+                    )
+
+        # Return a simplified format similar to action-plan
+        all_links = []
+
+        # Add direct links
+        for link in direct_links:
+            all_links.append(
+                {
+                    "str": link["requirement_assessment_name"],
+                    "id": link["requirement_assessment_id"],
+                }
+            )
+
+        # Add indirect links
+        for link in indirect_links:
+            all_links.append(
+                {
+                    "str": f"{link['requirement_assessment_name']} (via {link['applied_control_name'][:15]}...)",
+                    "id": link["requirement_assessment_id"],
+                }
+            )
+
+        return all_links
+
+    class Meta:
+        model = Evidence
+        fields = [
+            "id",
+            "name",
+            "status",
+            "last_update",
+            "expiry_date",
+            "owner",
+            "folder",
+            "size",
+            "requirement_assessments",
+        ]

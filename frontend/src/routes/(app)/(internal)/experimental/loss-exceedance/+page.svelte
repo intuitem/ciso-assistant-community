@@ -70,6 +70,7 @@
 					showXGrid={true}
 					showYGrid={true}
 					minorSplitLine={true}
+					autoXMax={true}
 				/>
 			</div>
 
@@ -107,6 +108,7 @@
 					yAxisScale="linear"
 					showXGrid={true}
 					showYGrid={true}
+					autoXMax={true}
 				/>
 			</div>
 		</div>

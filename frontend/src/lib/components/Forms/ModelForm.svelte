@@ -58,8 +58,12 @@
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
 	import OrganisationObjectiveForm from './ModelForm/OrganisationObjectiveForm.svelte';
+	import QuantitativeRiskStudyForm from './ModelForm/QuantitativeRiskStudyForm.svelte';
+	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
+	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
+	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -353,7 +357,16 @@
 		{:else if URLModel === 'reference-controls'}
 			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'evidences'}
-			<EvidencesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
+			<EvidencesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'compliance-assessments'}
 			<ComplianceAssessmentsForm
 				{form}
@@ -619,6 +632,39 @@
 				{context}
 				{...rest}
 			/>
+		{:else if URLModel === 'quantitative-risk-studies'}
+			<QuantitativeRiskStudyForm
+				{form}
+				{model}
+				{duplicate}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'quantitative-risk-scenarios'}
+			<QuantitativeRiskScenarioForm
+				{form}
+				{model}
+				{duplicate}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'quantitative-risk-hypotheses'}
+			<QuantitativeRiskHypothesisForm
+				{form}
+				{model}
+				{duplicate}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'organisation-issues'}
 			<OrganisationIssueForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'organisation-objectives'}
@@ -627,6 +673,16 @@
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'roles'}
 			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'evidence-revisions'}
+			<EvidenceRevisionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}
