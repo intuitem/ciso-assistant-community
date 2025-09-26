@@ -2415,8 +2415,8 @@ def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbo
 def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["score", "name", "description"]
-    optional_columns = ["description_doc"]
+    required_columns = ["score", "name"]
+    optional_columns = ["description_doc", "description"]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
