@@ -6139,6 +6139,12 @@ def get_disk_usage():
 
 
 @api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def healthcheck(request):
+    return Response({"status": "ok"})
+
+
+@api_view(["GET"])
 def get_build(request):
     """
     API endpoint that returns the build version of the application.
