@@ -66,5 +66,11 @@ def build_kafka_config(use_auth: bool = settings.KAFKA_USE_AUTH) -> dict:
                 f"Unsupported SASL mechanism: {settings.KAFKA_SASL_MECHANISM}"
             )
 
-    logger.debug(f"Kafka config: {cfg}")
+    # Redact any plaintext SASL credentials before logging
+    safe_cfg = dict(cfg)
+    if "sasl_plain_password" in safe_cfg:
+        safe_cfg["sasl_plain_password"] = "***REDACTED***"
+    if "sasl_plain_username" in safe_cfg:
+        safe_cfg["sasl_plain_username"] = "***REDACTED***"
+    logger.debug(f"Kafka config: {safe_cfg}")
     return cfg
