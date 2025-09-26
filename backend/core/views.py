@@ -795,6 +795,27 @@ class AssetViewSet(BaseModelViewSet):
             [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
         )
 
+    @action(detail=True, name="Get asset write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        asset_data = serializer_class(super().get_object()).data
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale_key = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
+        objective_scale = Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+        objectives = asset_data["security_objectives"].get("objectives", {})
+
+        for objective_name, objective_data in objectives.items():
+            if (objective_value := objective_data.get("value")) is None:
+                continue
+            objective_data["value"] = objective_scale[objective_value]
+
+        return Response(asset_data)
+
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
