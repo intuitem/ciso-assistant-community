@@ -2139,5 +2139,12 @@
 	"hasMfaEnabled": "MFA activée",
 	"evidenceRevisions": "Révisions",
 	"addEvidenceRevision": "Nouvelle révision",
-	"associatedEvidenceRevisions": "Versions associées"
+	"associatedEvidenceRevisions": "Révisions associées",
+	"privateKey": "Clé privée",
+	"generateDots": "Générer...",
+	"samlKeysGenerated": "Clés SAML générées avec succès",
+	"samlPrivateKeyHelpText": "Écriture seule : utilisez ce champ uniquement si vous devez fournir votre propre clé/certificat privée. Sinon, l'application générera celle-ci.",
+	"samlCertificateHelpText": "Vous pouvez spécifier votre propre certificat ou laisser l'application le générer.",
+	"samlAuthnRequestSignedHelpText": "Lorsque cette option est activée, la requête d'authentification SAML est signée avec la clé privée ci-dessous. Le certificat public correspondant est envoyé au fournisseur d'identité afin qu'il puisse vérifier la signature.",
+	"downloadCertificate": "Télécharger le certificat"
 }

@@ -967,5 +967,12 @@
 	"securityObjectiveScale": "Scară proprietăți de securitate",
 	"securityObjectiveScaleHelpText": "Alegeți scala dvs. pentru proprietățile de securitate (1 la 4 implicit)",
 	"actor": "Actor",
-	"action": "Acțiune"
+	"action": "Acțiune",
+	"privateKey": "Cheie privată",
+	"generateDots": "Generare...",
+	"samlKeysGenerated": "Cheile SAML au fost generate cu succes",
+	"samlPrivateKeyHelpText": "Doar scriere: utilizați acest câmp numai dacă aveți nevoie să furnizați propria cheie/certificat privat. În caz contrar, aplicația va genera cheia.",
+	"samlCertificateHelpText": "Puteți specifica propriul certificat sau lăsați aplicația să-l genereze.",
+	"samlAuthnRequestSignedHelpText": "Când este activat, cererea de autentificare SAML este semnată cu cheia privată de mai jos. Certificatul public corespunzător este trimis furnizorului de identitate pentru a putea verifica semnătura.",
+	"downloadCertificate": "Descărcați certificatul"
 }
