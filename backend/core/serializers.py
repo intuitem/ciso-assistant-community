@@ -396,7 +396,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 
 
 class AssetReadSerializer(AssetWriteSerializer):
-    path = serializers.SerializerMethodField()
+    path = PathField(read_only=True)
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
