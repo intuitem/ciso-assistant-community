@@ -68,6 +68,7 @@ READER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    "view_rightrequest",
     # campaigns,
     "view_campaign",
     # operating modes
@@ -137,6 +138,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    "view_rightrequest",
     # operating modes
     "view_elementaryaction",
     "view_operatingmode",
@@ -356,6 +358,10 @@ ANALYST_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -588,6 +594,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -790,6 +800,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_datatransfer",
     "view_datatransfer",
     "delete_datatransfer",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
     # incidents,
     "add_incident",
     "view_incident",

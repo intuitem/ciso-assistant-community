@@ -641,6 +641,22 @@ export const processingSchema = z.object({
 	associated_controls: z.array(z.string().optional()).optional()
 });
 
+export const rightRequestSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	owner: z.string().uuid().optional().array().optional(),
+	requested_on: z
+		.string()
+		.min(1)
+		.default(() => new Date().toISOString().split('T')[0]),
+	due_date: z.string().optional(),
+	request_type: z.string(),
+	status: z.string(),
+	observation: z.string().optional(),
+	processings: z.array(z.string()).optional().default([])
+});
+
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
@@ -1153,6 +1169,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'asset-assessments': AssetAssessmentSchema,
 	'escalation-thresholds': EscalationThresholdSchema,
 	processings: processingSchema,
+	'right-requests': rightRequestSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
 	'data-subjects': dataSubjectSchema,

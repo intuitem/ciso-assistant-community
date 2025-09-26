@@ -85,6 +85,7 @@ export const URL_MODEL = [
 	'findings-assessments',
 	// privacy,
 	'processings',
+	'right-requests',
 	'purposes',
 	'personal-data',
 	'data-subjects',

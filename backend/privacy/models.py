@@ -393,3 +393,46 @@ class DataTransfer(NameDescriptionFolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
+
+
+class RightRequest(NameDescriptionFolderMixin):
+    REQUEST_TYPE_CHOICES = (
+        ("deletion", "Deletion / Erasure"),
+        ("rectification", "Rectification"),
+        ("access", "Access / Extract"),
+        ("portability", "Portability"),
+        ("restriction", "Restriction"),
+        ("objection", "Objection"),
+        ("other", "Other"),
+    )
+
+    STATUS_CHOICES = (
+        ("new", "New"),
+        ("in_progress", "In Progress"),
+        ("on_hold", "On hold"),
+        ("done", "Done"),
+    )
+
+    ref_id = models.CharField(max_length=100, blank=True)
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name="assigned_right_requests",
+    )
+    requested_on = models.DateField()
+    due_date = models.DateField(null=True, blank=True)
+    request_type = models.CharField(
+        max_length=30, choices=REQUEST_TYPE_CHOICES, default="other"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new")
+    observation = models.TextField(blank=True)
+    processings = models.ManyToManyField(
+        Processing,
+        blank=True,
+        related_name="right_requests",
+    )
+
+    class Meta:
+        ordering = ["-requested_on"]
+        verbose_name = "Right Request"
+        verbose_name_plural = "Right Requests"
