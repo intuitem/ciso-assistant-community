@@ -526,6 +526,8 @@
 					<ContextMenu.Trigger asChild>
 						{#snippet children({ builder })}
 							<tr
+								use:builder.action
+								{...builder}
 								onclick={(e) => {
 									onRowClick(e, rowIndex);
 								}}
