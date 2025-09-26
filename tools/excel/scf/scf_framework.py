@@ -2,7 +2,7 @@
 Script to transform a SCF Framework Excel source file into a structured destination file for CISO Assistant.
 
 Input:
-    - Excel file with a sheet named "SCF 2025.1.1"
+    - Excel file with a sheet named "SCF 2025.2.2" (change "sheet_name" value for future updates)
     - Relevant columns:
         * "SCF Domain"
         * "SCF Control"
@@ -36,11 +36,14 @@ Output:
 """
 
 
+from warnings import deprecated
+from xml.etree.ElementTree import tostring
 import pandas as pd
 
 # File paths (adjust as needed)
-source_file = "secure-controls-framework-scf-2025-1-1.xlsx"
+source_file = "secure-controls-framework-scf-2025-2-2.xlsx"
 destination_file = "scf_framework.xlsx"
+sheet_name = "SCF 2025.2.2"
 
 # Columns of interest in the source file
 columns_to_use = [
@@ -55,7 +58,7 @@ columns_to_use = [
 ]
 
 # Load the source file
-df = pd.read_excel(source_file, sheet_name="SCF 2025.1.1", usecols=columns_to_use)
+df = pd.read_excel(source_file, sheet_name=sheet_name, usecols=columns_to_use)
 
 # List to store rows for the destination file
 rows = []
@@ -90,8 +93,14 @@ for _, row in df.iterrows():
     tier_str = ",".join(tiers)
 
     # Add a depth=2 row for the control
+    is_deprecated = (
+        True if str(row.get("Secure Controls Framework (SCF)\nControl Description", ""))
+                .strip().lower().startswith("[deprecated")
+        else False
+    )
+    
     rows.append({
-        "assessable": "x",
+        "assessable": ("x" if is_deprecated is False else ""),
         "depth": 2,
         "ref_id": row.get("SCF #", ""),
         "name": row.get("SCF Control", ""),
