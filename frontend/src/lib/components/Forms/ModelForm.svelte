@@ -37,6 +37,7 @@
 	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
 	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
 	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
+	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -509,6 +510,16 @@
 			/>
 		{:else if URLModel === 'data-transfers'}
 			<DataTransferForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{initialData}
+				{...rest}
+			/>
+		{:else if URLModel === 'right-requests'}
+			<RightRequestForm
 				{form}
 				{model}
 				{cacheLocks}
