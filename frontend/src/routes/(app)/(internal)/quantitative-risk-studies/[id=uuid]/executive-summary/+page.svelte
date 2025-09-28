@@ -25,12 +25,12 @@
 	{#await Promise.all( [data.stream.executiveSummary, data.stream.combinedLec, data.stream.aleComparison] )}
 		<!-- Breadcrumb loading state -->
 		<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
-			<p class="font-semibold text-lg">Loading...</p>
+			<p class="font-semibold text-lg">{m.loading()}</p>
 		</div>
 		<div class="flex items-center justify-center h-64">
 			<div class="text-center">
 				<LoadingSpinner />
-				<p class="mt-4 text-gray-600">Loading executive summary...</p>
+				<p class="mt-4 text-gray-600">{m.loadingExecutiveSummary()}</p>
 			</div>
 		</div>
 	{:then [summaryData, combinedLecData, aleComparisonData]}
@@ -81,7 +81,7 @@
 						class="btn preset-ghost-surface"
 						breadcrumbAction="pop"
 					>
-						<i class="fa-solid fa-arrow-left mr-2"></i>Back to Study
+						<i class="fa-solid fa-arrow-left mr-2"></i>{m.backToStudy()}
 					</Anchor>
 				</div>
 
@@ -89,32 +89,32 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
 					{#if summaryData.loss_threshold}
 						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Loss Threshold</div>
+							<div class="text-sm text-gray-600 font-medium mb-1">{m.lossThresholdLabel()}</div>
 							<div class="text-lg font-bold text-red-600">{summaryData.loss_threshold_display}</div>
-							<div class="text-xs text-gray-500">Maximum acceptable loss</div>
+							<div class="text-xs text-gray-500">{m.maximumAcceptableLoss()}</div>
 						</div>
 					{/if}
 					{#if combinedLecData?.current_threshold_probability_display}
 						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Current profile</div>
+							<div class="text-sm text-gray-600 font-medium mb-1">{m.currentProfile()}</div>
 							<div class="text-lg font-bold text-orange-600">
 								{combinedLecData.current_threshold_probability_display}
 							</div>
-							<div class="text-xs text-gray-500">Probability to exceed threshold</div>
+							<div class="text-xs text-gray-500">{m.probabilityToExceedThreshold()}</div>
 						</div>
 					{/if}
 					{#if combinedLecData?.residual_threshold_probability_display}
 						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Residual profile</div>
+							<div class="text-sm text-gray-600 font-medium mb-1">{m.residualProfile()}</div>
 							<div class="text-lg font-bold text-green-600">
 								{combinedLecData.residual_threshold_probability_display}
 							</div>
-							<div class="text-xs text-gray-500">Probability to exceed threshold</div>
+							<div class="text-xs text-gray-500">{m.probabilityToExceedThreshold()}</div>
 						</div>
 					{/if}
 					{#if summaryData.study_total_treatment_cost_display}
 						<div class="text-center">
-							<div class="text-sm text-gray-600 font-medium mb-1">Total Treatment Cost</div>
+							<div class="text-sm text-gray-600 font-medium mb-1">{m.totalTreatmentCost()}</div>
 							<div class="text-lg font-bold text-purple-600">
 								{summaryData.study_total_treatment_cost_display}
 							</div>
@@ -139,15 +139,15 @@
 				<div class="bg-white rounded-lg p-6 shadow-sm">
 					<div class="flex justify-between items-center mb-4">
 						<div class="flex items-center gap-3">
-							<h2 class="text-xl font-semibold">Portfolio risk profile</h2>
+							<h2 class="text-xl font-semibold">{m.portfolioRiskProfile()}</h2>
 							{#if aleComparisonData?.scenarios && aleComparisonData.scenarios.length > 0}
 								<button
 									onclick={() => (showAleBreakdownModal = true)}
 									class="text-sm text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
-									title="View ALE breakdown by scenario"
+									title={m.viewAleBreakdownByScenario()}
 								>
 									<i class="fa-solid fa-chart-column"></i>
-									Breakdown
+									{m.breakdown()}
 								</button>
 							{/if}
 						</div>
@@ -155,7 +155,7 @@
 							Current: {combinedLecData.scenarios_with_current_data} / {combinedLecData.total_scenarios}
 							{#if combinedLecData.scenarios_with_residual_data}
 								| Residual: {combinedLecData.scenarios_with_residual_data} / {combinedLecData.total_scenarios}
-								scenarios
+								{m.scenariosWith()}
 							{/if}
 						</div>
 					</div>
@@ -168,7 +168,7 @@
 							toleranceData={toleranceCurve?.data || []}
 							lossThreshold={summaryData.loss_threshold}
 							currency={combinedLecData.currency}
-							title="Combined Study Risk Profile"
+							title={m.combinedStudyRiskProfile()}
 							showTitle={false}
 							height="h-96"
 							width="w-full"
@@ -184,7 +184,7 @@
 				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 					<div class="flex flex-col items-center space-y-4">
 						<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-						<h3 class="text-lg font-semibold text-gray-600">Portfolio overview</h3>
+						<h3 class="text-lg font-semibold text-gray-600">{m.portfolioOverview()}</h3>
 						<p class="text-gray-500">
 							No combined LEC data available. Run simulations on your scenario hypotheses to
 							generate the combined curve.
@@ -232,7 +232,7 @@
 												<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 													{#if scenario.description}
 														<div>
-															<h4 class="text-sm font-medium text-gray-900 mb-2">Description</h4>
+															<h4 class="text-sm font-medium text-gray-900 mb-2">{m.description()}</h4>
 															<MarkdownRenderer
 																content={scenario.description}
 																class="text-gray-600"
@@ -241,7 +241,7 @@
 													{/if}
 													{#if scenario.observation}
 														<div>
-															<h4 class="text-sm font-medium text-gray-900 mb-2">Observation</h4>
+															<h4 class="text-sm font-medium text-gray-900 mb-2">{m.observation()}</h4>
 															<MarkdownRenderer
 																content={scenario.observation}
 																class="text-gray-600"
@@ -254,12 +254,12 @@
 									</div>
 								</div>
 
-								<!-- Assets, Threats, Qualifications -->
+								<!-- {m.assets()}, {m.threats()}, {m.qualifications()} -->
 								<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
 									{#if scenario.assets && scenario.assets.length > 0}
 										<div>
 											<h4 class="text-sm font-medium text-gray-900 mb-2">
-												<i class="fa-solid fa-gem mr-1"></i>Assets ({scenario.assets.length})
+												<i class="fa-solid fa-gem mr-1"></i>{m.assets()} ({scenario.assets.length})
 											</h4>
 											<div class="space-y-1">
 												{#each scenario.assets.slice(0, 3) as asset}
@@ -267,7 +267,7 @@
 												{/each}
 												{#if scenario.assets.length > 3}
 													<div class="text-sm text-gray-500">
-														... and {scenario.assets.length - 3} more
+														{m.andMore()} {scenario.assets.length - 3} {m.more()}
 													</div>
 												{/if}
 											</div>
@@ -277,7 +277,7 @@
 									{#if scenario.threats && scenario.threats.length > 0}
 										<div>
 											<h4 class="text-sm font-medium text-gray-900 mb-2">
-												<i class="fa-solid fa-exclamation-triangle mr-1"></i>Threats ({scenario
+												<i class="fa-solid fa-exclamation-triangle mr-1"></i>{m.threats()} ({scenario
 													.threats.length})
 											</h4>
 											<div class="space-y-1">
@@ -286,7 +286,7 @@
 												{/each}
 												{#if scenario.threats.length > 3}
 													<div class="text-sm text-gray-500">
-														... and {scenario.threats.length - 3} more
+														{m.andMore()} {scenario.threats.length - 3} {m.more()}
 													</div>
 												{/if}
 											</div>
@@ -296,7 +296,7 @@
 									{#if scenario.qualifications && scenario.qualifications.length > 0}
 										<div>
 											<h4 class="text-sm font-medium text-gray-900 mb-2">
-												<i class="fa-solid fa-tags mr-1"></i>Qualifications ({scenario
+												<i class="fa-solid fa-tags mr-1"></i>{m.qualifications()} ({scenario
 													.qualifications.length})
 											</h4>
 											<div class="space-y-1">
@@ -305,7 +305,7 @@
 												{/each}
 												{#if scenario.qualifications.length > 3}
 													<div class="text-sm text-gray-500">
-														... and {scenario.qualifications.length - 3} more
+														{m.andMore()} {scenario.qualifications.length - 3} {m.more()}
 													</div>
 												{/if}
 											</div>
@@ -320,8 +320,8 @@
 											{#if scenario.existing_controls && scenario.existing_controls.length > 0}
 												<div>
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
-														<i class="fa-solid fa-shield-halved mr-1 text-green-600"></i>Existing
-														Controls ({scenario.existing_controls.length})
+														<i class="fa-solid fa-shield-halved mr-1 text-green-600"></i>{m.existingControls()}
+														({scenario.existing_controls.length})
 													</h4>
 													<div class="space-y-2">
 														{#each scenario.existing_controls as control}
@@ -350,7 +350,7 @@
 																		href="/applied-controls/{control.id}"
 																		class="text-green-600 hover:text-green-800 p-1"
 																		breadcrumbAction="push"
-																		title="View control details"
+																		title={m.viewControlDetails()}
 																	>
 																		<i class="fa-solid fa-external-link text-xs"></i>
 																	</Anchor>
@@ -364,8 +364,8 @@
 											{#if scenario.additional_controls && scenario.additional_controls.length > 0}
 												<div>
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
-														<i class="fa-solid fa-plus-circle mr-1 text-blue-600"></i>Additional
-														Controls ({scenario.additional_controls.length})
+														<i class="fa-solid fa-plus-circle mr-1 text-blue-600"></i>{m.additionalControls()}
+														({scenario.additional_controls.length})
 													</h4>
 													<div class="space-y-2">
 														{#each scenario.additional_controls as control}
@@ -385,7 +385,7 @@
 																	{/if}
 																	{#if control.annual_cost && control.annual_cost > 0}
 																		<div class="text-xs text-blue-700 mt-1">
-																			Cost: {summaryData.currency}{control.annual_cost.toLocaleString()}/year
+																			{m.costYear()} {summaryData.currency}{control.annual_cost.toLocaleString()}{m.costPerYear()}
 																		</div>
 																	{/if}
 																</div>
@@ -399,7 +399,7 @@
 																		href="/applied-controls/{control.id}"
 																		class="text-blue-600 hover:text-blue-800 p-1"
 																		breadcrumbAction="push"
-																		title="View control details"
+																		title={m.viewControlDetails()}
 																	>
 																		<i class="fa-solid fa-external-link text-xs"></i>
 																	</Anchor>
@@ -423,26 +423,26 @@
 										<div class="text-lg font-bold text-red-600 mb-1">
 											{scenario.current_ale_display}
 										</div>
-										<div class="text-sm text-gray-600">Current ALE</div>
+										<div class="text-sm text-gray-600">{m.currentAle()}</div>
 									</div>
 									<div class="text-center">
 										<div class="text-lg font-bold text-green-600 mb-1">
 											{scenario.residual_ale_display}
 										</div>
-										<div class="text-sm text-gray-600">Residual ALE</div>
+										<div class="text-sm text-gray-600">{m.residualAle()}</div>
 									</div>
 									<div class="text-center">
 										<div class="text-lg font-bold text-purple-600 mb-1">
-											{scenario.risk_reduction_display || 'Cannot calculate'}
+											{scenario.risk_reduction_display || m.cannotCalculate()}
 										</div>
-										<div class="text-sm text-gray-600">Risk Reduction</div>
+										<div class="text-sm text-gray-600">{m.riskReduction()}</div>
 										<div class="text-xs text-gray-500">Current - Residual</div>
 									</div>
 									<div class="text-center">
 										<div class="text-lg font-bold text-blue-600 mb-1">
 											{scenario.treatment_cost_display || 'N/A'}
 										</div>
-										<div class="text-sm text-gray-600">Treatment Cost</div>
+										<div class="text-sm text-gray-600">{m.treatmentCostDisplay()}</div>
 									</div>
 								</div>
 
@@ -453,7 +453,7 @@
 									{@const toleranceCurve = scenario.lec_curves.find((c) => c.type === 'tolerance')}
 
 									<div class="bg-white border rounded-lg p-4">
-										<h4 class="text-lg font-medium text-gray-900 mb-4">Loss Exceedance Curve</h4>
+										<h4 class="text-lg font-medium text-gray-900 mb-4">{m.lossExceedanceCurve()}</h4>
 										<div class="w-full">
 											<LossExceedanceCurve
 												name="scenario-lec-{scenario.id}"
@@ -462,7 +462,7 @@
 												toleranceData={toleranceCurve?.data || []}
 												lossThreshold={summaryData.loss_threshold}
 												currency={summaryData.currency}
-												title="Scenario Risk Profile"
+												title={m.scenarioRiskProfile()}
 												showTitle={false}
 												height="h-80"
 												width="w-full"
@@ -492,7 +492,7 @@
 				<!-- No scenarios message -->
 				<div class="bg-white rounded-lg p-12 shadow-sm text-center">
 					<i class="fa-solid fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
-					<h3 class="text-xl font-semibold text-gray-600 mb-2">No Selected Scenarios</h3>
+					<h3 class="text-xl font-semibold text-gray-600 mb-2">{m.noSelectedScenarios()}</h3>
 					<p class="text-gray-500 mb-4">No scenarios are selected in this study.</p>
 					<p class="text-sm text-gray-400">Select scenarios to see the executive summary.</p>
 				</div>
@@ -501,10 +501,10 @@
 			<!-- Error state -->
 			<div class="bg-white rounded-lg p-12 shadow-sm text-center">
 				<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-				<h3 class="text-xl font-semibold text-gray-600 mb-2">Failed to Load Executive Summary</h3>
+				<h3 class="text-xl font-semibold text-gray-600 mb-2">{m.failedToLoadExecutiveSummary()}</h3>
 				<p class="text-gray-500 mb-4">There was an error loading the executive summary data.</p>
 				<button class="btn preset-filled-primary-500" onclick={() => window.location.reload()}>
-					<i class="fa-solid fa-refresh mr-2"></i>Retry
+					<i class="fa-solid fa-refresh mr-2"></i>{m.retry()}
 				</button>
 			</div>
 		{/if}
@@ -512,12 +512,12 @@
 		<!-- Error state -->
 		<div class="bg-white rounded-lg p-12 shadow-sm text-center">
 			<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-			<h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Data</h3>
+			<h3 class="text-xl font-semibold text-gray-600 mb-2">{m.errorLoadingData()}</h3>
 			<p class="text-gray-500 mb-4">
 				{error?.message || 'An unexpected error occurred while loading the executive summary.'}
 			</p>
 			<button class="btn preset-filled-primary-500" onclick={() => window.location.reload()}>
-				<i class="fa-solid fa-refresh mr-2"></i>Retry
+				<i class="fa-solid fa-refresh mr-2"></i>{m.retry()}
 			</button>
 		</div>
 	{/await}
@@ -533,7 +533,7 @@
 	>
 		<div class="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-auto">
 			<div class="flex justify-between items-center mb-4">
-				<h2 class="text-xl font-semibold">Loss breakdown by Scenario</h2>
+				<h2 class="text-xl font-semibold">{m.lossBreakdownByScenario()}</h2>
 				<button
 					onclick={() => (showAleBreakdownModal = false)}
 					class="text-gray-500 hover:text-gray-700 text-2xl"
@@ -546,7 +546,7 @@
 				<div class="flex items-center justify-center h-64">
 					<div class="text-center">
 						<LoadingSpinner />
-						<p class="mt-4 text-gray-600">Loading ALE comparison data...</p>
+						<p class="mt-4 text-gray-600">{m.loadingAleComparisonData()}</p>
 					</div>
 				</div>
 			{:then aleComparisonData}
@@ -554,7 +554,7 @@
 					<div class="mb-4">
 						<ALEComparisonChart
 							scenarios={aleComparisonData.scenarios}
-							title="ALE vs Treatment Cost by Scenario"
+							title={m.aleVsTreatmentCostByScenario()}
 							height="h-96"
 							width="w-full"
 						/>
@@ -564,23 +564,23 @@
 					<div class="bg-gray-50 rounded-lg p-4 text-sm">
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
 							<div>
-								<div class="font-semibold text-gray-700">Total Scenarios</div>
+								<div class="font-semibold text-gray-700">{m.totalScenarios()}</div>
 								<div class="text-lg font-bold">{aleComparisonData.total_scenarios}</div>
 							</div>
 							<div>
-								<div class="font-semibold text-gray-700">With Current ALE</div>
+								<div class="font-semibold text-gray-700">{m.withCurrentAle()}</div>
 								<div class="text-lg font-bold text-red-600">
 									{aleComparisonData.scenarios_with_current_ale}
 								</div>
 							</div>
 							<div>
-								<div class="font-semibold text-gray-700">With Residual ALE</div>
+								<div class="font-semibold text-gray-700">{m.withResidualAle()}</div>
 								<div class="text-lg font-bold text-green-600">
 									{aleComparisonData.scenarios_with_residual_ale}
 								</div>
 							</div>
 							<div>
-								<div class="font-semibold text-gray-700">With Treatment Cost</div>
+								<div class="font-semibold text-gray-700">{m.withTreatmentCost()}</div>
 								<div class="text-lg font-bold text-blue-600">
 									{aleComparisonData.scenarios_with_treatment_cost}
 								</div>
@@ -590,7 +590,7 @@
 				{:else}
 					<div class="text-center py-8">
 						<i class="fa-solid fa-chart-column text-4xl text-gray-400 mb-4"></i>
-						<h3 class="text-lg font-semibold text-gray-600 mb-2">No ALE Data Available</h3>
+						<h3 class="text-lg font-semibold text-gray-600 mb-2">{m.noAleDataAvailable()}</h3>
 						<p class="text-gray-500">
 							Run simulations on your scenarios to generate ALE comparison data.
 						</p>
@@ -599,7 +599,7 @@
 			{:catch error}
 				<div class="text-center py-8">
 					<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-					<h3 class="text-lg font-semibold text-gray-600 mb-2">Error Loading Data</h3>
+					<h3 class="text-lg font-semibold text-gray-600 mb-2">{m.errorLoadingData()}</h3>
 					<p class="text-gray-500">Failed to load ALE comparison data.</p>
 				</div>
 			{/await}

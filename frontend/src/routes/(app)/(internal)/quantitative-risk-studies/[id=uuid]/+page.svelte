@@ -46,14 +46,14 @@
 				class="btn bg-emerald-500 hover:bg-emerald-600 text-white h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-chart-line mr-2"></i>Executive summary
+				<i class="fa-solid fa-chart-line mr-2"></i>{m.executiveSummary()}
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/key-metrics`}
 				class="btn bg-amber-500 hover:bg-amber-600 text-white h-fit"
 				breadcrumbAction="push"
 			>
-				<i class="fa-solid fa-chart-simple mr-2"></i>Key metrics
+				<i class="fa-solid fa-chart-simple mr-2"></i>{m.keyMetrics()}
 			</Anchor>
 			<form
 				method="POST"
@@ -147,7 +147,7 @@
 							<i class="fa-solid fa-arrows-rotate"></i>
 						{/if}
 					</span>
-					Retrigger all simulations
+					{m.retriggerAllSimulations()}
 				</button>
 			</form>
 		</div>

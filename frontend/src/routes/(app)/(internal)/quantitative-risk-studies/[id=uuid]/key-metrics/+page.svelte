@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
+	import { m } from '$paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { Grid, Willow } from 'wx-svelte-grid';
 	import ALETimelineRaceChart from '$lib/components/Chart/ALETimelineRaceChart.svelte';
@@ -165,77 +166,77 @@
 		{
 			id: 'scenario',
 			header: {
-				text: 'Scenario',
+				text: m.scenario(),
 				filter: {
 					type: 'text',
 					config: {
-						placeholder: 'Filter by scenario name...'
+						placeholder: m.filterByScenarioName()
 					}
 				}
 			},
 			flexgrow: 2,
 			sort: true,
-			displayName: 'Scenario'
+			displayName: m.scenario()
 		},
 		{
 			id: 'level',
 			header: {
-				text: 'Level',
+				text: m.level(),
 				filter: {
 					type: 'richselect',
 					config: {
 						placeholder: 'Filter by level...',
 						options: [
-							{ id: '', label: 'All Levels' },
-							{ id: 'Current', label: 'Current' },
-							{ id: 'Residual', label: 'Residual' }
+							{ id: '', label: m.allLevels() },
+							{ id: 'Current', label: m.current() },
+							{ id: 'Residual', label: m.residual() }
 						]
 					}
 				}
 			},
 			flexgrow: 1,
 			sort: true,
-			displayName: 'Level'
+			displayName: m.level()
 		},
 		{
 			id: 'ale',
-			header: { text: 'ALE' },
+			header: { text: m.ale() },
 			flexgrow: 1,
 			sort: true,
 			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
-			displayName: 'ALE'
+			displayName: m.ale()
 		},
 		{
 			id: 'var_95',
-			header: { text: 'VaR 95%' },
+			header: { text: m.var95() },
 			flexgrow: 1,
 			sort: true,
 			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
-			displayName: 'VaR 95%'
+			displayName: m.var95()
 		},
 		{
 			id: 'var_99',
-			header: { text: 'VaR 99%' },
+			header: { text: m.var99() },
 			flexgrow: 1,
 			sort: true,
 			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
-			displayName: 'VaR 99%'
+			displayName: m.var99()
 		},
 		{
 			id: 'var_999',
-			header: { text: 'VaR 99.9%' },
+			header: { text: m.var999() },
 			flexgrow: 1,
 			sort: true,
 			template: (value: any, row: any, col: any) => formatCurrency(value, currency),
-			displayName: 'VaR 99.9%'
+			displayName: m.var999()
 		},
 		{
 			id: 'probability',
-			header: { text: 'P(>Threshold)' },
+			header: { text: m.pThreshold() },
 			flexgrow: 1,
 			sort: true,
 			template: (value: any, row: any, col: any) => formatProbability(value),
-			displayName: 'P(>Threshold)'
+			displayName: m.pThreshold()
 		}
 	];
 
@@ -291,15 +292,15 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-8">
 		<div>
-			<h1 class="text-3xl font-bold text-gray-900">Key Metrics</h1>
-			<p class="text-gray-600 mt-2">Advanced analysis metrics for quantitative risk scenarios</p>
+			<h1 class="text-3xl font-bold text-gray-900">{m.keyMetrics()}</h1>
+			<p class="text-gray-600 mt-2">{m.advancedAnalysisMetrics()}</p>
 		</div>
 		<button
 			class="btn variant-ghost-surface"
 			on:click={() => goto(`/quantitative-risk-studies/${$page.params.id}`)}
 		>
 			<i class="fa-solid fa-arrow-left mr-2"></i>
-			Back to Study
+			{m.backToStudy()}
 		</button>
 	</div>
 
@@ -316,7 +317,7 @@
 			<!-- Study Overview -->
 			<div class="bg-white rounded-lg p-6 shadow-sm mb-8">
 				<div class="flex justify-between items-center mb-4">
-					<h2 class="text-xl font-semibold text-gray-900">Study Overview</h2>
+					<h2 class="text-xl font-semibold text-gray-900">{m.studyOverview()}</h2>
 					<div class="text-sm text-gray-600">
 						{keyMetricsData.currency} • {keyMetricsData.total_scenarios} scenarios
 					</div>
@@ -327,19 +328,19 @@
 						<div class="text-2xl font-bold text-blue-600">
 							{keyMetricsData.scenarios_with_current_data}
 						</div>
-						<div class="text-sm text-gray-600">Scenarios with Current Data</div>
+						<div class="text-sm text-gray-600">{m.scenariosWithCurrentData()}</div>
 					</div>
 					<div class="bg-green-50 rounded-lg p-4 text-center">
 						<div class="text-2xl font-bold text-green-600">
 							{keyMetricsData.scenarios_with_residual_data}
 						</div>
-						<div class="text-sm text-gray-600">Scenarios with Residual Data</div>
+						<div class="text-sm text-gray-600">{m.scenariosWithResidualData()}</div>
 					</div>
 					<div class="bg-purple-50 rounded-lg p-4 text-center">
 						<div class="text-2xl font-bold text-purple-600">
 							{keyMetricsData.loss_threshold_display}
 						</div>
-						<div class="text-sm text-gray-600">Loss Threshold</div>
+						<div class="text-sm text-gray-600">{m.lossThresholdLabel()}</div>
 					</div>
 				</div>
 			</div>
