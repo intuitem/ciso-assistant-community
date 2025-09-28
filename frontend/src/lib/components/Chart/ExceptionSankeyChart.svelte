@@ -49,7 +49,7 @@
 			tooltip: {
 				trigger: 'item',
 				triggerOn: 'mousemove',
-				formatter: function(params) {
+				formatter: function (params) {
 					if (params.dataType === 'edge') {
 						// For links/flows, get node names by index
 						const sourceNode = nodes[params.data.source];
@@ -109,4 +109,8 @@
 	});
 </script>
 
-<div id={chart_id} class="{height} {width} {classesContainer}" style="width: 100%; height: 100%;"></div>
+<div
+	id={chart_id}
+	class="{height} {width} {classesContainer}"
+	style="width: 100%; height: 100%;"
+></div>

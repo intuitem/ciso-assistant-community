@@ -162,4 +162,8 @@
 	});
 </script>
 
-<div id={chart_id} class="{height} {width} {classesContainer}" style="width: 100%; height: 100%;"></div>
+<div
+	id={chart_id}
+	class="{height} {width} {classesContainer}"
+	style="width: 100%; height: 100%;"
+></div>

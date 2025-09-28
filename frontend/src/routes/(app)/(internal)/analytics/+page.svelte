@@ -698,116 +698,126 @@
 						{#if operationsAnalytics}
 							<section class="space-y-6">
 								<!-- First Row: Summary Cards -->
-							<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
-								<!-- Summary Cards (full width) -->
-								<div class="xl:col-span-1">
-									<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
-										<SimpleCard
-											count={operationsAnalytics.summary_stats.total_incidents}
-											label={m.totalIncidents()}
-											href="/incidents/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={operationsAnalytics.summary_stats.incidents_this_month}
-											label={m.incidentsThisMonth()}
-											href="/incidents/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={operationsAnalytics.summary_stats.open_incidents}
-											label={m.openIncidents()}
-											href="/incidents/?status=new&status=ongoing&status=resolved"
-											emphasis={true}
-										/>
-									</CardGroup>
-								</div>
-							</div>
-
-							<!-- Second Row: Severity Breakdown and Qualifications Radar -->
-							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-								<!-- Severity Breakdown Chart -->
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.incidentSeverityBreakdown()}</h3>
-									<div class="h-80">
-										<DonutChart
-											name="incident_severity"
-											values={operationsAnalytics.severity_breakdown}
-										/>
+								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
+									<!-- Summary Cards (full width) -->
+									<div class="xl:col-span-1">
+										<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
+											<SimpleCard
+												count={operationsAnalytics.summary_stats.total_incidents}
+												label={m.totalIncidents()}
+												href="/incidents/"
+												emphasis={true}
+											/>
+											<SimpleCard
+												count={operationsAnalytics.summary_stats.incidents_this_month}
+												label={m.incidentsThisMonth()}
+												href="/incidents/"
+												emphasis={true}
+											/>
+											<SimpleCard
+												count={operationsAnalytics.summary_stats.open_incidents}
+												label={m.openIncidents()}
+												href="/incidents/?status=new&status=ongoing&status=resolved"
+												emphasis={true}
+											/>
+										</CardGroup>
 									</div>
 								</div>
 
-								<!-- Qualifications Radar Chart -->
+								<!-- Second Row: Severity Breakdown and Qualifications Radar -->
+								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+									<!-- Severity Breakdown Chart -->
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.incidentSeverityBreakdown()}
+										</h3>
+										<div class="h-80">
+											<DonutChart
+												name="incident_severity"
+												values={operationsAnalytics.severity_breakdown}
+											/>
+										</div>
+									</div>
+
+									<!-- Qualifications Radar Chart -->
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.incidentQualificationsRadar()}
+										</h3>
+										<div class="h-80">
+											{#if operationsAnalytics.qualifications_breakdown.labels.length > 0}
+												<RadarChart
+													name="incident_qualifications"
+													title=""
+													labels={operationsAnalytics.qualifications_breakdown.labels}
+													values={operationsAnalytics.qualifications_breakdown.values}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-gray-500">
+													<p>{m.noQualificationsData()}</p>
+												</div>
+											{/if}
+										</div>
+									</div>
+								</div>
+
+								<!-- Third Row: Monthly Metrics and Detection Breakdown -->
+								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+									<!-- Monthly Incident Metrics (3/5 of width) -->
+									<div class="xl:col-span-3">
+										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+											<h3 class="text-lg font-semibold text-gray-900 mb-4">
+												{m.monthlyIncidentMetrics()}
+											</h3>
+											<div class="h-80">
+												<IncidentMonthlyChart
+													name="incident_monthly"
+													title=""
+													months={operationsAnalytics.monthly_metrics.months}
+													monthlyCount={operationsAnalytics.monthly_metrics.monthly_counts}
+													cumulativeCount={operationsAnalytics.monthly_metrics.cumulative_counts}
+												/>
+											</div>
+										</div>
+									</div>
+
+									<!-- Detection Breakdown Chart (2/5 of width) -->
+									<div class="xl:col-span-2">
+										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+											<h3 class="text-lg font-semibold text-gray-900 mb-4">
+												{m.incidentDetectionBreakdown()}
+											</h3>
+											<div class="h-80">
+												<DonutChart
+													name="incident_detection"
+													values={operationsAnalytics.incident_detection_breakdown}
+													colors={['#3B82F6', '#EF4444']}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Fourth Row: Security Exception Flow -->
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.incidentQualificationsRadar()}</h3>
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.securityExceptionFlow()}
+									</h3>
 									<div class="h-80">
-										{#if operationsAnalytics.qualifications_breakdown.labels.length > 0}
-											<RadarChart
-												name="incident_qualifications"
+										{#if operationsAnalytics.exception_sankey.nodes.length > 0}
+											<ExceptionSankeyChart
+												name="exception_sankey"
 												title=""
-												labels={operationsAnalytics.qualifications_breakdown.labels}
-												values={operationsAnalytics.qualifications_breakdown.values}
+												nodes={operationsAnalytics.exception_sankey.nodes}
+												links={operationsAnalytics.exception_sankey.links}
 											/>
 										{:else}
 											<div class="flex items-center justify-center h-full text-gray-500">
-												<p>{m.noQualificationsData()}</p>
+												<p>{m.noExceptionData()}</p>
 											</div>
 										{/if}
 									</div>
 								</div>
-							</div>
-
-							<!-- Third Row: Monthly Metrics and Detection Breakdown -->
-							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-								<!-- Monthly Incident Metrics (3/5 of width) -->
-								<div class="xl:col-span-3">
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.monthlyIncidentMetrics()}</h3>
-										<div class="h-80">
-											<IncidentMonthlyChart
-												name="incident_monthly"
-												title=""
-												months={operationsAnalytics.monthly_metrics.months}
-												monthlyCount={operationsAnalytics.monthly_metrics.monthly_counts}
-												cumulativeCount={operationsAnalytics.monthly_metrics.cumulative_counts}
-											/>
-										</div>
-									</div>
-								</div>
-
-								<!-- Detection Breakdown Chart (2/5 of width) -->
-								<div class="xl:col-span-2">
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.incidentDetectionBreakdown()}</h3>
-										<div class="h-80">
-											<DonutChart
-												name="incident_detection"
-												values={operationsAnalytics.incident_detection_breakdown}
-												colors={['#3B82F6', '#EF4444']}
-											/>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<!-- Fourth Row: Security Exception Flow -->
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.securityExceptionFlow()}</h3>
-								<div class="h-80">
-									{#if operationsAnalytics.exception_sankey.nodes.length > 0}
-										<ExceptionSankeyChart
-											name="exception_sankey"
-											title=""
-											nodes={operationsAnalytics.exception_sankey.nodes}
-											links={operationsAnalytics.exception_sankey.links}
-										/>
-									{:else}
-										<div class="flex items-center justify-center h-full text-gray-500">
-											<p>{m.noExceptionData()}</p>
-										</div>
-									{/if}
-								</div>
-							</div>
 							</section>
 						{:else}
 							<div
@@ -830,7 +840,9 @@
 							</div>
 						{/if}
 					{:catch error}
-						<div class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-dashed border-red-300">
+						<div
+							class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-dashed border-red-300"
+						>
 							<div class="text-red-400 mb-4">
 								<i class="fas fa-exclamation-triangle text-6xl"></i>
 							</div>
