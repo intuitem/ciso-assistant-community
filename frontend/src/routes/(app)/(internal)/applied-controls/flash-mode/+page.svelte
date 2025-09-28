@@ -188,7 +188,7 @@
 						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 					>
 						<i class="fa-solid fa-arrow-left"></i>
-						<p class="">{m.goBack()}</p>
+						<p class="">{m.goBackToControls()}</p>
 					</a>
 				</div>
 				<div class="relative">
@@ -243,26 +243,38 @@
 			<!-- Main content area -->
 			<div class="flex flex-col flex-1 justify-center overflow-hidden">
 				<div class="flex flex-col items-center space-y-6 h-full">
-					<button
-						onclick={navigateToEdit}
-						class="font-semibold text-xl hover:text-primary-600 cursor-pointer flex-shrink-0 text-center"
-						title="Click to edit this applied control"
-					>
-						{currentAppliedControl.name || 'Unnamed Applied Control'}
-					</button>
+					<div class="flex flex-col items-center space-y-2">
+						<button
+							onclick={navigateToEdit}
+							class="font-semibold text-xl hover:text-primary-600 cursor-pointer flex-shrink-0 text-center"
+							title="Click to edit this applied control"
+						>
+							{currentAppliedControl.name || 'Unnamed Applied Control'}
+						</button>
+
+						<div class="flex flex-col items-center space-y-1 text-sm text-gray-600">
+							{#if currentAppliedControl.folder}
+								<div class="flex items-center space-x-1">
+									<i class="fa-solid fa-folder text-xs"></i>
+									<span><strong>{m.folder()}</strong> {currentAppliedControl.folder.str}</span>
+								</div>
+							{/if}
+							{#if currentAppliedControl.owner && currentAppliedControl.owner.length > 0}
+								<div class="flex items-center space-x-1">
+									<i class="fa-solid fa-user text-xs"></i>
+									<span
+										><strong>{m.owner()}</strong>
+										{currentAppliedControl.owner.map((o) => o.str).join(', ')}</span
+									>
+								</div>
+							{/if}
+						</div>
+					</div>
 
 					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
 						{#if currentAppliedControl.description}
 							<div class="whitespace-pre-wrap leading-relaxed text-gray-700 text-left">
 								<MarkdownRenderer content={currentAppliedControl.description} />
-							</div>
-						{/if}
-						{#if currentAppliedControl.reference_control && currentAppliedControl.reference_control.description}
-							<div
-								class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-left"
-							>
-								<div class="text-sm font-medium text-gray-800 mb-2">Reference Control:</div>
-								<MarkdownRenderer content={currentAppliedControl.reference_control.description} />
 							</div>
 						{/if}
 					</div>
@@ -296,7 +308,7 @@
 							onChange={(newValue) => updateField('control_impact', newValue, impactOptions)}
 							key="id"
 							labelKey="label"
-							label={m.impact()}
+							label={m.controlImpact()}
 						/>
 					{/key}
 
@@ -338,7 +350,7 @@
 							onChange={(newValue) => updateField('csf_function', newValue, csfFunctionOptions)}
 							key="id"
 							labelKey="label"
-							label="CSF Function"
+							label={m.csfFunction()}
 						/>
 					{/key}
 				</div>

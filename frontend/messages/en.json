@@ -2229,5 +2229,5 @@
 	"associatedEvidenceRevisions": "Associated versions",
 	"userExpiryHelpText": "User will be disabled after this date. Super users are not affected.",
 	"isSuperuser": "Is superuser",
-	"goBack": "Go back"
+	"goBackToControls": "Back to controls"
 }
