@@ -80,9 +80,15 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return {};
 		});
 
-	const operationsAnalytics = await fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
-		.then((res) => res.json())
-		.then(async (detectionData) => {
+	const getOperationsAnalytics = async () => {
+		try {
+			const detectionData = await fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident detection breakdown:', error);
+					return { results: [] };
+				});
+
 			const monthlyData = await fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
 				.then((res) => res.json())
 				.catch((error) => {
@@ -126,11 +132,11 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 				qualifications_breakdown: qualificationsData.results,
 				exception_sankey: exceptionSankeyData.results
 			};
-		})
-		.catch((error) => {
+		} catch (error) {
 			console.error('Failed to fetch operations analytics:', error);
 			return null;
-		});
+		}
+	};
 
 	return {
 		composerForm,
@@ -145,12 +151,12 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
 		complianceAnalytics,
-		operationsAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {
 			metrics: getMetrics(),
-			counters: getCounters()
+			counters: getCounters(),
+			operationsAnalytics: getOperationsAnalytics()
 		}
 	};
 };

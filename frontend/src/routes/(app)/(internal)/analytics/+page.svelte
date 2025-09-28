@@ -689,28 +689,33 @@
 					</section>
 				</Tabs.Panel>
 				<Tabs.Panel value="operations">
-					<section class="space-y-6">
-
-						{#if data.operationsAnalytics}
-							<!-- First Row: Summary Cards -->
+					{#await data.stream.operationsAnalytics}
+						<div class="col-span-3 lg:col-span-1">
+							<div>Refreshing data ..</div>
+							<LoadingSpinner />
+						</div>
+					{:then operationsAnalytics}
+						{#if operationsAnalytics}
+							<section class="space-y-6">
+								<!-- First Row: Summary Cards -->
 							<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
 								<!-- Summary Cards (full width) -->
 								<div class="xl:col-span-1">
 									<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
 										<SimpleCard
-											count={data.operationsAnalytics.summary_stats.total_incidents}
+											count={operationsAnalytics.summary_stats.total_incidents}
 											label={m.totalIncidents()}
 											href="/incidents/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={data.operationsAnalytics.summary_stats.incidents_this_month}
+											count={operationsAnalytics.summary_stats.incidents_this_month}
 											label={m.incidentsThisMonth()}
 											href="/incidents/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={data.operationsAnalytics.summary_stats.open_incidents}
+											count={operationsAnalytics.summary_stats.open_incidents}
 											label={m.openIncidents()}
 											href="/incidents/?status=new&status=ongoing&status=resolved"
 											emphasis={true}
@@ -727,7 +732,7 @@
 									<div class="h-80">
 										<DonutChart
 											name="incident_severity"
-											values={data.operationsAnalytics.severity_breakdown}
+											values={operationsAnalytics.severity_breakdown}
 										/>
 									</div>
 								</div>
@@ -736,12 +741,12 @@
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 									<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.incidentQualificationsRadar()}</h3>
 									<div class="h-80">
-										{#if data.operationsAnalytics.qualifications_breakdown.labels.length > 0}
+										{#if operationsAnalytics.qualifications_breakdown.labels.length > 0}
 											<RadarChart
 												name="incident_qualifications"
 												title=""
-												labels={data.operationsAnalytics.qualifications_breakdown.labels}
-												values={data.operationsAnalytics.qualifications_breakdown.values}
+												labels={operationsAnalytics.qualifications_breakdown.labels}
+												values={operationsAnalytics.qualifications_breakdown.values}
 											/>
 										{:else}
 											<div class="flex items-center justify-center h-full text-gray-500">
@@ -762,9 +767,9 @@
 											<IncidentMonthlyChart
 												name="incident_monthly"
 												title=""
-												months={data.operationsAnalytics.monthly_metrics.months}
-												monthlyCount={data.operationsAnalytics.monthly_metrics.monthly_counts}
-												cumulativeCount={data.operationsAnalytics.monthly_metrics.cumulative_counts}
+												months={operationsAnalytics.monthly_metrics.months}
+												monthlyCount={operationsAnalytics.monthly_metrics.monthly_counts}
+												cumulativeCount={operationsAnalytics.monthly_metrics.cumulative_counts}
 											/>
 										</div>
 									</div>
@@ -777,7 +782,7 @@
 										<div class="h-80">
 											<DonutChart
 												name="incident_detection"
-												values={data.operationsAnalytics.incident_detection_breakdown}
+												values={operationsAnalytics.incident_detection_breakdown}
 												colors={['#3B82F6', '#EF4444']}
 											/>
 										</div>
@@ -789,12 +794,12 @@
 							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 								<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.securityExceptionFlow()}</h3>
 								<div class="h-80">
-									{#if data.operationsAnalytics.exception_sankey.nodes.length > 0}
+									{#if operationsAnalytics.exception_sankey.nodes.length > 0}
 										<ExceptionSankeyChart
 											name="exception_sankey"
 											title=""
-											nodes={data.operationsAnalytics.exception_sankey.nodes}
-											links={data.operationsAnalytics.exception_sankey.links}
+											nodes={operationsAnalytics.exception_sankey.nodes}
+											links={operationsAnalytics.exception_sankey.links}
 										/>
 									{:else}
 										<div class="flex items-center justify-center h-full text-gray-500">
@@ -803,6 +808,7 @@
 									{/if}
 								</div>
 							</div>
+							</section>
 						{:else}
 							<div
 								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
@@ -823,7 +829,17 @@
 								</a>
 							</div>
 						{/if}
-					</section>
+					{:catch error}
+						<div class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-dashed border-red-300">
+							<div class="text-red-400 mb-4">
+								<i class="fas fa-exclamation-triangle text-6xl"></i>
+							</div>
+							<div class="text-red-600">
+								<p class="text-xl font-semibold mb-2">Error loading operations data</p>
+								<p class="text-sm text-red-500">Please try refreshing the page</p>
+							</div>
+						</div>
+					{/await}
 				</Tabs.Panel>
 			</div>
 		{/key}
