@@ -1488,7 +1488,7 @@
 	"monthlyCount": "Monthly Count",
 	"cumulativeCount": "Cumulative Count",
 	"createAssessment": "Create Assessment",
-	"securityExceptionFlow": "Security Exception Flow",
+	"securityExceptionFlow": "Exceptions breakdown",
 	"noExceptionData": "No security exceptions found",
 	"timestamp": "Timestamp",
 	"addTimelineEntry": "Add an event",

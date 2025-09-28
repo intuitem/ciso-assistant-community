@@ -1454,6 +1454,7 @@
 	"monthlyCount": "Total par mois",
 	"cumulativeCount": "Total cummulé",
 	"createAssessment": "Create Assessment",
+	"securityExceptionFlow": "Analyse des exceptions",
 	"timestamp": "Horodatage",
 	"addTimelineEntry": "Ajouter un événement",
 	"associatedTimelineEntries": "Entrées chronologiques",

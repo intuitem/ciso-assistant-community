@@ -48,7 +48,18 @@
 			},
 			tooltip: {
 				trigger: 'item',
-				triggerOn: 'mousemove'
+				triggerOn: 'mousemove',
+				formatter: function(params) {
+					if (params.dataType === 'edge') {
+						// For links/flows, get node names by index
+						const sourceNode = nodes[params.data.source];
+						const targetNode = nodes[params.data.target];
+						return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
+					} else {
+						// For nodes, show the node name and its total count
+						return `${params.name}<br/>Count: ${params.value}`;
+					}
+				}
 			},
 			series: [
 				{

@@ -6407,7 +6407,8 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         combinations = (
             queryset.values("severity", "status")
             .annotate(count=Count("id"))
-            .filter(count__gt=0)
+            .filter(count__gt=0, status__isnull=False)
+            .exclude(status="")
         )
 
         # Build Sankey data structure
@@ -6415,19 +6416,28 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         links = []
         node_names = set()
 
-        # Create severity nodes (source)
-        severity_map = {}
-        for choice in Severity.choices:
-            severity_label = f"Severity: {choice[1].title()}"
-            severity_map[choice[0]] = severity_label
-            node_names.add(severity_label)
+        # Create maps for severity and status labels
+        severity_choice_map = {choice[0]: choice[1] for choice in Severity.choices}
+        status_choice_map = {
+            choice[0]: choice[1] for choice in SecurityException.Status.choices
+        }
 
-        # Create status nodes (target)
+        # Create severity and status nodes only for data that exists
+        severity_map = {}
         status_map = {}
-        for choice in SecurityException.Status.choices:
-            status_label = f"Status: {choice[1].title()}"
-            status_map[choice[0]] = status_label
-            node_names.add(status_label)
+
+        for combo in combinations:
+            # Create severity node if not already created
+            if combo["severity"] not in severity_map:
+                severity_label = f"Severity: {severity_choice_map.get(combo['severity'], 'Unknown').title()}"
+                severity_map[combo["severity"]] = severity_label
+                node_names.add(severity_label)
+
+            # Create status node if not already created
+            if combo["status"] not in status_map:
+                status_label = f"Status: {status_choice_map.get(combo['status'], 'Unknown').title()}"
+                status_map[combo["status"]] = status_label
+                node_names.add(status_label)
 
         # Convert node names to indexed list
         nodes = [{"name": name} for name in sorted(node_names)]
