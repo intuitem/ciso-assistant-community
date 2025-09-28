@@ -80,6 +80,58 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return {};
 		});
 
+	const operationsAnalytics = await fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+		.then((res) => res.json())
+		.then(async (detectionData) => {
+			const monthlyData = await fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch monthly incident metrics:', error);
+					return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
+				});
+
+			const summaryData = await fetch(`${BASE_API_URL}/incidents/summary_stats/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident summary stats:', error);
+					return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
+				});
+
+			const severityData = await fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident severity breakdown:', error);
+					return { results: [] };
+				});
+
+			const qualificationsData = await fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident qualifications breakdown:', error);
+					return { results: { labels: [], values: [] } };
+				});
+
+			const exceptionSankeyData = await fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch security exception Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				});
+
+			return {
+				incident_detection_breakdown: detectionData.results,
+				monthly_metrics: monthlyData.results,
+				summary_stats: summaryData.results,
+				severity_breakdown: severityData.results,
+				qualifications_breakdown: qualificationsData.results,
+				exception_sankey: exceptionSankeyData.results
+			};
+		})
+		.catch((error) => {
+			console.error('Failed to fetch operations analytics:', error);
+			return null;
+		});
+
 	return {
 		composerForm,
 		usedRiskMatrices,
@@ -93,6 +145,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
 		complianceAnalytics,
+		operationsAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {
