@@ -2228,5 +2228,6 @@
 	"addEvidenceRevision": "Add Revision",
 	"associatedEvidenceRevisions": "Associated versions",
 	"userExpiryHelpText": "User will be disabled after this date. Super users are not affected.",
-	"isSuperuser": "Is superuser"
+	"isSuperuser": "Is superuser",
+	"goBack": "Go back"
 }
