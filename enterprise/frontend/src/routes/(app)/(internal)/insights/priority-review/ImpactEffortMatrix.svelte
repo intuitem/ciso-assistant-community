@@ -11,7 +11,7 @@
 	let { data }: Props = $props();
 
 	let selectedCell: { impact: number; effort: number } | null = $state(null);
-	let overrideFilters: {[key: string]: any[]} = $state({control_impact: [], effort: []})
+	let overrideFilters: { [key: string]: any[] } = $state({ control_impact: [], effort: [] });
 
 	let modelTableKey = $state(0); // Force re-render when incremented
 
@@ -43,7 +43,7 @@
 
 	function resetFilters() {
 		selectedCell = null;
-		overrideFilters = {control_impact: [], effort: []};
+		overrideFilters = { control_impact: [], effort: [] };
 		modelTableKey++;
 	}
 </script>

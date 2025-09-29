@@ -37,6 +37,7 @@
 	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
 	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
 	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
+	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -63,6 +64,7 @@
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
+	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -356,7 +358,16 @@
 		{:else if URLModel === 'reference-controls'}
 			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'evidences'}
-			<EvidencesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
+			<EvidencesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'compliance-assessments'}
 			<ComplianceAssessmentsForm
 				{form}
@@ -499,6 +510,16 @@
 			/>
 		{:else if URLModel === 'data-transfers'}
 			<DataTransferForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{initialData}
+				{...rest}
+			/>
+		{:else if URLModel === 'right-requests'}
+			<RightRequestForm
 				{form}
 				{model}
 				{cacheLocks}
@@ -663,6 +684,16 @@
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'roles'}
 			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		{:else if URLModel === 'evidence-revisions'}
+			<EvidenceRevisionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

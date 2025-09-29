@@ -5,6 +5,7 @@ import type { Option } from 'svelte-multiselect';
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
+import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
@@ -908,6 +909,53 @@ const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'evidences/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'evidences/owner',
+		multiple: true
+	}
+};
+
+const VULNERABILITY_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'vulnerabilities/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'vulnerabilities/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -950,7 +998,9 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			status: VULNERABILITY_STATUS_FILTER,
+			severity: VULNERABILITY_SEVERITY_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -1223,10 +1273,19 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'description', 'folder', 'labels'],
-		body: ['name', 'attachment', 'size', 'description', 'folder', 'filtering_labels'],
+		head: ['name', 'file', 'size', 'folder', 'status', 'updatedAt', 'labels'],
+		body: ['name', 'attachment', 'size', 'folder', 'status', 'updated_at', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER,
+			status: EVIDENCE_STATUS_FILTER,
+			owner: EVIDENCE_OWNER_FILTER
+		}
+	},
+	'evidence-revisions': {
+		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
+		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
+		filters: {
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1359,6 +1418,50 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
 			legal_basis: PROCESSING_LEGAL_BASIS_FILTER
+		}
+	},
+	'right-requests': {
+		head: ['refId', 'name', 'requestType', 'status', 'owner', 'requestedOn', 'dueDate', 'folder'],
+		body: [
+			'ref_id',
+			'name',
+			'request_type',
+			'status',
+			'owner',
+			'requested_on',
+			'due_date',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			request_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/request_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'requestType',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					multiple: true
+				}
+			},
+			processings: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings',
+					label: 'processings',
+					multiple: true
+				}
+			}
 		}
 	},
 	purposes: {
@@ -1497,8 +1600,24 @@ export const listViewFields = {
 		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
-		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
-		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'severity',
+			'status',
+			'expiration_date',
+			'domain',
+			'associatedObjectsCount'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'severity',
+			'status',
+			'expiration_date',
+			'folder',
+			'associated_objects_count'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
@@ -1551,6 +1670,7 @@ export const listViewFields = {
 			'detection',
 			'folder',
 			'qualifications',
+			'entities',
 			'updated_at'
 		],
 		body: [
@@ -1561,11 +1681,13 @@ export const listViewFields = {
 			'detection',
 			'folder',
 			'qualifications',
+			'entities',
 			'updated_at'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
+			entities: ENTITY_FILTER,
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
 			severity: INCIDENT_SEVERITY_FILTER
@@ -1593,8 +1715,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-issues': {
-		head: ['name', 'category', 'origin', 'domain'],
-		body: ['name', 'category', 'origin', 'folder'],
+		head: ['refId', 'name', 'category', 'origin', 'domain'],
+		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
@@ -1678,6 +1800,7 @@ export const listViewFields = {
 	},
 	'task-templates': {
 		head: [
+			'refId',
 			'name',
 			'is_recurrent',
 			'assigned_to',
@@ -1687,6 +1810,7 @@ export const listViewFields = {
 			'folder'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'is_recurrent',
 			'assigned_to',
@@ -1746,6 +1870,7 @@ export const contextMenuActions = {
 		{ component: ChangeEffort, props: {} },
 		{ component: ChangePriority, props: {} }
 	],
+	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
@@ -1753,13 +1878,13 @@ export const contextMenuActions = {
 	'operational-scenarios': [{ component: SelectObject, props: {} }]
 };
 
-export const getListViewFields = ({
+export function getListViewFields({
 	key,
 	featureFlags = {}
 }: {
 	key: string;
 	featureFlags: Record<string, boolean>;
-}) => {
+}) {
 	if (!Object.keys(listViewFields).includes(key)) {
 		return { head: [], body: [] };
 	}
@@ -1788,12 +1913,4 @@ export const getListViewFields = ({
 		head,
 		body
 	};
-};
-
-function insertField(fields: string[], fieldToInsert: string, afterField: string): string[] {
-	const index = fields.indexOf(afterField);
-	if (index === -1) return fields;
-	const clone = [...fields];
-	clone.splice(index + 1, 0, fieldToInsert);
-	return clone;
 }
