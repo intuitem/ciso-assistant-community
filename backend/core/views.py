@@ -730,9 +730,7 @@ class AssetViewSet(BaseModelViewSet):
         if not objectives:
             return []
         return [
-            {
-                "str": f"{key.upper()}: {Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}"
-            }
+            {key: Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 objectives.items(),
                 key=lambda x: Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
@@ -2411,6 +2409,87 @@ class AppliedControlViewSet(BaseModelViewSet):
                 links.append({"source": indexes[ac_key], "target": indexes[sc_key]})
 
         return Response({"nodes": nodes, "categories": categories, "links": links})
+
+    @action(detail=False, name="Get applied controls sunburst data")
+    def sunburst_data(self, request):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        queryset = AppliedControl.objects.filter(id__in=viewable_objects)
+
+        # Build hierarchical structure: folder -> csf_function -> category -> priority -> status
+        hierarchy = {}
+
+        for control in queryset.select_related("folder"):
+            # Level 1: Folder (Domain)
+            folder_name = control.folder.name if control.folder else "No Domain"
+            if folder_name not in hierarchy:
+                hierarchy[folder_name] = {}
+
+            # Level 2: CSF Function
+            csf_function = (
+                dict(AppliedControl.CSF_FUNCTION).get(
+                    control.csf_function, "No CSF Function"
+                )
+                if control.csf_function
+                else "No CSF Function"
+            )
+            if csf_function not in hierarchy[folder_name]:
+                hierarchy[folder_name][csf_function] = {}
+
+            # Level 3: Category
+            category = (
+                dict(AppliedControl.CATEGORY).get(control.category, "No Category")
+                if control.category
+                else "No Category"
+            )
+            if category not in hierarchy[folder_name][csf_function]:
+                hierarchy[folder_name][csf_function][category] = {}
+
+            # Level 4: Priority
+            priority = (
+                dict(AppliedControl.PRIORITY).get(control.priority, "No Priority")
+                if control.priority
+                else "No Priority"
+            )
+            if priority not in hierarchy[folder_name][csf_function][category]:
+                hierarchy[folder_name][csf_function][category][priority] = {}
+
+            # Level 5: Status
+            status = (
+                dict(AppliedControl.Status.choices).get(control.status, "No Status")
+                if control.status
+                else "No Status"
+            )
+            if status not in hierarchy[folder_name][csf_function][category][priority]:
+                hierarchy[folder_name][csf_function][category][priority][status] = 0
+            hierarchy[folder_name][csf_function][category][priority][status] += 1
+
+        # Convert to sunburst format
+        def build_sunburst_data(data_dict, name="Root"):
+            if isinstance(data_dict, int):
+                return {"name": name, "value": data_dict}
+
+            children = []
+            total_value = 0
+
+            for key, value in data_dict.items():
+                child = build_sunburst_data(value, key)
+                children.append(child)
+                total_value += child.get("value", 0)
+
+            result = {"name": name, "value": total_value}
+            if children:
+                result["children"] = children
+
+            return result
+
+        sunburst_data = []
+        for folder_name, folder_data in hierarchy.items():
+            folder_node = build_sunburst_data(folder_data, folder_name)
+            sunburst_data.append(folder_node)
+
+        return Response({"results": sunburst_data})
 
 
 class ActionPlanList(generics.ListAPIView):
@@ -6389,6 +6468,75 @@ class SecurityExceptionViewSet(BaseModelViewSet):
             )
         )
 
+    @action(detail=False, name="Get security exception Sankey data")
+    def sankey_data(self, request):
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, SecurityException
+        )
+        queryset = SecurityException.objects.filter(id__in=viewable_objects)
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        # Get severity and status combinations
+        from django.db.models import Count
+
+        combinations = (
+            queryset.values("severity", "status")
+            .annotate(count=Count("id"))
+            .filter(count__gt=0, status__isnull=False)
+            .exclude(status="")
+        )
+
+        # Build Sankey data structure
+        nodes = []
+        links = []
+        node_names = set()
+
+        # Create maps for severity and status labels
+        severity_choice_map = {choice[0]: choice[1] for choice in Severity.choices}
+        status_choice_map = {
+            choice[0]: choice[1] for choice in SecurityException.Status.choices
+        }
+
+        # Create severity and status nodes only for data that exists
+        severity_map = {}
+        status_map = {}
+
+        for combo in combinations:
+            # Create severity node if not already created
+            if combo["severity"] not in severity_map:
+                severity_label = f"Severity: {severity_choice_map.get(combo['severity'], 'Unknown').title()}"
+                severity_map[combo["severity"]] = severity_label
+                node_names.add(severity_label)
+
+            # Create status node if not already created
+            if combo["status"] not in status_map:
+                status_label = f"Status: {status_choice_map.get(combo['status'], 'Unknown').title()}"
+                status_map[combo["status"]] = status_label
+                node_names.add(status_label)
+
+        # Convert node names to indexed list
+        nodes = [{"name": name} for name in sorted(node_names)]
+        node_index = {name: i for i, name in enumerate(sorted(node_names))}
+
+        # Create links
+        for combo in combinations:
+            severity_name = severity_map[combo["severity"]]
+            status_name = status_map[combo["status"]]
+
+            links.append(
+                {
+                    "source": node_index[severity_name],
+                    "target": node_index[status_name],
+                    "value": combo["count"],
+                }
+            )
+
+        return Response({"results": {"nodes": nodes, "links": links}})
+
 
 class FindingsAssessmentViewSet(BaseModelViewSet):
     model = FindingsAssessment
@@ -7030,6 +7178,219 @@ class IncidentViewSet(BaseModelViewSet):
             f'attachment; filename="{safe_name}_report.md"'
         )
         return response
+
+    @action(detail=False, name="Get incident detection breakdown")
+    def detection_breakdown(self, request):
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Incident
+        )
+        queryset = Incident.objects.filter(id__in=viewable_objects)
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        detection_stats = []
+        for detection_choice in Incident.Detection.choices:
+            count = queryset.filter(detection=detection_choice[0]).count()
+            detection_stats.append(
+                {
+                    "name": detection_choice[1],
+                    "value": count,
+                    "itemStyle": {
+                        "color": "#3B82F6"
+                        if detection_choice[0] == "internally_detected"
+                        else "#EF4444"
+                    },
+                }
+            )
+
+        return Response({"results": detection_stats})
+
+    @action(detail=False, name="Get monthly incident metrics")
+    def monthly_metrics(self, request):
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Incident
+        )
+        queryset = Incident.objects.filter(id__in=viewable_objects)
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        # Get incidents with reported_at dates
+        incidents_with_dates = queryset.filter(reported_at__isnull=False).order_by(
+            "reported_at"
+        )
+
+        if not incidents_with_dates.exists():
+            return Response(
+                {
+                    "results": {
+                        "months": [],
+                        "monthly_counts": [],
+                        "cumulative_counts": [],
+                    }
+                }
+            )
+
+        # Group by month
+        from collections import defaultdict
+        from datetime import datetime
+
+        monthly_counts = defaultdict(int)
+
+        for incident in incidents_with_dates:
+            month_key = incident.reported_at.strftime("%Y-%m")
+            monthly_counts[month_key] += 1
+
+        # Sort months and calculate cumulative
+        sorted_months = sorted(monthly_counts.keys())
+        cumulative_count = 0
+        cumulative_counts = []
+
+        for month in sorted_months:
+            cumulative_count += monthly_counts[month]
+            cumulative_counts.append(cumulative_count)
+
+        # Format months for display
+        formatted_months = []
+        for month in sorted_months:
+            date_obj = datetime.strptime(month, "%Y-%m")
+            formatted_months.append(date_obj.strftime("%b %Y"))
+
+        return Response(
+            {
+                "results": {
+                    "months": formatted_months,
+                    "monthly_counts": [
+                        monthly_counts[month] for month in sorted_months
+                    ],
+                    "cumulative_counts": cumulative_counts,
+                }
+            }
+        )
+
+    @action(detail=False, name="Get incident summary statistics")
+    def summary_stats(self, request):
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Incident
+        )
+        queryset = Incident.objects.filter(id__in=viewable_objects)
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        # Total incidents
+        total_incidents = queryset.count()
+
+        # Incidents this month
+        from datetime import datetime, date
+        import calendar
+
+        today = date.today()
+        first_day = today.replace(day=1)
+        last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+
+        incidents_this_month = queryset.filter(
+            reported_at__date__gte=first_day, reported_at__date__lte=last_day
+        ).count()
+
+        # Currently open incidents (not closed or dismissed)
+        open_incidents = queryset.exclude(
+            status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED]
+        ).count()
+
+        return Response(
+            {
+                "results": {
+                    "total_incidents": total_incidents,
+                    "incidents_this_month": incidents_this_month,
+                    "open_incidents": open_incidents,
+                }
+            }
+        )
+
+    @action(detail=False, name="Get incident severity breakdown")
+    def severity_breakdown(self, request):
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Incident
+        )
+        queryset = Incident.objects.filter(id__in=viewable_objects)
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        # Define severity colors
+        severity_colors = {
+            1: "#DC2626",  # Critical - Red
+            2: "#EA580C",  # Major - Orange
+            3: "#D97706",  # Moderate - Amber
+            4: "#65A30D",  # Minor - Lime
+            5: "#16A34A",  # Low - Green
+            6: "#6B7280",  # Unknown - Gray
+        }
+
+        severity_stats = []
+        for severity_choice in Incident.Severity.choices:
+            count = queryset.filter(severity=severity_choice[0]).count()
+            severity_stats.append(
+                {
+                    "name": severity_choice[1],
+                    "value": count,
+                    "itemStyle": {
+                        "color": severity_colors.get(severity_choice[0], "#6B7280")
+                    },
+                }
+            )
+
+        return Response({"results": severity_stats})
+
+    @action(detail=False, name="Get incident qualifications breakdown")
+    def qualifications_breakdown(self, request):
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Incident
+        )
+        queryset = Incident.objects.filter(id__in=viewable_objects)
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        # Get all unique qualifications used in incidents
+        from django.db.models import Count
+
+        qualifications_stats = []
+
+        # Get qualification counts
+        qualification_counts = (
+            queryset.values("qualifications__name")
+            .annotate(count=Count("id", distinct=True))
+            .filter(qualifications__name__isnull=False)
+            .order_by("-count")
+        )
+
+        # Format for radar chart
+        labels = []
+        values = []
+        for item in qualification_counts:
+            if item["qualifications__name"]:
+                values.append(item["count"])
+
+        # Create labels with proper format for radar chart
+        max_offset = max(values, default=0)
+        for item in qualification_counts:
+            if item["qualifications__name"]:
+                labels.append({"name": item["qualifications__name"], "max": max_offset})
+
+        return Response({"results": {"labels": labels, "values": values}})
 
 
 class TimelineEntryViewSet(BaseModelViewSet):
