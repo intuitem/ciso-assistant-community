@@ -27,7 +27,9 @@
 	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
-
+	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
+	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
+	import { onMount } from 'svelte';
 	interface Props {
 		data: PageData;
 		form: Actions;
@@ -281,9 +283,32 @@
 			};
 		})
 	);
+
+	let tocItems: TocItem[] = $state([]);
+	let showToc = $state(true);
+	// Generate TOC items from requirement assessments
+	$effect(() => {
+		if (requirementAssessments.length > 0) {
+			tocItems = requirementAssessments.map((ra, index) => ({
+				id: `requirement-${ra.id}`,
+				title: getTitle(ra),
+				level: 0
+			}));
+		}
+	});
+	onMount(() => {
+		// Show TOC only if there are more than 3 requirements
+		showToc = requirementAssessments.length > 3;
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
+	<TableOfContents
+		items={tocItems}
+		isVisible={showToc}
+		position="right"
+		className="hidden lg:block"
+	/>
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
@@ -325,7 +350,13 @@
 		{#each requirementAssessments as requirementAssessment, i}
 			<div class="w-2"></div>
 
-			<span class="relative flex justify-center py-4">
+			<span
+				class="relative flex justify-center py-4"
+				id="requirement-{requirementAssessment.id}"
+				data-toc
+				data-toc-title={getTitle(requirementAssessment)}
+				data-toc-level="0"
+			>
 				<div
 					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 				></div>
