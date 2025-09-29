@@ -119,7 +119,10 @@
 								{summaryData.study_total_treatment_cost_display}
 							</div>
 							<div class="text-xs text-gray-500">
-								{summaryData.unique_added_controls_count || 0} {summaryData.unique_added_controls_count === 1 ? m.uniqueControl() : m.uniqueControls()}
+								{summaryData.unique_added_controls_count || 0}
+								{summaryData.unique_added_controls_count === 1
+									? m.uniqueControl()
+									: m.uniqueControls()}
 							</div>
 						</div>
 					{/if}
@@ -228,7 +231,9 @@
 												<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 													{#if scenario.description}
 														<div>
-															<h4 class="text-sm font-medium text-gray-900 mb-2">{m.description()}</h4>
+															<h4 class="text-sm font-medium text-gray-900 mb-2">
+																{m.description()}
+															</h4>
 															<MarkdownRenderer
 																content={scenario.description}
 																class="text-gray-600"
@@ -237,7 +242,9 @@
 													{/if}
 													{#if scenario.observation}
 														<div>
-															<h4 class="text-sm font-medium text-gray-900 mb-2">{m.observation()}</h4>
+															<h4 class="text-sm font-medium text-gray-900 mb-2">
+																{m.observation()}
+															</h4>
 															<MarkdownRenderer
 																content={scenario.observation}
 																class="text-gray-600"
@@ -263,7 +270,9 @@
 												{/each}
 												{#if scenario.assets.length > 3}
 													<div class="text-sm text-gray-500">
-														{m.andMore()} {scenario.assets.length - 3} {m.more()}
+														{m.andMore()}
+														{scenario.assets.length - 3}
+														{m.more()}
 													</div>
 												{/if}
 											</div>
@@ -282,7 +291,9 @@
 												{/each}
 												{#if scenario.threats.length > 3}
 													<div class="text-sm text-gray-500">
-														{m.andMore()} {scenario.threats.length - 3} {m.more()}
+														{m.andMore()}
+														{scenario.threats.length - 3}
+														{m.more()}
 													</div>
 												{/if}
 											</div>
@@ -301,7 +312,9 @@
 												{/each}
 												{#if scenario.qualifications.length > 3}
 													<div class="text-sm text-gray-500">
-														{m.andMore()} {scenario.qualifications.length - 3} {m.more()}
+														{m.andMore()}
+														{scenario.qualifications.length - 3}
+														{m.more()}
 													</div>
 												{/if}
 											</div>
@@ -316,7 +329,8 @@
 											{#if scenario.existing_controls && scenario.existing_controls.length > 0}
 												<div>
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
-														<i class="fa-solid fa-shield-halved mr-1 text-green-600"></i>{m.existingControls()}
+														<i class="fa-solid fa-shield-halved mr-1 text-green-600"
+														></i>{m.existingControls()}
 														({scenario.existing_controls.length})
 													</h4>
 													<div class="space-y-2">
@@ -360,7 +374,8 @@
 											{#if scenario.additional_controls && scenario.additional_controls.length > 0}
 												<div>
 													<h4 class="text-sm font-medium text-gray-900 mb-3">
-														<i class="fa-solid fa-plus-circle mr-1 text-blue-600"></i>{m.additionalControls()}
+														<i class="fa-solid fa-plus-circle mr-1 text-blue-600"
+														></i>{m.additionalControls()}
 														({scenario.additional_controls.length})
 													</h4>
 													<div class="space-y-2">
@@ -381,7 +396,8 @@
 																	{/if}
 																	{#if control.annual_cost && control.annual_cost > 0}
 																		<div class="text-xs text-blue-700 mt-1">
-																			{m.costYear()} {summaryData.currency}{control.annual_cost.toLocaleString()}{m.costPerYear()}
+																			{m.costYear()}
+																			{summaryData.currency}{control.annual_cost.toLocaleString()}{m.costPerYear()}
 																		</div>
 																	{/if}
 																</div>
@@ -449,7 +465,9 @@
 									{@const toleranceCurve = scenario.lec_curves.find((c) => c.type === 'tolerance')}
 
 									<div class="bg-white border rounded-lg p-4">
-										<h4 class="text-lg font-medium text-gray-900 mb-4">{m.lossExceedanceCurve()}</h4>
+										<h4 class="text-lg font-medium text-gray-900 mb-4">
+											{m.lossExceedanceCurve()}
+										</h4>
 										<div class="w-full">
 											<LossExceedanceCurve
 												name="scenario-lec-{scenario.id}"

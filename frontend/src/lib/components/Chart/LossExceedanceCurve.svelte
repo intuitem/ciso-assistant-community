@@ -201,11 +201,9 @@
 							const toleranceProb = riskToleranceParam.value[1];
 
 							if (currentProb > toleranceProb) {
-								tooltip +=
-									`<span style="color: #dc3545;">⚠️ ${m.currentRiskExceedsTolerance()}</span><br/>`;
+								tooltip += `<span style="color: #dc3545;">⚠️ ${m.currentRiskExceedsTolerance()}</span><br/>`;
 							} else {
-								tooltip +=
-									`<span style="color: #28a745;">✓ ${m.currentRiskWithinTolerance()}</span><br/>`;
+								tooltip += `<span style="color: #28a745;">✓ ${m.currentRiskWithinTolerance()}</span><br/>`;
 							}
 						}
 
@@ -215,8 +213,7 @@
 							const toleranceProb = riskToleranceParam.value[1];
 
 							if (residualProb > toleranceProb) {
-								tooltip +=
-									`<span style="color: #dc3545;">⚠️ ${m.residualRiskExceedsTolerance()}</span>`;
+								tooltip += `<span style="color: #dc3545;">⚠️ ${m.residualRiskExceedsTolerance()}</span>`;
 							} else {
 								tooltip += `<span style="color: #28a745;">✓ ${m.residualRiskWithinTolerance()}</span>`;
 							}

@@ -167,7 +167,8 @@
 							</div>
 							<div class="text-sm text-gray-600">{m.currentAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
-								{data.combinedAle.scenarios_with_current_ale} / {data.combinedAle.total_scenarios} {m.scenarios()}
+								{data.combinedAle.scenarios_with_current_ale} / {data.combinedAle.total_scenarios}
+								{m.scenarios()}
 							</div>
 						</div>
 
@@ -178,7 +179,8 @@
 							</div>
 							<div class="text-sm text-gray-600">{m.residualAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
-								{data.combinedAle.scenarios_with_residual_ale} / {data.combinedAle.total_scenarios} {m.scenarios()}
+								{data.combinedAle.scenarios_with_residual_ale} / {data.combinedAle.total_scenarios}
+								{m.scenarios()}
 							</div>
 						</div>
 
@@ -195,7 +197,8 @@
 					<!-- Summary information -->
 					<div class="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
 						<p class="text-center">
-							<i class="fa-solid fa-circle-info"></i> {m.assumingIndependentScenarios()}
+							<i class="fa-solid fa-circle-info"></i>
+							{m.assumingIndependentScenarios()}
 						</p>
 					</div>
 				</div>
@@ -215,7 +218,8 @@
 									.total_scenarios}
 								{#if data.combinedLec.scenarios_with_residual_data}
 									| Residual: {data.combinedLec.scenarios_with_residual_data} / {data.combinedLec
-										.total_scenarios} {m.scenarios()}
+										.total_scenarios}
+									{m.scenarios()}
 								{/if}
 							</div>
 						</div>

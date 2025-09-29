@@ -319,7 +319,8 @@
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-xl font-semibold text-gray-900">{m.studyOverview()}</h2>
 					<div class="text-sm text-gray-600">
-						{keyMetricsData.currency} • {keyMetricsData.total_scenarios} {m.scenarios()}
+						{keyMetricsData.currency} • {keyMetricsData.total_scenarios}
+						{m.scenarios()}
 					</div>
 				</div>
 
@@ -410,7 +411,10 @@
 						</div>
 						<div class="flex items-center space-x-2">
 							<span class="text-sm text-gray-500">
-								{getVisibleColumnsCount()} {m.columnsOfColumns()} {allColumns.length} {m.columns()}
+								{getVisibleColumnsCount()}
+								{m.columnsOfColumns()}
+								{allColumns.length}
+								{m.columns()}
 							</span>
 							<div class="relative">
 								<button
