@@ -932,6 +932,30 @@ const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const VULNERABILITY_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'vulnerabilities/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'vulnerabilities/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -974,7 +998,9 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			status: VULNERABILITY_STATUS_FILTER,
+			severity: VULNERABILITY_SEVERITY_FILTER
 		}
 	},
 	'risk-assessments': {
