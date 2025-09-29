@@ -2248,6 +2248,7 @@
 	"associatedEvidenceRevisions": "Associated versions",
 	"userExpiryHelpText": "User will be disabled after this date. Super users are not affected.",
 	"isSuperuser": "Is superuser",
+	"goBackToControls": "Back to controls",
 	"pathLabel": "Path",
 	"controlsLabel": "Controls",
 	"countLabel": "Count",
