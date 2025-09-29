@@ -97,14 +97,16 @@
 
 		chart.setOption(option);
 
-		window.addEventListener('resize', function () {
+		const resizeHandler = function () {
 			chart.resize();
-		});
+		};
+
+		window.addEventListener('resize', resizeHandler);
 
 		// Cleanup function
 		return () => {
 			chart.dispose();
-			window.removeEventListener('resize', () => chart.resize());
+			window.removeEventListener('resize', resizeHandler);
 		};
 	});
 </script>
