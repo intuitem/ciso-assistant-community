@@ -290,7 +290,8 @@
 							<select
 								id="status"
 								value={currentAppliedControl?.status || '--'}
-								onchange={(e) => updateField('status', e.target.value === '--' ? null : e.target.value)}
+								onchange={(e) =>
+									updateField('status', e.target.value === '--' ? null : e.target.value)}
 								class="select select-bordered w-full"
 							>
 								{#each statusOptions as option}
