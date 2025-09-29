@@ -29,7 +29,5 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
 		: 7;
 
-	console.log(licenseStatus);
-
 	return { user: locals.user, settings: locals.settings, featureflags: locals.featureflags, licenseStatus, LICENSE_EXPIRATION_NOTIFY_DAYS };
 }) satisfies LayoutServerLoad;
