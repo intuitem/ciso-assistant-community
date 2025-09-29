@@ -98,7 +98,7 @@
 	async function updateField(field: string, newValue: string | number | null, options: any[] = []) {
 		// Convert display value to database value if options provided
 		let processedValue = newValue;
-		if (newValue === '' || newValue === '--') {
+		if (newValue === '' || (newValue === '--' && field !== 'status')) {
 			processedValue = null;
 		} else if (options.length > 0) {
 			// Find the option and get its dbValue
@@ -297,8 +297,7 @@
 							<select
 								id="status"
 								value={currentAppliedControl?.status || '--'}
-								onchange={(e) =>
-									updateField('status', e.target.value === '--' ? null : e.target.value)}
+								onchange={(e) => updateField('status', e.target.value)}
 								class="select select-bordered w-full"
 							>
 								{#each statusOptions as option}
