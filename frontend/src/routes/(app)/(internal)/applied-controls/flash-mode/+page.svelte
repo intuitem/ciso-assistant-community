@@ -4,7 +4,6 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 
 	interface Props {
 		data: PageData;
@@ -283,75 +282,90 @@
 
 			<!-- Field controls -->
 			<div class="flex flex-col space-y-6">
-				<div class="flex flex-col space-y-4">
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					<!-- Status -->
 					{#key currentAppliedControl?.id}
-						<RadioGroup
-							possibleOptions={statusOptions}
-							initialValue={currentAppliedControl?.status || '--'}
-							classes="w-full"
-							field="status"
-							onChange={(newValue) => updateField('status', newValue === '--' ? null : newValue)}
-							key="id"
-							labelKey="label"
-							label={m.status()}
-						/>
+						<div class="flex flex-col space-y-1">
+							<label class="text-sm font-semibold" for="status">{m.status()}</label>
+							<select
+								id="status"
+								value={currentAppliedControl?.status || '--'}
+								onchange={(e) => updateField('status', e.target.value === '--' ? null : e.target.value)}
+								class="select select-bordered w-full"
+							>
+								{#each statusOptions as option}
+									<option value={option.id}>{option.label}</option>
+								{/each}
+							</select>
+						</div>
 					{/key}
 
 					<!-- Impact -->
 					{#key currentAppliedControl?.id}
-						<RadioGroup
-							possibleOptions={impactOptions}
-							initialValue={currentAppliedControl?.control_impact || '--'}
-							classes="w-full"
-							field="control_impact"
-							onChange={(newValue) => updateField('control_impact', newValue, impactOptions)}
-							key="id"
-							labelKey="label"
-							label={m.controlImpact()}
-						/>
+						<div class="flex flex-col space-y-1">
+							<label class="text-sm font-semibold" for="control_impact">{m.controlImpact()}</label>
+							<select
+								id="control_impact"
+								value={currentAppliedControl?.control_impact || '--'}
+								onchange={(e) => updateField('control_impact', e.target.value, impactOptions)}
+								class="select select-bordered w-full"
+							>
+								{#each impactOptions as option}
+									<option value={option.id}>{option.label}</option>
+								{/each}
+							</select>
+						</div>
 					{/key}
 
 					<!-- Effort -->
 					{#key currentAppliedControl?.id}
-						<RadioGroup
-							possibleOptions={effortOptions}
-							initialValue={currentAppliedControl?.effort || '--'}
-							classes="w-full"
-							field="effort"
-							onChange={(newValue) => updateField('effort', newValue, effortOptions)}
-							key="id"
-							labelKey="label"
-							label={m.effort()}
-						/>
+						<div class="flex flex-col space-y-1">
+							<label class="text-sm font-semibold" for="effort">{m.effort()}</label>
+							<select
+								id="effort"
+								value={currentAppliedControl?.effort || '--'}
+								onchange={(e) => updateField('effort', e.target.value, effortOptions)}
+								class="select select-bordered w-full"
+							>
+								{#each effortOptions as option}
+									<option value={option.id}>{option.label}</option>
+								{/each}
+							</select>
+						</div>
 					{/key}
 
 					<!-- Priority -->
 					{#key currentAppliedControl?.id}
-						<RadioGroup
-							possibleOptions={priorityOptions}
-							initialValue={currentAppliedControl?.priority || '--'}
-							classes="w-full"
-							field="priority"
-							onChange={(newValue) => updateField('priority', newValue, priorityOptions)}
-							key="id"
-							labelKey="label"
-							label={m.priority()}
-						/>
+						<div class="flex flex-col space-y-1">
+							<label class="text-sm font-semibold" for="priority">{m.priority()}</label>
+							<select
+								id="priority"
+								value={currentAppliedControl?.priority || '--'}
+								onchange={(e) => updateField('priority', e.target.value, priorityOptions)}
+								class="select select-bordered w-full"
+							>
+								{#each priorityOptions as option}
+									<option value={option.id}>{option.label}</option>
+								{/each}
+							</select>
+						</div>
 					{/key}
 
 					<!-- CSF Function -->
 					{#key currentAppliedControl?.id}
-						<RadioGroup
-							possibleOptions={csfFunctionOptions}
-							initialValue={currentAppliedControl?.csf_function || '--'}
-							classes="w-full"
-							field="csf_function"
-							onChange={(newValue) => updateField('csf_function', newValue, csfFunctionOptions)}
-							key="id"
-							labelKey="label"
-							label={m.csfFunction()}
-						/>
+						<div class="flex flex-col space-y-1">
+							<label class="text-sm font-semibold" for="csf_function">{m.csfFunction()}</label>
+							<select
+								id="csf_function"
+								value={currentAppliedControl?.csf_function || '--'}
+								onchange={(e) => updateField('csf_function', e.target.value, csfFunctionOptions)}
+								class="select select-bordered w-full"
+							>
+								{#each csfFunctionOptions as option}
+									<option value={option.id}>{option.label}</option>
+								{/each}
+							</select>
+						</div>
 					{/key}
 				</div>
 
