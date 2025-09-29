@@ -10,6 +10,7 @@
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import IncidentMonthlyChart from '$lib/components/Chart/IncidentMonthlyChart.svelte';
 	import ExceptionSankeyChart from '$lib/components/Chart/ExceptionSankeyChart.svelte';
+	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
 	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
@@ -697,7 +698,27 @@
 					{:then operationsAnalytics}
 						{#if operationsAnalytics}
 							<section class="space-y-6">
-								<!-- First Row: Summary Cards -->
+								<!-- First Row: Applied Controls Sunburst -->
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.appliedControlsDistribution()}
+									</h3>
+									<div class="h-96">
+										{#if operationsAnalytics.applied_controls_sunburst && operationsAnalytics.applied_controls_sunburst.length > 0}
+											<SunburstChart
+												name="applied_controls_sunburst"
+												title=""
+												data={operationsAnalytics.applied_controls_sunburst}
+											/>
+										{:else}
+											<div class="flex items-center justify-center h-full text-gray-500">
+												<p>No applied controls data available</p>
+											</div>
+										{/if}
+									</div>
+								</div>
+
+								<!-- Second Row: Incident Summary Cards -->
 								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
 									<!-- Summary Cards (full width) -->
 									<div class="xl:col-span-1">
@@ -724,7 +745,7 @@
 									</div>
 								</div>
 
-								<!-- Second Row: Severity Breakdown and Qualifications Radar -->
+								<!-- Third Row: Severity Breakdown and Qualifications Radar -->
 								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 									<!-- Severity Breakdown Chart -->
 									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -761,7 +782,7 @@
 									</div>
 								</div>
 
-								<!-- Third Row: Monthly Metrics and Detection Breakdown -->
+								<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
 								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
 									<!-- Monthly Incident Metrics (3/5 of width) -->
 									<div class="xl:col-span-3">
@@ -798,7 +819,7 @@
 									</div>
 								</div>
 
-								<!-- Fourth Row: Security Exception Flow -->
+								<!-- Fifth Row: Security Exception Flow -->
 								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 									<h3 class="text-lg font-semibold text-gray-900 mb-4">
 										{m.securityExceptionFlow()}

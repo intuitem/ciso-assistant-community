@@ -74,6 +74,7 @@
 	"referenceControlsColon": "Reference controls:",
 	"planningTip": "Tip: update the start date and progress of your applied controls to see them here.",
 	"appliedControls": "Applied controls",
+	"appliedControlsDistribution": "Applied Controls Distribution",
 	"existingAppliedControls": "Existing controls",
 	"extraAppliedControls": "Extra controls",
 	"assets": "Assets",

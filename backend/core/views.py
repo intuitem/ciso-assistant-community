@@ -2412,6 +2412,87 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         return Response({"nodes": nodes, "categories": categories, "links": links})
 
+    @action(detail=False, name="Get applied controls sunburst data")
+    def sunburst_data(self, request):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        queryset = AppliedControl.objects.filter(id__in=viewable_objects)
+
+        # Build hierarchical structure: folder -> csf_function -> category -> priority -> status
+        hierarchy = {}
+
+        for control in queryset.select_related("folder"):
+            # Level 1: Folder (Domain)
+            folder_name = control.folder.name if control.folder else "No Domain"
+            if folder_name not in hierarchy:
+                hierarchy[folder_name] = {}
+
+            # Level 2: CSF Function
+            csf_function = (
+                dict(AppliedControl.CSF_FUNCTION).get(
+                    control.csf_function, "No CSF Function"
+                )
+                if control.csf_function
+                else "No CSF Function"
+            )
+            if csf_function not in hierarchy[folder_name]:
+                hierarchy[folder_name][csf_function] = {}
+
+            # Level 3: Category
+            category = (
+                dict(AppliedControl.CATEGORY).get(control.category, "No Category")
+                if control.category
+                else "No Category"
+            )
+            if category not in hierarchy[folder_name][csf_function]:
+                hierarchy[folder_name][csf_function][category] = {}
+
+            # Level 4: Priority
+            priority = (
+                dict(AppliedControl.PRIORITY).get(control.priority, "No Priority")
+                if control.priority
+                else "No Priority"
+            )
+            if priority not in hierarchy[folder_name][csf_function][category]:
+                hierarchy[folder_name][csf_function][category][priority] = {}
+
+            # Level 5: Status
+            status = (
+                dict(AppliedControl.Status.choices).get(control.status, "No Status")
+                if control.status
+                else "No Status"
+            )
+            if status not in hierarchy[folder_name][csf_function][category][priority]:
+                hierarchy[folder_name][csf_function][category][priority][status] = 0
+            hierarchy[folder_name][csf_function][category][priority][status] += 1
+
+        # Convert to sunburst format
+        def build_sunburst_data(data_dict, name="Root"):
+            if isinstance(data_dict, int):
+                return {"name": name, "value": data_dict}
+
+            children = []
+            total_value = 0
+
+            for key, value in data_dict.items():
+                child = build_sunburst_data(value, key)
+                children.append(child)
+                total_value += child.get("value", 0)
+
+            result = {"name": name, "value": total_value}
+            if children:
+                result["children"] = children
+
+            return result
+
+        sunburst_data = []
+        for folder_name, folder_data in hierarchy.items():
+            folder_node = build_sunburst_data(folder_data, folder_name)
+            sunburst_data.append(folder_node)
+
+        return Response({"results": sunburst_data})
+
 
 class ActionPlanList(generics.ListAPIView):
     filterset_fields = {

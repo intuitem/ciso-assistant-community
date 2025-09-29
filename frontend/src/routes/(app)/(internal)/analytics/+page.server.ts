@@ -124,13 +124,21 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 					return { results: { nodes: [], links: [] } };
 				});
 
+			const sunburstData = await fetch(`${BASE_API_URL}/applied-controls/sunburst_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch applied controls sunburst data:', error);
+					return { results: [] };
+				});
+
 			return {
 				incident_detection_breakdown: detectionData.results,
 				monthly_metrics: monthlyData.results,
 				summary_stats: summaryData.results,
 				severity_breakdown: severityData.results,
 				qualifications_breakdown: qualificationsData.results,
-				exception_sankey: exceptionSankeyData.results
+				exception_sankey: exceptionSankeyData.results,
+				applied_controls_sunburst: sunburstData.results
 			};
 		} catch (error) {
 			console.error('Failed to fetch operations analytics:', error);

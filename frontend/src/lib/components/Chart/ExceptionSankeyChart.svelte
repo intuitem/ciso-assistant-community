@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface SankeyNode {
 		name: string;
@@ -30,6 +31,20 @@
 		nodes = [],
 		links = []
 	}: Props = $props();
+
+	// Auto-translate node names for severity and status values
+	for (const node of nodes) {
+		if (node.name) {
+			// Handle patterns like "Severity: Critical" or "Status: New"
+			const parts = node.name.split(': ');
+			if (parts.length === 2) {
+				const [prefix, value] = parts;
+				const translatedPrefix = safeTranslate(prefix.toLowerCase());
+				const translatedValue = safeTranslate(value.toLowerCase());
+				node.name = `${translatedPrefix}: ${translatedValue}`;
+			}
+		}
+	}
 
 	const chart_id = `${name}_div`;
 
