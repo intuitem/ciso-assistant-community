@@ -1,5 +1,5 @@
 ---
-description: For fine-grained permissions management
+description: For fine-grained permissions management - PRO feature
 ---
 
 # Custom roles
