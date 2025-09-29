@@ -65,6 +65,13 @@
 		{ id: 'Recover', label: 'Recover', dbValue: 'recover' }
 	];
 
+	// Helper to map server values to display IDs for select value binding
+	function displayIdFromDb(value: unknown, options: { id: string; dbValue?: unknown }[]) {
+		if (value === null || value === undefined || value === '') return '--';
+		const match = options.find((o) => o.dbValue === value || o.id === value);
+		return match ? String(match.id) : String(value);
+	}
+
 	// Navigation state
 	let showNavigation = $state(false);
 	let jumpToInput = $state('');
@@ -307,7 +314,7 @@
 							<label class="text-sm font-semibold" for="control_impact">{m.controlImpact()}</label>
 							<select
 								id="control_impact"
-								value={currentAppliedControl?.control_impact || '--'}
+								value={displayIdFromDb(currentAppliedControl?.control_impact, impactOptions)}
 								onchange={(e) => updateField('control_impact', e.target.value, impactOptions)}
 								class="select select-bordered w-full"
 							>
@@ -324,7 +331,7 @@
 							<label class="text-sm font-semibold" for="effort">{m.effort()}</label>
 							<select
 								id="effort"
-								value={currentAppliedControl?.effort || '--'}
+								value={displayIdFromDb(currentAppliedControl?.effort, effortOptions)}
 								onchange={(e) => updateField('effort', e.target.value, effortOptions)}
 								class="select select-bordered w-full"
 							>
@@ -341,7 +348,7 @@
 							<label class="text-sm font-semibold" for="priority">{m.priority()}</label>
 							<select
 								id="priority"
-								value={currentAppliedControl?.priority || '--'}
+								value={displayIdFromDb(currentAppliedControl?.priority, priorityOptions)}
 								onchange={(e) => updateField('priority', e.target.value, priorityOptions)}
 								class="select select-bordered w-full"
 							>
@@ -358,7 +365,7 @@
 							<label class="text-sm font-semibold" for="csf_function">{m.csfFunction()}</label>
 							<select
 								id="csf_function"
-								value={currentAppliedControl?.csf_function || '--'}
+								value={displayIdFromDb(currentAppliedControl?.csf_function, csfFunctionOptions)}
 								onchange={(e) => updateField('csf_function', e.target.value, csfFunctionOptions)}
 								class="select select-bordered w-full"
 							>
