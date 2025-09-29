@@ -169,11 +169,6 @@
 	>
 		<div class="flex flex-col space-y-4">
 			{#each securityObjectives as objective}
-				{@const objectiveFormData =
-					data.security_objectives?.objectives &&
-					Object.hasOwn(data.security_objectives?.objectives, objective)
-						? data.security_objectives.objectives[objective]
-						: {}}
 				<span class="flex flex-row items-end space-x-4">
 					<Checkbox
 						{form}
@@ -192,7 +187,7 @@
 						key="value"
 						field={objective}
 						valuePath="security_objectives.objectives.{objective}.value"
-						disabled={objectiveFormData && objectiveFormData.is_enabled === false}
+						disabled={!data.security_objectives?.objectives[objective].is_enabled}
 					/>
 				</span>
 			{/each}
