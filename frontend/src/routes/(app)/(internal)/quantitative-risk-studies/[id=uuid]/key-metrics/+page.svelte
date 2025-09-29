@@ -285,7 +285,7 @@
 </script>
 
 <svelte:head>
-	<title>Key Metrics - Quantitative Risk Study</title>
+	<title>{m.keyMetrics()} - {m.quantitativeRiskStudyLabel()}</title>
 </svelte:head>
 
 <div class="container mx-auto px-4 py-8" on:click={handleClickOutside}>
@@ -309,7 +309,7 @@
 		<div class="flex justify-center items-center h-64">
 			<div class="flex flex-col items-center space-y-4">
 				<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-				<p class="text-gray-600">Loading key metrics...</p>
+				<p class="text-gray-600">{m.loadingKeyMetrics()}</p>
 			</div>
 		</div>
 	{:then keyMetricsData}
@@ -319,7 +319,7 @@
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-xl font-semibold text-gray-900">{m.studyOverview()}</h2>
 					<div class="text-sm text-gray-600">
-						{keyMetricsData.currency} • {keyMetricsData.total_scenarios} scenarios
+						{keyMetricsData.currency} • {keyMetricsData.total_scenarios} {m.scenarios()}
 					</div>
 				</div>
 
@@ -352,7 +352,7 @@
 					<ALETimelineRaceChart
 						scenarios={timelineChartData}
 						currency={keyMetricsData.currency}
-						title="ALE Evolution Timeline - Risk Reduction Through Treatment Implementation"
+						title={m.aleEvolutionTimeline()}
 						height="h-auto"
 						autoPlay={false}
 						animationSpeed={1500}
@@ -366,22 +366,22 @@
 						ALE Timeline Chart Debug Info
 					</h3>
 					<div class="text-sm text-yellow-700 space-y-1">
-						<p><strong>Total scenarios:</strong> {keyMetricsData?.scenarios?.length || 0}</p>
+						<p><strong>Total {m.scenarios()}:</strong> {keyMetricsData?.scenarios?.length || 0}</p>
 						<p>
-							<strong>Scenarios with current_level:</strong>
+							<strong>{m.scenariosWithCurrentLevel()}</strong>
 							{keyMetricsData?.scenarios?.filter((s) => s.current_level)?.length || 0}
 						</p>
 						<p>
-							<strong>Scenarios with residual_level:</strong>
+							<strong>{m.scenariosWithResidualLevel()}</strong>
 							{keyMetricsData?.scenarios?.filter((s) => s.residual_level)?.length || 0}
 						</p>
 						<p>
-							<strong>Scenarios with both levels:</strong>
+							<strong>{m.scenariosWithBothLevels()}</strong>
 							{keyMetricsData?.scenarios?.filter((s) => s.current_level && s.residual_level)
 								?.length || 0}
 						</p>
 						<p>
-							<strong>Scenarios with treatment controls:</strong>
+							<strong>{m.scenariosWithTreatmentControls()}</strong>
 							{keyMetricsData?.scenarios?.filter(
 								(s) => s.treatment_controls && s.treatment_controls.length > 0
 							)?.length || 0}
@@ -403,15 +403,14 @@
 				<div class="px-6 py-4 border-b border-gray-200">
 					<div class="flex justify-between items-start">
 						<div>
-							<h2 class="text-xl font-semibold text-gray-900">Risk Scenarios Analysis</h2>
+							<h2 class="text-xl font-semibold text-gray-900">{m.riskScenariosAnalysis()}</h2>
 							<p class="text-sm text-gray-600 mt-1">
-								Detailed metrics for each risk scenario - click column headers to sort, use filter
-								controls in Scenario and Level columns
+								{m.detailedMetricsForEachRisk()}
 							</p>
 						</div>
 						<div class="flex items-center space-x-2">
 							<span class="text-sm text-gray-500">
-								{getVisibleColumnsCount()} of {allColumns.length} columns
+								{getVisibleColumnsCount()} {m.columnsOfColumns()} {allColumns.length} {m.columns()}
 							</span>
 							<div class="relative">
 								<button
@@ -420,7 +419,7 @@
 									title="Show/Hide Columns"
 								>
 									<i class="fa-solid fa-columns text-sm mr-1"></i>
-									Columns
+									{m.columns()}
 								</button>
 
 								{#if showColumnControls}
@@ -428,7 +427,7 @@
 										class="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown"
 									>
 										<div class="flex justify-between items-center mb-3">
-											<h4 class="font-medium text-gray-900">Show/Hide Columns</h4>
+											<h4 class="font-medium text-gray-900">{m.showHideColumns()}</h4>
 											<button
 												class="text-gray-400 hover:text-gray-600"
 												on:click={() => (showColumnControls = false)}
@@ -443,14 +442,14 @@
 												on:click={() => toggleAllColumns(true)}
 												disabled={getVisibleColumnsCount() === allColumns.length}
 											>
-												Show All
+												{m.showAll()}
 											</button>
 											<button
 												class="btn btn-sm variant-ghost-error"
 												on:click={() => toggleAllColumns(false)}
 												disabled={getVisibleColumnsCount() <= 1}
 											>
-												Hide All
+												{m.hideAll()}
 											</button>
 										</div>
 
@@ -472,7 +471,7 @@
 													/>
 													<span class="text-sm text-gray-700">{column.displayName}</span>
 													{#if isLastVisible}
-														<span class="text-xs text-gray-400">(required)</span>
+														<span class="text-xs text-gray-400">({m.required()})</span>
 													{/if}
 												</label>
 											{/each}
@@ -500,21 +499,21 @@
 
 			<!-- Legend and Notes -->
 			<div class="mt-8 bg-gray-50 rounded-lg p-6">
-				<h3 class="text-lg font-semibold text-gray-900 mb-4">Legend & Notes</h3>
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.legendNotes()}</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<h4 class="font-medium text-gray-900 mb-2">Metrics Definitions</h4>
+						<h4 class="font-medium text-gray-900 mb-2">{m.metricsDefinitions()}</h4>
 						<ul class="text-sm text-gray-600 space-y-1">
-							<li><strong>ALE:</strong> Annual Loss Expectancy</li>
-							<li><strong>VaR:</strong> Value at Risk at specified percentiles</li>
-							<li><strong>P(>Threshold):</strong> Probability of exceeding loss threshold</li>
+							<li><strong>{m.ale()}:</strong> {m.annualLossExpectancy()}</li>
+							<li><strong>VaR:</strong> {m.valueAtRisk()}</li>
+							<li><strong>P(>Threshold):</strong> {m.probabilityExceedingThreshold()}</li>
 						</ul>
 					</div>
 					<div>
-						<h4 class="font-medium text-gray-900 mb-2">Risk Levels</h4>
+						<h4 class="font-medium text-gray-900 mb-2">{m.riskLevels()}</h4>
 						<ul class="text-sm text-gray-600 space-y-1">
-							<li><strong>Current:</strong> Risk with existing controls</li>
-							<li><strong>Residual:</strong> Risk after implementing selected treatments</li>
+							<li><strong>{m.current()}:</strong> {m.currentRiskWithExistingControls()}</li>
+							<li><strong>{m.residual()}:</strong> {m.residualRiskAfterTreatment()}</li>
 						</ul>
 					</div>
 				</div>
@@ -524,10 +523,9 @@
 			<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 				<div class="flex flex-col items-center space-y-4">
 					<i class="fa-solid fa-chart-simple text-4xl text-gray-400"></i>
-					<h3 class="text-lg font-semibold text-gray-600">No Key Metrics Available</h3>
+					<h3 class="text-lg font-semibold text-gray-600">{m.noKeyMetricsAvailable()}</h3>
 					<p class="text-gray-500 max-w-md">
-						No simulation data found for this study. Please run simulations on your scenarios and
-						hypotheses to generate key metrics.
+						{m.noSimulationDataFound()}
 					</p>
 				</div>
 			</div>
@@ -537,9 +535,9 @@
 		<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 			<div class="flex flex-col items-center space-y-4">
 				<i class="fa-solid fa-triangle-exclamation text-4xl text-red-400"></i>
-				<h3 class="text-lg font-semibold text-gray-600">Failed to Load Key Metrics</h3>
+				<h3 class="text-lg font-semibold text-gray-600">{m.failedToLoadKeyMetrics()}</h3>
 				<p class="text-gray-500 max-w-md">
-					There was an error loading the key metrics data. Please try refreshing the page.
+					{m.thereWasAnErrorLoading()}
 				</p>
 			</div>
 		</div>

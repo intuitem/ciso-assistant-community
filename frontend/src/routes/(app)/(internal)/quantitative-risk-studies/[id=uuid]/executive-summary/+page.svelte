@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Executive Summary - CISO Assistant</title>
+	<title>{m.executiveSummary()} - CISO Assistant</title>
 </svelte:head>
 
 <main class="p-6 space-y-6">
@@ -119,10 +119,7 @@
 								{summaryData.study_total_treatment_cost_display}
 							</div>
 							<div class="text-xs text-gray-500">
-								{summaryData.unique_added_controls_count || 0} unique control{summaryData.unique_added_controls_count ===
-								1
-									? ''
-									: 's'}
+								{summaryData.unique_added_controls_count || 0} {summaryData.unique_added_controls_count === 1 ? m.uniqueControl() : m.uniqueControls()}
 							</div>
 						</div>
 					{/if}
@@ -152,10 +149,10 @@
 							{/if}
 						</div>
 						<div class="text-sm text-gray-600">
-							Current: {combinedLecData.scenarios_with_current_data} / {combinedLecData.total_scenarios}
+							{m.currentLabel()}: {combinedLecData.scenarios_with_current_data} / {combinedLecData.total_scenarios}
 							{#if combinedLecData.scenarios_with_residual_data}
-								| Residual: {combinedLecData.scenarios_with_residual_data} / {combinedLecData.total_scenarios}
-								{m.scenariosWith()}
+								| {m.residualLabel()}: {combinedLecData.scenarios_with_residual_data} / {combinedLecData.total_scenarios}
+								{m.scenarios()}
 							{/if}
 						</div>
 					</div>
@@ -186,8 +183,7 @@
 						<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
 						<h3 class="text-lg font-semibold text-gray-600">{m.portfolioOverview()}</h3>
 						<p class="text-gray-500">
-							No combined LEC data available. Run simulations on your scenario hypotheses to
-							generate the combined curve.
+							{m.noCombinedLecDataAvailable()}
 						</p>
 					</div>
 				</div>
@@ -215,7 +211,7 @@
 												<span
 													class="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded capitalize"
 												>
-													{scenario.status}
+													{safeTranslate(scenario.status)}
 												</span>
 												{#if scenario.priority}
 													<span
@@ -436,7 +432,7 @@
 											{scenario.risk_reduction_display || m.cannotCalculate()}
 										</div>
 										<div class="text-sm text-gray-600">{m.riskReduction()}</div>
-										<div class="text-xs text-gray-500">Current - Residual</div>
+										<div class="text-xs text-gray-500">{m.currentAle()} - {m.residualAle()}</div>
 									</div>
 									<div class="text-center">
 										<div class="text-lg font-bold text-blue-600 mb-1">
@@ -478,9 +474,9 @@
 										class="bg-gray-100 border border-dashed border-gray-300 rounded-lg p-8 text-center"
 									>
 										<i class="fa-solid fa-chart-area text-3xl text-gray-400 mb-3"></i>
-										<p class="text-gray-500">No LEC data available for this scenario.</p>
+										<p class="text-gray-500">{m.noLecDataAvailableForScenario()}</p>
 										<p class="text-sm text-gray-400">
-											Run simulations on hypotheses to generate charts.
+											{m.runSimulationsOnHypotheses()}
 										</p>
 									</div>
 								{/if}
@@ -493,7 +489,7 @@
 				<div class="bg-white rounded-lg p-12 shadow-sm text-center">
 					<i class="fa-solid fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
 					<h3 class="text-xl font-semibold text-gray-600 mb-2">{m.noSelectedScenarios()}</h3>
-					<p class="text-gray-500 mb-4">No scenarios are selected in this study.</p>
+					<p class="text-gray-500 mb-4">{m.noScenariosSelectedInStudy()}</p>
 					<p class="text-sm text-gray-400">Select scenarios to see the executive summary.</p>
 				</div>
 			{/if}
@@ -502,7 +498,7 @@
 			<div class="bg-white rounded-lg p-12 shadow-sm text-center">
 				<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
 				<h3 class="text-xl font-semibold text-gray-600 mb-2">{m.failedToLoadExecutiveSummary()}</h3>
-				<p class="text-gray-500 mb-4">There was an error loading the executive summary data.</p>
+				<p class="text-gray-500 mb-4">{m.thereWasAnErrorLoadingExecutive()}</p>
 				<button class="btn preset-filled-primary-500" onclick={() => window.location.reload()}>
 					<i class="fa-solid fa-refresh mr-2"></i>{m.retry()}
 				</button>
@@ -514,7 +510,7 @@
 			<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
 			<h3 class="text-xl font-semibold text-gray-600 mb-2">{m.errorLoadingData()}</h3>
 			<p class="text-gray-500 mb-4">
-				{error?.message || 'An unexpected error occurred while loading the executive summary.'}
+				{error?.message || m.anUnexpectedErrorOccurred()}
 			</p>
 			<button class="btn preset-filled-primary-500" onclick={() => window.location.reload()}>
 				<i class="fa-solid fa-refresh mr-2"></i>{m.retry()}
@@ -592,7 +588,7 @@
 						<i class="fa-solid fa-chart-column text-4xl text-gray-400 mb-4"></i>
 						<h3 class="text-lg font-semibold text-gray-600 mb-2">{m.noAleDataAvailable()}</h3>
 						<p class="text-gray-500">
-							Run simulations on your scenarios to generate ALE comparison data.
+							{m.runSimulationsToGenerateAle()}
 						</p>
 					</div>
 				{/if}
@@ -600,7 +596,7 @@
 				<div class="text-center py-8">
 					<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
 					<h3 class="text-lg font-semibold text-gray-600 mb-2">{m.errorLoadingData()}</h3>
-					<p class="text-gray-500">Failed to load ALE comparison data.</p>
+					<p class="text-gray-500">{m.failedToLoadAleComparison()}</p>
 				</div>
 			{/await}
 		</div>

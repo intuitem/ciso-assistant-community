@@ -165,9 +165,9 @@
 							<div class="text-2xl font-bold text-blue-600 mb-2">
 								{metrics.current_ale_combined_display}
 							</div>
-							<div class="text-sm text-gray-600">Current ALE - Combined</div>
+							<div class="text-sm text-gray-600">{m.currentAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
-								{data.combinedAle.scenarios_with_current_ale} / {data.combinedAle.total_scenarios} scenarios
+								{data.combinedAle.scenarios_with_current_ale} / {data.combinedAle.total_scenarios} {m.scenarios()}
 							</div>
 						</div>
 
@@ -176,9 +176,9 @@
 							<div class="text-2xl font-bold text-green-600 mb-2">
 								{metrics.residual_ale_combined_display}
 							</div>
-							<div class="text-sm text-gray-600">Residual ALE - Combined</div>
+							<div class="text-sm text-gray-600">{m.residualAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
-								{data.combinedAle.scenarios_with_residual_ale} / {data.combinedAle.total_scenarios} scenarios
+								{data.combinedAle.scenarios_with_residual_ale} / {data.combinedAle.total_scenarios} {m.scenarios()}
 							</div>
 						</div>
 
@@ -187,15 +187,15 @@
 							<div class="text-2xl font-bold text-purple-600 mb-2">
 								{metrics.risk_reduction_display}
 							</div>
-							<div class="text-sm text-gray-600">Risk Reduction</div>
-							<div class="text-xs text-gray-500 mt-1">Current - Residual</div>
+							<div class="text-sm text-gray-600">{m.riskReduction()}</div>
+							<div class="text-xs text-gray-500 mt-1">{m.currentAle()} - {m.residualAle()}</div>
 						</div>
 					</div>
 
 					<!-- Summary information -->
 					<div class="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
 						<p class="text-center">
-							<i class="fa-solid fa-circle-info"></i> Assuming independent scenarios
+							<i class="fa-solid fa-circle-info"></i> {m.assumingIndependentScenarios()}
 						</p>
 					</div>
 				</div>
@@ -209,13 +209,13 @@
 
 					<div class="bg-white rounded-lg p-6 shadow-sm">
 						<div class="flex justify-between items-center mb-4">
-							<h3 class="text-lg font-semibold">Portfolio overview</h3>
+							<h3 class="text-lg font-semibold">{m.portfolioOverview()}</h3>
 							<div class="text-sm text-gray-600">
 								Current: {data.combinedLec.scenarios_with_current_data} / {data.combinedLec
 									.total_scenarios}
 								{#if data.combinedLec.scenarios_with_residual_data}
 									| Residual: {data.combinedLec.scenarios_with_residual_data} / {data.combinedLec
-										.total_scenarios} scenarios
+										.total_scenarios} {m.scenarios()}
 								{/if}
 							</div>
 						</div>
@@ -227,7 +227,7 @@
 								toleranceData={toleranceCurve?.data || []}
 								lossThreshold={data.data.loss_threshold}
 								currency={data.combinedLec.currency}
-								title="Study Risk Profile"
+								title={m.combinedStudyRiskProfile()}
 								showTitle={false}
 								height="h-96"
 								width="w-full"
@@ -243,10 +243,9 @@
 					<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 						<div class="flex flex-col items-center space-y-4">
 							<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-							<h5 class="text-lg font-semibold text-gray-600">Combined Loss Exceedance Curve</h5>
+							<h5 class="text-lg font-semibold text-gray-600">{m.combinedLossExceedanceCurve()}</h5>
 							<p class="text-gray-500">
-								No LEC data available. Run simulations on your scenario hypotheses to generate the
-								combined curve.
+								{m.noLecDataAvailable()}
 							</p>
 						</div>
 					</div>
@@ -256,10 +255,9 @@
 				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 					<div class="flex flex-col items-center space-y-4">
 						<i class="fa-solid fa-chart-column text-4xl text-gray-400"></i>
-						<h5 class="text-lg font-semibold text-gray-600">Combined ALE Metrics</h5>
+						<h5 class="text-lg font-semibold text-gray-600">{m.combinedAleMetrics()}</h5>
 						<p class="text-gray-500">
-							No ALE data available. Run simulations on your scenarios and hypotheses to generate
-							combined metrics.
+							{m.noAleDataAvailableRunSimulations()}
 						</p>
 					</div>
 				</div>

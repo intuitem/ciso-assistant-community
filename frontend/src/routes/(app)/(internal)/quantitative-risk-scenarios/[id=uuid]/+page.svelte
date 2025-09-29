@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { onMount } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		data: PageData;
@@ -24,7 +25,7 @@
 				let itemStyle: any = {};
 				let markLine: any = {};
 
-				if (curve.name === 'Current Risk' || curve.name === 'Combined Current Risk') {
+				if (curve.name === m.currentRisk() || curve.name === m.combinedCurrentRisk()) {
 					// Current risk: bold red line
 					lineStyle = {
 						width: 4,
@@ -43,7 +44,7 @@
 							label: {
 								show: true,
 								position: 'end',
-								formatter: `Loss Threshold: ${currency}${lossThreshold.toLocaleString()}`,
+								formatter: `${m.lossThresholdLabel()}: ${currency}${lossThreshold.toLocaleString()}`,
 								fontSize: 12,
 								color: '#7c3aed',
 								backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -60,12 +61,12 @@
 							data: [
 								{
 									xAxis: lossThreshold,
-									name: 'Loss Threshold'
+									name: m.lossThresholdLabel()
 								}
 							]
 						};
 					}
-				} else if (curve.name === 'Risk Tolerance') {
+				} else if (curve.name === m.riskTolerance()) {
 					// Risk tolerance: dashed orange line
 					lineStyle = {
 						width: 3,
@@ -109,7 +110,7 @@
 						if (params.length === 0) return '';
 
 						const lossAmount = params[0].value[0];
-						let tooltip = `Loss Amount: ${currency}${lossAmount.toLocaleString()}<br/>`;
+						let tooltip = `${m.lossAmount()}: ${currency}${lossAmount.toLocaleString()}<br/>`;
 
 						// Add each curve's probability value
 						params.forEach((param: any) => {
@@ -184,7 +185,7 @@
 			{#if data.lec?.curves?.length > 0}
 				<!-- Multi-Curve LEC Chart -->
 				<div class="bg-white rounded-lg p-4 shadow-sm w-full">
-					<h5 class="text-lg font-semibold text-gray-700 mb-4">Compare hypotheses</h5>
+					<h5 class="text-lg font-semibold text-gray-700 mb-4">{m.compareHypotheses()}</h5>
 					<div id="combined-lec-chart" style="height: 400px; width: 100%;"></div>
 				</div>
 			{:else}
@@ -192,9 +193,9 @@
 				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
 					<div class="flex flex-col items-center space-y-4">
 						<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-						<h5 class="text-lg font-semibold text-gray-600">Loss Exceedance Curves</h5>
+						<h5 class="text-lg font-semibold text-gray-600">{m.lossExceedanceCurves()}</h5>
 						<p class="text-gray-500">
-							No curve data available. Run simulations on your hypotheses to generate LEC charts.
+							{m.noCurveDataAvailable()}
 						</p>
 					</div>
 				</div>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		width?: string;
@@ -38,10 +39,10 @@
 		residualData = undefined,
 		lossThreshold = undefined,
 		currency = '€',
-		title = 'Loss Exceedance Curve',
+		title = m.lossExceedanceCurve(),
 		showTitle = false,
-		xAxisLabel = 'Loss Amount',
-		yAxisLabel = 'Exceedance Probability',
+		xAxisLabel = m.lossAmount(),
+		yAxisLabel = m.exceedanceProbability(),
 		minorSplitLine = false,
 		enableTooltip = false,
 		showXGrid = true,
@@ -132,7 +133,7 @@
 				left: '10%',
 				data: [
 					{
-						name: 'Current Risk',
+						name: m.currentRisk(),
 						icon: 'circle',
 						itemStyle: {
 							color: '#ff6b6b'
@@ -141,7 +142,7 @@
 					...(residualData && residualData.length > 0
 						? [
 								{
-									name: 'Residual Risk',
+									name: m.residualRisk(),
 									icon: 'circle',
 									itemStyle: {
 										color: '#007bff'
@@ -152,7 +153,7 @@
 					...(toleranceData && toleranceData.length > 0
 						? [
 								{
-									name: 'Risk Tolerance',
+									name: m.riskTolerance(),
 									icon: 'circle',
 									itemStyle: {
 										color: '#28a745'
@@ -179,20 +180,20 @@
 					let tooltip = `${xAxisLabel.replace('($)', `(${currency})`)}: ${currency}${lossAmount.toLocaleString()}<br/>`;
 
 					// Find different series
-					const currentRiskParam = params.find((p: any) => p.seriesName === 'Current Risk');
-					const residualRiskParam = params.find((p: any) => p.seriesName === 'Residual Risk');
-					const riskToleranceParam = params.find((p: any) => p.seriesName === 'Risk Tolerance');
+					const currentRiskParam = params.find((p: any) => p.seriesName === m.currentRisk());
+					const residualRiskParam = params.find((p: any) => p.seriesName === m.residualRisk());
+					const riskToleranceParam = params.find((p: any) => p.seriesName === m.riskTolerance());
 
 					if (currentRiskParam) {
-						tooltip += `Current Risk: ${(currentRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
+						tooltip += `${m.currentRisk()}: ${(currentRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
 					}
 
 					if (residualRiskParam) {
-						tooltip += `Residual Risk: ${(residualRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
+						tooltip += `${m.residualRisk()}: ${(residualRiskParam.value[1] * 100).toFixed(2)}%<br/>`;
 					}
 
 					if (riskToleranceParam) {
-						tooltip += `Risk Tolerance: ${(riskToleranceParam.value[1] * 100).toFixed(2)}%<br/>`;
+						tooltip += `${m.riskTolerance()}: ${(riskToleranceParam.value[1] * 100).toFixed(2)}%<br/>`;
 
 						// Add interpretation comparing current risk with tolerance
 						if (currentRiskParam && riskToleranceParam) {
@@ -201,10 +202,10 @@
 
 							if (currentProb > toleranceProb) {
 								tooltip +=
-									'<span style="color: #dc3545;">⚠️ Current risk exceeds tolerance</span><br/>';
+									`<span style="color: #dc3545;">⚠️ ${m.currentRiskExceedsTolerance()}</span><br/>`;
 							} else {
 								tooltip +=
-									'<span style="color: #28a745;">✓ Current risk within tolerance</span><br/>';
+									`<span style="color: #28a745;">✓ ${m.currentRiskWithinTolerance()}</span><br/>`;
 							}
 						}
 
@@ -215,9 +216,9 @@
 
 							if (residualProb > toleranceProb) {
 								tooltip +=
-									'<span style="color: #dc3545;">⚠️ Residual risk exceeds tolerance</span>';
+									`<span style="color: #dc3545;">⚠️ ${m.residualRiskExceedsTolerance()}</span>`;
 							} else {
-								tooltip += '<span style="color: #28a745;">✓ Residual risk within tolerance</span>';
+								tooltip += `<span style="color: #28a745;">✓ ${m.residualRiskWithinTolerance()}</span>`;
 							}
 						}
 					}
@@ -278,7 +279,7 @@
 			series: [
 				// Combined Current Risk curve
 				{
-					name: 'Current Risk',
+					name: m.currentRisk(),
 					type: 'line',
 					smooth: true,
 					symbol: 'none',
@@ -310,7 +311,7 @@
 									label: {
 										show: true,
 										position: 'end',
-										formatter: `Loss Threshold: ${currency}${lossThreshold.toLocaleString()}`,
+										formatter: `${m.lossThresholdLabel()}: ${currency}${lossThreshold.toLocaleString()}`,
 										fontSize: 12,
 										color: '#7c3aed',
 										backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -327,7 +328,7 @@
 									data: [
 										{
 											xAxis: lossThreshold,
-											name: 'Loss Threshold'
+											name: m.lossThresholdLabel()
 										}
 									]
 								}
@@ -338,7 +339,7 @@
 				...(residualData && residualData.length > 0
 					? [
 							{
-								name: 'Residual Risk',
+								name: m.residualRisk(),
 								type: 'line',
 								smooth: true,
 								symbol: 'none',
@@ -369,7 +370,7 @@
 				...(toleranceData && toleranceData.length > 0
 					? [
 							{
-								name: 'Risk Tolerance',
+								name: m.riskTolerance(),
 								type: 'line',
 								smooth: true,
 								symbol: 'none',
