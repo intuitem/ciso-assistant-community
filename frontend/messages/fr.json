@@ -485,6 +485,7 @@
 	"send": "Envoyer",
 	"goBackToLogin": "Revenir à la page de connexion",
 	"riskAcceptanceSubmittingReviewMessage": "Ceci sera envoyé à l'approbateur pour validation.",
+	"riskAcceptanceNotYetSubmittedMessage": "Cette acceptation de risque n'a pas encore été soumise.",
 	"riskAcceptanceValidatingReviewMessage": "Cette acceptation de risque est en attente de traitement. Pensez à la consulter avant de la valider ou de la rejeter, vous ne pourrez pas revenir en arrière.",
 	"riskAcceptanceMissingApproverMessage": "Approbateur requis avant de soumettre.",
 	"validate": "Valider",

@@ -239,7 +239,13 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
+		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
+			<div class="text-yello-900">
+				{m.riskAcceptanceNotYetSubmittedMessage()}
+			</div>
+		</div>
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>

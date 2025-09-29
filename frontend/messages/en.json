@@ -514,6 +514,7 @@
 	"send": "Send",
 	"goBackToLogin": "Go back to login",
 	"riskAcceptanceSubmittingReviewMessage": "This will be sent to the approver for validation.",
+	"riskAcceptanceNotYetSubmittedMessage": "This risk acceptance has not yet been submitted.",
 	"riskAcceptanceValidatingReviewMessage": "This risk acceptance is awaiting processing. Remember to review it before validating or rejecting it, you will not be able to go back.",
 	"riskAcceptanceMissingApproverMessage": "Approver required before submitting.",
 	"validate": "Validate",
