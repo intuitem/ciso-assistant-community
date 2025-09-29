@@ -932,6 +932,30 @@ const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const VULNERABILITY_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'vulnerabilities/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'vulnerabilities/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -974,7 +998,9 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			status: VULNERABILITY_STATUS_FILTER,
+			severity: VULNERABILITY_SEVERITY_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -1394,6 +1420,50 @@ export const listViewFields = {
 			legal_basis: PROCESSING_LEGAL_BASIS_FILTER
 		}
 	},
+	'right-requests': {
+		head: ['refId', 'name', 'requestType', 'status', 'owner', 'requestedOn', 'dueDate', 'folder'],
+		body: [
+			'ref_id',
+			'name',
+			'request_type',
+			'status',
+			'owner',
+			'requested_on',
+			'due_date',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			request_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/request_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'requestType',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					multiple: true
+				}
+			},
+			processings: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings',
+					label: 'processings',
+					multiple: true
+				}
+			}
+		}
+	},
 	purposes: {
 		head: ['name', 'description', 'processing'],
 		body: ['name', 'description', 'processing'],
@@ -1530,8 +1600,24 @@ export const listViewFields = {
 		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
 	},
 	'security-exceptions': {
-		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
-		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'severity',
+			'status',
+			'expiration_date',
+			'domain',
+			'associatedObjectsCount'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'severity',
+			'status',
+			'expiration_date',
+			'folder',
+			'associated_objects_count'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
@@ -1629,8 +1715,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-issues': {
-		head: ['name', 'category', 'origin', 'domain'],
-		body: ['name', 'category', 'origin', 'folder'],
+		head: ['refId', 'name', 'category', 'origin', 'domain'],
+		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
@@ -1714,6 +1800,7 @@ export const listViewFields = {
 	},
 	'task-templates': {
 		head: [
+			'refId',
 			'name',
 			'is_recurrent',
 			'assigned_to',
@@ -1723,6 +1810,7 @@ export const listViewFields = {
 			'folder'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'is_recurrent',
 			'assigned_to',

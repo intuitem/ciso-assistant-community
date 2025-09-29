@@ -659,6 +659,7 @@ class AssetViewSet(BaseModelViewSet):
     model = Asset
     filterset_class = AssetFilter
     search_fields = ["name", "description", "ref_id"]
+    ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
         return (
@@ -4905,7 +4906,7 @@ class QuickStartView(APIView):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health", "issues"]
+    filterset_fields = ["folder", "status", "health", "issues", "assigned_to"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -6139,6 +6140,12 @@ def get_disk_usage():
 
 
 @api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def healthcheck(request):
+    return Response({"status": "ok"})
+
+
+@api_view(["GET"])
 def get_build(request):
     """
     API endpoint that returns the build version of the application.
@@ -6367,6 +6374,21 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder")
+            .prefetch_related(
+                "assets",
+                "applied_controls",
+                "vulnerabilities",
+                "risk_scenarios",
+                "requirement_assessments",
+                "owners",
+            )
+        )
+
 
 class FindingsAssessmentViewSet(BaseModelViewSet):
     model = FindingsAssessment
@@ -6380,6 +6402,18 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "perimeter")
+            .prefetch_related(
+                "evidences",
+                "authors",
+                "owner",
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -6767,6 +6801,14 @@ class FindingViewSet(BaseModelViewSet):
     ]
     ordering = ["ref_id"]
 
+    def get_queryset(self) -> models.query.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "findings_assessment")
+            .prefetch_related("filtering_labels", "applied_controls", "evidences")
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -6995,6 +7037,14 @@ class TimelineEntryViewSet(BaseModelViewSet):
     filterset_fields = ["incident"]
     search_fields = ["entry", "entry_type"]
     ordering = ["-timestamp"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "incident", "author")
+            .prefetch_related("evidences")
+        )
 
     @action(detail=False, name="Get entry type choices")
     def entry_type(self, request):

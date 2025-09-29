@@ -284,22 +284,33 @@
 		class="toc-container fixed z-40 {position === 'right' ? 'right-4' : 'left-4'}
                top-1/2 transform -translate-y-1/2 max-h-[100vh] {className}"
 	>
-		<!-- Toggle Button -->
 		<button
 			onclick={toggleCollapse}
-			class="toc-toggle mb-2 p-2 bg-surface-200 hover:bg-surface-300 rounded-full shadow-lg transition-all duration-200"
-			title={isCollapsed ? m.showTableOfContents() : m.hideTableOfContents()}
-			aria-label={isCollapsed ? m.showTableOfContents() : m.hideTableOfContents()}
+			class="toc-toggle mb-2 p-2 bg-surface-200 hover:bg-surface-300 rounded-full shadow-lg transition-all duration-200 relative z-50 cursor-pointer {isCollapsed
+				? ''
+				: 'hidden'}"
+			title={m.showTableOfContents()}
+			aria-label={m.showTableOfContents()}
+			style="pointer-events: auto;"
 		>
-			<i class="fa-solid {isCollapsed ? 'fa-list' : 'fa-times'} text-sm" aria-hidden="true"></i>
+			<i class="fa-solid fa-list text-sm" aria-hidden="true"></i>
 		</button>
 
 		<!-- TOC Content -->
 		{#if !isCollapsed}
 			<div
-				class="toc-content bg-surface-50 border border-surface-300 rounded-lg shadow-lg p-4 w-64 max-h-[60vh] overflow-hidden flex flex-col"
+				class="toc-content bg-surface-50 border border-surface-300 rounded-lg shadow-lg p-4 w-64 max-h-[60vh] overflow-hidden flex flex-col relative"
 			>
-				<h3 class="text-sm font-semibold text-surface-700 mb-3 flex items-center">
+				<button
+					onclick={toggleCollapse}
+					class="absolute top-2 right-2 p-1 text-surface-400 hover:text-surface-600 hover:bg-surface-200 rounded transition-colors duration-150"
+					title={m.hideTableOfContents()}
+					aria-label={m.hideTableOfContents()}
+				>
+					<i class="fa-solid fa-times text-sm" aria-hidden="true"></i>
+				</button>
+
+				<h3 class="text-sm font-semibold text-surface-700 mb-3 flex items-center pr-8">
 					<i class="fa-solid fa-list-ul mr-2" aria-hidden="true"></i>
 					{m.tableOfContents()}
 				</h3>
@@ -424,6 +435,8 @@
 	.toc-toggle {
 		background-color: oklch(70.2% 0.183 293.541);
 		color: white;
+		pointer-events: auto;
+		cursor: pointer;
 	}
 
 	.toc-content {
