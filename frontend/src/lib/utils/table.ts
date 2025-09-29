@@ -1671,6 +1671,7 @@ export const listViewFields = {
 			'folder',
 			'qualifications',
 			'entities',
+			'reportedAt',
 			'updated_at'
 		],
 		body: [
@@ -1682,6 +1683,7 @@ export const listViewFields = {
 			'folder',
 			'qualifications',
 			'entities',
+			'reported_at',
 			'updated_at'
 		],
 		filters: {
