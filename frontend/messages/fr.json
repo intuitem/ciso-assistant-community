@@ -2174,5 +2174,8 @@
 	"addEvidenceRevision": "Nouvelle révision",
 	"associatedEvidenceRevisions": "Versions associées",
 	"userExpiryHelpText": "L'utilisateur sera désactivé après cette date. Les super utilisateurs ne sont pas concernés.",
-	"isSuperuser": "Est super utilisateur"
+	"isSuperuser": "Est super utilisateur",
+	"pathLabel": "Chemin",
+	"controlsLabel": "Mesures",
+	"countLabel": "Nombre"
 }

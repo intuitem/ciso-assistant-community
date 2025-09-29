@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
 
 	interface SunburstData {
 		name: string;
@@ -34,14 +34,7 @@
 		return nodes.map((node) => {
 			const translatedNode = { ...node };
 
-			// Translate the name if it's a common value
-			if (translatedNode.name) {
-				const nameToTranslate = translatedNode.name.toLowerCase();
-				const translatedName = safeTranslate(nameToTranslate);
-				if (translatedName !== nameToTranslate) {
-					translatedNode.name = translatedName;
-				}
-			}
+			// Note: Node name translation removed to use m.stringKey() pattern in tooltip only
 
 			// Recursively translate children
 			if (translatedNode.children) {
@@ -93,10 +86,10 @@
 
 					return `
 						<div style="max-width: 300px; word-wrap: break-word;">
-							<strong>Path:</strong><br/>
+							<strong>${m.pathLabel()}:</strong><br/>
 							${path}<br/>
-							<strong>Count:</strong> ${count} controls
-							${percentage ? `<br/><strong>Percentage:</strong> ${percentage}` : ''}
+							<strong>${m.countLabel()}:</strong> ${count} ${m.controlsLabel()}
+							${percentage ? `<br/><strong>${m.percentage()}:</strong> ${percentage}` : ''}
 						</div>
 					`;
 				}
