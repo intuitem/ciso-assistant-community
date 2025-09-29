@@ -730,9 +730,7 @@ class AssetViewSet(BaseModelViewSet):
         if not objectives:
             return []
         return [
-            {
-                "str": f"{key.upper()}: {Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}"
-            }
+            {key: Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 objectives.items(),
                 key=lambda x: Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
