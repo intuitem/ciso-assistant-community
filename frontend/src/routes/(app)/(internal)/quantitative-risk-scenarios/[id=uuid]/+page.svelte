@@ -120,11 +120,11 @@
 							// Use different colors for different curve types
 							let color = param.color;
 							if (
-								param.seriesName === 'Current Risk' ||
-								param.seriesName === 'Combined Current Risk'
+								param.seriesName === m.currentRisk() ||
+								param.seriesName === m.combinedCurrentRisk()
 							) {
 								color = '#FF6367';
-							} else if (param.seriesName === 'Risk Tolerance') {
+							} else if (param.seriesName === m.riskTolerance()) {
 								color = '#7CCF00';
 							}
 
@@ -149,7 +149,7 @@
 				},
 				xAxis: {
 					type: 'log',
-					name: `Loss Amount (${currency})`,
+					name: `${m.lossAmount()} (${currency})`,
 					nameLocation: 'middle',
 					nameGap: 30,
 					axisLabel: {
@@ -162,7 +162,7 @@
 				},
 				yAxis: {
 					type: 'value',
-					name: 'Exceedance Probability',
+					name: m.exceedanceProbability(),
 					nameLocation: 'middle',
 					nameGap: 50,
 					axisLabel: {
