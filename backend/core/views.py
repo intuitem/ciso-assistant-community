@@ -5161,10 +5161,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             writer.writerow(columns)
 
             compliance_assessment = ComplianceAssessment.objects.get(id=pk)
-            for req in compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True
-            ):
-                req_node = RequirementNode.objects.get(pk=req.requirement.id)
+            reqs = list(
+                compliance_assessment.get_requirement_assessments(
+                    include_non_assessable=True
+                )
+            )
+            req_nodes = RequirementNode.objects.in_bulk(
+                [ra.requirement_id for ra in reqs]
+            )
+            for req in reqs:
+                req_node = req_nodes.get(req.requirement.id)
                 row = [
                     req_node.urn,
                     req_node.ref_id,
@@ -5178,6 +5184,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         req.score,
                         req.observation,
                     ]
+                else:
+                    row += ["", "", "", ""]
                 writer.writerow(row)
 
             return response
