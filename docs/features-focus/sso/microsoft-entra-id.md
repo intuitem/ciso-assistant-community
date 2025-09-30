@@ -4,7 +4,7 @@ description: Configure Microsoft Entra ID as an Identity Provider for CISO Assis
 
 # Microsoft Entra ID
 
-Go into your **Azur portal home**
+Go into your **Azure portal home**
 
 1.  Open the sidebar menu and click on **Microsoft Entra ID**\
 
