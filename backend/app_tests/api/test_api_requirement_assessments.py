@@ -245,7 +245,6 @@ class TestRequirementAssessmentsAuthenticated:
                 "observation": "new " + REQUIREMENT_ASSESSMENT_OBSERVATION,
                 "folder": str(folder.id),
                 "compliance_assessment": str(compliance_assessment2.id),
-                "requirement": str(RequirementNode.objects.all()[1].id),
                 "applied_controls": [str(applied_control.id)],
                 "score": 3,
             },
@@ -299,6 +298,9 @@ class TestRequirementAssessmentsAuthenticated:
                     if RequirementNode.objects.all()[0].parent_requirement
                     else None,
                 },
+            },
+            {
+                "requirement": str(RequirementNode.objects.all()[0].id),
             },
             user_group=test.user_group,
         )
