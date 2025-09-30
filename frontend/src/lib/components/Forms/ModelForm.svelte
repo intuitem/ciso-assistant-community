@@ -697,7 +697,15 @@
 				{context}
 			/>
 		{:else if URLModel === 'generic-collections'}
-			<GenericCollectionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+			<GenericCollectionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{/if}
