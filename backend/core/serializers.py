@@ -1684,7 +1684,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = RequirementAssessment
-        fields = "__all__"
+        exclude = ["created_at", "updated_at", "requirement"]
 
 
 class RequirementMappingSetReadSerializer(BaseModelSerializer):
