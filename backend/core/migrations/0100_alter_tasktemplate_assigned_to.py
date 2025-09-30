@@ -5,16 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0099_incident_entities'),
+        ("core", "0099_incident_entities"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tasktemplate',
-            name='assigned_to',
-            field=models.ManyToManyField(blank=True, related_name='task_templates', to=settings.AUTH_USER_MODEL, verbose_name='Assigned to'),
+            model_name="tasktemplate",
+            name="assigned_to",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="task_templates",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Assigned to",
+            ),
         ),
     ]
