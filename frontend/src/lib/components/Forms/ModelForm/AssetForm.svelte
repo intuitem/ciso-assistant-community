@@ -187,7 +187,7 @@
 						key="value"
 						field={objective}
 						valuePath="security_objectives.objectives.{objective}.value"
-						disabled={!data.security_objectives?.objectives[objective].is_enabled}
+						disabled={data.security_objectives?.objectives?.[objective]?.is_enabled === false}
 					/>
 				</span>
 			{/each}
