@@ -79,6 +79,9 @@ READER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # pmbok
+    "view_genericcollection",
+    "view_accreditation",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -147,6 +150,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # pmbok
+    "view_genericcollection",
+    "view_accreditation",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -362,6 +368,15 @@ ANALYST_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -598,6 +613,15 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -868,6 +892,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_terminology",
     "change_terminology",
     "delete_terminology",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
     # roles,
     "add_role",
     "view_role",

@@ -57,7 +57,6 @@ class GenericCollection(NameDescriptionFolderMixin, FilteringLabelMixin):
         "self",
         blank=True,
         symmetrical=False,
-        related_name="dependencies",
     )
 
 

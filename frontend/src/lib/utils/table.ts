@@ -1848,6 +1848,52 @@ export const listViewFields = {
 			is_visible: IS_VISIBLE_FILTER
 		}
 	},
+	'generic-collections': {
+		head: ['ref_id', 'name', 'description', 'checklist'],
+		body: ['ref_id', 'name', 'description', 'checklist'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			checklist: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'compliance-assessments',
+					label: 'checklist',
+					multiple: true
+				}
+			}
+		}
+	},
+	accreditations: {
+		head: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date'],
+		body: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'accreditations/status',
+					label: 'status',
+					multiple: true
+				}
+			},
+			category: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'accreditations/category',
+					label: 'category',
+					multiple: true
+				}
+			},
+			author: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'users',
+					label: 'author',
+					multiple: true
+				}
+			}
+		}
+	},
 	extra: {
 		filters: {
 			risk: undefined,

@@ -1136,6 +1136,36 @@ export const RoleSchema = z.object({
 	permissions: z.array(z.number()).optional()
 });
 
+// PMBOK
+export const GenericCollectionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	checklist: z.string().uuid().optional().nullable(),
+	compliance_assessments: z.array(z.string().uuid().optional()).optional(),
+	risk_assessments: z.array(z.string().uuid().optional()).optional(),
+	crq_studies: z.array(z.string().uuid().optional()).optional(),
+	ebios_studies: z.array(z.string().uuid().optional()).optional(),
+	entity_assessments: z.array(z.string().uuid().optional()).optional(),
+	documents: z.array(z.string().uuid().optional()).optional(),
+	dependencies: z.array(z.string().uuid().optional()).optional(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const AccreditationSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().optional().default('other'),
+	authority: z.string().optional(),
+	status: z.string().optional().default('draft'),
+	author: z.string().uuid().optional().nullable(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	linked_collections: z.array(z.string().uuid().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1199,7 +1229,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
-	roles: RoleSchema
+	roles: RoleSchema,
+	'generic-collections': GenericCollectionSchema,
+	accreditations: AccreditationSchema
 };
 
 export const modelSchema = (model: string) => {

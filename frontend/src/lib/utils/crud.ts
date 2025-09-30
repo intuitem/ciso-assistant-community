@@ -1627,6 +1627,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'permissions',
 		verboseName: 'Permission',
 		verboseNamePlural: 'Permissions'
+	},
+	'generic-collections': {
+		name: 'genericcollection',
+		localName: 'genericCollection',
+		localNamePlural: 'genericCollections',
+		verboseName: 'Generic Collection',
+		verboseNamePlural: 'Generic Collections',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'checklist', urlModel: 'compliance-assessments' }
+		],
+		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
+	},
+	accreditations: {
+		name: 'accreditation',
+		localName: 'accreditation',
+		localNamePlural: 'accreditations',
+		verboseName: 'Accreditation',
+		verboseNamePlural: 'Accreditations',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'author', urlModel: 'users' }
+		],
+		selectFields: [{ field: 'folder' }, { field: 'ref_id' }, { field: 'status' }]
 	}
 };
 
