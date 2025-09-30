@@ -434,8 +434,5 @@
 			</button>
 		</span>
 	</div>
-	<div class="p-2 h-5 mt-2">
-		<p class="text-red-500 text-sm">{errorMessage}</p>
-	</div>
 	<div id={chart_id} class="{width} {height} {classesContainer} p-4" role="presentation"></div>
 </div>
