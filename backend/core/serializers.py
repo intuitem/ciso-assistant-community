@@ -1641,6 +1641,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
+    requirement = serializers.PrimaryKeyRelatedField(read_only=True)
+
     def validate(self, attrs):
         compliance_assessment = self.get_compliance_assessment()
 
@@ -1684,7 +1686,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = RequirementAssessment
-        exclude = ["created_at", "updated_at", "requirement"]
+        exclude = ["created_at", "updated_at"]
 
 
 class RequirementMappingSetReadSerializer(BaseModelSerializer):
