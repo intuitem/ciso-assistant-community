@@ -52,6 +52,7 @@
 	label={m.category()}
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
+	disableDoubleDash={true}
 />
 
 <TextField
