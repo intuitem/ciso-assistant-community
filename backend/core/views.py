@@ -5170,7 +5170,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 [ra.requirement_id for ra in reqs]
             )
             for req in reqs:
-                req_node = req_nodes.get(req.requirement.id)
+                req_node = req_nodes.get(req.requirement_id)
                 row = [
                     req_node.urn,
                     req_node.ref_id,
