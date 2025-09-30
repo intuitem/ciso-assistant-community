@@ -5160,7 +5160,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ]
             writer.writerow(columns)
 
-            for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+            for req in compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            ):
                 req_node = RequirementNode.objects.get(pk=req.requirement.id)
                 row = [
                     req_node.urn,
@@ -5195,7 +5198,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
         show_documentation_score = audit.show_documentation_score
-        for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+        for req in audit.get_requirement_assessments(include_non_assessable=True):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
             entry = {
                 "urn": req_node.urn,
