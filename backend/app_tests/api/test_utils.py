@@ -825,6 +825,7 @@ class EndpointTestsQueries:
                     )
 
                 if not (fails or user_perm_fails):
+                    # NOTE: We should check with a GET and not with the response of the PATCH request
                     for key, value in {
                         **build_params,
                         **update_params,
