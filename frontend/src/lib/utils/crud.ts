@@ -1634,17 +1634,25 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'genericCollections',
 		verboseName: 'Generic Collection',
 		verboseNamePlural: 'Generic Collections',
-		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'checklist', urlModel: 'compliance-assessments' }
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'observation' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		],
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [
-			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
-			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
-			{ field: 'crq_studies', urlModel: 'quantitative-risk-studies' },
-			{ field: 'ebios_studies', urlModel: 'ebios-rm' },
-			{ field: 'entity_assessments', urlModel: 'entity-assessments' },
-			{ field: 'documents', urlModel: 'evidences' }
+			{ field: 'genericcollection', urlModel: 'compliance-assessments' },
+			{ field: 'genericcollection', urlModel: 'risk-assessments' },
+			{ field: 'genericcollection', urlModel: 'quantitative-risk-studies' },
+			{ field: 'genericcollection', urlModel: 'ebios-rm' },
+			{ field: 'genericcollection', urlModel: 'entity-assessments' },
+			{ field: 'genericcollection', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
 	},
@@ -1656,7 +1664,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Accreditations',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'author', urlModel: 'users' }
+			{ field: 'author', urlModel: 'users' },
+			{ field: 'checklist', urlModel: 'compliance-assessments' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' }
 		],
 		selectFields: [
 			{ field: 'folder' },

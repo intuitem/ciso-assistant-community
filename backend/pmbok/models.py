@@ -22,12 +22,6 @@ class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
 
 class GenericCollection(NameDescriptionFolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=100, blank=True)
-    checklist = models.ForeignKey(
-        ComplianceAssessment,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="collection_checklist",
-    )
     compliance_assessments = models.ManyToManyField(
         ComplianceAssessment,
         blank=True,
@@ -94,5 +88,12 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     linked_collection = models.ForeignKey(
         GenericCollection, null=True, on_delete=models.SET_NULL
+    )
+    checklist = models.ForeignKey(
+        ComplianceAssessment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="accreditation_checklist",
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)

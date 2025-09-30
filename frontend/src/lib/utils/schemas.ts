@@ -1141,7 +1141,6 @@ export const GenericCollectionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	checklist: z.string().uuid().optional().nullable(),
 	compliance_assessments: z.array(z.string().uuid().optional()).optional(),
 	risk_assessments: z.array(z.string().uuid().optional()).optional(),
 	crq_studies: z.array(z.string().uuid().optional()).optional(),
@@ -1163,6 +1162,7 @@ export const AccreditationSchema = z.object({
 	author: z.string().uuid().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	linked_collection: z.string().uuid().optional().nullable(),
+	checklist: z.string().uuid().optional().nullable(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });

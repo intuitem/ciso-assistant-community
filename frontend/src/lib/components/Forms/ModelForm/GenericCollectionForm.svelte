@@ -34,16 +34,6 @@
 	label={m.refId()}
 />
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="compliance-assessments"
-	optionsLabelField="auto"
-	field="checklist"
-	cacheLock={cacheLocks['checklist']}
-	bind:cachedValue={formDataCache['checklist']}
-	label={m.checklist()}
-/>
-
 <Dropdown
 	open={false}
 	style="hover:text-primary-700"

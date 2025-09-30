@@ -1849,23 +1849,33 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'checklist', 'filteringLabels', 'folder'],
-		body: ['ref_id', 'name', 'checklist', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'filteringLabels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
 		filters: {
-			folder: DOMAIN_FILTER,
-			checklist: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'compliance-assessments',
-					label: 'checklist',
-					multiple: true
-				}
-			}
+			folder: DOMAIN_FILTER
 		}
 	},
 	accreditations: {
-		head: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date', 'folder'],
-		body: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'status',
+			'checklist',
+			'authority',
+			'expiry_date',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'status',
+			'checklist',
+			'authority',
+			'expiry_date',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: {
@@ -1889,6 +1899,14 @@ export const listViewFields = {
 				props: {
 					optionsEndpoint: 'users',
 					label: 'author',
+					multiple: true
+				}
+			},
+			checklist: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'compliance-assessments',
+					label: 'checklist',
 					multiple: true
 				}
 			}

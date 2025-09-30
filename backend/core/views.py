@@ -1191,6 +1191,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "status": ["exact"],
             "ebios_rm_study": ["exact"],
             "reviewers": ["exact"],
+            "genericcollection": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -4821,6 +4822,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "genericcollection",
         "owner",
         "status",
         "expiry_date",
@@ -5082,6 +5084,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "authors",
         "reviewers",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 

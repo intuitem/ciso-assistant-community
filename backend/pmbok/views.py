@@ -18,7 +18,6 @@ class GenericCollectionViewSet(BaseModelViewSet):
     serializers_module = "pmbok.serializers"
     filterset_fields = [
         "folder",
-        "checklist",
         "compliance_assessments",
         "risk_assessments",
         "crq_studies",
@@ -48,6 +47,7 @@ class AccreditationViewSet(BaseModelViewSet):
         "category",
         "author",
         "linked_collection",
+        "checklist",
     ]
     search_fields = ["name", "description", "ref_id", "authority"]
     ordering = ["created_at"]

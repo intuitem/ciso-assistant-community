@@ -101,6 +101,16 @@
 />
 
 <AutocompleteSelect
+	{form}
+	optionsEndpoint="compliance-assessments"
+	optionsLabelField="auto"
+	field="checklist"
+	cacheLock={cacheLocks['checklist']}
+	bind:cachedValue={formDataCache['checklist']}
+	label={m.checklist()}
+/>
+
+<AutocompleteSelect
 	multiple
 	{form}
 	createFromSelection={true}

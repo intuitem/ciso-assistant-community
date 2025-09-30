@@ -8,7 +8,6 @@ from pmbok.models import GenericCollection, Accreditation
 class GenericCollectionReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    checklist = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     crq_studies = FieldsRelatedField(many=True)
@@ -34,6 +33,7 @@ class AccreditationReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     author = FieldsRelatedField(["id", "first_name", "last_name"])
     linked_collection = FieldsRelatedField()
+    checklist = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     status = serializers.CharField(source="get_status_display")
     category = serializers.CharField(source="get_category_display")
