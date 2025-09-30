@@ -5669,6 +5669,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         User,
         verbose_name="Assigned to",
         blank=True,
+        related_name="task_templates"
     )
     assets = models.ManyToManyField(
         Asset,
