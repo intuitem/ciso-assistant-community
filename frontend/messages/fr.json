@@ -2346,6 +2346,16 @@
 	"uniqueControls": "Mesures uniques",
 	"combinedCurrentRisk": "Risque actuel combiné",
 	"compareHypotheses": "Comparer les hypothèses",
+	"noMatchingNodesFound": "Aucun nœud correspondant trouvé",
+	"findANode": "Trouver un nœud...",
+	"viewOnGraphExplorer": "Voir dans l'explorateur de graphes",
+	"visualizeAppliedMapping": "Visualiser le mapping appliqué dans l'explorateur de graphes",
+	"frameworksMapping": "Cartographie des frameworks",
+	"assetsExplorer": "Explorateur d'actifs",
+	"visualizeAssetsRelationships": "Visualiser les actifs et leurs relations",
+	"requirementsExplorer": "Explorateur des exigences",
+	"visualizeRequirements": "Visualiser toutes les exigences de tous les audits",
+	"assessable": "Évaluable",
 	"lossExceedanceCurves": "Courbes LEC",
 	"noCurveDataAvailable": "Pas de données disponibles. Relancer les simulations pour générer les courbes"
 }
