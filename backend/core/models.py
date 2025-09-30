@@ -5666,10 +5666,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     enabled = models.BooleanField(default=True)
 
     assigned_to = models.ManyToManyField(
-        User,
-        verbose_name="Assigned to",
-        blank=True,
-        related_name="task_templates"
+        User, verbose_name="Assigned to", blank=True, related_name="task_templates"
     )
     assets = models.ManyToManyField(
         Asset,
