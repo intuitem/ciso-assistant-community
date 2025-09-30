@@ -1149,6 +1149,7 @@ export const GenericCollectionSchema = z.object({
 	entity_assessments: z.array(z.string().uuid().optional()).optional(),
 	documents: z.array(z.string().uuid().optional()).optional(),
 	dependencies: z.array(z.string().uuid().optional()).optional(),
+	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
@@ -1161,7 +1162,7 @@ export const AccreditationSchema = z.object({
 	status: z.string().optional().default('draft'),
 	author: z.string().uuid().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	linked_collections: z.array(z.string().uuid().optional()).optional(),
+	linked_collection: z.string().uuid().optional().nullable(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });

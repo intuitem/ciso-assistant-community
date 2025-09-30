@@ -64,7 +64,7 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
         ("accredited", "Accredited"),
-        ("not_accredited", "Accredited"),
+        ("not_accredited", "Not Accredited"),
         ("obsolete", "Obsolete"),
     )
     CATEGORY_CHOICES = (
@@ -92,8 +92,7 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         blank=True,
         null=True,
     )
-    linked_collections = models.ManyToManyField(
-        GenericCollection,
-        blank=True,
+    linked_collection = models.ForeignKey(
+        GenericCollection, null=True, on_delete=models.SET_NULL
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)

@@ -6,6 +6,7 @@ from tprm.views import (
     EntityAssessmentViewSet,
 )
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
+from pmbok.views import GenericCollectionViewSet, AccreditationViewSet
 import importlib
 
 

@@ -1849,8 +1849,8 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'checklist'],
-		body: ['ref_id', 'name', 'description', 'checklist'],
+		head: ['ref_id', 'name', 'checklist', 'filteringLabels', 'folder'],
+		body: ['ref_id', 'name', 'checklist', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			checklist: {
@@ -1864,8 +1864,8 @@ export const listViewFields = {
 		}
 	},
 	accreditations: {
-		head: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date'],
-		body: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date'],
+		head: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date', 'folder'],
+		body: ['ref_id', 'name', 'category', 'status', 'authority', 'expiry_date', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: {

@@ -1638,6 +1638,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' }
 		],
+		reverseForeignKeyFields: [
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'crq_studies', urlModel: 'quantitative-risk-studies' },
+			{ field: 'ebios_studies', urlModel: 'ebios-rm' },
+			{ field: 'entity_assessments', urlModel: 'entity-assessments' },
+			{ field: 'documents', urlModel: 'evidences' }
+		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
 	},
 	accreditations: {
@@ -1650,7 +1658,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'author', urlModel: 'users' }
 		],
-		selectFields: [{ field: 'folder' }, { field: 'ref_id' }, { field: 'status' }]
+		selectFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'status' },
+			{ field: 'category' }
+		]
 	}
 };
 

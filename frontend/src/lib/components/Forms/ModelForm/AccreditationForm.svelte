@@ -1,0 +1,123 @@
+<script lang="ts">
+	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import TextField from '../TextField.svelte';
+	import TextArea from '../TextArea.svelte';
+	import Select from '../Select.svelte';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { SuperValidated } from 'sveltekit-superforms';
+	import { m } from '$paraglide/messages';
+
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: any;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {}
+	}: Props = $props();
+</script>
+
+<TextField
+	{form}
+	field="ref_id"
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+	label={m.refId()}
+/>
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	pathField="path"
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	hidden={initialData.folder}
+/>
+
+<Select
+	{form}
+	options={model.selectOptions['category']}
+	field="category"
+	label={m.category()}
+	cacheLock={cacheLocks['category']}
+	bind:cachedValue={formDataCache['category']}
+/>
+
+<TextField
+	{form}
+	field="authority"
+	cacheLock={cacheLocks['authority']}
+	bind:cachedValue={formDataCache['authority']}
+	label={m.authority()}
+/>
+
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="author"
+	cacheLock={cacheLocks['author']}
+	bind:cachedValue={formDataCache['author']}
+	label={m.author()}
+/>
+
+<TextField
+	type="date"
+	{form}
+	field="expiry_date"
+	cacheLock={cacheLocks['expiry_date']}
+	bind:cachedValue={formDataCache['expiry_date']}
+	label={m.expiryDate()}
+/>
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="generic-collections"
+	optionsLabelField="auto"
+	field="linked_collection"
+	cacheLock={cacheLocks['linked_collection']}
+	bind:cachedValue={formDataCache['linked_collection']}
+	label={m.linkedCollection()}
+/>
+
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	translateOptions={false}
+	allowUserOptions="append"
+/>
+
+<TextArea
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
