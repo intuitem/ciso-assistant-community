@@ -27,10 +27,13 @@
 * [Library upgrade](features-focus/library-upgrade.md)
 * [Mapping explorer](features-focus/graph-explorer.md)
 * [SSO](features-focus/sso/README.md)
-  * [Microsoft Entra ID](features-focus/sso/microsoft-entra-id.md)
-  * [Okta](features-focus/sso/okta.md)
-  * [Keycloak](features-focus/sso/keycloak.md)
-  * [Google Workspace](features-focus/sso/google-workplace.md)
+  * [SAML](features-focus/sso/saml.md)
+  * [OpenID Connect (OIDC)](features-focus/sso/openid-connect-oidc.md)
+  * [Identity providers](features-focus/sso/identity-providers/README.md)
+    * [Microsoft Entra ID](features-focus/sso/identity-providers/microsoft-entra-id.md)
+    * [Okta](features-focus/sso/identity-providers/okta.md)
+    * [Google Workspace](features-focus/sso/identity-providers/google-workplace.md)
+    * [Keycloak](features-focus/sso/identity-providers/keycloak.md)
 * [Setting up Multi-Factor Authentication (MFA)](features-focus/setting-up-multi-factor-authentication-mfa.md)
 
 ## Model
