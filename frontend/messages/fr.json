@@ -2234,7 +2234,7 @@
 	"errorMaxPatAmountExceeded": "Nombre maximum de jetons autorisés dépassé pour cet utilisateur.",
 	"evidencesHelpText": "Ce tableau montre toutes les preuves associées à cette évaluation de conformité, soit directement par les évaluations d'exigences, soit indirectement par les contrôles appliqués.",
 	"featureFlagSettingsUpdated": "Paramètres des indicateurs de fonctionnalités mis à jour. Veuillez actualiser la page pour appliquer les modifications.",
-	"featureFlags": "Indicateurs de fonctionnalités",
+	"featureFlags": "Gestion des fonctionnalités",
 	"fileAcceptExcelOnly": "Fichiers Excel uniquement (.xls, .xlsx)",
 	"hour": "Heure",
 	"indirect": "Indirect",
