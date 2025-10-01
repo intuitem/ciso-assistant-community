@@ -112,6 +112,30 @@
 		bind:cachedValue={formDataCache['documents']}
 		label={m.documents()}
 	/>
+{:else if context === 'selectSecurityExceptions'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="security-exceptions"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="security_exceptions"
+		cacheLock={cacheLocks['security_exceptions']}
+		bind:cachedValue={formDataCache['security_exceptions']}
+		label={m.securityExceptions()}
+	/>
+{:else if context === 'selectPolicies'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="policies"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="policies"
+		cacheLock={cacheLocks['policies']}
+		bind:cachedValue={formDataCache['policies']}
+		label={m.policies()}
+	/>
 {:else if context === 'selectDependencies'}
 	<AutocompleteSelect
 		{form}
@@ -221,6 +245,30 @@
 			cacheLock={cacheLocks['documents']}
 			bind:cachedValue={formDataCache['documents']}
 			label={m.documents()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="security-exceptions"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="policies"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			field="policies"
+			cacheLock={cacheLocks['policies']}
+			bind:cachedValue={formDataCache['policies']}
+			label={m.policies()}
 		/>
 
 		<AutocompleteSelect

@@ -3,6 +3,7 @@
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
@@ -45,6 +46,15 @@
 	hidden={initialData.folder}
 />
 
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="author"
+	cacheLock={cacheLocks['author']}
+	bind:cachedValue={formDataCache['author']}
+	label={m.author()}
+/>
 <Select
 	{form}
 	options={model.selectOptions['category']}
@@ -55,12 +65,15 @@
 	disableDoubleDash={true}
 />
 
-<TextField
+<AutocompleteSelect
 	{form}
-	field="authority"
-	cacheLock={cacheLocks['authority']}
-	bind:cachedValue={formDataCache['authority']}
-	label={m.authority()}
+	optionsEndpoint="compliance-assessments"
+	optionsLabelField="auto"
+	optionsExtraFields={[['perimeter', 'str']]}
+	field="checklist"
+	cacheLock={cacheLocks['checklist']}
+	bind:cachedValue={formDataCache['checklist']}
+	label={m.checklist()}
 />
 
 <Select
@@ -70,65 +83,54 @@
 	label={m.status()}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
-/>
-
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
-	field="author"
-	cacheLock={cacheLocks['author']}
-	bind:cachedValue={formDataCache['author']}
-	label={m.author()}
-/>
-
-<TextField
-	type="date"
-	{form}
-	field="expiry_date"
-	cacheLock={cacheLocks['expiry_date']}
-	bind:cachedValue={formDataCache['expiry_date']}
-	label={m.expiryDate()}
+	disableDoubleDash={true}
 />
 
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="generic-collections"
 	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
 	field="linked_collection"
 	cacheLock={cacheLocks['linked_collection']}
 	bind:cachedValue={formDataCache['linked_collection']}
 	label={m.linkedCollection()}
 />
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="compliance-assessments"
-	optionsLabelField="auto"
-	field="checklist"
-	cacheLock={cacheLocks['checklist']}
-	bind:cachedValue={formDataCache['checklist']}
-	label={m.checklist()}
-/>
-
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	translateOptions={false}
-	allowUserOptions="append"
-/>
-
-<TextArea
-	{form}
-	field="observation"
-	label={m.observation()}
-	helpText={m.observationHelpText()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<TextField
+		{form}
+		field="authority"
+		cacheLock={cacheLocks['authority']}
+		bind:cachedValue={formDataCache['authority']}
+		label={m.authority()}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="expiry_date"
+		cacheLock={cacheLocks['expiry_date']}
+		bind:cachedValue={formDataCache['expiry_date']}
+		label={m.expiryDate()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
+	/>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		helpText={m.observationHelpText()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+</Dropdown>

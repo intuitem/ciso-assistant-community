@@ -4,10 +4,12 @@ from core.models import (
     FilteringLabelMixin,
     FindingsAssessment,
     I18nObjectMixin,
+    Policy,
     ReferentialObjectMixin,
     ComplianceAssessment,
     RiskAssessment,
     Evidence,
+    SecurityException,
 )
 from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
@@ -52,6 +54,16 @@ class GenericCollection(NameDescriptionFolderMixin, FilteringLabelMixin):
         Evidence,
         blank=True,
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+    )
+
+    policies = models.ManyToManyField(
+        Policy,
+        blank=True,
+    )
+
     dependencies = models.ManyToManyField(
         "self",
         blank=True,

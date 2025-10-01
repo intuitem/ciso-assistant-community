@@ -36,6 +36,8 @@ export const load: PageServerLoad = async (event) => {
 		'entity-assessments': 'entity_assessments',
 		'findings-assessments': 'findings_assessments',
 		evidences: 'documents',
+		'security-exceptions': 'security_exceptions',
+		policies: 'policies',
 		'generic-collections': 'dependencies'
 	};
 

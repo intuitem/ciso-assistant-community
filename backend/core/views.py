@@ -1804,6 +1804,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
+            "genericcollection": ["exact"],
         }
 
 
@@ -2645,6 +2646,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -6444,6 +6446,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         "folder",
         "severity",
         "status",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 

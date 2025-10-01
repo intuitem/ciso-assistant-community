@@ -37,6 +37,8 @@
 		'entity-assessments': 'selectEntityAssessments',
 		'findings-assessments': 'selectFindingsAssessments',
 		evidences: 'selectDocuments',
+		'security-exceptions': 'selectSecurityExceptions',
+		policies: 'selectPolicies',
 		'generic-collections': 'selectDependencies'
 	};
 
@@ -49,6 +51,8 @@
 		'entity-assessments': 'entity_assessments',
 		'findings-assessments': 'findings_assessments',
 		evidences: 'documents',
+		'security-exceptions': 'security_exceptions',
+		policies: 'policies',
 		'generic-collections': 'dependencies'
 	};
 

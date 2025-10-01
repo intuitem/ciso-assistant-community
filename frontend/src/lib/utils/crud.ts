@@ -1634,6 +1634,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'genericCollections',
 		verboseName: 'Generic Collection',
 		verboseNamePlural: 'Generic Collections',
+		endpointUrl: 'pmbok/generic-collections',
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'folder' },
@@ -1653,7 +1654,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'genericcollection', urlModel: 'ebios-rm' },
 			{ field: 'genericcollection', urlModel: 'entity-assessments' },
 			{ field: 'genericcollection', urlModel: 'findings-assessments' },
-			{ field: 'genericcollection', urlModel: 'evidences' }
+			{ field: 'genericcollection', urlModel: 'evidences' },
+			{ field: 'genericcollection', urlModel: 'security-exceptions' },
+			{ field: 'genericcollection', urlModel: 'policies' }
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
 	},
@@ -1663,6 +1666,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'accreditations',
 		verboseName: 'Accreditation',
 		verboseNamePlural: 'Accreditations',
+		endpointUrl: 'pmbok/accreditations',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'author', urlModel: 'users' },
@@ -1672,8 +1676,17 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [
 			{ field: 'folder' },
 			{ field: 'ref_id' },
+			{ field: 'status', endpointUrl: 'pmbok/accreditations' },
+			{ field: 'category', endpointUrl: 'pmbok/accreditations' }
+		],
+		filters: [
+			{ field: 'folder' },
 			{ field: 'status' },
-			{ field: 'category' }
+			{ field: 'category' },
+			{ field: 'author' },
+			{ field: 'linked_collection' },
+			{ field: 'checklist' },
+			{ field: 'filtering_labels' }
 		]
 	}
 };

@@ -6,7 +6,6 @@ from tprm.views import (
     EntityAssessmentViewSet,
 )
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
-from pmbok.views import GenericCollectionViewSet, AccreditationViewSet
 import importlib
 
 
@@ -99,10 +98,6 @@ router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-en
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
-router.register(
-    r"generic-collections", GenericCollectionViewSet, basename="generic-collections"
-)
-router.register(r"accreditations", AccreditationViewSet, basename="accreditations")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -127,6 +122,7 @@ urlpatterns = [
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
+    path("pmbok/", include("pmbok.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),

@@ -24,6 +24,9 @@ class GenericCollectionViewSet(BaseModelViewSet):
         "ebios_studies",
         "entity_assessments",
         "findings_assessments",
+        "documents",
+        "security_exceptions",
+        "policies",
         "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id"]
@@ -50,6 +53,7 @@ class AccreditationViewSet(BaseModelViewSet):
         "author",
         "linked_collection",
         "checklist",
+        "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id", "authority"]
     ordering = ["created_at"]

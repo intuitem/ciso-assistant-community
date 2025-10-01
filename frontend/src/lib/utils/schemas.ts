@@ -1150,6 +1150,8 @@ export const GenericCollectionSchema = z.object({
 	entity_assessments: z.array(z.string().uuid().optional()).optional(),
 	findings_assessments: z.array(z.string().uuid().optional()).optional(),
 	documents: z.array(z.string().uuid().optional()).optional(),
+	security_exceptions: z.array(z.string().uuid().optional()).optional(),
+	policies: z.array(z.string().uuid().optional()).optional(),
 	dependencies: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()

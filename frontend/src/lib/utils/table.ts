@@ -77,6 +77,30 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'accreditations/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'accreditations/category',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1864,6 +1888,7 @@ export const listViewFields = {
 			'status',
 			'checklist',
 			'authority',
+			'author',
 			'expiry_date',
 			'folder'
 		],
@@ -1874,43 +1899,15 @@ export const listViewFields = {
 			'status',
 			'checklist',
 			'authority',
+			'author',
 			'expiry_date',
 			'folder'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			status: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'accreditations/status',
-					label: 'status',
-					multiple: true
-				}
-			},
-			category: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'accreditations/category',
-					label: 'category',
-					multiple: true
-				}
-			},
-			author: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'users',
-					label: 'author',
-					multiple: true
-				}
-			},
-			checklist: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'compliance-assessments',
-					label: 'checklist',
-					multiple: true
-				}
-			}
+			status: ACCREDITATION_STATUS_FILTER,
+			category: ACCREDITATION_CATEGORY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	extra: {
