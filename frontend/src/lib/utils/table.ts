@@ -910,7 +910,7 @@ const FIELD_PATH_FILTER: ListViewFilterConfig = {
 		label: 'field_path',
 		optionsEndpoint: 'terminologies/field_path',
 		optionsLabelField: 'label',
-		optionsValueField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	}
 };
