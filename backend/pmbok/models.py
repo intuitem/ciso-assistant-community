@@ -10,6 +10,7 @@ from core.models import (
     RiskAssessment,
     Evidence,
     SecurityException,
+    Terminology,
 )
 from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
@@ -93,7 +94,16 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         max_length=30, choices=CATEGORY_CHOICES, default="other"
     )
     authority = models.CharField(max_length=255, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    status = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        related_name="accreditation_status",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+    )
+
     author = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

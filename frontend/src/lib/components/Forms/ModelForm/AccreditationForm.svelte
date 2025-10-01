@@ -53,6 +53,7 @@
 	field="author"
 	cacheLock={cacheLocks['author']}
 	bind:cachedValue={formDataCache['author']}
+	nullable={true}
 	label={m.author()}
 />
 <Select
@@ -73,19 +74,20 @@
 	field="checklist"
 	cacheLock={cacheLocks['checklist']}
 	bind:cachedValue={formDataCache['checklist']}
+	nullable={true}
 	label={m.checklist()}
 />
 
-<Select
-	{form}
-	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-	disableDoubleDash={true}
-/>
 
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="terminologies?field_path=accreditation.status&is_visible=true"
+		optionsLabelField="translated_name"
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="generic-collections"
@@ -94,6 +96,7 @@
 	field="linked_collection"
 	cacheLock={cacheLocks['linked_collection']}
 	bind:cachedValue={formDataCache['linked_collection']}
+	nullable={true}
 	label={m.linkedCollection()}
 />
 

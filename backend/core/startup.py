@@ -1061,6 +1061,11 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
 
+    # Create default
+    try:
+        Terminology.create_default_accreditations_status()
+    except Exception as e:
+        logger.error("Error creating default values", exc_info=e)
     # Create default Processing natures
     try:
         ProcessingNature.create_default_values()
