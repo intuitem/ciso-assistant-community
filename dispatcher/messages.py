@@ -36,16 +36,26 @@ def get_resource_endpoint(message: dict, resource_endpoint: str | None = None) -
     return resource_endpoint
 
 
+def get_values(message: dict) -> dict:
+    """
+    Extracts and validates the update values from the message.
+    Returns the values dictionary.
+    """
+    values = message.get("values", {})
+
+    if not values:
+        raise Exception("No values provided in the message.")
+
+    return values
+
+
 def extract_update_data(message: dict) -> tuple[dict, dict]:
     """
     Extracts and validates the selector and update values from the message.
     Returns a tuple of (selector, values).
     """
+    values = get_values(message)
     selector = message.get("selector", {})
-    values = message.get("values", {})
-
-    if not values:
-        raise Exception("No update values provided in the message.")
 
     if not selector:
         raise Exception("No selector provided.")
@@ -120,12 +130,13 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     return res.json() if res.text else {"id": obj_id, **values}
 
 
-def create_object(resource: str, values: dict, name: str) -> str:
-    objects_endpoint = f"{API_URL}/{resource}/"
-    logger.info("Creating new object with name: {}", name, values=values)
+def create_object(message: dict, resource_endpoint: str) -> str:
+    objects_endpoint = f"{API_URL}/{resource_endpoint}/"
+    values = get_values(message)
+    logger.info("Creating new object", values=values)
     response = api.post(
         objects_endpoint,
-        data={"name": values.get("name", name)},
+        data=values,
         headers={"Authorization": f"Token {get_access_token()}"},
         verify=VERIFY_CERTIFICATE,
     )
@@ -224,8 +235,16 @@ def update_requirement_assessment(message: dict):
     return update_objects(message, "requirement-assessments")
 
 
+def create_folder(message: dict):
+    return create_object(message, "folders")
+
+
 def update_folder(message: dict):
     return update_objects(message, "folders")
+
+
+def create_user(message: dict):
+    return create_object(message, "users")
 
 
 def update_user(message: dict):
