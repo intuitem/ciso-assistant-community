@@ -1667,6 +1667,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Accreditation',
 		verboseNamePlural: 'Accreditations',
 		endpointUrl: 'pmbok/accreditations',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'checklist', urlModel: 'compliance-assessments' },
+			{ field: 'status' },
+			{ field: 'authority' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'expiry_date', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'author', urlModel: 'users' },

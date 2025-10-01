@@ -36,10 +36,24 @@ class AccreditationReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     author = FieldsRelatedField(["id", "first_name", "last_name"])
     linked_collection = FieldsRelatedField()
+    collection_data = serializers.SerializerMethodField()
     checklist = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     status = serializers.CharField(source="get_status_display")
     category = serializers.CharField(source="get_category_display")
+    checklist_progress = serializers.SerializerMethodField()
+
+    def get_collection_data(self, obj):
+        """Get the linked collection with all related objects"""
+        if obj.linked_collection:
+            return GenericCollectionReadSerializer(obj.linked_collection).data
+        return None
+
+    def get_checklist_progress(self, obj):
+        """Get the progress percentage of the checklist compliance assessment"""
+        if obj.checklist:
+            return obj.checklist.get_progress()
+        return None
 
     class Meta:
         model = Accreditation
