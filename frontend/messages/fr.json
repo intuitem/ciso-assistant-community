@@ -2238,7 +2238,7 @@
 	"create": "Créer",
 	"createComplianceAssessment": "Vous n'avez encore aucun audit ou n'y avez pas accès.",
 	"currentAleDisplay": "ALE actuel",
-	"dataWizard": "Assistant de données",
+	"dataWizard": "Import de données",
 	"dataWizardChooseModel": "Choisissez le modèle correspondant",
 	"dataWizardClickUpload": "Cliquez Télécharger",
 	"dataWizardLoadExcelData": "Charger les données Excel",
