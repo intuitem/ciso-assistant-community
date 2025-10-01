@@ -1652,6 +1652,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'genericcollection', urlModel: 'quantitative-risk-studies' },
 			{ field: 'genericcollection', urlModel: 'ebios-rm' },
 			{ field: 'genericcollection', urlModel: 'entity-assessments' },
+			{ field: 'genericcollection', urlModel: 'findings-assessments' },
 			{ field: 'genericcollection', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]

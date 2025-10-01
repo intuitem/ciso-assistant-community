@@ -13,6 +13,7 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
     crq_studies = FieldsRelatedField(many=True)
     ebios_studies = FieldsRelatedField(many=True)
     entity_assessments = FieldsRelatedField(many=True)
+    findings_assessments = FieldsRelatedField(many=True)
     documents = FieldsRelatedField(many=True)
     dependencies = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)

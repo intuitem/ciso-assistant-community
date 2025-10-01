@@ -2,6 +2,7 @@ from django.db import models
 from iam.models import User, FolderMixin
 from core.models import (
     FilteringLabelMixin,
+    FindingsAssessment,
     I18nObjectMixin,
     ReferentialObjectMixin,
     ComplianceAssessment,
@@ -41,6 +42,10 @@ class GenericCollection(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     entity_assessments = models.ManyToManyField(
         EntityAssessment,
+        blank=True,
+    )
+    findings_assessments = models.ManyToManyField(
+        FindingsAssessment,
         blank=True,
     )
     documents = models.ManyToManyField(

@@ -1852,7 +1852,8 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'description', 'filteringLabels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	accreditations: {

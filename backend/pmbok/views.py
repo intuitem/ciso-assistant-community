@@ -23,6 +23,8 @@ class GenericCollectionViewSet(BaseModelViewSet):
         "crq_studies",
         "ebios_studies",
         "entity_assessments",
+        "findings_assessments",
+        "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["created_at"]

@@ -1148,6 +1148,7 @@ export const GenericCollectionSchema = z.object({
 	crq_studies: z.array(z.string().uuid().optional()).optional(),
 	ebios_studies: z.array(z.string().uuid().optional()).optional(),
 	entity_assessments: z.array(z.string().uuid().optional()).optional(),
+	findings_assessments: z.array(z.string().uuid().optional()).optional(),
 	documents: z.array(z.string().uuid().optional()).optional(),
 	dependencies: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),

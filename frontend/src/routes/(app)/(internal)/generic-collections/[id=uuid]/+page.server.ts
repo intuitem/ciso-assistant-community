@@ -34,6 +34,7 @@ export const load: PageServerLoad = async (event) => {
 		'quantitative-risk-studies': 'crq_studies',
 		'ebios-rm': 'ebios_studies',
 		'entity-assessments': 'entity_assessments',
+		'findings-assessments': 'findings_assessments',
 		evidences: 'documents',
 		'generic-collections': 'dependencies'
 	};

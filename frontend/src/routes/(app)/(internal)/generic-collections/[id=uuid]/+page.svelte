@@ -35,6 +35,7 @@
 		'quantitative-risk-studies': 'selectCrqStudies',
 		'ebios-rm': 'selectEbiosStudies',
 		'entity-assessments': 'selectEntityAssessments',
+		'findings-assessments': 'selectFindingsAssessments',
 		evidences: 'selectDocuments',
 		'generic-collections': 'selectDependencies'
 	};
@@ -46,6 +47,7 @@
 		'quantitative-risk-studies': 'crq_studies',
 		'ebios-rm': 'ebios_studies',
 		'entity-assessments': 'entity_assessments',
+		'findings-assessments': 'findings_assessments',
 		evidences: 'documents',
 		'generic-collections': 'dependencies'
 	};

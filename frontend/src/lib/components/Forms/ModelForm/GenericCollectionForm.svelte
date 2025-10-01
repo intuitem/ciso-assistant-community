@@ -33,6 +33,7 @@
 		{form}
 		multiple
 		optionsEndpoint="compliance-assessments"
+		optionsExtraFields={[['perimeter', 'str']]}
 		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
@@ -44,6 +45,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
+		optionsExtraFields={[['perimeter', 'str']]}
 		optionsLabelField="auto"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}
@@ -54,7 +56,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="crq-studies"
+		optionsEndpoint="quantitative-risk-studies"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="crq_studies"
 		cacheLock={cacheLocks['crq_studies']}
@@ -66,6 +69,7 @@
 		{form}
 		multiple
 		optionsEndpoint="ebios-rm"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="ebios_studies"
 		cacheLock={cacheLocks['ebios_studies']}
@@ -77,17 +81,31 @@
 		{form}
 		multiple
 		optionsEndpoint="entity-assessments"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="entity_assessments"
 		cacheLock={cacheLocks['entity_assessments']}
 		bind:cachedValue={formDataCache['entity_assessments']}
 		label={m.entityAssessments()}
 	/>
+{:else if context === 'selectFindingsAssessments'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="findings-assessments"
+		optionsExtraFields={[['perimeter', 'str']]}
+		optionsLabelField="auto"
+		field="findings_assessments"
+		cacheLock={cacheLocks['findings_assessments']}
+		bind:cachedValue={formDataCache['findings_assessments']}
+		label={m.findingsAssessments()}
+	/>
 {:else if context === 'selectDocuments'}
 	<AutocompleteSelect
 		{form}
 		multiple
 		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="documents"
 		cacheLock={cacheLocks['documents']}
@@ -125,6 +143,7 @@
 			{form}
 			multiple
 			optionsEndpoint="compliance-assessments"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="compliance_assessments"
 			cacheLock={cacheLocks['compliance_assessments']}
@@ -136,6 +155,7 @@
 			{form}
 			multiple
 			optionsEndpoint="risk-assessments"
+			optionsExtraFields={[['perimeter', 'str']]}
 			optionsLabelField="auto"
 			field="risk_assessments"
 			cacheLock={cacheLocks['risk_assessments']}
@@ -146,7 +166,8 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			optionsEndpoint="crq-studies"
+			optionsEndpoint="quantitative-risk-studies"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="crq_studies"
 			cacheLock={cacheLocks['crq_studies']}
@@ -158,6 +179,7 @@
 			{form}
 			multiple
 			optionsEndpoint="ebios-rm"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="ebios_studies"
 			cacheLock={cacheLocks['ebios_studies']}
@@ -169,6 +191,7 @@
 			{form}
 			multiple
 			optionsEndpoint="entity-assessments"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="entity_assessments"
 			cacheLock={cacheLocks['entity_assessments']}
@@ -179,7 +202,20 @@
 		<AutocompleteSelect
 			{form}
 			multiple
+			optionsEndpoint="findings-assessments"
+			optionsExtraFields={[['perimeter', 'str']]}
+			optionsLabelField="auto"
+			field="findings_assessments"
+			cacheLock={cacheLocks['findings_assessments']}
+			bind:cachedValue={formDataCache['findings_assessments']}
+			label={m.findingsAssessments()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
 			optionsEndpoint="evidences"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="documents"
 			cacheLock={cacheLocks['documents']}
