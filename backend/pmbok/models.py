@@ -74,6 +74,7 @@ class GenericCollection(NameDescriptionFolderMixin, FilteringLabelMixin):
 class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
+        ("in_progress", "In progress"),
         ("accredited", "Accredited"),
         ("not_accredited", "Not Accredited"),
         ("obsolete", "Obsolete"),
