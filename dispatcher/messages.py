@@ -120,6 +120,45 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     return res.json() if res.text else {"id": obj_id, **values}
 
 
+def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str:
+    """
+    Either finds an existing object using a selector or creates a new object.
+    """
+    objects_endpoint = f"{API_URL}/{resource}/"
+    if selector:
+        logger.info("Using provided selector to find object", selector=selector)
+        selector["target"] = "single"
+        object_ids = get_object_ids(selector, resource)
+        if not object_ids:
+            logger.error(
+                "No object found for the provided selector.", selector=selector
+            )
+            raise Exception("No object found for the provided selector.")
+        object_id = object_ids[0]
+        logger.info("Found object", object_id=object_id)
+    else:
+        logger.info("Creating new object with name: {}", name, values=values)
+        response = api.post(
+            objects_endpoint,
+            data={"name": values.get("name", name)},
+            headers={"Authorization": f"Token {get_access_token()}"},
+            verify=VERIFY_CERTIFICATE,
+        )
+        if not response.ok:
+            logger.error(
+                "Failed to create object",
+                status_code=response.status_code,
+                response=response.text,
+            )
+            raise Exception(
+                f"Failed to create object: {response.status_code}, {response.text}"
+            )
+        data = response.json()
+        object_id = data["id"]
+        logger.info("Created object", object_id=object_id, object=data)
+    return object_id
+
+
 def update_objects(
     message: dict,
     resource_endpoint: str | None = None,
@@ -180,6 +219,18 @@ def update_requirement_assessment(message: dict):
     return update_objects(message, "requirement-assessments")
 
 
+def update_folder(message: dict):
+    return update_objects(message, "folders")
+
+
+def update_user(message: dict):
+    return update_objects(message, "users")
+
+
+def update_user_group(message: dict):
+    return update_objects(message, "user-groups")
+
+
 def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
     """
     Determines how to load the file.
@@ -228,45 +279,6 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
         raise Exception(
             "No valid file source provided. Provide base64 file content or S3 bucket and key."
         )
-
-
-def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str:
-    """
-    Either finds an existing object using a selector or creates a new object.
-    """
-    objects_endpoint = f"{API_URL}/{resource}/"
-    if selector:
-        logger.info("Using provided selector to find object", selector=selector)
-        selector["target"] = "single"
-        object_ids = get_object_ids(selector, resource)
-        if not object_ids:
-            logger.error(
-                "No object found for the provided selector.", selector=selector
-            )
-            raise Exception("No object found for the provided selector.")
-        object_id = object_ids[0]
-        logger.info("Found object", object_id=object_id)
-    else:
-        logger.info("Creating new object with name: {}", name, values=values)
-        response = api.post(
-            objects_endpoint,
-            data={"name": values.get("name", name)},
-            headers={"Authorization": f"Token {get_access_token()}"},
-            verify=VERIFY_CERTIFICATE,
-        )
-        if not response.ok:
-            logger.error(
-                "Failed to create object",
-                status_code=response.status_code,
-                response=response.text,
-            )
-            raise Exception(
-                f"Failed to create object: {response.status_code}, {response.text}"
-            )
-        data = response.json()
-        object_id = data["id"]
-        logger.info("Created object", object_id=object_id, object=data)
-    return object_id
 
 
 def upload_file_to_evidence(
