@@ -36,7 +36,11 @@
 			urlPattern: '/findings-assessments/'
 		},
 		{ key: 'documents', label: m.evidences(), urlPattern: '/evidences/' },
-		{ key: 'security_exceptions', label: m.securityExceptions(), urlPattern: '/security-exceptions/' },
+		{
+			key: 'security_exceptions',
+			label: m.securityExceptions(),
+			urlPattern: '/security-exceptions/'
+		},
 		{ key: 'policies', label: m.policies(), urlPattern: '/policies/' }
 	];
 
@@ -78,7 +82,9 @@
 	<!-- Status and Category badges in top right corner with progress bar below -->
 	<div class="absolute top-6 right-6 flex flex-col items-end gap-2">
 		<div class="flex gap-2">
-			<span class="badge text-xs {categoryColorMap[accreditation.category] || categoryColorMap.other}">
+			<span
+				class="badge text-xs {categoryColorMap[accreditation.category] || categoryColorMap.other}"
+			>
 				{safeTranslate(accreditation.category)}
 			</span>
 			<span class="badge text-xs {statusColorMap[accreditation.status] || statusColorMap.draft}">
