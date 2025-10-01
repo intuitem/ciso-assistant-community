@@ -254,7 +254,9 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
-        json    question
+        json    questions
+        int     weight
+        string  importance
     }
 
     REFERENCE_CONTROL {
@@ -317,7 +319,7 @@ erDiagram
         bool   selected
         string review_conclusion
         string review_observation
-        json   answer
+        json   answers
     }
 
     EVIDENCE {
@@ -656,6 +658,12 @@ The implementation_groups field contains a comma-separated list of implementatio
 
 A requirement node can be covered by typical reference controls. A requirement node can cover typical threats. This information is provided in the form of optional links between requirement nodes and reference controls/threats. This is only informative, but is an important added value of CISO Assistant.
 
+A requirement node can have a positive integer weight, that is used for score weighting. The default weight (if undefined) is 1.
+
+A requirement node has an "importance" field that can take the following values: mandatory/recommended/nice to have/undefined. The default value is "undefined".
+
+Combining importance=mandatory with result=non-compliant/partially conpliant can be used to generate a list of attention points in an audit.
+
 The order_id variable allows to sort the requirements nodes, it starts at 0 and is incremented automatically in a given group at import.
 
 A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a scores_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
@@ -680,7 +688,7 @@ Threats are referential objects used to clarify the aim of a requirement node or
 
 Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE, CISA KEV or any other catalog can be done in the references field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
 
-Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
+Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed/not_affected/not_exploitable.
 
 The format of the references field is list of the following objects (* for mandatory):
 
@@ -734,6 +742,8 @@ Both types of assessments have common fields:
 - a status: (--/planned/in progress/in review/done/deprecated) that facilitates reporting.
 - a list of authors
 - a list of reviewers
+- an observation
+- an is_locked boolean
 
 An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
 
@@ -752,13 +762,16 @@ Here are the specific fields for requirement assessments:
 - score: --/`<integer value from min_score to max_score>`.
 - a status: (todo/in progress/in review/done) that facilitates reporting.
 
-The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
+The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requirement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
 Requirement assessments can have attached evidences. An evidence contains a name, a description, an attached file, a url link.
 
 The auditor is free to use the result field (qualitative assessment), the score field (quantitative assessment), or both of them.
 
 Compliance assessments have a selected_implementation_groups field that contains the selected implementation groups. The None default value consists in selecting all groups, which makes sense also for the case no implementation groups are defined.
+
+Compliance assessments have a hidden_implementation_groups field that contains implementation groups with nodes that are hidden, independently of the content of selected_implementation_groups.
+
 For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
@@ -769,6 +782,90 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 - CMMI (1-5, Initial/Managed/Defined/Quantitatively Managed/Optimizing)
 - 0-5 (0-5, no score definition)
 - 0-10 (0-10, no score definition)
+
+### Question and answer format
+
+The format for questions and answers json fields will evolve over time. The initial format is the following:
+
+- questions:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": {
+        "type": "unique_choice",
+        "choices": [
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+                "value": "yes"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+                "value": "no"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
+                "value": "n/a"
+            }
+        ],
+        "text": "Question title",
+    },
+    "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    ...
+    }
+}
+```
+
+- answers:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1",
+        "urn:intuitem:risk:framework:example:answer01:choice:2"
+    ],
+    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
+    ...
+}
+```
+
+The schema variable follows JSON Schema standard (WIP).
+
+### Automation based on questions
+
+Unique choice questions can have additional fieds for automation.
+
+#### Score computing
+
+- add_score: <integer-value>
+ 
+The score is calculated based on this choice. The integer value can be positive or negative. All values selected within a requirement assessment are summed, and the sum is clipped by the scale.
+ 
+The score cannot be changed manually as long as one choice with add_score is selected.
+
+#### Result computing
+
+- compute_compliance: <boolean-value>
+
+If true, this choice contributes to compliance. If false, this choice contributes to non-compliance.
+
+When result_compliance is defined for one or several answered questions, the result is calculated based on the following rules:
+- if all answered questions with result_compliance have true values, the result is "compliant"
+- else if at least one answered question with result_compliance has a true value, the result is "partially compliant"
+- else, the result is "non compliant".
+
+To select "not-applicable" result, the user shall not answer any of the questions with result_compliance flag.
+
+#### IG selection
+
+- select_implementation_group: <IG>
+
+This choice provokes the selection of the corresponding implementation group, if at least one implementation group is already selected. This is done by adding this IG to the selected_implementation_groups field of the compliance assessment, if this field is not empty.
+
+- hide_implementation_group: <IG>
+
+This choice provokes the masking of requirement nodes that are part of the correponding implementation group. This is done by adding this IG in the hidden_implementation_groups of the compliance assessment.
+
+The select_implementation_group/hide_implementation_group logic is enforced each time the compliance assessment is updated, to guarantee consistency.
 
 ### Requirement Mapping set
 
@@ -1239,12 +1336,6 @@ erDiagram
         string      description
     }
 
-    COMPLIANCE_ASSESSMENT {
-        string      review_conclusion
-        string      review_observation
-        json        implementation_groups_selector
-    }
-
 ```
 
 ```mermaid
@@ -1301,83 +1392,6 @@ This represents a person that is linked to an entity (typically an employee), an
 
 There is no link between representatives (modeling of the ecosystem) and users of the solution (access control mechanism).
 
-### Evolution of existing models
-
-## Assessments (risk/compliance/entity)
-
-- add field observation
-
-### Requirement assessment
-
-- add the following fields:
-  - answers: a json corresponding to the answers of the requirement node questions.
-
-### Compliance assessment
-
-- add the following fields:
-  - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
-
-### Requirement node
-
-- Add the following fields:
-  - questions: a json corresponding to the optional questions of the requirement node.
-
-### Applied control
-
-- Add a "contract" category
-- Add a foreign key "contract" to point to a contract
-
-The foreign key contract shall be non-null only if the category is set to "contract". The UX shall reflect this constraint.
-
-Note: in the future, we will use the same approach for policies.
-
-### Question and answer format
-
-The format for questions and answers json fields will evolve over time. The initial format is the following:
-
-- questions:
-
-```json
-{
-    "urn:intuitem:risk:req_node:example:a.1:question:1": {
-        "type": "unique_choice",
-        "choices": [
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
-                "value": "yes"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
-                "value": "no"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
-                "value": "n/a"
-            }
-        ],
-        "text": "Question title",
-    },
-    "urn:intuitem:risk:req_node:example:a.1:question:2": {
-    ...
-    }
-}
-```
-
-- answers:
-
-```json
-{
-    "urn:intuitem:risk:req_node:example:a.1:question:1": [
-        "urn:intuitem:risk:framework:example:answer01:choice:1",
-        "urn:intuitem:risk:framework:example:answer01:choice:2"
-    ],
-    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
-    ...
-}
-```
-
-The schema variable follows JSON Schema standard (WIP).
-
 ### Enclave security approach
 
 The objects manipulated by the third party (compliance assessment and evidences) are put in a dedicated folder called an "enclave". This folder is a subfolder of the domain. Enclaves are not shown in the UI, they are only used for security implementation.
@@ -1387,9 +1401,6 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - The main entity is automatically created and owns the global domain. The name is set to "Main", and can be changed.
 - Other entities own no domain.
 - Solutions are automatically provided to the main entity.
-- The change in applied control is not retained.
-- implementation_group_selector is not retained.
-- ebios-RM parameters are not retained.
 
 ## EBIOS-RM evolution
 
