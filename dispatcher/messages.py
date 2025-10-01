@@ -120,11 +120,34 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     return res.json() if res.text else {"id": obj_id, **values}
 
 
+def create_object(resource: str, values: dict, name: str) -> str:
+    objects_endpoint = f"{API_URL}/{resource}/"
+    logger.info("Creating new object with name: {}", name, values=values)
+    response = api.post(
+        objects_endpoint,
+        data={"name": values.get("name", name)},
+        headers={"Authorization": f"Token {get_access_token()}"},
+        verify=VERIFY_CERTIFICATE,
+    )
+    if not response.ok:
+        logger.error(
+            "Failed to create object",
+            status_code=response.status_code,
+            response=response.text,
+        )
+        raise Exception(
+            f"Failed to create object: {response.status_code}, {response.text}"
+        )
+    data = response.json()
+    object_id = data["id"]
+    logger.info("Created object", object_id=object_id, object=data)
+    return object_id
+
+
 def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str:
     """
     Either finds an existing object using a selector or creates a new object.
     """
-    objects_endpoint = f"{API_URL}/{resource}/"
     if selector:
         logger.info("Using provided selector to find object", selector=selector)
         selector["target"] = "single"
@@ -137,25 +160,7 @@ def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str
         object_id = object_ids[0]
         logger.info("Found object", object_id=object_id)
     else:
-        logger.info("Creating new object with name: {}", name, values=values)
-        response = api.post(
-            objects_endpoint,
-            data={"name": values.get("name", name)},
-            headers={"Authorization": f"Token {get_access_token()}"},
-            verify=VERIFY_CERTIFICATE,
-        )
-        if not response.ok:
-            logger.error(
-                "Failed to create object",
-                status_code=response.status_code,
-                response=response.text,
-            )
-            raise Exception(
-                f"Failed to create object: {response.status_code}, {response.text}"
-            )
-        data = response.json()
-        object_id = data["id"]
-        logger.info("Created object", object_id=object_id, object=data)
+        object_id = create_object(resource, values, name)
     return object_id
 
 
