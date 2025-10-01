@@ -289,11 +289,30 @@
 	// Generate TOC items from requirement assessments
 	$effect(() => {
 		if (requirementAssessments.length > 0) {
-			tocItems = requirementAssessments.map((ra, index) => ({
-				id: `requirement-${ra.id}`,
-				title: getTitle(ra),
-				level: 0
-			}));
+			tocItems = requirementAssessments.map((ra, index) => {
+				let title = getTitle(ra).trim();
+				let level = 0;
+				// If title is empty or too short, use truncated description
+				if (!title) {
+					if (ra.description && ra.description.trim()) {
+						title = ra.description.substring(0, 50) + (ra.description.length > 50 ? '...' : '');
+						level = 2;
+					}
+				} else if (title && title.length < 6) {
+					level = 1;
+					title =
+						title +
+						(ra.description
+							? ` - ${ra.description.substring(0, 30)}${ra.description.length > 50 ? '...' : ''}`
+							: '');
+				}
+
+				return {
+					id: `requirement-${ra.id}`,
+					title: title,
+					level: level
+				};
+			});
 		}
 	});
 	onMount(() => {
