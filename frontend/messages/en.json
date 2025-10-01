@@ -778,6 +778,7 @@
 	"checklistProgress": "Checklist",
 	"associatedObjects": "Associated objects",
 	"accreditationStatus": "Accreditation status",
+	"accreditationCategory": "Accreditation category",
 	"entity": "Entity",
 	"entities": "Entities",
 	"addEntity": "Add entity",

@@ -90,8 +90,14 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
-    category = models.CharField(
-        max_length=30, choices=CATEGORY_CHOICES, default="other"
+    category = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        related_name="accreditation_category",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
     )
     authority = models.CharField(max_length=255, blank=True)
     status = models.ForeignKey(

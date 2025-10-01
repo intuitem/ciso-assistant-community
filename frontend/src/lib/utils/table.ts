@@ -92,12 +92,12 @@ const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
 const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'accreditations/category',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
+		optionsEndpoint: 'terminologies',
+		optionsLabelField: 'name',
 		label: 'category',
 		browserCache: 'force-cache',
-		multiple: true
+		multiple: true,
+		filters: { field_path: 'accreditation.category' }
 	}
 };
 

@@ -40,12 +40,14 @@ class AccreditationReadSerializer(BaseModelSerializer):
     checklist = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     status = serializers.SerializerMethodField()
-
-    category = serializers.CharField(source="get_category_display")
+    category = serializers.SerializerMethodField()
     checklist_progress = serializers.SerializerMethodField()
 
     def get_status(self, obj):
         return obj.status.get_name_translated
+
+    def get_category(self, obj):
+        return obj.category.get_name_translated
 
     def get_collection_data(self, obj):
         """Get the linked collection with all related objects"""

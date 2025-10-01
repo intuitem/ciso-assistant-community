@@ -56,14 +56,14 @@
 	nullable={true}
 	label={m.author()}
 />
-<Select
+<AutocompleteSelect
 	{form}
-	options={model.selectOptions['category']}
+	optionsEndpoint="terminologies?field_path=accreditation.category&is_visible=true"
+	optionsLabelField="translated_name"
 	field="category"
 	label={m.category()}
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
-	disableDoubleDash={true}
 />
 
 <AutocompleteSelect
@@ -78,16 +78,15 @@
 	label={m.checklist()}
 />
 
-
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="terminologies?field_path=accreditation.status&is_visible=true"
-		optionsLabelField="translated_name"
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
-	/>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="terminologies?field_path=accreditation.status&is_visible=true"
+	optionsLabelField="translated_name"
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="generic-collections"
