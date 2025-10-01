@@ -384,8 +384,8 @@
 			{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
 				const fieldsToShow = ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
 				if (!fieldsToShow.includes(key)) return false;
-				// Hide selected_implementation_groups if it's empty
-				if (key === 'selected_implementation_groups' && (!value || (Array.isArray(value) && value.length === 0))) return false;
+				// Hide selected_implementation_groups if framework doesn't support implementation groups
+				if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
 				return true;
 			}) as [key, value]}
 				<div class="flex flex-col">
