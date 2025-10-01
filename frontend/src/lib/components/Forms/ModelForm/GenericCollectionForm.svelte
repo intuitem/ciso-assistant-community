@@ -305,6 +305,4 @@
 			label={m.dependencies()}
 		/>
 	</Dropdown>
-
-
 {/if}
