@@ -157,6 +157,28 @@
 		label={m.refId()}
 	/>
 
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		pathField="path"
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.domain()}
+		hidden={initialData.folder}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
+	/>
 	<Dropdown
 		open={false}
 		style="hover:text-primary-700"
@@ -284,27 +306,5 @@
 		/>
 	</Dropdown>
 
-	<AutocompleteSelect
-		multiple
-		{form}
-		createFromSelection={true}
-		optionsEndpoint="filtering-labels"
-		optionsLabelField="label"
-		field="filtering_labels"
-		helpText={m.labelsHelpText()}
-		label={m.labels()}
-		translateOptions={false}
-		allowUserOptions="append"
-	/>
 
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
-		pathField="path"
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-		hidden={initialData.folder}
-	/>
 {/if}
