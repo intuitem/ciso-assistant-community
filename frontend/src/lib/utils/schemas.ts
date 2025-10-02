@@ -289,7 +289,6 @@ export const RequirementAssessmentSchema = z.object({
 	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
-	requirement: z.string(),
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
