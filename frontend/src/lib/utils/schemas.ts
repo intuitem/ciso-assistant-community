@@ -1,7 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -290,7 +289,6 @@ export const RequirementAssessmentSchema = z.object({
 	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
-	requirement: z.string(),
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
@@ -306,12 +304,42 @@ export const UserEditSchema = z.object({
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	expiry_date: z
+		.union([z.literal('').transform(() => null), z.string().date()])
+		.nullish()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined values
+				const expiryDate = new Date(val);
+				const today = new Date();
+				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
+				return expiryDate >= today;
+			},
+			{
+				message: 'Expiry date cannot be in the past'
+			}
+		)
 });
 
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	expiry_date: z
+		.union([z.literal('').transform(() => null), z.string().date()])
+		.nullish()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined values
+				const expiryDate = new Date(val);
+				const today = new Date();
+				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
+				return expiryDate >= today;
+			},
+			{
+				message: 'Expiry date cannot be in the past'
+			}
+		)
 });
 
 export const ChangePasswordSchema = z.object({
@@ -384,7 +412,24 @@ export const EvidenceSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	owner: z.string().optional().array().optional(),
+	status: z.string().optional().default('draft'),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
+export const EvidenceRevisionSchema = z.object({
+	folder: z.string().uuid(),
+	evidence: z.string().uuid(),
+	version: z.number().optional(),
+	attachment: z.any().optional().nullable(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const GeneralSettingsSchema = z.object({
@@ -593,6 +638,22 @@ export const processingSchema = z.object({
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional()
+});
+
+export const rightRequestSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	owner: z.string().uuid().optional().array().optional(),
+	requested_on: z
+		.string()
+		.min(1)
+		.default(() => new Date().toISOString().split('T')[0]),
+	due_date: z.string().optional(),
+	request_type: z.string(),
+	status: z.string(),
+	observation: z.string().optional(),
+	processings: z.array(z.string()).optional().default([])
 });
 
 export const purposeSchema = z.object({
@@ -915,7 +976,8 @@ export const IncidentSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().uuid().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional(),
+	entities: z.string().uuid().optional().array().optional()
 });
 
 export const TimelineEntrySchema = z.object({
@@ -1091,6 +1153,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
+	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
@@ -1105,6 +1168,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'asset-assessments': AssetAssessmentSchema,
 	'escalation-thresholds': EscalationThresholdSchema,
 	processings: processingSchema,
+	'right-requests': rightRequestSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
 	'data-subjects': dataSubjectSchema,

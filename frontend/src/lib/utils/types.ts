@@ -51,6 +51,7 @@ export const URL_MODEL = [
 	'role-assignments',
 	'compliance-assessments',
 	'evidences',
+	'evidence-revisions',
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
@@ -84,6 +85,7 @@ export const URL_MODEL = [
 	'findings-assessments',
 	// privacy,
 	'processings',
+	'right-requests',
 	'purposes',
 	'personal-data',
 	'data-subjects',
@@ -117,7 +119,11 @@ export const URL_MODEL = [
 	'permissions'
 ] as const;
 
-export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+export const THIRD_PARTY_URL_MODEL = [
+	'compliance-assessments',
+	'evidences',
+	'evidence-revisions'
+] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
 

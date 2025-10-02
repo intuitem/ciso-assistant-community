@@ -17,6 +17,7 @@ READER_PERMISSIONS_LIST = [
     "view_entity",
     "view_entityassessment",
     "view_evidence",
+    "view_evidencerevision",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -67,6 +68,7 @@ READER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    "view_rightrequest",
     # campaigns,
     "view_campaign",
     # operating modes
@@ -98,6 +100,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_requirementassessment",
     "view_requirementnode",
     "view_evidence",
+    "view_evidencerevision",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -135,6 +138,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    "view_rightrequest",
     # operating modes
     "view_elementaryaction",
     "view_operatingmode",
@@ -350,6 +354,14 @@ ANALYST_PERMISSIONS_LIST = [
     "add_quantitativeriskhypothesis",
     "change_quantitativeriskhypothesis",
     "delete_quantitativeriskhypothesis",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -578,6 +590,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_quantitativeriskhypothesis",
     "change_quantitativeriskhypothesis",
     "delete_quantitativeriskhypothesis",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -649,10 +669,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    # evidence
     "add_evidence",
     "view_evidence",
     "change_evidence",
     "delete_evidence",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
     "add_framework",
     "view_framework",
     "delete_framework",
@@ -775,6 +800,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_datatransfer",
     "view_datatransfer",
     "delete_datatransfer",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
     # incidents,
     "add_incident",
     "view_incident",
@@ -855,6 +884,10 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "add_evidence",
     "change_evidence",
     "delete_evidence",
+    "add_evidencerevision",
+    "view_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
     "view_folder",
 ]
 

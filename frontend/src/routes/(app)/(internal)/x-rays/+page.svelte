@@ -15,9 +15,16 @@
 		const types = ['errors', 'warnings', 'info'];
 		const result = {};
 
+		if (!item?.objects || typeof item.objects !== 'object') {
+			types.forEach((type) => {
+				result[type] = [];
+			});
+			return result;
+		}
+
 		types.forEach((type) => {
 			result[type] = Object.entries(item.objects).reduce((acc, [key, value]) => {
-				if (key !== 'object') {
+				if (key !== 'object' && value?.quality_check?.[type]) {
 					// if key === 'quality_check'
 					acc = [...acc, ...value.quality_check[type]];
 				}
@@ -31,17 +38,21 @@
 	let tabStates = $state({});
 
 	const processPerimetersData = (rawData: any) => {
+		if (!rawData || typeof rawData !== 'object') {
+			return [];
+		}
 		return Object.entries(rawData).map(([key, value]) => {
+			const valueObj = value as Record<string, any>;
 			return {
 				id: key,
-				...(value as Record<string, any>),
+				...valueObj,
 				compliance_assessments: {
-					...value.compliance_assessments,
-					...aggregateQualityChecks(value.compliance_assessments)
+					...valueObj.compliance_assessments,
+					...aggregateQualityChecks(valueObj.compliance_assessments)
 				},
 				risk_assessments: {
-					...value.risk_assessments,
-					...aggregateQualityChecks(value.risk_assessments)
+					...valueObj.risk_assessments,
+					...aggregateQualityChecks(valueObj.risk_assessments)
 				}
 			};
 		});

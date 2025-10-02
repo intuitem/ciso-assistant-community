@@ -37,11 +37,24 @@ export const load: PageServerLoad = async (event) => {
 		console.warn('Failed to fetch combined LEC data:', error);
 	}
 
+	// Fetch ALE comparison data
+	let aleComparisonData = null;
+	try {
+		const url = `${BASE_API_URL}/crq/quantitative-risk-studies/${event.params.id}/ale-comparison/`;
+		const response = await event.fetch(url);
+		if (response.ok) {
+			aleComparisonData = await response.json();
+		}
+	} catch (error) {
+		console.warn('Failed to fetch ALE comparison data:', error);
+	}
+
 	// Return the original data plus combined data
 	return {
 		...detailData,
 		combinedAle: combinedAleData,
-		combinedLec: combinedLecData
+		combinedLec: combinedLecData,
+		aleComparison: aleComparisonData
 	};
 };
 
