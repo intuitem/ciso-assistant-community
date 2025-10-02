@@ -57,8 +57,6 @@
 	"home": "Accueil",
 	"edit": "Modifier",
 	"view": "Voir",
-	"viewMore": "Voir plus",
-	"viewLess": "Voir moins",
 	"changePassword": "Changer le mot de passe",
 	"overview": "Vue d'ensemble",
 	"context": "Contexte",
@@ -2137,5 +2135,7 @@
 	"securityObjectives": "Propriétés de sécurité",
 	"securityObjectiveScale": "Échelle des propriétés de sécurité",
 	"securityObjectiveScaleHelpText": "Choisissez votre échelle pour les propriétés de sécurité (1 à 4 par défaut)",
-	"hasMfaEnabled": "MFA activée"
+	"hasMfaEnabled": "MFA activée",
+	"viewMore": "Voir plus",
+	"viewLess": "Voir moins"
 }

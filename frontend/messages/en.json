@@ -57,8 +57,6 @@
 	"home": "Home",
 	"edit": "Edit",
 	"view": "View",
-	"viewMore": "View more",
-	"viewLess": "View less",
 	"changePassword": "Change password",
 	"overview": "Overview",
 	"context": "Context",
@@ -2204,5 +2202,7 @@
 	"lossThreshold": "Loss threshold",
 	"lossThresholdHelpText": "Maximum acceptable loss that will serve as a baseline for the tolerance",
 	"hasMfaEnabled": "MFA enabled",
-	"libraryOverview": "{objectType}: {count}"
+	"libraryOverview": "{objectType}: {count}",
+	"viewMore": "View more",
+	"viewLess": "View less"
 }

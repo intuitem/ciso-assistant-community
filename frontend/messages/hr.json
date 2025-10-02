@@ -1768,5 +1768,7 @@
 	"riskToleranceHelpText": "Prag tolerancije rizika",
 	"withinTolerance": "Unutar tolerancije",
 	"markdownHelpText": "Podržava markdown: **bold**, *italic*, `code`, [links](url), liste, itd.",
-	"markdownCTA": "Dvostruko kliknite za dodavanje sadržaja..."
+	"markdownCTA": "Dvostruko kliknite za dodavanje sadržaja...",
+	"viewMore": "Prikaži više",
+	"viewLess": "Prikaži manje"
 }
