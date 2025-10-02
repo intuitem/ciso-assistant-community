@@ -4333,19 +4333,38 @@ class UserPreferencesView(APIView):
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")
-        if new_language is None or new_language not in (
-            lang[0] for lang in settings.LANGUAGES
-        ):
-            logger.error(
-                f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
-            )
-            return Response(
-                {"error": "This language doesn't exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        request.user.preferences["lang"] = new_language
+        decimal_notation = request.data.get("decimal_notation")
+
+        if new_language is not None:
+            if new_language in (lang[0] for lang in settings.LANGUAGES):
+                request.user.preferences["lang"] = new_language
+            else:
+                logger.error(
+                    f"Error in UserPreferencesView: new_language={new_language} is not a supported. Currenty supported languages include: {[lang[0] for lang in settings.LANGUAGES]}"
+                )
+                return Response(
+                    {"error": "This language doesn't exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        if decimal_notation is not None:
+            if isinstance(decimal_notation, bool):
+                request.user.preferences["lang"] = new_language
+
+        if decimal_notation is not None:
+            if decimal_notation in User.DecimalNotation:
+                request.user.preferences["decimal_notation"] = decimal_notation
+            else:
+                logger.error(
+                    f"Error in UserPreferencesView: decimal_notation={decimal_notation} is not supported. Currently supported decimal notations include: {[notation.value for notation in User.DecimalNotation]}"
+                )
+                return Response(
+                    {"error": "This decimal notation doesn't exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         request.user.save()
-        return Response({}, status=status.HTTP_200_OK)
+        return Response(request.user.preferences, status=status.HTTP_200_OK)
 
 
 @cache_page(60 * SHORT_CACHE_TTL)

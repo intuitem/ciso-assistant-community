@@ -776,7 +776,7 @@ export const quantitativeRiskStudySchema = z.object({
 	// .default({
 	// 	points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
 	// }),
-	loss_threshold: z.number().optional().nullable(),
+	loss_threshold: z.number().step(1).optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	folder: z.string()

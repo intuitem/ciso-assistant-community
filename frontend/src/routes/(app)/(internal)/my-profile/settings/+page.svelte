@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
+	import { onMount } from 'svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
+	import { clientSideToast } from '$lib/utils/stores';
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { m } from '$paraglide/messages';
@@ -124,6 +126,19 @@
 		$recoveryCodes =
 			form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
 	});
+
+	let decimalNotation = $state('point');
+	let processSubmit = $state(false);
+
+	onMount(() => {
+		try {
+			const storedPreferences = localStorage.getItem('preferences') ?? '{}';
+			const preferences = JSON.parse(storedPreferences);
+			decimalNotation = preferences.decimal_notation ?? 'point';
+		} catch {
+			decimalNotation = 'point';
+		}
+	});
 </script>
 
 <Tabs
@@ -137,12 +152,78 @@
 		<Tabs.Control value="security"
 			><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tabs.Control
 		>
+		<Tabs.Control value="preferences"
+			><i class="fa-solid fa-user-gear mr-2"></i>Preferences</Tabs.Control
+		>
 	{/snippet}
 	{#snippet content()}
+		<Tabs.Panel value="preferences">
+			<div class="p-4 flex flex-col space-y-4">
+				<div>
+					<h3 class="h3 font-bold">Preferences</h3>
+					<p class="text-sm text-surface-800">Configure your preferences here.</p>
+				</div>
+				<hr />
+
+				<div class="flex flex-col w-min">
+					<div class="flex p-2">
+						<label class="flex flex-col justify-center w-max" for="decimal-notation">
+							<p>Decimal notation</p>
+							<p class="text-sm text-gray-500">Choose how numbers should be displayed.</p>
+						</label>
+						<select
+							bind:value={decimalNotation}
+							id="decimal-notation"
+							class="box-border rounded-lg ml-2 pr-16"
+						>
+							<option value="point">Point (e.g. 1.168)</option>
+							<option value="comma">Comma (e.g. 1,168)</option>
+						</select>
+					</div>
+					<!-- Make this accessible by doing the same thing with Tab/Enter -->
+					<button
+						class="btn preset-filled-primary-500 rounded-lg p-2"
+						onclick={() => {
+							if (processSubmit) return;
+							processSubmit = true;
+							fetch('/fe-api/user-preferences', {
+								method: 'PATCH',
+								headers: { 'content-type': 'application/json' },
+								body: JSON.stringify({
+									decimal_notation: decimalNotation
+								})
+							})
+								.then((req) => {
+									const success = req.status >= 200 && req.status < 400;
+									if (!success) {
+										clientSideToast.set({
+											type: 'error',
+											message: 'An error occured while attempting to update the preferences.'
+										});
+										throw new Error();
+									}
+									clientSideToast.set({
+										type: 'success',
+										message: 'Preferences successfully updated.'
+									});
+									return req.json();
+								})
+								.then((newPreferences) => {
+									localStorage.setItem('preferences', JSON.stringify(newPreferences));
+								})
+								.finally(() => {
+									processSubmit = false;
+								});
+						}}
+						>{#if processSubmit}Processing...{:else}Save changes{/if}</button
+					>
+				</div>
+			</div>
+		</Tabs.Panel>
 		<Tabs.Panel value="security">
 			<div class="p-4 flex flex-col space-y-4">
 				<div class="flex flex-col">
-					<h3 class="h3 font-medium">{m.securitySettings()}</h3>
+					<h3 class="h3 font-bold">{m.securitySettings()}</h3>
 					<p class="text-sm text-surface-800">{m.securitySettingsDescription()}</p>
 				</div>
 				<hr />

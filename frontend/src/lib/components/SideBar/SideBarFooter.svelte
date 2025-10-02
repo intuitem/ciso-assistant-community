@@ -16,6 +16,7 @@
 		value = event?.target?.value;
 		await fetch('/fe-api/user-preferences', {
 			method: 'PATCH',
+			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({
 				lang: value
 			})
@@ -36,8 +37,17 @@
 
 	let enableMoreBtn = $state(false);
 
-	onMount(() => {
+	onMount(async () => {
 		enableMoreBtn = true;
+
+		const req = await fetch('/fe-api/user-preferences');
+		if (req.status >= 400) {
+			console.error('Failed to fetch user preferences.');
+			return;
+		}
+		const preferences = await req.json();
+		preferences.decimal_notation ?? 'point';
+		localStorage.setItem('preferences', JSON.stringify(preferences));
 	});
 
 	let openState = $state(false);

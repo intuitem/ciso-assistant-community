@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import { persisted, type Persisted } from 'svelte-persisted-store';
 import type { Driver } from 'driver.js';
 import { DataHandler } from '@vincjo/datatables/remote';
+import type { FlashMessage } from '$lib/utils/types';
 import type { TreeViewNode } from '$lib/components/TreeView/types';
 
 export const showNotification = writable(
@@ -13,7 +14,7 @@ showNotification.subscribe((val) => {
 });
 
 export const pageTitle = writable('');
-export const clientSideToast = writable(undefined);
+export const clientSideToast = writable<FlashMessage | undefined>(undefined);
 
 const requirementAssessmentsList: string[] = [];
 

@@ -131,6 +131,11 @@ export type thirdPartyUrlModel = (typeof THIRD_PARTY_URL_MODEL)[number];
 
 export type ModelInfo = ModelMapEntry;
 
+export interface FlashMessage {
+	message: string;
+	type: 'success' | 'error' | 'warning' | 'info';
+}
+
 interface ProbabilityImpactItem {
 	abbreviation: string;
 	name: string;

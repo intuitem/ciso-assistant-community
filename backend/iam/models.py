@@ -4,6 +4,7 @@ Inspired from Azure IAM model"""
 from collections import defaultdict
 from typing import Any, List, Self, Tuple, Generator
 import uuid
+from enum import StrEnum
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
@@ -494,6 +495,10 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    class DecimalNotation(StrEnum):
+        POINT = "point"
+        COMMA = "comma"
 
     class Meta:
         """for Model"""
