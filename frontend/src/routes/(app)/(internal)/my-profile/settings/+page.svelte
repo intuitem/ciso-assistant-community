@@ -139,6 +139,38 @@
 			decimalNotation = 'point';
 		}
 	});
+
+	function applyPreferenceChange() {
+		processSubmit = true;
+		fetch('/fe-api/user-preferences', {
+			method: 'PATCH',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				decimal_notation: decimalNotation
+			})
+		})
+			.then((req) => {
+				const success = req.status >= 200 && req.status < 400;
+				if (!success) {
+					clientSideToast.set({
+						type: 'error',
+						message: 'An error occured while attempting to update the preferences.'
+					});
+					throw new Error();
+				}
+				clientSideToast.set({
+					type: 'success',
+					message: 'Preferences successfully updated.'
+				});
+				return req.json();
+			})
+			.then((newPreferences) => {
+				localStorage.setItem('preferences', JSON.stringify(newPreferences));
+			})
+			.finally(() => {
+				processSubmit = false;
+			});
+	}
 </script>
 
 <Tabs
@@ -180,40 +212,14 @@
 							<option value="comma">Comma (e.g. 1,168)</option>
 						</select>
 					</div>
-					<!-- Make this accessible by doing the same thing with Tab/Enter -->
 					<button
 						class="btn preset-filled-primary-500 rounded-lg p-2"
+						onkeydown={(event) => {
+							if (!processSubmit && (event.key === 'Enter' || event.key === ' '))
+								applyPreferenceChange();
+						}}
 						onclick={() => {
-							if (processSubmit) return;
-							processSubmit = true;
-							fetch('/fe-api/user-preferences', {
-								method: 'PATCH',
-								headers: { 'content-type': 'application/json' },
-								body: JSON.stringify({
-									decimal_notation: decimalNotation
-								})
-							})
-								.then((req) => {
-									const success = req.status >= 200 && req.status < 400;
-									if (!success) {
-										clientSideToast.set({
-											type: 'error',
-											message: 'An error occured while attempting to update the preferences.'
-										});
-										throw new Error();
-									}
-									clientSideToast.set({
-										type: 'success',
-										message: 'Preferences successfully updated.'
-									});
-									return req.json();
-								})
-								.then((newPreferences) => {
-									localStorage.setItem('preferences', JSON.stringify(newPreferences));
-								})
-								.finally(() => {
-									processSubmit = false;
-								});
+							if (!processSubmit) applyPreferenceChange();
 						}}
 						>{#if processSubmit}Processing...{:else}Save changes{/if}</button
 					>
