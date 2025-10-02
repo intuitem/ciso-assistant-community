@@ -3471,6 +3471,8 @@ class Vulnerability(
         EXPLOITABLE = "exploitable", _("Exploitable")
         MITIGATED = "mitigated", _("Mitigated")
         FIXED = "fixed", _("Fixed")
+        NOTEXPLOITABLE = "not_exploitable", _("Not exploitable")
+        UNAFFECTED = "unaffected", _("Unaffected")
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")

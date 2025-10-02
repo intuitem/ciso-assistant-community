@@ -908,6 +908,8 @@
 	"potential": "Potentielle",
 	"exploitable": "Exploitable",
 	"mitigated": "Atténuée",
+	"unaffected": "Non affectée",
+	"notExploitable": "Non exploitable",
 	"fixed": "Fixée",
 	"general": "Général",
 	"generalSettingsDescription": "Configurez vos paramètres ici.",
