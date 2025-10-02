@@ -286,33 +286,41 @@
 
 	let tocItems: TocItem[] = $state([]);
 	let showToc = $state(true);
-	// Generate TOC items from requirement assessments
+	// Generate TOC items from requirement assessments - only include title nodes
 	$effect(() => {
 		if (requirementAssessments.length > 0) {
-			tocItems = requirementAssessments.map((ra, index) => {
-				let title = getTitle(ra).trim();
-				let level = 0;
-				// If title is empty or too short, use truncated description
-				if (!title) {
-					if (ra.description && ra.description.trim()) {
-						title = ra.description.substring(0, 50) + (ra.description.length > 50 ? '...' : '');
-						level = 2;
-					}
-				} else if (title && title.length < 6) {
-					level = 1;
-					title =
-						title +
-						(ra.description
-							? ` - ${ra.description.substring(0, 30)}${ra.description.length > 50 ? '...' : ''}`
-							: '');
-				}
+			tocItems = requirementAssessments
+				.filter((ra) => {
+					// Only include non-assessable nodes , non empty title and depth <= 4
+					const requirement = requirementHashmap[ra.requirement] ?? ra;
+					if (ra.assessable) return false;
 
-				return {
-					id: `requirement-${ra.id}`,
-					title: title,
-					level: level
-				};
-			});
+					const hasRefId = requirement.ref_id && requirement.ref_id.trim();
+					const hasName = requirement.name && requirement.name.trim();
+					if (!hasRefId && !hasName) return false;
+
+					const parts = requirement.requirement.ref_id && requirement.requirement.ref_id.split('.');
+					if (parts !== null && parts.length > 4) return false;
+					return true;
+				})
+				.map((ra, index) => {
+					const requirement = requirementHashmap[ra.requirement] ?? ra;
+					let title = '';
+					title = requirement.name.trim();
+					// Determine level based on ref_id structure
+					let level = 0;
+					if (requirement.requirement.ref_id) {
+						// Infer level from ref_id structure (e.g., "1.2.3" would be level 2)
+						const parts = requirement.requirement.ref_id.split('.');
+						level = Math.max(0, parts.length - 1);
+					}
+
+					return {
+						id: `requirement-${ra.id}`,
+						title: title,
+						level: Math.min(level, 4)
+					};
+				});
 		}
 	});
 	onMount(() => {
