@@ -8,22 +8,22 @@
     <style>
         * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { margin: 0; padding: 0; }
-        h1, h2, h3, h4, h5, h6 { margin: 0 0 1rem 0; font-weight: 400; letter-spacing: 1px; line-height: 1.4; }
-        a { color: #349cd8; text-decoration: none; }
-        a:hover { text-decoration: underline !important; }
-        p, div, span { font-size: 0.9rem; font-weight: 300; margin: 0; line-height: 1.6; }
+        body { margin: 0; padding: 2rem 0; background-color: #f9fafb; }
+        h1, h2, h3, h4, h5, h6 { margin: 0 0 1rem 0; font-weight: 500; letter-spacing: 0.025em; line-height: 1.3; color: #111827; }
+        a { color: #2563eb; text-decoration: none; transition: color 0.15s; }
+        a:hover { color: #1d4ed8; text-decoration: underline; }
+        p, div, span { font-size: 0.9rem; font-weight: 400; margin: 0; line-height: 1.6; color: #374151; }
         strong, b { font-weight: 600; }
-        h1 { font-size: 2rem; }
+        h1 { font-size: 1.875rem; font-weight: 600; color: #1f2937; }
         ul, ol { margin: 0; padding-left: 1.5rem; }
         ul li { list-style: circle outside; margin-bottom: 0.3rem; }
         ol li { list-style: decimal outside; margin-bottom: 0.3rem; }
 
-        .container { position: relative; width: 100%; margin: 0 auto; padding: 0 1rem; box-sizing: border-box; }
-        .container-tablet { max-width: 1200px; }
+        .container { position: relative; width: 100%; margin: 0 auto; padding: 0 2rem; box-sizing: border-box; }
+        .container-tablet { max-width: 1200px; background-color: #ffffff; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
 
-        hr { margin: 2.5rem 0 !important; border: 0; border-top: 1px solid #bfbfbf; }
-        hr.dotted { border-top: 1px dotted #bfbfbf; }
+        hr { margin: 1.5rem 0 !important; border: 0; border-top: 1px solid #e5e7eb; }
+        hr.dotted { border-top: 1px dotted #d1d5db; }
 
         /* Flexbox utilities */
         .flex { display: flex; }
@@ -58,11 +58,11 @@
 
         /* Border utilities */
         .border { border-width: 1px; border-style: solid; border-color: #e5e7eb; }
-        .border-t-2 { border-top-width: 2px; }
+        .border-t-2 { border-top-width: 3px; }
         .rounded-lg { border-radius: 0.5rem; }
 
         /* Shadow utilities */
-        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .shadow-md { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
 
         /* Text utilities */
         .text-left { text-align: left; }
@@ -82,10 +82,10 @@
         .rounded-full { border-radius: 9999px; }
 
         /* Color classes - indigo */
-        .bg-indigo-200 { background-color: #c7d2fe; }
+        .bg-indigo-200 { background-color: #e0e7ff; }
         .text-indigo-700 { color: #4338ca; }
         .text-indigo-500 { color: #6366f1; }
-        .hover\:text-indigo-500:hover { color: #6366f1; }
+        .hover\:text-indigo-500:hover { color: #4f46e5; }
 
         /* Color classes - dynamic status/result colors */
         .text-gray-300 { color: #d1d5db; }
@@ -126,7 +126,12 @@
         }
 
         .node {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media print {
+            body { background-color: white; padding: 0; }
+            .container-tablet { box-shadow: none; }
         }
     </style>
 </head>
