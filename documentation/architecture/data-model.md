@@ -203,6 +203,7 @@ erDiagram
         string      observation
 
         string[]    selected_implementation_groups
+        string[]    hidden_implementation_groups
         int         min_score
         int         max_score
         json        scores_definition
@@ -770,7 +771,7 @@ The auditor is free to use the result field (qualitative assessment), the score 
 
 Compliance assessments have a selected_implementation_groups field that contains the selected implementation groups. The None default value consists in selecting all groups, which makes sense also for the case no implementation groups are defined.
 
-Compliance assessments have a hidden_implementation_groups field that contains implementation groups with nodes that are hidden, independently of the content of selected_implementation_groups.
+Compliance assessments have a hidden_implementation_groups field that contains implementation groups with nodes that are hidden, independently of the content of selected_implementation_groups. This field is not editable, as it is calculated.
 
 For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
 
@@ -857,15 +858,11 @@ To select "not-applicable" result, the user shall not answer any of the question
 
 #### IG selection
 
-- select_implementation_group: <IG>
-
-This choice provokes the selection of the corresponding implementation group, if at least one implementation group is already selected. This is done by adding this IG to the selected_implementation_groups field of the compliance assessment, if this field is not empty.
-
 - hide_implementation_group: <IG>
 
 This choice provokes the masking of requirement nodes that are part of the correponding implementation group. This is done by adding this IG in the hidden_implementation_groups of the compliance assessment.
 
-The select_implementation_group/hide_implementation_group logic is enforced each time the compliance assessment is updated, to guarantee consistency.
+The hide_implementation_group logic is enforced each time the compliance assessment is updated, to guarantee consistency.
 
 ### Requirement Mapping set
 
