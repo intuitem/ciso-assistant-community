@@ -291,27 +291,43 @@
 		if (requirementAssessments.length > 0) {
 			tocItems = requirementAssessments
 				.filter((ra) => {
-					// Only include non-assessable nodes , non empty title and depth <= 4
+					// Only include non-assessable nodes, non empty title and depth <= 4
 					const requirement = requirementHashmap[ra.requirement] ?? ra;
-					if (ra.assessable) return false;
+					if (ra.assessable || requirement.assessable) return false;
 
-					const hasRefId = requirement.ref_id && requirement.ref_id.trim();
-					const hasName = requirement.name && requirement.name.trim();
+					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
+					const name = requirement.name;
+
+					const hasRefId = refId && refId.trim();
+					const hasName = name && name.trim();
 					if (!hasRefId && !hasName) return false;
 
-					const parts = requirement.requirement.ref_id && requirement.requirement.ref_id.split('.');
-					if (parts !== null && parts.length > 4) return false;
+					if (refId) {
+						const parts = refId.split('.');
+						if (parts.length > 4) return false;
+					}
+
 					return true;
 				})
 				.map((ra, index) => {
 					const requirement = requirementHashmap[ra.requirement] ?? ra;
+
+					// Safely access ref_id and name
+					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
+					const name = requirement.name;
+
 					let title = '';
-					title = requirement.name.trim();
-					// Determine level based on ref_id structure
+					if (name && name.trim()) {
+						title = name.trim();
+					} else if (refId && refId.trim()) {
+						title = refId.trim();
+					} else {
+						title = `Section ${index + 1}`;
+					}
+
 					let level = 0;
-					if (requirement.requirement.ref_id) {
-						// Infer level from ref_id structure (e.g., "1.2.3" would be level 2)
-						const parts = requirement.requirement.ref_id.split('.');
+					if (refId && refId.trim()) {
+						const parts = refId.split('.');
 						level = Math.max(0, parts.length - 1);
 					}
 
