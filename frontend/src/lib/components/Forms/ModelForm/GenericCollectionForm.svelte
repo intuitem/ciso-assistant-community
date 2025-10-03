@@ -136,18 +136,18 @@
 		bind:cachedValue={formDataCache['policies']}
 		label={m.policies()}
 	/>
-<!-- {:else if context === 'selectDependencies'} -->
-<!-- 	<AutocompleteSelect -->
-<!-- 		{form} -->
-<!-- 		multiple -->
-<!-- 		optionsEndpoint="generic-collections" -->
-<!-- 		optionsLabelField="auto" -->
-<!-- 		optionsSelf={object} -->
-<!-- 		field="dependencies" -->
-<!-- 		cacheLock={cacheLocks['dependencies']} -->
-<!-- 		bind:cachedValue={formDataCache['dependencies']} -->
-<!-- 		label={m.dependencies()} -->
-<!-- 	/> -->
+	<!-- {:else if context === 'selectDependencies'} -->
+	<!-- 	<AutocompleteSelect -->
+	<!-- 		{form} -->
+	<!-- 		multiple -->
+	<!-- 		optionsEndpoint="generic-collections" -->
+	<!-- 		optionsLabelField="auto" -->
+	<!-- 		optionsSelf={object} -->
+	<!-- 		field="dependencies" -->
+	<!-- 		cacheLock={cacheLocks['dependencies']} -->
+	<!-- 		bind:cachedValue={formDataCache['dependencies']} -->
+	<!-- 		label={m.dependencies()} -->
+	<!-- 	/> -->
 {:else}
 	<TextField
 		{form}
