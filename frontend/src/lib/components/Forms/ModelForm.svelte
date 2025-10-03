@@ -276,6 +276,7 @@
 									updated_fields.add('reference_control');
 									return {
 										...currentData,
+										name: r.name,
 										category: r.category,
 										csf_function: r.csf_function,
 										ref_id: r.ref_id
