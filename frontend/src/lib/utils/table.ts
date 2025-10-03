@@ -80,9 +80,8 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'accreditations/status',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
+		optionsEndpoint: 'terminologies?field_path=accreditation.status',
+		optionsLabelField: 'name',
 		label: 'status',
 		browserCache: 'force-cache',
 		multiple: true
@@ -92,12 +91,11 @@ const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
 const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'terminologies',
+		optionsEndpoint: 'terminologies?field_path=accreditation.category',
 		optionsLabelField: 'name',
 		label: 'category',
 		browserCache: 'force-cache',
-		multiple: true,
-		filters: { field_path: 'accreditation.category' }
+		multiple: true
 	}
 };
 
@@ -688,6 +686,26 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'entity',
 		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+
+const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=entity.relationship',
+		optionsLabelField: 'name',
+		label: 'relationship',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'authority',
+		optionsEndpoint: 'entities?relationship__name=accreditation_authority',
 		multiple: true
 	}
 };
@@ -1385,10 +1403,11 @@ export const listViewFields = {
 		}
 	},
 	entities: {
-		head: ['name', 'description', 'domain', 'ownedFolders'],
-		body: ['name', 'description', 'folder', 'owned_folders'],
+		head: ['name', 'description', 'domain', 'relationship', 'ownedFolders'],
+		body: ['name', 'description', 'folder', 'relationship', 'owned_folders'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
 	'entity-assessments': {
@@ -1894,32 +1913,13 @@ export const listViewFields = {
 		}
 	},
 	accreditations: {
-		head: [
-			'ref_id',
-			'name',
-			'category',
-			'status',
-			'checklist',
-			'authority',
-			'author',
-			'expiry_date',
-			'folder'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'category',
-			'status',
-			'checklist',
-			'authority',
-			'author',
-			'expiry_date',
-			'folder'
-		],
+		head: ['ref_id', 'name', 'category', 'status', 'authority', 'author', 'expiry_date', 'folder'],
+		body: ['ref_id', 'name', 'category', 'status', 'authority', 'author', 'expiry_date', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ACCREDITATION_STATUS_FILTER,
 			category: ACCREDITATION_CATEGORY_FILTER,
+			authority: ACCREDITATION_AUTHORITY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},

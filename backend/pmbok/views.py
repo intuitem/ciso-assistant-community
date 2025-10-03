@@ -51,6 +51,7 @@ class AccreditationViewSet(BaseModelViewSet):
         "status",
         "category",
         "author",
+        "authority",
         "linked_collection",
         "checklist",
         "filtering_labels",

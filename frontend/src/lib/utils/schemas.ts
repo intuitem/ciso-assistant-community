@@ -535,7 +535,8 @@ export const EntitiesSchema = z.object({
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
-		.optional()
+		.optional(),
+	relationship: z.string().optional().array().optional()
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -1161,7 +1162,7 @@ export const AccreditationSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	category: z.string().uuid(),
-	authority: z.string().optional(),
+	authority: z.string().uuid().optional().nullable(),
 	status: z.string().uuid(),
 	author: z.string().uuid().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),

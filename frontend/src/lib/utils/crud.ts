@@ -705,7 +705,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' }
+			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' },
+			{
+				field: 'relationship',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=entity.relationship'
+			}
 		]
 	},
 	'entity-assessments': {
@@ -1681,7 +1686,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'author', urlModel: 'users' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
-			{ field: 'linked_collection', urlModel: 'generic-collections' }
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'authority', urlModel: 'entities' }
 		],
 		selectFields: [
 			{ field: 'folder' },
