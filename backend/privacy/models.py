@@ -474,8 +474,7 @@ class DataBreach(NameDescriptionFolderMixin):
         max_length=50, choices=STATUS_CHOICES, default="privacy_discovered"
     )
 
-    # Affected entities
-    affected_subjects_count = models.IntegerField(
+    affected_subjects_count = models.PositiveIntegerField(
         default=0, help_text="Approximate number of affected data subjects"
     )
     affected_processings = models.ManyToManyField(
@@ -483,6 +482,9 @@ class DataBreach(NameDescriptionFolderMixin):
     )
     affected_personal_data = models.ManyToManyField(
         PersonalData, blank=True, related_name="data_breaches"
+    )
+    affected_personal_data_count = models.PositiveIntegerField(
+        default=0, help_text="Approximate number of affected personal data"
     )
 
     # Notification tracking
