@@ -1641,7 +1641,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
-			{ field: 'observation' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
