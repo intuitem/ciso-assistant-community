@@ -250,7 +250,7 @@
 					value: valueField,
 					suggested: optionsSuggestions?.some(
 						(s) =>
-							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
+							getNestedValue(s, optionsValueField) === valueField
 					),
 					translatedLabel:
 						safeTranslate(fullLabel) !== fullLabel
