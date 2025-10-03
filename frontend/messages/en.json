@@ -958,6 +958,8 @@
 	"potential": "Potential",
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
+	"unaffected": "Unaffected",
+	"notExploitable": "Not exploitable",
 	"fixed": "Fixed",
 	"general": "General",
 	"generalSettingsDescription": "Configure your general settings here.",
