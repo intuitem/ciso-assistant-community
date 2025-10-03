@@ -524,6 +524,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

@@ -659,6 +659,32 @@ export const rightRequestSchema = z.object({
 	processings: z.array(z.string()).optional().default([])
 });
 
+export const dataBreachSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	discovered_on: z
+		.string()
+		.min(1)
+		.default(() => new Date().toISOString()),
+	breach_type: z.string(),
+	risk_level: z.string(),
+	status: z.string(),
+	affected_subjects_count: z.number().optional().default(0),
+	affected_processings: z.array(z.string()).optional().default([]),
+	affected_personal_data: z.array(z.string()).optional().default([]),
+	affected_personal_data_count: z.number().optional().default(0),
+	authorities: z.array(z.string()).optional().default([]),
+	authority_notified_on: z.string().optional(),
+	authority_notification_ref: z.string().optional(),
+	subjects_notified_on: z.string().optional(),
+	potential_consequences: z.string().optional(),
+	remediation_measures: z.array(z.string()).optional().default([]),
+	incident: z.string().optional(),
+	reference_link: z.string().url().optional().or(z.literal('')),
+	observation: z.string().optional()
+});
+
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
@@ -1206,6 +1232,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'escalation-thresholds': EscalationThresholdSchema,
 	processings: processingSchema,
 	'right-requests': rightRequestSchema,
+	'data-breaches': dataBreachSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
 	'data-subjects': dataSubjectSchema,

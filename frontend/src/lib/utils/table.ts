@@ -1519,6 +1519,77 @@ export const listViewFields = {
 			}
 		}
 	},
+	'data-breaches': {
+		head: [
+			'refId',
+			'name',
+			'discoveredOn',
+			'breachType',
+			'riskLevel',
+			'status',
+			'affectedSubjectsCount',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'discovered_on',
+			'breach_type',
+			'risk_level',
+			'status',
+			'affected_subjects_count',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			breach_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'data-breaches/breach_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'breachType',
+					multiple: true
+				}
+			},
+			risk_level: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'data-breaches/risk_level',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'riskLevel',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'data-breaches/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					multiple: true
+				}
+			},
+			affected_processings: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings',
+					label: 'affectedProcessings',
+					multiple: true
+				}
+			},
+			incident: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'incidents',
+					label: 'incident',
+					multiple: false
+				}
+			}
+		}
+	},
 	purposes: {
 		head: ['name', 'description', 'processing'],
 		body: ['name', 'description', 'processing'],
