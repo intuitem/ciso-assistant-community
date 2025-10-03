@@ -286,14 +286,57 @@
 
 	let tocItems: TocItem[] = $state([]);
 	let showToc = $state(true);
-	// Generate TOC items from requirement assessments
+	// Generate TOC items from requirement assessments - only include title nodes
 	$effect(() => {
 		if (requirementAssessments.length > 0) {
-			tocItems = requirementAssessments.map((ra, index) => ({
-				id: `requirement-${ra.id}`,
-				title: getTitle(ra),
-				level: 0
-			}));
+			tocItems = requirementAssessments
+				.filter((ra) => {
+					// Only include non-assessable nodes, non empty title and depth <= 4
+					const requirement = requirementHashmap[ra.requirement] ?? ra;
+					if (ra.assessable || requirement.assessable) return false;
+
+					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
+					const name = requirement.name;
+
+					const hasRefId = refId && refId.trim();
+					const hasName = name && name.trim();
+					if (!hasRefId && !hasName) return false;
+
+					if (refId) {
+						const parts = refId.split('.');
+						if (parts.length > 4) return false;
+					}
+
+					return true;
+				})
+				.map((ra, index) => {
+					const requirement = requirementHashmap[ra.requirement] ?? ra;
+
+					// Safely access ref_id and name
+					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
+					const name = requirement.name;
+
+					let title = '';
+					if (name && name.trim()) {
+						title = name.trim();
+					} else if (refId && refId.trim()) {
+						title = refId.trim();
+					} else {
+						title = `Section ${index + 1}`;
+					}
+
+					let level = 0;
+					if (refId && refId.trim()) {
+						const parts = refId.split('.');
+						level = Math.max(0, parts.length - 1);
+					}
+
+					return {
+						id: `requirement-${ra.id}`,
+						title: title,
+						level: Math.min(level, 4)
+					};
+				});
 		}
 	});
 	onMount(() => {
