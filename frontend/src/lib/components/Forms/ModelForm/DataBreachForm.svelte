@@ -73,8 +73,8 @@
 	options={model.selectOptions['risk_level']}
 	cacheLock={cacheLocks['risk_level']}
 	bind:cachedValue={formDataCache['risk_level']}
-	label={m.riskLevel()}
-	helpText={m.riskLevelHelpText()}
+	label={m.dataBreachRiskLevel()}
+	helpText={m.dataBreachRiskLevelHelpText()}
 />
 
 <AutocompleteSelect
