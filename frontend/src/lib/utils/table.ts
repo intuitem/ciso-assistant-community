@@ -406,8 +406,6 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'processing-natures',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
 		label: 'nature',
 		browserCache: 'force-cache',
 		multiple: true
@@ -1453,6 +1451,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
+			nature: PROCESSING_NATURE_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
