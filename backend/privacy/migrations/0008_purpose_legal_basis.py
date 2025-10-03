@@ -6,17 +6,28 @@ from django.db import migrations, models
 def copy_legal_basis_to_purposes(apps, schema_editor):
     """
     Copy legal_basis from Processing to all related Purpose objects.
+    If a Processing has a legal_basis but no purposes, create a default purpose.
     """
     Processing = apps.get_model("privacy", "Processing")
     Purpose = apps.get_model("privacy", "Purpose")
 
     for processing in Processing.objects.all():
-        # Only copy if processing has a legal_basis set
+        # Only process if processing has a legal_basis set
         if processing.legal_basis:
-            # Update all purposes related to this processing
-            Purpose.objects.filter(processing=processing).update(
-                legal_basis=processing.legal_basis
-            )
+            existing_purposes = Purpose.objects.filter(processing=processing)
+
+            if existing_purposes.exists():
+                # Update all existing purposes
+                existing_purposes.update(legal_basis=processing.legal_basis)
+            else:
+                # Create a default purpose to preserve the legal_basis
+                Purpose.objects.create(
+                    processing=processing,
+                    name="Default Purpose",
+                    description=f"Auto-generated purpose to preserve legal basis: {processing.legal_basis}",
+                    legal_basis=processing.legal_basis,
+                    folder=processing.folder,
+                )
 
 
 class Migration(migrations.Migration):
