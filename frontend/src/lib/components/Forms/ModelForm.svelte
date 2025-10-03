@@ -65,6 +65,8 @@
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
+	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
+	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -274,7 +276,13 @@
 										return currentData; // Keep the current values in the edit form.
 									}
 									updated_fields.add('reference_control');
-									return { ...currentData, category: r.category, csf_function: r.csf_function };
+									return {
+										...currentData,
+										name: r.name,
+										category: r.category,
+										csf_function: r.csf_function,
+										ref_id: r.ref_id
+									};
 								});
 							});
 					}
@@ -694,6 +702,18 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'generic-collections'}
+			<GenericCollectionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'accreditations'}
+			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}
