@@ -20,6 +20,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.shortcuts import get_object_or_404
 
@@ -205,10 +207,38 @@ class RoToViewSet(BaseModelViewSet):
         return Response(dict(RoTo.Pertinence.choices))
 
 
+class StakeholderOrderingFilter(filters.OrderingFilter):
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+
+        # NOTE: Repeating pattern used in UserGroupOrderingFilter, consider refactoring
+        # Replace 'entity' with 'entity__name' for ordering
+        mapped_ordering = []
+        for field in ordering:
+            if field.lstrip("-") == "entity":
+                is_desc = field.startswith("-")
+                mapped_field = "entity__name"
+                if is_desc:
+                    mapped_field = "-" + mapped_field
+                mapped_ordering.append(mapped_field)
+            else:
+                mapped_ordering.append(field)
+
+        return mapped_ordering
+
+
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
     filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls", "category"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        StakeholderOrderingFilter,
+    ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
