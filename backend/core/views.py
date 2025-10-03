@@ -7889,6 +7889,15 @@ class TaskTemplateViewSet(BaseModelViewSet):
         )  # Synchronize task nodes when fetching a task template
         return Response(serializer_class(super().get_object()).data)
 
+    @action(detail=False, name="Get all task template assigned_to users")
+    def assigned_to(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(task_templates__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):
