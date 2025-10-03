@@ -60,7 +60,7 @@
 		class="flex flex-col p-1 rounded-md text-sm h-32 max-h-32 border
 		       {isPast
 			? 'bg-gray-300 text-gray-500 cursor-pointer hover:bg-gray-400'
-			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'} 
+			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'}
 		       {isToday ? 'border-gray-200 cursor-pointer hover:bg-gray-100' : ''}"
 		onclick={openSidePanel}
 	>
@@ -82,6 +82,9 @@
 							: ''}
 						{item.color === 'tertiary'
 							? 'hover:bg-tertiary-200 text-tertiary-700 bg-tertiary-50 border-l-tertiary-500'
+							: ''}
+						{item.color === 'warning'
+							? 'hover:bg-yellow-200 text-yellow-700 bg-yellow-50 border-l-yellow-500'
 							: ''}
 						"
 					>

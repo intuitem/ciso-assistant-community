@@ -194,6 +194,9 @@
 								{item.color === 'tertiary'
 									? 'hover:bg-tertiary-200 text-tertiary-700 bg-tertiary-50 border-l-tertiary-500'
 									: ''}
+								{item.color === 'warning'
+									? 'hover:bg-yellow-200 text-yellow-700 bg-yellow-50 border-l-yellow-500'
+									: ''}
 								"
 							>
 								<Anchor href={item.link} class="block">
