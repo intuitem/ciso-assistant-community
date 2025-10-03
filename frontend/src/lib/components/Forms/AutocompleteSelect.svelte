@@ -243,15 +243,21 @@
 				}
 
 				const fullLabel = `${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
+				const valueField = getNestedValue(object, optionsValueField);
 
 				return {
 					label: fullLabel,
-					value: getNestedValue(object, optionsValueField),
+					value: valueField,
 					suggested: optionsSuggestions?.some(
 						(s) =>
 							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
 					),
-					translatedLabel: safeTranslate(fullLabel),
+					translatedLabel:
+						safeTranslate(fullLabel) !== fullLabel
+							? safeTranslate(fullLabel)
+							: safeTranslate(valueField) !== valueField
+								? safeTranslate(valueField)
+								: fullLabel,
 					path,
 					infoString,
 					contentType: object?.content_type || ''
