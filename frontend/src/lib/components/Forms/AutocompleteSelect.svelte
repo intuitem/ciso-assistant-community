@@ -249,8 +249,7 @@
 					label: fullLabel,
 					value: valueField,
 					suggested: optionsSuggestions?.some(
-						(s) =>
-							getNestedValue(s, optionsValueField) === valueField
+						(s) => getNestedValue(s, optionsValueField) === valueField
 					),
 					translatedLabel:
 						safeTranslate(fullLabel) !== fullLabel
