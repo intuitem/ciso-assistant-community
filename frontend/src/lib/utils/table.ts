@@ -611,6 +611,18 @@ const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+
+const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'assigned_to',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'task-templates/assigned_to',
+		multiple: true
+	}
+};
+
 const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1847,6 +1859,7 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER
