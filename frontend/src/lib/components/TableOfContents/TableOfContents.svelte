@@ -24,7 +24,7 @@
 	let focusedIndex = $state(-1);
 	let tocContainer = $state<HTMLDivElement>();
 	let searchInput = $state<HTMLInputElement>();
-	let navigationButtons: HTMLButtonElement[] = [];
+	let navigationButtons = $state<HTMLButtonElement[]>([]);
 	let isScrolling = $state(false);
 
 	// Observer for active section tracking
