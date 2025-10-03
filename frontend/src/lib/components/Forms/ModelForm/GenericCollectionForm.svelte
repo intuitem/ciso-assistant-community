@@ -136,18 +136,18 @@
 		bind:cachedValue={formDataCache['policies']}
 		label={m.policies()}
 	/>
-{:else if context === 'selectDependencies'}
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="generic-collections"
-		optionsLabelField="auto"
-		optionsSelf={object}
-		field="dependencies"
-		cacheLock={cacheLocks['dependencies']}
-		bind:cachedValue={formDataCache['dependencies']}
-		label={m.dependencies()}
-	/>
+<!-- {:else if context === 'selectDependencies'} -->
+<!-- 	<AutocompleteSelect -->
+<!-- 		{form} -->
+<!-- 		multiple -->
+<!-- 		optionsEndpoint="generic-collections" -->
+<!-- 		optionsLabelField="auto" -->
+<!-- 		optionsSelf={object} -->
+<!-- 		field="dependencies" -->
+<!-- 		cacheLock={cacheLocks['dependencies']} -->
+<!-- 		bind:cachedValue={formDataCache['dependencies']} -->
+<!-- 		label={m.dependencies()} -->
+<!-- 	/> -->
 {:else}
 	<TextField
 		{form}
@@ -266,7 +266,7 @@
 			field="documents"
 			cacheLock={cacheLocks['documents']}
 			bind:cachedValue={formDataCache['documents']}
-			label={m.documents()}
+			label={m.evidences()}
 		/>
 
 		<AutocompleteSelect
@@ -293,16 +293,16 @@
 			label={m.policies()}
 		/>
 
-		<AutocompleteSelect
-			{form}
-			multiple
-			optionsEndpoint="generic-collections"
-			optionsLabelField="auto"
-			optionsSelf={object}
-			field="dependencies"
-			cacheLock={cacheLocks['dependencies']}
-			bind:cachedValue={formDataCache['dependencies']}
-			label={m.dependencies()}
-		/>
+		<!-- <AutocompleteSelect -->
+		<!-- 	{form} -->
+		<!-- 	multiple -->
+		<!-- 	optionsEndpoint="generic-collections" -->
+		<!-- 	optionsLabelField="auto" -->
+		<!-- 	optionsSelf={object} -->
+		<!-- 	field="dependencies" -->
+		<!-- 	cacheLock={cacheLocks['dependencies']} -->
+		<!-- 	bind:cachedValue={formDataCache['dependencies']} -->
+		<!-- 	label={m.dependencies()} -->
+		<!-- /> -->
 	</Dropdown>
 {/if}
