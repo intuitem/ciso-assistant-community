@@ -181,7 +181,7 @@
 	</Accordion.Item>
 	<Accordion.Item value="financial">
 		{#snippet control()}
-			<i class="fa-solid fa-coins mr-2"></i>Financial Settings
+			<i class="fa-solid fa-coins mr-2"></i>{m.financialSettings()}
 		{/snippet}
 		{#snippet panel()}
 			<div class="p-4 space-y-4">
@@ -196,14 +196,14 @@
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' }
 					]}
-					label="Currency"
-					helpText="Select the default currency for financial calculations"
+					label={m.currency()}
+					helpText={m.currencyHelpText()}
 				/>
 				<NumberField
 					{form}
 					field="daily_rate"
-					label="Daily Rate"
-					helpText="Default daily rate for cost calculations"
+					label={m.dailyRate()}
+					helpText={m.dailyRateHelpText()}
 					min={0}
 					step={1}
 				/>

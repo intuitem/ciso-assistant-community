@@ -34,6 +34,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "status",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
