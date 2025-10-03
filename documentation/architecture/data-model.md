@@ -482,7 +482,7 @@ Labels are attached to the root folder. They can be read by everyone, added by a
 ```mermaid
 erDiagram
     ANY_USER_DEFINED_OBJECT   }o--o{ LABEL : has_label
- 
+
     LABEL {
         string  label
     }
@@ -680,7 +680,7 @@ Threats are referential objects used to clarify the aim of a requirement node or
 
 Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE, CISA KEV or any other catalog can be done in the references field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
 
-Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
+Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed/not_exploitable/unaffected.
 
 The format of the references field is list of the following objects (* for mandatory):
 
@@ -1146,7 +1146,7 @@ A user can be authenticated either locally or with SSO.
 When SSO is activated, all users can use SSO.
 
 When the force_sso global flag is set, all users without keep_local_login:
-- have their password disabled, 
+- have their password disabled,
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.
 
