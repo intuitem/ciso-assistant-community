@@ -28,7 +28,9 @@
 		{ field: 'organisation_objectives', label: m.organisationObjectives() },
 		{ field: 'organisation_issues', label: m.organisationIssues() },
 		{ field: 'quantitative_risk_studies', label: m.quantitativeRiskStudies() },
-		{ field: 'terminologies', label: m.terminologies() }
+		{ field: 'terminologies', label: m.terminologies() },
+		{ field: 'bia', label: m.businessImpactAnalysis() },
+		{ field: 'project_management', label: m.projectManagement() }
 	];
 </script>
 

@@ -41,6 +41,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "entity",
         "criticality",
         "conclusion",
+        "genericcollection",
     ]
 
     def destroy(self, request, *args, **kwargs):

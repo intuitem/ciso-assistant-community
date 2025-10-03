@@ -116,7 +116,10 @@ export const URL_MODEL = [
 	'terminologies',
 	// roles,
 	'roles',
-	'permissions'
+	'permissions',
+	// pmbok
+	'generic-collections',
+	'accreditations'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [
