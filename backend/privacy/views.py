@@ -62,7 +62,11 @@ class PurposeViewSet(BaseModelViewSet):
     """
 
     model = Purpose
-    filterset_fields = ["processing"]
+    filterset_fields = ["processing", "legal_basis"]
+
+    @action(detail=False, name="Get legal basis choices")
+    def legal_basis(self, request):
+        return Response(dict(LEGAL_BASIS_CHOICES))
 
 
 class PersonalDataViewSet(BaseModelViewSet):
@@ -171,15 +175,11 @@ def agg_countries():
 class ProcessingViewSet(BaseModelViewSet):
     model = Processing
 
-    filterset_fields = ["folder", "nature", "status", "legal_basis"]
+    filterset_fields = ["folder", "nature", "status", "filtering_labels"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
-
-    @action(detail=False, name="Get legal basis choices")
-    def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
 
     @action(detail=False, name="processing metrics")
     def metrics(self, request, pk=None):

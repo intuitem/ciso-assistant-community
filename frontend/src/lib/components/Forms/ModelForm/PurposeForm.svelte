@@ -33,6 +33,14 @@
 />
 <AutocompleteSelect
 	{form}
+	field="legal_basis"
+	options={model.selectOptions['legal_basis']}
+	cacheLock={cacheLocks['legal_basis']}
+	bind:cachedValue={formDataCache['legal_basis']}
+	label={m.legalBasis()}
+/>
+<AutocompleteSelect
+	{form}
 	field="processing"
 	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}
