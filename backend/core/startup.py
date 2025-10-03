@@ -1091,6 +1091,12 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default ROTO Risk Origins", exc_info=e)
 
+    # Create default Regulatory Authorities
+    try:
+        Terminology.create_default_regulatory_authorities()
+    except Exception as e:
+        logger.error("Error creating default Regulatory Authorities", exc_info=e)
+
     call_command("storelibraries")
 
     # if superuser defined and does not exist, then create it

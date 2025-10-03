@@ -970,6 +970,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
+        REGULATORY_AUTHORITY = "regulatory_authority", "regulatoryAuthority"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1210,6 +1211,45 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+
+    DEFAULT_REGULATORY_AUTHORITIES = [
+        {
+            "name": "cnil",
+            "builtin": True,
+            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "is_visible": True,
+        },
+        {
+            "name": "ico",
+            "builtin": True,
+            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "is_visible": True,
+        },
+        {
+            "name": "edpb",
+            "builtin": True,
+            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "is_visible": True,
+        },
+        {
+            "name": "ecb",
+            "builtin": True,
+            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "is_visible": True,
+        },
+        {
+            "name": "anssi",
+            "builtin": True,
+            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "is_visible": True,
+        },
+    ]
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -1265,6 +1305,15 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     @classmethod
     def create_default_accreditations_category(cls):
         for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_regulatory_authorities(cls):
+        for item in cls.DEFAULT_REGULATORY_AUTHORITIES:
             Terminology.objects.update_or_create(
                 name=item["name"],
                 field_path=item["field_path"],
