@@ -70,9 +70,9 @@
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
 			<!-- Export action button -->
-			<button class="btn preset-filled-primary-500">
-				<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-			</button>
+			<!-- <button class="btn preset-filled-primary-500"> -->
+			<!-- 	<i class="fa-solid hidden fa-download mr-2"></i>{m.exportButton()} -->
+			<!-- </button> -->
 		</div>
 	{/snippet}
 </DetailView>
