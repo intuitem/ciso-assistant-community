@@ -122,6 +122,11 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
 
     def update_sensitive_data_flag(self):
         """Update the has_sensitive_personal_data flag based on associated personal data"""
@@ -463,6 +468,11 @@ class DataBreach(NameDescriptionFolderMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
     discovered_on = models.DateTimeField()
     breach_type = models.CharField(
         max_length=50, choices=BREACH_TYPE_CHOICES, default="privacy_other"

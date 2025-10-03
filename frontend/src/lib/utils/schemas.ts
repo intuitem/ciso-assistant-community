@@ -640,7 +640,8 @@ export const processingSchema = z.object({
 	dpia_required: z.boolean().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
-	associated_controls: z.array(z.string().optional()).optional()
+	associated_controls: z.array(z.string().optional()).optional(),
+	assigned_to: z.string().uuid().optional().array().optional()
 });
 
 export const rightRequestSchema = z.object({
@@ -663,6 +664,7 @@ export const dataBreachSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
+	assigned_to: z.string().uuid().optional().array().optional(),
 	discovered_on: z
 		.string()
 		.min(1)

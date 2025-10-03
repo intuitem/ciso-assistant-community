@@ -1010,6 +1010,7 @@
 	"informationChannel": "Canal d'information",
 	"usageChannel": "Canal d'utilisation",
 	"dpiaReference": "Référence à l'AIPD",
+	"dpiaReferenceHelpText": "Il peut s'agir d'une référence à une analyse de risque, un audit ou une référence externe",
 	"hasSensitivePersonalData": "Contient des données personnelles sensibles",
 	"associatedControls": "Mesures associées",
 	"processingNature": "Nature",

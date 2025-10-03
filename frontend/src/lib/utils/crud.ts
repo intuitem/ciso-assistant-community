@@ -840,7 +840,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'legal_basis' }, { field: 'nature' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'processing', urlModel: 'personal-data' },
@@ -861,6 +862,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'assigned_to' },
 			{ field: 'status' },
 			{ field: 'legal_basis' },
 			{ field: 'dpia_required' },
@@ -919,6 +921,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'affected_processings', urlModel: 'processings' },
 			{ field: 'affected_personal_data', urlModel: 'personal-data' },
 			{ field: 'authorities', urlModel: 'entities' },
@@ -930,6 +933,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'ref_id' },
+			{ field: 'assigned_to' },
 			{ field: 'discovered_on', type: 'datetime' },
 			{ field: 'breach_type' },
 			{ field: 'risk_level' },

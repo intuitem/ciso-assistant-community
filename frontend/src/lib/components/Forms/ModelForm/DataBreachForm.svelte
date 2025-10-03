@@ -38,6 +38,17 @@
 	bind:cachedValue={formDataCache['ref_id']}
 />
 
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="assigned_to"
+	cacheLock={cacheLocks['assigned_to']}
+	bind:cachedValue={formDataCache['assigned_to']}
+	label={m.assignedTo()}
+/>
+
 <TextField
 	{form}
 	field="discovered_on"

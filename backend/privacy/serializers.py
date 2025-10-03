@@ -125,6 +125,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(many=True)
     nature = FieldsRelatedField(["name"], many=True)
     associated_controls = FieldsRelatedField(["name"], many=True)
+    assigned_to = FieldsRelatedField(many=True)
 
     class Meta:
         model = Processing
@@ -167,6 +168,7 @@ class DataBreachWriteSerializer(BaseModelSerializer):
 
 class DataBreachReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    assigned_to = FieldsRelatedField(many=True)
     authorities = FieldsRelatedField(many=True)
     affected_processings = FieldsRelatedField(many=True)
     affected_personal_data = FieldsRelatedField(many=True)

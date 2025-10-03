@@ -1037,6 +1037,7 @@
 	"informationChannel": "Information channel",
 	"usageChannel": "Usage channel",
 	"dpiaReference": "Reference to DPIA",
+	"dpiaReferenceHelpText": "It can be a reference to a risk assessment, audit or external reference",
 	"hasSensitivePersonalData": "Has sensitive personal data",
 	"associatedControls": "Associated controls",
 	"processingNature": "Nature",
