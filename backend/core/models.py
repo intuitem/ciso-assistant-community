@@ -970,7 +970,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
-        REGULATORY_AUTHORITY = "regulatory_authority", "regulatoryAuthority"
+        ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1212,41 +1212,47 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
-    DEFAULT_REGULATORY_AUTHORITIES = [
+    DEFAULT_ENTITY_RELATIONSHIPS = [
         {
-            "name": "cnil",
+            "name": "regulatory_authority",
             "builtin": True,
-            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
-            "name": "ico",
+            "name": "partner",
             "builtin": True,
-            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
-            "name": "edpb",
+            "name": "accreditation_authority",
             "builtin": True,
-            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
-            "name": "ecb",
+            "name": "client",
             "builtin": True,
-            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
-            "name": "anssi",
+            "name": "supplier",
             "builtin": True,
-            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "contractor",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
         {
             "name": "other",
             "builtin": True,
-            "field_path": FieldPath.REGULATORY_AUTHORITY,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
             "is_visible": True,
         },
     ]
@@ -1312,8 +1318,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             )
 
     @classmethod
-    def create_default_regulatory_authorities(cls):
-        for item in cls.DEFAULT_REGULATORY_AUTHORITIES:
+    def create_default_entity_relationships(cls):
+        for item in cls.DEFAULT_ENTITY_RELATIONSHIPS:
             Terminology.objects.update_or_create(
                 name=item["name"],
                 field_path=item["field_path"],

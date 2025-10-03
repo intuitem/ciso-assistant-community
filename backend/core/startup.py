@@ -1091,11 +1091,11 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default ROTO Risk Origins", exc_info=e)
 
-    # Create default Regulatory Authorities
+    # Create default Entity Relationships
     try:
-        Terminology.create_default_regulatory_authorities()
+        Terminology.create_default_entity_relationships()
     except Exception as e:
-        logger.error("Error creating default Regulatory Authorities", exc_info=e)
+        logger.error("Error creating default Entity Relationships", exc_info=e)
 
     call_command("storelibraries")
 

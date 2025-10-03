@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl, Asset, Incident, Terminology
+from core.models import AppliedControl, Asset, Incident
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -486,17 +486,11 @@ class DataBreach(NameDescriptionFolderMixin):
     )
 
     # Notification tracking
-    authority = models.ForeignKey(
-        Terminology,
-        on_delete=models.PROTECT,
-        null=True,
+    authorities = models.ManyToManyField(
+        Entity,
         blank=True,
-        related_name="data_breach_authority",
-        limit_choices_to={
-            "field_path": Terminology.FieldPath.REGULATORY_AUTHORITY,
-            "is_visible": True,
-        },
-        help_text="Regulatory authority to notify (e.g., CNIL, ICO, etc.)",
+        related_name="data_breaches_authorities",
+        help_text="Regulatory authorities to notify (e.g., CNIL, ICO, etc.)",
     )
     authority_notified_on = models.DateTimeField(null=True, blank=True)
     authority_notification_ref = models.CharField(max_length=255, blank=True)
@@ -504,7 +498,6 @@ class DataBreach(NameDescriptionFolderMixin):
 
     # Consequences and remediation
     potential_consequences = models.TextField(blank=True)
-    actual_consequences = models.TextField(blank=True)
     remediation_measures = models.ManyToManyField(
         AppliedControl, blank=True, related_name="data_breaches_remediated"
     )
@@ -517,6 +510,12 @@ class DataBreach(NameDescriptionFolderMixin):
         blank=True,
         related_name="data_breaches",
         help_text="Link to associated security incident investigation",
+    )
+
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
     )
 
     # Additional documentation
