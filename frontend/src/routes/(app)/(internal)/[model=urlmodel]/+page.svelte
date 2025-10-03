@@ -125,7 +125,7 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios'].includes(URLModel)}
 									<a
 										href="{URLModel}/export/"
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"

@@ -77,6 +77,30 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'accreditations/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies',
+		optionsLabelField: 'name',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true,
+		filters: { field_path: 'accreditation.category' }
+	}
+};
+
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -886,7 +910,7 @@ const FIELD_PATH_FILTER: ListViewFilterConfig = {
 		label: 'field_path',
 		optionsEndpoint: 'terminologies/field_path',
 		optionsLabelField: 'label',
-		optionsValueField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	}
 };
@@ -1846,6 +1870,44 @@ export const listViewFields = {
 			field_path: FIELD_PATH_FILTER,
 			builtin: BUILTIN_FILTER,
 			is_visible: IS_VISIBLE_FILTER
+		}
+	},
+	'generic-collections': {
+		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	accreditations: {
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'status',
+			'checklist',
+			'authority',
+			'author',
+			'expiry_date',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'status',
+			'checklist',
+			'authority',
+			'author',
+			'expiry_date',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: ACCREDITATION_STATUS_FILTER,
+			category: ACCREDITATION_CATEGORY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	extra: {
