@@ -13,7 +13,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 import time
 from django.db.models import (
     F,
@@ -223,6 +223,42 @@ class GenericFilterSet(df.FilterSet):
                 },
             },
         }
+
+
+class CustomOrderingFilter(filters.OrderingFilter):
+    """A base class to map field ordering to specific field paths.
+
+    Example
+    -------
+    class SomeOrderingFilter(CustomOrderingFilter):
+        // The ordering of the "name" field will be based on the "owner__name" value instead.
+        ordering_mapping = { "name": "owner__name" }
+    """
+
+    ordering_mapping: dict[str, str]
+
+    def __init_subclass__(cls):
+        assert hasattr(cls, "ordering_mapping"), (
+            f"Subclasses of {cls.__name__} must define the ordering_mapping attribute."
+        )
+
+    def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
+        if (ordering_list := super().get_ordering(request, queryset, view)) is None:
+            return ordering_list
+
+        new_ordering_list = []
+        for ordering_term in ordering_list:
+            field_name = ordering_term.lstrip("-")
+
+            if (new_field := self.ordering_mapping.get(field_name)) is None:
+                new_ordering_list.append(ordering_term)
+                continue
+
+            is_desc = ordering_term.startswith("-")
+            new_ordering_term = f"-{new_field}" if is_desc else new_field
+            new_ordering_list.append(new_ordering_term)
+
+        return new_ordering_list
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -3174,25 +3210,8 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
-    def get_ordering(self, request, queryset, view):
-        ordering = super().get_ordering(request, queryset, view)
-        if not ordering:
-            return ordering
-
-        # Replace 'localization_dict' with 'folder'
-        mapped_ordering = []
-        for field in ordering:
-            if field.lstrip("-") == "localization_dict":
-                is_desc = field.startswith("-")
-                mapped_field = "folder"
-                if is_desc:
-                    mapped_field = "-" + mapped_field
-                mapped_ordering.append(mapped_field)
-            else:
-                mapped_ordering.append(field)
-
-        return mapped_ordering
+class UserGroupOrderingFilter(CustomOrderingFilter):
+    ordering_mapping = {"localization_dict": "folder__name"}
 
 
 class UserGroupViewSet(BaseModelViewSet):
