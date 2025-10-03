@@ -183,6 +183,7 @@ erDiagram
         json    translations
 
         json    implementation_groups_definition
+        string  initial_implementation_group
         int     min_score
         int     max_score
         json    scores_definition
@@ -203,7 +204,6 @@ erDiagram
         string      observation
 
         string[]    selected_implementation_groups
-        string[]    hidden_implementation_groups
         int         min_score
         int         max_score
         json        scores_definition
@@ -771,11 +771,13 @@ The auditor is free to use the result field (qualitative assessment), the score 
 
 Compliance assessments have a selected_implementation_groups field that contains the selected implementation groups. The None default value consists in selecting all groups, which makes sense also for the case no implementation groups are defined.
 
-Compliance assessments have a hidden_implementation_groups field that contains implementation groups with nodes that are hidden, independently of the content of selected_implementation_groups. This field is not editable, as it is calculated.
-
 For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
+
+If the framework used by the compliance assessment has a non-empty initial_implementation_group, then:
+- it designate an implementation group that is selected at creation, and remains selected permanently.
+- the IGs cannot be selected by the user, the list of IG is calculated dynamically depending on answers to questions. 
 
 Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
 
@@ -783,6 +785,8 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 - CMMI (1-5, Initial/Managed/Defined/Quantitatively Managed/Optimizing)
 - 0-5 (0-5, no score definition)
 - 0-10 (0-10, no score definition)
+
+Note: for now, the score scale is not selectable, it is defined by the framework.
 
 ### Question and answer format
 
@@ -858,11 +862,11 @@ To select "not-applicable" result, the user shall not answer any of the question
 
 #### IG selection
 
-- hide_implementation_group: <IG>
+- select_implementation_groups: <IG>
 
-This choice provokes the masking of requirement nodes that are part of the correponding implementation group. This is done by adding this IG in the hidden_implementation_groups of the compliance assessment.
+This choice provokes the selection of the indicated IG to the selected_implementation_groups of the compliance assessment. This mechanism is complementary to the initial_implementation_group feature, which puts the compliance assessment in "piloted" mode, that is the IGs are managed dynamically, not selected by the user.
 
-The hide_implementation_group logic is enforced each time the compliance assessment is updated, to guarantee consistency.
+In piloted mode, the list of selected IGs is calculated by combining the initial_implementation_group with the IGs that are selected via the select_implementation_groups choices. This is checked at each saving of a requirement assessment.
 
 ### Requirement Mapping set
 
