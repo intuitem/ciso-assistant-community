@@ -1,6 +1,10 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+    CustomOrderingFilter,
+)
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -207,28 +211,6 @@ class RoToViewSet(BaseModelViewSet):
         return Response(dict(RoTo.Pertinence.choices))
 
 
-class StakeholderOrderingFilter(filters.OrderingFilter):
-    def get_ordering(self, request, queryset, view):
-        ordering = super().get_ordering(request, queryset, view)
-        if not ordering:
-            return ordering
-
-        # NOTE: Repeating pattern used in UserGroupOrderingFilter, consider refactoring
-        # Replace 'entity' with 'entity__name' for ordering
-        mapped_ordering = []
-        for field in ordering:
-            if field.lstrip("-") == "entity":
-                is_desc = field.startswith("-")
-                mapped_field = "entity__name"
-                if is_desc:
-                    mapped_field = "-" + mapped_field
-                mapped_ordering.append(mapped_field)
-            else:
-                mapped_ordering.append(field)
-
-        return mapped_ordering
-
-
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
@@ -237,7 +219,7 @@ class StakeholderViewSet(BaseModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        StakeholderOrderingFilter,
+        CustomOrderingFilter({"entity": "entity__name"}),
     ]
 
     @action(detail=False, name="Get category choices")

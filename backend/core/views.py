@@ -225,6 +225,42 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
+def CustomOrderingFilter(field_mapping: Dict[str, str]):
+    """
+    A custom ordering class factory that allows mapping of old field names to new ones.
+
+    @Args:
+        field_mapping (Dict[str, str]): A dictionary mapping old field names to new field names.
+
+    @Returns:
+        a new class that extends filters.OrderingFilter with custom field mapping.
+    """
+
+    class _CustomOrderingFilter(filters.OrderingFilter):
+        def get_ordering(self, request, queryset, view):
+            ordering = super().get_ordering(request, queryset, view)
+            if not ordering:
+                return ordering
+
+            # Replace old fields with mapped fields
+            mapped_ordering = []
+            for field in ordering:
+                stripped = field.lstrip("-")
+
+                if stripped in field_mapping:
+                    is_desc = field.startswith("-")
+                    mapped = field_mapping[stripped]
+                    if is_desc:
+                        mapped = "-" + mapped
+                    mapped_ordering.append(mapped)
+                else:
+                    mapped_ordering.append(field)
+
+            return mapped_ordering
+
+    return _CustomOrderingFilter
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -3174,27 +3210,6 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
-    def get_ordering(self, request, queryset, view):
-        ordering = super().get_ordering(request, queryset, view)
-        if not ordering:
-            return ordering
-
-        # Replace 'localization_dict' with 'folder'
-        mapped_ordering = []
-        for field in ordering:
-            if field.lstrip("-") == "localization_dict":
-                is_desc = field.startswith("-")
-                mapped_field = "folder"
-                if is_desc:
-                    mapped_field = "-" + mapped_field
-                mapped_ordering.append(mapped_field)
-            else:
-                mapped_ordering.append(field)
-
-        return mapped_ordering
-
-
 class UserGroupViewSet(BaseModelViewSet):
     """
     API endpoint that allows user groups to be viewed or edited
@@ -3209,7 +3224,7 @@ class UserGroupViewSet(BaseModelViewSet):
     ]  # temporary hack, filters only by folder name, not role name
     filter_backends = [
         DjangoFilterBackend,
-        UserGroupOrderingFilter,
+        CustomOrderingFilter({"localization_dict": "folder"}),
         filters.SearchFilter,
     ]
 
