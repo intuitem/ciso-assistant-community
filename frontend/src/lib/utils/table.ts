@@ -1873,7 +1873,7 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'filteringLabels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,

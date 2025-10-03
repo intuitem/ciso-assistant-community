@@ -1671,10 +1671,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'linked_collection', urlModel: 'generic-collections' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
+			{ field: 'category' },
 			{ field: 'status' },
 			{ field: 'authority' },
 			{ field: 'updated_at', type: 'datetime' },
-			{ field: 'expiry_date', type: 'datetime' }
+			{ field: 'expiry_date', type: 'date' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },

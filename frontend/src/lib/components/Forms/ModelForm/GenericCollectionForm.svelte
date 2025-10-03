@@ -189,7 +189,7 @@
 			{form}
 			multiple
 			optionsEndpoint="compliance-assessments"
-			optionsExtraFields={[['folder', 'str']]}
+			optionsExtraFields={[['perimeter', 'str']]}
 			optionsLabelField="auto"
 			field="compliance_assessments"
 			cacheLock={cacheLocks['compliance_assessments']}
