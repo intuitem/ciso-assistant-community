@@ -2419,6 +2419,16 @@
 	"noCombinedLecDataAvailable": "No combined LEC data available. Run simulations on your scenario hypotheses to generate the combined curve",
 	"compareHypotheses": "Compare hypotheses",
 	"lossExceedanceCurves": "Loss Exceedance Curves",
+	"noMatchingNodesFound": "No matching nodes found",
+	"findANode": "Find a node...",
+	"viewOnGraphExplorer": "View on graph explorer",
+	"visualizeAppliedMapping": "Visualize applied mapping data as a graph",
+	"frameworksMapping": "Frameworks mapping",
+	"assetsExplorer": "Assets explorer",
+	"visualizeAssetsRelationships": "Visualize assets and their relationships",
+	"requirementsExplorer": "Requirements explorer",
+	"visualizeRequirements": "Visualize all requirements across all audits",
+	"assessable": "Assessable",
 	"noCurveDataAvailable": "No curve data available. Run simulations on your hypotheses to generate LEC charts",
 	"combinedCurrentRisk": "Combined Current Risk"
 }
