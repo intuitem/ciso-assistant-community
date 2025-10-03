@@ -1174,31 +1174,31 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     DEFAULT_ACCREDITATION_CATEGORY = [
         {
-            "name": "acc_simplified",
+            "name": "accreditation_simplified",
             "builtin": True,
             "field_path": FieldPath.ACCREDITATION_CATEGORY,
             "is_visible": True,
         },
         {
-            "name": "acc_elaborated",
+            "name": "accreditation_elaborated",
             "builtin": True,
             "field_path": FieldPath.ACCREDITATION_CATEGORY,
             "is_visible": True,
         },
         {
-            "name": "acc_advanced",
+            "name": "accreditation_advanced",
             "builtin": True,
             "field_path": FieldPath.ACCREDITATION_CATEGORY,
             "is_visible": True,
         },
         {
-            "name": "acc_sensitive",
+            "name": "accreditation_sensitive",
             "builtin": True,
             "field_path": FieldPath.ACCREDITATION_CATEGORY,
             "is_visible": True,
         },
         {
-            "name": "acc_restricted",
+            "name": "accreditation_restricted",
             "builtin": True,
             "field_path": FieldPath.ACCREDITATION_CATEGORY,
             "is_visible": True,

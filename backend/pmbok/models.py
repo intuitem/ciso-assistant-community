@@ -81,11 +81,11 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("obsolete", "Obsolete"),
     )
     CATEGORY_CHOICES = (
-        ("acc_simplified", "accSimplified"),
-        ("acc_elaborated", "accElaborated"),
-        ("acc_advanced", "accAdvanced"),
-        ("acc_sensitive", "accSensitive"),
-        ("acc_restricted", "accRestricted"),
+        ("accreditation_simplified", "accreditationSimplified"),
+        ("accreditation_elaborated", "accreditationElaborated"),
+        ("accreditation_advanced", "accreditationAdvanced"),
+        ("accreditation_sensitive", "accreditationSensitive"),
+        ("accreditation_restricted", "accreditationRestricted"),
         ("other", "Other"),
     )
 
