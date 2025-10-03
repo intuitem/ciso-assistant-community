@@ -3,7 +3,7 @@ from core.serializers import RiskMatrixReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     GenericFilterSet,
-    CustomOrderingFilter,
+    StakeholderOrderingFilter,
 )
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
@@ -219,7 +219,7 @@ class StakeholderViewSet(BaseModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        CustomOrderingFilter({"entity": "entity__name"}),
+        StakeholderOrderingFilter,
     ]
 
     @action(detail=False, name="Get category choices")

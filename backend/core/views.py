@@ -13,7 +13,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 import time
 from django.db.models import (
     F,
@@ -225,40 +225,48 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
-def CustomOrderingFilter(field_mapping: Dict[str, str]):
+class CustomOrderingFilter(filters.OrderingFilter):
+    """A base class to map field ordering to specific field paths.
+
+    Example
+    -------
+    class SomeOrderingFilter(CustomOrderingFilter):
+        // The ordering of the "name" field will be based on the "owner__name" value instead.
+        ordering_mapping = { "name": "owner__name" }
     """
-    A custom ordering class factory that allows mapping of old field names to new ones.
 
-    @Args:
-        field_mapping (Dict[str, str]): A dictionary mapping old field names to new field names.
+    ordering_mapping: dict[str, str]
 
-    @Returns:
-        a new class that extends filters.OrderingFilter with custom field mapping.
-    """
+    def __init_subclass__(cls):
+        assert hasattr(cls, "ordering_mapping"), (
+            f"Subclasses of {cls.__name__} must define a ordering_mapping attribute."
+        )
 
-    class _CustomOrderingFilter(filters.OrderingFilter):
-        def get_ordering(self, request, queryset, view):
-            ordering = super().get_ordering(request, queryset, view)
-            if not ordering:
-                return ordering
+    def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
+        if (ordering_list := super().get_ordering(request, queryset, view)) is None:
+            return ordering_list
 
-            # Replace old fields with mapped fields
-            mapped_ordering = []
-            for field in ordering:
-                stripped = field.lstrip("-")
+        new_ordering_list = []
+        for ordering_term in ordering_list:
+            field_name = ordering_term.lstrip("-")
 
-                if stripped in field_mapping:
-                    is_desc = field.startswith("-")
-                    mapped = field_mapping[stripped]
-                    if is_desc:
-                        mapped = "-" + mapped
-                    mapped_ordering.append(mapped)
-                else:
-                    mapped_ordering.append(field)
+            if (new_field := self.ordering_mapping.get(field_name)) is None:
+                new_ordering_list.append(ordering_term)
+                continue
 
-            return mapped_ordering
+            is_desc = ordering_term.startswith("-")
+            new_ordering_term = f"-{new_field}" if is_desc else new_field
+            new_ordering_list.append(new_ordering_term)
 
-    return _CustomOrderingFilter
+        return new_ordering_list
+
+
+class StakeholderOrderingFilter(CustomOrderingFilter):
+    ordering_mapping = {"entity": "entity__name"}
+
+
+class UserGroupOrderingFilter(CustomOrderingFilter):
+    ordering_mapping = {"localization_dict": "folder__name"}
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -3224,7 +3232,7 @@ class UserGroupViewSet(BaseModelViewSet):
     ]  # temporary hack, filters only by folder name, not role name
     filter_backends = [
         DjangoFilterBackend,
-        CustomOrderingFilter({"localization_dict": "folder"}),
+        UserGroupOrderingFilter,
         filters.SearchFilter,
     ]
 
