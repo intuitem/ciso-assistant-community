@@ -1579,14 +1579,6 @@ export const listViewFields = {
 					label: 'affectedProcessings',
 					multiple: true
 				}
-			},
-			incident: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'incidents',
-					label: 'incident',
-					multiple: false
-				}
 			}
 		}
 	},
