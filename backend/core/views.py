@@ -261,14 +261,6 @@ class CustomOrderingFilter(filters.OrderingFilter):
         return new_ordering_list
 
 
-class StakeholderOrderingFilter(CustomOrderingFilter):
-    ordering_mapping = {"entity": "entity__name"}
-
-
-class UserGroupOrderingFilter(CustomOrderingFilter):
-    ordering_mapping = {"localization_dict": "folder__name"}
-
-
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -3216,6 +3208,10 @@ class UserViewSet(BaseModelViewSet):
                 )
 
         return super().destroy(request, *args, **kwargs)
+
+
+class UserGroupOrderingFilter(CustomOrderingFilter):
+    ordering_mapping = {"localization_dict": "folder__name"}
 
 
 class UserGroupViewSet(BaseModelViewSet):

@@ -3,7 +3,7 @@ from core.serializers import RiskMatrixReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     GenericFilterSet,
-    StakeholderOrderingFilter,
+    CustomOrderingFilter,
 )
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
@@ -209,6 +209,10 @@ class RoToViewSet(BaseModelViewSet):
     @action(detail=False, name="Get pertinence choices")
     def pertinence(self, request):
         return Response(dict(RoTo.Pertinence.choices))
+
+
+class StakeholderOrderingFilter(CustomOrderingFilter):
+    ordering_mapping = {"entity": "entity__name"}
 
 
 class StakeholderViewSet(BaseModelViewSet):
