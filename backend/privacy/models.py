@@ -108,9 +108,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
     )
-    legal_basis = models.CharField(
-        max_length=255, choices=LEGAL_BASIS_CHOICES, blank=True
-    )
     information_channel = models.CharField(max_length=255, blank=True)
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
@@ -138,6 +135,9 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
 class Purpose(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="purposes"
+    )
+    legal_basis = models.CharField(
+        max_length=255, choices=LEGAL_BASIS_CHOICES, default="privacy_other"
     )
 
     def save(self, *args, **kwargs):
