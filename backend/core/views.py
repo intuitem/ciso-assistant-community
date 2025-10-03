@@ -239,7 +239,7 @@ class CustomOrderingFilter(filters.OrderingFilter):
 
     def __init_subclass__(cls):
         assert hasattr(cls, "ordering_mapping"), (
-            f"Subclasses of {cls.__name__} must define a ordering_mapping attribute."
+            f"Subclasses of {cls.__name__} must define the ordering_mapping attribute."
         )
 
     def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
