@@ -151,6 +151,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     terminologies = serializers.BooleanField(
         source="value.terminologies", required=False, default=True
     )
+    bia = serializers.BooleanField(source="value.bia", required=False, default=True)
+    project_management = serializers.BooleanField(
+        source="value.project_management", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -173,6 +177,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "organisation_issues",
             "quantitative_risk_studies",
             "terminologies",
+            "bia",
+            "project_management",
         ]
         read_only_fields = ["name"]
 

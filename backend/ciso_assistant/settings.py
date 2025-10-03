@@ -187,6 +187,7 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "pmbok",
     "ebios_rm",
     "tprm",
     "privacy",
