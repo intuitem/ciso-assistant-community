@@ -289,7 +289,6 @@ export const RequirementAssessmentSchema = z.object({
 	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
-	requirement: z.string(),
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
@@ -466,7 +465,9 @@ export const FeatureFlagsSchema = z.object({
 	organisation_objectives: z.boolean().optional(),
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
-	terminologies: z.boolean().optional()
+	terminologies: z.boolean().optional(),
+	bia: z.boolean().optional(),
+	project_management: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1136,6 +1137,40 @@ export const RoleSchema = z.object({
 	permissions: z.array(z.number()).optional()
 });
 
+// PMBOK
+export const GenericCollectionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	compliance_assessments: z.array(z.string().uuid().optional()).optional(),
+	risk_assessments: z.array(z.string().uuid().optional()).optional(),
+	crq_studies: z.array(z.string().uuid().optional()).optional(),
+	ebios_studies: z.array(z.string().uuid().optional()).optional(),
+	entity_assessments: z.array(z.string().uuid().optional()).optional(),
+	findings_assessments: z.array(z.string().uuid().optional()).optional(),
+	documents: z.array(z.string().uuid().optional()).optional(),
+	security_exceptions: z.array(z.string().uuid().optional()).optional(),
+	policies: z.array(z.string().uuid().optional()).optional(),
+	dependencies: z.array(z.string().uuid().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const AccreditationSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().uuid(),
+	authority: z.string().optional(),
+	status: z.string().uuid(),
+	author: z.string().uuid().optional().nullable(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	linked_collection: z.string().uuid().optional().nullable(),
+	checklist: z.string().uuid().optional().nullable(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1199,7 +1234,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
-	roles: RoleSchema
+	roles: RoleSchema,
+	'generic-collections': GenericCollectionSchema,
+	accreditations: AccreditationSchema
 };
 
 export const modelSchema = (model: string) => {

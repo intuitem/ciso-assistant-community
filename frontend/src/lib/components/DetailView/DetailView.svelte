@@ -239,7 +239,13 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
+		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
+			<div class="text-yelloW-900">
+				{m.riskAcceptanceNotYetSubmittedMessage()}
+			</div>
+		</div>
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -378,9 +384,16 @@
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+														{#each value.sort((a, b) => {
+															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id && key !== 'qualifications'}
+																{#if key === 'security_objectives'}
+																	{@const [securityObjectiveName, securityObjectiveValue] =
+																		Object.entries(val)[0]}
+																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																{:else if val.str && val.id && key !== 'qualifications'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel

@@ -80,6 +80,72 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return {};
 		});
 
+	const getOperationsAnalytics = async () => {
+		try {
+			const detectionData = await fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident detection breakdown:', error);
+					return { results: [] };
+				});
+
+			const monthlyData = await fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch monthly incident metrics:', error);
+					return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
+				});
+
+			const summaryData = await fetch(`${BASE_API_URL}/incidents/summary_stats/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident summary stats:', error);
+					return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
+				});
+
+			const severityData = await fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident severity breakdown:', error);
+					return { results: [] };
+				});
+
+			const qualificationsData = await fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident qualifications breakdown:', error);
+					return { results: { labels: [], values: [] } };
+				});
+
+			const exceptionSankeyData = await fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch security exception Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				});
+
+			const sunburstData = await fetch(`${BASE_API_URL}/applied-controls/sunburst_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch applied controls sunburst data:', error);
+					return { results: [] };
+				});
+
+			return {
+				incident_detection_breakdown: detectionData.results,
+				monthly_metrics: monthlyData.results,
+				summary_stats: summaryData.results,
+				severity_breakdown: severityData.results,
+				qualifications_breakdown: qualificationsData.results,
+				exception_sankey: exceptionSankeyData.results,
+				applied_controls_sunburst: sunburstData.results
+			};
+		} catch (error) {
+			console.error('Failed to fetch operations analytics:', error);
+			return null;
+		}
+	};
+
 	return {
 		composerForm,
 		usedRiskMatrices,
@@ -97,7 +163,8 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		title: m.analytics(),
 		stream: {
 			metrics: getMetrics(),
-			counters: getCounters()
+			counters: getCounters(),
+			operationsAnalytics: getOperationsAnalytics()
 		}
 	};
 };

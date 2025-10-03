@@ -968,6 +968,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
         QUALIFICATIONS = "qualifications", "qualifications"
+        ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
+        ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1137,6 +1139,77 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    DEFAULT_ACCREDITATION_STATUS = [
+        {
+            "name": "draft",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "in_progress",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "accredited",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "not_accredited",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "obsolete",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_ACCREDITATION_CATEGORY = [
+        {
+            "name": "accreditation_simplified",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_elaborated",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_advanced",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_sensitive",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_restricted",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+    ]
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -1178,6 +1251,24 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 name=qualification["name"],
                 field_path=qualification["field_path"],
                 defaults=qualification,
+            )
+
+    @classmethod
+    def create_default_accreditations_status(cls):
+        for item in cls.DEFAULT_ACCREDITATION_STATUS:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_accreditations_category(cls):
+        for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
             )
 
     @property
@@ -2201,9 +2292,9 @@ class Asset(
 
         return {"objectives": disaster_recovery_objectives}
 
-    def get_security_objectives_display(self) -> list[dict[str, str]]:
+    def get_security_objectives_display(self) -> list[dict[str, int]]:
         """
-        Gets the security objectives of a given asset as strings.
+        Gets the security objectives values of a given asset.
         """
         security_objectives = self.get_security_objectives()
         if len(security_objectives) == 0:
@@ -2215,9 +2306,7 @@ class Asset(
             else "1-4"
         )
         return [
-            {
-                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
-            }
+            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 security_objectives.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
@@ -3473,6 +3562,8 @@ class Vulnerability(
         EXPLOITABLE = "exploitable", _("Exploitable")
         MITIGATED = "mitigated", _("Mitigated")
         FIXED = "fixed", _("Fixed")
+        NOTEXPLOITABLE = "not_exploitable", _("Not exploitable")
+        UNAFFECTED = "unaffected", _("Unaffected")
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -5668,9 +5759,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     enabled = models.BooleanField(default=True)
 
     assigned_to = models.ManyToManyField(
-        User,
-        verbose_name="Assigned to",
-        blank=True,
+        User, verbose_name="Assigned to", blank=True, related_name="task_templates"
     )
     assets = models.ManyToManyField(
         Asset,

@@ -559,9 +559,16 @@
 													>
 														{#if Array.isArray(value)}
 															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+																{#each [...value].sort((a, b) => {
+																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																}) as val}
 																	<li>
-																		{#if val.str && val.id && key !== 'qualifications'}
+																		{#if key === 'security_objectives'}
+																			{@const [securityObjectiveName, securityObjectiveValue] =
+																				Object.entries(val)[0]}
+																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																		{:else if val.str && val.id && key !== 'qualifications'}
 																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 																			<Anchor href={itemHref} class="anchor" stopPropagation
 																				>{val.str}</Anchor
@@ -605,7 +612,7 @@
 															>
 																{safeTranslate(value.name ?? value.str) ?? '-'}
 															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
+														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at')}
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
 															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
