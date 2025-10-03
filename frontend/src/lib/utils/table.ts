@@ -391,10 +391,10 @@ const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const PROCESSING_LEGAL_BASIS_FILTER: ListViewFilterConfig = {
+const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'processings/legal_basis',
+		optionsEndpoint: 'purposes/legal_basis',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'legalBasis',
@@ -406,8 +406,6 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'processing-natures',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
 		label: 'nature',
 		browserCache: 'force-cache',
 		multiple: true
@@ -1448,12 +1446,13 @@ export const listViewFields = {
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
-		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
-		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder'],
+		head: ['name', 'description', 'status', 'processingNature', 'labels', 'folder'],
+		body: ['name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
-			legal_basis: PROCESSING_LEGAL_BASIS_FILTER
+			nature: PROCESSING_NATURE_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'right-requests': {
@@ -1501,10 +1500,11 @@ export const listViewFields = {
 		}
 	},
 	purposes: {
-		head: ['name', 'description', 'processing'],
-		body: ['name', 'description', 'processing'],
+		head: ['name', 'description', 'legalBasis', 'processing'],
+		body: ['name', 'description', 'legal_basis', 'processing'],
 		filters: {
-			processing: PROCESSING_FILTER
+			processing: PROCESSING_FILTER,
+			legal_basis: LEGAL_BASIS_FILTER
 		}
 	},
 	'personal-data': {
