@@ -636,7 +636,6 @@ export const processingSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
-	legal_basis: z.string(),
 	dpia_required: z.boolean().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
@@ -690,6 +689,7 @@ export const dataBreachSchema = z.object({
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	legal_basis: z.string(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({

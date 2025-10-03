@@ -60,14 +60,6 @@
 />
 <AutocompleteSelect
 	{form}
-	field="legal_basis"
-	options={model.selectOptions['legal_basis']}
-	cacheLock={cacheLocks['legal_basis']}
-	bind:cachedValue={formDataCache['legal_basis']}
-	label={m.legalBasis()}
-/>
-<AutocompleteSelect
-	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	pathField="path"
