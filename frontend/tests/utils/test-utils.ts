@@ -586,7 +586,7 @@ export class TestContent {
 							url: 'reference-controls'
 						}
 					},
-					name: 'Controls accountability matrix',
+					name: '',
 					description: '',
 					status: 'Active'
 					//eta: '2025-12-31',
