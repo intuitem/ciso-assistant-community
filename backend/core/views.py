@@ -1191,6 +1191,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "status": ["exact"],
             "ebios_rm_study": ["exact"],
             "reviewers": ["exact"],
+            "genericcollection": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -1803,6 +1804,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
+            "genericcollection": ["exact"],
         }
 
 
@@ -2644,6 +2646,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -4896,6 +4899,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "genericcollection",
         "owner",
         "status",
         "expiry_date",
@@ -5157,6 +5161,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "authors",
         "reviewers",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -6527,6 +6532,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         "folder",
         "severity",
         "status",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -6685,6 +6691,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 

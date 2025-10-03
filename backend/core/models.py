@@ -968,6 +968,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
         QUALIFICATIONS = "qualifications", "qualifications"
+        ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
+        ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1137,6 +1139,77 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    DEFAULT_ACCREDITATION_STATUS = [
+        {
+            "name": "draft",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "in_progress",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "accredited",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "not_accredited",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "obsolete",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_ACCREDITATION_CATEGORY = [
+        {
+            "name": "accreditation_simplified",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_elaborated",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_advanced",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_sensitive",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_restricted",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+    ]
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -1178,6 +1251,24 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 name=qualification["name"],
                 field_path=qualification["field_path"],
                 defaults=qualification,
+            )
+
+    @classmethod
+    def create_default_accreditations_status(cls):
+        for item in cls.DEFAULT_ACCREDITATION_STATUS:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_accreditations_category(cls):
+        for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
             )
 
     @property
