@@ -1525,10 +1525,15 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     def render_grid_as_colors(self):
         risk_matrix = self.parse_json()
-        grid = risk_matrix["grid"]
-        res = [[risk_matrix["risk"][i] for i in row] for row in grid]
+        raw_grid = risk_matrix["grid"]
+        populated_grid = [[risk_matrix["risk"][i] for i in row] for row in raw_grid]
+        return populated_grid
 
-        return res
+    def render_transposed_grid_as_colors(self):
+        """Return the transposed version of the grid given by the render_grid_as_colors method."""
+        grid = self.render_grid_as_colors()
+        transposed_grid = [list(x) for x in zip(*grid)]
+        return transposed_grid
 
     @property
     def get_json_translated(self):
