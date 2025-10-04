@@ -25,4 +25,10 @@
 		link="/requirement-assessments"
 		tags={['analysis', 'assets']}
 	/>
+	<Article
+		title="Vulnerability Treemap"
+		desc="Hierarchical visualization of vulnerabilities by domain, severity, and status"
+		link="/experimental/vulnerability-treemap"
+		tags={['analysis', 'vulnerabilities', 'treemap']}
+	/>
 </div>

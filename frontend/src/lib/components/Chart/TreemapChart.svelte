@@ -59,7 +59,34 @@
 				series: {
 					type: 'treemap',
 					breadcrumb: {
-						show: false
+						show: true,
+						formatter: function (name: string, item: any) {
+							if (item.value) {
+								return name + ' (' + item.value + ')';
+							}
+							return name;
+						},
+						itemStyle: {
+							color: '#f0f0f0',
+							borderColor: '#d0d0d0',
+							borderWidth: 1,
+							shadowBlur: 3,
+							shadowColor: 'rgba(0, 0, 0, 0.2)',
+							textStyle: {
+								color: '#333'
+							}
+						},
+						emphasis: {
+							itemStyle: {
+								color: '#e0e0e0'
+							}
+						}
+					},
+					label: {
+						show: true,
+						formatter: function (params: any) {
+							return params.name + '\n(' + params.value + ')';
+						}
 					},
 					// type: 'sunburst',
 					// emphasis: {
