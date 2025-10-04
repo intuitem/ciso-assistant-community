@@ -775,9 +775,7 @@ For the sake of performance, when a change is done on the selected implementatio
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
 
-If the framework used by the compliance assessment has a non-empty initial_implementation_group, then:
-- it designate an implementation group that is selected at creation, and remains selected permanently.
-- the IGs cannot be selected by the user, the list of IG is calculated dynamically depending on answers to questions. 
+If the framework used by the compliance assessment has a non-empty initial_implementation_groups, then the corresponding IGs are selected initialy.
 
 Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
 
@@ -860,13 +858,15 @@ When result_compliance is defined for one or several answered questions, the res
 
 To select "not-applicable" result, the user shall not answer any of the questions with result_compliance flag.
 
-#### IG selection
+#### IG piloted selection
 
-- select_implementation_groups: <IG>
+- select_implementation_groups: <IG1, IG2, ...>
 
-This choice provokes the selection of the indicated IG to the selected_implementation_groups of the compliance assessment. This mechanism is complementary to the initial_implementation_group feature, which puts the compliance assessment in "piloted" mode, that is the IGs are managed dynamically, not selected by the user.
+This choice provokes the selection of the indicated IG to the selected_implementation_groups of the compliance assessment.
 
-In piloted mode, the list of selected IGs is calculated by combining the initial_implementation_group with the IGs that are selected via the select_implementation_groups choices. This is checked at each saving of a requirement assessment.
+If there is at least one select_implementation_groups field, then the selection of IGs is deemded to be in piloted mode:
+- The user cannot select IGs
+- The list of selected IGs is computed as the union of the initial_implementation_groups with the IGs that are selected via the select_implementation_groups choices. This is done at each saving of a requirement assessment.
 
 ### Requirement Mapping set
 
