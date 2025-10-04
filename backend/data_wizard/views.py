@@ -356,7 +356,7 @@ class LoadFileView(APIView):
             "ebiosreconnaissance": 0,
             "enter": 1,
             "initial access": 1,
-            "ebiositialaccess": 1,
+            "ebiosinitialaccess": 1,
             "discover": 2,
             "discovery": 2,
             "ebiosdiscovery": 2,
