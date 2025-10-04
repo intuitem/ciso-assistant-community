@@ -227,10 +227,11 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 
 class Severity(models.IntegerChoices):
     UNDEFINED = -1, "undefined"
-    LOW = 0, "low"
-    MEDIUM = 1, "medium"
-    HIGH = 2, "high"
-    CRITICAL = 3, "critical"
+    INFO = 0, "info"
+    LOW = 1, "low"
+    MEDIUM = 2, "medium"
+    HIGH = 3, "high"
+    CRITICAL = 4, "critical"
 
 
 class StoredLibrary(LibraryMixin):
@@ -5543,7 +5544,7 @@ class FindingsAssessment(Assessment):
         # Excludes findings that are mitigated, resolved, or dismissed
         unresolved_important = (
             findings.filter(
-                severity__gte=2  # HIGH or CRITICAL (>=2)
+                severity__gte=3  # HIGH or CRITICAL (>=3)
             )
             .exclude(
                 status__in=[
@@ -5573,6 +5574,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         IN_PROGRESS = "in_progress", _("In Progress")
         MITIGATED = "mitigated", _("Mitigated")
         RESOLVED = "resolved", _("Resolved")
+        CLOSED = "closed", _("Closed")
         DEPRECATED = "deprecated", _("Deprecated")
 
     findings_assessment = models.ForeignKey(

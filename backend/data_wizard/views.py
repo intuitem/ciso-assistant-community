@@ -368,10 +368,11 @@ class LoadFileView(APIView):
                 )
 
                 SEVERITY_MAP = {
-                    "low": 0,
-                    "medium": 1,
-                    "high": 2,
-                    "critical": 3,
+                    "info": 0,
+                    "low": 1,
+                    "medium": 2,
+                    "high": 3,
+                    "critical": 4,
                 }
 
                 for record in records:
