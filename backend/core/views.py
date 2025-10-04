@@ -6907,6 +6907,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.MITIGATED,
             Finding.Status.RESOLVED,
+            Finding.Status.CLOSED,
             Finding.Status.DEPRECATED,
         ]
         open_statuses = [
@@ -7031,6 +7032,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.MITIGATED,
             Finding.Status.RESOLVED,
+            Finding.Status.CLOSED,
             Finding.Status.DEPRECATED,
         ]
         open_statuses = [

@@ -5542,7 +5542,7 @@ class FindingsAssessment(Assessment):
             severity_distribution[label] = findings.filter(severity=value).count()
 
         # Count of unresolved important findings (severity is HIGH or CRITICAL)
-        # Excludes findings that are mitigated, resolved, or dismissed
+        # Excludes findings that are mitigated, resolved, dismissed, or closed
         unresolved_important = (
             findings.filter(
                 severity__gte=3  # HIGH or CRITICAL (>=3)
@@ -5552,6 +5552,7 @@ class FindingsAssessment(Assessment):
                     Finding.Status.MITIGATED,
                     Finding.Status.RESOLVED,
                     Finding.Status.DISMISSED,
+                    Finding.Status.CLOSED,
                 ]
             )
             .count()
