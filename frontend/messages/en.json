@@ -2287,6 +2287,8 @@
 	"missing": "Missing",
 	"hasMfaEnabled": "MFA enabled",
 	"libraryOverview": "{objectType}: {count}",
+	"viewMore": "View more",
+	"viewLess": "View less",
 	"evidenceRevisions": "Revisions",
 	"addEvidenceRevision": "Add Revision",
 	"associatedEvidenceRevisions": "Associated versions",
