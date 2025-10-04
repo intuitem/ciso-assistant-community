@@ -37,6 +37,8 @@
 	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
 	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
 	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
+	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
+	import DataBreachForm from './ModelForm/DataBreachForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -64,6 +66,8 @@
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
+	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
+	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -273,7 +277,15 @@
 										return currentData; // Keep the current values in the edit form.
 									}
 									updated_fields.add('reference_control');
-									return { ...currentData, category: r.category, csf_function: r.csf_function };
+									// Only auto-fill name if it's empty OR user hasn't manually edited it
+									const shouldUpdateName = !currentData.name || !updated_fields.has('name');
+									return {
+										...currentData,
+										name: shouldUpdateName ? r.name : currentData.name,
+										category: r.category,
+										csf_function: r.csf_function,
+										ref_id: r.ref_id
+									};
 								});
 							});
 					}
@@ -288,6 +300,9 @@
 				cacheLock={cacheLocks['name']}
 				bind:cachedValue={formDataCache['name']}
 				data-focusindex="0"
+				oninput={() => {
+					updated_fields.add('name');
+				}}
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
@@ -517,6 +532,26 @@
 				{initialData}
 				{...rest}
 			/>
+		{:else if URLModel === 'right-requests'}
+			<RightRequestForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{initialData}
+				{...rest}
+			/>
+		{:else if URLModel === 'data-breaches'}
+			<DataBreachForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{initialData}
+				{...rest}
+			/>
 		{:else if URLModel === 'ebios-rm'}
 			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
 		{:else if URLModel === 'feared-events'}
@@ -683,6 +718,18 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'generic-collections'}
+			<GenericCollectionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'accreditations'}
+			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}
