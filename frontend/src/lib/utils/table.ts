@@ -1230,6 +1230,7 @@ export const listViewFields = {
 			'type',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
+			'owner',
 			'domain',
 			'labels'
 		],
@@ -1239,6 +1240,7 @@ export const listViewFields = {
 			'type',
 			'security_objectives',
 			'disaster_recovery_objectives',
+			'owner',
 			'folder',
 			'filtering_labels'
 		],
