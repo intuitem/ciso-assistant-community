@@ -753,7 +753,7 @@
 	"accreditationCategory": "Catégorie d'homologation",
 	"accreditationAuthority": "Autorité d'homologation",
 	"regulatoryAuthority": "Autorité de régulation",
-	"regulatoryAuthorityHelpText": "Entité de type 'autorité d'homologation'. Vous pouvez en créer dans le menu entités",
+	"regulatoryAuthorityHelpText": "Entité de type 'autorité de régulation'. Vous pouvez en créer dans le menu entités",
 	"contractor": "Prestataire",
 	"entityRelationship": "Relation avec l'entité",
 	"entity": "Entité",
