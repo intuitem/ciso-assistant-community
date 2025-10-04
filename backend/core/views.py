@@ -6724,6 +6724,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         def format_severity_data(metrics):
             severity_colors = {
+                "info": "#3B82F6",
                 "low": "#59BBB2",
                 "medium": "#F5C481",
                 "high": "#E6686D",

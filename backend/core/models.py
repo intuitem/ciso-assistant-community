@@ -5530,10 +5530,11 @@ class FindingsAssessment(Assessment):
         # Severity distribution using the defined severity levels - we need a better way for this
         severity_values = {
             -1: "undefined",
-            0: "low",
-            1: "medium",
-            2: "high",
-            3: "critical",
+            0: "info",
+            1: "low",
+            2: "medium",
+            3: "high",
+            4: "critical",
         }
 
         severity_distribution = {}
