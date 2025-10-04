@@ -14,7 +14,7 @@ from core.models import (
 )
 from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
-from tprm.models import EntityAssessment
+from tprm.models import Entity, EntityAssessment
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from django.db.models import Count
 
@@ -99,7 +99,14 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
             "is_visible": True,
         },
     )
-    authority = models.CharField(max_length=255, blank=True)
+    authority = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        related_name="accreditation_authority",
+        null=True,
+        blank=True,
+        help_text="Accreditation authority entity",
+    )
     status = models.ForeignKey(
         Terminology,
         on_delete=models.PROTECT,

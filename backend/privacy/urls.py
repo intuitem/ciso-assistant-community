@@ -12,6 +12,7 @@ from .views import (
     ProcessingViewSet,
     ProcessingNatureViewSet,
     RightRequestViewSet,
+    DataBreachViewSet,
 )
 
 router = DefaultRouter()
@@ -26,6 +27,7 @@ router.register(
     r"processing-natures", ProcessingNatureViewSet, basename="processing-natures"
 )
 router.register(r"right-requests", RightRequestViewSet, basename="right-requests")
+router.register(r"data-breaches", DataBreachViewSet, basename="data-breaches")
 
 urlpatterns = [
     path("", include(router.urls)),

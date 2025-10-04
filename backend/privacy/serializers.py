@@ -10,6 +10,7 @@ from .models import (
     DataTransfer,
     Processing,
     RightRequest,
+    DataBreach,
 )
 
 
@@ -124,6 +125,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(many=True)
     nature = FieldsRelatedField(["name"], many=True)
     associated_controls = FieldsRelatedField(["name"], many=True)
+    assigned_to = FieldsRelatedField(many=True)
 
     class Meta:
         model = Processing
@@ -154,4 +156,25 @@ class RightRequestReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = RightRequest
+        fields = "__all__"
+
+
+# DataBreach Serializers
+class DataBreachWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DataBreach
+        fields = "__all__"
+
+
+class DataBreachReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assigned_to = FieldsRelatedField(many=True)
+    authorities = FieldsRelatedField(many=True)
+    affected_processings = FieldsRelatedField(many=True)
+    affected_personal_data = FieldsRelatedField(many=True)
+    remediation_measures = FieldsRelatedField(["name"], many=True)
+    incident = FieldsRelatedField()
+
+    class Meta:
+        model = DataBreach
         fields = "__all__"
