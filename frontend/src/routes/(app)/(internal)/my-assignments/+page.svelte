@@ -3,11 +3,20 @@
 	import { m } from '$paraglide/messages';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
+	import { listViewFields } from '$lib/utils/table';
+
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const appliedControlFilters = listViewFields['applied-controls'].filters;
+	const APPLIED_CONTROL_FILTERS = {
+		status: appliedControlFilters.status,
+		priority: appliedControlFilters.priority,
+		folder: appliedControlFilters.folder
+	};
 </script>
 
 <div class="grid grid-cols-12 gap-4 p-2">
@@ -25,9 +34,9 @@
 					eta: 'eta',
 					folder: 'folder'
 				},
-				body: []
+				body: [],
+				filters: APPLIED_CONTROL_FILTERS
 			}}
-			hideFilters={true}
 			URLModel="applied-controls"
 			baseEndpoint="/applied-controls?owner={data.user.id}"
 		/>
