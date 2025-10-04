@@ -236,3 +236,51 @@ Supported fields:
 
 {% file src="../.gitbook/assets/sample06.xlsx" %}
 
+
+
+### ⚙️  Elementary actions
+
+
+
+Elementary actions are useful to model a killchain during the 4th workshop of an EBIOS RM study.&#x20;
+
+&#x20;Supported fields:
+
+
+
+* ref\_id
+* name\*
+* description&#x20;
+* attack\_stage\*
+  * (in English)
+    * know
+    * enter
+    * _discover_
+    * _exploit_
+  * (in F&#x72;_&#x65;nch)_
+    * _connaitre_
+    * _entrer_
+    * _trouver_
+    * _exploiter_
+* icon
+  * _server_
+  * _computer_
+  * _cloud_
+  * _file_
+  * _diamond_
+  * _phone_
+  * _cube_
+  * _blocks_
+  * _shapes_
+  * _network_
+  * _database_
+  * _key_
+  * _search_
+  * _carrot_
+  * _money_
+  * _skull_
+  * _globe_
+  * _usb_
+* domain
+
+{% file src="../.gitbook/assets/sample007.xlsx" %}
