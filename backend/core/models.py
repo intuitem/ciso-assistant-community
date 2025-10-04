@@ -970,6 +970,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
+        ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1210,6 +1211,51 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+
+    DEFAULT_ENTITY_RELATIONSHIPS = [
+        {
+            "name": "regulatory_authority",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "partner",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_authority",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "client",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "supplier",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "contractor",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+    ]
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -1265,6 +1311,15 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     @classmethod
     def create_default_accreditations_category(cls):
         for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_entity_relationships(cls):
+        for item in cls.DEFAULT_ENTITY_RELATIONSHIPS:
             Terminology.objects.update_or_create(
                 name=item["name"],
                 field_path=item["field_path"],

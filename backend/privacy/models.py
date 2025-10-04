@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl, Asset
+from core.models import AppliedControl, Asset, Incident
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -118,6 +118,11 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
+    )
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
     )
 
     def update_sensitive_data_flag(self):
@@ -436,3 +441,99 @@ class RightRequest(NameDescriptionFolderMixin):
         ordering = ["-requested_on"]
         verbose_name = "Right Request"
         verbose_name_plural = "Right Requests"
+
+
+class DataBreach(NameDescriptionFolderMixin):
+    BREACH_TYPE_CHOICES = (
+        ("privacy_destruction", "Destruction"),
+        ("privacy_loss", "Loss"),
+        ("privacy_alteration", "Alteration"),
+        ("privacy_unauthorized_disclosure", "Unauthorized Disclosure"),
+        ("privacy_unauthorized_access", "Unauthorized Access"),
+        ("privacy_other", "Other"),
+    )
+
+    RISK_LEVEL_CHOICES = (
+        ("privacy_no_risk", "No Risk"),
+        ("privacy_risk", "Risk"),
+        ("privacy_high_risk", "High Risk"),
+    )
+
+    STATUS_CHOICES = (
+        ("privacy_discovered", "Discovered"),
+        ("privacy_under_investigation", "Under Investigation"),
+        ("privacy_authority_notified", "Authority Notified"),
+        ("privacy_subjects_notified", "Data Subjects Notified"),
+        ("privacy_closed", "Closed"),
+    )
+
+    ref_id = models.CharField(max_length=100, blank=True)
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    discovered_on = models.DateTimeField()
+    breach_type = models.CharField(
+        max_length=50, choices=BREACH_TYPE_CHOICES, default="privacy_other"
+    )
+    risk_level = models.CharField(
+        max_length=30, choices=RISK_LEVEL_CHOICES, default="privacy_risk"
+    )
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default="privacy_discovered"
+    )
+
+    affected_subjects_count = models.PositiveIntegerField(
+        default=0, help_text="Approximate number of affected data subjects"
+    )
+    affected_processings = models.ManyToManyField(
+        Processing, blank=True, related_name="data_breaches"
+    )
+    affected_personal_data = models.ManyToManyField(
+        PersonalData, blank=True, related_name="data_breaches"
+    )
+    affected_personal_data_count = models.PositiveIntegerField(
+        default=0, help_text="Approximate number of affected personal data"
+    )
+
+    # Notification tracking
+    authorities = models.ManyToManyField(
+        Entity,
+        blank=True,
+        related_name="data_breaches_authorities",
+        help_text="Regulatory authorities to notify (e.g., CNIL, ICO, etc.)",
+    )
+    authority_notified_on = models.DateTimeField(null=True, blank=True)
+    authority_notification_ref = models.CharField(max_length=255, blank=True)
+    subjects_notified_on = models.DateTimeField(null=True, blank=True)
+
+    # Consequences and remediation
+    potential_consequences = models.TextField(blank=True)
+    remediation_measures = models.ManyToManyField(
+        AppliedControl, blank=True, related_name="data_breaches_remediated"
+    )
+
+    # Investigation
+    incident = models.ForeignKey(
+        Incident,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="data_breaches",
+        help_text="Link to associated security incident investigation",
+    )
+
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
+    )
+
+    # Additional documentation
+    observation = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-discovered_on"]
+        verbose_name = "Data Breach"
+        verbose_name_plural = "Data Breaches"

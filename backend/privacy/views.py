@@ -18,6 +18,7 @@ from .models import (
     DataTransfer,
     Processing,
     RightRequest,
+    DataBreach,
     LEGAL_BASIS_CHOICES,
 )
 
@@ -224,3 +225,32 @@ class RightRequestViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RightRequest.STATUS_CHOICES))
+
+
+class DataBreachViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows data breaches to be viewed or edited.
+    """
+
+    model = DataBreach
+    filterset_fields = [
+        "folder",
+        "breach_type",
+        "risk_level",
+        "status",
+        "authorities",
+        "affected_processings",
+        "incident",
+    ]
+
+    @action(detail=False, name="Get breach type choices")
+    def breach_type(self, request):
+        return Response(dict(DataBreach.BREACH_TYPE_CHOICES))
+
+    @action(detail=False, name="Get risk level choices")
+    def risk_level(self, request):
+        return Response(dict(DataBreach.RISK_LEVEL_CHOICES))
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(DataBreach.STATUS_CHOICES))
