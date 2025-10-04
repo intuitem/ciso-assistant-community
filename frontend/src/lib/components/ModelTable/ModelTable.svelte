@@ -266,11 +266,12 @@
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters =
-		tableURLModel &&
+		source?.filters ??
+		(tableURLModel &&
 		listViewFields[tableURLModel] &&
 		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
-			: (source?.filters ?? {});
+			: {});
 
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
