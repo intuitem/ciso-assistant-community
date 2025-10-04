@@ -15,6 +15,19 @@
 
 	let { data, form }: Props = $props();
 	let exportPopupOpen = $state(false);
+	let chartKey = $state(0);
+
+	function resizeObserver(node: HTMLElement) {
+		const observer = new ResizeObserver(() => {
+			chartKey = chartKey + 1;
+		});
+		observer.observe(node);
+		return {
+			destroy() {
+				observer.disconnect();
+			}
+		};
+	}
 </script>
 
 {#if data.data?.is_locked}
@@ -93,24 +106,26 @@
 					</div>
 				</div>
 
-				<div class="card p-4 bg-gray-50 shadow-xs grow">
-					<div class="h-1/2">
-						<HalfDonutChart
-							name="current_h"
-							title={m.severity()}
-							classesContainer="flex-1 card p-4 bg-white"
-							values={data.findings_metrics.severity_chart_data}
-							colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
-						/>
-					</div>
-					<div class="h-1/2">
-						<DonutChart
-							classesContainer="flex-1 card p-4 bg-white"
-							name="f_treatment_progress"
-							title={m.progress()}
-							values={data.findings_metrics.status_chart_data.values}
-						/>
-					</div>
+				<div class="card p-2 bg-gray-50 shadow-xs flex-1 flex flex-col gap-2" use:resizeObserver>
+					{#key chartKey}
+						<div class="flex-1 min-h-0">
+							<HalfDonutChart
+								name="current_h"
+								title={m.severity()}
+								classesContainer="card p-2 bg-white h-full"
+								values={data.findings_metrics.severity_chart_data}
+								colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
+							/>
+						</div>
+						<div class="flex-1 min-h-0">
+							<DonutChart
+								classesContainer="card p-2 bg-white h-full"
+								name="f_treatment_progress"
+								title={m.progress()}
+								values={data.findings_metrics.status_chart_data.values}
+							/>
+						</div>
+					{/key}
 				</div>
 			</div>
 		{/key}
