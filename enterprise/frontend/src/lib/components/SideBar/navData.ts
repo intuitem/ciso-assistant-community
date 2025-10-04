@@ -374,6 +374,29 @@ export const navData = {
 					fa_icon: 'fa-solid fa-user-shield',
 					href: '/right-requests',
 					permissions: ['view_rightrequest']
+				},
+				{
+					name: 'dataBreaches',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/data-breaches',
+					permissions: ['view_databreach']
+				}
+			]
+		},
+		{
+			name: 'projectManagement',
+			items: [
+				{
+					name: 'genericCollections',
+					fa_icon: 'fa-solid fa-box-archive',
+					href: '/generic-collections',
+					permissions: ['view_genericcollection']
+				},
+				{
+					name: 'accreditations',
+					fa_icon: 'fa-solid fa-award',
+					href: '/accreditations',
+					permissions: ['view_accreditation']
 				}
 			]
 		},

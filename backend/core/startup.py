@@ -69,6 +69,7 @@ READER_PERMISSIONS_LIST = [
     "view_datacontractor",
     "view_datatransfer",
     "view_rightrequest",
+    "view_databreach",
     # campaigns,
     "view_campaign",
     # operating modes
@@ -79,6 +80,9 @@ READER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # pmbok
+    "view_genericcollection",
+    "view_accreditation",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -147,6 +151,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # pmbok
+    "view_genericcollection",
+    "view_accreditation",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -362,6 +369,19 @@ ANALYST_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -598,6 +618,19 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -804,6 +837,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
     # incidents,
     "add_incident",
     "view_incident",
@@ -868,6 +905,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_terminology",
     "change_terminology",
     "delete_terminology",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
     # roles,
     "add_role",
     "view_role",
@@ -1028,6 +1074,18 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
 
+    # Create default accreditation status
+    try:
+        Terminology.create_default_accreditations_status()
+    except Exception as e:
+        logger.error("Error creating default accreditation status", exc_info=e)
+
+    # Create default accreditation category
+    try:
+        Terminology.create_default_accreditations_category()
+    except Exception as e:
+        logger.error("Error creating default accreditation category", exc_info=e)
+
     # Create default Processing natures
     try:
         ProcessingNature.create_default_values()
@@ -1045,6 +1103,12 @@ def startup(sender: AppConfig, **kwargs):
         Terminology.create_default_roto_risk_origins()
     except Exception as e:
         logger.error("Error creating default ROTO Risk Origins", exc_info=e)
+
+    # Create default Entity Relationships
+    try:
+        Terminology.create_default_entity_relationships()
+    except Exception as e:
+        logger.error("Error creating default Entity Relationships", exc_info=e)
 
     call_command("storelibraries")
 

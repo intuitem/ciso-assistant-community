@@ -1191,6 +1191,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "status": ["exact"],
             "ebios_rm_study": ["exact"],
             "reviewers": ["exact"],
+            "genericcollection": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -1803,6 +1804,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "ref_id": ["exact"],
             "processings": ["exact"],
+            "genericcollection": ["exact"],
         }
 
 
@@ -2644,6 +2646,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -2800,6 +2803,81 @@ class RiskScenarioViewSet(BaseModelViewSet):
             sok_choices = RiskScenario.DEFAULT_SOK_OPTIONS
         choices = undefined | sok_choices
         return Response(choices)
+
+    @action(detail=False, name="Export risk scenarios as CSV")
+    def export_csv(self, request):
+        try:
+            (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, RiskScenario
+            )
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = (
+                'attachment; filename="risk_scenarios_export.csv"'
+            )
+
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "internal_id",
+                "ref_id",
+                "name",
+                "description",
+                "risk_assessment",
+                "treatment",
+                "inherent_probability",
+                "inherent_impact",
+                "inherent_level",
+                "current_probability",
+                "current_impact",
+                "current_level",
+                "residual_probability",
+                "residual_impact",
+                "residual_level",
+                "owners",
+                "threats",
+                "assets",
+                "vulnerabilities",
+                "applied_controls",
+                "existing_applied_controls",
+                "qualifications",
+            ]
+            writer.writerow(columns)
+
+            for scenario in RiskScenario.objects.filter(id__in=viewable_ids).iterator():
+                row = [
+                    scenario.id,
+                    scenario.ref_id,
+                    scenario.name,
+                    scenario.description,
+                    scenario.risk_assessment.name if scenario.risk_assessment else "",
+                    scenario.get_treatment_display(),
+                    scenario.get_inherent_proba().get("name", "--"),
+                    scenario.get_inherent_impact().get("name", "--"),
+                    scenario.get_inherent_risk().get("name", "--"),
+                    scenario.get_current_proba().get("name", "--"),
+                    scenario.get_current_impact().get("name", "--"),
+                    scenario.get_current_risk().get("name", "--"),
+                    scenario.get_residual_proba().get("name", "--"),
+                    scenario.get_residual_impact().get("name", "--"),
+                    scenario.get_residual_risk().get("name", "--"),
+                    ",".join([o.email for o in scenario.owner.all()]),
+                    ",".join([t.name for t in scenario.threats.all()]),
+                    ",".join([a.name for a in scenario.assets.all()]),
+                    ",".join([v.name for v in scenario.vulnerabilities.all()]),
+                    ",".join([c.name for c in scenario.applied_controls.all()]),
+                    ",".join(
+                        [c.name for c in scenario.existing_applied_controls.all()]
+                    ),
+                    ",".join([q.name for q in scenario.qualifications.all()]),
+                ]
+                writer.writerow(row)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error exporting risk scenarios to CSV: {str(e)}")
+            return HttpResponse(
+                status=500, content="An error occurred while generating the CSV export."
+            )
 
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
@@ -4862,6 +4940,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "genericcollection",
         "owner",
         "status",
         "expiry_date",
@@ -5123,6 +5202,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "authors",
         "reviewers",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -5201,8 +5281,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ]
             writer.writerow(columns)
 
-            for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
-                req_node = RequirementNode.objects.get(pk=req.requirement.id)
+            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+            reqs = list(
+                compliance_assessment.get_requirement_assessments(
+                    include_non_assessable=True
+                )
+            )
+            req_nodes = RequirementNode.objects.in_bulk(
+                [ra.requirement_id for ra in reqs]
+            )
+            for req in reqs:
+                req_node = req_nodes.get(req.requirement_id)
                 row = [
                     req_node.urn,
                     req_node.ref_id,
@@ -5216,6 +5305,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         req.score,
                         req.observation,
                     ]
+                else:
+                    row += ["", "", "", ""]
                 writer.writerow(row)
 
             return response
@@ -5236,7 +5327,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
         show_documentation_score = audit.show_documentation_score
-        for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+        for req in audit.get_requirement_assessments(include_non_assessable=True):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
             entry = {
                 "urn": req_node.urn,
@@ -6482,6 +6573,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
         "folder",
         "severity",
         "status",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -6493,6 +6585,57 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
+
+    @action(detail=False, name="Export security exceptions as CSV")
+    def export_csv(self, request):
+        try:
+            (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, SecurityException
+            )
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = (
+                'attachment; filename="security_exceptions_export.csv"'
+            )
+
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "internal_id",
+                "ref_id",
+                "name",
+                "description",
+                "severity",
+                "status",
+                "expiration_date",
+                "owners",
+                "approver",
+                "folder",
+            ]
+            writer.writerow(columns)
+
+            for exception in SecurityException.objects.filter(
+                id__in=viewable_ids
+            ).iterator():
+                row = [
+                    exception.id,
+                    exception.ref_id,
+                    exception.name,
+                    exception.description,
+                    exception.get_severity_display(),
+                    exception.get_status_display(),
+                    exception.expiration_date,
+                    ",".join([o.email for o in exception.owners.all()]),
+                    exception.approver.email if exception.approver else "",
+                    exception.folder.name if exception.folder else "",
+                ]
+                writer.writerow(row)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error exporting security exceptions to CSV: {str(e)}")
+            return HttpResponse(
+                status=500, content="An error occurred while generating the CSV export."
+            )
 
     def get_queryset(self):
         return (
@@ -6589,6 +6732,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -6621,6 +6765,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         def format_severity_data(metrics):
             severity_colors = {
+                "info": "#3B82F6",
                 "low": "#59BBB2",
                 "medium": "#F5C481",
                 "high": "#E6686D",
@@ -6803,6 +6948,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.MITIGATED,
             Finding.Status.RESOLVED,
+            Finding.Status.CLOSED,
             Finding.Status.DEPRECATED,
         ]
         open_statuses = [
@@ -6927,6 +7073,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.MITIGATED,
             Finding.Status.RESOLVED,
+            Finding.Status.CLOSED,
             Finding.Status.DEPRECATED,
         ]
         open_statuses = [
@@ -7045,6 +7192,65 @@ class IncidentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get detection channel choices")
     def detection(self, request):
         return Response(dict(Incident.Detection.choices))
+
+    @action(detail=False, name="Export incidents as CSV")
+    def export_csv(self, request):
+        try:
+            (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Incident
+            )
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = (
+                'attachment; filename="incidents_export.csv"'
+            )
+
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "internal_id",
+                "ref_id",
+                "name",
+                "description",
+                "status",
+                "severity",
+                "detection",
+                "reported_at",
+                "owners",
+                "folder",
+                "qualifications",
+                "threats",
+                "assets",
+                "entities",
+                "link",
+            ]
+            writer.writerow(columns)
+
+            for incident in Incident.objects.filter(id__in=viewable_ids).iterator():
+                row = [
+                    incident.id,
+                    incident.ref_id,
+                    incident.name,
+                    incident.description,
+                    incident.get_status_display(),
+                    incident.get_severity_display(),
+                    incident.get_detection_display() if incident.detection else "",
+                    incident.reported_at,
+                    ",".join([o.email for o in incident.owners.all()]),
+                    incident.folder.name if incident.folder else "",
+                    ",".join([q.name for q in incident.qualifications.all()]),
+                    ",".join([t.name for t in incident.threats.all()]),
+                    ",".join([a.name for a in incident.assets.all()]),
+                    ",".join([e.name for e in incident.entities.all()]),
+                    incident.link,
+                ]
+                writer.writerow(row)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error exporting incidents to CSV: {str(e)}")
+            return HttpResponse(
+                status=500, content="An error occurred while generating the CSV export."
+            )
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()
@@ -7726,6 +7932,15 @@ class TaskTemplateViewSet(BaseModelViewSet):
             self.get_object()
         )  # Synchronize task nodes when fetching a task template
         return Response(serializer_class(super().get_object()).data)
+
+    @action(detail=False, name="Get all task template assigned_to users")
+    def assigned_to(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(task_templates__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")

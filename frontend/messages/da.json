@@ -1250,5 +1250,7 @@
 	"securityObjectiveScale": "Skala for sikkerhedsegenskaber",
 	"securityObjectiveScaleHelpText": "Vælg skala for sikkerhedsegenskaber (1 til 4 som standard)",
 	"actor": "Aktør",
-	"action": "Handling"
+	"action": "Handling",
+	"viewMore": "Se mere",
+	"viewLess": "Se mindre"
 }
