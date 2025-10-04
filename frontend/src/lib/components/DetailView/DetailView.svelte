@@ -472,16 +472,6 @@
 					{/each}
 				</dl>
 			</div>
-			{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
-				<button
-					onclick={() => (expandedTable = !expandedTable)}
-					class="m-5 text-blue-800"
-					aria-expanded={expandedTable}
-				>
-					<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
-					{expandedTable ? m.viewLess() : m.viewMore()}
-				</button>
-			{/if}
 			<!-- Right side - Widgets area (only if widgets exist) -->
 			{#if hasWidgets}
 				<div class="flex-1 min-w-[300px] flex flex-col">
@@ -492,6 +482,16 @@
 				</div>
 			{/if}
 		</div>
+		{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+			<button
+				onclick={() => (expandedTable = !expandedTable)}
+				class="m-5 text-blue-800"
+				aria-expanded={expandedTable}
+			>
+				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
+				{expandedTable ? m.viewLess() : m.viewMore()}
+			</button>
+		{/if}
 
 		<!-- Bottom row for action buttons -->
 		<div class="flex flex-row justify-end mt-4 gap-2">
