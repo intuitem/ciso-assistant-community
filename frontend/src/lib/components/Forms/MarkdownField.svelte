@@ -58,6 +58,19 @@
 
 	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
 	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
+
+	function adaptTextAreaSize(textArea: HTMLTextAreaElement) {
+		textArea.style.height = 'auto';
+		textArea.style.height = textArea.scrollHeight + 'px';
+	}
+
+	let textareaElem: HTMLTextAreaElement | null = $state(null);
+
+	$effect(() => {
+		if (textareaElem) {
+			adaptTextAreaSize(textareaElem);
+		}
+	});
 </script>
 
 <div class={classesDisabled(disabled)}>
@@ -101,7 +114,7 @@
 	<div class="control">
 		{#if showPreview}
 			<div
-				class="p-3 border border-surface-300 rounded-md min-h-[120px] bg-surface-50"
+				class="p-3 border border-surface-300 rounded-md min-h-[120px] overflow-auto max-h-[75dvh] bg-surface-50"
 				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"
@@ -121,10 +134,14 @@
 			</div>
 		{:else}
 			<textarea
-				class="{'input ' + _class} {classesTextField($errors)}"
+				class="{'input ' + _class} max-h-[75dvh] {classesTextField($errors)}"
 				data-testid="form-input-{field.replaceAll('_', '-')}"
 				name={field}
 				aria-invalid={$errors ? 'true' : undefined}
+				oninput={(event) => {
+					adaptTextAreaSize(event.target);
+				}}
+				bind:this={textareaElem}
 				bind:value={$value}
 				{...$constraints}
 				{...rest}
