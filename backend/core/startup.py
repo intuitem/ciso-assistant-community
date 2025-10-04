@@ -69,6 +69,7 @@ READER_PERMISSIONS_LIST = [
     "view_datacontractor",
     "view_datatransfer",
     "view_rightrequest",
+    "view_databreach",
     # campaigns,
     "view_campaign",
     # operating modes
@@ -368,6 +369,10 @@ ANALYST_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -613,6 +618,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -828,6 +837,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_rightrequest",
     "view_rightrequest",
     "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
     # incidents,
     "add_incident",
     "view_incident",
@@ -1090,6 +1103,12 @@ def startup(sender: AppConfig, **kwargs):
         Terminology.create_default_roto_risk_origins()
     except Exception as e:
         logger.error("Error creating default ROTO Risk Origins", exc_info=e)
+
+    # Create default Entity Relationships
+    try:
+        Terminology.create_default_entity_relationships()
+    except Exception as e:
+        logger.error("Error creating default Entity Relationships", exc_info=e)
 
     call_command("storelibraries")
 
