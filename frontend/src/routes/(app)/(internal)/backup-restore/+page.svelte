@@ -55,6 +55,7 @@
 			}
 
 			const blob = await response.blob();
+			// this is where the name of the file is really defined
 			const filename = `backup-${new Date().toISOString().split('T')[0]}.bak`;
 
 			downloadBlob(blob, filename);
