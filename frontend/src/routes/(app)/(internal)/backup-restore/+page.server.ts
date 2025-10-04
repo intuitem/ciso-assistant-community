@@ -38,6 +38,9 @@ export const actions: Actions = {
 				case 'errorBackupInvalidVersion':
 					setFlash({ type: 'error', message: m.backupVersionError() }, event);
 					break;
+				case 'InvalidSchemaVersion':
+					setFlash({ type: 'error', message: m.backupVersionError() }, event);
+					break;
 				case 'GreaterBackupVersion':
 					setFlash({ type: 'error', message: m.backupGreaterVersionError() }, event);
 					break;

@@ -10,8 +10,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
 		error(400, 'Error fetching the dump file');
 	}
 
-	const fileName = `ciso-assistant-db-${new Date().toISOString()}.bak`;
-
+	const fileName = `backup-${new Date().toISOString()}.bak`;
+	// the filename is only informative, as is not used by the browser
 	return new Response(await res.blob(), {
 		headers: {
 			'Content-Type': 'application/gzip',
