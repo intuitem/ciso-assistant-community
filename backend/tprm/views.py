@@ -24,7 +24,7 @@ class EntityViewSet(BaseModelViewSet):
     """
 
     model = Entity
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "relationship", "relationship__name"]
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):

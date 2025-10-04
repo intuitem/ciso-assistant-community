@@ -48,3 +48,12 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="terminologies?field_path=entity.relationship"
+	field="relationship"
+	cacheLock={cacheLocks['relationship']}
+	bind:cachedValue={formDataCache['relationship']}
+	label={m.relationship()}
+	multiple
+/>

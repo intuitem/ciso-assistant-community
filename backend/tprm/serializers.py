@@ -21,6 +21,7 @@ User = get_user_model()
 class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owned_folders = FieldsRelatedField(many=True)
+    relationship = FieldsRelatedField(many=True)
 
     class Meta:
         model = Entity

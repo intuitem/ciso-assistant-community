@@ -86,6 +86,7 @@ export const URL_MODEL = [
 	// privacy,
 	'processings',
 	'right-requests',
+	'data-breaches',
 	'purposes',
 	'personal-data',
 	'data-subjects',
