@@ -106,6 +106,7 @@
 						possibleOptions={question.choices}
 						{form}
 						initialValue={internalAnswers[urn]}
+						nullable={true}
 						key="urn"
 						labelKey="value"
 						field="answers"
