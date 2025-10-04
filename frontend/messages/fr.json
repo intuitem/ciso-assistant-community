@@ -929,7 +929,7 @@
 	"tooManyLoginAttempts": "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
 	"step": "Étape {number}",
 	"critical": "Critique",
-	"info": "Info",
+	"info": "Information",
 	"vulnerabilities": "Vulnérabilités",
 	"severity": "Niveau de gravité",
 	"potential": "Potentielle",

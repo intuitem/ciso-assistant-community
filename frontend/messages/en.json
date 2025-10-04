@@ -953,7 +953,7 @@
 	"tooManyLoginAttempts": "Too many login attempts. Please try again later.",
 	"step": "Step {number}",
 	"critical": "Critical",
-	"info": "Info",
+	"info": "Information",
 	"vulnerabilities": "Vulnerabilities",
 	"severity": "Severity",
 	"potential": "Potential",
