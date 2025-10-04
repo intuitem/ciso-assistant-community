@@ -2231,6 +2231,7 @@
 	"dataWizardRiskAssessment": "Analyse de risque",
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
+	"dataWizardElementaryActionDescription": "Importer des actions élémentaires pour EBIOS RM",
 	"annualCostDisplay": "Coût annuel",
 	"amortizationPeriod": "Durée d'amortissement (années)",
 	"amortizationPeriodHelpText": "Période sur laquelle on amortit le coût de build",

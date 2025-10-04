@@ -29,6 +29,7 @@ from core.serializers import (
     RiskAssessmentWriteSerializer,
     RiskScenarioWriteSerializer,
 )
+from ebios_rm.serializers import ElementaryActionWriteSerializer
 from iam.models import RoleAssignment
 
 logger = logging.getLogger(__name__)
@@ -136,6 +137,10 @@ class LoadFileView(APIView):
         elif model_type == "RiskAssessment":
             return self._process_risk_assessment(
                 request, records, folder_id, perimeter_id, matrix_id
+            )
+        elif model_type == "ElementaryAction":
+            return self._process_elementary_actions(
+                request, records, folders_map, folder_id
             )
         else:
             return {
@@ -336,6 +341,126 @@ class LoadFileView(APIView):
                 results["errors"].append({"record": record, "error": str(e)})
         logger.info(
             f"Perimeter import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_elementary_actions(self, request, records, folders_map, folder_id):
+        """Process elementary actions import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Define attack stage mapping (supports English and French)
+        ATTACK_STAGE_MAP = {
+            # English
+            "know": 0,
+            "reconnaissance": 0,
+            "ebiosreconnaissance": 0,
+            "enter": 1,
+            "initial access": 1,
+            "ebiositialaccess": 1,
+            "discover": 2,
+            "discovery": 2,
+            "ebiosdiscovery": 2,
+            "exploit": 3,
+            "exploitation": 3,
+            "ebiosexploitation": 3,
+            # French
+            "connaitre": 0,
+            "connaître": 0,
+            "pénétrer": 1,
+            "penetrer": 1,
+            "entrer": 1,
+            "trouver": 2,
+            "découvrir": 2,
+            "decouvrir": 2,
+            "exploiter": 3,
+        }
+
+        # Define icon mapping
+        ICON_MAP = {
+            icon.lower(): icon
+            for icon in [
+                "server",
+                "computer",
+                "cloud",
+                "file",
+                "diamond",
+                "phone",
+                "cube",
+                "blocks",
+                "shapes",
+                "network",
+                "database",
+                "key",
+                "search",
+                "carrot",
+                "money",
+                "skull",
+                "globe",
+                "usb",
+            ]
+        }
+
+        for record in records:
+            # Get domain from record or use fallback
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Map attack stage
+            attack_stage = 0  # Default to "Know"
+            if record.get("attack_stage", ""):
+                attack_stage_value = str(record.get("attack_stage")).strip().lower()
+                attack_stage = ATTACK_STAGE_MAP.get(attack_stage_value, 0)
+
+            # Map icon
+            icon = None
+            if record.get("icon", ""):
+                icon_value = str(record.get("icon")).strip().lower()
+                icon = ICON_MAP.get(icon_value)
+
+            # Prepare data for serializer
+            elementary_action_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "folder": domain,
+                "attack_stage": attack_stage,
+            }
+
+            # Add icon if valid
+            if icon:
+                elementary_action_data["icon"] = icon
+
+            # Use the serializer for validation and saving
+            serializer = ElementaryActionWriteSerializer(
+                data=elementary_action_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating elementary action {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Elementary Action import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 
