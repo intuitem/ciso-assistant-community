@@ -938,5 +938,7 @@
 	"securityObjectiveScale": "مقياس خصائص الأمان",
 	"securityObjectiveScaleHelpText": "اختر مقياسك لخصائص الأمان (1 إلى 4 بشكل افتراضي)",
 	"actor": "فاعل",
-	"action": "إجراء"
+	"action": "إجراء",
+	"viewMore": "عرض المزيد",
+	"viewLess": "عرض أقل"
 }

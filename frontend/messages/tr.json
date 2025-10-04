@@ -1703,5 +1703,7 @@
 	"image": "Resim",
 	"securityObjectives": "Güvenlik özellikleri",
 	"securityObjectiveScale": "Güvenlik özellikleri ölçeği",
-	"securityObjectiveScaleHelpText": "Güvenlik özellikleri için ölçeğinizi seçin (varsayılan olarak 1 ile 4)"
+	"securityObjectiveScaleHelpText": "Güvenlik özellikleri için ölçeğinizi seçin (varsayılan olarak 1 ile 4)",
+	"viewMore": "Daha fazla görüntüle",
+	"viewLess": "Daha az görüntüle"
 }
