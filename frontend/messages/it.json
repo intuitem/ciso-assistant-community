@@ -1345,5 +1345,7 @@
 	"securityObjectiveScale": "Scala proprietà di sicurezza",
 	"securityObjectiveScaleHelpText": "Scegli la scala per le proprietà di sicurezza (1 a 4 di default)",
 	"actor": "Attore",
-	"action": "Azione"
+	"action": "Azione",
+	"viewMore": "Vedi di più",
+	"viewLess": "Vedi meno"
 }

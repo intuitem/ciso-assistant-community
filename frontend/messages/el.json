@@ -1667,5 +1667,7 @@
 	"image": "Εικόνα",
 	"securityObjectives": "Ασφαλή ιδιότητες",
 	"securityObjectiveScale": "Κλίμακα ασφαλών ιδιοτήτων",
-	"securityObjectiveScaleHelpText": "Επιλέξτε την κλίμακα σας για τις ασφαλείς ιδιότητες (1 έως 4 από προεπιλογή)"
+	"securityObjectiveScaleHelpText": "Επιλέξτε την κλίμακα σας για τις ασφαλείς ιδιότητες (1 έως 4 από προεπιλογή)",
+	"viewMore": "Προβολή περισσότερων",
+	"viewLess": "Προβολή λιγότερων"
 }
