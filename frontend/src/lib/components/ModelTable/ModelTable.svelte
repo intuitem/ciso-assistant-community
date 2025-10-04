@@ -568,7 +568,7 @@
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications'}
+																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
 																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 																			<Anchor href={itemHref} class="anchor" stopPropagation
 																				>{val.str}</Anchor
