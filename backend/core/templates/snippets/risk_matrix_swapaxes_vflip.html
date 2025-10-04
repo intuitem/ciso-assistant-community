@@ -19,7 +19,7 @@
                         </td>
                     {% endfor %}
                 </tr>
-                {% for row in risk_matrix.render_grid_as_colors reversed %}
+                {% for row in risk_matrix.render_transposed_grid_as_colors reversed %}
                     {% with row_index=forloop.counter0 %}
                         <tr>
                             <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
