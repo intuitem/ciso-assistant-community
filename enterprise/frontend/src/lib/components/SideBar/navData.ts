@@ -374,6 +374,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-user-shield',
 					href: '/right-requests',
 					permissions: ['view_rightrequest']
+				},
+				{
+					name: 'dataBreaches',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/data-breaches',
+					permissions: ['view_databreach']
 				}
 			]
 		},

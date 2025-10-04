@@ -6724,6 +6724,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         def format_severity_data(metrics):
             severity_colors = {
+                "info": "#3B82F6",
                 "low": "#59BBB2",
                 "medium": "#F5C481",
                 "high": "#E6686D",
@@ -6906,6 +6907,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.MITIGATED,
             Finding.Status.RESOLVED,
+            Finding.Status.CLOSED,
             Finding.Status.DEPRECATED,
         ]
         open_statuses = [
@@ -7030,6 +7032,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.DISMISSED,
             Finding.Status.MITIGATED,
             Finding.Status.RESOLVED,
+            Finding.Status.CLOSED,
             Finding.Status.DEPRECATED,
         ]
         open_statuses = [
