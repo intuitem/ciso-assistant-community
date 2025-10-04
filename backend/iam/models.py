@@ -101,6 +101,11 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("parent folder"),
         default=_get_root_folder,
     )
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name=_("reference ID")
+    )
+
     builtin = models.BooleanField(default=False)
 
     fields_to_check = ["name"]

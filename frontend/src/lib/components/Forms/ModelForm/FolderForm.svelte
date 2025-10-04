@@ -4,6 +4,7 @@
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import TextField from '../TextField.svelte';
 
 	// Props unused but referenced to avoid browser warnings because they're needed for enterprise Folderform
 
@@ -28,6 +29,8 @@
 		model
 	}: Props = $props();
 </script>
+
+<TextField {form} field="ref_id" label={m.refId()} />
 
 {#if importFolder}
 	<FileInput
