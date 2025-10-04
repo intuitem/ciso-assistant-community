@@ -3096,7 +3096,6 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-
 class UserGroupOrderingFilter(filters.OrderingFilter):
     """
     Custom ordering filter:
