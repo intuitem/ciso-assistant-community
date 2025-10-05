@@ -2285,6 +2285,7 @@
 	"dataWizardSelectRiskMatrix": "Select a Risk Matrix",
 	"dataWizardRiskAssessmentDescription": "Import risk scenarios with the associated controls",
 	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)",
+	"dataWizardElementaryActionDescription": "Import elementary actions for EBIOS RM",
 	"annualCostDisplay": "Annual cost",
 	"amortizationPeriod": "Amortization period (years)",
 	"amortizationPeriodHelpText": "Period over which we will amortize the build cost",
