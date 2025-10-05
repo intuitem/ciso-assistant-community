@@ -29,13 +29,13 @@
 	const translatedTree = $derived(
 		tree.map((item) => ({
 			...item,
-			name: safeTranslate(item.id),
+			name: item.name, // Use the name directly (already set by parent component)
 			children: item.children?.map((child) => ({
 				...child,
-				name: safeTranslate(child.id),
+				name: child.name, // Use the name directly (already translated if needed)
 				children: child.children?.map((grandChild: any) => ({
 					...grandChild,
-					name: grandChild.name // Don't translate leaf nodes
+					name: grandChild.name // Leaf nodes keep their names
 				}))
 			}))
 		}))
