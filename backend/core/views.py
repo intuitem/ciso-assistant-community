@@ -280,9 +280,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = SerializerFactory(
-            self.serializers_module, MODULE_PATHS.get("serializers", [])
+            self.serializers_module, *MODULE_PATHS.get("serializers", [])
         )
-        serializer_class = serializer_factory.get_serializer(
+        serializer_class = serializer_factory.get_serializer_class(
             self.model.__name__, kwargs.get("action", self.action)
         )
         logger.debug(
