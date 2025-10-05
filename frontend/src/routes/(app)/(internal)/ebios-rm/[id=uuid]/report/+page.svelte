@@ -164,7 +164,7 @@
 				{#each reportData.stakeholders as stakeholder}
 					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
 						<h3 class="text-lg font-semibold text-gray-800 mb-2">
-							{stakeholder.entity.str} ({safeTranslate(stakeholder.category)})
+							{stakeholder.entity.str} ({safeTranslate(stakeholder.category_raw)})
 						</h3>
 						<div class="grid grid-cols-2 gap-4 text-sm">
 							<div>
@@ -264,9 +264,16 @@
 						{#if attackPath.stakeholders.length > 0}
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-gray-700">{m.stakeholders()}:</span>
-								<span class="ml-2 text-gray-600"
-									>{attackPath.stakeholders.map((s) => s.str).join(', ')}</span
-								>
+								<span class="ml-2 text-gray-600">
+									{attackPath.stakeholders
+										.map((s) => {
+											const stakeholderData = reportData.stakeholders.find((st) => st.id === s.id);
+											return stakeholderData
+												? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+												: s.str;
+										})
+										.join(', ')}
+								</span>
 							</div>
 						{/if}
 						{#if attackPath.justification}
@@ -342,9 +349,16 @@
 						{#if opScenario.stakeholders.length > 0}
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-gray-700">{m.stakeholders()}:</span>
-								<span class="ml-2 text-gray-600"
-									>{opScenario.stakeholders.map((s) => s.str).join(', ')}</span
-								>
+								<span class="ml-2 text-gray-600">
+									{opScenario.stakeholders
+										.map((s) => {
+											const stakeholderData = reportData.stakeholders.find((st) => st.id === s.id);
+											return stakeholderData
+												? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+												: s.str;
+										})
+										.join(', ')}
+								</span>
 							</div>
 						{/if}
 						{#if opScenario.justification}

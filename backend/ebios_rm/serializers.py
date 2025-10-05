@@ -203,6 +203,7 @@ class StakeholderReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
 
     category = serializers.CharField(source="get_category_display")
+    category_raw = serializers.CharField(source="category", read_only=True)
     current_criticality = serializers.CharField(
         source="get_current_criticality_display"
     )
