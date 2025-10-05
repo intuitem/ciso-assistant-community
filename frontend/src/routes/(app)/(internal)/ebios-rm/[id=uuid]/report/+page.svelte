@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import type { PageData } from './$types';
@@ -42,7 +43,7 @@
 			</div>
 			<div>
 				<span class="font-semibold text-gray-700">{m.status()}:</span>
-				<span class="ml-2">{study.status || 'N/A'}</span>
+				<span class="ml-2">{study.status ? safeTranslate(study.status) : 'N/A'}</span>
 			</div>
 			<div>
 				<span class="font-semibold text-gray-700">{m.eta()}:</span>
@@ -72,7 +73,7 @@
 									class="ml-2 px-2 py-1 rounded"
 									style="background-color: {event.gravity.hexcolor}"
 								>
-									{event.gravity.name}
+									{safeTranslate(event.gravity.name)}
 								</span>
 							</div>
 							{#if event.assets.length > 0}
@@ -110,24 +111,24 @@
 				{#each reportData.ro_to_couples as roto}
 					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
 						<h3 class="text-lg font-semibold text-gray-800 mb-2">
-							{roto.risk_origin} - {roto.target_objective}
+							{safeTranslate(roto.risk_origin)} - {roto.target_objective}
 						</h3>
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
 							<div>
 								<span class="font-semibold text-gray-700">{m.motivation()}:</span>
-								<span class="ml-2">{roto.motivation}</span>
+								<span class="ml-2">{safeTranslate(roto.motivation)}</span>
 							</div>
 							<div>
 								<span class="font-semibold text-gray-700">{m.resources()}:</span>
-								<span class="ml-2">{roto.resources}</span>
+								<span class="ml-2">{safeTranslate(roto.resources)}</span>
 							</div>
 							<div>
 								<span class="font-semibold text-gray-700">{m.activity()}:</span>
-								<span class="ml-2">{roto.activity}</span>
+								<span class="ml-2">{safeTranslate(roto.activity)}</span>
 							</div>
 							<div>
 								<span class="font-semibold text-gray-700">{m.pertinence()}:</span>
-								<span class="ml-2">{roto.pertinence}</span>
+								<span class="ml-2">{safeTranslate(roto.pertinence)}</span>
 							</div>
 						</div>
 						{#if roto.feared_events.length > 0}
@@ -163,7 +164,7 @@
 				{#each reportData.stakeholders as stakeholder}
 					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
 						<h3 class="text-lg font-semibold text-gray-800 mb-2">
-							{stakeholder.entity.str} ({stakeholder.category})
+							{stakeholder.entity.str} ({safeTranslate(stakeholder.category)})
 						</h3>
 						<div class="grid grid-cols-2 gap-4 text-sm">
 							<div>
@@ -215,7 +216,7 @@
 									class="ml-2 px-2 py-1 rounded"
 									style="background-color: {scenario.gravity.hexcolor}"
 								>
-									{scenario.gravity.name}
+									{safeTranslate(scenario.gravity.name)}
 								</span>
 							</div>
 							{#if scenario.ref_id}
@@ -247,7 +248,7 @@
 						<div class="flex flex-wrap gap-4 text-sm">
 							<div>
 								<span class="font-semibold text-gray-700">{m.riskOrigin()}:</span>
-								<span class="ml-2">{attackPath.risk_origin}</span>
+								<span class="ml-2">{safeTranslate(attackPath.risk_origin)}</span>
 							</div>
 							<div>
 								<span class="font-semibold text-gray-700">{m.targetObjective()}:</span>
@@ -308,7 +309,7 @@
 									class="ml-2 px-2 py-1 rounded"
 									style="background-color: {opScenario.likelihood.hexcolor}"
 								>
-									{opScenario.likelihood.name}
+									{safeTranslate(opScenario.likelihood.name)}
 								</span>
 							</div>
 							<div>
@@ -317,7 +318,7 @@
 									class="ml-2 px-2 py-1 rounded"
 									style="background-color: {opScenario.gravity.hexcolor}"
 								>
-									{opScenario.gravity.name}
+									{safeTranslate(opScenario.gravity.name)}
 								</span>
 							</div>
 							<div>
@@ -326,7 +327,7 @@
 									class="ml-2 px-2 py-1 rounded"
 									style="background-color: {opScenario.risk_level.hexcolor || '#f9fafb'}"
 								>
-									{opScenario.risk_level.name}
+									{safeTranslate(opScenario.risk_level.name)}
 								</span>
 							</div>
 						</div>
