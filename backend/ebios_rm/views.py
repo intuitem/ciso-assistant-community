@@ -128,7 +128,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             StrategicScenarioReadSerializer,
             AttackPathReadSerializer,
             OperationalScenarioReadSerializer,
+            OperatingModeReadSerializer,
         )
+        from .models import OperatingMode
+        from core.models import RequirementAssessment
 
         # Get all related data
         feared_events = FearedEvent.objects.filter(
@@ -144,6 +147,55 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
 
+        # Get operating modes for all operational scenarios
+        operating_modes = OperatingMode.objects.filter(
+            operational_scenario__in=operational_scenarios
+        )
+
+        # Get compliance assessments with their result counts
+        compliance_assessments_data = []
+        for assessment in study.compliance_assessments.all():
+            result_counts = {}
+            for count, result in assessment.get_requirements_result_count():
+                result_counts[result] = count
+
+            compliance_assessments_data.append(
+                {
+                    "id": str(assessment.id),
+                    "name": assessment.name,
+                    "framework": assessment.framework.name
+                    if assessment.framework
+                    else None,
+                    "version": assessment.version,
+                    "eta": assessment.eta,
+                    "due_date": assessment.due_date,
+                    "status": assessment.status,
+                    "progress": assessment.get_progress(),
+                    "result_counts": result_counts,
+                }
+            )
+
+        # Get risk matrix data from last risk assessment
+        risk_matrix_data = None
+        if study.last_risk_assessment:
+            from core.serializers import (
+                RiskScenarioReadSerializer,
+                RiskMatrixReadSerializer,
+            )
+
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_matrix_data = {
+                "risk_assessment": {
+                    "id": str(study.last_risk_assessment.id),
+                    "name": study.last_risk_assessment.name,
+                    "version": study.last_risk_assessment.version,
+                },
+                "risk_matrix": RiskMatrixReadSerializer(study.risk_matrix).data,
+                "risk_scenarios": RiskScenarioReadSerializer(
+                    risk_scenarios, many=True
+                ).data,
+            }
+
         # Build comprehensive report data
         report_data = {
             "study": EbiosRMStudyReadSerializer(study).data,
@@ -157,6 +209,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             "operational_scenarios": OperationalScenarioReadSerializer(
                 operational_scenarios, many=True
             ).data,
+            "operating_modes": OperatingModeReadSerializer(
+                operating_modes, many=True
+            ).data,
+            "compliance_assessments": compliance_assessments_data,
+            "risk_matrix_data": risk_matrix_data,
         }
 
         return Response(report_data)
