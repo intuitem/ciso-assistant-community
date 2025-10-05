@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from './test-utils.js';
 import { navData } from '$lib/components/SideBar/navData.js';
+import { getSidebarVisibleItems } from '$lib/utils/sidebar-config.js';
 
 type TabContent = {
 	name: string;
@@ -22,8 +23,16 @@ export class SideBar {
 
 	constructor(page: Page) {
 		this.page = page;
+		// Get default feature flags (empty object uses all defaults)
+		const sideBarVisibleItems = getSidebarVisibleItems({});
+
+		// Filter nav items based on sideBarVisibleItems, same logic as SideBarNavigation.svelte
+		const filteredNavData = navData.items.filter(
+			(item) => sideBarVisibleItems[item.name] !== false
+		);
+
 		this.items = new Map(
-			navData.items.map((item) => [
+			filteredNavData.map((item) => [
 				item.name,
 				item.items.flatMap((item: TabContent) => ({ name: item.name, href: item.href }))
 			])

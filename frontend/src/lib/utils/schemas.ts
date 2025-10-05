@@ -535,7 +535,8 @@ export const EntitiesSchema = z.object({
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
-		.optional()
+		.optional(),
+	relationship: z.string().optional().array().optional()
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -635,11 +636,11 @@ export const processingSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
-	legal_basis: z.string(),
 	dpia_required: z.boolean().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
-	associated_controls: z.array(z.string().optional()).optional()
+	associated_controls: z.array(z.string().optional()).optional(),
+	assigned_to: z.string().uuid().optional().array().optional()
 });
 
 export const rightRequestSchema = z.object({
@@ -658,9 +659,37 @@ export const rightRequestSchema = z.object({
 	processings: z.array(z.string()).optional().default([])
 });
 
+export const dataBreachSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	assigned_to: z.string().uuid().optional().array().optional(),
+	discovered_on: z
+		.string()
+		.min(1)
+		.default(() => new Date().toISOString()),
+	breach_type: z.string(),
+	risk_level: z.string(),
+	status: z.string(),
+	affected_subjects_count: z.number().optional().default(0),
+	affected_processings: z.array(z.string()).optional().default([]),
+	affected_personal_data: z.array(z.string()).optional().default([]),
+	affected_personal_data_count: z.number().optional().default(0),
+	authorities: z.array(z.string()).optional().default([]),
+	authority_notified_on: z.string().optional(),
+	authority_notification_ref: z.string().optional(),
+	subjects_notified_on: z.string().optional(),
+	potential_consequences: z.string().optional(),
+	remediation_measures: z.array(z.string()).optional().default([]),
+	incident: z.string().optional(),
+	reference_link: z.string().url().optional().or(z.literal('')),
+	observation: z.string().optional()
+});
+
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	legal_basis: z.string(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
@@ -1161,7 +1190,7 @@ export const AccreditationSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	category: z.string().uuid(),
-	authority: z.string().optional(),
+	authority: z.string().uuid().optional().nullable(),
 	status: z.string().uuid(),
 	author: z.string().uuid().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -1205,6 +1234,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'escalation-thresholds': EscalationThresholdSchema,
 	processings: processingSchema,
 	'right-requests': rightRequestSchema,
+	'data-breaches': dataBreachSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
 	'data-subjects': dataSubjectSchema,
