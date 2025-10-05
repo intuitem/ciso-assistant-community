@@ -226,13 +226,18 @@
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
 			{#snippet action()}
-				<div>
+				<div class="flex flex-col gap-2">
 					<a
 						class="text-orange-600 hover:text-purple-600 font-medium"
 						href={`${page.url.pathname}/visual/`}
 						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded-sm">New</span><i
 							class="fa-solid fa-chart-diagram mr-2"
 						></i><span class="font-semibold">{m.visualAnalysis()}</span></a
+					>
+					<a
+						class="text-blue-600 hover:text-purple-600 font-medium"
+						href={`${page.url.pathname}/report/`}
+						><i class="fa-solid fa-file-lines mr-2"></i><span class="font-semibold">Report</span></a
 					>
 				</div>
 			{/snippet}

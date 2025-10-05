@@ -112,6 +112,55 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         study = get_object_or_404(EbiosRMStudy, id=pk)
         return Response(ebios_rm_visual_analysis(study))
 
+    @action(detail=True, name="Get EBIOS RM study report data", url_path="report-data")
+    def report_data(self, request, pk):
+        """
+        Endpoint to prepare comprehensive report data for an EBIOS RM study.
+        Returns all study attributes and associated objects in a structured format.
+        """
+        study = get_object_or_404(EbiosRMStudy, id=pk)
+
+        from .serializers import (
+            EbiosRMStudyReadSerializer,
+            FearedEventReadSerializer,
+            RoToReadSerializer,
+            StakeholderReadSerializer,
+            StrategicScenarioReadSerializer,
+            AttackPathReadSerializer,
+            OperationalScenarioReadSerializer,
+        )
+
+        # Get all related data
+        feared_events = FearedEvent.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        )
+        ro_to_couples = RoTo.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        ).with_pertinence()
+        stakeholders = Stakeholder.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        )
+        strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
+        attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
+        operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
+
+        # Build comprehensive report data
+        report_data = {
+            "study": EbiosRMStudyReadSerializer(study).data,
+            "feared_events": FearedEventReadSerializer(feared_events, many=True).data,
+            "ro_to_couples": RoToReadSerializer(ro_to_couples, many=True).data,
+            "stakeholders": StakeholderReadSerializer(stakeholders, many=True).data,
+            "strategic_scenarios": StrategicScenarioReadSerializer(
+                strategic_scenarios, many=True
+            ).data,
+            "attack_paths": AttackPathReadSerializer(attack_paths, many=True).data,
+            "operational_scenarios": OperationalScenarioReadSerializer(
+                operational_scenarios, many=True
+            ).data,
+        }
+
+        return Response(report_data)
+
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
