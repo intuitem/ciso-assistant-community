@@ -1448,6 +1448,7 @@
 	"tourAnalyticsDescription": "The overview section cover your main dashboards and analytics. <br/><b>Click on it.</b>",
 	"tourAnalyticsViewDescription": "View the aggregated analytics and reports here.",
 	"tourAssignmentsDescription": "or track your indivdual assignements and tasks here.",
+	"assessmentsPerStatus": "Assessments Per Status",
 	"tourHelpFinalTitle": "Help & Tour",
 	"tourHelpFinalDescription": "Remember, you can always restart the tour from here!",
 	"documentationScore": "Documentation score",

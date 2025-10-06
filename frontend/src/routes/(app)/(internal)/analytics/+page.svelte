@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
@@ -323,6 +324,31 @@
 						</section>
 					{:catch}
 						<div>Data load eror</div>
+					{/await}
+					{#await data.stream.combinedAssessmentsStatus}
+						<div class="col-span-3 lg:col-span-1">
+							<div>Loading assessments data...</div>
+							<LoadingSpinner />
+						</div>
+					{:then combinedAssessmentsStatus}
+						{#if combinedAssessmentsStatus}
+							<section class="bg-white rounded-lg p-4 border border-gray-200">
+								<GroupedBarChart
+									name="combined_assessments_status"
+									title={m.assessmentsPerStatus()}
+									categories={combinedAssessmentsStatus.status_labels.map((label) =>
+										safeTranslate(label)
+									)}
+									series={combinedAssessmentsStatus.series.map((s) => ({
+										name: safeTranslate(s.name),
+										data: s.data
+									}))}
+									height="h-80"
+								/>
+							</section>
+						{/if}
+					{:catch}
+						<div>Error loading assessments data</div>
 					{/await}
 					<section class="space-y-4">
 						<div

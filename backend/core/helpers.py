@@ -582,6 +582,55 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
+def combined_assessments_per_status(user: User):
+    """
+    Returns assessment counts grouped by status for all three assessment types:
+    RiskAssessment, ComplianceAssessment, and FindingsAssessment
+    """
+    from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+
+    # Get all unique statuses across all assessment types
+    # Using RiskAssessment.Status as they should all share the same status choices
+    all_statuses = ["undefined"] + [
+        choice[0] for choice in RiskAssessment.Status.choices
+    ]
+    status_labels = ["undefined"] + [
+        choice[1] for choice in RiskAssessment.Status.choices
+    ]
+
+    # Initialize result structure
+    result = {"statuses": all_statuses, "status_labels": status_labels, "series": []}
+
+    # Process each assessment type
+    assessment_types = [
+        ("complianceAssessments", ComplianceAssessment),
+        ("riskAssessments", RiskAssessment),
+        ("findingsAssessments", FindingsAssessment),
+    ]
+
+    for series_name, model in assessment_types:
+        # Get accessible objects
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, model
+        )
+        viewable_assessments = model.objects.filter(id__in=object_ids_view)
+
+        # Count by status
+        data = []
+        # Count undefined (null status)
+        undefined_count = viewable_assessments.filter(status__isnull=True).count()
+        data.append(undefined_count)
+
+        # Count each defined status
+        for status_choice in model.Status.choices:
+            count = viewable_assessments.filter(status=status_choice[0]).count()
+            data.append(count)
+
+        result["series"].append({"name": series_name, "data": data})
+
+    return result
+
+
 def applied_control_per_cur_risk(user: User):
     output = list()
     (

@@ -4488,6 +4488,16 @@ def get_metrics_view(request):
     return Response({"results": get_metrics(request.user, folder_id)})
 
 
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_combined_assessments_status_view(request):
+    """
+    API endpoint that returns combined assessment counts per status
+    for RiskAssessment, ComplianceAssessment, and FindingsAssessment
+    """
+    return Response({"results": combined_assessments_per_status(request.user)})
+
+
 # TODO: Add all the proper docstrings for the following list of functions
 
 

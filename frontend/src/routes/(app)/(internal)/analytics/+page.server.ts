@@ -32,6 +32,17 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return null;
 		}
 	};
+
+	const getCombinedAssessmentsStatus = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_combined_assessments_status/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('failed to fetch or parse combined assessments status:', error);
+			return null;
+		}
+	};
 	const getMetrics = async () => {
 		try {
 			const response = await fetch(`${BASE_API_URL}/get_metrics/`);
@@ -164,6 +175,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		stream: {
 			metrics: getMetrics(),
 			counters: getCounters(),
+			combinedAssessmentsStatus: getCombinedAssessmentsStatus(),
 			operationsAnalytics: getOperationsAnalytics()
 		}
 	};
