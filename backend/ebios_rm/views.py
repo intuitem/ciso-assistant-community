@@ -153,6 +153,75 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             operational_scenario__in=operational_scenarios
         )
 
+        # Build graph data for each operating mode
+        def build_mode_graph(mo):
+            """Build graph data for a single operating mode"""
+            nodes = []
+            links = []
+            groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
+            panels = {
+                0: "reconnaissance",
+                1: "initialAccess",
+                2: "discovery",
+                3: "exploitation",
+            }
+            panel_nodes = {panel: [] for panel in panels.values()}
+
+            # Collect all elementary actions that are part of kill chain steps
+            kill_chain_ea_ids = set()
+            for step in mo.kill_chain_steps.all():
+                kill_chain_ea_ids.add(step.elementary_action.id)
+                # Also add antecedents
+                for ant in step.antecedents.all():
+                    kill_chain_ea_ids.add(ant.id)
+
+            # Create nodes only for elementary actions in the kill chain
+            kill_chain_eas = mo.elementary_actions.filter(
+                id__in=kill_chain_ea_ids
+            ).order_by("attack_stage")
+
+            for ea in kill_chain_eas:
+                stage = ea.attack_stage
+                entry = {"id": str(ea.id), "label": ea.name, "group": groups.get(stage)}
+                if ea.icon:
+                    entry["icon"] = ea.icon_fa_hex
+                nodes.append(entry)
+                panel_name = panels.get(stage)
+                if panel_name:
+                    panel_nodes[panel_name].append(str(ea.id))
+
+            # Build links based on kill chain steps
+            for step in mo.kill_chain_steps.all().order_by(
+                "elementary_action__attack_stage"
+            ):
+                ea = step.elementary_action
+                if step.antecedents.exists():
+                    target = str(ea.id)
+                    if step.logic_operator:
+                        # Get the stage from the first antecedent for panel placement
+                        antecedent_stage = step.antecedents.first().attack_stage
+                        nodes.append(
+                            {
+                                "id": str(step.id),
+                                "icon": step.logic_operator,
+                                "shape": "circle",
+                                "size": 45,
+                            }
+                        )
+                        # Add logic operator to the same panel as its antecedents
+                        panel_name = panels.get(antecedent_stage)
+                        if panel_name:
+                            panel_nodes[panel_name].append(str(step.id))
+                        target = str(step.id)
+                        links.append({"source": str(step.id), "target": str(ea.id)})
+                    for ant in step.antecedents.all().order_by("attack_stage"):
+                        links.append({"source": str(ant.id), "target": target})
+
+            # Only return graph data if there are nodes
+            if nodes:
+                return {"nodes": nodes, "links": links, "panelNodes": panel_nodes}
+            return None
+
         # Get compliance assessments with their result counts
         compliance_assessments_data = []
         for assessment in study.compliance_assessments.all():
@@ -200,6 +269,63 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Get ecosystem radar data
         radar_data = ecosystem_radar_chart_data(stakeholders)
 
+        # Get action plans from compliance assessments
+        from core.serializers import AppliedControlReadSerializer
+        from core.models import AppliedControl
+
+        compliance_action_plans = []
+        for assessment in study.compliance_assessments.all():
+            requirement_assessments = assessment.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            applied_controls = (
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments
+                )
+                .distinct()
+                .order_by("eta")
+            )
+            if applied_controls.exists():
+                compliance_action_plans.append(
+                    {
+                        "assessment_id": str(assessment.id),
+                        "assessment_name": assessment.name,
+                        "framework": (
+                            assessment.framework.name if assessment.framework else None
+                        ),
+                        "applied_controls": AppliedControlReadSerializer(
+                            applied_controls, many=True
+                        ).data,
+                    }
+                )
+
+        # Get action plan from risk assessment
+        risk_action_plan = None
+        if study.last_risk_assessment:
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_applied_controls = (
+                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios)
+                .distinct()
+                .order_by("eta")
+            )
+            if risk_applied_controls.exists():
+                risk_action_plan = {
+                    "risk_assessment_id": str(study.last_risk_assessment.id),
+                    "risk_assessment_name": study.last_risk_assessment.name,
+                    "applied_controls": AppliedControlReadSerializer(
+                        risk_applied_controls, many=True
+                    ).data,
+                }
+
+        # Serialize operating modes with graph data
+        operating_modes_data = []
+        for mode in operating_modes:
+            mode_data = OperatingModeReadSerializer(mode).data
+            graph_data = build_mode_graph(mode)
+            if graph_data:
+                mode_data["graph"] = graph_data
+            operating_modes_data.append(mode_data)
+
         # Build comprehensive report data
         report_data = {
             "study": EbiosRMStudyReadSerializer(study).data,
@@ -213,12 +339,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             "operational_scenarios": OperationalScenarioReadSerializer(
                 operational_scenarios, many=True
             ).data,
-            "operating_modes": OperatingModeReadSerializer(
-                operating_modes, many=True
-            ).data,
+            "operating_modes": operating_modes_data,
             "compliance_assessments": compliance_assessments_data,
             "risk_matrix_data": risk_matrix_data,
             "radar": radar_data,
+            "compliance_action_plans": compliance_action_plans,
+            "risk_action_plan": risk_action_plan,
         }
 
         return Response(report_data)

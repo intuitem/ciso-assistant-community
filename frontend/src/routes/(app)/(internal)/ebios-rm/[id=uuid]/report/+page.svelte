@@ -7,6 +7,7 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
+	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 
@@ -710,6 +711,22 @@
 													</div>
 												{/if}
 											</div>
+											<!-- Operating Mode Graph -->
+											{#if mode.graph}
+												<div class="mt-4 pt-4 border-t border-gray-200">
+													<h5 class="text-xs font-semibold text-gray-700 mb-2">
+														{m.killChain()}
+													</h5>
+													<div class="bg-gray-50 rounded p-2">
+														<GraphComponent
+															data={{ nodes: mode.graph.nodes, links: mode.graph.links }}
+															panelNodes={mode.graph.panelNodes}
+															linkFlow={false}
+															height="400px"
+														/>
+													</div>
+												</div>
+											{/if}
 										</div>
 									{/each}
 								</div>
@@ -824,6 +841,163 @@
 					/>
 				</div>
 			</div>
+		</section>
+	{/if}
+
+	<!-- Treatment Plan Section -->
+	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan}
+		<section class="mb-6">
+			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+				{m.treatmentPlan()}
+			</h2>
+
+			<!-- Compliance Assessment Action Plans -->
+			{#if reportData.compliance_action_plans && reportData.compliance_action_plans.length > 0}
+				<div class="space-y-6">
+					{#each reportData.compliance_action_plans as actionPlan}
+						{#if actionPlan.applied_controls.length > 0}
+							<div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+								<h3 class="text-lg font-semibold text-blue-900 mb-3">
+									<i class="fa-solid fa-clipboard-check mr-2"></i>
+									{actionPlan.assessment_name}
+									{#if actionPlan.framework}
+										<span class="text-sm font-normal text-blue-700">
+											({actionPlan.framework})
+										</span>
+									{/if}
+								</h3>
+								<div class="overflow-x-auto">
+									<table class="min-w-full divide-y divide-gray-200 bg-white rounded border">
+										<thead class="bg-gray-50">
+											<tr>
+												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+													>{m.name()}</th
+												>
+												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+													>{m.priority()}</th
+												>
+												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+													>{m.status()}</th
+												>
+												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+													>{m.owner()}</th
+												>
+												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+													>{m.eta()}</th
+												>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-gray-200">
+											{#each actionPlan.applied_controls as control}
+												<tr class="hover:bg-gray-50">
+													<td class="px-3 py-2 text-sm text-gray-900">{control.name}</td>
+													<td class="px-3 py-2 text-sm">
+														{#if control.priority}
+															<span class="px-2 py-1 rounded text-xs font-medium"
+																>{safeTranslate(control.priority)}</span
+															>
+														{:else}
+															--
+														{/if}
+													</td>
+													<td class="px-3 py-2 text-sm">
+														{#if control.status}
+															<span class="px-2 py-1 rounded text-xs font-medium"
+																>{safeTranslate(control.status)}</span
+															>
+														{:else}
+															--
+														{/if}
+													</td>
+													<td class="px-3 py-2 text-sm">
+														{#if control.owner}
+															{control.owner.str}
+														{:else}
+															--
+														{/if}
+													</td>
+													<td class="px-3 py-2 text-sm">
+														{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+													</td>
+												</tr>
+											{/each}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			{/if}
+
+			<!-- Risk Assessment Action Plan -->
+			{#if reportData.risk_action_plan && reportData.risk_action_plan.applied_controls.length > 0}
+				<div class="border border-red-200 rounded-lg p-4 bg-red-50 mt-6">
+					<h3 class="text-lg font-semibold text-red-900 mb-3">
+						<i class="fa-solid fa-shield-halved mr-2"></i>
+						{reportData.risk_action_plan.risk_assessment_name}
+						<span class="text-sm font-normal text-red-700">({m.riskAssessment()})</span>
+					</h3>
+					<div class="overflow-x-auto">
+						<table class="min-w-full divide-y divide-gray-200 bg-white rounded border">
+							<thead class="bg-gray-50">
+								<tr>
+									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+										>{m.name()}</th
+									>
+									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+										>{m.priority()}</th
+									>
+									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+										>{m.status()}</th
+									>
+									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+										>{m.owner()}</th
+									>
+									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+										>{m.eta()}</th
+									>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-gray-200">
+								{#each reportData.risk_action_plan.applied_controls as control}
+									<tr class="hover:bg-gray-50">
+										<td class="px-3 py-2 text-sm text-gray-900">{control.name}</td>
+										<td class="px-3 py-2 text-sm">
+											{#if control.priority}
+												<span class="px-2 py-1 rounded text-xs font-medium"
+													>{safeTranslate(control.priority)}</span
+												>
+											{:else}
+												--
+											{/if}
+										</td>
+										<td class="px-3 py-2 text-sm">
+											{#if control.status}
+												<span class="px-2 py-1 rounded text-xs font-medium"
+													>{safeTranslate(control.status)}</span
+												>
+											{:else}
+												--
+											{/if}
+										</td>
+										<td class="px-3 py-2 text-sm">
+											{#if control.owner}
+												{control.owner.str}
+											{:else}
+												--
+											{/if}
+										</td>
+										<td class="px-3 py-2 text-sm">
+											{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			{/if}
 		</section>
 	{/if}
 </div>
