@@ -6,6 +6,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 
@@ -335,6 +336,35 @@
 						{/if}
 					</div>
 				{/each}
+			</div>
+		</section>
+	{/if}
+
+	<!-- Ecosystem Radar Section -->
+	{#if reportData.stakeholders.length > 0 && reportData.radar}
+		<section class="mb-8">
+			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+				{m.ecosystemRadar()}
+			</h2>
+			<div class="bg-white flex gap-4">
+				<div class="w-1/2">
+					<EcosystemRadarChart
+						title={m.current()}
+						name="c_ecosystem_report"
+						data={reportData.radar.current}
+						classesContainer="w-full"
+						height="h-[500px]"
+					/>
+				</div>
+				<div class="w-1/2">
+					<EcosystemRadarChart
+						title={m.residual()}
+						name="r_ecosystem_report"
+						data={reportData.radar.residual}
+						classesContainer="w-full"
+						height="h-[500px]"
+					/>
+				</div>
 			</div>
 		</section>
 	{/if}

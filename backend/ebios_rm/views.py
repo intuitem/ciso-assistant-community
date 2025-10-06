@@ -132,6 +132,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
         from .models import OperatingMode
         from core.models import RequirementAssessment
+        from .helpers import ecosystem_radar_chart_data
 
         # Get all related data
         feared_events = FearedEvent.objects.filter(
@@ -196,6 +197,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 ).data,
             }
 
+        # Get ecosystem radar data
+        radar_data = ecosystem_radar_chart_data(stakeholders)
+
         # Build comprehensive report data
         report_data = {
             "study": EbiosRMStudyReadSerializer(study).data,
@@ -214,6 +218,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             ).data,
             "compliance_assessments": compliance_assessments_data,
             "risk_matrix_data": risk_matrix_data,
+            "radar": radar_data,
         }
 
         return Response(report_data)
