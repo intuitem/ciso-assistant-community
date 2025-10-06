@@ -11,6 +11,7 @@
 		form?: SuperForm<Record<string, any>>;
 		disabled?: boolean;
 		initialValue?: any;
+		nullable?: boolean;
 		onChange?: (value: string) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any;
@@ -28,6 +29,7 @@
 		form,
 		disabled = false,
 		initialValue,
+		nullable = false,
 		onChange = () => {},
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
@@ -54,8 +56,6 @@
 		if (value) {
 			$value = internalValue;
 		}
-		const input = radioInputs[internalValue];
-		if (input) input.checked = true;
 	});
 
 	$effect(() => {
@@ -89,6 +89,16 @@
 							class="invisible"
 							id={option.id}
 							bind:this={radioInputs[option[key]]}
+							onclick={(event) => {
+								if (!nullable) return;
+								if (internalValue === option[key]) {
+									internalValue = null;
+									onChange(internalValue);
+								} else {
+									// This makes it possible to reselect an unselected radio input in svelte.
+									event.target?.dispatchEvent(new Event('change', { bubbles: true }));
+								}
+							}}
 							onchange={(e) => {
 								internalValue = option[key];
 								onChange(internalValue);
