@@ -987,6 +987,17 @@ class UserReadSerializer(BaseModelSerializer):
         ]
 
 
+class UserPermsOnFolderSerializer(BaseModelSerializer):
+    permissions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "is_active", "permissions"]
+
+    def get_permissions(self, obj):
+        return self.context["permissions"].get(obj.id, [])
+
+
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
 

@@ -2534,6 +2534,34 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
+class UserPermsOnFolderList(generics.ListAPIView):
+    filterset_fields = {}
+    search_fields = ["email"]
+    serializer_class = UserPermsOnFolderSerializer
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering_fields = "__all__"
+    ordering = ["email"]
+
+    def get_queryset(self):
+        qs = User.objects.filter(id__in=self.get_serializer_context()["permissions"])
+        return qs
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        try:
+            folder = Folder.objects.get(id=self.kwargs["pk"])
+        except Folder.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        context.update({"pk": self.kwargs["pk"]})
+        context.update({"permissions": folder.get_user_permissions()})
+        return context
+
+
 class ComplianceAssessmentActionPlanList(ActionPlanList):
     serializer_class = ComplianceAssessmentActionPlanSerializer
 
@@ -3355,11 +3383,6 @@ class FolderViewSet(BaseModelViewSet):
             folders_list.append(entry)
 
         return Response({"name": "Global", "children": folders_list})
-
-    @action(detail=True, methods=["get"])
-    def users(self, request, pk):
-        instance = self.model.objects.get(id=pk)
-        return Response(instance.get_user_permissions())
 
     @action(detail=False, methods=["get"])
     def ids(self, request):

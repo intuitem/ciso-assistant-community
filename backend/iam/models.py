@@ -218,7 +218,7 @@ class Folder(NameDescriptionMixin):
 
         direct_perms_qs = (
             RoleAssignment.objects.filter(role_assignment_filter, user__isnull=False)
-            .values(email=F("user__email"), permission=F("role__permissions__codename"))
+            .values(user_pk=F("user__id"), permission=F("role__permissions__codename"))
             .order_by()
         )
 
@@ -229,7 +229,7 @@ class Folder(NameDescriptionMixin):
                 role_assignment_filter, user_group__isnull=False
             )
             .values(
-                email=F("user_group__user__email"),
+                user_pk=F("user_group__user__id"),
                 permission=F("role__permissions__codename"),
             )
             .order_by()
@@ -242,8 +242,8 @@ class Folder(NameDescriptionMixin):
         for item in all_permissions_qs:
             # Filter out nulls that can occur if a role has no permissions
             # or a group has no users.
-            if item.get("email") and item.get("permission"):
-                user_permissions[item["email"]].append(item["permission"])
+            if item.get("user_pk") and item.get("permission"):
+                user_permissions[item["user_pk"]].append(item["permission"])
 
         return dict(user_permissions)
 
