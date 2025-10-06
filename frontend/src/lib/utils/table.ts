@@ -1995,7 +1995,8 @@ export const listViewFields = {
 			impact: undefined,
 			likelihood: undefined,
 			gravity: undefined
-		}
+		},
+		body: ['users']
 	}
 } as const satisfies ListViewFieldsConfig;
 
