@@ -202,6 +202,25 @@
 		modalStore.trigger(modal);
 	}
 
+	function getReverseForeignKeyEndpoint({
+		model,
+		field,
+		id,
+		detail,
+		endpointUrl
+	}: {
+		model: ModelMapEntry;
+		field: string;
+		id: string;
+		detail: boolean;
+		endpointUrl?: string;
+	}) {
+		if (endpointUrl?.startsWith('./')) {
+			return `/${model.urlModel}/${id}/${endpointUrl.slice(2)}`;
+		}
+		return `/${model.urlModel}?${field}=${id}`;
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -612,13 +631,21 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = getListViewFields({
-								key: urlmodel,
-								featureFlags: page.data?.featureflags
-							}).body.filter((v) => v !== field.field)}
+							{@const fieldsToUse =
+								field?.tableFields ||
+								getListViewFields({
+									key: urlmodel,
+									featureFlags: page.data?.featureflags
+								}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+									baseEndpoint={getReverseForeignKeyEndpoint({
+										model: data.model,
+										field: field.field,
+										id: data.data.id,
+										detail: true,
+										endpointUrl: field.endpointUrl
+									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
 									disableDelete={disableDelete || model.disableDelete}
