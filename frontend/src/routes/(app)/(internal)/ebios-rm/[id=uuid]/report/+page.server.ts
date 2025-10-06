@@ -7,7 +7,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
+	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object`).then((res) =>
+		res.json()
+	);
+
 	return {
-		reportData: data
+		reportData: data,
+		useBubbles: interface_settings.interface_agg_scenario_matrix
 	};
 };

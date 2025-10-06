@@ -18,6 +18,7 @@
 
 	const { reportData } = data;
 	const study = reportData.study;
+	const useBubbles = data.useBubbles;
 
 	// Build risk cluster for current risk level
 	const buildRiskCluster = (
@@ -544,6 +545,152 @@
 		</section>
 	{/if}
 
+	<!-- Operational Scenarios Section -->
+	{#if reportData.operational_scenarios.length > 0}
+		<section class="mb-8">
+			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+				{m.operationalScenarios()}
+			</h2>
+			<div class="space-y-6">
+				{#each reportData.operational_scenarios as opScenario}
+					{@const opModes =
+						reportData.operating_modes?.filter(
+							(om) => om.operational_scenario.id === opScenario.id
+						) || []}
+					<div class="border-2 border-yellow-200 rounded-lg p-4 bg-yellow-50">
+						<div class="mb-4">
+							<h3 class="text-lg font-semibold text-yellow-900 mb-2">
+								<i class="fa-solid fa-gears mr-2"></i>{opScenario.ref_id || m.operationalScenario()}
+							</h3>
+							{#if opScenario.attack_path}
+								<div class="text-sm mb-3">
+									<span class="font-semibold text-gray-700">{m.attackPath()}:</span>
+									<span class="ml-2 text-gray-700">{opScenario.attack_path.name}</span>
+								</div>
+							{/if}
+							{#if opScenario.operating_modes_description}
+								<div class="text-sm mb-3">
+									<span class="font-semibold text-gray-700">{m.operatingModesDescription()}:</span>
+									<p class="ml-2 text-gray-700 mt-1">{opScenario.operating_modes_description}</p>
+								</div>
+							{/if}
+							<div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+								<div>
+									<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
+									<span
+										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										style="background-color: {opScenario.likelihood.hexcolor}"
+									>
+										{safeTranslate(opScenario.likelihood.name)}
+									</span>
+								</div>
+								<div>
+									<span class="font-semibold text-gray-700">{m.gravity()}:</span>
+									<span
+										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										style="background-color: {opScenario.gravity.hexcolor}"
+									>
+										{safeTranslate(opScenario.gravity.name)}
+									</span>
+								</div>
+								<div>
+									<span class="font-semibold text-gray-700">{m.riskLevel()}:</span>
+									<span
+										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										style="background-color: {opScenario.risk_level.hexcolor || '#gray'}"
+									>
+										{safeTranslate(opScenario.risk_level.name)}
+									</span>
+								</div>
+							</div>
+							{#if opScenario.threats && opScenario.threats.length > 0}
+								<div class="mt-3 text-sm">
+									<span class="font-semibold text-gray-700">{m.threats()}:</span>
+									<span class="ml-2 text-gray-700">
+										{opScenario.threats.map((t) => t.str).join(', ')}
+									</span>
+								</div>
+							{/if}
+							{#if opScenario.stakeholders && opScenario.stakeholders.length > 0}
+								<div class="mt-2 text-sm">
+									<span class="font-semibold text-gray-700">{m.stakeholders()}:</span>
+									<span class="ml-2 text-gray-700">
+										{opScenario.stakeholders
+											.map((s) => {
+												const stakeholderData = reportData.stakeholders.find(
+													(st) => st.id === s.id
+												);
+												return stakeholderData
+													? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+													: s.str;
+											})
+											.join(', ')}
+									</span>
+								</div>
+							{/if}
+							{#if opScenario.justification}
+								<div class="mt-2 text-sm">
+									<span class="font-semibold text-gray-700">{m.justification()}:</span>
+									<p class="ml-2 text-gray-600 mt-1">{opScenario.justification}</p>
+								</div>
+							{/if}
+						</div>
+
+						<!-- Operating Modes -->
+						{#if opModes.length > 0}
+							<div class="mt-4 pt-4 border-t border-yellow-300">
+								<h4 class="text-md font-semibold text-gray-800 mb-3">
+									<i class="fa-solid fa-cog mr-2"></i>{m.operatingModes()}
+								</h4>
+								<div class="space-y-3">
+									{#each opModes as mode}
+										<div class="bg-white border border-gray-200 rounded p-3">
+											<div class="flex items-start gap-2 mb-2">
+												{#if mode.is_selected}
+													<span class="text-green-600 mt-0.5">
+														<i class="fa-solid fa-check-circle"></i>
+													</span>
+												{:else}
+													<span class="text-gray-400 mt-0.5">
+														<i class="fa-regular fa-circle"></i>
+													</span>
+												{/if}
+												<div class="flex-1">
+													<div class="font-medium text-gray-900 text-sm">{mode.name}</div>
+													{#if mode.description}
+														<p class="text-gray-600 text-xs mt-1">{mode.description}</p>
+													{/if}
+												</div>
+											</div>
+											<div class="flex flex-wrap gap-3 ml-6">
+												<div class="text-xs">
+													<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
+													<span
+														class="ml-1 px-2 py-0.5 rounded"
+														style="background-color: {mode.likelihood.hexcolor}"
+													>
+														{safeTranslate(mode.likelihood.name)}
+													</span>
+												</div>
+												{#if mode.elementary_actions.length > 0}
+													<div class="text-xs">
+														<span class="font-semibold text-gray-700">{m.elementaryActions()}:</span
+														>
+														<span class="ml-1 text-gray-600">{mode.elementary_actions.length}</span>
+													</div>
+												{/if}
+											</div>
+										</div>
+									{/each}
+								</div>
+							</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</section>
+	{/if}
+
 	<!-- Risk Matrix Section -->
 	{#if reportData.risk_matrix_data}
 		{@const riskMatrix = reportData.risk_matrix_data.risk_matrix}
@@ -632,7 +779,7 @@
 						matrixName="current"
 						data={currentCluster}
 						dataItemComponent={RiskScenarioItem}
-						useBubbles={true}
+						{useBubbles}
 					/>
 				</div>
 				<div>
@@ -643,7 +790,7 @@
 						data={residualCluster}
 						dataItemComponent={RiskScenarioItem}
 						showLegend={true}
-						useBubbles={true}
+						{useBubbles}
 					/>
 				</div>
 			</div>
