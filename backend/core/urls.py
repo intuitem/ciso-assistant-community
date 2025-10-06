@@ -122,7 +122,9 @@ urlpatterns = [
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
+    path("pmbok/", include("pmbok.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
+    path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),
     path(
         "evidences/<uuid:pk>/upload/",
@@ -158,6 +160,10 @@ urlpatterns = [
     path(
         "compliance-assessments/<uuid:pk>/action-plan/",
         ComplianceAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "compliance-assessments/<uuid:pk>/evidences-list/",
+        ComplianceAssessmentEvidenceList.as_view(),
     ),
     path(
         "risk-assessments/<uuid:pk>/action-plan/",

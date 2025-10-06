@@ -8,6 +8,9 @@
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
+	import IncidentMonthlyChart from '$lib/components/Chart/IncidentMonthlyChart.svelte';
+	import ExceptionSankeyChart from '$lib/components/Chart/ExceptionSankeyChart.svelte';
+	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
 	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
@@ -86,6 +89,7 @@
 		<Tabs.Control value="governance">{m.governance()}</Tabs.Control>
 		<Tabs.Control value="risk">{m.risk()}</Tabs.Control>
 		<Tabs.Control value="compliance">{m.compliance()}</Tabs.Control>
+		<Tabs.Control value="operations">{m.operations()}</Tabs.Control>
 	{/snippet}
 	{#snippet content()}
 		{#key group}
@@ -679,11 +683,196 @@
 									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
 								>
 									<i class="fas fa-plus text-sm"></i>
-									Create Assessment
+									{m.createAssessment()}
 								</a>
 							</div>
 						{/if}
 					</section>
+				</Tabs.Panel>
+				<Tabs.Panel value="operations">
+					{#await data.stream.operationsAnalytics}
+						<div class="col-span-3 lg:col-span-1">
+							<div>Refreshing data ..</div>
+							<LoadingSpinner />
+						</div>
+					{:then operationsAnalytics}
+						{#if operationsAnalytics}
+							<section class="space-y-6">
+								<!-- First Row: Applied Controls Sunburst -->
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.appliedControlsDistribution()}
+									</h3>
+									<div class="h-96">
+										{#if operationsAnalytics.applied_controls_sunburst && operationsAnalytics.applied_controls_sunburst.length > 0}
+											<SunburstChart
+												name="applied_controls_sunburst"
+												title=""
+												data={operationsAnalytics.applied_controls_sunburst}
+											/>
+										{:else}
+											<div class="flex items-center justify-center h-full text-gray-500">
+												<p>No applied controls data available</p>
+											</div>
+										{/if}
+									</div>
+								</div>
+
+								<!-- Second Row: Incident Summary Cards -->
+								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
+									<!-- Summary Cards (full width) -->
+									<div class="xl:col-span-1">
+										<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
+											<SimpleCard
+												count={operationsAnalytics.summary_stats.total_incidents}
+												label={m.totalIncidents()}
+												href="/incidents/"
+												emphasis={true}
+											/>
+											<SimpleCard
+												count={operationsAnalytics.summary_stats.incidents_this_month}
+												label={m.incidentsThisMonth()}
+												href="/incidents/"
+												emphasis={true}
+											/>
+											<SimpleCard
+												count={operationsAnalytics.summary_stats.open_incidents}
+												label={m.openIncidents()}
+												href="/incidents/?status=new&status=ongoing&status=resolved"
+												emphasis={true}
+											/>
+										</CardGroup>
+									</div>
+								</div>
+
+								<!-- Third Row: Severity Breakdown and Qualifications Radar -->
+								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+									<!-- Severity Breakdown Chart -->
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.incidentSeverityBreakdown()}
+										</h3>
+										<div class="h-80">
+											<DonutChart
+												name="incident_severity"
+												values={operationsAnalytics.severity_breakdown}
+											/>
+										</div>
+									</div>
+
+									<!-- Qualifications Radar Chart -->
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.incidentQualificationsRadar()}
+										</h3>
+										<div class="h-80">
+											{#if operationsAnalytics.qualifications_breakdown.labels.length > 0}
+												<RadarChart
+													name="incident_qualifications"
+													title=""
+													labels={operationsAnalytics.qualifications_breakdown.labels}
+													values={operationsAnalytics.qualifications_breakdown.values}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-gray-500">
+													<p>{m.noQualificationsData()}</p>
+												</div>
+											{/if}
+										</div>
+									</div>
+								</div>
+
+								<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
+								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+									<!-- Monthly Incident Metrics (3/5 of width) -->
+									<div class="xl:col-span-3">
+										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+											<h3 class="text-lg font-semibold text-gray-900 mb-4">
+												{m.monthlyIncidentMetrics()}
+											</h3>
+											<div class="h-80">
+												<IncidentMonthlyChart
+													name="incident_monthly"
+													title=""
+													months={operationsAnalytics.monthly_metrics.months}
+													monthlyCount={operationsAnalytics.monthly_metrics.monthly_counts}
+													cumulativeCount={operationsAnalytics.monthly_metrics.cumulative_counts}
+												/>
+											</div>
+										</div>
+									</div>
+
+									<!-- Detection Breakdown Chart (2/5 of width) -->
+									<div class="xl:col-span-2">
+										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+											<h3 class="text-lg font-semibold text-gray-900 mb-4">
+												{m.incidentDetectionBreakdown()}
+											</h3>
+											<div class="h-80">
+												<DonutChart
+													name="incident_detection"
+													values={operationsAnalytics.incident_detection_breakdown}
+													colors={['#3B82F6', '#EF4444']}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Fifth Row: Security Exception Flow -->
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.securityExceptionFlow()}
+									</h3>
+									<div class="h-80">
+										{#if operationsAnalytics.exception_sankey.nodes.length > 0}
+											<ExceptionSankeyChart
+												name="exception_sankey"
+												title=""
+												nodes={operationsAnalytics.exception_sankey.nodes}
+												links={operationsAnalytics.exception_sankey.links}
+											/>
+										{:else}
+											<div class="flex items-center justify-center h-full text-gray-500">
+												<p>{m.noExceptionData()}</p>
+											</div>
+										{/if}
+									</div>
+								</div>
+							</section>
+						{:else}
+							<div
+								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+							>
+								<div class="text-gray-400 mb-4">
+									<i class="fas fa-exclamation-triangle text-6xl"></i>
+								</div>
+								<div class="text-gray-600">
+									<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
+									<p class="text-sm text-gray-500">{m.createIncidents()}</p>
+								</div>
+								<a
+									href="/incidents"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								>
+									<i class="fas fa-plus text-sm"></i>
+									{m.createIncident()}
+								</a>
+							</div>
+						{/if}
+					{:catch error}
+						<div
+							class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-dashed border-red-300"
+						>
+							<div class="text-red-400 mb-4">
+								<i class="fas fa-exclamation-triangle text-6xl"></i>
+							</div>
+							<div class="text-red-600">
+								<p class="text-xl font-semibold mb-2">Error loading operations data</p>
+								<p class="text-sm text-red-500">Please try refreshing the page</p>
+							</div>
+						</div>
+					{/await}
 				</Tabs.Panel>
 			</div>
 		{/key}

@@ -20,7 +20,6 @@
 	let attachment: Attachment | undefined = $state();
 
 	const fetchAttachment = async () => {
-		console.log(meta);
 		const res = await fetch(
 			`/${meta.evidence ? 'evidence-revisions' : 'evidences'}/${meta.id}/attachment`
 		);
@@ -47,14 +46,53 @@
 			attachment = undefined;
 		}
 	});
+
+	let display = $state(false);
+	const wrapperClasses =
+		'fixed w-full h-full inset-0 flex justify-center items-center backdrop-blur-sm backdrop-brightness-40 z-999';
+	const imageElementClasses = 'w-[90%] h-[90%]';
+	const embedElementClasses = 'w-[50%] h-[90%]';
 </script>
+
+{#snippet displayPreview()}
+	<div
+		role="button"
+		tabindex="0"
+		class={display ? wrapperClasses : 'relative cursor-zoom-in'}
+		onclick={(event) => {
+			display = !display;
+			event.stopPropagation();
+		}}
+		onkeydown={(event) => {
+			if ((display && event.key === 'Escape') || event.key === 'Tab') {
+				display = !display;
+			}
+		}}
+	>
+		{#if attachment.type.startsWith('image')}
+			<img
+				src={attachment.url}
+				alt="attachment"
+				class="h-24 object-contain {display ? imageElementClasses : ''}"
+			/>
+		{:else if attachment.type === 'application/pdf'}
+			{#if !display}
+				<!-- This div prevents the <embed> element from stopping the click event propagation. -->
+				<div class="absolute w-full h-full top-0 left-0"></div>
+			{/if}
+			<embed
+				src={attachment.url}
+				type="application/pdf"
+				class="h-24 object-contain {display ? embedElementClasses : ''}"
+			/>
+		{/if}
+	</div>
+{/snippet}
 
 {#if cell}
 	{#if attachment}
-		{#if attachment.type.startsWith('image')}
-			<img src={attachment.url} alt="attachment" class="h-24" />
-		{:else if attachment.type === 'application/pdf'}
-			<embed src={attachment.url} type="application/pdf" class="h-24" />
+		{#if attachment.type.startsWith('image') || attachment.type === 'application/pdf'}
+			{@render displayPreview(attachment)}
 		{:else if !attachment.fileExists}
 			<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
 		{:else}

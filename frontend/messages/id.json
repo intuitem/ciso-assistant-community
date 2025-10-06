@@ -1155,5 +1155,7 @@
 	"securityObjectiveScale": "Skala properti keamanan",
 	"securityObjectiveScaleHelpText": "Pilih skala untuk properti keamanan Anda (1 hingga 4 secara default)",
 	"actor": "Pelaku",
-	"action": "Aksi"
+	"action": "Aksi",
+	"viewMore": "Lihat lebih banyak",
+	"viewLess": "Lihat lebih sedikit"
 }

@@ -7,7 +7,7 @@
                 <p class="-rotate-90">{% trans "impact" %}</p>
             </div>
             <table class="w-3/4 mt-10 ml-13">
-                {% for row in risk_matrix.render_grid_as_colors %}
+                {% for row in risk_matrix.render_transposed_grid_as_colors %}
                     {% with row_index=forloop.revcounter0 %}
                         <tr>
                             <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
