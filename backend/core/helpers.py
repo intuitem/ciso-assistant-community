@@ -807,38 +807,42 @@ def risks_per_perimeter_groups(user: User):
 
 
 def get_counters(user: User):
-    controls_count = len(
-        RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, AppliedControl
-        )[0]
-    )
+    # Get all accessible applied controls
+    applied_controls_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )[0]
+
+    # Count policies and non-policies separately
+    all_applied_controls = AppliedControl.objects.filter(id__in=applied_controls_ids)
+    policies_count = all_applied_controls.filter(category="policy").count()
+    applied_controls_count = all_applied_controls.exclude(category="policy").count()
+
+    # Get accessible frameworks
+    frameworks_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Framework
+    )[0]
+
+    # Get accessible risk acceptances
+    risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAcceptance
+    )[0]
+
+    # Get accessible security exceptions
+    security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, SecurityException
+    )[0]
+
     return {
         "domains": len(
             RoleAssignment.get_accessible_object_ids(
                 Folder.get_root_folder(), user, Folder
             )[0]
         ),
-        "perimeters": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Perimeter
-            )[0]
-        ),
-        "applied_controls": controls_count,
-        "risk_assessments": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, RiskAssessment
-            )[0]
-        ),
-        "compliance_assessments": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, ComplianceAssessment
-            )[0]
-        ),
-        "policies": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Policy
-            )[0]
-        ),
+        "frameworks": len(frameworks_ids),
+        "applied_controls": applied_controls_count,
+        "policies": policies_count,
+        "exceptions": len(security_exceptions_ids),
+        "risk_acceptances": len(risk_acceptances_ids),
     }
 
 

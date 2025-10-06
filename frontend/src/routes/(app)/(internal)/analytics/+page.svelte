@@ -286,38 +286,38 @@
 								<CounterCard
 									count={counters.domains}
 									label={m.domains()}
-									faIcon="fa-solid fa-diagram-project"
+									faIcon="fa-solid fa-sitemap"
 									href="/folders"
 								/>
 								<CounterCard
-									count={counters.perimeters}
-									label={m.perimeters()}
-									faIcon="fa-solid fa-cubes"
-									href="/perimeters"
+									count={counters.frameworks}
+									label={m.frameworks()}
+									faIcon="fa-solid fa-book"
+									href="/frameworks"
 								/>
 								<CounterCard
 									count={counters.applied_controls}
 									label={m.appliedControls()}
 									faIcon="fa-solid fa-fire-extinguisher"
-									href="/applied-controls"
-								/>
-								<CounterCard
-									count={counters.risk_assessments}
-									label={m.riskAssessments()}
-									faIcon="fa-solid fa-magnifying-glass-chart"
-									href="/risk-assessments"
-								/>
-								<CounterCard
-									count={counters.compliance_assessments}
-									label={m.complianceAssessments()}
-									faIcon="fa-solid fa-arrows-to-eye"
-									href="/compliance-assessments"
+									href="/applied-controls?category=!policy"
 								/>
 								<CounterCard
 									count={counters.policies}
 									label={m.policies()}
-									faIcon="fas fa-file-alt"
-									href="/policies"
+									faIcon="fa-solid fa-file-alt"
+									href="/applied-controls?category=policy"
+								/>
+								<CounterCard
+									count={counters.exceptions}
+									label={m.securityExceptions()}
+									faIcon="fa-solid fa-circle-exclamation"
+									href="/security-exceptions"
+								/>
+								<CounterCard
+									count={counters.risk_acceptances}
+									label={m.riskAcceptances()}
+									faIcon="fa-solid fa-signature"
+									href="/risk-acceptances"
 								/>
 							</div>
 						</section>
