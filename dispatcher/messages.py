@@ -425,3 +425,8 @@ def upload_attachment(message: dict):
 message_registry.add(update_applied_control)
 message_registry.add(update_requirement_assessment)
 message_registry.add(upload_attachment)
+message_registry.add(create_folder)
+message_registry.add(update_folder)
+message_registry.add(create_user)
+message_registry.add(update_user)
+message_registry.add(update_user_group)
