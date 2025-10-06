@@ -219,19 +219,19 @@
 			<i class="fa-solid fa-arrow-left"></i>
 			<p>{m.backToStudy()}</p>
 		</Anchor>
-		<button
-			onclick={exportPDF}
-			disabled={isGeneratingPDF}
-			class="btn preset-filled-primary-500 flex items-center gap-2"
-		>
-			{#if isGeneratingPDF}
-				<i class="fa-solid fa-spinner fa-spin"></i>
-				<span>{m.generating()}...</span>
-			{:else}
-				<i class="fa-solid fa-file-pdf"></i>
-				<span>{m.exportPdf()}</span>
-			{/if}
-		</button>
+		<!-- <button -->
+		<!-- 	onclick={exportPDF} -->
+		<!-- 	disabled={isGeneratingPDF} -->
+		<!-- 	class="btn preset-filled-primary-500 flex items-center gap-2" -->
+		<!-- > -->
+		<!-- 	{#if isGeneratingPDF} -->
+		<!-- 		<i class="fa-solid fa-spinner fa-spin"></i> -->
+		<!-- 		<span>{m.generating()}...</span> -->
+		<!-- 	{:else} -->
+		<!-- 		<i class="fa-solid fa-file-pdf"></i> -->
+		<!-- 		<span>{m.exportPdf()}</span> -->
+		<!-- 	{/if} -->
+		<!-- </button> -->
 	</div>
 
 	<!-- Study Header -->
