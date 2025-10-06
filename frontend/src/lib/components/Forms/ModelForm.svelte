@@ -38,6 +38,7 @@
 	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
 	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
 	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
+	import DataBreachForm from './ModelForm/DataBreachForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -276,9 +277,11 @@
 										return currentData; // Keep the current values in the edit form.
 									}
 									updated_fields.add('reference_control');
+									// Only auto-fill name if it's empty OR user hasn't manually edited it
+									const shouldUpdateName = !currentData.name || !updated_fields.has('name');
 									return {
 										...currentData,
-										name: r.name,
+										name: shouldUpdateName ? r.name : currentData.name,
 										category: r.category,
 										csf_function: r.csf_function,
 										ref_id: r.ref_id
@@ -297,6 +300,9 @@
 				cacheLock={cacheLocks['name']}
 				bind:cachedValue={formDataCache['name']}
 				data-focusindex="0"
+				oninput={() => {
+					updated_fields.add('name');
+				}}
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
@@ -528,6 +534,16 @@
 			/>
 		{:else if URLModel === 'right-requests'}
 			<RightRequestForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{initialData}
+				{...rest}
+			/>
+		{:else if URLModel === 'data-breaches'}
+			<DataBreachForm
 				{form}
 				{model}
 				{cacheLocks}

@@ -100,12 +100,15 @@
 />
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<TextField
+	<AutocompleteSelect
 		{form}
+		optionsEndpoint="entities?relationship__name=accreditation_authority"
 		field="authority"
 		cacheLock={cacheLocks['authority']}
 		bind:cachedValue={formDataCache['authority']}
+		nullable={true}
 		label={m.authority()}
+		helpText={m.regulatoryAuthorityHelpText()}
 	/>
 	<TextField
 		type="date"

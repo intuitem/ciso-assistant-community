@@ -961,5 +961,7 @@
 	"securityObjectiveScale": "Skala för säkerhetsmål",
 	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)",
 	"actor": "Aktör",
-	"action": "Åtgärd"
+	"action": "Åtgärd",
+	"viewMore": "Visa mer",
+	"viewLess": "Visa mindre"
 }
