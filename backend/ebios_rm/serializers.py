@@ -46,6 +46,10 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     operational_scenario_count = serializers.IntegerField()
     applied_control_count = serializers.IntegerField()
     last_risk_assessment = FieldsRelatedField()
+    counters = serializers.SerializerMethodField()
+
+    def get_counters(self, obj):
+        return obj.get_counters()
 
     class Meta:
         model = EbiosRMStudy
@@ -347,6 +351,19 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     gravity = serializers.JSONField(source="get_gravity_display")
     risk_level = serializers.JSONField(source="get_risk_level_display")
     ref_id = serializers.CharField()
+    operating_modes_description = serializers.SerializerMethodField()
+
+    def get_operating_modes_description(self, obj):
+        # If there's a description, use it
+        if obj.operating_modes_description:
+            return obj.operating_modes_description
+
+        # Otherwise, generate from operating modes
+        operating_modes = obj.operating_modes.all()
+        if operating_modes:
+            return " | ".join([mode.name for mode in operating_modes])
+
+        return ""
 
     class Meta:
         model = OperationalScenario
@@ -358,6 +375,24 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
     attack_path = HashSlugRelatedField(slug_field="pk", read_only=True)
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    operating_modes_description = serializers.SerializerMethodField()
+
+    def get_operating_modes_description(self, obj):
+        if obj.operating_modes_description:
+            return obj.operating_modes_description
+
+        # If empty, return combination of operating modes
+        operating_modes = obj.operating_modes.all()
+        if operating_modes:
+            mode_descriptions = []
+            for mode in operating_modes:
+                mode_text = mode.name
+                if mode.description:
+                    mode_text += f": {mode.description}"
+                mode_descriptions.append(mode_text)
+            return "\n".join(mode_descriptions)
+
+        return ""
 
     class Meta:
         model = OperationalScenario

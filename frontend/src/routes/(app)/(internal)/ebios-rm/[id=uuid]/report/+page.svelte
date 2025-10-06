@@ -10,6 +10,7 @@
 	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
+	import { toPng, toSvg } from 'html-to-image';
 
 	interface Props {
 		data: PageData;
@@ -21,6 +22,170 @@
 	const { reportData } = data;
 	const study = reportData.study;
 	const useBubbles = data.useBubbles;
+	const inherentRiskEnabled = data.inherentRiskEnabled;
+
+	let isGeneratingPDF = $state(false);
+
+	async function exportPDF() {
+		isGeneratingPDF = true;
+		try {
+			const charts: Record<string, string> = {};
+
+			// Capture radar charts
+			const radarCurrent = document.querySelector('[data-chart="radar-current"]');
+			if (radarCurrent) {
+				charts.radarCurrent = await toPng(radarCurrent as HTMLElement);
+			}
+
+			const radarResidual = document.querySelector('[data-chart="radar-residual"]');
+			if (radarResidual) {
+				charts.radarResidual = await toPng(radarResidual as HTMLElement);
+			}
+
+			// Capture risk matrices
+			const riskMatrixInherent = document.querySelector('[data-chart="risk-matrix-inherent"]');
+			if (riskMatrixInherent) {
+				charts.riskMatrixInherent = await toPng(riskMatrixInherent as HTMLElement);
+			}
+
+			const riskMatrixCurrent = document.querySelector('[data-chart="risk-matrix-current"]');
+			if (riskMatrixCurrent) {
+				charts.riskMatrixCurrent = await toPng(riskMatrixCurrent as HTMLElement);
+			}
+
+			const riskMatrixResidual = document.querySelector('[data-chart="risk-matrix-residual"]');
+			if (riskMatrixResidual) {
+				charts.riskMatrixResidual = await toPng(riskMatrixResidual as HTMLElement);
+			}
+
+			// Capture operating mode graphs as SVG with Font Awesome CSS embedded
+			const graphElements = document.querySelectorAll('[data-chart^="operating-mode-"]');
+			const operatingModeGraphs: Record<string, string> = {};
+
+			// Fetch Font Awesome CSS from CDN
+			let fontAwesomeCSS = '';
+			try {
+				fontAwesomeCSS = await fetch(
+					'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css'
+				)
+					.then((r) => r.text())
+					.catch(() => '');
+			} catch (e) {
+				console.warn('Could not fetch Font Awesome CSS:', e);
+			}
+
+			for (const graph of Array.from(graphElements)) {
+				const modeId = graph.getAttribute('data-chart')?.replace('operating-mode-', '');
+				if (modeId) {
+					// Force inline styles to ensure backgrounds are white
+					const element = graph as HTMLElement;
+					const originalStyle = element.style.cssText;
+					element.style.backgroundColor = 'white';
+
+					// Find all SVG elements and ensure fills are preserved
+					const svgElements = element.querySelectorAll('rect, path, circle');
+					const originalFills = new Map();
+					svgElements.forEach((el) => {
+						const svgEl = el as SVGElement;
+						originalFills.set(svgEl, svgEl.style.fill);
+						const computedFill = window.getComputedStyle(svgEl).fill;
+						if (computedFill && computedFill !== 'none') {
+							svgEl.style.fill = computedFill;
+						}
+					});
+
+					// Use toSvg with Font Awesome CSS embedded
+					operatingModeGraphs[modeId] = await toSvg(element, {
+						cacheBust: true,
+						fontEmbedCSS: fontAwesomeCSS,
+						backgroundColor: '#ffffff'
+					});
+
+					// Restore original styles
+					element.style.cssText = originalStyle;
+					svgElements.forEach((el) => {
+						const svgEl = el as SVGElement;
+						const originalFill = originalFills.get(svgEl);
+						if (originalFill !== undefined) {
+							svgEl.style.fill = originalFill;
+						}
+					});
+				}
+			}
+			charts.operatingModeGraphs = JSON.stringify(operatingModeGraphs);
+
+			// Use form action to send to server
+			const formData = new FormData();
+			formData.append('charts', JSON.stringify({ charts }));
+
+			const response = await fetch('?/exportPdf', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to generate PDF');
+			}
+
+			const result = await response.json();
+
+			if (result.type === 'success') {
+				// Parse the devalue serialized data
+				const actionResult =
+					typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+
+				// Handle devalue serialization format
+				// Index 0: metadata object {success: 1, pdf: 2}
+				// Index 1: boolean (true)
+				// Index 2: array containing the actual PDF bytes
+				const actualData = Array.isArray(actionResult) ? actionResult[0] : actionResult;
+
+				if (actualData.success && actualData.pdf !== undefined) {
+					// The PDF bytes are in an array at index actualData.pdf (which is 2)
+					const pdfIndices = actionResult[actualData.pdf];
+
+					if (!Array.isArray(pdfIndices)) {
+						throw new Error('Invalid PDF data structure');
+					}
+
+					// Dereference the indices to get actual byte values
+					const pdfBytes = pdfIndices.map((index) => actionResult[index]);
+
+					// Check if PDF starts with correct magic bytes (37 80 68 70 = %PDF)
+					if (
+						pdfBytes[0] !== 37 ||
+						pdfBytes[1] !== 80 ||
+						pdfBytes[2] !== 68 ||
+						pdfBytes[3] !== 70
+					) {
+						throw new Error('Invalid PDF data received');
+					}
+
+					// Convert array back to Blob
+					const pdfArray = new Uint8Array(pdfBytes);
+					const blob = new Blob([pdfArray], { type: 'application/pdf' });
+
+					const url = window.URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = `ebios-rm-report-${study.name}.pdf`;
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);
+				} else {
+					throw new Error('Invalid response from server');
+				}
+			} else {
+				throw new Error('Invalid response from server');
+			}
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			alert('Failed to generate PDF. Please try again.');
+		} finally {
+			isGeneratingPDF = false;
+		}
+	}
 
 	// Build risk cluster for current risk level
 	const buildRiskCluster = (
@@ -44,8 +209,8 @@
 </script>
 
 <div class="bg-white shadow-sm p-4 max-w-7xl mx-auto">
-	<!-- Back to Study Link -->
-	<div class="mb-4">
+	<!-- Back to Study Link and Export Button -->
+	<div class="mb-4 flex justify-between items-center">
 		<Anchor
 			breadcrumbAction="push"
 			href={`/ebios-rm/${study.id}`}
@@ -54,6 +219,19 @@
 			<i class="fa-solid fa-arrow-left"></i>
 			<p>{m.backToStudy()}</p>
 		</Anchor>
+		<button
+			onclick={exportPDF}
+			disabled={isGeneratingPDF}
+			class="btn preset-filled-primary-500 flex items-center gap-2"
+		>
+			{#if isGeneratingPDF}
+				<i class="fa-solid fa-spinner fa-spin"></i>
+				<span>{m.generating()}...</span>
+			{:else}
+				<i class="fa-solid fa-file-pdf"></i>
+				<span>{m.exportPdf()}</span>
+			{/if}
+		</button>
 	</div>
 
 	<!-- Study Header -->
@@ -348,7 +526,7 @@
 				{m.ecosystemRadar()}
 			</h2>
 			<div class="bg-white flex gap-4">
-				<div class="w-1/2">
+				<div class="w-1/2" data-chart="radar-current">
 					<EcosystemRadarChart
 						title={m.current()}
 						name="c_ecosystem_report"
@@ -357,7 +535,7 @@
 						height="h-[800px]"
 					/>
 				</div>
-				<div class="w-1/2">
+				<div class="w-1/2" data-chart="radar-residual">
 					<EcosystemRadarChart
 						title={m.residual()}
 						name="r_ecosystem_report"
@@ -470,7 +648,7 @@
 												<h5 class="text-sm font-semibold text-yellow-900 mb-2">
 													<i class="fa-solid fa-gears mr-2"></i>{m.operationalScenario()}
 												</h5>
-												{#if operationalScenario.operating_modes_description}
+												{#if operationalScenario.operating_modes_description && opModes.length === 0}
 													<div class="text-sm mb-2">
 														<span class="font-semibold text-gray-700"
 															>{m.operatingModesDescription()}:</span
@@ -582,6 +760,12 @@
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.operationalScenarios()}
 			</h2>
+			{#if study.quotation_method}
+				<div class="mb-4 text-sm">
+					<span class="font-semibold text-gray-700">{m.quotationMethod()}:</span>
+					<span class="ml-2">{safeTranslate(study.quotation_method)}</span>
+				</div>
+			{/if}
 			<div class="space-y-6">
 				{#each reportData.operational_scenarios as opScenario}
 					{@const opModes =
@@ -599,7 +783,7 @@
 									<span class="ml-2 text-gray-700">{opScenario.attack_path.name}</span>
 								</div>
 							{/if}
-							{#if opScenario.operating_modes_description}
+							{#if opScenario.operating_modes_description && opModes.length === 0}
 								<div class="text-sm mb-3">
 									<span class="font-semibold text-gray-700">{m.operatingModesDescription()}:</span>
 									<p class="ml-2 text-gray-700 mt-1">{opScenario.operating_modes_description}</p>
@@ -717,7 +901,7 @@
 													<h5 class="text-xs font-semibold text-gray-700 mb-2">
 														{m.killChain()}
 													</h5>
-													<div class="bg-gray-50 rounded p-2">
+													<div class="bg-gray-50 rounded p-2" data-chart="operating-mode-{mode.id}">
 														<GraphComponent
 															data={{ nodes: mode.graph.nodes, links: mode.graph.links }}
 															panelNodes={mode.graph.panelNodes}
@@ -742,6 +926,7 @@
 	{#if reportData.risk_matrix_data}
 		{@const riskMatrix = reportData.risk_matrix_data.risk_matrix}
 		{@const riskScenarios = reportData.risk_matrix_data.risk_scenarios}
+		{@const inherentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'inherent')}
 		{@const currentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'current')}
 		{@const residualCluster = buildRiskCluster(riskScenarios, riskMatrix, 'residual')}
 		<section class="mb-6">
@@ -771,6 +956,12 @@
 									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
 									>{m.name()}</th
 								>
+								{#if inherentRiskEnabled}
+									<th
+										class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+										>{m.inherentRisk()}</th
+									>
+								{/if}
 								<th
 									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
 									>{m.currentRisk()}</th
@@ -788,6 +979,20 @@
 										>{scenario.ref_id || '--'}</td
 									>
 									<td class="px-4 py-3 text-sm text-gray-700 border-r">{scenario.name}</td>
+									{#if inherentRiskEnabled}
+										<td class="px-4 py-3 text-sm border-r">
+											{#if scenario.inherent_level}
+												<span
+													class="px-2 py-1 rounded text-xs font-medium"
+													style="background-color: {scenario.inherent_level.hexcolor}"
+												>
+													{safeTranslate(scenario.inherent_level.name)}
+												</span>
+											{:else}
+												<span class="text-gray-400">--</span>
+											{/if}
+										</td>
+									{/if}
 									<td class="px-4 py-3 text-sm border-r">
 										{#if scenario.current_level}
 											<span
@@ -819,7 +1024,19 @@
 				</div>
 			{/if}
 			<div class="space-y-8">
-				<div>
+				{#if inherentRiskEnabled}
+					<div data-chart="risk-matrix-inherent">
+						<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+						<RiskMatrix
+							{riskMatrix}
+							matrixName="inherent"
+							data={inherentCluster}
+							dataItemComponent={RiskScenarioItem}
+							{useBubbles}
+						/>
+					</div>
+				{/if}
+				<div data-chart="risk-matrix-current">
 					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 					<RiskMatrix
 						{riskMatrix}
@@ -829,7 +1046,7 @@
 						{useBubbles}
 					/>
 				</div>
-				<div>
+				<div data-chart="risk-matrix-residual">
 					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 					<RiskMatrix
 						{riskMatrix}

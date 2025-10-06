@@ -226,52 +226,66 @@
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
 			{#snippet action()}
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col gap-3">
 					<a
-						class="text-orange-600 hover:text-purple-600 font-medium"
+						class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
 						href={`${page.url.pathname}/visual/`}
-						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded-sm">New</span><i
-							class="fa-solid fa-chart-diagram mr-2"
-						></i><span class="font-semibold">{m.visualAnalysis()}</span></a
 					>
+						<i class="fa-solid fa-chart-diagram"></i>
+						<span>{m.visualAnalysis()}</span>
+					</a>
 					<a
-						class="text-blue-600 hover:text-purple-600 font-medium"
+						class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
 						href={`${page.url.pathname}/report/`}
-						><i class="fa-solid fa-file-lines mr-2"></i><span class="font-semibold">Report</span></a
 					>
+						<i class="fa-solid fa-file-lines"></i>
+						<span>{m.report()}</span>
+					</a>
 				</div>
 			{/snippet}
 			{#snippet content()}
-				<div>
+				{@const counters = data.data?.counters || {}}
+				<div class="grid grid-cols-2 gap-2">
 					<Card
-						count={data.data.roto_count}
-						label={m.roToCouples()}
+						count={String(counters.selected_asset_count ?? 0)}
+						label={m.assets()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
-						count={data.data.selected_roto_count}
-						label={m.selectedRoToCouples()}
+						count={String(counters.selected_feared_event_count ?? 0)}
+						label={m.fearedEvents()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
-						count={data.data.selected_attack_path_count}
-						label={m.selectedAttackPaths()}
+						count={String(counters.compliance_assessment_count ?? 0)}
+						label={m.complianceAssessments()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card count={String(counters.roto_count ?? 0)} label={m.roToCouples()} section={''} />
+					<Card
+						count={String(counters.stakeholder_count ?? 0)}
+						label={m.stakeholders()}
+						section={''}
 					/>
 					<Card
-						count={data.data.operational_scenario_count}
+						count={String(counters.strategic_scenario_count ?? 0)}
+						label={m.strategicScenarios()}
+						section={''}
+					/>
+					<Card
+						count={String(counters.operational_scenario_count ?? 0)}
 						label={m.operationalScenarios()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
-						count={data.data.applied_control_count}
-						label={m.appliedControls()}
+						count={String(counters.compliance_applied_control_count ?? 0)}
+						label={m.appliedControlsFromAudits()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card
+						count={String(counters.risk_assessment_applied_control_count ?? 0)}
+						label={m.appliedControlsFromRiskAssessment()}
+						section={''}
 					/>
 				</div>
 			{/snippet}

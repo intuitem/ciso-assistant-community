@@ -349,6 +349,130 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         return Response(report_data)
 
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Get EBIOS RM study report PDF",
+        url_path="report_pdf",
+    )
+    def report_pdf(self, request, pk):
+        """
+        Generate PDF report for EBIOS RM study with embedded chart images
+        """
+        from django.template.loader import render_to_string
+        from weasyprint import HTML
+        from django.http import HttpResponse
+        import json
+        import base64
+
+        study = get_object_or_404(EbiosRMStudy, id=pk)
+
+        # Get chart images from request
+        charts_data = request.data.get("charts", {})
+
+        # Decode operating mode graphs from JSON string
+        operating_mode_graphs = {}
+        if "operatingModeGraphs" in charts_data:
+            operating_mode_graphs = json.loads(charts_data["operatingModeGraphs"])
+
+        # Prepare context with all report data
+        feared_events = FearedEvent.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        )
+        ro_to_couples = RoTo.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        ).with_pertinence()
+        stakeholders = Stakeholder.objects.filter(
+            ebios_rm_study=study, is_selected=True
+        )
+        operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
+        operating_modes = OperatingMode.objects.filter(
+            operational_scenario__in=operational_scenarios
+        )
+
+        # Get compliance assessments with result counts
+        compliance_assessments_data = []
+        for assessment in study.compliance_assessments.all():
+            result_counts = {}
+            for count, result in assessment.get_requirements_result_count():
+                result_counts[result] = count
+
+            compliance_assessments_data.append(
+                {
+                    "name": assessment.name,
+                    "framework": (
+                        assessment.framework.name if assessment.framework else None
+                    ),
+                    "progress": assessment.get_progress(),
+                    "result_counts": result_counts,
+                }
+            )
+
+        # Get action plans
+        from core.models import AppliedControl
+
+        compliance_action_plans = []
+        for assessment in study.compliance_assessments.all():
+            requirement_assessments = assessment.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            applied_controls = (
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments
+                )
+                .distinct()
+                .order_by("eta")
+            )
+            if applied_controls.exists():
+                compliance_action_plans.append(
+                    {
+                        "assessment_name": assessment.name,
+                        "framework": (
+                            assessment.framework.name if assessment.framework else None
+                        ),
+                        "controls": list(applied_controls),
+                    }
+                )
+
+        risk_action_plan_controls = []
+        if study.last_risk_assessment:
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_applied_controls = (
+                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios)
+                .distinct()
+                .order_by("eta")
+            )
+            if risk_applied_controls.exists():
+                risk_action_plan_controls = list(risk_applied_controls)
+
+        context = {
+            "study": study,
+            "feared_events": feared_events,
+            "ro_to_couples": ro_to_couples,
+            "stakeholders": stakeholders,
+            "operational_scenarios": operational_scenarios,
+            "operating_modes": operating_modes,
+            "compliance_assessments": compliance_assessments_data,
+            "compliance_action_plans": compliance_action_plans,
+            "risk_action_plan_controls": risk_action_plan_controls,
+            "radar_current_image": charts_data.get("radarCurrent"),
+            "radar_residual_image": charts_data.get("radarResidual"),
+            "risk_matrix_current_image": charts_data.get("riskMatrixCurrent"),
+            "risk_matrix_residual_image": charts_data.get("riskMatrixResidual"),
+            "operating_mode_graphs": operating_mode_graphs,
+        }
+
+        html_string = render_to_string("core/ebios_rm_report_pdf.html", context)
+        pdf_file = HTML(
+            string=html_string, base_url=request.build_absolute_uri()
+        ).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            f'attachment; filename="ebios_rm_report_{study.name}.pdf"'
+        )
+        return response
+
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
