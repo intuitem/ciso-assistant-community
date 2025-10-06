@@ -24,10 +24,11 @@
 
 	async function modalBuildInfo() {
 		const res = await fetch('/fe-api/build').then((res) => res.json());
+	console.log(res);
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'displayJSONModal',
-			title: 'About CISO Assistant',
+			title: m.aboutCiso(),
 			body: JSON.stringify(res)
 		};
 		openState = false;

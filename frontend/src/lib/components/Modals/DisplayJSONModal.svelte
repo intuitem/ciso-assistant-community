@@ -19,6 +19,7 @@
 			<div data-testid="key-value">
 				{#each Object.entries(JSON.parse(body)) as [key, value]}
 					<div>
+						{console.log(key, value)}
 						<div data-testid="{key}-key" class="font-bold">{safeTranslate(key)}:</div>
 						<div data-testid="{key}-value">{safeTranslate(value)}</div>
 					</div>
