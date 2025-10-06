@@ -42,7 +42,7 @@
 	};
 </script>
 
-<div class="bg-white shadow-sm p-8 max-w-7xl mx-auto">
+<div class="bg-white shadow-sm p-4 max-w-7xl mx-auto">
 	<!-- Back to Study Link -->
 	<div class="mb-4">
 		<Anchor
@@ -56,7 +56,7 @@
 	</div>
 
 	<!-- Study Header -->
-	<div class="mb-8">
+	<div class="mb-6">
 		<h1 class="text-3xl font-bold text-gray-900 mb-2">{study.name}</h1>
 		{#if study.description}
 			<p class="text-gray-600 mb-4">{study.description}</p>
@@ -83,7 +83,7 @@
 
 	<!-- Feared Events Section -->
 	{#if reportData.feared_events.length > 0}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.fearedEvents()} ({reportData.feared_events.length})
 			</h2>
@@ -130,7 +130,7 @@
 
 	<!-- Compliance Assessments Section -->
 	{#if reportData.compliance_assessments && reportData.compliance_assessments.length > 0}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.complianceAssessments()} ({reportData.compliance_assessments.length})
 			</h2>
@@ -247,7 +247,7 @@
 
 	<!-- RO/TO Couples Section -->
 	{#if reportData.ro_to_couples.length > 0}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.roToCouples()} ({reportData.ro_to_couples.length})
 			</h2>
@@ -300,7 +300,7 @@
 
 	<!-- Stakeholders Section -->
 	{#if reportData.stakeholders.length > 0}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.stakeholders()} ({reportData.stakeholders.length})
 			</h2>
@@ -342,7 +342,7 @@
 
 	<!-- Ecosystem Radar Section -->
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.ecosystemRadar()}
 			</h2>
@@ -353,7 +353,7 @@
 						name="c_ecosystem_report"
 						data={reportData.radar.current}
 						classesContainer="w-full"
-						height="h-[500px]"
+						height="h-[800px]"
 					/>
 				</div>
 				<div class="w-1/2">
@@ -362,7 +362,7 @@
 						name="r_ecosystem_report"
 						data={reportData.radar.residual}
 						classesContainer="w-full"
-						height="h-[500px]"
+						height="h-[800px]"
 					/>
 				</div>
 			</div>
@@ -371,7 +371,7 @@
 
 	<!-- Scenarios Hierarchy Section -->
 	{#if reportData.strategic_scenarios.length > 0}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.strategicScenarios()} & {m.attackPaths()}
 			</h2>
@@ -577,7 +577,7 @@
 
 	<!-- Operational Scenarios Section -->
 	{#if reportData.operational_scenarios.length > 0}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.operationalScenarios()}
 			</h2>
@@ -727,7 +727,7 @@
 		{@const riskScenarios = reportData.risk_matrix_data.risk_scenarios}
 		{@const currentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'current')}
 		{@const residualCluster = buildRiskCluster(riskScenarios, riskMatrix, 'residual')}
-		<section class="mb-8">
+		<section class="mb-6">
 			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
 				{m.riskMatrix()}
 				{#if reportData.risk_matrix_data.risk_assessment}
