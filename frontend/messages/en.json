@@ -829,6 +829,8 @@
 	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the governance menu.",
 	"licenseSeats": "License seats",
 	"licenseExpiration": "License expiration",
+	"diskSpace": "Disk space",
+	"diskUsed": "Disk used",
 	"answer": "Answer",
 	"questionnaireMode": "Questionnaire mode",
 	"assessmentMode": "Assessment mode",
