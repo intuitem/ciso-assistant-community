@@ -72,7 +72,13 @@
 			series: [
 				{
 					data: values,
-					type: 'bar'
+					type: 'bar',
+					itemStyle: {
+						color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+							{ offset: 0, color: '#4f46e5' },
+							{ offset: 1, color: '#7c3aed' }
+						])
+					}
 				}
 			]
 		};
