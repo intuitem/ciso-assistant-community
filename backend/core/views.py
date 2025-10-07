@@ -2548,17 +2548,26 @@ class UserPermsOnFolderList(generics.ListAPIView):
     ordering = ["email"]
 
     def get_queryset(self):
-        qs = User.objects.filter(id__in=self.get_serializer_context()["permissions"])
-        return qs
+        # Use cached permissions if present to avoid duplicate computation
+        perms = getattr(self, "_folder_perms", None)
+        if perms is None:
+            perms = self.get_serializer_context().get("permissions", {})
+        user_ids = list(perms.keys())
+        return User.objects.filter(id__in=user_ids)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        try:
-            folder = Folder.objects.get(id=self.kwargs["pk"])
-        except Folder.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        context.update({"pk": self.kwargs["pk"]})
-        context.update({"permissions": folder.get_user_permissions()})
+        folder = get_object_or_404(Folder, id=self.kwargs["pk"])
+        # Authorize: ensure requester can view this folder
+        viewable_folders, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Folder
+        )
+        if folder.id not in viewable_folders:
+            raise PermissionDenied()
+        perms = folder.get_user_permissions()
+        # cache for reuse in get_queryset
+        self._folder_perms = perms
+        context.update({"pk": self.kwargs["pk"], "permissions": perms})
         return context
 
 
