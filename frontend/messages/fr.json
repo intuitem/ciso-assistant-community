@@ -1516,6 +1516,8 @@
 	"incidentsThisMonth": "Incidents ce mois",
 	"openIncidents": "Incidents ouverts",
 	"incidentSummary": "Incidents",
+	"findingsBreakdown": "Répartition des constats",
+	"noFindingsData": "Aucune donnée des constats disponible",
 	"monthlyCount": "Total par mois",
 	"cumulativeCount": "Total cumulé",
 	"createAssessment": "Create Assessment",

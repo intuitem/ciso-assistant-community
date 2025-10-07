@@ -11,6 +11,7 @@
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import IncidentMonthlyChart from '$lib/components/Chart/IncidentMonthlyChart.svelte';
 	import ExceptionSankeyChart from '$lib/components/Chart/ExceptionSankeyChart.svelte';
+	import FindingsSankeyChart from '$lib/components/Chart/FindingsSankeyChart.svelte';
 	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
 	import CalendarHeatmap from '$lib/components/Chart/CalendarHeatmap.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
@@ -837,7 +838,28 @@
 									</div>
 								</div>
 
-								<!-- Second Row: Incident Summary Cards -->
+								<!-- Second Row: Findings Breakdown Sankey -->
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.findingsBreakdown()}
+									</h3>
+									<div class="h-80">
+										{#if operationsAnalytics.findings_sankey && operationsAnalytics.findings_sankey.nodes && operationsAnalytics.findings_sankey.nodes.length > 0}
+											<FindingsSankeyChart
+												name="findings_sankey"
+												title=""
+												nodes={operationsAnalytics.findings_sankey.nodes}
+												links={operationsAnalytics.findings_sankey.links}
+											/>
+										{:else}
+											<div class="flex items-center justify-center h-full text-gray-500">
+												<p>{m.noFindingsData()}</p>
+											</div>
+										{/if}
+									</div>
+								</div>
+
+								<!-- Third Row: Incident Summary Cards -->
 								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
 									<!-- Summary Cards (full width) -->
 									<div class="xl:col-span-1">

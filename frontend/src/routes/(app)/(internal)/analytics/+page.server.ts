@@ -159,6 +159,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 					return { results: [] };
 				});
 
+			const findingsSankeyData = await fetch(`${BASE_API_URL}/findings/sankey_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch findings Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				});
+
 			return {
 				incident_detection_breakdown: detectionData.results,
 				monthly_metrics: monthlyData.results,
@@ -166,7 +173,8 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 				severity_breakdown: severityData.results,
 				qualifications_breakdown: qualificationsData.results,
 				exception_sankey: exceptionSankeyData.results,
-				applied_controls_sunburst: sunburstData.results
+				applied_controls_sunburst: sunburstData.results,
+				findings_sankey: findingsSankeyData.results
 			};
 		} catch (error) {
 			console.error('Failed to fetch operations analytics:', error);

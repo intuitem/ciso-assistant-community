@@ -7417,6 +7417,107 @@ class FindingViewSet(BaseModelViewSet):
             ).data
         )
 
+    @action(detail=False, name="Get findings sankey data")
+    def sankey_data(self, request):
+        """
+        Returns findings data structured for Sankey diagram:
+        Category -> Severity -> Status
+        """
+        folder_id = request.query_params.get("folder", None)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Finding
+        )
+        queryset = Finding.objects.filter(id__in=viewable_objects).select_related(
+            "findings_assessment"
+        )
+
+        if folder_id:
+            folder = Folder.objects.get(id=folder_id)
+            queryset = queryset.filter(folder=folder)
+
+        # Build Sankey data structure
+        from django.db.models import Count
+
+        # Get category -> severity -> status combinations
+        nodes = []
+        links = []
+        node_names = set()
+
+        # Create maps for choices
+        category_choice_map = {
+            choice[0]: choice[1] for choice in FindingsAssessment.Category.choices
+        }
+        severity_choice_map = {choice[0]: choice[1] for choice in Severity.choices}
+        status_choice_map = {choice[0]: choice[1] for choice in Finding.Status.choices}
+
+        # Track category -> severity links
+        category_severity_counts = {}
+        # Track severity -> status links
+        severity_status_counts = {}
+
+        for finding in queryset:
+            # Get category from parent findings assessment
+            category_value = (
+                finding.findings_assessment.category
+                if finding.findings_assessment
+                else "--"
+            )
+            category_label = f"Category: {category_choice_map.get(category_value, 'Unknown').title()}"
+
+            # Get severity
+            severity_value = finding.severity if finding.severity else "--"
+            severity_label = f"Severity: {severity_choice_map.get(severity_value, 'Unknown').title()}"
+
+            # Get status
+            status_value = finding.status if finding.status else "--"
+            status_label = (
+                f"Status: {status_choice_map.get(status_value, 'Unknown').title()}"
+            )
+
+            # Add to node sets
+            node_names.add(category_label)
+            node_names.add(severity_label)
+            node_names.add(status_label)
+
+            # Track links
+            cat_sev_key = f"{category_label}||{severity_label}"
+            category_severity_counts[cat_sev_key] = (
+                category_severity_counts.get(cat_sev_key, 0) + 1
+            )
+
+            sev_stat_key = f"{severity_label}||{status_label}"
+            severity_status_counts[sev_stat_key] = (
+                severity_status_counts.get(sev_stat_key, 0) + 1
+            )
+
+        # Convert node names to indexed list
+        nodes = [{"name": name} for name in sorted(node_names)]
+        node_index = {name: i for i, name in enumerate(sorted(node_names))}
+
+        # Create links for category -> severity
+        for key, value in category_severity_counts.items():
+            category, severity = key.split("||")
+            links.append(
+                {
+                    "source": node_index[category],
+                    "target": node_index[severity],
+                    "value": value,
+                }
+            )
+
+        # Create links for severity -> status
+        for key, value in severity_status_counts.items():
+            severity, status = key.split("||")
+            links.append(
+                {
+                    "source": node_index[severity],
+                    "target": node_index[status],
+                    "value": value,
+                }
+            )
+
+        return Response({"results": {"nodes": nodes, "links": links}})
+
 
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
