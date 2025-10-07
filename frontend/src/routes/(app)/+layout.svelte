@@ -94,11 +94,44 @@
 	}
 </script>
 
+<svelte:head>
+	<style>
+		/* Global print styles to hide app chrome */
+		@media print {
+			/* Hide sidebar and navbar */
+			.sidebar,
+			.app-bar,
+			nav,
+			header,
+			.breadcrumbs {
+				display: none !important;
+			}
+
+			/* Reset main content area for printing */
+			main {
+				margin: 0 !important;
+				padding: 0 !important;
+				background: white !important;
+				min-height: auto !important;
+			}
+
+			/* Remove all page margins and transitions */
+			body,
+			html {
+				margin: 0 !important;
+				padding: 0 !important;
+				width: 100% !important;
+				overflow: visible !important;
+			}
+		}
+	</style>
+</svelte:head>
+
 <!-- App Shell -->
-<div class="overflow-x-hidden">
-	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
+<div class="overflow-x-hidden app-shell">
+	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} class="sidebar" />
 	<AppBar
-		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
+		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)} app-bar"
 		background="bg-white"
 		padding="pb-2 px-4"
 	>

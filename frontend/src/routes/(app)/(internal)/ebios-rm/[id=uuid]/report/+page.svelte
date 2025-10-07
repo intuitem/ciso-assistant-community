@@ -10,12 +10,29 @@
 	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import { toPng, toSvg } from 'html-to-image';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
 	}
+
+	$effect(() => {
+		// Ensure page title includes "print" class when printing
+		const mediaQueryList = window.matchMedia('print');
+		const handlePrint = () => {
+			document.documentElement.classList.add('is-printing');
+		};
+		const handleAfterPrint = () => {
+			document.documentElement.classList.remove('is-printing');
+		};
+		window.addEventListener('beforeprint', handlePrint);
+		window.addEventListener('afterprint', handleAfterPrint);
+
+		return () => {
+			window.removeEventListener('beforeprint', handlePrint);
+			window.removeEventListener('afterprint', handleAfterPrint);
+		};
+	});
 
 	let { data }: Props = $props();
 	pageTitle.set('EBIOS RM Study Report');
@@ -33,167 +50,8 @@
 		higly_relevant: 'bg-red-200 text-red-700'
 	};
 
-	let isGeneratingPDF = $state(false);
-
-	async function exportPDF() {
-		isGeneratingPDF = true;
-		try {
-			const charts: Record<string, string> = {};
-
-			// Capture radar charts
-			const radarCurrent = document.querySelector('[data-chart="radar-current"]');
-			if (radarCurrent) {
-				charts.radarCurrent = await toPng(radarCurrent as HTMLElement);
-			}
-
-			const radarResidual = document.querySelector('[data-chart="radar-residual"]');
-			if (radarResidual) {
-				charts.radarResidual = await toPng(radarResidual as HTMLElement);
-			}
-
-			// Capture risk matrices
-			const riskMatrixInherent = document.querySelector('[data-chart="risk-matrix-inherent"]');
-			if (riskMatrixInherent) {
-				charts.riskMatrixInherent = await toPng(riskMatrixInherent as HTMLElement);
-			}
-
-			const riskMatrixCurrent = document.querySelector('[data-chart="risk-matrix-current"]');
-			if (riskMatrixCurrent) {
-				charts.riskMatrixCurrent = await toPng(riskMatrixCurrent as HTMLElement);
-			}
-
-			const riskMatrixResidual = document.querySelector('[data-chart="risk-matrix-residual"]');
-			if (riskMatrixResidual) {
-				charts.riskMatrixResidual = await toPng(riskMatrixResidual as HTMLElement);
-			}
-
-			// Capture operating mode graphs as SVG with Font Awesome CSS embedded
-			const graphElements = document.querySelectorAll('[data-chart^="operating-mode-"]');
-			const operatingModeGraphs: Record<string, string> = {};
-
-			// Fetch Font Awesome CSS from CDN
-			let fontAwesomeCSS = '';
-			try {
-				fontAwesomeCSS = await fetch(
-					'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css'
-				)
-					.then((r) => r.text())
-					.catch(() => '');
-			} catch (e) {
-				console.warn('Could not fetch Font Awesome CSS:', e);
-			}
-
-			for (const graph of Array.from(graphElements)) {
-				const modeId = graph.getAttribute('data-chart')?.replace('operating-mode-', '');
-				if (modeId) {
-					// Force inline styles to ensure backgrounds are white
-					const element = graph as HTMLElement;
-					const originalStyle = element.style.cssText;
-					element.style.backgroundColor = 'white';
-
-					// Find all SVG elements and ensure fills are preserved
-					const svgElements = element.querySelectorAll('rect, path, circle');
-					const originalFills = new Map();
-					svgElements.forEach((el) => {
-						const svgEl = el as SVGElement;
-						originalFills.set(svgEl, svgEl.style.fill);
-						const computedFill = window.getComputedStyle(svgEl).fill;
-						if (computedFill && computedFill !== 'none') {
-							svgEl.style.fill = computedFill;
-						}
-					});
-
-					// Use toSvg with Font Awesome CSS embedded
-					operatingModeGraphs[modeId] = await toSvg(element, {
-						cacheBust: true,
-						fontEmbedCSS: fontAwesomeCSS,
-						backgroundColor: '#ffffff'
-					});
-
-					// Restore original styles
-					element.style.cssText = originalStyle;
-					svgElements.forEach((el) => {
-						const svgEl = el as SVGElement;
-						const originalFill = originalFills.get(svgEl);
-						if (originalFill !== undefined) {
-							svgEl.style.fill = originalFill;
-						}
-					});
-				}
-			}
-			charts.operatingModeGraphs = JSON.stringify(operatingModeGraphs);
-
-			// Use form action to send to server
-			const formData = new FormData();
-			formData.append('charts', JSON.stringify({ charts }));
-
-			const response = await fetch('?/exportPdf', {
-				method: 'POST',
-				body: formData
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to generate PDF');
-			}
-
-			const result = await response.json();
-
-			if (result.type === 'success') {
-				// Parse the devalue serialized data
-				const actionResult =
-					typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
-
-				// Handle devalue serialization format
-				// Index 0: metadata object {success: 1, pdf: 2}
-				// Index 1: boolean (true)
-				// Index 2: array containing the actual PDF bytes
-				const actualData = Array.isArray(actionResult) ? actionResult[0] : actionResult;
-
-				if (actualData.success && actualData.pdf !== undefined) {
-					// The PDF bytes are in an array at index actualData.pdf (which is 2)
-					const pdfIndices = actionResult[actualData.pdf];
-
-					if (!Array.isArray(pdfIndices)) {
-						throw new Error('Invalid PDF data structure');
-					}
-
-					// Dereference the indices to get actual byte values
-					const pdfBytes = pdfIndices.map((index) => actionResult[index]);
-
-					// Check if PDF starts with correct magic bytes (37 80 68 70 = %PDF)
-					if (
-						pdfBytes[0] !== 37 ||
-						pdfBytes[1] !== 80 ||
-						pdfBytes[2] !== 68 ||
-						pdfBytes[3] !== 70
-					) {
-						throw new Error('Invalid PDF data received');
-					}
-
-					// Convert array back to Blob
-					const pdfArray = new Uint8Array(pdfBytes);
-					const blob = new Blob([pdfArray], { type: 'application/pdf' });
-
-					const url = window.URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.href = url;
-					a.download = `ebios-rm-report-${study.name}.pdf`;
-					document.body.appendChild(a);
-					a.click();
-					document.body.removeChild(a);
-					window.URL.revokeObjectURL(url);
-				} else {
-					throw new Error('Invalid response from server');
-				}
-			} else {
-				throw new Error('Invalid response from server');
-			}
-		} catch (error) {
-			console.error('Error generating PDF:', error);
-			alert('Failed to generate PDF. Please try again.');
-		} finally {
-			isGeneratingPDF = false;
-		}
+	function exportPDF() {
+		window.print();
 	}
 
 	// Build risk cluster for current risk level
@@ -219,7 +77,7 @@
 
 <div class="bg-white shadow-sm p-4 max-w-7xl mx-auto relative">
 	<!-- Workshop Navigation Pad -->
-	<div class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3">
+	<div class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print">
 		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
 		<div class="flex flex-col gap-2">
 			<a
@@ -261,7 +119,7 @@
 	</div>
 
 	<!-- Back to Study Link and Export Button -->
-	<div class="mb-4 flex justify-between items-center">
+	<div class="mb-4 flex justify-between items-center no-print">
 		<Anchor
 			breadcrumbAction="push"
 			href={`/ebios-rm/${study.id}`}
@@ -270,19 +128,13 @@
 			<i class="fa-solid fa-arrow-left"></i>
 			<p>{m.backToStudy()}</p>
 		</Anchor>
-		<!-- <button -->
-		<!-- 	onclick={exportPDF} -->
-		<!-- 	disabled={isGeneratingPDF} -->
-		<!-- 	class="btn preset-filled-primary-500 flex items-center gap-2" -->
-		<!-- > -->
-		<!-- 	{#if isGeneratingPDF} -->
-		<!-- 		<i class="fa-solid fa-spinner fa-spin"></i> -->
-		<!-- 		<span>{m.generating()}...</span> -->
-		<!-- 	{:else} -->
-		<!-- 		<i class="fa-solid fa-file-pdf"></i> -->
-		<!-- 		<span>{m.exportPdf()}</span> -->
-		<!-- 	{/if} -->
-		<!-- </button> -->
+		<button
+			onclick={exportPDF}
+			class="btn preset-filled-primary-500 flex items-center gap-2 no-print"
+		>
+			<i class="fa-solid fa-file-pdf"></i>
+			<span>{m.exportPdf()}</span>
+		</button>
 	</div>
 
 	<!-- Study Header -->
@@ -314,7 +166,7 @@
 	</div>
 
 	<!-- Workshop 1 -->
-	<div id="workshop-1" class="my-12 scroll-mt-20">
+	<div id="workshop-1" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-pink-600" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-pink-600">
@@ -378,7 +230,7 @@
 
 	<!-- Feared Events Section -->
 	{#if reportData.feared_events.length > 0}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2
 				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
 			>
@@ -428,7 +280,7 @@
 
 	<!-- Compliance Assessments Section -->
 	{#if reportData.compliance_assessments && reportData.compliance_assessments.length > 0}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2
 				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
 			>
@@ -549,7 +401,7 @@
 	{/if}
 
 	<!-- Workshop 2 -->
-	<div id="workshop-2" class="my-12 scroll-mt-20">
+	<div id="workshop-2" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-fuchsia-900" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-fuchsia-900">
@@ -560,7 +412,7 @@
 
 	<!-- RO/TO Couples Section -->
 	{#if reportData.ro_to_couples.length > 0}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2
 				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
 			>
@@ -617,7 +469,7 @@
 	{/if}
 
 	<!-- Workshop 3 -->
-	<div id="workshop-3" class="my-12 scroll-mt-20">
+	<div id="workshop-3" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-teal-500" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-teal-500">
@@ -628,7 +480,7 @@
 
 	<!-- Stakeholders Section -->
 	{#if reportData.stakeholders.length > 0}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2
 				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
 			>
@@ -677,7 +529,7 @@
 
 	<!-- Ecosystem Radar Section -->
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.ecosystemRadar()}
 			</h2>
@@ -706,7 +558,7 @@
 
 	<!-- Scenarios Hierarchy Section -->
 	{#if reportData.strategic_scenarios.length > 0}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.strategicScenarios()} & {m.attackPaths()}
 			</h2>
@@ -911,7 +763,7 @@
 	{/if}
 
 	<!-- Workshop 4 -->
-	<div id="workshop-4" class="my-12 scroll-mt-20">
+	<div id="workshop-4" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-yellow-600" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-yellow-600">
@@ -922,7 +774,7 @@
 
 	<!-- Operational Scenarios Section -->
 	{#if reportData.operational_scenarios.length > 0}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.operationalScenarios()}
 			</h2>
@@ -1089,7 +941,7 @@
 	{/if}
 
 	<!-- Workshop 5 -->
-	<div id="workshop-5" class="my-12 scroll-mt-20">
+	<div id="workshop-5" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-red-500" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-red-500">
@@ -1105,7 +957,7 @@
 		{@const inherentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'inherent')}
 		{@const currentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'current')}
 		{@const residualCluster = buildRiskCluster(riskScenarios, riskMatrix, 'residual')}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.riskMatrix()}
 				{#if reportData.risk_matrix_data.risk_assessment}
@@ -1239,7 +1091,7 @@
 
 	<!-- Treatment Plan Section -->
 	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan}
-		<section class="mb-6">
+		<section class="mb-6 page-break-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.treatmentPlan()}
 			</h2>
@@ -1398,5 +1250,284 @@
 <style>
 	:global(html) {
 		scroll-behavior: smooth;
+	}
+
+	/* Print styles for PDF export */
+	@media print {
+		/* Hide elements that shouldn't be printed */
+		:global(.no-print),
+		:global(.app-shell > .sidebar),
+		:global(.app-bar),
+		:global(nav),
+		:global(header),
+		:global(.breadcrumbs) {
+			display: none !important;
+		}
+
+		/* Page setup */
+		@page {
+			size: A3 portrait;
+			margin: 1.5cm 2cm;
+		}
+
+		/* Reset all layout constraints */
+		:global(html),
+		:global(body) {
+			margin: 0 !important;
+			padding: 0 !important;
+			width: 100% !important;
+			height: auto !important;
+			overflow: visible !important;
+			background: white !important;
+		}
+
+		/* Reset main content area */
+		:global(main) {
+			margin: 0 !important;
+			padding: 0 !important;
+			background: white !important;
+			min-height: auto !important;
+			width: 100% !important;
+			max-width: 100% !important;
+		}
+
+		/* Hide app shell wrapper completely */
+		:global(.app-shell) {
+			background: white !important;
+		}
+
+		/* Remove any background gradients */
+		:global([class*='bg-linear']),
+		:global([class*='from-']),
+		:global([class*='to-']) {
+			background: white !important;
+		}
+
+		/* Reset report container */
+		:global(.max-w-7xl) {
+			max-width: 100% !important;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+
+		/* Remove shadow and positioning from report container */
+		:global(.relative) {
+			position: static !important;
+		}
+
+		/* Ensure content fills the page properly */
+		:global(.bg-white) {
+			background: white !important;
+		}
+
+		/* Remove shadows for cleaner print */
+		:global(.shadow-sm),
+		:global(.shadow-md),
+		:global(.shadow-lg) {
+			box-shadow: none !important;
+		}
+
+		/* Page breaks before major sections - DISABLED in favor of workshop breaks */
+		.page-break-section {
+			page-break-before: auto !important;
+			break-before: auto !important;
+		}
+
+		/* Prevent page breaks inside important elements */
+		.card,
+		.border {
+			page-break-inside: avoid !important;
+			break-inside: avoid !important;
+		}
+
+		/* Allow tables to break if needed but avoid orphans */
+		table {
+			page-break-inside: auto !important;
+		}
+
+		tr {
+			page-break-inside: avoid !important;
+			page-break-after: auto !important;
+		}
+
+		thead {
+			display: table-header-group !important;
+		}
+
+		/* Force page breaks before workshop dividers */
+		.workshop-divider {
+			page-break-before: always !important;
+			break-before: page !important;
+			margin: 2cm 0 1cm 0 !important;
+			padding-top: 0 !important;
+		}
+
+		/* First workshop shouldn't break */
+		#workshop-1 {
+			page-break-before: auto !important;
+			break-before: auto !important;
+			margin-top: 2cm !important;
+		}
+
+		/* Workshop title styling */
+		.workshop-divider hr {
+			margin-bottom: 0 !important;
+			border-width: 3px !important;
+		}
+
+		.workshop-divider .text-center {
+			margin-top: -0.75em !important;
+			margin-bottom: 1.5cm !important;
+		}
+
+		.workshop-divider .text-center span {
+			padding: 0.3em 1.5em !important;
+			background: white !important;
+			display: inline-block !important;
+		}
+
+		/* Ensure workshop headers stay with content */
+		h1,
+		h2,
+		h3 {
+			page-break-after: avoid !important;
+			break-after: avoid !important;
+			page-break-inside: avoid !important;
+		}
+
+		/* Ensure charts render at good quality and fit on page */
+		[data-chart] {
+			width: 100% !important;
+			max-width: 100% !important;
+			page-break-inside: avoid !important;
+			break-inside: avoid !important;
+			margin: 0.5cm 0 !important;
+			overflow: hidden !important;
+		}
+
+		/* Scale down large charts to fit */
+		[data-chart] > * {
+			max-width: 100% !important;
+			max-height: 20cm !important;
+			height: auto !important;
+			width: auto !important;
+			transform: scale(0.95) !important;
+			transform-origin: top left !important;
+		}
+
+		/* Specific fixes for radar charts */
+		[data-chart="radar-current"],
+		[data-chart="radar-residual"] {
+			max-height: 25cm !important;
+		}
+
+		[data-chart="radar-current"] > *,
+		[data-chart="radar-residual"] > * {
+			max-height: 25cm !important;
+		}
+
+		/* Fix operating mode graphs overflow */
+		[data-chart^="operating-mode-"] {
+			max-height: 15cm !important;
+			overflow: hidden !important;
+		}
+
+		[data-chart^="operating-mode-"] > * {
+			max-height: 15cm !important;
+			transform: scale(0.9) !important;
+		}
+
+		/* Ensure chart containers don't create extra space */
+		:global([class*='h-[']) {
+			height: auto !important;
+			max-height: 25cm !important;
+		}
+
+		/* Make tables print nicely */
+		table {
+			border-collapse: collapse !important;
+			width: 100% !important;
+			font-size: 8pt !important;
+		}
+
+		table,
+		th,
+		td {
+			border: 1px solid #999 !important;
+		}
+
+		th {
+			background-color: #f3f4f6 !important;
+			font-weight: bold !important;
+			padding: 4px 6px !important;
+		}
+
+		td {
+			padding: 3px 6px !important;
+		}
+
+		/* Ensure badges and colored elements print well */
+		.badge,
+		[class*='bg-'],
+		[style*='background-color'] {
+			-webkit-print-color-adjust: exact !important;
+			print-color-adjust: exact !important;
+			color-adjust: exact !important;
+		}
+
+		/* Better spacing for sections */
+		section {
+			margin-bottom: 1rem !important;
+		}
+
+		/* Remove fixed positioning */
+		:global(.fixed) {
+			position: static !important;
+		}
+
+		/* Ensure proper link rendering */
+		a {
+			color: inherit !important;
+			text-decoration: none !important;
+		}
+
+		/* Make sure icons print */
+		:global(.fa-solid),
+		:global(.fa-regular) {
+			-webkit-print-color-adjust: exact !important;
+			print-color-adjust: exact !important;
+		}
+
+		/* Optimize grid layouts for print */
+		.grid {
+			grid-template-columns: repeat(2, 1fr) !important;
+		}
+
+		/* Optimize font sizes for A3 */
+		body {
+			font-size: 10pt !important;
+		}
+
+		h1 {
+			font-size: 18pt !important;
+		}
+
+		h2 {
+			font-size: 14pt !important;
+		}
+
+		h3 {
+			font-size: 12pt !important;
+		}
+
+		/* Better table sizing for A3 */
+		table {
+			font-size: 9pt !important;
+		}
+
+		/* Ensure workshop dividers print nicely */
+		hr {
+			page-break-after: avoid !important;
+		}
 	}
 </style>
