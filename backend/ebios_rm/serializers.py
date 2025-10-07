@@ -35,7 +35,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     reference_entity = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
     reference_entity = FieldsRelatedField()
-    assets = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(["id", "type", {"folder": ["id"]}], many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)

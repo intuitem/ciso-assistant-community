@@ -191,15 +191,13 @@
 							class="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-md transition-shadow"
 						>
 							<div class="flex items-start gap-2">
-								<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
+								{#if asset.type === 'PR'}
+									<i class="fa-solid fa-briefcase text-blue-500 mt-1"></i>
+								{:else}
+									<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
+								{/if}
 								<div class="flex-1">
 									<div class="font-semibold text-gray-900">{asset.str}</div>
-									{#if asset.type}
-										<div class="text-xs text-gray-600 mt-1">
-											<span class="font-medium">{m.type()}:</span>
-											<span class="ml-1">{safeTranslate(asset.type)}</span>
-										</div>
-									{/if}
 									{#if asset.folder}
 										<div class="text-xs text-gray-600">
 											<span class="font-medium">{m.domain()}:</span>
@@ -535,11 +533,10 @@
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-current">
 				<EcosystemRadarChart
-					title={m.current()}
 					name="c_ecosystem_report"
 					data={reportData.radar.current}
 					classesContainer="w-full"
-					height="h-[800px]"
+					height="h-[700px]"
 				/>
 			</div>
 		</section>
@@ -553,11 +550,10 @@
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-residual">
 				<EcosystemRadarChart
-					title={m.residual()}
 					name="r_ecosystem_report"
 					data={reportData.radar.residual}
 					classesContainer="w-full"
-					height="h-[800px]"
+					height="h-[700px]"
 				/>
 			</div>
 		</section>
@@ -1268,7 +1264,17 @@
 		:global(nav),
 		:global(header),
 		:global(.breadcrumbs),
-		:global([class*='AppBar']) {
+		:global([class*='AppBar']),
+		:global(.drawer),
+		:global([class*='drawer']),
+		:global(.sidebar),
+		:global([class*='sidebar']),
+		:global(aside),
+		:global([role='complementary']),
+		:global(button[aria-label*='menu']),
+		:global(button[aria-label*='Menu']),
+		:global(button[class*='chevron']),
+		:global([class*='Chevron']) {
 			display: none !important;
 			visibility: hidden !important;
 			height: 0 !important;
