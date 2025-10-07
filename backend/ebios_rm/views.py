@@ -368,12 +368,23 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         study = get_object_or_404(EbiosRMStudy, id=pk)
 
         # Get chart images from request
-        charts_data = request.data.get("charts", {})
+        charts_param = request.data.get("charts", "{}")
+        if isinstance(charts_param, str):
+            charts_payload = json.loads(charts_param or "{}")
+        else:
+            charts_payload = charts_param
+        if isinstance(charts_payload, dict) and "charts" in charts_payload:
+            charts_data = charts_payload["charts"] or {}
+        else:
+            charts_data = charts_payload or {}
 
         # Decode operating mode graphs from JSON string
         operating_mode_graphs = {}
-        if "operatingModeGraphs" in charts_data:
-            operating_mode_graphs = json.loads(charts_data["operatingModeGraphs"])
+        raw_graphs = charts_data.get("operatingModeGraphs")
+        if raw_graphs:
+            operating_mode_graphs = (
+                json.loads(raw_graphs) if isinstance(raw_graphs, str) else raw_graphs
+            )
 
         # Prepare context with all report data
         feared_events = FearedEvent.objects.filter(
