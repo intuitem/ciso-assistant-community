@@ -17,8 +17,7 @@
 
 	$effect(() => {
 		const arr = [...meta.path.slice(0, -1).map((f) => f.str), cell.folder];
-		const shortened = arr.length > MAX_VISIBLE ? [arr[0], '...', ...arr.slice(-LAST_VISIBLE)] : arr;
-		fullPath = shortened.join(' / ');
+		fullPath = arr.join(' / ');
 	});
 </script>
 
