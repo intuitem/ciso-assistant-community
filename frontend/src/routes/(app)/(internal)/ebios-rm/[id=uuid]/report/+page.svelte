@@ -11,6 +11,7 @@
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import { toPng, toSvg } from 'html-to-image';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -23,6 +24,14 @@
 	const study = reportData.study;
 	const useBubbles = data.useBubbles;
 	const inherentRiskEnabled = data.inherentRiskEnabled;
+
+	const pertinenceColor = {
+		undefined: 'bg-gray-200 text-gray-700',
+		irrelevant: 'bg-green-200 text-green-700',
+		'partially relevant': 'bg-yellow-200 text-yellow-700',
+		fairly_relevant: 'bg-orange-200 text-orange-700',
+		higly_relevant: 'bg-red-200 text-red-700'
+	};
 
 	let isGeneratingPDF = $state(false);
 
@@ -238,7 +247,9 @@
 	<div class="mb-6">
 		<h1 class="text-3xl font-bold text-gray-900 mb-2">{study.name}</h1>
 		{#if study.description}
-			<p class="text-gray-600 mb-4">{study.description}</p>
+			<div class="text-gray-600 mb-4">
+				<MarkdownRenderer content={study.description} />
+			</div>
 		{/if}
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
 			<div>
@@ -260,11 +271,73 @@
 		</div>
 	</div>
 
+	<!-- Workshop 1 -->
+	<div class="my-12">
+		<hr class="border-t-4 border-pink-600" />
+		<div class="text-center -mt-5 mb-12">
+			<span class="bg-white px-6 py-2 text-xl font-bold text-pink-600">
+				{m.workshop()} 1 - {m.frameTheStudy()}
+			</span>
+		</div>
+	</div>
+
+	<!-- Selected Assets -->
+	<section class="mb-6">
+		<!-- Selected Assets -->
+		{#if study.assets && study.assets.length > 0}
+			<div class="mb-4">
+				<h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+					<i class="fa-solid fa-server"></i>
+					{m.assets()}
+					<span class="badge preset-tonal-secondary text-xs">{study.assets.length}</span>
+				</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+					{#each study.assets as asset}
+						<div class="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-md transition-shadow">
+							<div class="flex items-start gap-2">
+								<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
+								<div class="flex-1">
+									<div class="font-semibold text-gray-900">{asset.str}</div>
+									{#if asset.type}
+										<div class="text-xs text-gray-600 mt-1">
+											<span class="font-medium">{m.type()}:</span>
+											<span class="ml-1">{safeTranslate(asset.type)}</span>
+										</div>
+									{/if}
+									{#if asset.folder}
+										<div class="text-xs text-gray-600">
+											<span class="font-medium">{m.domain()}:</span>
+											<span class="ml-1">{asset.folder.str}</span>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Observation -->
+		{#if study.observation}
+			<div class="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+				<h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+					<i class="fa-solid fa-eye text-gray-500"></i>
+					<span>{m.observation()}</span>
+				</h3>
+				<div class="text-gray-600">
+					<MarkdownRenderer content={study.observation} />
+				</div>
+			</div>
+		{/if}
+	</section>
+
 	<!-- Feared Events Section -->
 	{#if reportData.feared_events.length > 0}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
-				{m.fearedEvents()} ({reportData.feared_events.length})
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+				{m.fearedEvents()}
+				<span class="badge preset-tonal-secondary text-xs">{reportData.feared_events.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.feared_events as event}
@@ -310,8 +383,9 @@
 	<!-- Compliance Assessments Section -->
 	{#if reportData.compliance_assessments && reportData.compliance_assessments.length > 0}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
-				{m.complianceAssessments()} ({reportData.compliance_assessments.length})
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+				{m.complianceAssessments()}
+				<span class="badge preset-tonal-secondary text-xs">{reportData.compliance_assessments.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.compliance_assessments as assessment}
@@ -424,11 +498,22 @@
 		</section>
 	{/if}
 
+	<!-- Workshop 2 -->
+	<div class="my-12">
+		<hr class="border-t-4 border-fuchsia-900" />
+		<div class="text-center -mt-5 mb-12">
+			<span class="bg-white px-6 py-2 text-xl font-bold text-fuchsia-900">
+				{m.workshop()} 2 - {m.identifyRiskSources()}
+			</span>
+		</div>
+	</div>
+
 	<!-- RO/TO Couples Section -->
 	{#if reportData.ro_to_couples.length > 0}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
-				{m.roToCouples()} ({reportData.ro_to_couples.length})
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+				{m.roToCouples()}
+				<span class="badge preset-tonal-secondary text-xs">{reportData.ro_to_couples.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.ro_to_couples as roto}
@@ -446,12 +531,14 @@
 								<span class="ml-2">{safeTranslate(roto.resources)}</span>
 							</div>
 							<div>
-								<span class="font-semibold text-gray-700">{m.activity()}:</span>
+								<span class="font-semibold text-gray-700">{m.rotoActivity()}:</span>
 								<span class="ml-2">{safeTranslate(roto.activity)}</span>
 							</div>
 							<div>
 								<span class="font-semibold text-gray-700">{m.pertinence()}:</span>
-								<span class="ml-2">{safeTranslate(roto.pertinence)}</span>
+								<span class="badge ml-2 {pertinenceColor[roto.pertinence]}"
+									>{safeTranslate(roto.pertinence)}</span
+								>
 							</div>
 						</div>
 						{#if roto.feared_events.length > 0}
@@ -477,26 +564,41 @@
 		</section>
 	{/if}
 
+	<!-- Workshop 3 -->
+	<div class="my-12">
+		<hr class="border-t-4 border-teal-500" />
+		<div class="text-center -mt-5 mb-12">
+			<span class="bg-white px-6 py-2 text-xl font-bold text-teal-500">
+				{m.workshop()} 3 - {m.studyTheEcosystem()}
+			</span>
+		</div>
+	</div>
+
 	<!-- Stakeholders Section -->
 	{#if reportData.stakeholders.length > 0}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
-				{m.stakeholders()} ({reportData.stakeholders.length})
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+				{m.stakeholders()}
+				<span class="badge preset-tonal-secondary text-xs">{reportData.stakeholders.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.stakeholders as stakeholder}
 					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-						<h3 class="text-lg font-semibold text-gray-800 mb-2">
+						<h3 class="text-lg font-semibold text-gray-800 mb-3">
 							{stakeholder.entity.str} ({safeTranslate(stakeholder.category_raw)})
 						</h3>
-						<div class="grid grid-cols-2 gap-4 text-sm">
-							<div>
-								<span class="font-semibold text-gray-700">{m.currentCriticality()}:</span>
-								<span class="ml-2">{stakeholder.current_criticality}</span>
+						<div class="flex flex-wrap gap-6 text-sm mb-2">
+							<div class="flex flex-col">
+								<span class="text-xs text-gray-500 mb-1">{m.currentCriticality()}</span>
+								<span class="badge bg-blue-100 text-blue-800 font-bold text-base px-3 py-1"
+									>{stakeholder.current_criticality}</span
+								>
 							</div>
-							<div>
-								<span class="font-semibold text-gray-700">{m.residualCriticality()}:</span>
-								<span class="ml-2">{stakeholder.residual_criticality}</span>
+							<div class="flex flex-col">
+								<span class="text-xs text-gray-500 mb-1">{m.residualCriticality()}</span>
+								<span class="badge bg-green-100 text-green-800 font-bold text-base px-3 py-1"
+									>{stakeholder.residual_criticality}</span
+								>
 							</div>
 						</div>
 						{#if stakeholder.applied_controls.length > 0}
@@ -522,7 +624,7 @@
 	<!-- Ecosystem Radar Section -->
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.ecosystemRadar()}
 			</h2>
 			<div class="bg-white flex gap-4">
@@ -551,7 +653,7 @@
 	<!-- Scenarios Hierarchy Section -->
 	{#if reportData.strategic_scenarios.length > 0}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.strategicScenarios()} & {m.attackPaths()}
 			</h2>
 			<div class="space-y-6">
@@ -754,10 +856,20 @@
 		</section>
 	{/if}
 
+	<!-- Workshop 4 -->
+	<div class="my-12">
+		<hr class="border-t-4 border-yellow-600" />
+		<div class="text-center -mt-5 mb-12">
+			<span class="bg-white px-6 py-2 text-xl font-bold text-yellow-600">
+				{m.workshop()} 4 - {m.assessTheRiskScenarios()}
+			</span>
+		</div>
+	</div>
+
 	<!-- Operational Scenarios Section -->
 	{#if reportData.operational_scenarios.length > 0}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.operationalScenarios()}
 			</h2>
 			{#if study.quotation_method}
@@ -922,6 +1034,16 @@
 		</section>
 	{/if}
 
+	<!-- Workshop 5 -->
+	<div class="my-12">
+		<hr class="border-t-4 border-red-500" />
+		<div class="text-center -mt-5 mb-12">
+			<span class="bg-white px-6 py-2 text-xl font-bold text-red-500">
+				{m.workshop()} 5 - {m.validateTheTreatment()}
+			</span>
+		</div>
+	</div>
+
 	<!-- Risk Matrix Section -->
 	{#if reportData.risk_matrix_data}
 		{@const riskMatrix = reportData.risk_matrix_data.risk_matrix}
@@ -930,7 +1052,7 @@
 		{@const currentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'current')}
 		{@const residualCluster = buildRiskCluster(riskScenarios, riskMatrix, 'residual')}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.riskMatrix()}
 				{#if reportData.risk_matrix_data.risk_assessment}
 					<span class="text-sm font-normal text-gray-600">
@@ -1064,7 +1186,7 @@
 	<!-- Treatment Plan Section -->
 	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan}
 		<section class="mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.treatmentPlan()}
 			</h2>
 
