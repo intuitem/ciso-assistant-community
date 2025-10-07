@@ -66,7 +66,7 @@
 				}
 				// show: false
 			},
-			grid: { left: 0, top: 40, right: 0, bottom: 10, containLabel: true },
+			grid: { left: 10, top: 40, right: 10, bottom: 10, containLabel: true },
 			xAxis: horizontal ? value : category,
 			yAxis: horizontal ? category : value,
 			series: [
