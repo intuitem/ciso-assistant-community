@@ -85,6 +85,8 @@ export const URL_MODEL = [
 	'findings-assessments',
 	// privacy,
 	'processings',
+	'right-requests',
+	'data-breaches',
 	'purposes',
 	'personal-data',
 	'data-subjects',
@@ -115,7 +117,10 @@ export const URL_MODEL = [
 	'terminologies',
 	// roles,
 	'roles',
-	'permissions'
+	'permissions',
+	// pmbok
+	'generic-collections',
+	'accreditations'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

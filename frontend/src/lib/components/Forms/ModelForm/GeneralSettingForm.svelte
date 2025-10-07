@@ -30,7 +30,7 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications', 'interface', 'financial']);
+	let openAccordionItems = $state(['notifications', 'financial']);
 </script>
 
 <Accordion
@@ -48,20 +48,6 @@
 					{form}
 					field="notifications_enable_mailing"
 					label={m.settingsNotificationsMail()}
-				/>
-			</div>
-		{/snippet}
-	</Accordion.Item>
-	<Accordion.Item value="interface">
-		{#snippet control()}
-			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
-		{/snippet}
-		{#snippet panel()}
-			<div class="p-4">
-				<Checkbox
-					{form}
-					field="interface_agg_scenario_matrix"
-					label={m.settingsAggregateMatrix()}
 				/>
 			</div>
 		{/snippet}
@@ -89,6 +75,11 @@
 		{#snippet panel()}
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
+					<Checkbox
+						{form}
+						field="interface_agg_scenario_matrix"
+						label={m.settingsAggregateMatrix()}
+					/>
 					<Checkbox
 						{form}
 						field="risk_matrix_swap_axes"
@@ -190,7 +181,7 @@
 	</Accordion.Item>
 	<Accordion.Item value="financial">
 		{#snippet control()}
-			<i class="fa-solid fa-coins mr-2"></i>Financial Settings
+			<i class="fa-solid fa-coins mr-2"></i>{m.financialSettings()}
 		{/snippet}
 		{#snippet panel()}
 			<div class="p-4 space-y-4">
@@ -205,14 +196,14 @@
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' }
 					]}
-					label="Currency"
-					helpText="Select the default currency for financial calculations"
+					label={m.currency()}
+					helpText={m.currencyHelpText()}
 				/>
 				<NumberField
 					{form}
 					field="daily_rate"
-					label="Daily Rate"
-					helpText="Default daily rate for cost calculations"
+					label={m.dailyRate()}
+					helpText={m.dailyRateHelpText()}
 					min={0}
 					step={1}
 				/>

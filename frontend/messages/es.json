@@ -975,5 +975,7 @@
 	"securityObjectiveScale": "Escala de propiedades de seguridad",
 	"securityObjectiveScaleHelpText": "Elija su escala para las propiedades de seguridad (1 a 4 por defecto)",
 	"actor": "Actor",
-	"action": "Acción"
+	"action": "Acción",
+	"viewMore": "Ver más",
+	"viewLess": "Ver menos"
 }

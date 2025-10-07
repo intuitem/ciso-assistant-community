@@ -1,27 +1,40 @@
 <script lang="ts">
 	import Article from '$lib/components/DataViz/Article.svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 
 	$pageTitle = 'Experimental';
 </script>
 
 <div class="bg-white grid grid-cols-2 p-4 gap-4">
 	<Article
-		title="Frameworks mapping"
-		desc="Visualize applied mapping data as a graph"
+		title={m.frameworksMapping()}
+		desc={m.visualizeAppliedMapping()}
 		link="/experimental/mapping"
 		tags={['analysis', 'mapping']}
 	/>
 	<Article
-		title="Assets explorer"
-		desc="Visualize assets and their relationships"
+		title={m.assetsExplorer()}
+		desc={m.visualizeAssetsRelationships()}
 		link="/assets/graph"
 		tags={['analysis', 'assets']}
 	/>
 	<Article
-		title="Requirements explorer"
-		desc="Visualize all requirements across all audits"
+		title={m.requirementsExplorer()}
+		desc={m.visualizeRequirements()}
 		link="/requirement-assessments"
 		tags={['analysis', 'assets']}
+	/>
+	<Article
+		title="Vulnerability Treemap"
+		desc="Hierarchical visualization of vulnerabilities by domain, severity, and status"
+		link="/experimental/vulnerability-treemap"
+		tags={['analysis', 'vulnerabilities', 'treemap']}
+	/>
+	<Article
+		title="Vulnerability Flow Diagram"
+		desc="Sankey diagram showing vulnerability flow from domains through severity to status"
+		link="/experimental/vulnerability-sankey"
+		tags={['analysis', 'vulnerabilities', 'sankey']}
 	/>
 </div>
