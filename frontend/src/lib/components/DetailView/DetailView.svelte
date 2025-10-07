@@ -203,20 +203,22 @@
 	}
 
 	function getReverseForeignKeyEndpoint({
-		model,
+		parentModel,
+		targetUrlModel,
 		field,
 		id,
 		endpointUrl
 	}: {
-		model: ModelMapEntry;
+		parentModel: ModelMapEntry;
+		targetUrlModel: string;
 		field: string;
 		id: string;
 		endpointUrl?: string;
 	}) {
 		if (endpointUrl?.startsWith('./')) {
-			return `/${model.urlModel}/${id}/${endpointUrl.slice(2)}`;
+			return `/${parentModel.urlModel}/${id}/${endpointUrl.slice(2)}`;
 		}
-		return `/${model.urlModel}?${field}=${id}`;
+		return `/${targetUrlModel}?${field}=${id}`;
 	}
 
 	const user = page.data.user;
@@ -638,10 +640,10 @@
 							{#if model.table}
 								<ModelTable
 									baseEndpoint={getReverseForeignKeyEndpoint({
-										model: data.model,
+										parentModel: data.model,
+										targetUrlModel: urlmodel,
 										field: field.field,
 										id: data.data.id,
-										detail: true,
 										endpointUrl: field.endpointUrl
 									})}
 									source={model.table}
