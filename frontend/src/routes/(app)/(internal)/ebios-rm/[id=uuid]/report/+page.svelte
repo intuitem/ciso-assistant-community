@@ -1439,7 +1439,7 @@
 		}
 
 		.workshop-divider .text-center {
-			margin-top: -0.75em !important;
+			margin-top: -0.8em !important;
 			margin-bottom: 1.5cm !important;
 		}
 
@@ -1447,6 +1447,7 @@
 			padding: 0.3em 1.5em !important;
 			background: white !important;
 			display: inline-block !important;
+			line-height: 1 !important;
 		}
 
 		/* Ensure workshop headers stay with content */
