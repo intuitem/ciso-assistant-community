@@ -75,11 +75,13 @@
 	};
 </script>
 
-<div class="bg-white shadow-sm p-4 max-w-7xl mx-auto relative">
+<div class="bg-white shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
 	<!-- Workshop Navigation Pad -->
-	<div class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print">
+	<div
+		class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
+	>
 		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
-		<div class="flex flex-col gap-2">
+		<div class="flex flex-col gap-2 items-center">
 			<a
 				href="#workshop-1"
 				class="w-10 h-10 flex items-center justify-center rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-bold transition-colors"
@@ -528,7 +530,9 @@
 	<!-- Ecosystem Radar Section - Current -->
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
 		<section class="mb-6 radar-page">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center"
+			>
 				{m.ecosystemRadar()} - {m.current()}
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-current">
@@ -545,7 +549,9 @@
 	<!-- Ecosystem Radar Section - Residual -->
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
 		<section class="mb-6 radar-page">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center"
+			>
 				{m.ecosystemRadar()} - {m.residual()}
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-residual">
@@ -1480,14 +1486,14 @@
 		}
 
 		/* Specific fixes for radar charts */
-		[data-chart="radar-current"],
-		[data-chart="radar-residual"] {
+		[data-chart='radar-current'],
+		[data-chart='radar-residual'] {
 			max-height: 25cm !important;
-			margin-left: -4cm !important;
+			margin-left: -1cm !important;
 		}
 
-		[data-chart="radar-current"] > *,
-		[data-chart="radar-residual"] > * {
+		[data-chart='radar-current'] > *,
+		[data-chart='radar-residual'] > * {
 			max-height: 25cm !important;
 		}
 
@@ -1507,7 +1513,7 @@
 		}
 
 		/* Fix operating mode graphs - scale to fit and wrap if needed */
-		[data-chart^="operating-mode-"] {
+		[data-chart^='operating-mode-'] {
 			max-width: 100% !important;
 			max-height: 18cm !important;
 			overflow: hidden !important;
@@ -1515,7 +1521,7 @@
 			margin: 1cm 0 !important;
 		}
 
-		[data-chart^="operating-mode-"] > * {
+		[data-chart^='operating-mode-'] > * {
 			max-width: 100% !important;
 			max-height: 18cm !important;
 			transform: scale(0.85) !important;
@@ -1523,7 +1529,7 @@
 		}
 
 		/* Ensure operating mode SVG elements scale properly */
-		[data-chart^="operating-mode-"] svg {
+		[data-chart^='operating-mode-'] svg {
 			max-width: 100% !important;
 			height: auto !important;
 		}
