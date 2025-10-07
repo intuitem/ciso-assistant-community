@@ -956,6 +956,7 @@
 	"critical": "Critical",
 	"info": "Information",
 	"vulnerabilities": "Vulnerabilities",
+	"vulnerabilityTreemap": "vulnerabilityTreemap",
 	"severity": "Severity",
 	"potential": "Potential",
 	"exploitable": "Exploitable",

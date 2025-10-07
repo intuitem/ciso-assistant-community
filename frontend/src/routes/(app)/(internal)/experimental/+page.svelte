@@ -25,4 +25,16 @@
 		link="/requirement-assessments"
 		tags={['analysis', 'assets']}
 	/>
+	<Article
+		title="Vulnerability Treemap"
+		desc="Hierarchical visualization of vulnerabilities by domain, severity, and status"
+		link="/experimental/vulnerability-treemap"
+		tags={['analysis', 'vulnerabilities', 'treemap']}
+	/>
+	<Article
+		title="Vulnerability Flow Diagram"
+		desc="Sankey diagram showing vulnerability flow from domains through severity to status"
+		link="/experimental/vulnerability-sankey"
+		tags={['analysis', 'vulnerabilities', 'sankey']}
+	/>
 </div>
