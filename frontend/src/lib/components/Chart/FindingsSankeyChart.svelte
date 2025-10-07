@@ -33,7 +33,7 @@
 	}: Props = $props();
 
 	// Auto-translate node names for category, severity and status values
-	const translatedNodes = nodes.map(node => {
+	const translatedNodes = nodes.map((node) => {
 		if (node.name) {
 			// Handle patterns like "Category: Pentest", "Severity: Critical" or "Status: Identified"
 			const parts = node.name.split(': ');

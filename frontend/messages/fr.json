@@ -1416,7 +1416,7 @@
 	"tourRiskDescription": "C'est ici que vous pourrez gérer votre analyse et registre des risques. <br/><b>Cliquez dessus</b>.",
 	"tourRiskAssessmentTitle": "Évaluation des Risques",
 	"tourRiskAssessmentDescription": "Groupez et gérez vos analyses à travers des évaluations des risques.",
-	"assessmentsPerStatus": "Avancement des études",
+	"assessmentsPerStatus": "Avancement des évaluations",
 	"tourAnalyticsTitle": "Analyses",
 	"tourAnalyticsDescription": "La section aperçu couvre vos principaux tableaux de bord et analyses. <br/><b>Cliquez dessus</b>.",
 	"tourAnalyticsViewDescription": "Consultez ici les analyses et rapports agrégés.",

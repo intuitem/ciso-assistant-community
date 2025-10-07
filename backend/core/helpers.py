@@ -781,16 +781,18 @@ def combined_assessments_per_status(user: User):
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
 
-        # Count by status
-        data = []
-        # Count undefined (null status)
+        # Count by status in a single query
+        status_counts = dict(
+            viewable_assessments.exclude(status__isnull=True)
+            .values_list("status")
+            .annotate(count=Count("status"))
+        )
         undefined_count = viewable_assessments.filter(status__isnull=True).count()
-        data.append(undefined_count)
 
-        # Count each defined status
-        for status_choice in model.Status.choices:
-            count = viewable_assessments.filter(status=status_choice[0]).count()
-            data.append(count)
+        # Build data array matching all_statuses order
+        data = [undefined_count] + [
+            status_counts.get(status, 0) for status in all_statuses[1:]
+        ]
 
         result["series"].append({"name": series_name, "data": data})
 
