@@ -572,30 +572,43 @@ def task_template_per_status(user: User):
 
     # Count statuses based on the logic:
     # - If not recurrent: get the status of the node
-    # - If recurrent: get the status of the last occurrence
-    status_counts = {"pending": 0, "in_progress": 0, "completed": 0, "cancelled": 0}
+    # - If recurrent: get the status of the last occurrence (most recent past event)
+    from django.db.models import Subquery, OuterRef
+    from django.utils import timezone
 
-    for template in viewable_task_templates:
-        if template.is_recurrent:
-            # Get the most recent node (last occurrence)
-            last_node = (
-                TaskNode.objects.filter(task_template=template)
-                .order_by("-due_date")
-                .first()
-            )
-            if last_node:
-                status_counts[last_node.status] += 1
-            else:
-                # No nodes yet, consider as pending
-                status_counts["pending"] += 1
-        else:
-            # Non-recurrent: get the single node's status
-            node = TaskNode.objects.filter(task_template=template).first()
-            if node:
-                status_counts[node.status] += 1
-            else:
-                # No node yet, consider as pending
-                status_counts["pending"] += 1
+    status_counts = {"pending": 0, "in_progress": 0, "completed": 0, "cancelled": 0}
+    today = timezone.localdate()
+
+    # For recurrent templates, get last occurrence status (most recent past)
+    last_occurrence_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
+
+    recurrent_with_status = (
+        viewable_task_templates.filter(is_recurrent=True)
+        .annotate(node_status=Subquery(last_occurrence_subq))
+        .values_list("node_status", flat=True)
+    )
+
+    # For non-recurrent templates, get the single node's status
+    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
+        "status"
+    )[:1]
+
+    non_recurrent_with_status = (
+        viewable_task_templates.filter(is_recurrent=False)
+        .annotate(node_status=Subquery(single_node_subq))
+        .values_list("node_status", flat=True)
+    )
+
+    # Count statuses
+    for status in recurrent_with_status:
+        status_counts[status or "pending"] += 1
+
+    for status in non_recurrent_with_status:
+        status_counts[status or "pending"] += 1
 
     for st in TaskNode.TASK_STATUS_CHOICES:
         count = status_counts[st[0]]
