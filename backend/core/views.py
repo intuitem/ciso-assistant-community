@@ -3166,6 +3166,7 @@ class UserFilter(GenericFilterSet):
             "is_approver",
             "is_third_party",
             "expiry_date",
+            "user_groups",
         ]
 
 

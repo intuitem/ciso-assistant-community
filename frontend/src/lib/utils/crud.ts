@@ -520,6 +520,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
+		reverseForeignKeyFields: [{ field: 'user_groups', urlModel: 'users' }],
 		filters: []
 	},
 	'role-assignments': {
