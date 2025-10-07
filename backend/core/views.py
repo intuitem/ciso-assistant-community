@@ -1164,6 +1164,156 @@ class VulnerabilityViewSet(BaseModelViewSet):
     def severity(self, request):
         return Response(dict(Severity.choices))
 
+    @action(detail=False, methods=["get"], name="Get sankey data")
+    def sankey_data(self, request):
+        """
+        Returns vulnerability data structured for Sankey diagram:
+        Folders -> Severity -> Status (as links)
+        """
+        folder_id = request.query_params.get("folder", None)
+
+        # Get viewable vulnerabilities
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, Vulnerability
+        )
+
+        vulnerabilities = Vulnerability.objects.filter(
+            id__in=object_ids
+        ).select_related("folder")
+
+        # Build link structure for Sankey: folder -> severity -> status
+        links = []
+        folder_severity_counts = {}
+        severity_status_counts = {}
+
+        for vuln in vulnerabilities:
+            # Get folder name
+            if vuln.folder:
+                folder_name = vuln.folder.name
+            else:
+                folder_name = "No Folder"
+
+            # Get severity label
+            severity_value = vuln.severity
+            severity_label = dict(Severity.choices).get(severity_value, "undefined")
+
+            # Get status label
+            status_value = vuln.status
+            status_label = status_value if status_value else "--"
+
+            # Count folder -> severity links
+            folder_severity_key = f"{folder_name}||{severity_label}"
+            folder_severity_counts[folder_severity_key] = (
+                folder_severity_counts.get(folder_severity_key, 0) + 1
+            )
+
+            # Count severity -> status links
+            severity_status_key = f"{severity_label}||{status_label}"
+            severity_status_counts[severity_status_key] = (
+                severity_status_counts.get(severity_status_key, 0) + 1
+            )
+
+        # Convert to Sankey link format
+        for key, value in folder_severity_counts.items():
+            folder, severity = key.split("||")
+            links.append({"source": folder, "target": severity, "value": value})
+
+        for key, value in severity_status_counts.items():
+            severity, status_label = key.split("||")
+            links.append({"source": severity, "target": status_label, "value": value})
+
+        return Response(links)
+
+    @action(detail=False, methods=["get"], name="Get treemap data")
+    def treemap_data(self, request):
+        """
+        Returns vulnerability data structured for treemap visualization:
+        Folders -> Severity -> Status
+        """
+        folder_id = request.query_params.get("folder", None)
+
+        # Get viewable vulnerabilities
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, Vulnerability
+        )
+
+        vulnerabilities = Vulnerability.objects.filter(
+            id__in=object_ids
+        ).select_related("folder")
+
+        # Build hierarchical structure: folder -> severity -> status
+        folder_data = {}
+
+        for vuln in vulnerabilities:
+            # Get folder name
+            if vuln.folder:
+                folder_name = vuln.folder.name
+                folder_id = str(vuln.folder.id)
+            else:
+                folder_name = "No Folder"
+                folder_id = "no-folder"
+
+            # Get severity label (lowercase for frontend translation)
+            severity_value = vuln.severity
+            severity_label = dict(Severity.choices).get(severity_value, "undefined")
+
+            # Get status label (from the choice value, not display)
+            status_value = vuln.status
+            status_label = status_value if status_value else "--"
+
+            # Initialize folder structure if needed
+            if folder_name not in folder_data:
+                folder_data[folder_name] = {"folder_id": folder_id, "severities": {}}
+
+            # Initialize severity structure if needed
+            if severity_label not in folder_data[folder_name]["severities"]:
+                folder_data[folder_name]["severities"][severity_label] = {}
+
+            # Count status occurrences
+            if (
+                status_label
+                not in folder_data[folder_name]["severities"][severity_label]
+            ):
+                folder_data[folder_name]["severities"][severity_label][status_label] = 0
+
+            folder_data[folder_name]["severities"][severity_label][status_label] += 1
+
+        # Convert to treemap structure
+        treemap_data = []
+        for folder_name, folder_info in folder_data.items():
+            folder_node = {
+                "name": folder_name,
+                "id": folder_info["folder_id"],
+                "children": [],
+            }
+
+            for severity_name, statuses in folder_info["severities"].items():
+                severity_node = {
+                    "name": severity_name,
+                    "id": f"{folder_info['folder_id']}-{severity_name.lower()}",
+                    "children": [],
+                }
+
+                for status_name, count in statuses.items():
+                    status_node = {
+                        "name": status_name,
+                        "id": f"{folder_info['folder_id']}-{severity_name.lower()}-{status_name.lower().replace(' ', '-')}",
+                        "value": count,
+                    }
+                    severity_node["children"].append(status_node)
+
+                folder_node["children"].append(severity_node)
+
+            treemap_data.append(folder_node)
+
+        return Response(treemap_data, status=status.HTTP_200_OK)
+
 
 class FilteringLabelViewSet(BaseModelViewSet):
     """
