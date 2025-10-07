@@ -226,20 +226,17 @@ class LicenseStatusView(APIView):
 
         if not expiry_date_str:
             return Response(
-                {"status": "active", "message": "No expiratiion date set"},
+                {"status": "active", "message": "No expiration date set"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            try:
-                expiration_date = datetime.fromisoformat(expiry_date_str)
-            except ValueError:
-                expiration_date = "noExpirationDateSet"
-                return Response({"status": "active", "message": expiration_date})
+            expiration_date = datetime.fromisoformat(expiry_date_str)
         except ValueError as e:
             logger.error("Invalid expiration date format", exc_info=e)
+            error_msg = "noExpirationDateSet"
             return Response(
-                {"status": "error", "message": "Invalid expiration date format"},
+                {"status": "active", "message": error_msg},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
