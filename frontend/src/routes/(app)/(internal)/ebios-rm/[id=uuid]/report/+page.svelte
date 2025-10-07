@@ -293,7 +293,9 @@
 				</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 					{#each study.assets as asset}
-						<div class="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-md transition-shadow">
+						<div
+							class="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-md transition-shadow"
+						>
 							<div class="flex items-start gap-2">
 								<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
 								<div class="flex-1">
@@ -335,7 +337,9 @@
 	<!-- Feared Events Section -->
 	{#if reportData.feared_events.length > 0}
 		<section class="mb-6">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+			>
 				{m.fearedEvents()}
 				<span class="badge preset-tonal-secondary text-xs">{reportData.feared_events.length}</span>
 			</h2>
@@ -383,9 +387,13 @@
 	<!-- Compliance Assessments Section -->
 	{#if reportData.compliance_assessments && reportData.compliance_assessments.length > 0}
 		<section class="mb-6">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+			>
 				{m.complianceAssessments()}
-				<span class="badge preset-tonal-secondary text-xs">{reportData.compliance_assessments.length}</span>
+				<span class="badge preset-tonal-secondary text-xs"
+					>{reportData.compliance_assessments.length}</span
+				>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.compliance_assessments as assessment}
@@ -511,7 +519,9 @@
 	<!-- RO/TO Couples Section -->
 	{#if reportData.ro_to_couples.length > 0}
 		<section class="mb-6">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+			>
 				{m.roToCouples()}
 				<span class="badge preset-tonal-secondary text-xs">{reportData.ro_to_couples.length}</span>
 			</h2>
@@ -577,7 +587,9 @@
 	<!-- Stakeholders Section -->
 	{#if reportData.stakeholders.length > 0}
 		<section class="mb-6">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+			>
 				{m.stakeholders()}
 				<span class="badge preset-tonal-secondary text-xs">{reportData.stakeholders.length}</span>
 			</h2>
