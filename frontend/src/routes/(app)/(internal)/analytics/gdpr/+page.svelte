@@ -28,7 +28,11 @@
 			text={m.dataRecipients()}
 			count={data.data.recipients_count}
 		/>
-		<!-- <Card icon="fa-solid fa-circle-exclamation" text="Incidents" count={2} /> -->
+		<Card
+			icon="fa-solid fa-user-shield"
+			text={m.openRightRequests()}
+			count={data.data.open_right_requests_count}
+		/>
 	</div>
 	<div class="col-span-7">
 		{#if data?.data?.countries?.length > 0}

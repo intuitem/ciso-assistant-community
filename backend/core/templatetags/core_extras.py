@@ -1,3 +1,4 @@
+import os
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -86,6 +87,14 @@ def get_answers(question, answers):
 @register.filter(name="get_item")
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter(name="basename")
+def basename_filter(file_path):
+    """Extract the basename from a file path."""
+    if not file_path:
+        return ""
+    return os.path.basename(str(file_path))
 
 
 @register.simple_tag

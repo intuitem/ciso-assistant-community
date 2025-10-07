@@ -3,6 +3,7 @@ from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
 from core.models import AppliedControl, ComplianceAssessment
 from tprm.models import EntityAssessment
+from iam.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import models
@@ -422,3 +423,30 @@ def lock_overdue_compliance_assessments():
         logger.info(f"Successfully locked {count} overdue compliance assessments")
     else:
         logger.debug("No overdue compliance assessments found to lock")
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="3", minute="0"))
+def deactivate_expired_users():
+    """Deactivate users whose expiry_date has passed, except superusers"""
+    today = date.today()
+    expired_users = User.objects.filter(
+        expiry_date__lt=today,
+        expiry_date__isnull=False,
+        is_active=True,
+        is_superuser=False,  # Exclude superusers from auto-deactivation
+    )
+
+    count = 0
+    for user in expired_users:
+        user.is_active = False
+        user.save()
+        count += 1
+        logger.info(
+            f"Deactivated expired user: {user.email} (ID: {user.id}), expiry date: {user.expiry_date}"
+        )
+
+    if count > 0:
+        logger.info(f"Successfully deactivated {count} expired users")
+    else:
+        logger.debug("No expired users found to deactivate")
