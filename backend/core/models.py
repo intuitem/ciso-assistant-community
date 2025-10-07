@@ -4662,7 +4662,7 @@ class ComplianceAssessment(Assessment):
                         "is_scored",
                         "observation",
                     ],
-                    batch_size=1000
+                    batch_size=1000,
                 )
 
             # Handle M2M relationships
@@ -5251,7 +5251,7 @@ class ComplianceAssessment(Assessment):
                 "is_scored",
                 "observation",
             ],
-            batch_size=1000
+            batch_size=1000,
         )
         return requirement_assessments
 
