@@ -81,7 +81,9 @@
 			},
 			radar: {
 				shape: 'circle',
-				indicator: labels
+				indicator: labels,
+				radius: '65%',
+				center: ['50%', '55%']
 			},
 			series: [
 				{
