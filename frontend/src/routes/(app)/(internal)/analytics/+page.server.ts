@@ -10,6 +10,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
 	const applied_control_status = await req_applied_control_status.json();
 
+	const req_task_template_status = await fetch(`${BASE_API_URL}/task-templates/per_status/`);
+	const task_template_status = await req_task_template_status.json();
+
 	const riskAssessmentsPerStatus = await fetch(`${BASE_API_URL}/risk-assessments/per_status/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
@@ -29,6 +32,17 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return data.results;
 		} catch (error) {
 			console.error('failed to fetch or parse counters:', error);
+			return null;
+		}
+	};
+
+	const getCombinedAssessmentsStatus = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_combined_assessments_status/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('failed to fetch or parse combined assessments status:', error);
 			return null;
 		}
 	};
@@ -79,6 +93,20 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			console.error('Failed to fetch compliance analytics:', error);
 			return {};
 		});
+
+	const getGovernanceCalendarData = async () => {
+		try {
+			const currentYear = new Date().getFullYear();
+			const response = await fetch(
+				`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`
+			);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('Failed to fetch governance calendar data:', error);
+			return [];
+		}
+	};
 
 	const getOperationsAnalytics = async () => {
 		try {
@@ -131,6 +159,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 					return { results: [] };
 				});
 
+			const findingsSankeyData = await fetch(`${BASE_API_URL}/findings/sankey_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch findings Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				});
+
 			return {
 				incident_detection_breakdown: detectionData.results,
 				monthly_metrics: monthlyData.results,
@@ -138,11 +173,34 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 				severity_breakdown: severityData.results,
 				qualifications_breakdown: qualificationsData.results,
 				exception_sankey: exceptionSankeyData.results,
-				applied_controls_sunburst: sunburstData.results
+				applied_controls_sunburst: sunburstData.results,
+				findings_sankey: findingsSankeyData.results
 			};
 		} catch (error) {
 			console.error('Failed to fetch operations analytics:', error);
 			return null;
+		}
+	};
+
+	const getVulnerabilitySankeyData = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/vulnerabilities/sankey_data/`);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Failed to fetch vulnerability sankey data:', error);
+			return [];
+		}
+	};
+
+	const getFindingsAssessmentSunburstData = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/findings-assessments/sunburst_data/`);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Failed to fetch findings assessment sunburst data:', error);
+			return [];
 		}
 	};
 
@@ -158,13 +216,18 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		qualifications_count,
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
+		task_template_status: task_template_status.results,
 		complianceAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {
 			metrics: getMetrics(),
 			counters: getCounters(),
-			operationsAnalytics: getOperationsAnalytics()
+			combinedAssessmentsStatus: getCombinedAssessmentsStatus(),
+			governanceCalendarData: getGovernanceCalendarData(),
+			operationsAnalytics: getOperationsAnalytics(),
+			vulnerabilitySankeyData: getVulnerabilitySankeyData(),
+			findingsAssessmentSunburstData: getFindingsAssessmentSunburstData()
 		}
 	};
 };

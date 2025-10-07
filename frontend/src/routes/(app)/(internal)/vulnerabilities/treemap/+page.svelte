@@ -3,6 +3,7 @@
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -11,7 +12,7 @@
 
 	let { data }: Props = $props();
 
-	$pageTitle = 'Vulnerability Treemap';
+	$pageTitle = m.vulnerabilityTreemap();
 
 	// Define available severities and statuses based on actual Vulnerability model (lowercase keys from backend)
 	const severityOptions = ['critical', 'high', 'medium', 'low', 'info', 'undefined'];
@@ -142,34 +143,27 @@
 </script>
 
 <div class="bg-white p-6 h-screen overflow-auto">
-	<div class="mb-4">
-		<h1 class="text-2xl font-bold">Vulnerability Distribution Treemap</h1>
-		<p class="text-gray-600 mt-2">
-			Hierarchical view: Domains → Severity → Status (with dummy data)
-		</p>
-	</div>
-
 	<!-- Filters Section -->
 	<div class="mb-6 space-y-6 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
 		<!-- Severity Filters -->
 		<div>
 			<div class="flex items-center justify-between mb-3">
 				<div>
-					<label class="text-base font-semibold text-gray-900">Severity</label>
-					<p class="text-xs text-gray-500 mt-0.5">Filter vulnerabilities by severity level</p>
+					<label class="text-base font-semibold text-gray-900">{m.severity()}</label>
+					<p class="text-xs text-gray-500 mt-0.5">{m.filterVulnerabilitiesBySeverity()}</p>
 				</div>
 				<div class="flex gap-2">
 					<button
 						onclick={selectAllSeverities}
 						class="text-xs px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
 					>
-						Select All
+						{m.selectAll()}
 					</button>
 					<button
 						onclick={clearAllSeverities}
 						class="text-xs px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
 					>
-						Clear
+						{m.clear()}
 					</button>
 				</div>
 			</div>
@@ -199,21 +193,21 @@
 		<div>
 			<div class="flex items-center justify-between mb-3">
 				<div>
-					<label class="text-base font-semibold text-gray-900">Status</label>
-					<p class="text-xs text-gray-500 mt-0.5">Filter vulnerabilities by remediation status</p>
+					<label class="text-base font-semibold text-gray-900">{m.status()}</label>
+					<p class="text-xs text-gray-500 mt-0.5">{m.filterVulnerabilitiesByStatus()}</p>
 				</div>
 				<div class="flex gap-2">
 					<button
 						onclick={selectAllStatuses}
 						class="text-xs px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
 					>
-						Select All
+						{m.selectAll()}
 					</button>
 					<button
 						onclick={clearAllStatuses}
 						class="text-xs px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
 					>
-						Clear
+						{m.clear()}
 					</button>
 				</div>
 			</div>
@@ -248,19 +242,19 @@
 				{@const filteredData = filterTreemapData(loadedData)}
 				{#if filteredData.length === 0}
 					<div class="flex items-center justify-center h-full text-gray-500">
-						No data matches the selected filters
+						{m.noDataMatchesFilters()}
 					</div>
 				{:else}
 					<TreemapChart
 						tree={filteredData}
 						name="vulnerability_treemap"
-						title="Click to drill down"
+						title={m.clickToDrillDown()}
 					/>
 				{/if}
 			{/key}
 		{:catch error}
 			<div class="flex items-center justify-center h-full text-red-500">
-				Failed to load vulnerability data: {error.message}
+				{m.failedToLoadVulnerabilityData()}: {error.message}
 			</div>
 		{/await}
 	</div>
