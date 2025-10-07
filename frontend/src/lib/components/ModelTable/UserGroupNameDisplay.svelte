@@ -10,9 +10,6 @@
 	}
 	let { cell, meta }: Props = $props();
 
-	const MAX_VISIBLE = 4; // How many folder to show at once (including the first one) before shortening with "..."
-	const LAST_VISIBLE = MAX_VISIBLE - 1; // How many of the last folders to show when shortening
-
 	let fullPath = $state('');
 
 	$effect(() => {
