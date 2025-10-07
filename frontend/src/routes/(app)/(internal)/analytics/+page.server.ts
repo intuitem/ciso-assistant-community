@@ -10,6 +10,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
 	const applied_control_status = await req_applied_control_status.json();
 
+	const req_task_template_status = await fetch(`${BASE_API_URL}/task-templates/per_status/`);
+	const task_template_status = await req_task_template_status.json();
+
 	const riskAssessmentsPerStatus = await fetch(`${BASE_API_URL}/risk-assessments/per_status/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
@@ -169,6 +172,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		qualifications_count,
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
+		task_template_status: task_template_status.results,
 		complianceAnalytics,
 		user: locals.user,
 		title: m.analytics(),

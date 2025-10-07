@@ -279,7 +279,7 @@
 							<LoadingSpinner />
 						</div>
 					{:then counters}
-						<section id="stats">
+						<section id="stats" class="mb-6">
 							<span class="text-xl font-extrabold">{m.statistics()}</span>
 							<div
 								class="flex justify-between flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4"
@@ -300,13 +300,13 @@
 									count={counters.applied_controls}
 									label={m.appliedControls()}
 									faIcon="fa-solid fa-fire-extinguisher"
-									href="/applied-controls?category=!policy"
+									href="/applied-controls"
 								/>
 								<CounterCard
 									count={counters.policies}
 									label={m.policies()}
 									faIcon="fa-solid fa-file-alt"
-									href="/applied-controls?category=policy"
+									href="/policies"
 								/>
 								<CounterCard
 									count={counters.exceptions}
@@ -350,123 +350,88 @@
 					{:catch}
 						<div>Error loading assessments data</div>
 					{/await}
-					<section class="space-y-4">
-						<div
-							class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 h-96 lg:h-48 text-sm whitespace-nowrap"
-						>
-							<BarChart
-								classesContainer="flex-1 card p-4 bg-white"
-								name="complianceAssessmentsPerStatus"
-								title={m.complianceAssessmentsStatus()}
-								labels={localizeChartLabels(data.complianceAssessmentsPerStatus.localLables)}
-								values={data.complianceAssessmentsPerStatus.values}
-							/>
-							<BarChart
-								classesContainer="basis-1/2 card p-4 bg-white"
-								name="usedFrameworks"
-								horizontal
-								title={m.usedFrameworks()}
-								labels={data.usedFrameworks.map((framework) =>
-									framework.name.length > 60
-										? `${framework.name.substring(0, 60)}...`
-										: framework.name
-								)}
-								values={data.usedFrameworks.map(
-									(framework) => framework.compliance_assessments_count
-								)}
-							/>
-						</div>
-						<div
-							class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 h-96 lg:h-48 text-sm whitespace-nowrap"
-						>
-							<BarChart
-								classesContainer="flex-1 card p-4 bg-white"
-								name="riskAssessmentsPerStatus"
-								title={m.riskAssessmentsStatus()}
-								labels={localizeChartLabels(data.riskAssessmentsPerStatus.localLables)}
-								values={data.riskAssessmentsPerStatus.values}
-							/>
-							<DonutChart
-								classesContainer="flex-1 card p-4 bg-white"
-								name="riskScenariosStatus"
-								title={m.riskScenariosStatus()}
-								values={data.riskScenariosPerStatus.values}
-								orientation="horizontal"
-							/>
-						</div>
-					</section>
-					<section class="card p-4 bg-white">
-						<div>
-							<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
-							<div class="text-sm text-gray-500">
-								{m.orderdByRankingScore()}
-							</div>
-							<ModelTable
-								URLModel="applied-controls"
-								source={appliedControlTodoTable}
-								fields={[
-									'name',
-									'category',
-									'csf_function',
-									'folder',
-									'ranking_score',
-									'eta',
-									'state'
-								]}
-								hideFilters={true}
-								search={false}
-								rowsPerPage={false}
-								orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
-								baseEndpoint="/applied-controls?todo=true"
-							/>
-							<div class="text-sm">
-								<i class="fa-solid fa-info-circle"></i>
-								{m.rankingScoreDefintion()}.
+					<div>3- placeholder: calendar heatmap goes here</div>
+
+					<!-- Applied Controls and Task Templates Status Donuts -->
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+						<!-- Applied Controls Status Donut -->
+						<div class="bg-white rounded-lg p-4 border border-gray-200">
+							<h3 class="text-lg font-semibold text-gray-900 mb-4">
+								{m.appliedControlsStatus()}
+							</h3>
+							<div class="h-80">
+								{#if data.applied_control_status}
+									<DonutChart
+										name="applied_controls_status"
+										values={data.applied_control_status.values.map((v, i) => ({
+											...v,
+											localName: data.applied_control_status.localLables[i]
+										}))}
+										colors={data.applied_control_status.values?.map((v) => v.itemStyle.color)}
+									/>
+								{:else}
+									<div class="flex items-center justify-center h-full text-gray-500">
+										<p>No applied controls data available</p>
+									</div>
+								{/if}
 							</div>
 						</div>
-					</section>
-					<section class="space-y-2 card p-4 bg-white">
-						<div>
-							<div class="text-xl font-extrabold">{m.watchlist()}</div>
-							<div class="text-sm text-gray-500">
-								{m.watchlistDescription()}
+
+						<!-- Task Templates Status Donut -->
+						<div class="bg-white rounded-lg p-4 border border-gray-200">
+							<h3 class="text-lg font-semibold text-gray-900 mb-4">
+								{m.tasksStatus()}
+							</h3>
+							<div class="h-80">
+								{#if data.task_template_status}
+									<DonutChart
+										name="task_templates_status"
+										values={data.task_template_status.values.map((v, i) => ({
+											...v,
+											localName: data.task_template_status.localLables[i]
+										}))}
+										colors={data.task_template_status.values?.map((v) => v.itemStyle.color)}
+									/>
+								{:else}
+									<div class="flex items-center justify-center h-full text-gray-500">
+										<p>No tasks data available</p>
+									</div>
+								{/if}
 							</div>
 						</div>
-						<div class="flex flex-col space-y-5 items-center content-center">
-							<div class="w-full">
-								<span class="text-md font-semibold">{m.measuresToReview()}</span>
-								<ModelTable
-									source={appliedControlWatchlistTable}
-									URLModel="applied-controls"
-									hideFilters={true}
-									search={false}
-									rowsPerPage={false}
-									fields={[
-										'name',
-										'category',
-										'csf_function',
-										'folder',
-										'eta',
-										'expiry_date',
-										'state'
-									]}
-									baseEndpoint="/applied-controls?to_review=true"
-								/>
-							</div>
-							<div class="w-full">
-								<span class="text-md font-semibold">{m.acceptancesToReview()}</span>
-								<ModelTable
-									source={riskAcceptanceWatchlistTable}
-									URLModel="risk-acceptances"
-									hideFilters={true}
-									search={false}
-									rowsPerPage={false}
-									fields={['name', 'risk_scenarios', 'expiry_date', 'state']}
-									baseEndpoint="/risk-acceptances?to_review=true&approver={page.data.user.id}"
-								/>
-							</div>
+					</div>
+
+					<!-- Security Exception Flow -->
+					{#await data.stream.operationsAnalytics}
+						<div class="col-span-3 lg:col-span-1">
+							<div>Loading exceptions data...</div>
+							<LoadingSpinner />
 						</div>
-					</section>
+					{:then operationsAnalytics}
+						{#if operationsAnalytics}
+							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+								<h3 class="text-lg font-semibold text-gray-900 mb-4">
+									{m.securityExceptionFlow()}
+								</h3>
+								<div class="h-80">
+									{#if operationsAnalytics.exception_sankey.nodes.length > 0}
+										<ExceptionSankeyChart
+											name="exception_sankey"
+											title=""
+											nodes={operationsAnalytics.exception_sankey.nodes}
+											links={operationsAnalytics.exception_sankey.links}
+										/>
+									{:else}
+										<div class="flex items-center justify-center h-full text-gray-500">
+											<p>{m.noExceptionData()}</p>
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/if}
+					{:catch}
+						<div>Error loading exceptions data</div>
+					{/await}
 				</Tabs.Panel>
 				<Tabs.Panel value="risk">
 					<!-- Risk tab -->
@@ -537,14 +502,7 @@
 								/>
 							</div>
 						</div>
-						<div class="h-96">
-							<BarChart
-								name="mtg"
-								title={m.appliedControlsStatus()}
-								labels={data.applied_control_status.labels}
-								values={data.applied_control_status.values}
-							/>
-						</div>
+						<div>placeholder: vulns sankey chart here</div>
 					</section>
 				</Tabs.Panel>
 				<Tabs.Panel value="compliance">
@@ -842,27 +800,6 @@
 												/>
 											</div>
 										</div>
-									</div>
-								</div>
-
-								<!-- Fifth Row: Security Exception Flow -->
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
-										{m.securityExceptionFlow()}
-									</h3>
-									<div class="h-80">
-										{#if operationsAnalytics.exception_sankey.nodes.length > 0}
-											<ExceptionSankeyChart
-												name="exception_sankey"
-												title=""
-												nodes={operationsAnalytics.exception_sankey.nodes}
-												links={operationsAnalytics.exception_sankey.links}
-											/>
-										{:else}
-											<div class="flex items-center justify-center h-full text-gray-500">
-												<p>{m.noExceptionData()}</p>
-											</div>
-										{/if}
 									</div>
 								</div>
 							</section>

@@ -7952,6 +7952,11 @@ class TaskTemplateViewSet(BaseModelViewSet):
             ).data
         )
 
+    @action(detail=False, name="Task templates per status")
+    def per_status(self, request):
+        data = task_template_per_status(request.user)
+        return Response({"results": data})
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):

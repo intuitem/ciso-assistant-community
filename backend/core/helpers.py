@@ -549,6 +549,63 @@ def applied_control_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
+def task_template_per_status(user: User):
+    from core.models import TaskTemplate, TaskNode
+
+    values = list()
+    labels = list()
+    local_lables = list()
+    color_map = {
+        "pending": "#BFDBFE",
+        "in_progress": "#392F5A",
+        "completed": "#46D39A",
+        "cancelled": "#E55759",
+    }
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, TaskTemplate
+    )
+    viewable_task_templates = TaskTemplate.objects.filter(id__in=object_ids_view)
+
+    # Count statuses based on the logic:
+    # - If not recurrent: get the status of the node
+    # - If recurrent: get the status of the last occurrence
+    status_counts = {"pending": 0, "in_progress": 0, "completed": 0, "cancelled": 0}
+
+    for template in viewable_task_templates:
+        if template.is_recurrent:
+            # Get the most recent node (last occurrence)
+            last_node = (
+                TaskNode.objects.filter(task_template=template)
+                .order_by("-due_date")
+                .first()
+            )
+            if last_node:
+                status_counts[last_node.status] += 1
+            else:
+                # No nodes yet, consider as pending
+                status_counts["pending"] += 1
+        else:
+            # Non-recurrent: get the single node's status
+            node = TaskNode.objects.filter(task_template=template).first()
+            if node:
+                status_counts[node.status] += 1
+            else:
+                # No node yet, consider as pending
+                status_counts["pending"] += 1
+
+    for st in TaskNode.TASK_STATUS_CHOICES:
+        count = status_counts[st[0]]
+        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        values.append(v)
+        labels.append(st[1])
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
+
+
 def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
     values = list()
     labels = list()
