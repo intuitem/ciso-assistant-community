@@ -217,7 +217,49 @@
 	};
 </script>
 
-<div class="bg-white shadow-sm p-4 max-w-7xl mx-auto">
+<div class="bg-white shadow-sm p-4 max-w-7xl mx-auto relative">
+	<!-- Workshop Navigation Pad -->
+	<div class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3">
+		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
+		<div class="flex flex-col gap-2">
+			<a
+				href="#workshop-1"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-bold transition-colors"
+				title="{m.workshop()} 1"
+			>
+				1
+			</a>
+			<a
+				href="#workshop-2"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-fuchsia-900 hover:bg-fuchsia-950 text-white font-bold transition-colors"
+				title="{m.workshop()} 2"
+			>
+				2
+			</a>
+			<a
+				href="#workshop-3"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-bold transition-colors"
+				title="{m.workshop()} 3"
+			>
+				3
+			</a>
+			<a
+				href="#workshop-4"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-bold transition-colors"
+				title="{m.workshop()} 4"
+			>
+				4
+			</a>
+			<a
+				href="#workshop-5"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition-colors"
+				title="{m.workshop()} 5"
+			>
+				5
+			</a>
+		</div>
+	</div>
+
 	<!-- Back to Study Link and Export Button -->
 	<div class="mb-4 flex justify-between items-center">
 		<Anchor
@@ -272,7 +314,7 @@
 	</div>
 
 	<!-- Workshop 1 -->
-	<div class="my-12">
+	<div id="workshop-1" class="my-12 scroll-mt-20">
 		<hr class="border-t-4 border-pink-600" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-pink-600">
@@ -507,7 +549,7 @@
 	{/if}
 
 	<!-- Workshop 2 -->
-	<div class="my-12">
+	<div id="workshop-2" class="my-12 scroll-mt-20">
 		<hr class="border-t-4 border-fuchsia-900" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-fuchsia-900">
@@ -575,7 +617,7 @@
 	{/if}
 
 	<!-- Workshop 3 -->
-	<div class="my-12">
+	<div id="workshop-3" class="my-12 scroll-mt-20">
 		<hr class="border-t-4 border-teal-500" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-teal-500">
@@ -869,7 +911,7 @@
 	{/if}
 
 	<!-- Workshop 4 -->
-	<div class="my-12">
+	<div id="workshop-4" class="my-12 scroll-mt-20">
 		<hr class="border-t-4 border-yellow-600" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-yellow-600">
@@ -1047,7 +1089,7 @@
 	{/if}
 
 	<!-- Workshop 5 -->
-	<div class="my-12">
+	<div id="workshop-5" class="my-12 scroll-mt-20">
 		<hr class="border-t-4 border-red-500" />
 		<div class="text-center -mt-5 mb-12">
 			<span class="bg-white px-6 py-2 text-xl font-bold text-red-500">
@@ -1352,3 +1394,9 @@
 		</section>
 	{/if}
 </div>
+
+<style>
+	:global(html) {
+		scroll-behavior: smooth;
+	}
+</style>
