@@ -2569,16 +2569,11 @@ class AppliedControlViewSet(BaseModelViewSet):
         )
         queryset = AppliedControl.objects.filter(id__in=viewable_objects)
 
-        # Build hierarchical structure: folder -> csf_function -> category -> priority -> status
+        # Build hierarchical structure: csf_function -> category -> priority -> status
         hierarchy = {}
 
         for control in queryset.select_related("folder"):
-            # Level 1: Folder (Domain)
-            folder_name = control.folder.name if control.folder else "No Domain"
-            if folder_name not in hierarchy:
-                hierarchy[folder_name] = {}
-
-            # Level 2: CSF Function
+            # Level 1: CSF Function
             csf_function = (
                 dict(AppliedControl.CSF_FUNCTION).get(
                     control.csf_function, "No CSF Function"
@@ -2586,47 +2581,67 @@ class AppliedControlViewSet(BaseModelViewSet):
                 if control.csf_function
                 else "No CSF Function"
             )
-            if csf_function not in hierarchy[folder_name]:
-                hierarchy[folder_name][csf_function] = {}
+            if csf_function not in hierarchy:
+                hierarchy[csf_function] = {}
 
-            # Level 3: Category
+            # Level 2: Category
             category = (
                 dict(AppliedControl.CATEGORY).get(control.category, "No Category")
                 if control.category
                 else "No Category"
             )
-            if category not in hierarchy[folder_name][csf_function]:
-                hierarchy[folder_name][csf_function][category] = {}
+            if category not in hierarchy[csf_function]:
+                hierarchy[csf_function][category] = {}
 
-            # Level 4: Priority
+            # Level 3: Priority
             priority = (
                 dict(AppliedControl.PRIORITY).get(control.priority, "No Priority")
                 if control.priority
                 else "No Priority"
             )
-            if priority not in hierarchy[folder_name][csf_function][category]:
-                hierarchy[folder_name][csf_function][category][priority] = {}
+            if priority not in hierarchy[csf_function][category]:
+                hierarchy[csf_function][category][priority] = {}
 
-            # Level 5: Status
+            # Level 4: Status
             status = (
                 dict(AppliedControl.Status.choices).get(control.status, "No Status")
                 if control.status
                 else "No Status"
             )
-            if status not in hierarchy[folder_name][csf_function][category][priority]:
-                hierarchy[folder_name][csf_function][category][priority][status] = 0
-            hierarchy[folder_name][csf_function][category][priority][status] += 1
+            if status not in hierarchy[csf_function][category][priority]:
+                hierarchy[csf_function][category][priority][status] = 0
+            hierarchy[csf_function][category][priority][status] += 1
+
+        # CSF Function color mapping (matching NightingaleChart palette)
+        csf_color_map = {
+            "(undefined)": "#505372",
+            "Govern": "#FAE482",
+            "Identify": "#85C4EA",
+            "Protect": "#B29BBA",
+            "Detect": "#FAB647",
+            "Respond": "#E47677",
+            "Recover": "#8ACB93",
+            "No CSF Function": "#505372",
+        }
 
         # Convert to sunburst format
-        def build_sunburst_data(data_dict, name="Root"):
+        def build_sunburst_data(data_dict, name="Root", level=0, parent_color=None):
             if isinstance(data_dict, int):
-                return {"name": name, "value": data_dict}
+                result = {"name": name, "value": data_dict}
+                if parent_color:
+                    result["itemStyle"] = {"color": parent_color}
+                return result
 
             children = []
             total_value = 0
 
+            # Determine color for this level
+            current_color = parent_color
+            if level == 1 and name in csf_color_map:
+                current_color = csf_color_map[name]
+
             for key, value in data_dict.items():
-                child = build_sunburst_data(value, key)
+                child = build_sunburst_data(value, key, level + 1, current_color)
                 children.append(child)
                 total_value += child.get("value", 0)
 
@@ -2634,12 +2649,16 @@ class AppliedControlViewSet(BaseModelViewSet):
             if children:
                 result["children"] = children
 
+            # Apply color at all levels if we have a color
+            if current_color and level >= 1:
+                result["itemStyle"] = {"color": current_color}
+
             return result
 
         sunburst_data = []
-        for folder_name, folder_data in hierarchy.items():
-            folder_node = build_sunburst_data(folder_data, folder_name)
-            sunburst_data.append(folder_node)
+        for csf_function, function_data in hierarchy.items():
+            function_node = build_sunburst_data(function_data, csf_function, level=1)
+            sunburst_data.append(function_node)
 
         return Response({"results": sunburst_data})
 
