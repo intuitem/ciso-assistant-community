@@ -164,7 +164,7 @@ export const navData = {
 				},
 				{
 					name: 'policies',
-					fa_icon: 'fa-solid fa-book',
+					fa_icon: 'fa-solid fa-file-alt',
 					href: '/policies',
 					permissions: ['view_appliedcontrol']
 				},

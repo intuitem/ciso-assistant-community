@@ -66,13 +66,19 @@
 				}
 				// show: false
 			},
-			grid: { left: 0, top: 40, right: 0, bottom: 10, containLabel: true },
+			grid: { left: 10, top: 40, right: 10, bottom: 10, containLabel: true },
 			xAxis: horizontal ? value : category,
 			yAxis: horizontal ? category : value,
 			series: [
 				{
 					data: values,
-					type: 'bar'
+					type: 'bar',
+					itemStyle: {
+						color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+							{ offset: 0, color: '#4f46e5' },
+							{ offset: 1, color: '#7c3aed' }
+						])
+					}
 				}
 			]
 		};
