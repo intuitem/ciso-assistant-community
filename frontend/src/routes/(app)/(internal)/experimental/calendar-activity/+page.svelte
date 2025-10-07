@@ -35,7 +35,10 @@
 			<div class="space-y-2">
 				<p><span class="font-medium">Date:</span> {new Date(selectedDate).toLocaleDateString()}</p>
 				<p><span class="font-medium">Activity Value:</span> {selectedValue}</p>
-				<p><span class="font-medium">Day of Week:</span> {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long' })}</p>
+				<p>
+					<span class="font-medium">Day of Week:</span>
+					{new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long' })}
+				</p>
 			</div>
 		{:else}
 			<p class="text-gray-500">Click on a date in the calendar to see details</p>
