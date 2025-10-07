@@ -1386,7 +1386,7 @@
 	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude",
 	"report": "Rapport",
 	"appliedControlsFromAudits": "Mesures (via la conformité)",
-	"appliedControlsFromRiskAssessment": "Mesures (via l'analayse de risque)",
+	"appliedControlsFromRiskAssessment": "Mesures (via l'analyse de risque)",
 	"percentageDisplay": "{number} %",
 	"reviewProgress": "Avancement",
 	"ecosystemRadar": "Radar de l'écosystème",

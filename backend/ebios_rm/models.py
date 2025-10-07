@@ -914,7 +914,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     operating_modes_description = models.TextField(
         verbose_name=_("Operating modes description"),
         help_text=_("Description of the operating modes of the operational scenario"),
-        blank="True",
+        blank=True,
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
