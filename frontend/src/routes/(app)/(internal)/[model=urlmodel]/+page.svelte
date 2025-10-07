@@ -178,6 +178,15 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
+								{#if URLModel === 'vulnerabilities'}
+									<Anchor
+										href="vulnerabilities/treemap/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.visualizeButton()}
+										label={m.visualize()}
+										data-testid="viz-button"><i class="fa-solid fa-chart-pie"></i></Anchor
+									>
+								{/if}
 							{:else if ['risk-matrices', 'frameworks', 'requirement-mapping-sets'].includes(URLModel)}
 								{@const href = `/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 								{@const title =
