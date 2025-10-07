@@ -33,7 +33,7 @@
 	}: Props = $props();
 
 	// Auto-translate node names for category, severity and status values
-	for (const node of nodes) {
+	const translatedNodes = nodes.map(node => {
 		if (node.name) {
 			// Handle patterns like "Category: Pentest", "Severity: Critical" or "Status: Identified"
 			const parts = node.name.split(': ');
@@ -41,10 +41,11 @@
 				const [prefix, value] = parts;
 				const translatedPrefix = safeTranslate(prefix.toLowerCase());
 				const translatedValue = safeTranslate(value.toLowerCase());
-				node.name = `${translatedPrefix}: ${translatedValue}`;
+				return { ...node, name: `${translatedPrefix}: ${translatedValue}` };
 			}
 		}
-	}
+		return node;
+	});
 
 	const chart_id = `${name}_div`;
 
@@ -67,8 +68,8 @@
 				formatter: function (params) {
 					if (params.dataType === 'edge') {
 						// For links/flows, get node names by index
-						const sourceNode = nodes[params.data.source];
-						const targetNode = nodes[params.data.target];
+						const sourceNode = translatedNodes[params.data.source];
+						const targetNode = translatedNodes[params.data.target];
 						return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
 					} else {
 						// For nodes, show the node name and its total count
@@ -79,7 +80,7 @@
 			series: [
 				{
 					type: 'sankey',
-					data: nodes,
+					data: translatedNodes,
 					links: links,
 					emphasis: {
 						focus: 'adjacency'
