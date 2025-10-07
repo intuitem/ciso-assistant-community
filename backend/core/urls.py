@@ -143,6 +143,11 @@ urlpatterns = [
         get_combined_assessments_status_view,
         name="get_combined_assessments_status_view",
     ),
+    path(
+        "get_governance_calendar_data/",
+        get_governance_calendar_data_view,
+        name="get_governance_calendar_data_view",
+    ),
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),

@@ -12,6 +12,7 @@
 	import IncidentMonthlyChart from '$lib/components/Chart/IncidentMonthlyChart.svelte';
 	import ExceptionSankeyChart from '$lib/components/Chart/ExceptionSankeyChart.svelte';
 	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
+	import CalendarHeatmap from '$lib/components/Chart/CalendarHeatmap.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
 	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
@@ -332,7 +333,7 @@
 						</div>
 					{:then combinedAssessmentsStatus}
 						{#if combinedAssessmentsStatus}
-							<section class="bg-white rounded-lg p-4 border border-gray-200">
+							<section class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
 								<GroupedBarChart
 									name="combined_assessments_status"
 									title={m.assessmentsPerStatus()}
@@ -350,7 +351,34 @@
 					{:catch}
 						<div>Error loading assessments data</div>
 					{/await}
-					<div>3- placeholder: calendar heatmap goes here</div>
+
+					<!-- Calendar Heatmap -->
+					{#await data.stream.governanceCalendarData}
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
+							<div class="flex items-center justify-center h-64">
+								<LoadingSpinner />
+							</div>
+						</div>
+					{:then calendarData}
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
+							<CalendarHeatmap
+								name="governance_activity"
+								data={calendarData}
+								year={new Date().getFullYear()}
+								title=""
+								height="h-64"
+							/>
+						</div>
+					{:catch error}
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
+							<div class="flex items-center justify-center h-64 text-gray-500">
+								<p>Error loading calendar data</p>
+							</div>
+						</div>
+					{/await}
 
 					<!-- Applied Controls and Task Templates Status Donuts -->
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

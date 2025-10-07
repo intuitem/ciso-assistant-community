@@ -606,6 +606,115 @@ def task_template_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
+def get_governance_calendar_data(user: User, year: int = None):
+    """
+    Generate calendar heatmap data for governance activities.
+    Returns activity counts per date for:
+    - TaskNode due dates
+    - AppliedControl ETAs
+    - RiskAcceptance expiry dates
+    - RiskAssessment due dates and ETAs
+    - ComplianceAssessment due dates and ETAs
+    - FindingsAssessment due dates and ETAs
+    """
+    from core.models import (
+        TaskNode,
+        AppliedControl,
+        RiskAcceptance,
+        RiskAssessment,
+        ComplianceAssessment,
+        FindingsAssessment,
+    )
+    from datetime import datetime
+    from collections import defaultdict
+
+    if year is None:
+        year = datetime.now().year
+
+    start_date = datetime(year, 1, 1).date()
+    end_date = datetime(year, 12, 31).date()
+
+    # Dictionary to accumulate activity counts per date
+    activity_counts = defaultdict(int)
+
+    # Get accessible objects for each model
+    (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, TaskNode
+    )
+    (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )
+    (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAcceptance
+    )
+    (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAssessment
+    )
+    (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, ComplianceAssessment
+    )
+    (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, FindingsAssessment
+    )
+
+    # Count TaskNode due dates
+    task_nodes = TaskNode.objects.filter(
+        id__in=task_ids, due_date__gte=start_date, due_date__lte=end_date
+    ).values_list("due_date", flat=True)
+
+    for due_date in task_nodes:
+        if due_date:
+            activity_counts[str(due_date)] += 1
+
+    # Count AppliedControl ETAs
+    applied_controls = AppliedControl.objects.filter(
+        id__in=control_ids, eta__gte=start_date, eta__lte=end_date
+    ).values_list("eta", flat=True)
+
+    for eta in applied_controls:
+        if eta:
+            activity_counts[str(eta)] += 1
+
+    # Count RiskAcceptance expiry dates
+    risk_acceptances = RiskAcceptance.objects.filter(
+        id__in=acceptance_ids, expiry_date__gte=start_date, expiry_date__lte=end_date
+    ).values_list("expiry_date", flat=True)
+
+    for expiry_date in risk_acceptances:
+        if expiry_date:
+            activity_counts[str(expiry_date)] += 1
+
+    # Helper function to count assessment dates
+    def count_assessment_dates(assessment_ids, model):
+        # Count due dates
+        due_dates = model.objects.filter(
+            id__in=assessment_ids, due_date__gte=start_date, due_date__lte=end_date
+        ).values_list("due_date", flat=True)
+
+        for due_date in due_dates:
+            if due_date:
+                activity_counts[str(due_date)] += 1
+
+        # Count ETAs
+        etas = model.objects.filter(
+            id__in=assessment_ids, eta__gte=start_date, eta__lte=end_date
+        ).values_list("eta", flat=True)
+
+        for eta in etas:
+            if eta:
+                activity_counts[str(eta)] += 1
+
+    # Count dates from all assessment types
+    count_assessment_dates(risk_assessment_ids, RiskAssessment)
+    count_assessment_dates(compliance_assessment_ids, ComplianceAssessment)
+    count_assessment_dates(findings_assessment_ids, FindingsAssessment)
+
+    # Convert to array format expected by frontend: [[date, value], ...]
+    result = [[date_str, count] for date_str, count in sorted(activity_counts.items())]
+
+    return result
+
+
 def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
     values = list()
     labels = list()

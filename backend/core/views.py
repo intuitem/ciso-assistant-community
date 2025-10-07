@@ -4498,6 +4498,19 @@ def get_combined_assessments_status_view(request):
     return Response({"results": combined_assessments_per_status(request.user)})
 
 
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_governance_calendar_data_view(request):
+    """
+    API endpoint that returns governance activity calendar data
+    Aggregates TaskNode due dates, AppliedControl ETAs, and RiskAcceptance expiry dates
+    """
+    year = request.query_params.get("year", None)
+    if year:
+        year = int(year)
+    return Response({"results": get_governance_calendar_data(request.user, year)})
+
+
 # TODO: Add all the proper docstrings for the following list of functions
 
 

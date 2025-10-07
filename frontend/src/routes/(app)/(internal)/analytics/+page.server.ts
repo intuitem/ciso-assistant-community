@@ -94,6 +94,20 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return {};
 		});
 
+	const getGovernanceCalendarData = async () => {
+		try {
+			const currentYear = new Date().getFullYear();
+			const response = await fetch(
+				`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`
+			);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('Failed to fetch governance calendar data:', error);
+			return [];
+		}
+	};
+
 	const getOperationsAnalytics = async () => {
 		try {
 			const detectionData = await fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
@@ -180,6 +194,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			metrics: getMetrics(),
 			counters: getCounters(),
 			combinedAssessmentsStatus: getCombinedAssessmentsStatus(),
+			governanceCalendarData: getGovernanceCalendarData(),
 			operationsAnalytics: getOperationsAnalytics()
 		}
 	};

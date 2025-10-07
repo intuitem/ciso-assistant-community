@@ -1488,6 +1488,7 @@
 	"createComplianceAssessment": "You don't have any audits yet or have access to.",
 	"sectionMoved": "Section moved here",
 	"more": "More",
+	"activityCalendar": "Activity calendar",
 	"securityException": "Exception",
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Add exception",
