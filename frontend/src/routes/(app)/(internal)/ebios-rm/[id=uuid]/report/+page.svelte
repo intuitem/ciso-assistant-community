@@ -1274,7 +1274,13 @@
 		:global(button[aria-label*='menu']),
 		:global(button[aria-label*='Menu']),
 		:global(button[class*='chevron']),
-		:global([class*='Chevron']) {
+		:global([class*='Chevron']),
+		:global(button[class*='btn-icon']),
+		:global(.btn-icon),
+		:global([class*='drawer-toggle']),
+		:global([class*='menu-toggle']),
+		:global(button.fixed),
+		:global(.fixed button) {
 			display: none !important;
 			visibility: hidden !important;
 			height: 0 !important;
@@ -1476,6 +1482,7 @@
 		[data-chart="radar-current"],
 		[data-chart="radar-residual"] {
 			max-height: 25cm !important;
+			margin-left: -4cm !important;
 		}
 
 		[data-chart="radar-current"] > *,
