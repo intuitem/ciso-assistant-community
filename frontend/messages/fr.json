@@ -2474,5 +2474,19 @@
 	"visualizeRequirements": "Visualiser toutes les exigences de tous les audits",
 	"assessable": "Évaluable",
 	"lossExceedanceCurves": "Courbes LEC",
-	"noCurveDataAvailable": "Pas de données disponibles. Relancer les simulations pour générer les courbes"
+	"noCurveDataAvailable": "Pas de données disponibles. Relancer les simulations pour générer les courbes",
+	"vulnerabilityDistribution": "Distribution des vulnérabilités",
+	"visualize": "Visualiser",
+	"clear": "Réinitialiser",
+	"visualizeButton": "Visualiser les vulnérabilités",
+	"vulnerabilityTreemap": "Treemap des vulnérabilités",
+	"hierarchicalViewDomainsToSeverityToStatus": "Vue hiérarchique : Domaines → Gravité → Statut",
+	"filterVulnerabilitiesBySeverity": "Filtrer les vulnérabilités par gravité (sévérité)",
+	"filterVulnerabilitiesByStatus": "Filtrer les vulnérabilités par statut",
+	"noDataMatchesFilters": "Aucune donnée ne correspond aux filtres sélectionnés",
+	"clickToDrillDown": "Cliquer pour explorer",
+	"failedToLoadVulnerabilityData": "Échec du chargement des données de vulnérabilité",
+	"noQualificationsFoundOnRiskScenarios": "Aucune qualification trouvée sur les scénarios de risque",
+	"errorLoadingVulnerabilityData": "Erreur lors du chargement des données de vulnérabilité",
+	"findingsAssessmentDistribution": "Distribution des suivis de constats"
 }

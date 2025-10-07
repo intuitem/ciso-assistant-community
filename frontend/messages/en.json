@@ -956,7 +956,6 @@
 	"critical": "Critical",
 	"info": "Information",
 	"vulnerabilities": "Vulnerabilities",
-	"vulnerabilityTreemap": "vulnerabilityTreemap",
 	"severity": "Severity",
 	"potential": "Potential",
 	"exploitable": "Exploitable",
@@ -2478,5 +2477,19 @@
 	"visualizeRequirements": "Visualize all requirements across all audits",
 	"assessable": "Assessable",
 	"noCurveDataAvailable": "No curve data available. Run simulations on your hypotheses to generate LEC charts",
-	"combinedCurrentRisk": "Combined Current Risk"
+	"combinedCurrentRisk": "Combined Current Risk",
+	"vulnerabilityDistribution": "Vulnerability Distribution",
+	"visualize": "Visualize",
+	"clear": "clear",
+	"visualizeButton": "Visualize vulnerabilities",
+	"vulnerabilityTreemap": "Vulnerability Treemap",
+	"hierarchicalViewDomainsToSeverityToStatus": "Hierarchical view: Domains → Severity → Status",
+	"filterVulnerabilitiesBySeverity": "Filter vulnerabilities by severity",
+	"filterVulnerabilitiesByStatus": "Filter vulnerabilities by status",
+	"noDataMatchesFilters": "No data matches the selected filters",
+	"clickToDrillDown": "Click to drill down",
+	"failedToLoadVulnerabilityData": "Failed to load vulnerability data",
+	"noQualificationsFoundOnRiskScenarios": "No qualifications found on risk scenarios",
+	"errorLoadingVulnerabilityData": "Error loading vulnerability data",
+	"findingsAssessmentDistribution": "Findings Assessment Distribution"
 }

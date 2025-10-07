@@ -7295,6 +7295,67 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         )
         return response
 
+    @action(detail=False, methods=["get"], name="Get sunburst data")
+    def sunburst_data(self, request):
+        """
+        Returns FindingsAssessment data structured for sunburst visualization:
+        Categories (pentest, audit, self-identified) -> Status
+        """
+        folder_id = request.query_params.get("folder", None)
+
+        # Get viewable findings assessments
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, FindingsAssessment
+        )
+
+        findings_assessments = FindingsAssessment.objects.filter(id__in=object_ids)
+
+        # Color mapping for statuses
+        status_colors = {
+            "planned": "#BFDBFE",
+            "in_progress": "#5470c6",
+            "in_review": "#BBF7D0",
+            "done": "#46D39A",
+            "deprecated": "#E55759",
+        }
+
+        # Build hierarchical structure: category -> status
+        category_data = {}
+
+        for fa in findings_assessments:
+            category = fa.category if fa.category else "--"
+            status = fa.status if fa.status else "planned"
+
+            if category not in category_data:
+                category_data[category] = {}
+
+            if status not in category_data[category]:
+                category_data[category][status] = 0
+
+            category_data[category][status] += 1
+
+        # Convert to sunburst format
+        sunburst_data = []
+        for category, statuses in category_data.items():
+            children = []
+            for status, count in statuses.items():
+                if count > 0:
+                    children.append(
+                        {
+                            "name": status,
+                            "value": count,
+                            "itemStyle": {"color": status_colors.get(status, "#CCC")},
+                        }
+                    )
+
+            if children:
+                sunburst_data.append({"name": category, "children": children})
+
+        return Response(sunburst_data)
+
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding

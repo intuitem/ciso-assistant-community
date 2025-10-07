@@ -174,6 +174,28 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		}
 	};
 
+	const getVulnerabilitySankeyData = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/vulnerabilities/sankey_data/`);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Failed to fetch vulnerability sankey data:', error);
+			return [];
+		}
+	};
+
+	const getFindingsAssessmentSunburstData = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/findings-assessments/sunburst_data/`);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Failed to fetch findings assessment sunburst data:', error);
+			return [];
+		}
+	};
+
 	return {
 		composerForm,
 		usedRiskMatrices,
@@ -195,7 +217,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			counters: getCounters(),
 			combinedAssessmentsStatus: getCombinedAssessmentsStatus(),
 			governanceCalendarData: getGovernanceCalendarData(),
-			operationsAnalytics: getOperationsAnalytics()
+			operationsAnalytics: getOperationsAnalytics(),
+			vulnerabilitySankeyData: getVulnerabilitySankeyData(),
+			findingsAssessmentSunburstData: getFindingsAssessmentSunburstData()
 		}
 	};
 };

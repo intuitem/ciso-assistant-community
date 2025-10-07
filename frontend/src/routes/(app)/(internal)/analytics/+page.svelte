@@ -380,7 +380,7 @@
 						</div>
 					{/await}
 
-					<!-- Applied Controls and Task Templates Status Donuts -->
+					<!-- Applied Controls Status and Assessments Status -->
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 						<!-- Applied Controls Status Donut -->
 						<div class="bg-white rounded-lg p-4 border border-gray-200">
@@ -393,7 +393,7 @@
 										name="applied_controls_status"
 										values={data.applied_control_status.values.map((v, i) => ({
 											...v,
-											localName: data.applied_control_status.localLables[i]
+											name: safeTranslate(data.applied_control_status.labels?.[i] || '')
 										}))}
 										colors={data.applied_control_status.values?.map((v) => v.itemStyle.color)}
 									/>
@@ -405,26 +405,53 @@
 							</div>
 						</div>
 
-						<!-- Task Templates Status Donut -->
+						<!-- Findings Assessment Distribution -->
 						<div class="bg-white rounded-lg p-4 border border-gray-200">
 							<h3 class="text-lg font-semibold text-gray-900 mb-4">
-								{m.tasksStatus()}
+								{m.findingsAssessmentDistribution()}
 							</h3>
 							<div class="h-80">
-								{#if data.task_template_status}
-									<DonutChart
-										name="task_templates_status"
-										values={data.task_template_status.values.map((v, i) => ({
-											...v,
-											localName: data.task_template_status.localLables[i]
-										}))}
-										colors={data.task_template_status.values?.map((v) => v.itemStyle.color)}
-									/>
-								{:else}
-									<div class="flex items-center justify-center h-full text-gray-500">
-										<p>No tasks data available</p>
+								{#await data.stream.findingsAssessmentSunburstData}
+									<div class="flex items-center justify-center h-full">
+										<LoadingSpinner />
 									</div>
-								{/if}
+								{:then chartData}
+									{#if chartData && chartData.length > 0}
+										{@const statuses = [
+											...new Set(chartData.flatMap((d) => d.children.map((c) => c.name)))
+										].map((s) => safeTranslate(s))}
+										{@const categoryColors = {
+											pentest: '#3b82f6',
+											audit: '#10b981',
+											self_identified: '#f59e0b',
+											'--': '#6b7280'
+										}}
+										{@const series = chartData.map((category) => ({
+											name: safeTranslate(category.name),
+											data: statuses.map((status) => {
+												const originalStatus = chartData
+													.flatMap((d) => d.children)
+													.find((c) => safeTranslate(c.name) === status)?.name;
+												return category.children.find((c) => c.name === originalStatus)?.value || 0;
+											}),
+											color: categoryColors[category.name] || '#999'
+										}))}
+										<GroupedBarChart
+											name="findings_assessment_grouped"
+											title=""
+											categories={statuses}
+											{series}
+										/>
+									{:else}
+										<div class="flex items-center justify-center h-full text-gray-500">
+											<p>No findings assessment data available</p>
+										</div>
+									{/if}
+								{:catch error}
+									<div class="flex items-center justify-center h-full text-red-500">
+										<p>Error loading findings assessment data</p>
+									</div>
+								{/await}
 							</div>
 						</div>
 					</div>
@@ -465,72 +492,122 @@
 					<!-- Risk tab -->
 
 					<section>
-						<div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-96 my-2">
+						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 							{#if data.threats_count.results.labels.length > 0}
-								<div class="flex-1 card p-4 bg-white">
-									<RadarChart
-										name="threatRadar"
-										title={m.threatRadarChart()}
-										labels={data.threats_count.results.labels}
-										values={data.threats_count.results.values}
-									/>
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.threatRadarChart()}
+									</h3>
+									<div class="h-80">
+										<RadarChart
+											name="threatRadar"
+											title=""
+											labels={data.threats_count.results.labels}
+											values={data.threats_count.results.values}
+										/>
+									</div>
 								</div>
 							{:else}
-								<div class="flex-1 card p-4 bg-white flex items-center justify-center">
-									<p class="">{m.noThreatsMapped()}</p>
+								<div
+									class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+								>
+									<p class="text-gray-500">{m.noThreatsMapped()}</p>
 								</div>
 							{/if}
 							{#if data.qualifications_count.results.labels.length > 0}
-								<div class="flex-1 card p-4 bg-white">
-									<BarChart
-										name="qualificationsBar"
-										title={m.qualificationsChartTitle()}
-										labels={localizeChartLabels(data.qualifications_count.results.labels)}
-										values={data.qualifications_count.results.values}
-										horizontal={true}
-									/>
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.qualificationsChartTitle()}
+									</h3>
+									<div class="h-80">
+										<BarChart
+											name="qualificationsBar"
+											title=""
+											labels={localizeChartLabels(data.qualifications_count.results.labels)}
+											values={data.qualifications_count.results.values}
+											horizontal={true}
+										/>
+									</div>
 								</div>
 							{:else}
-								<div class="flex-1 card p-4 bg-white flex items-center justify-center">
-									<p class="">No qualifications found on risk scenarios</p>
+								<div
+									class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+								>
+									<p class="text-gray-500">{m.noQualificationsFoundOnRiskScenarios()}</p>
 								</div>
 							{/if}
 						</div>
-						<div class="flex flex-wrap lg:flex-nowrap">
-							{#if page.data?.featureflags?.inherent_risk}
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+							<div class="flex flex-wrap lg:flex-nowrap gap-6">
+								{#if page.data?.featureflags?.inherent_risk}
+									<div class="h-96 flex-col grow lg:flex-1">
+										<span class="text-sm font-semibold">{m.inherentRiskLevelPerScenario()}</span>
+
+										<DonutChart
+											s_label={m.inherentRisk()}
+											name="inherent_risk_level"
+											values={data.risks_count_per_level.inherent}
+											colors={data.risks_count_per_level.inherent?.map((object) => object.color)}
+										/>
+									</div>
+								{/if}
 								<div class="h-96 flex-col grow lg:flex-1">
-									<span class="text-sm font-semibold">{m.inherentRiskLevelPerScenario()}</span>
+									<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 									<DonutChart
-										s_label={m.inherentRisk()}
-										name="inherent_risk_level"
-										values={data.risks_count_per_level.inherent}
-										colors={data.risks_count_per_level.inherent?.map((object) => object.color)}
+										s_label={cur_rsk_label}
+										name="current_risk_level"
+										values={data.risks_count_per_level.current}
+										colors={data.risks_count_per_level.current?.map((object) => object.color)}
 									/>
 								</div>
-							{/if}
-							<div class="h-96 flex-col grow lg:flex-1">
-								<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
+								<div class="h-96 flex-col grow lg:flex-1">
+									<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
-								<DonutChart
-									s_label={cur_rsk_label}
-									name="current_risk_level"
-									values={data.risks_count_per_level.current}
-									colors={data.risks_count_per_level.current?.map((object) => object.color)}
-								/>
-							</div>
-							<div class="h-96 flex-col grow lg:flex-1">
-								<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
-
-								<DonutChart
-									s_label={rsd_rsk_label}
-									name="residual_risk_level"
-									values={data.risks_count_per_level.residual}
-									colors={data.risks_count_per_level.residual?.map((object) => object.color)}
-								/>
+									<DonutChart
+										s_label={rsd_rsk_label}
+										name="residual_risk_level"
+										values={data.risks_count_per_level.residual}
+										colors={data.risks_count_per_level.residual?.map((object) => object.color)}
+									/>
+								</div>
 							</div>
 						</div>
-						<div>placeholder: vulns sankey chart here</div>
+						<!-- Vulnerability Sankey -->
+						{#await data.stream.vulnerabilitySankeyData}
+							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+								<h3 class="text-lg font-semibold text-gray-900 mb-4">
+									{m.vulnerabilityDistribution()}
+								</h3>
+								<div class="flex items-center justify-center h-80">
+									<LoadingSpinner />
+								</div>
+							</div>
+						{:then sankeyData}
+							{#if sankeyData && sankeyData.length > 0}
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										{m.vulnerabilityDistribution()}
+									</h3>
+									<div class="h-96">
+										{#await import('$lib/components/Chart/VulnerabilitySankeyChart.svelte')}
+											<LoadingSpinner />
+										{:then { default: VulnerabilitySankeyChart }}
+											<VulnerabilitySankeyChart {sankeyData} />
+										{/await}
+									</div>
+								</div>
+							{/if}
+						{:catch error}
+							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+								<h3 class="text-lg font-semibold text-gray-900 mb-4">
+									{m.vulnerabilityDistribution()}
+								</h3>
+								<div class="flex items-center justify-center h-80 text-gray-500">
+									<p>{m.errorLoadingVulnerabilityData()}</p>
+								</div>
+							</div>
+						{/await}
 					</section>
 				</Tabs.Panel>
 				<Tabs.Panel value="compliance">
@@ -710,23 +787,53 @@
 					{:then operationsAnalytics}
 						{#if operationsAnalytics}
 							<section class="space-y-6">
-								<!-- First Row: Applied Controls Sunburst -->
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
-										{m.appliedControlsDistribution()}
-									</h3>
-									<div class="h-96">
-										{#if operationsAnalytics.applied_controls_sunburst && operationsAnalytics.applied_controls_sunburst.length > 0}
-											<SunburstChart
-												name="applied_controls_sunburst"
-												title=""
-												data={operationsAnalytics.applied_controls_sunburst}
-											/>
-										{:else}
-											<div class="flex items-center justify-center h-full text-gray-500">
-												<p>No applied controls data available</p>
-											</div>
-										{/if}
+								<!-- First Row: Applied Controls Sunburst and Task Templates Status -->
+								<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+									<!-- Applied Controls Sunburst (2/3 width) -->
+									<div
+										class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+									>
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.appliedControlsDistribution()}
+										</h3>
+										<div class="h-96">
+											{#if operationsAnalytics.applied_controls_sunburst && operationsAnalytics.applied_controls_sunburst.length > 0}
+												<SunburstChart
+													name="applied_controls_sunburst"
+													title=""
+													data={operationsAnalytics.applied_controls_sunburst}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-gray-500">
+													<p>No applied controls data available</p>
+												</div>
+											{/if}
+										</div>
+									</div>
+
+									<!-- Task Templates Status Donut (1/3 width) -->
+									<div
+										class="xl:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+									>
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.tasksStatus()}
+										</h3>
+										<div class="h-96">
+											{#if data.task_template_status}
+												<DonutChart
+													name="task_templates_status"
+													values={data.task_template_status.values.map((v, i) => ({
+														...v,
+														localName: data.task_template_status.localLables[i]
+													}))}
+													colors={data.task_template_status.values?.map((v) => v.itemStyle.color)}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-gray-500">
+													<p>No tasks data available</p>
+												</div>
+											{/if}
+										</div>
 									</div>
 								</div>
 
