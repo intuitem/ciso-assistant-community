@@ -501,11 +501,11 @@
 					<section>
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 							{#if data.threats_count.results.labels.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+									<h3 class="text-lg font-semibold text-gray-900 mb-2">
 										{m.threatRadarChart()}
 									</h3>
-									<div class="h-80">
+									<div class="h-96">
 										<RadarChart
 											name="threatRadar"
 											title=""
