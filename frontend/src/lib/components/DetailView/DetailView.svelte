@@ -206,13 +206,11 @@
 		model,
 		field,
 		id,
-		detail,
 		endpointUrl
 	}: {
 		model: ModelMapEntry;
 		field: string;
 		id: string;
-		detail: boolean;
 		endpointUrl?: string;
 	}) {
 		if (endpointUrl?.startsWith('./')) {
