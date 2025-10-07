@@ -5238,9 +5238,19 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
-                requirement_assessment.save()
                 requirement_assessments.append(requirement_assessment)
 
+        RequirementAssessment.objects.bulk_update(
+            requirement_assessments,
+            [
+                "mapping_inference",
+                "result",
+                "status",
+                "score",
+                "is_scored",
+                "observation",
+            ],
+        )
         return requirement_assessments
 
     def get_progress(self) -> int:
