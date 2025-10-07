@@ -98,13 +98,23 @@
 	<style>
 		/* Global print styles to hide app chrome */
 		@media print {
-			/* Hide sidebar and navbar */
+			/* Hide sidebar and navbar completely */
 			.sidebar,
 			.app-bar,
 			nav,
 			header,
-			.breadcrumbs {
+			.breadcrumbs,
+			:global(.breadcrumbs),
+			:global([class*='AppBar']),
+			:global(button),
+			:global(hr) {
 				display: none !important;
+				visibility: hidden !important;
+				height: 0 !important;
+				width: 0 !important;
+				overflow: hidden !important;
+				position: absolute !important;
+				left: -9999px !important;
 			}
 
 			/* Reset main content area for printing */
@@ -122,6 +132,13 @@
 				padding: 0 !important;
 				width: 100% !important;
 				overflow: visible !important;
+			}
+
+			/* Ensure first element on page doesn't have top margin */
+			main > *:first-child,
+			main > *:first-child > * {
+				margin-top: 0 !important;
+				padding-top: 0 !important;
 			}
 		}
 	</style>

@@ -527,38 +527,45 @@
 		</section>
 	{/if}
 
-	<!-- Ecosystem Radar Section -->
+	<!-- Ecosystem Radar Section - Current -->
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
-		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
-				{m.ecosystemRadar()}
+		<section class="mb-6 radar-page">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center">
+				{m.ecosystemRadar()} - {m.current()}
 			</h2>
-			<div class="bg-white flex gap-4">
-				<div class="w-1/2" data-chart="radar-current">
-					<EcosystemRadarChart
-						title={m.current()}
-						name="c_ecosystem_report"
-						data={reportData.radar.current}
-						classesContainer="w-full"
-						height="h-[800px]"
-					/>
-				</div>
-				<div class="w-1/2" data-chart="radar-residual">
-					<EcosystemRadarChart
-						title={m.residual()}
-						name="r_ecosystem_report"
-						data={reportData.radar.residual}
-						classesContainer="w-full"
-						height="h-[800px]"
-					/>
-				</div>
+			<div class="bg-white radar-chart-container" data-chart="radar-current">
+				<EcosystemRadarChart
+					title={m.current()}
+					name="c_ecosystem_report"
+					data={reportData.radar.current}
+					classesContainer="w-full"
+					height="h-[800px]"
+				/>
+			</div>
+		</section>
+	{/if}
+
+	<!-- Ecosystem Radar Section - Residual -->
+	{#if reportData.stakeholders.length > 0 && reportData.radar}
+		<section class="mb-6 radar-page">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center">
+				{m.ecosystemRadar()} - {m.residual()}
+			</h2>
+			<div class="bg-white radar-chart-container" data-chart="radar-residual">
+				<EcosystemRadarChart
+					title={m.residual()}
+					name="r_ecosystem_report"
+					data={reportData.radar.residual}
+					classesContainer="w-full"
+					height="h-[800px]"
+				/>
 			</div>
 		</section>
 	{/if}
 
 	<!-- Scenarios Hierarchy Section -->
 	{#if reportData.strategic_scenarios.length > 0}
-		<section class="mb-6 page-break-section">
+		<section class="mb-6 strategic-scenarios-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.strategicScenarios()} & {m.attackPaths()}
 			</h2>
@@ -1260,14 +1267,57 @@
 		:global(.app-bar),
 		:global(nav),
 		:global(header),
-		:global(.breadcrumbs) {
+		:global(.breadcrumbs),
+		:global([class*='AppBar']) {
+			display: none !important;
+			visibility: hidden !important;
+			height: 0 !important;
+			width: 0 !important;
+			overflow: hidden !important;
+			position: absolute !important;
+			left: -9999px !important;
+		}
+
+		/* Hide navigation elements only (not all buttons/links) */
+		.no-print button,
+		.no-print a,
+		.no-print i.fa-arrow-left {
 			display: none !important;
 		}
 
-		/* Page setup */
+		/* Allow workshop HR lines to show */
+		.workshop-divider hr {
+			display: block !important;
+			visibility: visible !important;
+			height: auto !important;
+			width: 100% !important;
+			position: static !important;
+			left: auto !important;
+		}
+
+		/* Ensure study header starts at top of first page */
+		.bg-white.shadow-sm:first-of-type {
+			padding-top: 0 !important;
+			margin-top: 0 !important;
+		}
+
+		/* Default page setup - portrait */
 		@page {
 			size: A3 portrait;
 			margin: 1.5cm 2cm;
+		}
+
+		/* Landscape page for wide charts */
+		@page landscape {
+			size: A3 landscape;
+			margin: 1.5cm 2cm;
+		}
+
+		/* Apply landscape orientation to specific sections */
+		.landscape-page {
+			page: landscape;
+			page-break-before: always;
+			page-break-after: always;
 		}
 
 		/* Reset all layout constraints */
@@ -1308,6 +1358,7 @@
 			max-width: 100% !important;
 			margin: 0 !important;
 			padding: 0 !important;
+			box-sizing: border-box !important;
 		}
 
 		/* Remove shadow and positioning from report container */
@@ -1426,15 +1477,41 @@
 			max-height: 25cm !important;
 		}
 
-		/* Fix operating mode graphs overflow */
+		/* Radar pages - one chart per page, centered */
+		.radar-page {
+			page-break-before: always !important;
+			page-break-after: always !important;
+		}
+
+		.radar-page h2 {
+			text-align: center !important;
+		}
+
+		/* Strategic scenarios section gets page break */
+		.strategic-scenarios-section {
+			page-break-before: always !important;
+		}
+
+		/* Fix operating mode graphs - scale to fit and wrap if needed */
 		[data-chart^="operating-mode-"] {
-			max-height: 15cm !important;
+			max-width: 100% !important;
+			max-height: 18cm !important;
 			overflow: hidden !important;
+			page-break-inside: avoid !important;
+			margin: 1cm 0 !important;
 		}
 
 		[data-chart^="operating-mode-"] > * {
-			max-height: 15cm !important;
-			transform: scale(0.9) !important;
+			max-width: 100% !important;
+			max-height: 18cm !important;
+			transform: scale(0.85) !important;
+			transform-origin: top left !important;
+		}
+
+		/* Ensure operating mode SVG elements scale properly */
+		[data-chart^="operating-mode-"] svg {
+			max-width: 100% !important;
+			height: auto !important;
 		}
 
 		/* Ensure chart containers don't create extra space */
