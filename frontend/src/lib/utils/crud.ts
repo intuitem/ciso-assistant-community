@@ -9,6 +9,7 @@ import { listViewFields } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
 import MarkdownDescription from '$lib/components/ModelTable/MarkdownDescription.svelte';
+import PermissionList from '$lib/components/ModelTable/PermissionList.svelte';
 type GetOptionsParams = {
 	objects: any[];
 	suggestions?: any[];
@@ -1784,6 +1785,9 @@ const FIELD_COMPONENT_MAP = {
 		locales: LanguageDisplay,
 		objects_meta: LibraryOverview,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	},
+	users: {
+		permissions: PermissionList
 	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay

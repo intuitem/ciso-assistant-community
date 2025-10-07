@@ -2474,5 +2474,15 @@
 	"visualizeRequirements": "Visualize all requirements across all audits",
 	"assessable": "Assessable",
 	"noCurveDataAvailable": "No curve data available. Run simulations on your hypotheses to generate LEC charts",
-	"combinedCurrentRisk": "Combined Current Risk"
+	"combinedCurrentRisk": "Combined Current Risk",
+	"permissionDisplay": "{operation} {model}",
+	"event": "Event",
+	"evidenceRevision": "Evidence Revision",
+	"loadedLibrary": "Loaded Library",
+	"storedLibrary": "Stored Library",
+	"timelineEntry": "Timeline Entry",
+	"globalsettings": "Global Settings",
+	"ssosettings": "SSO Settings",
+	"logentry": "Log Entry",
+	"userGroup": "User Group"
 }
