@@ -630,9 +630,32 @@ class AssetFilter(GenericFilterSet):
         label="Exclude children",
     )
 
+    asset_class = df.ModelMultipleChoiceFilter(
+        queryset=AssetClass.objects.all(),
+        method="filter_asset_class_with_descendants",
+        label="Asset class",
+    )
+
     def filter_exclude_children(self, queryset, name, value):
         descendants = value.get_descendants()
         return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    def filter_asset_class_with_descendants(self, queryset, name, value):
+        """
+        Filter assets by asset class including all descendants.
+        This efficiently handles hierarchical filtering without N+1 queries.
+        """
+        if not value:
+            return queryset
+
+        # Collect the selected classes and all their descendants
+        asset_class_ids = set()
+        for asset_class in value:
+            asset_class_ids.add(asset_class.id)
+            descendants = asset_class.get_descendants()
+            asset_class_ids.update(d.id for d in descendants)
+
+        return queryset.filter(asset_class_id__in=asset_class_ids)
 
     class Meta:
         model = Asset
@@ -791,7 +814,7 @@ class AssetViewSet(BaseModelViewSet):
     def asset_class(self, request):
         # this is for filters
         return Response(
-            [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
+            [{"value": ac.id, "label": ac.full_path} for ac in AssetClass.objects.all()]
         )
 
     @action(detail=False, name="Get assets graph")
