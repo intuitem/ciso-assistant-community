@@ -215,6 +215,7 @@
 	"currentRiskLevelPerScenario": "Niveau de risque actuel par scénario de risque",
 	"residualRiskLevelPerScenario": "Niveau de risque résiduel par scénario de risque",
 	"appliedControlsStatus": "Statut des mesures appliquées",
+	"tasksStatus": "Statut des tâches",
 	"currentRisk": "Risque actuel",
 	"residualRisk": "Risque résiduel",
 	"planned": "Planifié",
