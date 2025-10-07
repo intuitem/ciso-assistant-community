@@ -44,7 +44,7 @@
 		</div>
 		<div class="mt-auto">
 			<p class="text-2xl font-bold text-left" data-testid="card-{section}-{label}">{count}</p>
-			<div class="text-xs capitalize">{label}</div>
+			<div class="text-xs">{label}</div>
 		</div>
 	</Anchor>
 {:else}
@@ -59,7 +59,7 @@
 		</div>
 		<div class="mt-auto">
 			<p class="text-2xl font-bold text-left" data-testid="card-{section}-{label}">{count}</p>
-			<div class="text-xs capitalize">{label}</div>
+			<div class="text-xs">{label}</div>
 		</div>
 	</div>
 {/if}
