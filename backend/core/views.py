@@ -3194,43 +3194,15 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
 
             # Optimize DB access: fetch the related folder in one query
             queryset = queryset.select_related("folder")
+            objs = list(queryset)
+            objs.sort(reverse=desc)
 
-            # Materialize queryset into a list to sort in Python
-            data = list(queryset)
-
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
-            return data
+            # TODO: Find another way, this is not optimal at all
+            preserved = Case(
+                *[When(pk=obj.pk, then=pos) for pos, obj in enumerate(objs)],
+                output_field=IntegerField(),
+            )
+            return queryset.filter(pk__in=[obj.pk for obj in objs]).order_by(preserved)
 
         # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)

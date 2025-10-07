@@ -114,6 +114,16 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
+    def __lt__(self, other: Any) -> bool:
+        names = [f.name for f in self.get_folder_full_path(include_root=False)]
+        names_other = [f.name for f in other.get_folder_full_path(include_root=False)]
+        return "/".join(names) < "/".join(names_other)
+
+    def __gt__(self, other: Any) -> bool:
+        names = [f.name for f in self.get_folder_full_path(include_root=False)]
+        names_other = [f.name for f in other.get_folder_full_path(include_root=False)]
+        return "/".join(names) > "/".join(names_other)
+
     def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
 
@@ -318,6 +328,12 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         if self.builtin:
             return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
         return f"{self.folder.name} - {self.name}"
+
+    def __lt__(self, other: Any) -> bool:
+        return self.folder < other.folder
+
+    def __gt__(self, other: Any) -> bool:
+        return self.folder > other.folder
 
     def get_name_display(self) -> str:
         return self.name
