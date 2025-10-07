@@ -3210,8 +3210,66 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(CustomOrderingFilter):
-    ordering_mapping = {"localization_dict": "folder__name"}
+class UserGroupOrderingFilter(filters.OrderingFilter):
+    """
+    Custom ordering filter:
+    - Performs in-memory (Python) sorting only for `localization_dict`.
+    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
+    - Supports `-localization_dict` for descending order.
+    - For all other fields, it falls back to standard SQL ordering.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if not ordering:
+            return queryset
+
+        # Special case: in-memory sorting for `localization_dict`
+        if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
+            desc = ordering[0].startswith("-")
+
+            # Optimize DB access: fetch the related folder in one query
+            queryset = queryset.select_related("folder")
+
+            # Materialize queryset into a list to sort in Python
+            data = list(queryset)
+
+            def full_path_or_name(folder):
+                """
+                Build a string key from the folder:
+                - Prefer the full path (names of all parent folders + current).
+                - Fall back to the folder's name if no path is available.
+                """
+                if folder is None:
+                    return ""
+
+                path_list = getattr(folder, "get_folder_full_path", None)
+                if callable(path_list):
+                    items = folder.get_folder_full_path(include_root=False)
+                    names = [getattr(f, "name", "") or "" for f in items]
+                    if names:
+                        return "/".join(names)
+
+                # Fallback: just the folder name
+                return getattr(folder, "name", "") or ""
+
+            def key_func(obj):
+                # Get the folder from the object
+                folder = getattr(obj, "folder", None)
+                # If you want to be more robust, you could use:
+                # from yourapp.models import Folder
+                # folder = Folder.get_folder(obj)
+
+                path_key = full_path_or_name(folder).casefold()
+                name_key = (getattr(obj, "name", "") or "").casefold()
+                return (path_key, name_key)
+
+            # Perform stable sort, reverse if `-localization_dict`
+            data.sort(key=key_func, reverse=desc)
+            return data
+
+        # Default case: fall back to SQL ordering
+        return super().filter_queryset(request, queryset, view)
 
 
 class UserGroupViewSet(BaseModelViewSet):
