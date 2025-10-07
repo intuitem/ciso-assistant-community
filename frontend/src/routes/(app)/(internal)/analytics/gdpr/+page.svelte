@@ -34,14 +34,14 @@
 			count={data.data.open_right_requests_count}
 		/>
 	</div>
-	<div class="col-span-7">
+	<div class="col-span-7 flex items-center justify-center">
 		{#if data?.data?.countries?.length > 0}
 			<WorldMap data={data.data.countries} />
 		{:else}
-			<div class="h-12 flex items-center justify-center text-slate-700">{m.noDataAvailable()}</div>
+			<div class="text-slate-700">{m.noDataAvailable()}</div>
 		{/if}
 	</div>
-	<div class="col-span-5">
+	<div class="col-span-5 min-h-96">
 		<TreemapChart tree={data.data.pd_categories} name="pd_cat" />
 	</div>
 </div>
