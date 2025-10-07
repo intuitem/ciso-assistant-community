@@ -201,6 +201,12 @@
 											label={m.sumpageEvidences()}
 											href="/evidences/"
 										/>
+										<SimpleCard
+											count={metrics.compliance.expired_evidences}
+											label={m.sumpageExpiredEvidences()}
+											href="/evidences/?status=expired"
+											emphasis={true}
+										/>
 									</CardGroup>
 								</div>
 

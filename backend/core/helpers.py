@@ -1224,6 +1224,7 @@ def get_metrics(user: User, folder_id):
                 status__in=["in_progress", "in_review", "done"]
             ).count(),
             "evidences": viewable_evidences.count(),
+            "expired_evidences": viewable_evidences.filter(status="expired").count(),
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
