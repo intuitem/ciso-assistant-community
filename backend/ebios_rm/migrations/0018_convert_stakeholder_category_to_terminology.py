@@ -34,7 +34,7 @@ def migrate_category_to_terminology(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0104_add_info_severity"),
-        ("ebios_rm", "0016_alter_fearedevent_qualifications"),
+        ("ebios_rm", "0017_alter_operationalscenario_operating_modes_description"),
     ]
 
     operations = [
