@@ -352,6 +352,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     risk_level = serializers.JSONField(source="get_risk_level_display")
     ref_id = serializers.CharField()
     operating_modes_description = serializers.SerializerMethodField()
+    operating_modes = FieldsRelatedField(many=True)
 
     def get_operating_modes_description(self, obj):
         # If there's a description, use it
