@@ -128,6 +128,20 @@
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					optionsInfoFields={{
+						fields: [
+							{
+								field: 'relationship',
+								display: (relationships) => {
+									if (!relationships || relationships.length === 0) return '';
+									return relationships.map((r) => safeTranslate(r.str || r.name || r)).join(' | ');
+								}
+							}
+						],
+						position: 'suffix',
+						separator: ' | ',
+						classes: 'text-xs text-surface-500'
+					}}
 				/>
 			</span>
 
