@@ -1,6 +1,10 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+    CustomOrderingFilter,
+)
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -20,6 +24,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.shortcuts import get_object_or_404
 
@@ -442,10 +448,20 @@ class RoToViewSet(BaseModelViewSet):
         return Response(dict(RoTo.Pertinence.choices))
 
 
+class StakeholderOrderingFilter(CustomOrderingFilter):
+    ordering_mapping = {"entity": "entity__name"}
+
+
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
     filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls", "category"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        StakeholderOrderingFilter,
+    ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
