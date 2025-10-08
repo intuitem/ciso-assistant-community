@@ -3238,7 +3238,7 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
                     ),
                     order_string=Concat(F("path"), Value(" - "), F("codename")),
                 )
-                .filter(depth__lt=256) # Hardcoded folder depth limit
+                .filter(depth__lt=256)  # Hardcoded folder depth limit
                 .order_by("order_string" if not is_desc else "-order_string"),
             )
 
