@@ -9,7 +9,6 @@ import { listViewFields } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
 import MarkdownDescription from '$lib/components/ModelTable/MarkdownDescription.svelte';
-import PermissionList from '$lib/components/ModelTable/PermissionList.svelte';
 type GetOptionsParams = {
 	objects: any[];
 	suggestions?: any[];
