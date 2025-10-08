@@ -3196,7 +3196,7 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
 
             def make_folder_path_cte(cte):
                 return (
-                    Folder.objects.filter(folder__isnull=True)
+                    Folder.objects.filter(parent_folder__isnull=True)
                     .values(
                         "id",
                         "name",
@@ -3205,7 +3205,7 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
                     )
                     .union(
                         # recursive union: get descendants
-                        cte.join(Folder, folder=cte.col.id).values(
+                        cte.join(Folder, parent_folder=cte.col.id).values(
                             "id",
                             "name",
                             path=Concat(
