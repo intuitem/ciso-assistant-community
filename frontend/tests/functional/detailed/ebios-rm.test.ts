@@ -110,7 +110,7 @@ test('ebios rm study', async ({
 			name: ebiosRmStudy.build.name,
 			folder: vars.folderName
 		});
-		await page.getByRole('gridcell', { name: ebiosRmStudy.build.name }).click();
+		await page.getByRole('gridcell', { name: ebiosRmStudy.build.name }).first().click();
 	});
 
 	await test.step('workshop 1', async () => {

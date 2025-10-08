@@ -4,9 +4,9 @@
 	import { setContext, onDestroy } from 'svelte';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
@@ -38,6 +38,7 @@
 	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
 	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
 	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
+	import DataBreachForm from './ModelForm/DataBreachForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -72,7 +73,7 @@
 
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
-	import { superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -223,6 +224,20 @@
 			}
 		}
 	});
+
+	let isLoading = $state(false);
+	let previousFormErrors = $derived('');
+	const { form: formData, errors } = _form;
+
+	errors.subscribe((newErrors) => {
+		const errorCount = Object.values(newErrors).reduce((acc, error) => (acc += error ? 1 : 0), 0);
+		const stringifiedErrors = JSON.stringify([Date.now(), newErrors]);
+
+		if (errorCount && stringifiedErrors !== previousFormErrors) {
+			isLoading = false;
+			previousFormErrors = stringifiedErrors;
+		}
+	});
 </script>
 
 {#if missingConstraints.length > 0}
@@ -276,9 +291,11 @@
 										return currentData; // Keep the current values in the edit form.
 									}
 									updated_fields.add('reference_control');
+									// Only auto-fill name if it's empty OR user hasn't manually edited it
+									const shouldUpdateName = !currentData.name || !updated_fields.has('name');
 									return {
 										...currentData,
-										name: r.name,
+										name: shouldUpdateName ? r.name : currentData.name,
 										category: r.category,
 										csf_function: r.csf_function,
 										ref_id: r.ref_id
@@ -297,6 +314,9 @@
 				cacheLock={cacheLocks['name']}
 				bind:cachedValue={formDataCache['name']}
 				data-focusindex="0"
+				oninput={() => {
+					updated_fields.add('name');
+				}}
 			/>
 		{/if}
 		{#if shape.description && !customNameDescription}
@@ -536,6 +556,16 @@
 				{initialData}
 				{...rest}
 			/>
+		{:else if URLModel === 'data-breaches'}
+			<DataBreachForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{initialData}
+				{...rest}
+			/>
 		{:else if URLModel === 'ebios-rm'}
 			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
 		{:else if URLModel === 'feared-events'}
@@ -727,9 +757,26 @@
 					}}>{m.cancel()}</button
 				>
 				<button
-					class="btn preset-filled-primary-500 font-semibold w-full"
+					class="btn preset-filled-primary-500 font-semibold w-full {isLoading
+						? 'cursor-wait'
+						: ''}"
 					data-testid="save-button"
-					type="submit">{m.save()}</button
+					type="submit"
+					onclick={(e) => {
+						if (URLModel !== 'folders-import') return;
+						if (isLoading) {
+							e.preventDefault();
+							e.stopPropagation();
+							return;
+						}
+
+						const schema = modelSchema(URLModel);
+						const result = schema.safeParse($formData);
+						if (!result.success) return;
+
+						isLoading = true;
+					}}
+					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
 				>
 			{:else}
 				{#if cancelButton}

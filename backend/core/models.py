@@ -227,10 +227,11 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 
 class Severity(models.IntegerChoices):
     UNDEFINED = -1, "undefined"
-    LOW = 0, "low"
-    MEDIUM = 1, "medium"
-    HIGH = 2, "high"
-    CRITICAL = 3, "critical"
+    INFO = 0, "info"
+    LOW = 1, "low"
+    MEDIUM = 2, "medium"
+    HIGH = 3, "high"
+    CRITICAL = 4, "critical"
 
 
 class StoredLibrary(LibraryMixin):
@@ -970,6 +971,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
+        ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1210,6 +1212,51 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+
+    DEFAULT_ENTITY_RELATIONSHIPS = [
+        {
+            "name": "regulatory_authority",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "partner",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_authority",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "client",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "supplier",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "contractor",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+    ]
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -1265,6 +1312,15 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     @classmethod
     def create_default_accreditations_category(cls):
         for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_entity_relationships(cls):
+        for item in cls.DEFAULT_ENTITY_RELATIONSHIPS:
             Terminology.objects.update_or_create(
                 name=item["name"],
                 field_path=item["field_path"],
@@ -1469,10 +1525,15 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     def render_grid_as_colors(self):
         risk_matrix = self.parse_json()
-        grid = risk_matrix["grid"]
-        res = [[risk_matrix["risk"][i] for i in row] for row in grid]
+        raw_grid = risk_matrix["grid"]
+        populated_grid = [[risk_matrix["risk"][i] for i in row] for row in raw_grid]
+        return populated_grid
 
-        return res
+    def render_transposed_grid_as_colors(self):
+        """Return the transposed version of the grid given by the render_grid_as_colors method."""
+        grid = self.render_grid_as_colors()
+        transposed_grid = [list(x) for x in zip(*grid)]
+        return transposed_grid
 
     @property
     def get_json_translated(self):
@@ -4601,6 +4662,7 @@ class ComplianceAssessment(Assessment):
                         "is_scored",
                         "observation",
                     ],
+                    batch_size=1000,
                 )
 
             # Handle M2M relationships
@@ -5177,9 +5239,20 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
-                requirement_assessment.save()
                 requirement_assessments.append(requirement_assessment)
 
+        RequirementAssessment.objects.bulk_update(
+            requirement_assessments,
+            [
+                "mapping_inference",
+                "result",
+                "status",
+                "score",
+                "is_scored",
+                "observation",
+            ],
+            batch_size=1000,
+        )
         return requirement_assessments
 
     def get_progress(self) -> int:
@@ -5474,10 +5547,11 @@ class FindingsAssessment(Assessment):
         # Severity distribution using the defined severity levels - we need a better way for this
         severity_values = {
             -1: "undefined",
-            0: "low",
-            1: "medium",
-            2: "high",
-            3: "critical",
+            0: "info",
+            1: "low",
+            2: "medium",
+            3: "high",
+            4: "critical",
         }
 
         severity_distribution = {}
@@ -5485,16 +5559,17 @@ class FindingsAssessment(Assessment):
             severity_distribution[label] = findings.filter(severity=value).count()
 
         # Count of unresolved important findings (severity is HIGH or CRITICAL)
-        # Excludes findings that are mitigated, resolved, or dismissed
+        # Excludes findings that are mitigated, resolved, dismissed, or closed
         unresolved_important = (
             findings.filter(
-                severity__gte=2  # HIGH or CRITICAL (>=2)
+                severity__gte=3  # HIGH or CRITICAL (>=3)
             )
             .exclude(
                 status__in=[
                     Finding.Status.MITIGATED,
                     Finding.Status.RESOLVED,
                     Finding.Status.DISMISSED,
+                    Finding.Status.CLOSED,
                 ]
             )
             .count()
@@ -5518,6 +5593,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         IN_PROGRESS = "in_progress", _("In Progress")
         MITIGATED = "mitigated", _("Mitigated")
         RESOLVED = "resolved", _("Resolved")
+        CLOSED = "closed", _("Closed")
         DEPRECATED = "deprecated", _("Deprecated")
 
     findings_assessment = models.ForeignKey(
