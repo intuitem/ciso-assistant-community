@@ -108,6 +108,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
         )
 
+    @action(detail=True, name="Get ecosystem circular chart data")
+    def ecosystem_circular_chart_data(self, request, pk):
+        from .helpers import ecosystem_circular_chart_data
+
+        return Response(
+            ecosystem_circular_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+        )
+
     @action(detail=True, name="Get EBIOS RM  study visual analysis")
     def visual_analysis(self, request, pk):
         study = get_object_or_404(EbiosRMStudy, id=pk)

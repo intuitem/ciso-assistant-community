@@ -494,7 +494,7 @@
 				{#each reportData.stakeholders as stakeholder}
 					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
 						<h3 class="text-lg font-semibold text-gray-800 mb-3">
-							{stakeholder.entity.str} ({safeTranslate(stakeholder.category_raw)})
+							{stakeholder.entity.str} ({safeTranslate(stakeholder.category)})
 						</h3>
 						<div class="flex flex-wrap gap-6 text-sm mb-2">
 							<div class="flex flex-col">
@@ -648,7 +648,7 @@
 																(st) => st.id === s.id
 															);
 															return stakeholderData
-																? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+																? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category)})`
 																: s.str;
 														})
 														.join(', ')}
@@ -866,7 +866,7 @@
 													(st) => st.id === s.id
 												);
 												return stakeholderData
-													? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+													? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category)})`
 													: s.str;
 											})
 											.join(', ')}

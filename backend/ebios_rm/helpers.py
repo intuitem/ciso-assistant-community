@@ -16,6 +16,116 @@ from core.models import Asset
 import textwrap
 
 
+def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
+    """
+    Generate data for circular ecosystem chart.
+    Returns stakeholders grouped by category with simple format:
+    {
+        "categories": ["client", "partner", "supplier"],
+        "current": {
+            "client": [[criticality, angle, exposure, label], ...],
+            "partner": [...],
+            ...
+        },
+        "residual": { ... },
+        "not_displayed": 0
+    }
+    """
+    qs = stakeholders_queryset
+    max_val = GlobalSettings.objects.get(name="general").value.get("ebios_radar_max", 6)
+
+    # Get unique categories
+    categories = set()
+    for sh in qs:
+        if sh.category:
+            categories.add(sh.category.name)
+
+    categories_list = sorted(list(categories))
+    num_categories = len(categories_list)
+
+    if num_categories == 0:
+        return {
+            "categories": [],
+            "current": {},
+            "residual": {},
+            "not_displayed": len(qs),
+        }
+
+    # Calculate angle section for each category
+    angle_step = 360 / num_categories
+    category_angles = {}
+    for i, cat in enumerate(categories_list):
+        # Start from 90 degrees (top) and go clockwise
+        category_angles[cat] = {
+            "base": 90 - (i * angle_step),
+            "start": 90 - (i * angle_step) - angle_step / 2,
+            "end": 90 - (i * angle_step) + angle_step / 2,
+        }
+
+    # Initialize data structures
+    current_data = {cat: [] for cat in categories_list}
+    residual_data = {cat: [] for cat in categories_list}
+    not_displayed = 0
+
+    # Counter for distributing points within each category
+    category_counters = {cat: 0 for cat in categories_list}
+
+    for sh in qs:
+        if not sh.category:
+            not_displayed += 1
+            continue
+
+        category_name = sh.category.name
+        cat_info = category_angles[category_name]
+
+        # Distribute points evenly with slight jitter
+        # Use counter to spread points across the section
+        section_width = angle_step * 0.8  # Use 80% of section width
+        offset = (
+            category_counters[category_name] * 37
+        ) % section_width - section_width / 2  # Prime number for better distribution
+        jitter = random.uniform(-5, 5)  # Small jitter for natural look
+        angle = cat_info["base"] + offset + jitter
+
+        # Normalize angle to 0-360
+        angle = angle % 360
+
+        category_counters[category_name] += 1
+
+        # Current data
+        c_criticality = (
+            math.floor(sh.current_criticality * 100) / 100.0
+            if sh.current_criticality <= max_val
+            else max_val - 1 + 0.25
+        )
+        c_exposure = sh.current_dependency * sh.current_penetration
+        c_exposure_val = c_exposure * 4  # Scale for size
+
+        current_data[category_name].append(
+            [c_criticality, angle, c_exposure_val, f"{sh.entity.name}-{category_name}"]
+        )
+
+        # Residual data
+        r_criticality = (
+            math.floor(sh.residual_criticality * 100) / 100.0
+            if sh.residual_criticality <= max_val
+            else max_val - 1 + 0.25
+        )
+        r_exposure = sh.residual_dependency * sh.residual_penetration
+        r_exposure_val = r_exposure * 4  # Scale for size
+
+        residual_data[category_name].append(
+            [r_criticality, angle, r_exposure_val, f"{sh.entity.name}-{category_name}"]
+        )
+
+    return {
+        "categories": categories_list,
+        "current": current_data,
+        "residual": residual_data,
+        "not_displayed": not_displayed,
+    }
+
+
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     qs = stakeholders_queryset
 
