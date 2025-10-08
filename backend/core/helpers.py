@@ -549,6 +549,185 @@ def applied_control_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
+def task_template_per_status(user: User):
+    from core.models import TaskTemplate, TaskNode
+
+    values = list()
+    labels = list()
+    local_lables = list()
+    color_map = {
+        "pending": "#BFDBFE",
+        "in_progress": "#392F5A",
+        "completed": "#46D39A",
+        "cancelled": "#E55759",
+    }
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, TaskTemplate
+    )
+    viewable_task_templates = TaskTemplate.objects.filter(id__in=object_ids_view)
+
+    # Count statuses based on the logic:
+    # - If not recurrent: get the status of the node
+    # - If recurrent: get the status of the last occurrence (most recent past event)
+    from django.db.models import Subquery, OuterRef
+    from django.utils import timezone
+
+    status_counts = {"pending": 0, "in_progress": 0, "completed": 0, "cancelled": 0}
+    today = timezone.localdate()
+
+    # For recurrent templates, get last occurrence status (most recent past)
+    last_occurrence_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
+
+    recurrent_with_status = (
+        viewable_task_templates.filter(is_recurrent=True)
+        .annotate(node_status=Subquery(last_occurrence_subq))
+        .values_list("node_status", flat=True)
+    )
+
+    # For non-recurrent templates, get the single node's status
+    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
+        "status"
+    )[:1]
+
+    non_recurrent_with_status = (
+        viewable_task_templates.filter(is_recurrent=False)
+        .annotate(node_status=Subquery(single_node_subq))
+        .values_list("node_status", flat=True)
+    )
+
+    # Count statuses
+    for status in recurrent_with_status:
+        status_counts[status or "pending"] += 1
+
+    for status in non_recurrent_with_status:
+        status_counts[status or "pending"] += 1
+
+    for st in TaskNode.TASK_STATUS_CHOICES:
+        count = status_counts[st[0]]
+        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        values.append(v)
+        labels.append(st[1])
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
+
+
+def get_governance_calendar_data(user: User, year: int = None):
+    """
+    Generate calendar heatmap data for governance activities.
+    Returns activity counts per date for:
+    - TaskNode due dates
+    - AppliedControl ETAs
+    - RiskAcceptance expiry dates
+    - RiskAssessment due dates and ETAs
+    - ComplianceAssessment due dates and ETAs
+    - FindingsAssessment due dates and ETAs
+    """
+    from core.models import (
+        TaskNode,
+        AppliedControl,
+        RiskAcceptance,
+        RiskAssessment,
+        ComplianceAssessment,
+        FindingsAssessment,
+    )
+    from datetime import datetime
+    from collections import defaultdict
+
+    if year is None:
+        year = datetime.now().year
+
+    start_date = datetime(year, 1, 1).date()
+    end_date = datetime(year, 12, 31).date()
+
+    # Dictionary to accumulate activity counts per date
+    activity_counts = defaultdict(int)
+
+    # Get accessible objects for each model
+    (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, TaskNode
+    )
+    (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )
+    (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAcceptance
+    )
+    (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAssessment
+    )
+    (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, ComplianceAssessment
+    )
+    (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, FindingsAssessment
+    )
+
+    # Count TaskNode due dates
+    task_nodes = TaskNode.objects.filter(
+        id__in=task_ids, due_date__gte=start_date, due_date__lte=end_date
+    ).values_list("due_date", flat=True)
+
+    for due_date in task_nodes:
+        if due_date:
+            activity_counts[str(due_date)] += 1
+
+    # Count AppliedControl ETAs
+    applied_controls = AppliedControl.objects.filter(
+        id__in=control_ids, eta__gte=start_date, eta__lte=end_date
+    ).values_list("eta", flat=True)
+
+    for eta in applied_controls:
+        if eta:
+            activity_counts[str(eta)] += 1
+
+    # Count RiskAcceptance expiry dates
+    risk_acceptances = RiskAcceptance.objects.filter(
+        id__in=acceptance_ids, expiry_date__gte=start_date, expiry_date__lte=end_date
+    ).values_list("expiry_date", flat=True)
+
+    for expiry_date in risk_acceptances:
+        if expiry_date:
+            activity_counts[str(expiry_date)] += 1
+
+    # Helper function to count assessment dates
+    def count_assessment_dates(assessment_ids, model):
+        # Count due dates
+        due_dates = model.objects.filter(
+            id__in=assessment_ids, due_date__gte=start_date, due_date__lte=end_date
+        ).values_list("due_date", flat=True)
+
+        for due_date in due_dates:
+            if due_date:
+                activity_counts[str(due_date)] += 1
+
+        # Count ETAs
+        etas = model.objects.filter(
+            id__in=assessment_ids, eta__gte=start_date, eta__lte=end_date
+        ).values_list("eta", flat=True)
+
+        for eta in etas:
+            if eta:
+                activity_counts[str(eta)] += 1
+
+    # Count dates from all assessment types
+    count_assessment_dates(risk_assessment_ids, RiskAssessment)
+    count_assessment_dates(compliance_assessment_ids, ComplianceAssessment)
+    count_assessment_dates(findings_assessment_ids, FindingsAssessment)
+
+    # Convert to array format expected by frontend: [[date, value], ...]
+    result = [[date_str, count] for date_str, count in sorted(activity_counts.items())]
+
+    return result
+
+
 def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
     values = list()
     labels = list()
@@ -580,6 +759,57 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
+
+
+def combined_assessments_per_status(user: User):
+    """
+    Returns assessment counts grouped by status for all three assessment types:
+    RiskAssessment, ComplianceAssessment, and FindingsAssessment
+    """
+    from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+
+    # Get all unique statuses across all assessment types
+    # Using RiskAssessment.Status as they should all share the same status choices
+    all_statuses = ["undefined"] + [
+        choice[0] for choice in RiskAssessment.Status.choices
+    ]
+    status_labels = ["undefined"] + [
+        choice[1] for choice in RiskAssessment.Status.choices
+    ]
+
+    # Initialize result structure
+    result = {"statuses": all_statuses, "status_labels": status_labels, "series": []}
+
+    # Process each assessment type
+    assessment_types = [
+        ("complianceAssessments", ComplianceAssessment),
+        ("riskAssessments", RiskAssessment),
+        ("findingsAssessments", FindingsAssessment),
+    ]
+
+    for series_name, model in assessment_types:
+        # Get accessible objects
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, model
+        )
+        viewable_assessments = model.objects.filter(id__in=object_ids_view)
+
+        # Count by status in a single query
+        status_counts = dict(
+            viewable_assessments.exclude(status__isnull=True)
+            .values_list("status")
+            .annotate(count=Count("status"))
+        )
+        undefined_count = viewable_assessments.filter(status__isnull=True).count()
+
+        # Build data array matching all_statuses order
+        data = [undefined_count] + [
+            status_counts.get(status, 0) for status in all_statuses[1:]
+        ]
+
+        result["series"].append({"name": series_name, "data": data})
+
+    return result
 
 
 def applied_control_per_cur_risk(user: User):
@@ -807,38 +1037,42 @@ def risks_per_perimeter_groups(user: User):
 
 
 def get_counters(user: User):
-    controls_count = len(
-        RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, AppliedControl
-        )[0]
-    )
+    # Get all accessible applied controls
+    applied_controls_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )[0]
+
+    # Count policies and non-policies separately
+    all_applied_controls = AppliedControl.objects.filter(id__in=applied_controls_ids)
+    policies_count = all_applied_controls.filter(category="policy").count()
+    applied_controls_count = all_applied_controls.exclude(category="policy").count()
+
+    # Get accessible frameworks
+    frameworks_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Framework
+    )[0]
+
+    # Get accessible risk acceptances
+    risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAcceptance
+    )[0]
+
+    # Get accessible security exceptions
+    security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, SecurityException
+    )[0]
+
     return {
         "domains": len(
             RoleAssignment.get_accessible_object_ids(
                 Folder.get_root_folder(), user, Folder
             )[0]
         ),
-        "perimeters": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Perimeter
-            )[0]
-        ),
-        "applied_controls": controls_count,
-        "risk_assessments": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, RiskAssessment
-            )[0]
-        ),
-        "compliance_assessments": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, ComplianceAssessment
-            )[0]
-        ),
-        "policies": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Policy
-            )[0]
-        ),
+        "frameworks": len(frameworks_ids),
+        "applied_controls": applied_controls_count,
+        "policies": policies_count,
+        "exceptions": len(security_exceptions_ids),
+        "risk_acceptances": len(risk_acceptances_ids),
     }
 
 
@@ -1005,6 +1239,7 @@ def get_metrics(user: User, folder_id):
                 status__in=["in_progress", "in_review", "done"]
             ).count(),
             "evidences": viewable_evidences.count(),
+            "expired_evidences": viewable_evidences.filter(status="expired").count(),
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
