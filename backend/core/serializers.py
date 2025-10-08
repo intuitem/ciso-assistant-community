@@ -995,10 +995,7 @@ class UserPermsOnFolderSerializer(BaseModelSerializer):
         fields = ["id", "email", "first_name", "last_name", "is_active", "roles"]
 
     def get_roles(self, obj):
-        return [
-            {"str": str(role)}
-            for role in self.context["user_roles_map"].get(obj.id, [])
-        ]
+        return [{"str": str(role)} for role in self.context["roles"].get(obj.id, [])]
 
 
 class UserWriteSerializer(BaseModelSerializer):
