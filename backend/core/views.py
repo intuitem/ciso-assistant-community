@@ -10,6 +10,7 @@ from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
+import itertools
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
@@ -5943,15 +5944,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 # Compute results and get all affected requirement assessments
-                computed_assessments = instance.compute_requirement_assessments_results(
-                    mapping_set, baseline
+                computed_assessments, assessment_source_dict = (
+                    instance.compute_requirement_assessments_results(
+                        mapping_set, baseline
+                    )
                 )
 
                 # Collect all source requirement assessment IDs
-                source_assessment_ids = [
-                    assessment.mapping_inference["source_requirement_assessment"]["id"]
-                    for assessment in computed_assessments
-                ]
+                source_assessment_ids = itertools.chain.from_iterable(
+                    assessment_source_dict.values()
+                )
 
                 # Fetch all baseline requirement assessments in one query
                 baseline_assessments = {
@@ -5966,21 +5968,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 m2m_operations = []
 
                 for requirement_assessment in computed_assessments:
-                    source_id = requirement_assessment.mapping_inference[
+                    selected_source_id = requirement_assessment.mapping_inference[
                         "source_requirement_assessment"
                     ]["id"]
-                    baseline_ra = baseline_assessments[source_id]
+                    selected_baseline_ra = baseline_assessments[selected_source_id]
 
                     # Update observation
-                    requirement_assessment.observation = baseline_ra.observation
+                    requirement_assessment.observation = (
+                        selected_baseline_ra.observation
+                    )
                     updates.append(requirement_assessment)
+
+                    source_ids = assessment_source_dict[requirement_assessment]
+                    baseline_requirement_assessments = [
+                        baseline_assessments[source_id] for source_id in source_ids
+                    ]
 
                     # Store M2M operations for later
                     m2m_operations.append(
                         (
                             requirement_assessment,
-                            baseline_ra.evidences.all(),
-                            baseline_ra.applied_controls.all(),
+                            selected_baseline_ra.evidences.all(),
+                            itertools.chain.from_iterable(
+                                requirement_assessment.applied_controls.all()
+                                for requirement_assessment in baseline_requirement_assessments
+                            ),
                         )
                     )
 
