@@ -60,7 +60,10 @@
 		risk_matrix: any,
 		risk: 'current' | 'residual' | 'inherent'
 	) => {
-		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
+		const parsedRiskMatrix: RiskMatrixJsonDefinition =
+			typeof risk_matrix.json_definition === 'string'
+				? JSON.parse(risk_matrix.json_definition)
+				: (risk_matrix.json_definition as RiskMatrixJsonDefinition);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
 			Array.from({ length: parsedRiskMatrix.impact.length }, () => [])
 		);
