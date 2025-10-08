@@ -94,7 +94,7 @@
 		"svelte-persisted-store": "^0.12.0",
 		"wx-svelte-grid": "^2.3.0"
 	},
-	"packageManager": "pnpm@10.16.1",
+	"packageManager": "pnpm@10.18.1",
 	"pnpm": {
 		"overrides": {
 			"esbuild": "^0.25.5",
