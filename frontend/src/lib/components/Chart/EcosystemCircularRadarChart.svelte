@@ -40,6 +40,7 @@
 
 		const categories = data.categories || [];
 		const chartData = data[type] || {};
+		// Use chart_max from backend to ensure consistent scale across current and residual
 		const chartMax = data.chart_max || max;
 
 		// Define colors for categories

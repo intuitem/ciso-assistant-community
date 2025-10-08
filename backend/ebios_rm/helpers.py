@@ -98,7 +98,7 @@ def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
         c_exposure = sh.current_dependency * sh.current_penetration
         c_exposure_val = c_exposure * 4  # Scale for size
 
-        # Track max criticality
+        # Track max criticality across both current and residual
         max_criticality_found = max(max_criticality_found, c_criticality)
 
         current_data[category_name].append(
@@ -110,14 +110,14 @@ def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
         r_exposure = sh.residual_dependency * sh.residual_penetration
         r_exposure_val = r_exposure * 4  # Scale for size
 
-        # Track max criticality
+        # Track max criticality across both current and residual
         max_criticality_found = max(max_criticality_found, r_criticality)
 
         residual_data[category_name].append(
             [r_criticality, angle, r_exposure_val, f"{sh.entity.name}-{category_name}"]
         )
 
-    # Calculate chart max: use max of configured max_val and actual max criticality found
+    # Calculate consistent chart max for both current and residual comparison
     chart_max = (
         max(max_val, max_criticality_found) if max_criticality_found > 0 else max_val
     )
