@@ -1,6 +1,7 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.models import Terminology
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -212,7 +213,10 @@ class StakeholderViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(Stakeholder.Category.choices))
+        categories = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP, is_visible=True
+        ).values_list("name", "name")
+        return Response(dict(categories))
 
     @action(detail=False, name="Get chart data")
     def chart_data(self, request):

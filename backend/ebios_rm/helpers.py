@@ -73,7 +73,8 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             else max_val - 1 + 0.25
         )
 
-        angle = angle_offset[sh.category] + (
+        category_name = sh.category.name if sh.category else "partner"
+        angle = angle_offset.get(category_name, 225) + (
             get_exposure_segment_id(c_exposure) * (45 / 4)
         )
 
@@ -93,7 +94,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             else max_val - 1 + 0.25
         )
 
-        angle = angle_offset[sh.category] + (
+        angle = angle_offset.get(category_name, 225) + (
             get_exposure_segment_id(r_exposure) * (45 / 4)
         )
 

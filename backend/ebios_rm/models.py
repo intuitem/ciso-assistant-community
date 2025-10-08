@@ -471,11 +471,6 @@ class RoTo(AbstractBaseModel, FolderMixin):
 
 
 class Stakeholder(AbstractBaseModel, FolderMixin):
-    class Category(models.TextChoices):
-        CLIENT = "client", _("Client")
-        PARTNER = "partner", _("Partner")
-        SUPPLIER = "supplier", _("Supplier")
-
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -498,8 +493,15 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         help_text=_("Controls applied to lower stakeholder criticality"),
     )
 
-    category = models.CharField(
-        max_length=32, verbose_name=_("Category"), choices=Category.choices
+    category = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        verbose_name=_("Category"),
+        related_name="stakeholders_category",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
     )
 
     current_dependency = models.PositiveSmallIntegerField(
@@ -558,7 +560,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
-        return f"{self.entity.name} ({self.get_category_display()})"
+        return f"{self.entity.name} ({self.category.get_name_translated if self.category else 'N/A'})"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder

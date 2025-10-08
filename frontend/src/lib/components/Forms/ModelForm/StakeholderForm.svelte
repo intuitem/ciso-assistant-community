@@ -2,7 +2,6 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -110,9 +109,13 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<div>
 			<span class="flex flex-row space-x-4">
-				<Select
+				<AutocompleteSelect
 					{form}
-					options={model.selectOptions['category']}
+					optionsEndpoint="terminologies"
+					optionsDetailedUrlParameters={[
+						['field_path', 'entity.relationship'],
+						['is_visible', 'true']
+					]}
 					field="category"
 					label={m.category()}
 					cacheLock={cacheLocks['category']}
