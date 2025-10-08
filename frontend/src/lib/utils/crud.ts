@@ -584,8 +584,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner' },
 			{ field: 'status' },
 			{ field: 'link' },
-			{ field: 'created_at' },
-			{ field: 'updated_at' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'expiry_date' }
@@ -705,7 +705,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' }
+			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' },
+			{
+				field: 'relationship',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=entity.relationship'
+			}
 		]
 	},
 	'entity-assessments': {
@@ -832,10 +837,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }, { field: 'legal_basis' }, { field: 'nature' }],
+		selectFields: [{ field: 'status' }, { field: 'nature' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'processing', urlModel: 'personal-data' },
@@ -844,6 +851,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
+			{ field: 'processings', urlModel: 'right-requests' },
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',
@@ -855,8 +863,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'assigned_to' },
 			{ field: 'status' },
-			{ field: 'legal_basis' },
 			{ field: 'dpia_required' },
 			{ field: 'dpia_reference' },
 			{ field: 'folder' },
@@ -874,6 +882,80 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'processing nature',
 		verboseNamePlural: 'processing natures'
 	},
+	'right-requests': {
+		endpointUrl: 'privacy/right-requests',
+		name: 'rightrequest',
+		localName: 'rightRequest',
+		localNamePlural: 'rightRequests',
+		verboseName: 'right request',
+		verboseNamePlural: 'right requests',
+		selectFields: [{ field: 'request_type' }, { field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'processings', urlModel: 'processings', endpointUrl: 'processings' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'owner' },
+			{ field: 'requested_on', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'request_type' },
+			{ field: 'status' },
+			{ field: 'observation' },
+			{ field: 'processings' },
+			{ field: 'folder' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'data-breaches': {
+		endpointUrl: 'privacy/data-breaches',
+		name: 'databreach',
+		localName: 'dataBreach',
+		localNamePlural: 'dataBreaches',
+		verboseName: 'data breach',
+		verboseNamePlural: 'data breaches',
+		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'affected_processings', urlModel: 'processings' },
+			{ field: 'affected_personal_data', urlModel: 'personal-data' },
+			{ field: 'authorities', urlModel: 'entities' },
+			{ field: 'remediation_measures', urlModel: 'applied-controls' },
+			{ field: 'incident', urlModel: 'incidents' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'assigned_to' },
+			{ field: 'discovered_on', type: 'datetime' },
+			{ field: 'breach_type' },
+			{ field: 'risk_level' },
+			{ field: 'status' },
+			{ field: 'affected_subjects_count' },
+			{ field: 'affected_processings' },
+			{ field: 'affected_personal_data' },
+			{ field: 'affected_personal_data_count' },
+			{ field: 'authorities' },
+			{ field: 'authority_notified_on', type: 'datetime' },
+			{ field: 'authority_notification_ref' },
+			{ field: 'subjects_notified_on', type: 'datetime' },
+			{ field: 'potential_consequences' },
+			{ field: 'remediation_measures' },
+			{ field: 'incident' },
+			{ field: 'reference_link' },
+			{ field: 'observation' },
+			{ field: 'folder' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',
 		name: 'purpose',
@@ -881,6 +963,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'purposes',
 		verboseName: 'purpose',
 		verboseNamePlural: 'purposes',
+		selectFields: [{ field: 'legal_basis' }],
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }]
 	},
 	'personal-data': {
@@ -1597,6 +1680,78 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'permissions',
 		verboseName: 'Permission',
 		verboseNamePlural: 'Permissions'
+	},
+	'generic-collections': {
+		name: 'genericcollection',
+		localName: 'genericCollection',
+		localNamePlural: 'genericCollections',
+		verboseName: 'Generic Collection',
+		verboseNamePlural: 'Generic Collections',
+		endpointUrl: 'pmbok/generic-collections',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		reverseForeignKeyFields: [
+			{ field: 'genericcollection', urlModel: 'compliance-assessments' },
+			{ field: 'genericcollection', urlModel: 'risk-assessments' },
+			{ field: 'genericcollection', urlModel: 'quantitative-risk-studies' },
+			{ field: 'genericcollection', urlModel: 'ebios-rm' },
+			{ field: 'genericcollection', urlModel: 'entity-assessments' },
+			{ field: 'genericcollection', urlModel: 'findings-assessments' },
+			{ field: 'genericcollection', urlModel: 'evidences' },
+			{ field: 'genericcollection', urlModel: 'security-exceptions' },
+			{ field: 'genericcollection', urlModel: 'policies' }
+		],
+		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
+	},
+	accreditations: {
+		name: 'accreditation',
+		localName: 'accreditation',
+		localNamePlural: 'accreditations',
+		verboseName: 'Accreditation',
+		verboseNamePlural: 'Accreditations',
+		endpointUrl: 'pmbok/accreditations',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'checklist', urlModel: 'compliance-assessments' },
+			{ field: 'category' },
+			{ field: 'status' },
+			{ field: 'authority' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'expiry_date', type: 'date' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'author', urlModel: 'users' },
+			{ field: 'checklist', urlModel: 'compliance-assessments' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'authority', urlModel: 'entities' }
+		],
+		selectFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'status', endpointUrl: 'pmbok/accreditations' },
+			{ field: 'category', endpointUrl: 'pmbok/accreditations' }
+		],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'category' },
+			{ field: 'author' },
+			{ field: 'linked_collection' },
+			{ field: 'checklist' },
+			{ field: 'filtering_labels' }
+		]
 	}
 };
 
