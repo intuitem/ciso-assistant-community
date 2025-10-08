@@ -114,12 +114,12 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def __lt__(self, other: Any) -> bool:
+    def __lt__(self, other: "UserGroup") -> bool:
         names = [f.name for f in self.get_folder_full_path(include_root=False)]
         names_other = [f.name for f in other.get_folder_full_path(include_root=False)]
         return "/".join(names) < "/".join(names_other)
 
-    def __gt__(self, other: Any) -> bool:
+    def __gt__(self, other: "UserGroup") -> bool:
         names = [f.name for f in self.get_folder_full_path(include_root=False)]
         names_other = [f.name for f in other.get_folder_full_path(include_root=False)]
         return "/".join(names) > "/".join(names_other)
