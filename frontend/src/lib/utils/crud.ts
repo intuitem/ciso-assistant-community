@@ -99,6 +99,10 @@ interface ForeignKeyField {
 	urlModel: urlModel;
 	endpointUrl?: string;
 	urlParams?: string;
+	tableFields?: string[];
+}
+
+interface ReverseForeignKeyField extends ForeignKeyField {
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
 	disableCreate?: boolean;
@@ -132,7 +136,7 @@ export interface ModelMapEntry {
 	flaggedFields?: Record<string, FeatureFlag>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
-	reverseForeignKeyFields?: ForeignKeyField[];
+	reverseForeignKeyFields?: ReverseForeignKeyField[];
 	selectFields?: SelectField[];
 	fileFields?: string[];
 	filters?: SelectField[];
@@ -157,7 +161,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
-			{ field: 'folder', urlModel: 'assets' }
+			{ field: 'folder', urlModel: 'assets' },
+			{
+				field: 'folder',
+				urlModel: 'users',
+				detail: true,
+				endpointUrl: './users',
+				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
+			}
 		]
 	},
 	perimeters: {
@@ -508,6 +519,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
+		reverseForeignKeyFields: [{ field: 'user_groups', urlModel: 'users' }],
 		filters: []
 	},
 	'role-assignments': {
