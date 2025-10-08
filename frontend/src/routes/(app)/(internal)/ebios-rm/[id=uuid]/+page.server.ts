@@ -13,7 +13,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const URLModel = 'ebios-rm';
 	const model: ModelInfo = getModelInfo(URLModel);
 
@@ -22,6 +22,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		: `${BASE_API_URL}/${model.urlModel}/${params.id}/`;
 	const res = await fetch(endpoint);
 	const data = await res.json();
+
+	// Get data from parent layout
+	const layoutData = await parent();
 
 	const initialData = {
 		risk_matrix: data.risk_matrix.id,

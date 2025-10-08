@@ -39,7 +39,8 @@
 		layoutType = GraphLayoutType.Parallel,
 		layoutParallelGroupSpacing = 250, // Increased from 200 for more space between columns
 		layoutParallelNodesPerColumn = 5, // Reduced from 4 to spread nodes more
-		layoutParallelSubGroupsPerRow = 3 // Control sub-groups per row
+		layoutParallelSubGroupsPerRow = 3, // Control sub-groups per row
+		zoomLevel = 1.0 // Default zoom level
 	}: {
 		data: GraphData;
 		panelNodes?: {
@@ -56,6 +57,7 @@
 		layoutParallelGroupSpacing?: number;
 		layoutParallelNodesPerColumn?: number;
 		layoutParallelSubGroupsPerRow?: number;
+		zoomLevel?: number;
 	} = $props();
 
 	// Build panels with increased padding for more space
@@ -255,6 +257,7 @@
 			{linkArrow}
 			{linkFlow}
 			{linkArrowSize}
+			zoomScaleExtent={[zoomLevel, zoomLevel]}
 		/>
 	</VisSingleContainer>
 </div>
