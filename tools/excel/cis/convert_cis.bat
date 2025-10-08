@@ -1,15 +1,18 @@
 @echo off
 REM Check if an argument is provided
 IF "%~1"=="" (
-    echo Usage: convert_cis.bat cis_file.xlsx
+    echo Usage: convert_cis.bat cis_file.xlsx ^<packager^>
+    exit /b 1
+)
+IF "%~2"=="" (
+    echo Usage: convert_cis.bat cis_file.xlsx ^<packager^>
     exit /b 1
 )
 
-SET packager=personal
 
 REM Run the Python scripts
 echo ==^> [STEP 1] Extract Excel file data...
-python prep_cis.py %1 %packager%
+python prep_cis.py %1 %2
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 1 failed
     exit /b 1
