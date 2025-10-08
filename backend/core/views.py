@@ -3209,9 +3209,9 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
                             "id",
                             "name",
                             path=Concat(
-                                F("name"),
-                                Value("/"),
                                 cte.col.path,
+                                Value("/"),
+                                F("name"),
                                 output_field=TextField(),
                             ),
                             depth=cte.col.depth + Value(1, output_field=IntegerField()),
