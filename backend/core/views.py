@@ -2718,10 +2718,10 @@ class UserPermsOnFolderList(generics.ListAPIView):
 
     def get_queryset(self):
         # Use cached permissions if present to avoid duplicate computation
-        perms = getattr(self, "_folder_perms", None)
-        if perms is None:
-            perms = self.get_serializer_context().get("permissions", {})
-        user_ids = list(perms.keys())
+        roles = getattr(self, "_folder_roles", None)
+        if roles is None:
+            roles = self.get_serializer_context().get("roles", {})
+        user_ids = list(roles.keys())
         return User.objects.filter(id__in=user_ids)
 
     def get_serializer_context(self):
@@ -2733,10 +2733,10 @@ class UserPermsOnFolderList(generics.ListAPIView):
         )
         if folder.id not in viewable_folders:
             raise PermissionDenied()
-        perms = folder.get_user_permissions()
+        roles = folder.get_user_roles()
         # cache for reuse in get_queryset
-        self._folder_perms = perms
-        context.update({"pk": self.kwargs["pk"], "permissions": perms})
+        self._folder_roles = roles
+        context.update({"pk": self.kwargs["pk"], "roles": roles})
         return context
 
 

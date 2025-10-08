@@ -168,7 +168,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'users',
 				detail: true,
 				endpointUrl: './users',
-				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'permissions']
+				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
 			}
 		]
 	},
@@ -1786,9 +1786,6 @@ const FIELD_COMPONENT_MAP = {
 		locales: LanguageDisplay,
 		objects_meta: LibraryOverview,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	},
-	users: {
-		permissions: PermissionList
 	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay

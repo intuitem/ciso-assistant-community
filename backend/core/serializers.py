@@ -988,14 +988,14 @@ class UserReadSerializer(BaseModelSerializer):
 
 
 class UserPermsOnFolderSerializer(BaseModelSerializer):
-    permissions = serializers.SerializerMethodField()
+    roles = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "is_active", "permissions"]
+        fields = ["id", "email", "first_name", "last_name", "is_active", "roles"]
 
-    def get_permissions(self, obj):
-        return self.context["permissions"].get(obj.id, [])
+    def get_roles(self, obj):
+        return [{"str": str(role)} for role in self.context["roles"].get(obj.id, [])]
 
 
 class UserWriteSerializer(BaseModelSerializer):
