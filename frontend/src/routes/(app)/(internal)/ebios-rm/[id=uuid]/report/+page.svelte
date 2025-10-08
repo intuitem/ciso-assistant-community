@@ -42,12 +42,12 @@
 	const useBubbles = data.useBubbles;
 	const inherentRiskEnabled = data.inherentRiskEnabled;
 
-	const pertinenceColor = {
+	const pertinenceColor: Record<string, string> = {
 		undefined: 'bg-gray-200 text-gray-700',
 		irrelevant: 'bg-green-200 text-green-700',
-		'partially relevant': 'bg-yellow-200 text-yellow-700',
+		partially_relevant: 'bg-yellow-200 text-yellow-700',
 		fairly_relevant: 'bg-orange-200 text-orange-700',
-		higly_relevant: 'bg-red-200 text-red-700'
+		highly_relevant: 'bg-red-200 text-red-700'
 	};
 
 	function exportPDF() {
