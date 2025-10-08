@@ -589,7 +589,12 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
+		<Tabs
+			value={group}
+			onValueChange={(e) => (group = e.value)}
+			listJustify="justify-center"
+			listClasses="flex flex-wrap"
+		>
 			{#snippet list()}
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Control value={urlmodel}>
