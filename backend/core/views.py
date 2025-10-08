@@ -2716,28 +2716,41 @@ class UserPermsOnFolderList(generics.ListAPIView):
     ordering_fields = "__all__"
     ordering = ["email"]
 
-    def get_queryset(self):
-        # Use cached permissions if present to avoid duplicate computation
-        roles = getattr(self, "_folder_roles", None)
-        if roles is None:
-            roles = self.get_serializer_context().get("roles", {})
-        user_ids = list(roles.keys())
-        return User.objects.filter(id__in=user_ids)
+    _user_roles_map = None  # cached variable
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
+    def get_queryset(self):
+        # this is called before get_serializer_context, so the cache is intiated here
         folder = get_object_or_404(Folder, id=self.kwargs["pk"])
-        # Authorize: ensure requester can view this folder
-        viewable_folders, _, _ = RoleAssignment.get_accessible_object_ids(
+
+        # authorize
+        viewable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, Folder
         )
-        if folder.id not in viewable_folders:
+        if folder.id not in viewable_ids:
             raise PermissionDenied()
-        roles = folder.get_user_roles()
-        # cache for reuse in get_queryset
-        self._folder_roles = roles
-        context.update({"pk": self.kwargs["pk"], "roles": roles})
-        return context
+
+        # reuse shared visibility logic
+        visible_ids = set(
+            UserViewSet.visible_users_qs(self.request.user).values_list("id", flat=True)
+        )
+
+        # compute once and cache
+        raw_map = folder.get_user_roles()  # {user_id: [Role, ...]}
+        self._user_roles_map = {
+            uid: roles for uid, roles in raw_map.items() if uid in visible_ids
+        }
+
+        return User.objects.filter(id__in=self._user_roles_map.keys())
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx.update(
+            {
+                "pk": self.kwargs["pk"],
+                "user_roles_map": self._user_roles_map or {},
+            }
+        )
+        return ctx
 
 
 class ComplianceAssessmentActionPlanList(ActionPlanList):
@@ -3349,9 +3362,24 @@ class UserViewSet(BaseModelViewSet):
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
 
+    @classmethod
+    def visible_users_qs(cls, for_user: User):
+        """
+        Return a queryset of users visible to `for_user`, always including `for_user`.
+        Mirrors the logic used in get_queryset().
+        """
+        if not getattr(for_user, "is_authenticated", False):
+            return User.objects.none()
+
+        (visible_user_groups, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), for_user, UserGroup
+        )
+        visible_users = User.objects.filter(user_groups__in=visible_user_groups)
+        return (visible_users | User.objects.filter(pk=for_user.pk)).distinct()
+
     def get_queryset(self):
-        # TODO: Implement a proper filter for the queryset
-        return User.objects.all()
+        # Call the class method
+        return self.visible_users_qs(self.request.user)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()
