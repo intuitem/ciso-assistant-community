@@ -2703,6 +2703,43 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
+class UserPermsOnFolderList(generics.ListAPIView):
+    filterset_fields = {}
+    search_fields = ["email"]
+    serializer_class = UserPermsOnFolderSerializer
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering_fields = "__all__"
+    ordering = ["email"]
+
+    def get_queryset(self):
+        # Use cached permissions if present to avoid duplicate computation
+        roles = getattr(self, "_folder_roles", None)
+        if roles is None:
+            roles = self.get_serializer_context().get("roles", {})
+        user_ids = list(roles.keys())
+        return User.objects.filter(id__in=user_ids)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        folder = get_object_or_404(Folder, id=self.kwargs["pk"])
+        # Authorize: ensure requester can view this folder
+        viewable_folders, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Folder
+        )
+        if folder.id not in viewable_folders:
+            raise PermissionDenied()
+        roles = folder.get_user_roles()
+        # cache for reuse in get_queryset
+        self._folder_roles = roles
+        context.update({"pk": self.kwargs["pk"], "roles": roles})
+        return context
+
+
 class ComplianceAssessmentActionPlanList(ActionPlanList):
     serializer_class = ComplianceAssessmentActionPlanSerializer
 
@@ -3298,6 +3335,7 @@ class UserFilter(GenericFilterSet):
             "is_approver",
             "is_third_party",
             "expiry_date",
+            "user_groups",
         ]
 
 
