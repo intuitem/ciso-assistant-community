@@ -28,6 +28,7 @@ from django.db.models import (
     OuterRef,
     When,
     Case,
+    Prefetch,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -3374,8 +3375,20 @@ class UserViewSet(BaseModelViewSet):
         (visible_user_groups, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), for_user, UserGroup
         )
-        visible_users = User.objects.filter(user_groups__in=visible_user_groups)
-        return (visible_users | User.objects.filter(pk=for_user.pk)).distinct()
+        base_qs = (
+            User.objects.filter(user_groups__in=visible_user_groups)
+            | User.objects.filter(pk=for_user.pk)
+        ).distinct()
+
+        # 🔒 Filtered prefetch for serializer
+        return base_qs.prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(id__in=visible_user_groups)
+                                          .only("id", "builtin"),  # minimal
+            )
+        )
+
 
     def get_queryset(self):
         # Call the class method
