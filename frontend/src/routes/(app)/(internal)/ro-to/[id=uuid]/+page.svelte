@@ -25,12 +25,12 @@
 		}
 	});
 
-	const pertinenceColor = {
+	const pertinenceColor: Record<string, string> = {
 		undefined: 'bg-gray-200 text-gray-700',
 		irrelevant: 'bg-green-200 text-green-700',
-		'partially relevant': 'bg-yellow-200 text-yellow-700',
+		partially_relevant: 'bg-yellow-200 text-yellow-700',
 		fairly_relevant: 'bg-orange-200 text-orange-700',
-		higly_relevant: 'bg-red-200 text-red-700'
+		highly_relevant: 'bg-red-200 text-red-700'
 	};
 
 	const user = page.data.user;
@@ -134,7 +134,7 @@
 				</p>
 			</div>
 			<p>
-				<span class="badge bg-violet-200 text-violet-700">{m.activity()}</span>
+				<span class="badge bg-violet-200 text-violet-700">{m.rotoActivity()}</span>
 				<span>=</span>
 				<span class="font-bold">{safeTranslate(roto.activity)}</span>
 			</p>
