@@ -15,6 +15,7 @@ import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from django_cte import With, with_cte, CTE
 from django.db.models import (
     F,
     Count,
@@ -22,6 +23,8 @@ from django.db.models import (
     ExpressionWrapper,
     FloatField,
     IntegerField,
+    CharField,
+    TextField,
     Value,
     Min,
     Subquery,
@@ -29,7 +32,7 @@ from django.db.models import (
     When,
     Case,
 )
-from django.db.models.functions import Greatest, Coalesce
+from django.db.models.functions import Greatest, Coalesce, Concat
 
 from collections import defaultdict
 import pytz
@@ -3188,21 +3191,56 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
         if not ordering:
             return queryset
 
-        # Special case: in-memory sorting for `localization_dict`
         if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
-            desc = ordering[0].startswith("-")
+            is_desc = ordering[0].startswith("-")
 
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
-            objs = list(queryset)
-            objs.sort(reverse=desc)
+            def make_folder_path_cte(cte):
+                return (
+                    Folder.objects.filter(folder__isnull=True)
+                    .values(
+                        "id",
+                        "name",
+                        path=F("name"),
+                        depth=Value(0, output_field=IntegerField()),
+                    )
+                    .union(
+                        # recursive union: get descendants
+                        cte.join(Folder, folder=cte.col.id).values(
+                            "id",
+                            "name",
+                            path=Concat(
+                                F("name"),
+                                Value("/"),
+                                cte.col.path,
+                                output_field=TextField(),
+                            ),
+                            depth=cte.col.depth + Value(1, output_field=IntegerField()),
+                        ),
+                        all=True,
+                    )
+                )
 
-            # TODO: Find another way, this is not optimal at all
-            preserved = Case(
-                *[When(pk=obj.pk, then=pos) for pos, obj in enumerate(objs)],
-                output_field=IntegerField(),
+            cte = CTE.recursive(make_folder_path_cte)
+
+            return with_cte(
+                cte,
+                select=cte.join(UserGroup, folder=cte.col.id)
+                .annotate(
+                    path=cte.col.path,
+                    depth=cte.col.depth,
+                    codename=Case(
+                        *[
+                            When(name=key, then=Value(str(val)))
+                            for key, val in BUILTIN_USERGROUP_CODENAMES.items()
+                        ],
+                        default=F("name"),
+                        output_field=CharField(),
+                    ),
+                    order_string=Concat(F("path"), Value(" - "), F("codename")),
+                )
+                .filter(depth__lt=256)  # Hardcoded folder depth limit
+                .order_by("order_string" if not is_desc else "-order_string"),
             )
-            return queryset.filter(pk__in=[obj.pk for obj in objs]).order_by(preserved)
 
         # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
