@@ -934,6 +934,7 @@
 															panelNodes={mode.graph.panelNodes}
 															linkFlow={false}
 															height="400px"
+															zoomLevel={0.6}
 														/>
 													</div>
 												</div>
