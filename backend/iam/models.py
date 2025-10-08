@@ -242,7 +242,6 @@ class Folder(NameDescriptionMixin):
             if item.user_pk and item.role:
                 user_roles[item.user_pk].append(item.role)
 
-        print(user_roles)
         return dict(user_roles)
 
     @staticmethod
