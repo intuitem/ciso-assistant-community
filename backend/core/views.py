@@ -3384,11 +3384,11 @@ class UserViewSet(BaseModelViewSet):
         return base_qs.prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(id__in=visible_user_groups)
-                                          .only("id", "builtin"),  # minimal
+                queryset=UserGroup.objects.filter(id__in=visible_user_groups).only(
+                    "id", "builtin"
+                ),  # minimal
             )
         )
-
 
     def get_queryset(self):
         # Call the class method
