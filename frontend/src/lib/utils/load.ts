@@ -34,13 +34,16 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const relatedModels = {} as RelatedModels;
 
-	if (
-		model.reverseForeignKeyFields &&
-		!(model.urlModel === 'folders' && data.content_type === 'GLOBAL')
-	) {
+	if (model.reverseForeignKeyFields) {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
+				if (
+					e.urlModel === 'perimeters' &&
+					model.urlModel === 'folders' &&
+					data.content_type === 'GLOBAL'
+				)
+					return;
 				const tableFieldsRef = listViewFields[e.urlModel];
 				const tableFields = {
 					head: [...tableFieldsRef.head],
