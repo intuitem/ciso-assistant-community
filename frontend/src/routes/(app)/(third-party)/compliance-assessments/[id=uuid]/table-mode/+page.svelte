@@ -27,7 +27,9 @@
 	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
-
+	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
+	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
+	import { onMount } from 'svelte';
 	interface Props {
 		data: PageData;
 		form: Actions;
@@ -281,9 +283,75 @@
 			};
 		})
 	);
+
+	let tocItems: TocItem[] = $state([]);
+	let showToc = $state(true);
+	// Generate TOC items from requirement assessments - only include title nodes
+	$effect(() => {
+		if (requirementAssessments.length > 0) {
+			tocItems = requirementAssessments
+				.filter((ra) => {
+					// Only include non-assessable nodes, non empty title and depth <= 4
+					const requirement = requirementHashmap[ra.requirement] ?? ra;
+					if (ra.assessable || requirement.assessable) return false;
+
+					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
+					const name = requirement.name;
+
+					const hasRefId = refId && refId.trim();
+					const hasName = name && name.trim();
+					if (!hasRefId && !hasName) return false;
+
+					if (refId) {
+						const parts = refId.split('.');
+						if (parts.length > 4) return false;
+					}
+
+					return true;
+				})
+				.map((ra, index) => {
+					const requirement = requirementHashmap[ra.requirement] ?? ra;
+
+					// Safely access ref_id and name
+					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
+					const name = requirement.name;
+
+					let title = '';
+					if (name && name.trim()) {
+						title = name.trim();
+					} else if (refId && refId.trim()) {
+						title = refId.trim();
+					} else {
+						title = `Section ${index + 1}`;
+					}
+
+					let level = 0;
+					if (refId && refId.trim()) {
+						const parts = refId.split('.');
+						level = Math.max(0, parts.length - 1);
+					}
+
+					return {
+						id: `requirement-${ra.id}`,
+						title: title,
+						level: Math.min(level, 4)
+					};
+				});
+		}
+	});
+	onMount(() => {
+		// Show TOC only if there are more than 3 requirements
+		showToc = requirementAssessments.length > 3;
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
+	<TableOfContents
+		items={tocItems}
+		isVisible={showToc}
+		position="right"
+		className="hidden lg:block"
+	/>
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
@@ -325,7 +393,13 @@
 		{#each requirementAssessments as requirementAssessment, i}
 			<div class="w-2"></div>
 
-			<span class="relative flex justify-center py-4">
+			<span
+				class="relative flex justify-center py-4"
+				id="requirement-{requirementAssessment.id}"
+				data-toc
+				data-toc-title={getTitle(requirementAssessment)}
+				data-toc-level="0"
+			>
 				<div
 					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 				></div>

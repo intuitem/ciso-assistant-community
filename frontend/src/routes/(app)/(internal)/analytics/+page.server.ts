@@ -10,6 +10,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
 	const applied_control_status = await req_applied_control_status.json();
 
+	const req_task_template_status = await fetch(`${BASE_API_URL}/task-templates/per_status/`);
+	const task_template_status = await req_task_template_status.json();
+
 	const riskAssessmentsPerStatus = await fetch(`${BASE_API_URL}/risk-assessments/per_status/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
@@ -29,6 +32,17 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return data.results;
 		} catch (error) {
 			console.error('failed to fetch or parse counters:', error);
+			return null;
+		}
+	};
+
+	const getCombinedAssessmentsStatus = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_combined_assessments_status/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('failed to fetch or parse combined assessments status:', error);
 			return null;
 		}
 	};
@@ -80,6 +94,116 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return {};
 		});
 
+	const getGovernanceCalendarData = async () => {
+		try {
+			const currentYear = new Date().getFullYear();
+			const response = await fetch(
+				`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`
+			);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('Failed to fetch governance calendar data:', error);
+			return [];
+		}
+	};
+
+	const getOperationsAnalytics = async () => {
+		try {
+			const detectionData = await fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident detection breakdown:', error);
+					return { results: [] };
+				});
+
+			const monthlyData = await fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch monthly incident metrics:', error);
+					return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
+				});
+
+			const summaryData = await fetch(`${BASE_API_URL}/incidents/summary_stats/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident summary stats:', error);
+					return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
+				});
+
+			const severityData = await fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident severity breakdown:', error);
+					return { results: [] };
+				});
+
+			const qualificationsData = await fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident qualifications breakdown:', error);
+					return { results: { labels: [], values: [] } };
+				});
+
+			const exceptionSankeyData = await fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch security exception Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				});
+
+			const sunburstData = await fetch(`${BASE_API_URL}/applied-controls/sunburst_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch applied controls sunburst data:', error);
+					return { results: [] };
+				});
+
+			const findingsSankeyData = await fetch(`${BASE_API_URL}/findings/sankey_data/`)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch findings Sankey data:', error);
+					return { results: { nodes: [], links: [] } };
+				});
+
+			return {
+				incident_detection_breakdown: detectionData.results,
+				monthly_metrics: monthlyData.results,
+				summary_stats: summaryData.results,
+				severity_breakdown: severityData.results,
+				qualifications_breakdown: qualificationsData.results,
+				exception_sankey: exceptionSankeyData.results,
+				applied_controls_sunburst: sunburstData.results,
+				findings_sankey: findingsSankeyData.results
+			};
+		} catch (error) {
+			console.error('Failed to fetch operations analytics:', error);
+			return null;
+		}
+	};
+
+	const getVulnerabilitySankeyData = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/vulnerabilities/sankey_data/`);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Failed to fetch vulnerability sankey data:', error);
+			return [];
+		}
+	};
+
+	const getFindingsAssessmentSunburstData = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/findings-assessments/sunburst_data/`);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Failed to fetch findings assessment sunburst data:', error);
+			return [];
+		}
+	};
+
 	return {
 		composerForm,
 		usedRiskMatrices,
@@ -92,12 +216,18 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		qualifications_count,
 		risk_assessments: risk_assessments.results,
 		applied_control_status: applied_control_status.results,
+		task_template_status: task_template_status.results,
 		complianceAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {
 			metrics: getMetrics(),
-			counters: getCounters()
+			counters: getCounters(),
+			combinedAssessmentsStatus: getCombinedAssessmentsStatus(),
+			governanceCalendarData: getGovernanceCalendarData(),
+			operationsAnalytics: getOperationsAnalytics(),
+			vulnerabilitySankeyData: getVulnerabilitySankeyData(),
+			findingsAssessmentSunburstData: getFindingsAssessmentSunburstData()
 		}
 	};
 };

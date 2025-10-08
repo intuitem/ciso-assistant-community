@@ -39,7 +39,7 @@
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		Quantitative Risk Study:
+		{m.quantitativeRiskStudyLabel()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/quantitative-risk-studies/{data.quantitative_risk_study.id}/"
@@ -51,8 +51,8 @@
 <div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center">
 		<div>
-			<p class="text-xl font-extrabold">Action Plan</p>
-			<p class="text-sm text-gray-500">Controls from quantitative risk hypotheses</p>
+			<p class="text-xl font-extrabold">{m.actionPlan()}</p>
+			<p class="text-sm text-gray-500">{m.controlsFromQuantitativeRisk()}</p>
 		</div>
 	</div>
 
