@@ -810,7 +810,7 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
-    @action(detail=False, name="Get asset class choices")
+    @action(detail=False, name="Get asset class choices", url_path="asset-class")
     def asset_class(self, request):
         # this is for filters
         return Response(
