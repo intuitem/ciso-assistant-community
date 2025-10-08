@@ -4662,6 +4662,7 @@ class ComplianceAssessment(Assessment):
                         "is_scored",
                         "observation",
                     ],
+                    batch_size=1000,
                 )
 
             # Handle M2M relationships
@@ -5243,9 +5244,20 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
-                requirement_assessment.save()
                 requirement_assessments.append(requirement_assessment)
 
+        RequirementAssessment.objects.bulk_update(
+            requirement_assessments,
+            [
+                "mapping_inference",
+                "result",
+                "status",
+                "score",
+                "is_scored",
+                "observation",
+            ],
+            batch_size=1000,
+        )
         return requirement_assessments, assessment_source_dict
 
     def get_progress(self) -> int:
