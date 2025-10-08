@@ -66,6 +66,7 @@ def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
     current_data = {cat: [] for cat in categories_list}
     residual_data = {cat: [] for cat in categories_list}
     not_displayed = 0
+    max_criticality_found = 0
 
     # Counter for distributing points within each category
     category_counters = {cat: 0 for cat in categories_list}
@@ -93,36 +94,40 @@ def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
         category_counters[category_name] += 1
 
         # Current data
-        c_criticality = (
-            math.floor(sh.current_criticality * 100) / 100.0
-            if sh.current_criticality <= max_val
-            else max_val - 1 + 0.25
-        )
+        c_criticality = math.floor(sh.current_criticality * 100) / 100.0
         c_exposure = sh.current_dependency * sh.current_penetration
         c_exposure_val = c_exposure * 4  # Scale for size
+
+        # Track max criticality
+        max_criticality_found = max(max_criticality_found, c_criticality)
 
         current_data[category_name].append(
             [c_criticality, angle, c_exposure_val, f"{sh.entity.name}-{category_name}"]
         )
 
         # Residual data
-        r_criticality = (
-            math.floor(sh.residual_criticality * 100) / 100.0
-            if sh.residual_criticality <= max_val
-            else max_val - 1 + 0.25
-        )
+        r_criticality = math.floor(sh.residual_criticality * 100) / 100.0
         r_exposure = sh.residual_dependency * sh.residual_penetration
         r_exposure_val = r_exposure * 4  # Scale for size
+
+        # Track max criticality
+        max_criticality_found = max(max_criticality_found, r_criticality)
 
         residual_data[category_name].append(
             [r_criticality, angle, r_exposure_val, f"{sh.entity.name}-{category_name}"]
         )
+
+    # Calculate chart max: use max of configured max_val and actual max criticality found
+    chart_max = (
+        max(max_val, max_criticality_found) if max_criticality_found > 0 else max_val
+    )
 
     return {
         "categories": categories_list,
         "current": current_data,
         "residual": residual_data,
         "not_displayed": not_displayed,
+        "chart_max": chart_max,
     }
 
 

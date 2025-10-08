@@ -40,6 +40,7 @@
 
 		const categories = data.categories || [];
 		const chartData = data[type] || {};
+		const chartMax = data.chart_max || max;
 
 		// Define colors for categories
 		const categoryColors = [
@@ -86,12 +87,19 @@
 			},
 			radiusAxis: {
 				type: 'value',
-				max: max,
+				max: chartMax,
 				inverse: true,
 				axisLabel: { show: false },
 				axisLine: { show: false },
 				axisTick: { show: false },
-				splitLine: { show: false }
+				splitLine: {
+					show: true,
+					lineStyle: {
+						color: '#d1d5db',
+						width: 1,
+						type: 'solid'
+					}
+				}
 			},
 			series: [
 				// Category series
@@ -101,12 +109,12 @@
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						// val[2] contains the exposure value (dependency * penetration * 4), range 0-64
-						// Scale to 8-32 pixel range to ensure visibility
+						// Scale with offset to ensure visibility
 						const exposure = val[2];
-						const minSize = 8;
-						const maxSize = 32;
+						const baseSize = 12; // Base size for zero exposure
+						const additionalSize = 20; // Additional size range based on exposure
 						const maxExposure = 64; // 4 * 4 * 4
-						return minSize + (exposure / maxExposure) * (maxSize - minSize);
+						return baseSize + (exposure / maxExposure) * additionalSize;
 					},
 					data: chartData[category] || [],
 					animationDelay: function (idx) {
@@ -126,7 +134,7 @@
 					},
 					showInLegend: false,
 					silent: true,
-					zlevel: -1
+					z: 1
 				},
 				{
 					name: 'Yellow Zone',
@@ -140,7 +148,7 @@
 					},
 					showInLegend: false,
 					silent: true,
-					zlevel: -1
+					z: 1
 				},
 				{
 					name: 'Green Zone',
@@ -154,7 +162,7 @@
 					},
 					showInLegend: false,
 					silent: true,
-					zlevel: -1
+					z: 1
 				}
 			]
 		};
