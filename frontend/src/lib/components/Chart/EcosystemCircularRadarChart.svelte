@@ -38,32 +38,52 @@
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
-		const categories = data.categories || [];
+		const maturityGroups = data.maturity_groups || ['<4', '4-5', '6-7', '>7'];
 		const chartData = data[type] || {};
 		// Use chart_max from backend to ensure consistent scale across current and residual
 		const chartMax = data.chart_max || max;
+		const categoryBoundaries = data.category_boundaries || [];
+		const categoryLabelPositions = data.category_label_positions || [];
 
-		// Define colors for categories
-		const categoryColors = [
-			'#3b82f6', // blue
-			'#ef4444', // red
-			'#10b981', // green
-			'#f59e0b', // amber
-			'#8b5cf6', // purple
-			'#ec4899', // pink
-			'#14b8a6', // teal
-			'#f97316'  // orange
-		];
+		// Define colors for maturity groups (matching original radar chart)
+		const maturityColors = {
+			'<4': '#E73E51', // red - low maturity
+			'4-5': '#DE8898', // pink - medium-low maturity
+			'6-7': '#BAD9EA', // light blue - medium-high maturity
+			'>7': '#8A8B8A' // gray - high maturity
+		};
 
 		const option = {
 			title: {
 				text: title
 			},
+			graphic: [
+				{
+					type: 'text',
+					left: 'center',
+					top: 40,
+					style: {
+						text: m.cyberReliability(),
+						font: 'bold 16px Arial',
+						fill: '#333',
+						textAlign: 'center'
+					}
+				}
+			],
 			legend: {
-				data: categories.map((cat) => safeTranslate(cat)),
+				data: maturityGroups,
 				top: 60
 			},
-			polar: {},
+			grid: {
+				top: 120,
+				bottom: 60,
+				left: 80,
+				right: 80
+			},
+			polar: {
+				center: ['50%', '55%'],
+				radius: '65%'
+			},
 			tooltip: {
 				formatter: function (params) {
 					const parts = params.value[3].split('-');
@@ -78,7 +98,7 @@
 			},
 			angleAxis: {
 				type: 'value',
-				startAngle: 90,
+				startAngle: 0,
 				min: 0,
 				max: 360,
 				axisLabel: { show: false },
@@ -90,8 +110,12 @@
 				type: 'value',
 				max: chartMax,
 				inverse: true,
-				axisLabel: { show: false },
-				axisLine: { show: false },
+				axisLabel: { show: true },
+				axisLine: {
+					show: true,
+					symbol: ['arrow', 'none'],
+					lineStyle: { width: 2 }
+				},
 				axisTick: { show: false },
 				splitLine: {
 					show: true,
@@ -100,12 +124,14 @@
 						width: 1,
 						type: 'solid'
 					}
-				}
+				},
+				z: 100
 			},
 			series: [
-				// Category series
-				...categories.map((category, index) => ({
-					name: safeTranslate(category),
+				// Maturity group series
+				...maturityGroups.map((group) => ({
+					name: group,
+					color: maturityColors[group],
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -117,10 +143,51 @@
 						const maxExposure = 64; // 4 * 4 * 4
 						return baseSize + (exposure / maxExposure) * additionalSize;
 					},
-					data: chartData[category] || [],
+					data: chartData[group] || [],
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
+				})),
+				// Category labels at outer ring
+				{
+					name: 'Category Labels',
+					type: 'scatter',
+					coordinateSystem: 'polar',
+					symbolSize: 0,
+					data: categoryLabelPositions.map((pos) => [0, pos.angle]),
+					label: {
+						show: true,
+						position: 'outside',
+						formatter: function (params) {
+							const labelPos = categoryLabelPositions[params.dataIndex];
+							return safeTranslate(labelPos.category);
+						},
+						fontSize: 14,
+						fontWeight: 'bold',
+						color: '#374151'
+					},
+					showInLegend: false,
+					silent: true,
+					z: 10
+				},
+				// Category delimiter lines
+				...categoryBoundaries.map((angle) => ({
+					name: 'Category Delimiter',
+					type: 'line',
+					coordinateSystem: 'polar',
+					symbol: 'none',
+					data: [
+						[0, angle],
+						[chartMax, angle]
+					],
+					lineStyle: {
+						color: '#9ca3af',
+						width: 2,
+						type: 'dashed'
+					},
+					showInLegend: false,
+					silent: true,
+					z: 0
 				})),
 				// Threshold circles
 				{

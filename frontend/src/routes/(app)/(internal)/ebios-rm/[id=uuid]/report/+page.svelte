@@ -6,7 +6,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
+	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
 	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
@@ -539,9 +539,10 @@
 				{m.ecosystemRadar()} - {m.current()}
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-current">
-				<EcosystemRadarChart
+				<EcosystemCircularRadarChart
 					name="c_ecosystem_report"
-					data={reportData.radar.current}
+					data={reportData.radar}
+					type="current"
 					classesContainer="w-full"
 					height="h-[700px]"
 				/>
@@ -558,9 +559,10 @@
 				{m.ecosystemRadar()} - {m.residual()}
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-residual">
-				<EcosystemRadarChart
+				<EcosystemCircularRadarChart
 					name="r_ecosystem_report"
-					data={reportData.radar.residual}
+					data={reportData.radar}
+					type="residual"
 					classesContainer="w-full"
 					height="h-[700px]"
 				/>
