@@ -218,6 +218,50 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     def applied_control_count(self):
         return AppliedControl.objects.filter(stakeholders__ebios_rm_study=self).count()
 
+    def get_counters(self):
+        """Return all counters as a dictionary"""
+        from core.models import RequirementAssessment
+
+        # Get compliance applied controls count
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment__in=self.compliance_assessments.all()
+        )
+        compliance_applied_control_count = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            )
+            .distinct()
+            .count()
+        )
+
+        # Get risk assessment applied controls count
+        risk_assessment_applied_control_count = 0
+        if self.last_risk_assessment:
+            risk_scenarios = self.last_risk_assessment.risk_scenarios.all()
+            risk_assessment_applied_control_count = (
+                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios)
+                .distinct()
+                .count()
+            )
+
+        return {
+            "selected_asset_count": self.assets.count(),
+            "selected_feared_event_count": FearedEvent.objects.filter(
+                ebios_rm_study=self, is_selected=True
+            ).count(),
+            "compliance_assessment_count": self.compliance_assessments.count(),
+            "roto_count": self.roto_set.count(),
+            "stakeholder_count": Stakeholder.objects.filter(
+                ebios_rm_study=self, is_selected=True
+            ).count(),
+            "strategic_scenario_count": StrategicScenario.objects.filter(
+                ebios_rm_study=self
+            ).count(),
+            "operational_scenario_count": self.operational_scenarios.count(),
+            "compliance_applied_control_count": compliance_applied_control_count,
+            "risk_assessment_applied_control_count": risk_assessment_applied_control_count,
+        }
+
     @property
     def last_risk_assessment(self):
         """Get the latest risk assessment for the study
@@ -872,6 +916,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     operating_modes_description = models.TextField(
         verbose_name=_("Operating modes description"),
         help_text=_("Description of the operating modes of the operational scenario"),
+        blank=True,
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)

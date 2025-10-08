@@ -5,6 +5,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 
@@ -96,7 +97,7 @@
 		>
 			{m.activityOne()}
 		</p>
-		<TextArea
+		<MarkdownField
 			{form}
 			field="description"
 			label={m.description()}
@@ -182,7 +183,7 @@
 			helpText={m.studyAssetHelpText()}
 		/>
 	</div>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}
