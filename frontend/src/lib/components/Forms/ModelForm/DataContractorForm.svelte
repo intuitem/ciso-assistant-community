@@ -6,6 +6,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -62,6 +63,20 @@
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}
 	label={m.entity()}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'relationship',
+				display: (relationships) => {
+					if (!relationships || relationships.length === 0) return '';
+					return relationships.map((r) => safeTranslate(r.str || r.name || r)).join(' | ');
+				}
+			}
+		],
+		position: 'suffix',
+		separator: ' | ',
+		classes: 'text-xs text-surface-500'
+	}}
 />
 <AutocompleteSelect
 	{form}
