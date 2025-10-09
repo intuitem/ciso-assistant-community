@@ -112,7 +112,7 @@ class TestUsersAuthenticated:
 
     def test_update_users(self, test):
         """test to update users with the API with authentication"""
-    
+
         EndpointTestsQueries.Auth.update_object(
             test.client,
             "Users",
@@ -125,7 +125,7 @@ class TestUsersAuthenticated:
             },
             user_group=test.user_group,
             scope="Global",
-          #  scope=GROUPS_PERMISSIONS[test.user_group]["folder"],
+            #  scope=GROUPS_PERMISSIONS[test.user_group]["folder"],
         )
 
     def test_delete_users(self, test):

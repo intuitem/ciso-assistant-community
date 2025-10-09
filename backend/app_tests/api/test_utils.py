@@ -423,7 +423,10 @@ class EndpointTestsQueries:
                         **build_params
                     )  # no password is required in the build_params
                     # create the new user in the same group as the test user to make it visible
-                    group = UserGroup.objects.get(name=user_group, folder__name=GROUPS_PERMISSIONS[user_group]["folder"])
+                    group = UserGroup.objects.get(
+                        name=user_group,
+                        folder__name=GROUPS_PERMISSIONS[user_group]["folder"],
+                    )
                     group.user_set.add(user)
 
                 else:
