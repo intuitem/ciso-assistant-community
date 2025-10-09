@@ -35,6 +35,30 @@
 		return result;
 	};
 
+	const aggregateIssuesByType = (issues: any[], assessmentType: string, assessmentId: string) => {
+		const grouped = new Map();
+
+		issues.forEach((issue) => {
+			const key = issue.msgid;
+			if (!grouped.has(key)) {
+				grouped.set(key, {
+					msgid: key,
+					findings: []
+				});
+			}
+
+			// If issue has a link, use it with /edit, otherwise link to the assessment
+			const link = issue.link ? `/${issue.link}/edit` : `/${assessmentType}/${assessmentId}`;
+
+			grouped.get(key).findings.push({
+				name: issue.object.name,
+				link: link
+			});
+		});
+
+		return Array.from(grouped.values());
+	};
+
 	let tabStates = $state({});
 
 	const processPerimetersData = (rawData: any) => {
@@ -141,76 +165,125 @@
 										>
 									</li>
 									{@const quality_check = compliance_assessment.quality_check}
+									{@const aggregatedErrors = aggregateIssuesByType(
+										quality_check.errors,
+										'compliance-assessments',
+										compliance_assessment.object.id
+									)}
+									{@const aggregatedWarnings = aggregateIssuesByType(
+										quality_check.warnings,
+										'compliance-assessments',
+										compliance_assessment.object.id
+									)}
+									{@const aggregatedInfo = aggregateIssuesByType(
+										quality_check.info,
+										'compliance-assessments',
+										compliance_assessment.object.id
+									)}
 									<div class="flex flex-col space-y-3">
-										{#if quality_check.errors.length > 0}
+										{#if aggregatedErrors.length > 0}
 											<div class="space-y-2">
 												<div class="preset-tonal-error rounded-base px-2 py-1">
 													<i class="fa-solid fa-bug mr-1"></i>
-													{#if quality_check.errors.length === 1}
-														<span class="font-bold">{quality_check.errors.length}</span>
-														{m.errorsFound({ s: '' })}
-													{:else}
-														<span class="font-bold">{quality_check.errors.length}</span>
-														{m.errorsFound({ s: '' })}
-													{/if}
+													<span class="font-bold">{aggregatedErrors.length}</span>
+													{aggregatedErrors.length === 1 ? 'issue type' : 'issue types'}
+													<span class="text-xs opacity-75">
+														({quality_check.errors.length}
+														{quality_check.errors.length === 1 ? 'finding' : 'findings'})
+													</span>
 												</div>
-												<ul class="list-disc pl-4 text-sm">
-													{#each quality_check.errors as error}
+												<ul class="list-none pl-4 text-sm space-y-3">
+													{#each aggregatedErrors as error}
 														<li>
-															{#if error.object.name}<Anchor class="anchor" href={error.link}
-																	>{error.object.name}</Anchor
-																>:{/if}
-															{safeTranslate(error.msgid)}
+															<div class="font-semibold mb-1">
+																{safeTranslate(error.msgid)}
+															</div>
+															<div class="pl-4 text-xs space-y-1">
+																{#each error.findings as finding, idx}
+																	<div>
+																		<span class="text-gray-500">{idx + 1}.</span>
+																		{#if finding.name}
+																			<Anchor class="anchor" href={finding.link}
+																				>{finding.name}</Anchor
+																			>
+																		{:else}
+																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
 														</li>
 													{/each}
 												</ul>
 											</div>
 										{/if}
-										{#if quality_check.warnings.length > 0}
+										{#if aggregatedWarnings.length > 0}
 											<div class="space-y-2">
 												<div class="preset-tonal-warning rounded-base px-2 py-1">
 													<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-													{#if quality_check.warnings.length === 1}
-														<span class="font-bold">{quality_check.warnings.length}</span>
-														{m.warningsFound({ s: '' })}
-													{:else}
-														<span class="font-bold">{quality_check.warnings.length}</span>
-														{m.warningsFound({ s: 's' })}
-													{/if}
+													<span class="font-bold">{aggregatedWarnings.length}</span>
+													{aggregatedWarnings.length === 1 ? 'issue type' : 'issue types'}
+													<span class="text-xs opacity-75">
+														({quality_check.warnings.length}
+														{quality_check.warnings.length === 1 ? 'finding' : 'findings'})
+													</span>
 												</div>
-												<ul class="list-disc pl-4 text-sm">
-													{#each quality_check.warnings as warning}
+												<ul class="list-none pl-4 text-sm space-y-3">
+													{#each aggregatedWarnings as warning}
 														<li>
-															{#if warning.object.name}
-																<Anchor class="anchor" href={warning.link}
-																	>{warning.object.name}</Anchor
-																>:
-															{/if}
-															{safeTranslate(warning.msgid)}
+															<div class="font-semibold mb-1">
+																{safeTranslate(warning.msgid)}
+															</div>
+															<div class="pl-4 text-xs space-y-1">
+																{#each warning.findings as finding, idx}
+																	<div>
+																		<span class="text-gray-500">{idx + 1}.</span>
+																		{#if finding.name}
+																			<Anchor class="anchor" href={finding.link}
+																				>{finding.name}</Anchor
+																			>
+																		{:else}
+																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
 														</li>
 													{/each}
 												</ul>
 											</div>
 										{/if}
-										{#if quality_check.info.length > 0}
+										{#if aggregatedInfo.length > 0}
 											<div class="space-y-2">
 												<div class="preset-tonal-secondary rounded-base px-2 py-1">
 													<i class="fa-solid fa-circle-info mr-1"></i>
-													{#if quality_check.info.length === 1}
-														<span class="font-bold">{quality_check.info.length}</span>
-														{m.infosFound({ s: '' })}
-													{:else}
-														<span class="font-bold">{quality_check.info.length}</span>
-														{m.infosFound({ s: 's' })}
-													{/if}
+													<span class="font-bold">{aggregatedInfo.length}</span>
+													{aggregatedInfo.length === 1 ? 'issue type' : 'issue types'}
+													<span class="text-xs opacity-75">
+														({quality_check.info.length}
+														{quality_check.info.length === 1 ? 'finding' : 'findings'})
+													</span>
 												</div>
-												<ul class="list-disc pl-4 text-sm">
-													{#each quality_check.info as info}
+												<ul class="list-none pl-4 text-sm space-y-3">
+													{#each aggregatedInfo as info}
 														<li>
-															{#if info.object.name}<Anchor class="anchor" href={info.link}
-																	>{info.object.name}</Anchor
-																>:{/if}
-															{safeTranslate(info.msgid)}
+															<div class="font-semibold mb-1">
+																{safeTranslate(info.msgid)}
+															</div>
+															<div class="pl-4 text-xs space-y-1">
+																{#each info.findings as finding, idx}
+																	<div>
+																		<span class="text-gray-500">{idx + 1}.</span>
+																		{#if finding.name}
+																			<Anchor class="anchor" href={finding.link}
+																				>{finding.name}</Anchor
+																			>
+																		{:else}
+																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
 														</li>
 													{/each}
 												</ul>
@@ -233,74 +306,125 @@
 										>
 									</li>
 									{@const quality_check = risk_assessment.quality_check}
+									{@const aggregatedErrors = aggregateIssuesByType(
+										quality_check.errors,
+										'risk-assessments',
+										risk_assessment.object.id
+									)}
+									{@const aggregatedWarnings = aggregateIssuesByType(
+										quality_check.warnings,
+										'risk-assessments',
+										risk_assessment.object.id
+									)}
+									{@const aggregatedInfo = aggregateIssuesByType(
+										quality_check.info,
+										'risk-assessments',
+										risk_assessment.object.id
+									)}
 									<div class="flex flex-col space-y-3">
-										{#if quality_check.errors.length > 0}
+										{#if aggregatedErrors.length > 0}
 											<div class="space-y-2">
 												<div class="preset-tonal-error rounded-base px-2 py-1">
 													<i class="fa-solid fa-bug mr-1"></i>
-													{#if quality_check.errors.length === 1}
-														<span class="font-bold">{quality_check.errors.length}</span>
-														{m.errorsFound({ s: '' })}
-													{:else}
-														<span class="font-bold">{quality_check.errors.length}</span>
-														{m.errorsFound({ s: '' })}
-													{/if}
+													<span class="font-bold">{aggregatedErrors.length}</span>
+													{aggregatedErrors.length === 1 ? 'issue type' : 'issue types'}
+													<span class="text-xs opacity-75">
+														({quality_check.errors.length}
+														{quality_check.errors.length === 1 ? 'finding' : 'findings'})
+													</span>
 												</div>
-												<ul class="list-disc pl-4 text-sm">
-													{#each quality_check.errors as error}
+												<ul class="list-none pl-4 text-sm space-y-3">
+													{#each aggregatedErrors as error}
 														<li>
-															{#if error.object.name}<Anchor class="anchor" href={error.link}
-																	>{error.object.name}</Anchor
-																>:{/if}
-															{safeTranslate(error.msgid)}
+															<div class="font-semibold mb-1">
+																{safeTranslate(error.msgid)}
+															</div>
+															<div class="pl-4 text-xs space-y-1">
+																{#each error.findings as finding, idx}
+																	<div>
+																		<span class="text-gray-500">{idx + 1}.</span>
+																		{#if finding.name}
+																			<Anchor class="anchor" href={finding.link}
+																				>{finding.name}</Anchor
+																			>
+																		{:else}
+																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
 														</li>
 													{/each}
 												</ul>
 											</div>
 										{/if}
-										{#if quality_check.warnings.length > 0}
+										{#if aggregatedWarnings.length > 0}
 											<div class="space-y-2">
 												<div class="preset-tonal-warning rounded-base px-2 py-1">
 													<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-													{#if quality_check.warnings.length === 1}
-														<span class="font-bold">{quality_check.warnings.length}</span>
-														{m.warningsFound({ s: '' })}
-													{:else}
-														<span class="font-bold">{quality_check.warnings.length}</span>
-														{m.warningsFound({ s: 's' })}
-													{/if}
+													<span class="font-bold">{aggregatedWarnings.length}</span>
+													{aggregatedWarnings.length === 1 ? 'issue type' : 'issue types'}
+													<span class="text-xs opacity-75">
+														({quality_check.warnings.length}
+														{quality_check.warnings.length === 1 ? 'finding' : 'findings'})
+													</span>
 												</div>
-												<ul class="list-disc pl-4 text-sm">
-													{#each quality_check.warnings as warning}
+												<ul class="list-none pl-4 text-sm space-y-3">
+													{#each aggregatedWarnings as warning}
 														<li>
-															{#if warning.object.name}<Anchor class="anchor" href={warning.link}
-																	>{warning.object.name}</Anchor
-																>:{/if}
-															{safeTranslate(warning.msgid)}
+															<div class="font-semibold mb-1">
+																{safeTranslate(warning.msgid)}
+															</div>
+															<div class="pl-4 text-xs space-y-1">
+																{#each warning.findings as finding, idx}
+																	<div>
+																		<span class="text-gray-500">{idx + 1}.</span>
+																		{#if finding.name}
+																			<Anchor class="anchor" href={finding.link}
+																				>{finding.name}</Anchor
+																			>
+																		{:else}
+																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
 														</li>
 													{/each}
 												</ul>
 											</div>
 										{/if}
-										{#if quality_check.info.length > 0}
+										{#if aggregatedInfo.length > 0}
 											<div class="space-y-2">
 												<div class="preset-tonal-secondary rounded-base px-2 py-1">
 													<i class="fa-solid fa-circle-info mr-1"></i>
-													{#if quality_check.info.length === 1}
-														<span class="font-bold">{quality_check.info.length}</span>
-														{m.infosFound({ s: '' })}
-													{:else}
-														<span class="font-bold">{quality_check.info.length}</span>
-														{m.infosFound({ s: 's' })}
-													{/if}
+													<span class="font-bold">{aggregatedInfo.length}</span>
+													{aggregatedInfo.length === 1 ? 'issue type' : 'issue types'}
+													<span class="text-xs opacity-75">
+														({quality_check.info.length}
+														{quality_check.info.length === 1 ? 'finding' : 'findings'})
+													</span>
 												</div>
-												<ul class="list-disc pl-4 text-sm">
-													{#each quality_check.info as info}
+												<ul class="list-none pl-4 text-sm space-y-3">
+													{#each aggregatedInfo as info}
 														<li>
-															{#if info.object.name}<Anchor class="anchor" href={info.link}
-																	>{info.object.name}</Anchor
-																>:{/if}
-															{safeTranslate(info.msgid)}
+															<div class="font-semibold mb-1">
+																{safeTranslate(info.msgid)}
+															</div>
+															<div class="pl-4 text-xs space-y-1">
+																{#each info.findings as finding, idx}
+																	<div>
+																		<span class="text-gray-500">{idx + 1}.</span>
+																		{#if finding.name}
+																			<Anchor class="anchor" href={finding.link}
+																				>{finding.name}</Anchor
+																			>
+																		{:else}
+																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
 														</li>
 													{/each}
 												</ul>
