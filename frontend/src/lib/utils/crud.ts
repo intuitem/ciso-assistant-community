@@ -99,6 +99,10 @@ interface ForeignKeyField {
 	urlModel: urlModel;
 	endpointUrl?: string;
 	urlParams?: string;
+	tableFields?: string[];
+}
+
+interface ReverseForeignKeyField extends ForeignKeyField {
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
 	disableCreate?: boolean;
@@ -132,7 +136,7 @@ export interface ModelMapEntry {
 	flaggedFields?: Record<string, FeatureFlag>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
-	reverseForeignKeyFields?: ForeignKeyField[];
+	reverseForeignKeyFields?: ReverseForeignKeyField[];
 	selectFields?: SelectField[];
 	fileFields?: string[];
 	filters?: SelectField[];
@@ -157,7 +161,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
-			{ field: 'folder', urlModel: 'assets' }
+			{ field: 'folder', urlModel: 'assets' },
+			{
+				field: 'folder',
+				urlModel: 'users',
+				detail: true,
+				endpointUrl: './users',
+				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
+			}
 		]
 	},
 	perimeters: {
@@ -508,6 +519,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
+		reverseForeignKeyFields: [{ field: 'user_groups', urlModel: 'users' }],
 		filters: []
 	},
 	'role-assignments': {
@@ -851,7 +863,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
-			{ field: 'processings', urlModel: 'right-requests' },
+			{
+				field: 'processings',
+				urlModel: 'right-requests',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',
@@ -1111,9 +1128,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{
+				field: 'category',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=entity.relationship&is_visible=true'
+			}
 		],
-		selectFields: [{ field: 'category' }],
 		reverseForeignKeyFields: [
 			{
 				field: 'stakeholders',

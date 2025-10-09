@@ -1,6 +1,7 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.models import Terminology
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -107,6 +108,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
         )
 
+    @action(detail=True, name="Get ecosystem circular chart data")
+    def ecosystem_circular_chart_data(self, request, pk):
+        from .helpers import ecosystem_circular_chart_data
+
+        return Response(
+            ecosystem_circular_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+        )
+
     @action(detail=True, name="Get EBIOS RM  study visual analysis")
     def visual_analysis(self, request, pk):
         study = get_object_or_404(EbiosRMStudy, id=pk)
@@ -132,7 +141,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
         from .models import OperatingMode
         from core.models import RequirementAssessment
-        from .helpers import ecosystem_radar_chart_data
+        from .helpers import ecosystem_circular_chart_data
 
         # Get all related data
         feared_events = FearedEvent.objects.filter(
@@ -267,7 +276,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             }
 
         # Get ecosystem radar data
-        radar_data = ecosystem_radar_chart_data(stakeholders)
+        radar_data = ecosystem_circular_chart_data(stakeholders)
 
         # Get action plans from compliance assessments
         from core.serializers import AppliedControlReadSerializer
@@ -449,7 +458,10 @@ class StakeholderViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(Stakeholder.Category.choices))
+        categories = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP, is_visible=True
+        ).values_list("name", "name")
+        return Response(dict(categories))
 
     @action(detail=False, name="Get chart data")
     def chart_data(self, request):

@@ -179,6 +179,11 @@ urlpatterns = [
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
     ),
+    path(
+        "folders/<uuid:pk>/users/",
+        UserPermsOnFolderList.as_view(),
+        name="user-perms-on-folder-list",
+    ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
 ]

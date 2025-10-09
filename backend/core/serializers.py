@@ -861,6 +861,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "effort",
             "control_impact",
             "cost",
+            "annual_cost",
             "ranking_score",
             "requirement_assessments",
             "reference_control",
@@ -904,6 +905,7 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "effort",
             "control_impact",
             "cost",
+            "annual_cost",
             "ranking_score",
             "risk_scenarios",
             "reference_control",
@@ -985,6 +987,17 @@ class UserReadSerializer(BaseModelSerializer):
             "expiry_date",
             "is_superuser",
         ]
+
+
+class UserPermsOnFolderSerializer(BaseModelSerializer):
+    roles = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "is_active", "roles"]
+
+    def get_roles(self, obj):
+        return [{"str": str(role)} for role in self.context["roles"].get(obj.id, [])]
 
 
 class UserWriteSerializer(BaseModelSerializer):
