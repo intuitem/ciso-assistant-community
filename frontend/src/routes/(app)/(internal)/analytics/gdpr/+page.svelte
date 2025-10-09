@@ -34,7 +34,7 @@
 			count={data.data.open_right_requests_count}
 		/>
 	</div>
-	<div class="col-span-7 flex items-center justify-center">
+	<div class="col-span-7 flex items-center justify-center p-4">
 		{#if data?.data?.countries?.length > 0}
 			<WorldMap data={data.data.countries} />
 		{:else}
