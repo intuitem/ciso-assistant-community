@@ -190,11 +190,11 @@
 			<div class="flex justify-between items-center">
 				<div class="">
 					<a
-						href="/applied-controls"
+						href={data.backUrl}
 						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 					>
 						<i class="fa-solid fa-arrow-left"></i>
-						<p class="">{m.goBackToControls()}</p>
+						<p class="">{data.backLabel}</p>
 					</a>
 				</div>
 				<div class="relative">

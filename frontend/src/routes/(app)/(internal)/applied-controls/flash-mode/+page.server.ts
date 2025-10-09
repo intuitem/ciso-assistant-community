@@ -12,16 +12,25 @@ export const load = (async ({ fetch, url }) => {
 	// Get search parameters from the URL to preserve any filters
 	const searchParams = url.searchParams;
 	for (const [key, value] of searchParams.entries()) {
-		queryParams.set(key, value);
+		// Don't pass through UI-specific parameters to the API
+		if (!['backUrl', 'backLabel'].includes(key)) {
+			queryParams.set(key, value);
+		}
 	}
 
 	const fullEndpoint = `${endpoint}?${queryParams.toString()}`;
 	const response = await fetch(fullEndpoint);
 	const appliedControlsData = await response.json();
 
+	// Extract UI parameters for the flash mode page
+	const backUrl = searchParams.get('backUrl') || '/applied-controls';
+	const backLabel = searchParams.get('backLabel') || 'Applied Controls';
+
 	return {
 		URLModel,
-		applied_controls: appliedControlsData.results || appliedControlsData
+		applied_controls: appliedControlsData.results || appliedControlsData,
+		backUrl: decodeURIComponent(backUrl),
+		backLabel: decodeURIComponent(backLabel)
 	};
 }) satisfies PageServerLoad;
 
