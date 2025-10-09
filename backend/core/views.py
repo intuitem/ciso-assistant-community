@@ -15,7 +15,7 @@ import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from django_cte import With, with_cte, CTE
+from django_cte import with_cte, CTE
 from django.db.models import (
     F,
     Count,
@@ -116,6 +116,7 @@ from core.utils import (
     compare_schema_versions,
     _generate_occurrences,
     _create_task_dict,
+    BUILTIN_USERGROUP_CODENAMES,
 )
 from dateutil import relativedelta as rd
 
@@ -3180,8 +3181,8 @@ class UserViewSet(BaseModelViewSet):
 class UserGroupOrderingFilter(filters.OrderingFilter):
     """
     Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
+    - Performs sorting only for `localization_dict`.
+    - Use CTE to recursively build folder paths and apply ordering.
     - Supports `-localization_dict` for descending order.
     - For all other fields, it falls back to standard SQL ordering.
     """
