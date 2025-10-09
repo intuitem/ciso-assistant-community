@@ -191,7 +191,20 @@ class ProcessingViewSet(BaseModelViewSet):
         pd_categories = PersonalData.get_categories_count()
         total_categories = len(pd_categories)
         processings_count = Processing.objects.all().count()
-        recipients_count = DataRecipient.objects.all().count()
+
+        # Count distinct entities from data contractors and data transfers
+        contractor_entities = (
+            DataContractor.objects.filter(entity__isnull=False)
+            .values_list("entity", flat=True)
+            .distinct()
+        )
+        transfer_entities = (
+            DataTransfer.objects.filter(entity__isnull=False)
+            .values_list("entity", flat=True)
+            .distinct()
+        )
+        recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
+
         open_right_requests_count = RightRequest.objects.exclude(status="done").count()
         open_data_breaches_count = DataBreach.objects.exclude(
             status="privacy_closed"
