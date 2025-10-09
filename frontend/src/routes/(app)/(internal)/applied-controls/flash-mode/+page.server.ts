@@ -32,8 +32,8 @@ export const load = (async ({ fetch, url }) => {
 	return {
 		URLModel,
 		applied_controls: appliedControlsData.results || appliedControlsData,
-		backUrl: decodeURIComponent(backUrl),
-		backLabel: decodeURIComponent(backLabel)
+		backUrl,
+		backLabel
 	};
 }) satisfies PageServerLoad;
 
