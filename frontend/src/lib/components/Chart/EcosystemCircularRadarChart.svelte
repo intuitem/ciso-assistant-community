@@ -125,7 +125,7 @@
 						type: 'solid'
 					}
 				},
-				z: 100
+				z: 0
 			},
 			series: [
 				// Maturity group series
