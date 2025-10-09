@@ -3372,11 +3372,16 @@ class UserViewSet(BaseModelViewSet):
         if not getattr(for_user, "is_authenticated", False):
             return User.objects.none()
 
-        (visible_user_groups, _, _) = RoleAssignment.get_accessible_object_ids(
+        (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), for_user, User
+        )
+        (visible_user_groups_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), for_user, UserGroup
         )
         base_qs = (
-            User.objects.filter(user_groups__in=visible_user_groups)
+            User.objects.filter(
+                Q(id__in=visible_users_ids) | Q(user_groups__in=visible_user_groups_ids)
+            )
             | User.objects.filter(pk=for_user.pk)
         ).distinct()
 
@@ -3384,7 +3389,7 @@ class UserViewSet(BaseModelViewSet):
         return base_qs.prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(id__in=visible_user_groups).only(
+                queryset=UserGroup.objects.filter(id__in=visible_user_groups_ids).only(
                     "id", "builtin"
                 ),  # minimal
             )
