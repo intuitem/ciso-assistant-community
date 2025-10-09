@@ -863,7 +863,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
-			{ field: 'processings', urlModel: 'right-requests' },
+			{
+				field: 'processings',
+				urlModel: 'right-requests',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',
@@ -1123,9 +1128,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{
+				field: 'category',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=entity.relationship&is_visible=true'
+			}
 		],
-		selectFields: [{ field: 'category' }],
 		reverseForeignKeyFields: [
 			{
 				field: 'stakeholders',

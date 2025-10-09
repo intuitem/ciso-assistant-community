@@ -139,16 +139,6 @@
 		{#snippet panel()}
 			<NumberField
 				{form}
-				field="ebios_radar_max"
-				label={m.maxRadius()}
-				min={6}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_max']}
-				bind:cachedValue={formDataCache['ebios_radar_max']}
-			/>
-			<NumberField
-				{form}
 				field="ebios_radar_green_zone_radius"
 				label={m.greenZoneRadius()}
 				min={0.1}

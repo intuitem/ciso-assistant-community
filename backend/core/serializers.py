@@ -861,6 +861,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "effort",
             "control_impact",
             "cost",
+            "annual_cost",
             "ranking_score",
             "requirement_assessments",
             "reference_control",
@@ -876,8 +877,10 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
         pk = self.context.get("pk")
         if pk is None:
             return None
-        risk_scenarios = RiskScenario.objects.filter(
-            risk_assessment=pk, applied_controls=obj
+        risk_scenarios = (
+            RiskScenario.objects.filter(risk_assessment=pk)
+            .filter(Q(applied_controls=obj) | Q(existing_applied_controls=obj))
+            .distinct()
         )
         return [
             {
@@ -904,6 +907,7 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "effort",
             "control_impact",
             "cost",
+            "annual_cost",
             "ranking_score",
             "risk_scenarios",
             "reference_control",
@@ -1098,10 +1102,18 @@ class UserGroupWriteSerializer(BaseModelSerializer):
 
 class PermissionReadSerializer(BaseModelSerializer):
     content_type = FieldsRelatedField(fields=["app_label", "model"])
+    normalized_model = serializers.SerializerMethodField()
+    normalized_codename = serializers.SerializerMethodField()
 
     class Meta:
         model = Permission
         fields = "__all__"
+
+    def get_normalized_model(self, obj):
+        return obj.content_type.model_class().__name__
+
+    def get_normalized_codename(self, obj):
+        return f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}"
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
