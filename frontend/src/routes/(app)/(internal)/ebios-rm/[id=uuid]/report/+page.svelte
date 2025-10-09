@@ -6,7 +6,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
+	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
 	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
@@ -494,7 +494,7 @@
 				{#each reportData.stakeholders as stakeholder}
 					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
 						<h3 class="text-lg font-semibold text-gray-800 mb-3">
-							{stakeholder.entity.str} ({safeTranslate(stakeholder.category_raw)})
+							{stakeholder.entity.str} ({safeTranslate(stakeholder.category)})
 						</h3>
 						<div class="flex flex-wrap gap-6 text-sm mb-2">
 							<div class="flex flex-col">
@@ -539,9 +539,10 @@
 				{m.ecosystemRadar()} - {m.current()}
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-current">
-				<EcosystemRadarChart
+				<EcosystemCircularRadarChart
 					name="c_ecosystem_report"
-					data={reportData.radar.current}
+					data={reportData.radar}
+					type="current"
 					classesContainer="w-full"
 					height="h-[700px]"
 				/>
@@ -558,9 +559,10 @@
 				{m.ecosystemRadar()} - {m.residual()}
 			</h2>
 			<div class="bg-white radar-chart-container" data-chart="radar-residual">
-				<EcosystemRadarChart
+				<EcosystemCircularRadarChart
 					name="r_ecosystem_report"
-					data={reportData.radar.residual}
+					data={reportData.radar}
+					type="residual"
 					classesContainer="w-full"
 					height="h-[700px]"
 				/>
@@ -648,7 +650,7 @@
 																(st) => st.id === s.id
 															);
 															return stakeholderData
-																? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+																? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category)})`
 																: s.str;
 														})
 														.join(', ')}
@@ -866,7 +868,7 @@
 													(st) => st.id === s.id
 												);
 												return stakeholderData
-													? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category_raw)})`
+													? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category)})`
 													: s.str;
 											})
 											.join(', ')}
