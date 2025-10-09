@@ -53,7 +53,7 @@ CLICA uses Personal Access Tokens (PAT) for authentication with the CISO Assista
 
 ### Step 2: Configure Authentication
 
-Create or use existing  `.clica.env` file in the CLI directory with the following content:
+Create or use existing `.clica.env` file in the CLI directory with the following content:
 
 ```env
 TOKEN=
@@ -71,7 +71,8 @@ VERIFY_CERTIFICATE=true
 
 The CLI uses environment variables for configuration. Make sure your `.clica.env` file is properly configured before running any commands.
 
-**Important:** Never commit your `.clica.env` file to version control as it contains sensitive authentication information.
+> [!WARNING]
+> Never commit your `.clica.env` file to version control as it contains sensitive authentication information.
 
 ## Available Commands
 
@@ -264,11 +265,11 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
 ### Setup for Claude Desktop
 
 1. Install prerequisites:
-
    - Python 3.12
    - uv package manager
    - Node.js
    - Claude Desktop
+
 2. Configure your `.mcp.env` file with the same parameters as `.clica.env`
 3. Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
@@ -277,12 +278,7 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
   "mcpServers": {
     "ciso-assistant": {
       "command": "/full/path/to/uv",
-      "args": [
-        "--directory",
-        "/full/path/to/cli/folder",
-        "run",
-        "ca_mcp.py"
-      ]
+      "args": ["--directory", "/full/path/to/cli/folder", "run", "ca_mcp.py"]
     }
   }
 }
