@@ -756,6 +756,8 @@
 	"waitingRiskAcceptances": "Ciao! Hai attualmente {number} accettazione/i del rischio in sospeso. Trovale nel menu governance.",
 	"licenseSeats": "Posti della licenza",
 	"licenseExpiration": "Scadenza licenza",
+	"diskSpace": "Spazio su disco",
+	"diskUsed": "Disco utilizzato",
 	"answer": "Risposta",
 	"questionnaireMode": "Modalità questionario",
 	"assessmentMode": "Modalità valutazione",
