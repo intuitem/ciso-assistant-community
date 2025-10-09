@@ -2838,13 +2838,10 @@ class RiskAssessmentActionPlanList(ActionPlanList):
         )
         risk_scenarios = risk_assessment.risk_scenarios.all()
         # Include both extra controls (applied_controls) and existing controls (existing_applied_controls)
-        extra_controls = AppliedControl.objects.filter(
-            risk_scenarios__in=risk_scenarios
-        )
-        existing_controls = AppliedControl.objects.filter(
-            risk_scenarios_e__in=risk_scenarios
-        )
-        return (extra_controls | existing_controls).distinct()
+        return AppliedControl.objects.filter(
+            Q(risk_scenarios__in=risk_scenarios)
+            | Q(risk_scenarios_e__in=risk_scenarios)
+        ).distinct()
 
 
 class PolicyViewSet(AppliedControlViewSet):
