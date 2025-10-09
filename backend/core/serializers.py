@@ -1106,7 +1106,6 @@ class PermissionReadSerializer(BaseModelSerializer):
         return obj.content_type.model_class().__name__
 
     def get_normalized_codename(self, obj):
-        print(f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}")
         return f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}"
 
 
