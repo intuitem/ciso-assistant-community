@@ -1405,7 +1405,7 @@
 	"roToIsSelectedHelpText": "Selection of the RO/TO couple for the study",
 	"roToFearedEventHelpText": "Confronting the most serious feared events",
 	"stakeholderEntityHelpText": "Stakeholder in the ecosystem",
-	"stakeholderCategoryHelpText": "Relationship with the stakeholder",
+	"stakeholderCategoryHelpText": "Considered relationship with the stakeholder",
 	"dependencyHelpText": "Is the relationship with this stakeholder vital to my business?",
 	"penetrationHelpText": "To what extent does the stakeholder have access to my internal resources?",
 	"maturityHelpText": "What are the stakeholder's safety capabilities?",
