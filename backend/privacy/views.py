@@ -215,6 +215,98 @@ class ProcessingViewSet(BaseModelViewSet):
             for item in request_types
         ]
 
+        # Build Sankey diagram data: Personal Data → Processing → Legal Basis
+        sankey_nodes = []
+        sankey_links = []
+        node_indices = {}  # Map node names to indices
+
+        # Get all personal data with their processings and legal bases
+        personal_data = (
+            PersonalData.objects.select_related("processing")
+            .prefetch_related("processing__purposes", "processing__data_transfers")
+            .all()
+        )
+
+        for pd in personal_data:
+            pd_category = pd.category
+            processing_name = (
+                pd.processing.name if pd.processing else "Unknown Processing"
+            )
+
+            # Add personal data category node (depth 0)
+            pd_key = f"pd_{pd_category}"
+            if pd_key not in node_indices:
+                node_indices[pd_key] = len(sankey_nodes)
+                sankey_nodes.append({"name": pd_category, "depth": 0})
+
+            # Add processing node (depth 1)
+            proc_key = f"proc_{processing_name}"
+            if proc_key not in node_indices:
+                node_indices[proc_key] = len(sankey_nodes)
+                sankey_nodes.append(
+                    {"name": f"Processing: {processing_name}", "depth": 1}
+                )
+
+            # Link personal data to processing
+            existing_link = next(
+                (
+                    l
+                    for l in sankey_links
+                    if l["source"] == node_indices[pd_key]
+                    and l["target"] == node_indices[proc_key]
+                ),
+                None,
+            )
+            if existing_link:
+                existing_link["value"] += 1
+            else:
+                sankey_links.append(
+                    {
+                        "source": node_indices[pd_key],
+                        "target": node_indices[proc_key],
+                        "value": 1,
+                    }
+                )
+
+            # Get legal bases from purposes and data transfers
+            legal_bases = set()
+            if pd.processing:
+                for purpose in pd.processing.purposes.all():
+                    if purpose.legal_basis:
+                        legal_bases.add(purpose.legal_basis)
+                for transfer in pd.processing.data_transfers.all():
+                    if transfer.legal_basis:
+                        legal_bases.add(transfer.legal_basis)
+
+            # Link processing to legal bases (depth 2)
+            for legal_basis in legal_bases:
+                legal_key = f"legal_{legal_basis}"
+                if legal_key not in node_indices:
+                    node_indices[legal_key] = len(sankey_nodes)
+                    sankey_nodes.append(
+                        {"name": f"LegalBasis: {legal_basis}", "depth": 2}
+                    )
+
+                existing_link = next(
+                    (
+                        l
+                        for l in sankey_links
+                        if l["source"] == node_indices[proc_key]
+                        and l["target"] == node_indices[legal_key]
+                    ),
+                    None,
+                )
+                if existing_link:
+                    existing_link["value"] += 1
+                else:
+                    sankey_links.append(
+                        {
+                            "source": node_indices[proc_key],
+                            "target": node_indices[legal_key],
+                            "value": 1,
+                        }
+                    )
+
         return Response(
             {
                 "countries": agg_countries(),
@@ -226,6 +318,8 @@ class ProcessingViewSet(BaseModelViewSet):
                 "open_data_breaches_count": open_data_breaches_count,
                 "breach_types": breach_type_data,
                 "request_types": request_type_data,
+                "sankey_nodes": sankey_nodes,
+                "sankey_links": sankey_links,
             }
         )
 
