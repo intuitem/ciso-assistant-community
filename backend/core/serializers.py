@@ -1095,10 +1095,19 @@ class UserGroupWriteSerializer(BaseModelSerializer):
 
 class PermissionReadSerializer(BaseModelSerializer):
     content_type = FieldsRelatedField(fields=["app_label", "model"])
+    normalized_model = serializers.SerializerMethodField()
+    normalized_codename = serializers.SerializerMethodField()
 
     class Meta:
         model = Permission
         fields = "__all__"
+
+    def get_normalized_model(self, obj):
+        return obj.content_type.model_class().__name__
+    
+    def get_normalized_codename(self, obj):
+        print(f"{obj.codename.split("_")[0]}{obj.content_type.model_class().__name__}")
+        return f"{obj.codename.split("_")[0]}{obj.content_type.model_class().__name__}"
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
