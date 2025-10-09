@@ -15,6 +15,7 @@
 		title?: string;
 		name?: string;
 		tree: treeType[];
+		translate?: boolean;
 	}
 
 	let {
@@ -23,19 +24,22 @@
 		classesContainer = '',
 		title = '',
 		name = '',
-		tree
+		tree,
+		translate = false
 	}: Props = $props();
 
 	const translatedTree = $derived(
 		tree.map((item) => ({
 			...item,
-			name: item.name, // Use the name directly (already set by parent component)
+			name: translate ? safeTranslate(item.name?.toLowerCase() || item.name) : item.name,
 			children: item.children?.map((child) => ({
 				...child,
-				name: child.name, // Use the name directly (already translated if needed)
+				name: translate ? safeTranslate(child.name?.toLowerCase() || child.name) : child.name,
 				children: child.children?.map((grandChild: any) => ({
 					...grandChild,
-					name: grandChild.name // Leaf nodes keep their names
+					name: translate
+						? safeTranslate(grandChild.name?.toLowerCase() || grandChild.name)
+						: grandChild.name
 				}))
 			}))
 		}))

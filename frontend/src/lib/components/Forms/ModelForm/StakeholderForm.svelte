@@ -111,19 +111,6 @@
 			<span class="flex flex-row space-x-4">
 				<AutocompleteSelect
 					{form}
-					optionsEndpoint="terminologies"
-					optionsDetailedUrlParameters={[
-						['field_path', 'entity.relationship'],
-						['is_visible', 'true']
-					]}
-					field="category"
-					label={m.category()}
-					cacheLock={cacheLocks['category']}
-					bind:cachedValue={formDataCache['category']}
-					helpText={m.stakeholderCategoryHelpText()}
-				/>
-				<AutocompleteSelect
-					{form}
 					optionsEndpoint="entities"
 					field="entity"
 					cacheLock={cacheLocks['entity']}
@@ -145,6 +132,19 @@
 						separator: ' | ',
 						classes: 'text-xs text-surface-500'
 					}}
+				/>
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint="terminologies"
+					optionsDetailedUrlParameters={[
+						['field_path', 'entity.relationship'],
+						['is_visible', 'true']
+					]}
+					field="category"
+					label={m.category()}
+					cacheLock={cacheLocks['category']}
+					bind:cachedValue={formDataCache['category']}
+					helpText={m.stakeholderCategoryHelpText()}
 				/>
 			</span>
 
