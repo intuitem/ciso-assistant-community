@@ -176,7 +176,7 @@
 									if (group.path) {
 										for (const p of group.path) {
 											grp = grp?.[p];
-										}	
+										}
 									}
 									return grp;
 								})

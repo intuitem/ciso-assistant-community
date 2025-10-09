@@ -1104,10 +1104,10 @@ class PermissionReadSerializer(BaseModelSerializer):
 
     def get_normalized_model(self, obj):
         return obj.content_type.model_class().__name__
-    
+
     def get_normalized_codename(self, obj):
-        print(f"{obj.codename.split("_")[0]}{obj.content_type.model_class().__name__}")
-        return f"{obj.codename.split("_")[0]}{obj.content_type.model_class().__name__}"
+        print(f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}")
+        return f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}"
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
