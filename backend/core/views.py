@@ -3196,8 +3196,7 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
 
             def make_folder_path_cte(cte):
                 return (
-                    Folder.objects.exclude(id=Folder.get_root_folder_id())
-                    .filter(parent_folder__parent_folder__isnull=True)
+                    Folder.objects.filter(id=Folder.get_root_folder_id())
                     .values(
                         "id",
                         "name",
@@ -3209,10 +3208,12 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
                         cte.join(Folder, parent_folder=cte.col.id).values(
                             "id",
                             "name",
-                            path=Concat(
-                                cte.col.path,
-                                Value("/"),
-                                F("name"),
+                            path=Case(
+                                When(
+                                    parent_folder=Folder.get_root_folder_id(),
+                                    then=F("name"),
+                                ),
+                                default=Concat(cte.col.path, Value("/"), F("name")),
                                 output_field=TextField(),
                             ),
                             depth=cte.col.depth + Value(1, output_field=IntegerField()),
@@ -3223,42 +3224,24 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
 
             cte = CTE.recursive(make_folder_path_cte)
 
-            return (
-                with_cte(
-                    cte,
-                    select=cte.join(UserGroup, folder=cte.col.id)
-                    .annotate(
-                        path=cte.col.path,
-                        depth=cte.col.depth,
-                        codename=Case(
-                            *[
-                                When(name=key, then=Value(str(val)))
-                                for key, val in BUILTIN_USERGROUP_CODENAMES.items()
-                            ],
-                            default=F("name"),
-                            output_field=CharField(),
-                        ),
-                        order_string=Concat(F("path"), Value(" - "), F("codename")),
-                    )
-                    .filter(depth__lt=256),  # Hardcoded folder depth limit
+            return with_cte(
+                cte,
+                select=cte.join(UserGroup, folder=cte.col.id)
+                .annotate(
+                    path=cte.col.path,
+                    depth=cte.col.depth,
+                    codename=Case(
+                        *[
+                            When(name=key, then=Value(str(val)))
+                            for key, val in BUILTIN_USERGROUP_CODENAMES.items()
+                        ],
+                        default=F("name"),
+                        output_field=CharField(),
+                    ),
+                    order_string=Concat(F("path"), Value(" - "), F("codename")),
                 )
-                .union(
-                    UserGroup.objects.filter(folder=Folder.get_root_folder()).annotate(
-                        path=F("folder__name"),
-                        depth=Value(0),
-                        codename=Case(
-                            *[
-                                When(name=key, then=Value(str(val)))
-                                for key, val in BUILTIN_USERGROUP_CODENAMES.items()
-                            ],
-                            default=F("name"),
-                            output_field=CharField(),
-                        ),
-                        order_string=Concat(F("path"), Value(" - "), F("codename")),
-                    )
-                )
-                .order_by("order_string" if not is_desc else "-order_string")
-            )
+                .filter(depth__lt=256),  # Hardcoded folder depth limit
+            ).order_by("order_string" if not is_desc else "-order_string")
 
         # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
