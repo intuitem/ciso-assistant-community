@@ -653,6 +653,8 @@
 	"riskScenarioResidualImpactHigherThanCurrent": "Residual risk impact is higher than the current one",
 	"riskScenarioResidualLoweredWithoutMeasures": "Residual risk level has been lowered without any specific measure",
 	"riskScenarioAcceptedNoAcceptance": "Risk accepted but no risk acceptance attached",
+	"existingControlNotActive": "Is marked as an existing control but its status is not active",
+	"controlInBothLists": "Appears in both existing and additional controls",
 	"appliedControlNoETA": "Does not have an ETA",
 	"appliedControlETAInPast": "ETA is in the past now. Consider updating its status or the date",
 	"appliedControlNoEffort": "Does not have an estimated effort. This will help you for prioritization",

@@ -622,6 +622,8 @@
 	"riskScenarioResidualImpactHigherThanCurrent": "La conséquence du risque résiduel est supérieure à l'actuel",
 	"riskScenarioResidualLoweredWithoutMeasures": "Le niveau de risque résiduel a baissé sans aucune mesure additionnelle",
 	"riskScenarioAcceptedNoAcceptance": "Risque accepté, mais aucune acceptation de risque n'est attachée",
+	"existingControlNotActive": "Est marquée comme mesure existante mais son statut n'est pas actif",
+	"controlInBothLists": "Apparaît à la fois dans les mesures existantes et additionnelles",
 	"appliedControlNoETA": "N'a pas d'ETA",
 	"appliedControlETAInPast": "L’ETA est dépassé. Pensez à mettre à jour le statut ou la date",
 	"appliedControlNoEffort": "N'a pas d'effort estimé. Cela vous aidera pour la priorisation",

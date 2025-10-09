@@ -3982,6 +3982,49 @@ class RiskAssessment(Assessment):
                             "object": ri,
                         }
                     )
+
+        # --- checks on existing_applied_controls (controls marked as existing but not active)
+        for ri in scenarios:
+            scenario_obj = self.risk_scenarios.get(id=ri["id"])
+            existing_controls_set = set(scenario_obj.existing_applied_controls.all())
+            applied_controls_set = set(scenario_obj.applied_controls.all())
+
+            # Check for controls appearing in both lists
+            duplicate_controls = existing_controls_set & applied_controls_set
+            for duplicate_control in duplicate_controls:
+                errors_lst.append(
+                    {
+                        "msg": _(
+                            "{} appears in both existing and additional controls"
+                        ).format(duplicate_control.name),
+                        "msgid": "controlInBothLists",
+                        "link": f"applied-controls/{duplicate_control.id}",
+                        "obj_type": "appliedcontrol",
+                        "object": {
+                            "name": duplicate_control.name,
+                            "id": duplicate_control.id,
+                        },
+                    }
+                )
+
+            # Check for existing controls that are not active
+            for existing_control in scenario_obj.existing_applied_controls.all():
+                if existing_control.status != "active":
+                    errors_lst.append(
+                        {
+                            "msg": _(
+                                "{} is marked as an existing control but its status is not active"
+                            ).format(existing_control.name),
+                            "msgid": "existingControlNotActive",
+                            "link": f"applied-controls/{existing_control.id}",
+                            "obj_type": "appliedcontrol",
+                            "object": {
+                                "name": existing_control.name,
+                                "id": existing_control.id,
+                            },
+                        }
+                    )
+
         # --- checks on the applied controls
         _measures = serializers.serialize(
             "json",
