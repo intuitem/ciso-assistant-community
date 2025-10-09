@@ -419,9 +419,12 @@ class EndpointTestsQueries:
             # Creates a test object from the model
             if build_params and object:
                 if object.__name__ == "User":
-                    object.objects.create_superuser(
+                    user = object.objects.create_superuser(
                         **build_params
                     )  # no password is required in the build_params
+                    # create the new user in the same group as the test user to make it visible
+                    group = UserGroup.objects.get(name=user_group, folder__name=GROUPS_PERMISSIONS[user_group]["folder"])
+                    group.user_set.add(user)
 
                 else:
                     m2m_fields = {}
