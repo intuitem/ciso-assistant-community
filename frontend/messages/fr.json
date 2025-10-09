@@ -1372,7 +1372,7 @@
 	"roToIsSelectedHelpText": "Sélection du couple SR/OV pour l'étude",
 	"roToFearedEventHelpText": "Confronter les événements redoutés les plus graves",
 	"stakeholderEntityHelpText": "Partie prenante de l'écosystème",
-	"stakeholderCategoryHelpText": "Relation avec la partie prenante",
+	"stakeholderCategoryHelpText": "Relation avec la partie prenante pour cette étude",
 	"dependencyHelpText": "La relation avec cette partie prenante est-elle vitale pour mon entreprise ?",
 	"penetrationHelpText": "Dans quelle mesure la partie prenante a-t-elle accès à mes ressources internes ?",
 	"maturityHelpText": "Quelles sont les capacités de sécurité des parties prenantes ?",

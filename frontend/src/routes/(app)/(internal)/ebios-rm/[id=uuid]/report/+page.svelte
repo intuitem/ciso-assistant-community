@@ -159,14 +159,6 @@
 				<span class="font-semibold text-gray-700">{m.status()}:</span>
 				<span class="ml-2">{study.status ? safeTranslate(study.status) : 'N/A'}</span>
 			</div>
-			<div>
-				<span class="font-semibold text-gray-700">{m.eta()}:</span>
-				<span class="ml-2">{study.eta ? formatDateOrDateTime(study.eta) : 'N/A'}</span>
-			</div>
-			<div>
-				<span class="font-semibold text-gray-700">{m.dueDate()}:</span>
-				<span class="ml-2">{study.due_date ? formatDateOrDateTime(study.due_date) : 'N/A'}</span>
-			</div>
 		</div>
 	</div>
 
