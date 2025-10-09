@@ -193,6 +193,28 @@ class ProcessingViewSet(BaseModelViewSet):
         processings_count = Processing.objects.all().count()
         recipients_count = DataRecipient.objects.all().count()
         open_right_requests_count = RightRequest.objects.exclude(status="done").count()
+        open_data_breaches_count = DataBreach.objects.exclude(
+            status="privacy_closed"
+        ).count()
+
+        # Aggregate data breaches by breach type
+        breach_types = DataBreach.objects.values("breach_type").annotate(
+            count=Count("id")
+        )
+        breach_type_data = [
+            {"name": item["breach_type"], "value": item["count"]}
+            for item in breach_types
+        ]
+
+        # Aggregate right requests by request type
+        request_types = RightRequest.objects.values("request_type").annotate(
+            count=Count("id")
+        )
+        request_type_data = [
+            {"name": item["request_type"], "value": item["count"]}
+            for item in request_types
+        ]
+
         return Response(
             {
                 "countries": agg_countries(),
@@ -201,6 +223,9 @@ class ProcessingViewSet(BaseModelViewSet):
                 "pd_categories": pd_categories,
                 "pd_cat_count": total_categories,
                 "open_right_requests_count": open_right_requests_count,
+                "open_data_breaches_count": open_data_breaches_count,
+                "breach_types": breach_type_data,
+                "request_types": request_type_data,
             }
         )
 
