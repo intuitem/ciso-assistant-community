@@ -863,7 +863,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
-			{ field: 'processings', urlModel: 'right-requests' },
+			{
+				field: 'processings',
+				urlModel: 'right-requests',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',

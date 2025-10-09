@@ -1193,6 +1193,7 @@
 	"rightRequest": "Request",
 	"addRightRequest": "Trace a request",
 	"openRightRequests": "Open Requests",
+	"associatedRightRequests": "Associated requests",
 	"assignee": "Assignee",
 	"requestType": "Request type",
 	"requestedOn": "Requested on",
