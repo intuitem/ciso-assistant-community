@@ -205,9 +205,11 @@ class StakeholderReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+    category = serializers.SerializerMethodField()
 
-    category = serializers.CharField(source="get_category_display")
-    category_raw = serializers.CharField(source="category", read_only=True)
+    def get_category(self, obj):
+        return obj.category.get_name_translated if obj.category else None
+
     current_criticality = serializers.CharField(
         source="get_current_criticality_display"
     )
@@ -225,6 +227,7 @@ class StakeholderImportExportSerializer(BaseModelSerializer):
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    category = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = Stakeholder

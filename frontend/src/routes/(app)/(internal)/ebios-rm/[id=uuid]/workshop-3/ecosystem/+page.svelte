@@ -4,7 +4,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { m } from '$paraglide/messages';
-	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
+	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
@@ -70,21 +70,23 @@
 				{m.ecosystemRadar()}
 			{/snippet}
 			{#snippet panel()}
-				<div class="bg-white flex">
+				<div class="bg-white flex flex-col space-y-4">
 					<div class="flex w-full h-fit">
-						<EcosystemRadarChart
+						<EcosystemCircularRadarChart
 							title={m.current()}
-							name="c_ecosystem"
-							data={data.radar.current}
+							name="c_ecosystem_circular"
+							data={data.circularRadar}
+							type="current"
 							classesContainer="w-full"
 							height="h-screen"
 						/>
-						<EcosystemRadarChart
+						<EcosystemCircularRadarChart
 							title={m.residual()}
-							name="r_ecosystem"
+							name="r_ecosystem_circular"
+							data={data.circularRadar}
+							type="residual"
 							classesContainer="w-full"
 							height="h-screen"
-							data={data.radar.residual}
 						/>
 					</div>
 				</div>
