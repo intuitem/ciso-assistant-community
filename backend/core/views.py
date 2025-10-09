@@ -106,6 +106,7 @@ from core.models import (
     RequirementMappingSet,
     RiskAssessment,
     RiskMatrix,
+    RiskScenario,
     AssetClass,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
@@ -2836,8 +2837,10 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             id=self.kwargs["pk"]
         )
         risk_scenarios = risk_assessment.risk_scenarios.all()
+        # Include both extra controls (applied_controls) and existing controls (existing_applied_controls)
         return AppliedControl.objects.filter(
-            risk_scenarios__in=risk_scenarios
+            Q(risk_scenarios__in=risk_scenarios)
+            | Q(risk_scenarios_e__in=risk_scenarios)
         ).distinct()
 
 
@@ -2874,6 +2877,10 @@ class RiskScenarioFilter(GenericFilterSet):
         choices=[("YES", "YES"), ("NO", "NO"), ("--", "--")],
         method="filter_within_tolerance",
     )
+    applied_controls = df.ModelMultipleChoiceFilter(
+        method="filter_applied_controls",
+        queryset=AppliedControl.objects.all(),
+    )
 
     def filter_within_tolerance(self, queryset, name, value):
         if value == "YES":
@@ -2890,6 +2897,14 @@ class RiskScenarioFilter(GenericFilterSet):
             return queryset.filter(risk_assessment__risk_tolerance__lt=0)
         return queryset
 
+    def filter_applied_controls(self, queryset, name, value):
+        """Filter by both extra controls (applied_controls) and existing controls (existing_applied_controls)"""
+        if value:
+            return queryset.filter(
+                Q(applied_controls__in=value) | Q(existing_applied_controls__in=value)
+            ).distinct()
+        return queryset
+
     class Meta:
         model = RiskScenario
         # Only include actual model fields here
@@ -2904,7 +2919,7 @@ class RiskScenarioFilter(GenericFilterSet):
             "treatment": ["exact"],
             "threats": ["exact"],
             "assets": ["exact"],
-            "applied_controls": ["exact"],
+            "existing_applied_controls": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
         }
