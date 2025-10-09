@@ -8,6 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
+from iam.models import User, UserGroup
 
 from test_vars import *
 
@@ -421,6 +422,7 @@ class EndpointTestsQueries:
                     object.objects.create_superuser(
                         **build_params
                     )  # no password is required in the build_params
+
                 else:
                     m2m_fields = {}
                     non_m2m_fields = {}
@@ -818,10 +820,13 @@ class EndpointTestsQueries:
                     )
                 else:
                     # User does not have permission to update the object
-                    assert update_response.status_code == user_perm_expected_status, (
-                        f"{verbose_name} can be updated without permission"
-                        if update_response.status_code == status.HTTP_200_OK
-                        else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    # For Users detail, the API may return 404 (anti-enumeration) instead of 403.
+                    expected_statuses = {user_perm_expected_status}
+                    if verbose_name == "Users":
+                        expected_statuses.add(status.HTTP_404_NOT_FOUND)
+                    assert update_response.status_code in expected_statuses, (
+                        f"Updating {verbose_name.lower()} should give a status in {expected_statuses}, "
+                        f"got {update_response.status_code}"
                     )
 
                 if not (fails or user_perm_fails):
@@ -944,10 +949,13 @@ class EndpointTestsQueries:
                     )
                 else:
                     # User does not have permission to delete the object
-                    assert delete_response.status_code == user_perm_expected_status, (
-                        f"{verbose_name} can be deleted without permission"
-                        if delete_response.status_code == status.HTTP_204_NO_CONTENT
-                        else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    # For Users detail, the API may return 404 (anti-enumeration) instead of 403.
+                    expected_statuses = {user_perm_expected_status}
+                    if verbose_name == "Users":
+                        expected_statuses.add(status.HTTP_404_NOT_FOUND)
+                    assert delete_response.status_code in expected_statuses, (
+                        f"Deleting {verbose_name.lower()} should give a status in {expected_statuses}, "
+                        f"got {delete_response.status_code}"
                     )
 
                 if not (fails or user_perm_fails):

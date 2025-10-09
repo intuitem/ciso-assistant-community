@@ -6,6 +6,7 @@ from iam.models import User
 
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
 from test_utils import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
 
 # Generic user data for tests
 USER_FIRSTNAME = "John"
@@ -77,7 +78,6 @@ class TestUsersAuthenticated:
 
     def test_get_users(self, test):
         """test to get users from the API with authentication"""
-        from test_vars import GROUPS_PERMISSIONS
 
         # Users with Global folder access can see all users (admin + test user)
         # Users with domain folder access can only see themselves
@@ -112,7 +112,7 @@ class TestUsersAuthenticated:
 
     def test_update_users(self, test):
         """test to update users with the API with authentication"""
-
+    
         EndpointTestsQueries.Auth.update_object(
             test.client,
             "Users",
@@ -125,6 +125,7 @@ class TestUsersAuthenticated:
             },
             user_group=test.user_group,
             scope="Global",
+          #  scope=GROUPS_PERMISSIONS[test.user_group]["folder"],
         )
 
     def test_delete_users(self, test):
