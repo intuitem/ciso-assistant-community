@@ -356,6 +356,17 @@ const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_PRIORITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/priority',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'priority',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1771,6 +1782,7 @@ export const listViewFields = {
 			'name',
 			'findings_assessment',
 			'severity',
+			'priority',
 			'owner',
 			'status',
 			'applied_controls',
@@ -1781,6 +1793,7 @@ export const listViewFields = {
 			'name',
 			'findings_assessment',
 			'severity',
+			'priority',
 			'owner',
 			'status',
 			'applied_controls',
@@ -1790,6 +1803,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
+			priority: FINDINGS_PRIORITY_FILTER,
 			owner: FINDINGS_OWNER_FILTER
 		}
 	},
