@@ -2763,6 +2763,16 @@ class UserRolesOnFolderList(generics.ListAPIView):
         )
         return ctx
 
+    def list(self, request, *args, **kwargs):
+        if not RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="change_folder"),
+            folder=get_object_or_404(Folder, id=self.kwargs["pk"]),
+        ):
+            raise PermissionDenied()
+
+        return super().list(request, *args, **kwargs)
+
 
 class ComplianceAssessmentActionPlanList(ActionPlanList):
     serializer_class = ComplianceAssessmentActionPlanSerializer
