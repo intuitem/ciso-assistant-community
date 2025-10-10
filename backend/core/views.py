@@ -3386,7 +3386,6 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        # Call the class method
         return User.visible_users(self.request.user)
 
     def update(self, request: Request, *args, **kwargs) -> Response:

@@ -966,16 +966,8 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 
 class UserReadSerializer(BaseModelSerializer):
-    #    user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
-    user_groups = serializers.SerializerMethodField()
+    user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
-
-    def get_user_groups(self, obj):
-        (user_groups_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.context["request"].user, UserGroup
-        )
-        user_groups = obj.user_groups.filter(id__in=user_groups_ids)
-        return [{"id": ug.id, "str": str(ug)} for ug in user_groups]
 
     class Meta:
         model = User
