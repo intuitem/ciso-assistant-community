@@ -2423,6 +2423,39 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         else:
             return f"{self.parent.full_path}/{self.name}"
 
+    def get_descendants(self) -> set["AssetClass"]:
+        """
+        Returns a set of all descendant asset classes using a constant number of
+        queries (2).
+        """
+        # Get all parent-child relationships for AssetClass
+        all_links = self.__class__.objects.filter(parent__isnull=False).values_list(
+            "id", "parent_id"
+        )
+
+        # Build parent-to-children mapping
+        parent_to_children_map = {}
+        for child_id, parent_id in all_links:
+            if parent_id not in parent_to_children_map:
+                parent_to_children_map[parent_id] = set()
+            parent_to_children_map[parent_id].add(child_id)
+
+        # Use BFS to find all descendants
+        descendant_ids = set()
+        visited_ids = {self.pk}  # Avoid cycles
+        queue = deque([self.pk])
+
+        while queue:
+            current_id = queue.popleft()
+            child_ids = parent_to_children_map.get(current_id, set())
+            for child_id in child_ids:
+                if child_id not in visited_ids:
+                    visited_ids.add(child_id)
+                    descendant_ids.add(child_id)
+                    queue.append(child_id)
+
+        return set(self.__class__.objects.filter(pk__in=descendant_ids))
+
     @classmethod
     def build_tree(cls):
         all_nodes = list(cls.objects.all())
