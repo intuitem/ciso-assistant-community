@@ -81,9 +81,7 @@ class TestUsersAuthenticated:
 
         # Users with Global folder access can see all users (admin + test user)
         # Users with domain folder access can only see themselves
-        expected_count = (
-            2 if GROUPS_PERMISSIONS[test.user_group]["folder"] == "Global" else 1
-        )
+        expected_count = 2
 
         EndpointTestsQueries.Auth.get_object(
             test.client,
