@@ -373,7 +373,6 @@
 								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
 								<div class="flex flex-wrap gap-1">
 									{#each meta.evidences as evidence}
-										{console.log('evidence', evidence)}
 										<a
 											href={`/evidences/${evidence.id}`}
 											class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"

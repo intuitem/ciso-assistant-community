@@ -2041,7 +2041,7 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
 
     class Meta:
         model = TimelineEntry
-        exclude = ["created_at", "updated_at"]
+        exclude = []
 
 
 class IncidentWriteSerializer(BaseModelSerializer):
