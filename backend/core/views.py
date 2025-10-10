@@ -2736,7 +2736,9 @@ class UserRolesOnFolderList(generics.ListAPIView):
 
         # visibility
         visible_ids = set(
-            User.visible_users(self.request.user).values_list("id", flat=True)
+            User.visible_users(self.request.user, view_all_users=True).values_list(
+                "id", flat=True
+            )
         )
 
         # roles per user (no role filtering)
@@ -3386,7 +3388,7 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        return User.visible_users(self.request.user)
+        return User.visible_users(self.request.user, view_all_users=True)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()

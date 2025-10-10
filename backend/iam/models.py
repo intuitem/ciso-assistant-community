@@ -550,7 +550,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         permissions = (("backup", "backup"), ("restore", "restore"))
 
     @classmethod
-    def visible_users(cls, for_user: AbstractBaseUser | AnonymousUser):
+    def visible_users(
+        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
+    ):
         """
         Return a queryset of users visible to `for_user`, always including `for_user`.
         Mirrors the logic used in UserViewSet.get_queryset().
@@ -562,8 +564,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             Folder.get_root_folder(), for_user, UserGroup
         )
 
-        view_all_users_flag = True
-        if view_all_users_flag:
+        if view_all_users:
             base_qs = User.objects.all()
 
         else:
