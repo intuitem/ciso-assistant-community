@@ -3982,6 +3982,59 @@ class RiskAssessment(Assessment):
                             "object": ri,
                         }
                     )
+
+        # --- checks on existing_applied_controls (controls marked as existing but not active)
+        # Create a mapping of scenario ID to scenario object with prefetched controls
+        scenario_objects = {
+            str(s.id): s
+            for s in self.risk_scenarios.prefetch_related(
+                "existing_applied_controls", "applied_controls"
+            ).all()
+        }
+
+        for ri in scenarios:
+            scenario_obj = scenario_objects.get(ri["id"])
+            if not scenario_obj:
+                continue
+            existing_controls_set = set(scenario_obj.existing_applied_controls.all())
+            applied_controls_set = set(scenario_obj.applied_controls.all())
+
+            # Check for controls appearing in both lists
+            duplicate_controls = existing_controls_set & applied_controls_set
+            for duplicate_control in duplicate_controls:
+                errors_lst.append(
+                    {
+                        "msg": _(
+                            "{} appears in both existing and additional controls"
+                        ).format(duplicate_control.name),
+                        "msgid": "controlInBothLists",
+                        "link": f"applied-controls/{duplicate_control.id}",
+                        "obj_type": "appliedcontrol",
+                        "object": {
+                            "name": duplicate_control.name,
+                            "id": duplicate_control.id,
+                        },
+                    }
+                )
+
+            # Check for existing controls that are not active
+            for existing_control in scenario_obj.existing_applied_controls.all():
+                if existing_control.status != "active":
+                    errors_lst.append(
+                        {
+                            "msg": _(
+                                "{} is marked as an existing control but its status is not active"
+                            ).format(existing_control.name),
+                            "msgid": "existingControlNotActive",
+                            "link": f"applied-controls/{existing_control.id}",
+                            "obj_type": "appliedcontrol",
+                            "object": {
+                                "name": existing_control.name,
+                                "id": existing_control.id,
+                            },
+                        }
+                    )
+
         # --- checks on the applied controls
         _measures = serializers.serialize(
             "json",
@@ -5075,6 +5128,25 @@ class ComplianceAssessment(Assessment):
             ra_dict["name"] = str(ra)
             ra_dict["id"] = ra.id
             requirement_assessments.append(ra_dict)
+
+            # Check if assessable requirement assessment with compliant result has no evidence
+            if (
+                ra.requirement.assessable
+                and ra.result == RequirementAssessment.Result.COMPLIANT
+                and not ra.has_evidence()
+            ):
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Requirement assessment is compliant but has no evidence attached"
+                        ).format(str(ra)),
+                        "msgid": "requirementAssessmentCompliantNoEvidence",
+                        "link": f"requirement-assessments/{ra.id}",
+                        "obj_type": "requirementassessment",
+                        "object": ra_dict,
+                    }
+                )
+
         for requirement_assessment in requirement_assessments:
             if (
                 requirement_assessment["result"] in ("compliant", "partially_compliant")
@@ -5484,6 +5556,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Meta:
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
+
+    def has_evidence(self) -> bool:
+        """
+        Check if this requirement assessment has evidence attached,
+        either directly or through its applied controls.
+        """
+        # Check for direct evidences or evidences through applied controls in a single query
+        return Evidence.objects.filter(
+            Q(requirement_assessments=self)
+            | Q(applied_controls__requirement_assessments=self)
+        ).exists()
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
