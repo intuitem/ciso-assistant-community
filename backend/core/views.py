@@ -3512,7 +3512,7 @@ class FolderFilter(GenericFilterSet):
 
     class Meta:
         model = Folder
-        fields = ["parent_folder", "content_type", "owner", "owned"]
+        fields = ["parent_folder", "content_type", "owner", "owned", "filtering_labels"]
 
 
 class FolderViewSet(BaseModelViewSet):

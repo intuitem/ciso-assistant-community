@@ -104,6 +104,13 @@ class Folder(NameDescriptionMixin):
     )
     builtin = models.BooleanField(default=False)
 
+    filtering_labels = models.ManyToManyField(
+        "core.FilteringLabel",
+        blank=True,
+        verbose_name=_("Labels"),
+        related_name="folders",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:

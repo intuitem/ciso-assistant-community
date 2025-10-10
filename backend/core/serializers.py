@@ -1158,6 +1158,7 @@ class FolderWriteSerializer(BaseModelSerializer):
 class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     content_type = serializers.CharField(source="get_content_type_display")
 
