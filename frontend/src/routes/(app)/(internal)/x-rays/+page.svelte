@@ -47,6 +47,10 @@
 		const grouped = new Map();
 
 		issues.forEach((issue) => {
+			if (!issue?.msgid || !issue?.object) {
+				return; // Skip malformed issues
+			}
+
 			const key = issue.msgid;
 			if (!grouped.has(key)) {
 				grouped.set(key, {
@@ -59,7 +63,7 @@
 			const link = issue.link ? `/${issue.link}/edit` : `/${assessmentType}/${assessmentId}`;
 
 			grouped.get(key).findings.push({
-				name: issue.object.name,
+				name: issue.object.name || '',
 				link: link
 			});
 		});
