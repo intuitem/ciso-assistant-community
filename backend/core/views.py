@@ -66,7 +66,6 @@ from django.core.cache import cache
 
 from django.apps import apps
 from django.contrib.auth.models import Permission
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models, transaction
@@ -77,7 +76,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, RoleAssignment, UserGroup
+from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
@@ -147,8 +146,6 @@ from global_settings.utils import ff_is_enabled
 import structlog
 
 logger = structlog.get_logger(__name__)
-
-User = get_user_model()
 
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
@@ -2712,10 +2709,10 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
-class UserPermsOnFolderList(generics.ListAPIView):
+class UserRolesOnFolderList(generics.ListAPIView):
     filterset_fields = {}
     search_fields = ["email"]
-    serializer_class = UserPermsOnFolderSerializer
+    serializer_class = UserRolesOnFolderSerializer
 
     filter_backends = [
         DjangoFilterBackend,
@@ -2725,28 +2722,56 @@ class UserPermsOnFolderList(generics.ListAPIView):
     ordering_fields = "__all__"
     ordering = ["email"]
 
-    def get_queryset(self):
-        # Use cached permissions if present to avoid duplicate computation
-        roles = getattr(self, "_folder_roles", None)
-        if roles is None:
-            roles = self.get_serializer_context().get("roles", {})
-        user_ids = list(roles.keys())
-        return User.objects.filter(id__in=user_ids)
+    _user_roles_map = None  # cached variable
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
+    def get_queryset(self):
         folder = get_object_or_404(Folder, id=self.kwargs["pk"])
-        # Authorize: ensure requester can view this folder
-        viewable_folders, _, _ = RoleAssignment.get_accessible_object_ids(
+
+        # authorize
+        (viewable_ids, _updatable_ids, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, Folder
         )
-        if folder.id not in viewable_folders:
+        if folder.id not in viewable_ids:
             raise PermissionDenied()
-        roles = folder.get_user_roles()
-        # cache for reuse in get_queryset
-        self._folder_roles = roles
-        context.update({"pk": self.kwargs["pk"], "roles": roles})
-        return context
+
+        # visibility
+        visible_ids = set(
+            User.visible_users(self.request.user, view_all_users=True).values_list(
+                "id", flat=True
+            )
+        )
+
+        # roles per user (no role filtering)
+        raw_map = folder.get_user_roles()  # {user_id: [Role, ...]}
+
+        # keep users that are visible AND have at least one role in raw_map
+        self._user_roles_map = {
+            uid: roles
+            for uid, roles in raw_map.items()
+            if uid in visible_ids and roles  # roles non-empty in raw_map
+        }
+
+        return User.objects.filter(id__in=self._user_roles_map.keys())
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx.update(
+            {
+                "pk": self.kwargs["pk"],
+                "user_roles_map": self._user_roles_map or {},
+            }
+        )
+        return ctx
+
+    def list(self, request, *args, **kwargs):
+        if not RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="change_folder"),
+            folder=get_object_or_404(Folder, id=self.kwargs["pk"]),
+        ):
+            raise PermissionDenied()
+
+        return super().list(request, *args, **kwargs)
 
 
 class ComplianceAssessmentActionPlanList(ActionPlanList):
@@ -3373,8 +3398,7 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        # TODO: Implement a proper filter for the queryset
-        return User.objects.all()
+        return User.visible_users(self.request.user, view_all_users=True)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()

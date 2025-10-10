@@ -27,7 +27,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${params.id}/${params.field}${
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${params.id}/${params.field}/${
 		url.search || ''
 	}`;
 	const res = await fetch(endpoint);
