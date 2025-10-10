@@ -629,6 +629,25 @@ class AssetFilter(GenericFilterSet):
         method="filter_exclude_children",
         label="Exclude children",
     )
+    folder = df.ModelMultipleChoiceFilter(
+        method="filter_folders",
+        queryset=Folder.objects.all(),
+    )
+
+    def filter_folders(self, queryset, name, value):
+        if value:
+            folder_ids = set()
+            for folder in value:
+                if folder.id in folder_ids:
+                    continue
+                folder_ids.add(folder.id)
+                if folder.content_type != Folder.ContentType.ROOT:
+                    folder_ids.update(
+                        sub_folder.id for sub_folder in folder.get_sub_folders()
+                    )
+
+            return Asset.objects.filter(folder__id__in=folder_ids)
+        return queryset
 
     def filter_exclude_children(self, queryset, name, value):
         descendants = value.get_descendants()
@@ -1330,6 +1349,10 @@ class RiskAssessmentFilterSet(GenericFilterSet):
     status = df.MultipleChoiceFilter(
         choices=RiskAssessment.get_status_choices(), method="filter_status"
     )
+    folder = df.ModelMultipleChoiceFilter(
+        method="filter_folders",
+        queryset=Folder.objects.all(),
+    )
 
     class Meta:
         model = RiskAssessment
@@ -1343,6 +1366,21 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
         }
+
+    def filter_folders(self, queryset, name, value):
+        if value:
+            folder_ids = set()
+            for folder in value:
+                if folder.id in folder_ids:
+                    continue
+                folder_ids.add(folder.id)
+                if folder.content_type != Folder.ContentType.ROOT:
+                    folder_ids.update(
+                        sub_folder.id for sub_folder in folder.get_sub_folders()
+                    )
+
+            return RiskAssessment.objects.filter(folder__id__in=folder_ids)
+        return queryset
 
     def filter_status(self, queryset, name, value):
         ra_undefined_status = queryset.filter(status__isnull=True)
@@ -5415,25 +5453,51 @@ class CampaignViewSet(BaseModelViewSet):
                 compliance_assessment.create_requirement_assessments()
 
 
+class ComplianceAssessmentFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(
+        method="filter_folders",
+        queryset=Folder.objects.all(),
+    )
+
+    def filter_folders(self, queryset, name, value):
+        if value:
+            folder_ids = set()
+            for folder in value:
+                if folder.id in folder_ids:
+                    continue
+                folder_ids.add(folder.id)
+                if folder.content_type != Folder.ContentType.ROOT:
+                    folder_ids.update(
+                        sub_folder.id for sub_folder in folder.get_sub_folders()
+                    )
+
+            return ComplianceAssessment.objects.filter(folder__id__in=folder_ids)
+        return queryset
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "folder",
+            "framework",
+            "perimeter",
+            "campaign",
+            "status",
+            "ebios_rm_studies",
+            "assets",
+            "evidences",
+            "authors",
+            "reviewers",
+            "genericcollection",
+        ]
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = [
-        "folder",
-        "framework",
-        "perimeter",
-        "campaign",
-        "status",
-        "ebios_rm_studies",
-        "assets",
-        "evidences",
-        "authors",
-        "reviewers",
-        "genericcollection",
-    ]
+    filterset_class = ComplianceAssessmentFilter
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
     def get_queryset(self):

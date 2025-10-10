@@ -104,6 +104,7 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	props: {
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
+		pathField: 'path',
 		multiple: true
 	}
 };
