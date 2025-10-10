@@ -583,9 +583,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return base_qs.prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(id__in=changeable_user_groups_ids).only(
-                    "id", "builtin"
-                ),  # minimal
+                queryset=UserGroup.objects.filter(
+                    id__in=changeable_user_groups_ids
+                ).only("id", "builtin"),  # minimal
             )
         )
 

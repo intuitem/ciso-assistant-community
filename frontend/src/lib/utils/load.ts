@@ -41,7 +41,7 @@ export const loadDetail = async ({ event, model, id }) => {
 			model.reverseForeignKeyFields
 				.filter(
 					(m) =>
-						!Boolean(m?.folderPermsNeeded) ||
+						!(m?.folderPermsNeeded) ||
 						canPerformAction({
 							user: event.locals.user,
 							action: 'change',
