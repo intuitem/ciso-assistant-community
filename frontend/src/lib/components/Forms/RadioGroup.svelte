@@ -67,6 +67,7 @@
 	$effect(() => (cachedValue = $value));
 
 	let disabledClasses = $derived(disabled ? 'opacity-50 cursor-not-allowed' : '');
+	let cursorClass = $derived(disabled ? 'cursor-inherit' : 'cursor-pointer');
 	let labeledOptions = $derived(possibleOptions.filter((option) => option[labelKey]));
 	let radioInputs: { [key: string]: HTMLInputElement } = {};
 </script>
@@ -80,35 +81,26 @@
 	>
 		{#each labeledOptions as option}
 			{@const color = colorMap[option.id] ?? 'preset-filled-primary-500'}
-			<label class="flex-auto rounded-lg {option[key] === internalValue ? color : ''}">
-				<div class="text-base text-center cursor-pointer px-4 py-1 hover:preset-tonal h-full">
-					<div class="h-0 w-0 overflow-hidden">
-						<input
-							type="radio"
-							name={field}
-							class="invisible"
-							id={option.id}
-							bind:this={radioInputs[option[key]]}
-							onclick={(event) => {
-								if (!nullable) return;
-								if (internalValue === option[key]) {
-									internalValue = null;
-									onChange(internalValue);
-								} else {
-									// This makes it possible to reselect an unselected radio input in svelte.
-									event.target?.dispatchEvent(new Event('change', { bubbles: true }));
-								}
-							}}
-							onchange={(e) => {
-								internalValue = option[key];
-								onChange(internalValue);
-							}}
-							{disabled}
-						/>
-					</div>
+			<button
+				class="cursor-[inherit] flex-auto rounded-lg {option[key] === internalValue ? color : ''}"
+				onclick={(event) => {
+					event.preventDefault();
+					if (disabled) return;
+					// event.stopPropagation();
+					if (internalValue === option[key] && nullable) {
+						internalValue = null;
+						onChange(internalValue);
+						return;
+					}
+					value?.set(option[key]);
+					internalValue = option[key];
+					onChange(internalValue);
+				}}
+			>
+				<div class="text-base text-center px-4 py-1 {cursorClass} hover:preset-tonal h-full">
 					{option[labelKey]}
 				</div>
-			</label>
+			</button>
 		{/each}
 	</div>
 	{#if helpText}
