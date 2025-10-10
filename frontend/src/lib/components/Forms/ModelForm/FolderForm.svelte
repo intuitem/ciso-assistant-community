@@ -3,6 +3,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
+	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 
 	// Props unused but referenced to avoid browser warnings because they're needed for enterprise Folderform
@@ -43,5 +44,18 @@
 		field="load_missing_libraries"
 		label={m.loadMissingLibraries()}
 		helpText={m.loadMissingLibrariesHelpText()}
+	/>
+{:else}
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
 	/>
 {/if}
