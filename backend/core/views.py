@@ -28,7 +28,6 @@ from django.db.models import (
     OuterRef,
     When,
     Case,
-    Prefetch,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -67,7 +66,6 @@ from django.core.cache import cache
 
 from django.apps import apps
 from django.contrib.auth.models import Permission
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models, transaction
@@ -78,7 +76,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, RoleAssignment, UserGroup
+from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
@@ -148,8 +146,6 @@ from global_settings.utils import ff_is_enabled
 import structlog
 
 logger = structlog.get_logger(__name__)
-
-User = get_user_model()
 
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
@@ -2733,7 +2729,7 @@ class UserPermsOnFolderList(generics.ListAPIView):
 
         # reuse shared visibility logic
         visible_ids = set(
-            UserViewSet.visible_users_qs(self.request.user).values_list("id", flat=True)
+            User.visible_users(self.request.user).values_list("id", flat=True)
         )
 
         # compute once and cache
@@ -3378,41 +3374,9 @@ class UserViewSet(BaseModelViewSet):
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
 
-    @classmethod
-    def visible_users_qs(cls, for_user: User):
-        """
-        Return a queryset of users visible to `for_user`, always including `for_user`.
-        Mirrors the logic used in get_queryset().
-        """
-        if not getattr(for_user, "is_authenticated", False):
-            return User.objects.none()
-
-        (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), for_user, User
-        )
-        (visible_user_groups_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), for_user, UserGroup
-        )
-        base_qs = (
-            User.objects.filter(
-                Q(id__in=visible_users_ids) | Q(user_groups__in=visible_user_groups_ids)
-            )
-            | User.objects.filter(pk=for_user.pk)
-        ).distinct()
-
-        # 🔒 Filtered prefetch for serializer
-        return base_qs.prefetch_related(
-            Prefetch(
-                "user_groups",
-                queryset=UserGroup.objects.filter(id__in=visible_user_groups_ids).only(
-                    "id", "builtin"
-                ),  # minimal
-            )
-        )
-
     def get_queryset(self):
         # Call the class method
-        return self.visible_users_qs(self.request.user)
+        return User.visible_users(self.request.user)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()

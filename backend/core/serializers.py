@@ -2,7 +2,6 @@ import importlib
 from typing import Any
 
 import structlog
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import F
 
@@ -23,8 +22,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 logger = structlog.get_logger(__name__)
-
-User = get_user_model()
 
 
 class SerializerFactory:
