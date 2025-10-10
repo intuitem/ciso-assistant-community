@@ -406,6 +406,8 @@ class AssetReadSerializer(AssetWriteSerializer):
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
     disaster_recovery_objectives = serializers.SerializerMethodField()
+    security_capabilities = serializers.SerializerMethodField()
+    recovery_capabilities = serializers.SerializerMethodField()
 
     def get_children_assets(self, obj):
         """
@@ -442,6 +444,28 @@ class AssetReadSerializer(AssetWriteSerializer):
 
         # Fallback for single object serialization
         return obj.get_disaster_recovery_objectives_display()
+
+    def get_security_capabilities(self, obj):
+        """
+        Gets pre-calculated security capabilities for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("security_capabilities", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_security_capabilities_display()
+
+    def get_recovery_capabilities(self, obj):
+        """
+        Gets pre-calculated recovery capabilities for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("recovery_capabilities", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_recovery_capabilities_display()
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
