@@ -262,6 +262,31 @@ export const AssetSchema = z.object({
 				.optional()
 		})
 		.optional(),
+	security_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional(),
+						is_enabled: z.boolean().default(false)
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	recovery_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
 	reference_link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {

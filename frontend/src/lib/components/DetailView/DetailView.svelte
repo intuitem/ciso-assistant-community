@@ -414,7 +414,7 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives'}
+																{#if key === 'security_objectives' || key === 'security_capabilities'}
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
