@@ -7,7 +7,7 @@ import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
-from django.db.models import Q, F
+from django.db.models import Q, F, Prefetch
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -548,6 +548,46 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
+
+    @classmethod
+    def visible_users(
+        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
+    ):
+        """
+        Return a queryset of users visible to `for_user`, always including `for_user`.
+        Mirrors the logic used in UserViewSet.get_queryset().
+        """
+        if not getattr(for_user, "is_authenticated", False):
+            return User.objects.none()
+
+        (_, changeable_user_groups_ids, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), for_user, UserGroup
+        )
+
+        if view_all_users:
+            base_qs = User.objects.all()
+
+        else:
+            (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), for_user, User
+            )
+            base_qs = (
+                User.objects.filter(
+                    Q(id__in=visible_users_ids)
+                    | Q(user_groups__in=changeable_user_groups_ids)
+                )
+                | User.objects.filter(pk=for_user.pk)
+            ).distinct()
+
+        # 🔒 Filtered prefetch for serializer
+        return base_qs.prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(
+                    id__in=changeable_user_groups_ids
+                ).only("id", "builtin"),  # minimal
+            )
+        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)

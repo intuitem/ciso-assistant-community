@@ -28,7 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
 
 from library.helpers import (
     get_referential_translation,
@@ -48,8 +48,6 @@ from .validators import (
 from collections import defaultdict, deque
 
 logger = get_logger(__name__)
-
-User = get_user_model()
 
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
