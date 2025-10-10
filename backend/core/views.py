@@ -2701,10 +2701,10 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
-class UserPermsOnFolderList(generics.ListAPIView):
+class UserRolesOnFolderList(generics.ListAPIView):
     filterset_fields = {}
     search_fields = ["email"]
-    serializer_class = UserPermsOnFolderSerializer
+    serializer_class = UserRolesOnFolderSerializer
 
     filter_backends = [
         DjangoFilterBackend,
@@ -2717,28 +2717,32 @@ class UserPermsOnFolderList(generics.ListAPIView):
     _user_roles_map = None  # cached variable
 
     def get_queryset(self):
-        # this is called before get_serializer_context, so the cache is intiated here
         folder = get_object_or_404(Folder, id=self.kwargs["pk"])
 
         # authorize
-        viewable_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+        (viewable_ids, _updatable_ids, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, Folder
         )
         if folder.id not in viewable_ids:
             raise PermissionDenied()
 
-        # reuse shared visibility logic
+        # visibility
         visible_ids = set(
             User.visible_users(self.request.user).values_list("id", flat=True)
         )
 
-        # compute once and cache
+        # roles per user (no role filtering)
         raw_map = folder.get_user_roles()  # {user_id: [Role, ...]}
+
+        # keep users that are visible AND have at least one role in raw_map
         self._user_roles_map = {
-            uid: roles for uid, roles in raw_map.items() if uid in visible_ids
+            uid: roles
+            for uid, roles in raw_map.items()
+            if uid in visible_ids and roles  # roles non-empty in raw_map
         }
 
         return User.objects.filter(id__in=self._user_roles_map.keys())
+
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()

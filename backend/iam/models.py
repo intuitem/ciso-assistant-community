@@ -557,6 +557,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         if not getattr(for_user, "is_authenticated", False):
             return User.objects.none()
+        view_all_users_flag = True
+        if view_all_users_flag:
+            return User.objects.all()
 
         (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), for_user, User
