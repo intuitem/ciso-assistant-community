@@ -181,7 +181,7 @@ urlpatterns = [
     ),
     path(
         "folders/<uuid:pk>/users/",
-        UserPermsOnFolderList.as_view(),
+        UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),

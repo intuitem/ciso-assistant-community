@@ -94,7 +94,7 @@ export const getOptions = ({
 	return options;
 };
 
-interface ForeignKeyField {
+export interface ForeignKeyField {
 	field: string;
 	urlModel: urlModel;
 	endpointUrl?: string;
@@ -102,11 +102,12 @@ interface ForeignKeyField {
 	tableFields?: string[];
 }
 
-interface ReverseForeignKeyField extends ForeignKeyField {
+export interface ReverseForeignKeyField extends ForeignKeyField {
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
 	disableCreate?: boolean;
 	disableDelete?: boolean;
+	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 }
 
 interface Field {
@@ -167,6 +168,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'users',
 				detail: true,
 				endpointUrl: './users',
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
 				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
 			}
 		]
@@ -519,7 +521,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
-		reverseForeignKeyFields: [{ field: 'user_groups', urlModel: 'users' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'user_groups',
+				urlModel: 'users',
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
+			}
+		],
 		filters: []
 	},
 	'role-assignments': {
