@@ -2743,7 +2743,6 @@ class UserRolesOnFolderList(generics.ListAPIView):
 
         return User.objects.filter(id__in=self._user_roles_map.keys())
 
-
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         ctx.update(
