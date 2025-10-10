@@ -3986,7 +3986,7 @@ class RiskAssessment(Assessment):
         # --- checks on existing_applied_controls (controls marked as existing but not active)
         # Create a mapping of scenario ID to scenario object with prefetched controls
         scenario_objects = {
-            s.id: s
+            str(s.id): s
             for s in self.risk_scenarios.prefetch_related(
                 "existing_applied_controls", "applied_controls"
             ).all()
