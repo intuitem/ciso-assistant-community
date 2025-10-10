@@ -74,7 +74,8 @@ const NameDescriptionMixin = {
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
-	parent_folder: z.string().optional()
+	parent_folder: z.string().optional(),
+	filtering_labels: z.array(z.string()).optional()
 });
 
 export const FolderImportSchema = z.object({
