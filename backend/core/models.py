@@ -5118,6 +5118,25 @@ class ComplianceAssessment(Assessment):
             ra_dict["name"] = str(ra)
             ra_dict["id"] = ra.id
             requirement_assessments.append(ra_dict)
+
+            # Check if assessable requirement assessment with compliant result has no evidence
+            if (
+                ra.requirement.assessable
+                and ra.result == RequirementAssessment.Result.COMPLIANT
+                and not ra.has_evidence()
+            ):
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Requirement assessment is compliant but has no evidence attached"
+                        ).format(str(ra)),
+                        "msgid": "requirementAssessmentCompliantNoEvidence",
+                        "link": f"requirement-assessments/{ra.id}",
+                        "obj_type": "requirementassessment",
+                        "object": ra_dict,
+                    }
+                )
+
         for requirement_assessment in requirement_assessments:
             if (
                 requirement_assessment["result"] in ("compliant", "partially_compliant")
@@ -5527,6 +5546,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Meta:
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
+
+    def has_evidence(self) -> bool:
+        """
+        Check if this requirement assessment has evidence attached,
+        either directly or through its applied controls.
+        """
+        # Check for direct evidences or evidences through applied controls in a single query
+        return Evidence.objects.filter(
+            Q(requirement_assessments=self)
+            | Q(applied_controls__requirement_assessments=self)
+        ).exists()
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

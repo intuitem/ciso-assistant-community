@@ -86,7 +86,7 @@
 <div class="card bg-white p-6 shadow-sm flex flex-col space-y-4">
 	{#await data.stream.data}
 		<div class="flex flex-col items-center justify-center py-8">
-			<div class="text-sm text-gray-600 mb-4">Loading data...</div>
+			<div class="text-sm text-gray-600 mb-4">{m.xRaysLoadingData()}</div>
 			<LoadingSpinner />
 		</div>
 	{:then rawData}
@@ -186,10 +186,10 @@
 												<div class="preset-tonal-error rounded-base px-2 py-1">
 													<i class="fa-solid fa-bug mr-1"></i>
 													<span class="font-bold">{aggregatedErrors.length}</span>
-													{aggregatedErrors.length === 1 ? 'issue type' : 'issue types'}
+													{aggregatedErrors.length === 1 ? m.xRaysIssueType() : m.xRaysIssueTypes()}
 													<span class="text-xs opacity-75">
 														({quality_check.errors.length}
-														{quality_check.errors.length === 1 ? 'finding' : 'findings'})
+														{quality_check.errors.length === 1 ? m.xRaysFinding() : m.xRaysFindings()})
 													</span>
 												</div>
 												<ul class="list-none pl-4 text-sm space-y-3">
@@ -207,7 +207,7 @@
 																				>{finding.name}</Anchor
 																			>
 																		{:else}
-																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																			<Anchor class="anchor" href={finding.link}>{m.xRaysView()}</Anchor>
 																		{/if}
 																	</div>
 																{/each}
@@ -222,10 +222,10 @@
 												<div class="preset-tonal-warning rounded-base px-2 py-1">
 													<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 													<span class="font-bold">{aggregatedWarnings.length}</span>
-													{aggregatedWarnings.length === 1 ? 'issue type' : 'issue types'}
+													{aggregatedWarnings.length === 1 ? m.xRaysIssueType() : m.xRaysIssueTypes()}
 													<span class="text-xs opacity-75">
 														({quality_check.warnings.length}
-														{quality_check.warnings.length === 1 ? 'finding' : 'findings'})
+														{quality_check.warnings.length === 1 ? m.xRaysFinding() : m.xRaysFindings()})
 													</span>
 												</div>
 												<ul class="list-none pl-4 text-sm space-y-3">
@@ -243,7 +243,7 @@
 																				>{finding.name}</Anchor
 																			>
 																		{:else}
-																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																			<Anchor class="anchor" href={finding.link}>{m.xRaysView()}</Anchor>
 																		{/if}
 																	</div>
 																{/each}
@@ -258,10 +258,10 @@
 												<div class="preset-tonal-secondary rounded-base px-2 py-1">
 													<i class="fa-solid fa-circle-info mr-1"></i>
 													<span class="font-bold">{aggregatedInfo.length}</span>
-													{aggregatedInfo.length === 1 ? 'issue type' : 'issue types'}
+													{aggregatedInfo.length === 1 ? m.xRaysIssueType() : m.xRaysIssueTypes()}
 													<span class="text-xs opacity-75">
 														({quality_check.info.length}
-														{quality_check.info.length === 1 ? 'finding' : 'findings'})
+														{quality_check.info.length === 1 ? m.xRaysFinding() : m.xRaysFindings()})
 													</span>
 												</div>
 												<ul class="list-none pl-4 text-sm space-y-3">
@@ -279,7 +279,7 @@
 																				>{finding.name}</Anchor
 																			>
 																		{:else}
-																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																			<Anchor class="anchor" href={finding.link}>{m.xRaysView()}</Anchor>
 																		{/if}
 																	</div>
 																{/each}
@@ -327,10 +327,10 @@
 												<div class="preset-tonal-error rounded-base px-2 py-1">
 													<i class="fa-solid fa-bug mr-1"></i>
 													<span class="font-bold">{aggregatedErrors.length}</span>
-													{aggregatedErrors.length === 1 ? 'issue type' : 'issue types'}
+													{aggregatedErrors.length === 1 ? m.xRaysIssueType() : m.xRaysIssueTypes()}
 													<span class="text-xs opacity-75">
 														({quality_check.errors.length}
-														{quality_check.errors.length === 1 ? 'finding' : 'findings'})
+														{quality_check.errors.length === 1 ? m.xRaysFinding() : m.xRaysFindings()})
 													</span>
 												</div>
 												<ul class="list-none pl-4 text-sm space-y-3">
@@ -348,7 +348,7 @@
 																				>{finding.name}</Anchor
 																			>
 																		{:else}
-																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																			<Anchor class="anchor" href={finding.link}>{m.xRaysView()}</Anchor>
 																		{/if}
 																	</div>
 																{/each}
@@ -363,10 +363,10 @@
 												<div class="preset-tonal-warning rounded-base px-2 py-1">
 													<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 													<span class="font-bold">{aggregatedWarnings.length}</span>
-													{aggregatedWarnings.length === 1 ? 'issue type' : 'issue types'}
+													{aggregatedWarnings.length === 1 ? m.xRaysIssueType() : m.xRaysIssueTypes()}
 													<span class="text-xs opacity-75">
 														({quality_check.warnings.length}
-														{quality_check.warnings.length === 1 ? 'finding' : 'findings'})
+														{quality_check.warnings.length === 1 ? m.xRaysFinding() : m.xRaysFindings()})
 													</span>
 												</div>
 												<ul class="list-none pl-4 text-sm space-y-3">
@@ -384,7 +384,7 @@
 																				>{finding.name}</Anchor
 																			>
 																		{:else}
-																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																			<Anchor class="anchor" href={finding.link}>{m.xRaysView()}</Anchor>
 																		{/if}
 																	</div>
 																{/each}
@@ -399,10 +399,10 @@
 												<div class="preset-tonal-secondary rounded-base px-2 py-1">
 													<i class="fa-solid fa-circle-info mr-1"></i>
 													<span class="font-bold">{aggregatedInfo.length}</span>
-													{aggregatedInfo.length === 1 ? 'issue type' : 'issue types'}
+													{aggregatedInfo.length === 1 ? m.xRaysIssueType() : m.xRaysIssueTypes()}
 													<span class="text-xs opacity-75">
 														({quality_check.info.length}
-														{quality_check.info.length === 1 ? 'finding' : 'findings'})
+														{quality_check.info.length === 1 ? m.xRaysFinding() : m.xRaysFindings()})
 													</span>
 												</div>
 												<ul class="list-none pl-4 text-sm space-y-3">
@@ -420,7 +420,7 @@
 																				>{finding.name}</Anchor
 																			>
 																		{:else}
-																			<Anchor class="anchor" href={finding.link}>View</Anchor>
+																			<Anchor class="anchor" href={finding.link}>{m.xRaysView()}</Anchor>
 																		{/if}
 																	</div>
 																{/each}
