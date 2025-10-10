@@ -939,6 +939,7 @@ class AssetViewSet(BaseModelViewSet):
                 "name",
                 "description",
                 "type",
+                "folder",
                 "security_objectives",
                 "disaster_recovery_objectives",
                 "link",
@@ -954,8 +955,13 @@ class AssetViewSet(BaseModelViewSet):
                     asset.name,
                     asset.description,
                     asset.type,
+                    asset.folder.name,
                     ",".join(
-                        [i["str"] for i in asset.get_security_objectives_display()]
+                        [
+                            f"{k}: {v}"
+                            for obj in asset.get_security_objectives_display()
+                            for k, v in obj.items()
+                        ]
                     ),
                     ",".join(
                         [
