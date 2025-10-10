@@ -35,7 +35,15 @@
 		return result;
 	};
 
-	const aggregateIssuesByType = (issues: any[], assessmentType: string, assessmentId: string) => {
+	const aggregateIssuesByType = (
+		issues: any[] | undefined,
+		assessmentType: string,
+		assessmentId: string
+	) => {
+		if (!Array.isArray(issues) || issues.length === 0) {
+			return [];
+		}
+
 		const grouped = new Map();
 
 		issues.forEach((issue) => {
