@@ -742,8 +742,14 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 		label: 'current_criticality',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		options: [1, 2, 3, 4],
-		multiple: true
+		options: [
+			{ label: '1', value: 1 },
+			{ label: '2', value: 2 },
+			{ label: '3', value: 3 },
+			{ label: '4', value: 4 }
+		],
+		multiple: true,
+		translateOptions: false
 	}
 };
 
@@ -826,12 +832,11 @@ const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		optionsEndpoint: 'terminologies?field_path=entity.relationship',
+		optionsLabelField: 'name',
 		label: 'category',
-		optionsEndpoint: 'stakeholders/category',
-		multiple: true,
-		optionsLabelField: 'label',
 		browserCache: 'force-cache',
-		optionsValueField: 'value'
+		multiple: true
 	}
 };
 
@@ -1665,9 +1670,7 @@ export const listViewFields = {
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
 			entity: ENTITY_FILTER,
-			category: STAKEHOLDER_CATEGORY_FILTER,
-			current_criticality: CURRENT_CRITICALITY_FILTER,
-			residual_criticality: RESIDUAL_CRITICALITY_FILTER
+			category: STAKEHOLDER_CATEGORY_FILTER
 		}
 	},
 	'strategic-scenarios': {
