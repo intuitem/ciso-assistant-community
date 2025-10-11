@@ -86,10 +86,12 @@
 				onclick={(event) => {
 					event.preventDefault();
 					if (disabled) return;
-					// event.stopPropagation();
-					if (internalValue === option[key] && nullable) {
-						internalValue = null;
-						onChange(internalValue);
+					if (internalValue === option[key]) {
+						if (nullable) {
+							internalValue = null;
+							onChange(internalValue);
+							return;
+						}
 						return;
 					}
 					value?.set(option[key]);
