@@ -170,6 +170,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'folder',
 				urlModel: 'users',
 				detail: true,
+				disableCreate: true,
+				disableDelete: true,
 				endpointUrl: './users',
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
 				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
@@ -528,6 +530,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'user_groups',
 				urlModel: 'users',
+				disableCreate: true,
+				disableDelete: true,
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
 			}
 		],
