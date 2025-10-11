@@ -459,6 +459,17 @@ class LogEntryViewSet(
     serializer_class = LogEntrySerializer
 
     def get_queryset(self):
+        query = LogEntry.objects.all().annotate(
+            folder=Lower(
+                Case(
+                    When(additional_data__isnull=True, then=Value("")),
+                    When(additional_data__folder=None, then=Value("")),
+                    default=Cast("additional_data__folder", CharField()),
+                    output_field=CharField(),
+                )
+            ),
+        )
+
         return LogEntry.objects.all().annotate(
             folder=Lower(
                 Case(
