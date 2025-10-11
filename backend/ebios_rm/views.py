@@ -461,7 +461,13 @@ class StakeholderFilter(df.FilterSet):
 
     class Meta:
         model = Stakeholder
-        fields = ["ebios_rm_study", "is_selected", "applied_controls", "category"]
+        fields = [
+            "ebios_rm_study",
+            "is_selected",
+            "applied_controls",
+            "category",
+            "entity",
+        ]
 
     def filter_current_criticality(self, queryset, name, values):
         ids = [obj.id for obj in queryset if obj.current_criticality in values]
