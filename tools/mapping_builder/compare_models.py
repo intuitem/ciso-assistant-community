@@ -9,11 +9,20 @@ import argparse
 import subprocess
 import pandas as pd
 from pathlib import Path
+from typing import Optional
 import sys
 
 
 def run_mapping(
-    source: str, target: str, model: str, output_dir: Path, ollama_url: str
+    source: str,
+    target: str,
+    model: str,
+    output_dir: Path,
+    ollama_url: str,
+    resume: bool = False,
+    checkpoint_interval: int = 1,
+    top_n: Optional[int] = None,
+    threshold: Optional[float] = None,
 ) -> Path:
     """Run semantic mapping with a specific model"""
     output_file = output_dir / f"mapping_{model.replace(':', '_')}.csv"
@@ -35,7 +44,18 @@ def run_mapping(
         ollama_url,
         "--output",
         str(output_file),
+        "--checkpoint-interval",
+        str(checkpoint_interval),
     ]
+
+    if resume:
+        cmd.append("--resume")
+
+    if top_n is not None:
+        cmd.extend(["--top-n", str(top_n)])
+
+    if threshold is not None:
+        cmd.extend(["--threshold", str(threshold)])
 
     try:
         subprocess.run(cmd, check=True)
@@ -205,6 +225,29 @@ def main():
         default="./comparison_results",
         help="Directory to save results (default: ./comparison_results)",
     )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from existing output files if they exist",
+    )
+    parser.add_argument(
+        "--checkpoint-interval",
+        type=int,
+        default=1,
+        help="Save checkpoint every N source items (default: 1)",
+    )
+    parser.add_argument(
+        "--top-n",
+        type=int,
+        default=None,
+        help="Return top N matches per source item (default: 1)",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=None,
+        help="Minimum score threshold for matches, 0.0-1.0 (default: None)",
+    )
 
     args = parser.parse_args()
 
@@ -219,7 +262,15 @@ def main():
     result_files = []
     for model in args.models:
         result_file = run_mapping(
-            args.source, args.target, model, output_dir, args.ollama_url
+            args.source,
+            args.target,
+            model,
+            output_dir,
+            args.ollama_url,
+            args.resume,
+            args.checkpoint_interval,
+            args.top_n,
+            args.threshold,
         )
         result_files.append(result_file)
 

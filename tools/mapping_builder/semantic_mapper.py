@@ -268,6 +268,10 @@ def build_mapping_table(
     ollama_url: str = "http://localhost:11434",
     model: str = "mistral",
     output_path: Optional[str] = None,
+    resume: bool = False,
+    checkpoint_interval: int = 1,
+    top_n: Optional[int] = None,
+    threshold: Optional[float] = None,
 ) -> pd.DataFrame:
     """
     Build a semantic mapping table between two frameworks
@@ -278,6 +282,10 @@ def build_mapping_table(
         ollama_url: Ollama API endpoint
         model: LLM model to use
         output_path: Optional path to save output CSV/Excel
+        resume: If True, resume from existing output file
+        checkpoint_interval: Save progress every N source items (default: 1)
+        top_n: Return top N matches per source item (default: 1 = best match only)
+        threshold: Minimum score threshold for matches (0.0-1.0)
 
     Returns:
         pandas DataFrame with mapping results
@@ -295,18 +303,45 @@ def build_mapping_table(
     print(f"\nInitializing semantic mapper with model: {model}")
     mapper = SemanticMapper(ollama_url=ollama_url, model=model)
 
-    # Build mapping table
+    # Check for existing results to resume from
     results = []
+    processed_source_refs = set()
+    start_index = 0
+
+    if resume and output_path and Path(output_path).exists():
+        print(f"\nResuming from existing file: {output_path}")
+        existing_df = (
+            pd.read_csv(output_path)
+            if output_path.endswith(".csv")
+            else pd.read_excel(output_path)
+        )
+
+        # Filter results for current model only
+        existing_df = existing_df[existing_df["model"] == model]
+
+        results = existing_df.to_dict("records")
+        processed_source_refs = set(existing_df["source_ref_id"].tolist())
+        start_index = len(processed_source_refs)
+
+        print(f"Loaded {len(processed_source_refs)} existing mappings")
+        print(f"Resuming from source item {start_index + 1}/{len(source_items)}")
+
+    # Build mapping table
     total_comparisons = len(source_items) * len(target_items)
-    comparison_count = 0
+    comparison_count = start_index * len(target_items)
 
-    print(f"\nPerforming {total_comparisons} semantic comparisons...")
+    print(f"\nPerforming semantic comparisons...")
+    print(f"Total comparisons needed: {total_comparisons}")
+    print(f"Already completed: {comparison_count}")
+    print(f"Remaining: {total_comparisons - comparison_count}")
 
-    for source_item in source_items:
-        best_match = None
-        best_score = 0.0
-        best_relationship = "no_relationship"
-        best_explanation = ""
+    for idx, source_item in enumerate(source_items):
+        # Skip already processed items
+        if source_item.ref_id in processed_source_refs:
+            continue
+
+        # Collect all matches for this source item
+        matches = []
 
         for target_item in target_items:
             comparison_count += 1
@@ -319,29 +354,68 @@ def build_mapping_table(
                 source_item, target_item
             )
 
-            # Track best match for this source item
-            if score > best_score:
-                best_score = score
-                best_relationship = relationship
-                best_explanation = explanation
-                best_match = target_item
+            # Collect all matches with their scores
+            matches.append(
+                {
+                    "target_item": target_item,
+                    "relationship": relationship,
+                    "score": score,
+                    "explanation": explanation,
+                }
+            )
 
-        # Add result row
-        result = {
-            "model": model,
-            "source_ref_id": source_item.ref_id,
-            "source_urn": source_item.urn,
-            "source_name": source_item.name,
-            "source_full_sentence": source_item.full_sentence,
-            "target_ref_id": best_match.ref_id if best_match else "",
-            "target_urn": best_match.urn if best_match else "",
-            "target_name": best_match.name if best_match else "",
-            "target_full_sentence": best_match.full_sentence if best_match else "",
-            "relationship": best_relationship,
-            "score": best_score,
-            "explanation": best_explanation,
-        }
-        results.append(result)
+        # Sort by score descending (best matches first)
+        matches.sort(key=lambda x: x["score"], reverse=True)
+
+        # Apply filters
+        filtered_matches = matches
+
+        # Filter by threshold if specified
+        if threshold is not None:
+            filtered_matches = [m for m in filtered_matches if m["score"] >= threshold]
+
+        # Limit to top N if specified
+        if top_n is not None:
+            filtered_matches = filtered_matches[:top_n]
+
+        # If no matches after filtering and we had matches before, keep at least the best one
+        if not filtered_matches and matches:
+            filtered_matches = matches[:1]
+
+        matches = filtered_matches
+
+        # Create result rows for each match
+        for match in matches:
+            target_item = match["target_item"]
+            result = {
+                "model": model,
+                "source_ref_id": source_item.ref_id,
+                "source_urn": source_item.urn,
+                "source_name": source_item.name,
+                "source_full_sentence": source_item.full_sentence,
+                "target_ref_id": target_item.ref_id,
+                "target_urn": target_item.urn,
+                "target_name": target_item.name,
+                "target_full_sentence": target_item.full_sentence,
+                "relationship": match["relationship"],
+                "score": match["score"],
+                "explanation": match["explanation"],
+            }
+            results.append(result)
+
+        # Checkpoint: save progress every N items
+        if output_path and (idx + 1) % checkpoint_interval == 0:
+            df_checkpoint = pd.DataFrame(results)
+            output_file = Path(output_path)
+
+            if output_file.suffix == ".xlsx":
+                df_checkpoint.to_excel(output_path, index=False, engine="openpyxl")
+            else:
+                df_checkpoint.to_csv(output_path, index=False)
+
+            print(
+                f"\n✓ Checkpoint saved: {idx + 1}/{len(source_items)} items completed"
+            )
 
     # Create DataFrame
     df = pd.DataFrame(results)
@@ -377,8 +451,38 @@ def main():
         "--model", default="mistral", help="LLM model to use (default: mistral)"
     )
     parser.add_argument("--output", help="Output file path for results (CSV or XLSX)")
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from existing output file if it exists",
+    )
+    parser.add_argument(
+        "--checkpoint-interval",
+        type=int,
+        default=1,
+        help="Save checkpoint every N source items (default: 1 = after each item)",
+    )
+    parser.add_argument(
+        "--top-n",
+        type=int,
+        default=None,
+        help="Return top N matches per source item (default: 1 = best match only)",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=None,
+        help="Minimum score threshold for matches, 0.0-1.0 (default: None = all matches)",
+    )
 
     args = parser.parse_args()
+
+    # Set default top_n to 1 if neither top_n nor threshold is specified
+    top_n = (
+        args.top_n
+        if args.top_n is not None
+        else (None if args.threshold is not None else 1)
+    )
 
     # Build mapping table
     df = build_mapping_table(
@@ -387,6 +491,10 @@ def main():
         ollama_url=args.ollama_url,
         model=args.model,
         output_path=args.output,
+        resume=args.resume,
+        checkpoint_interval=args.checkpoint_interval,
+        top_n=top_n,
+        threshold=args.threshold,
     )
 
     # Print summary
@@ -394,7 +502,23 @@ def main():
     print("MAPPING SUMMARY")
     print("=" * 80)
     print(f"Model used: {args.model}")
-    print(f"Total source items: {len(df)}")
+
+    # Count unique source items
+    unique_sources = df["source_ref_id"].nunique()
+    total_mappings = len(df)
+    avg_matches_per_source = (
+        total_mappings / unique_sources if unique_sources > 0 else 0
+    )
+
+    print(f"Total source items: {unique_sources}")
+    print(f"Total mappings (source→target): {total_mappings}")
+    print(f"Average matches per source: {avg_matches_per_source:.2f}")
+
+    if args.top_n:
+        print(f"Top-N setting: {args.top_n}")
+    if args.threshold:
+        print(f"Threshold setting: {args.threshold}")
+
     print(f"\nRelationship distribution:")
     print(df["relationship"].value_counts())
     print(f"\nScore statistics:")
@@ -402,7 +526,7 @@ def main():
     print("\n" + "=" * 80)
 
     # Show sample of best matches
-    print("\nTop 5 matches (by score):")
+    print("\nTop 5 mappings (by score):")
     print(
         df.nlargest(5, "score")[
             ["source_ref_id", "target_ref_id", "relationship", "score", "explanation"]

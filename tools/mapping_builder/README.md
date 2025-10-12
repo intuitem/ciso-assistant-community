@@ -58,6 +58,10 @@ python semantic_mapper.py \
 - `--ollama-url` (optional): Ollama API endpoint URL (default: http://localhost:11434)
 - `--model` (optional): LLM model to use (default: mistral). Available models can be listed with `ollama list`
 - `--output` (optional): Output file path for results (CSV or XLSX format)
+- `--resume` (optional): Resume from existing output file if it exists
+- `--checkpoint-interval` (optional): Save checkpoint every N source items (default: 1 = after each item)
+- `--top-n` (optional): Return top N matches per source item (default: 1 = best match only)
+- `--threshold` (optional): Minimum score threshold for matches, 0.0-1.0 (default: None)
 
 ## Output Format
 
@@ -115,16 +119,110 @@ python semantic_mapper.py \
   --output nist-ai-to-iso27001-mapping.xlsx
 ```
 
+## Multiple Target Mappings
+
+By default, each source item maps to only its best match (top-1). You can configure this to find multiple related target items:
+
+### Top-N Matches
+
+Get the top N best matches per source item:
+
+```bash
+# Get top 3 matches for each source requirement
+python semantic_mapper.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --top-n 3 \
+  --output mapping_top3.csv
+```
+
+### Threshold-Based Matching
+
+Get all matches above a score threshold:
+
+```bash
+# Get all matches with score >= 0.5
+python semantic_mapper.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --threshold 0.5 \
+  --output mapping_threshold.csv
+```
+
+### Combined: Top-N + Threshold
+
+Combine both approaches for better control:
+
+```bash
+# Get top 5 matches, but only if score >= 0.3
+python semantic_mapper.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --top-n 5 \
+  --threshold 0.3 \
+  --output mapping_combined.csv
+```
+
+**Output Format**: With multiple matches, you'll get multiple rows per source item - one for each matching target. The results are sorted by score (best matches first).
+
+**Use Cases**:
+- **Top-N**: When you want a fixed number of alternatives per requirement
+- **Threshold**: When you want all semantically related items above a quality bar
+- **Combined**: When you want "up to N matches, but only good ones"
+
+## Checkpoint & Resume (For Long-Running Jobs)
+
+Large frameworks can take hours to process. The tool includes checkpoint/resume functionality:
+
+### Automatic Checkpointing
+
+By default, progress is saved after each source item:
+
+```bash
+python semantic_mapper.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --output mapping.csv
+```
+
+If interrupted, resume with:
+
+```bash
+python semantic_mapper.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --output mapping.csv \
+  --resume
+```
+
+### Checkpoint Interval
+
+For very large frameworks, save checkpoints less frequently to improve performance:
+
+```bash
+# Save every 5 items instead of every item
+python semantic_mapper.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --output mapping.csv \
+  --checkpoint-interval 5 \
+  --resume
+```
+
+**Note:** Lower checkpoint intervals (e.g., 10-20) can improve processing speed by reducing I/O, but you may lose more progress if interrupted.
+
 ## Performance Notes
 
 - Processing time depends on:
   - Number of assessable items in each framework
   - LLM model speed
   - Ollama server performance
+  - Checkpoint interval (more frequent = slower)
 
 - For frameworks with 100 items each, expect:
   - ~10,000 LLM API calls
   - Processing time: 30-60 minutes (depending on model and hardware)
+  - Use `--checkpoint-interval 10` to reduce overhead by ~10-20%
 
 ## Comparing Model Performance
 
@@ -139,6 +237,15 @@ python compare_models.py \
   --target ../../backend/library/libraries/iso27001-2013.yaml \
   --models mistral llama3.1 llama3 \
   --output-dir ./comparison_results
+
+# With resume support (if interrupted, run same command)
+python compare_models.py \
+  --source ../../backend/library/libraries/nist-ai-rmf-1.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2013.yaml \
+  --models mistral llama3.1 llama3 \
+  --output-dir ./comparison_results \
+  --resume \
+  --checkpoint-interval 5
 ```
 
 This will:
@@ -149,6 +256,7 @@ This will:
   - Score statistics by model
   - Agreement/disagreement analysis
   - Combined results file
+- Resume from where it left off if interrupted (with `--resume`)
 
 ### Manual Comparison
 
@@ -202,10 +310,33 @@ print(comparison)
 
 ## Tips
 
+### Model Selection
 - Use faster/smaller models (e.g., `mistral`, `llama3`) for quicker results
 - Use larger models (e.g., `llama3.1:70b`) for more accurate analysis if available
 - List available models with: `ollama list`
+
+### Output Formats
 - Save results to CSV format when comparing models (easier to programmatically merge)
 - Save results to XLSX format for better readability in spreadsheet applications
-- Review items with scores between 0.3-0.7 manually as they may need human judgment
 - The `model` column in output allows tracking and comparing results from different LLMs
+
+### Long-Running Jobs
+- Always use `--resume` flag to enable recovery from interruptions
+- Start with `--checkpoint-interval 1` (default) for safety
+- For very large frameworks (100+ items), use `--checkpoint-interval 5-10` for better performance
+- Monitor progress - checkpoints show completion status
+- If a checkpoint file exists, you can safely Ctrl+C and resume later
+
+### Multiple Matches Strategy
+- **Use `--top-n 3` or `--top-n 5`** for comprehensive mapping where you want alternatives
+- **Use `--threshold 0.5` or `--threshold 0.7`** for high-quality matches only (stricter control)
+- **Use `--top-n 5 --threshold 0.3`** for balanced approach: "best 5, but only decent ones"
+- Default (single best match) works well for 1:1 framework alignment
+- Multiple matches are essential for many-to-many relationship discovery
+
+### Quality Review
+- Review items with scores between 0.3-0.7 manually as they may need human judgment
+- Compare results from multiple models to validate mappings
+- Check disagreement cases - they often indicate edge cases or nuanced requirements
+- With multiple matches: review all matches per source to understand coverage
+- Low-scoring matches (0.2-0.4) might reveal tangential relationships worth documenting
