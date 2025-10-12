@@ -424,12 +424,14 @@ class AssetWriteSerializer(BaseModelSerializer):
         old_type = instance.type
         new_type = validated_data.get("type", old_type)
 
-        # If switching to PRIMARY type, clear parent_assets
+        # If switching to PRIMARY type, clear parent_assets and prevent reapplication
         if old_type != new_type and new_type == Asset.Type.PRIMARY:
+            validated_data.pop("parent_assets", None)
             instance.parent_assets.clear()
 
-        # If switching to SUPPORT type, clear child_assets
+        # If switching to SUPPORT type, clear child_assets (already popped above)
         if old_type != new_type and new_type == Asset.Type.SUPPORT:
+            child_assets = None  # Prevent setting below
             instance.child_assets.clear()
 
         instance = super().update(instance, validated_data)
