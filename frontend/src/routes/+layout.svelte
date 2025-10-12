@@ -14,6 +14,7 @@
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import ProblematicScenariosModal from '$lib/components/Modals/ProblematicScenariosModal.svelte';
 	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
+	import type { FlashMessage } from '$lib/utils/types';
 	import {
 		initializeToastStore,
 		getToastStore,
@@ -37,11 +38,6 @@
 		};
 		toastStore.trigger(t);
 	};
-
-	interface FlashMessage {
-		message: string;
-		type: 'success' | 'error' | 'warning' | 'info';
-	}
 
 	function handleToast(flash: FlashMessage | undefined) {
 		if (!flash) return;
