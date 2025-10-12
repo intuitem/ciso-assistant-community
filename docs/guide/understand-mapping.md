@@ -11,7 +11,7 @@ This capability is supported on CISO Assistant and allows the user to create a p
 \
 Mapping are library objects that can be customized, imported and submitted to the community. To see the available ones, head to the libraries store and filter to mapping:\
 \
-![](<../.gitbook/assets/image (1) (1) (1).png>)
+![](<../.gitbook/assets/image (1) (1) (1) (1).png>)
 
 
 

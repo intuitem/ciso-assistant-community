@@ -25,6 +25,7 @@
 * [Flash mode](features-focus/flash-mode.md)
 * [Evidences from clipboard](features-focus/evidences-from-clipboard.md)
 * [Library upgrade](features-focus/library-upgrade.md)
+* [Library clean-up](features-focus/library-clean-up.md)
 * [Mapping explorer](features-focus/graph-explorer.md)
 * [SSO](features-focus/sso/README.md)
   * [SAML](features-focus/sso/saml.md)

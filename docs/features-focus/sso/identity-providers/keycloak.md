@@ -60,8 +60,8 @@ Go into your **Keycloak admin console**
 1.  Open the sidebar menu > **Clients** and **Create client**
 
     <figure><img src="../../../.gitbook/assets/Screenshot 2024-08-20 09.40.06.png" alt=""><figcaption></figcaption></figure>
-2. Choose **OpenID Connect** client type and give it a **Client ID**, then click **Next**![](../../../.gitbook/assets/image.png)
-3.  Enable **Client authentication**, make sure **Standard flow** is selected, then click **Next**![](<../../../.gitbook/assets/image (1).png>)
+2. Choose **OpenID Connect** client type and give it a **Client ID**, then click **Next**![](<../../../.gitbook/assets/image (1).png>)
+3.  Enable **Client authentication**, make sure **Standard flow** is selected, then click **Next**![](<../../../.gitbook/assets/image (1) (1).png>)
 
 
 4. Enter your deployment's **Root URL**. It is the URL of your frontend.
