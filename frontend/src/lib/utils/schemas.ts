@@ -960,6 +960,7 @@ export const FindingSchema = z.object({
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
 	severity: z.number().default(-1),
+	priority: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
