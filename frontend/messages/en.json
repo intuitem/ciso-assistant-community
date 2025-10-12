@@ -177,6 +177,7 @@
 	"parentAsset": "Supported asset",
 	"parentAssets": "Supported assets",
 	"childrenAssets": "Underlying assets",
+	"supportAssets": "Support assets",
 	"approver": "Approver",
 	"state": "State",
 	"justification": "Justification",

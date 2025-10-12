@@ -211,6 +211,27 @@
 			{/each}
 		</div>
 	</Dropdown>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets?type=SP"
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
+		optionsDetailedUrlParameters={[['exclude_parents', object.id]]}
+		optionsLabelField="auto"
+		pathField="path"
+		optionsSelf={object}
+		field="child_assets"
+		cacheLock={cacheLocks['child_assets']}
+		bind:cachedValue={formDataCache['child_assets']}
+		label={m.supportAssets()}
+	/>
 {/if}
 <AutocompleteSelect
 	multiple

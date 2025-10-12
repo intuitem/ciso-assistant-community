@@ -372,6 +372,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
+    child_assets = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Asset.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -391,11 +396,56 @@ class AssetWriteSerializer(BaseModelSerializer):
                     )
         return parent_assets
 
+    def validate_child_assets(self, child_assets):
+        """
+        Check that adding children won't create cycles
+        """
+        if not self.instance:
+            return child_assets
+        if child_assets:
+            for asset in child_assets:
+                if asset in self.instance.ancestors_plus_self():
+                    raise serializers.ValidationError(
+                        "errorAssetGraphMustNotContainCycles"
+                    )
+        return child_assets
+
+    def create(self, validated_data):
+        child_assets = validated_data.pop("child_assets", None)
+        asset = super().create(validated_data)
+
+        if child_assets is not None:
+            asset.child_assets.set(child_assets)
+
+        return asset
+
+    def update(self, instance, validated_data):
+        child_assets = validated_data.pop("child_assets", None)
+        old_type = instance.type
+        new_type = validated_data.get("type", old_type)
+
+        # If switching to PRIMARY type, clear parent_assets
+        if old_type != new_type and new_type == Asset.Type.PRIMARY:
+            instance.parent_assets.clear()
+
+        # If switching to SUPPORT type, clear child_assets
+        if old_type != new_type and new_type == Asset.Type.SUPPORT:
+            instance.child_assets.clear()
+
+        instance = super().update(instance, validated_data)
+
+        # Set child_assets for PRIMARY type if provided
+        if child_assets is not None and instance.type == Asset.Type.PRIMARY:
+            instance.child_assets.set(child_assets)
+
+        return instance
+
 
 class AssetReadSerializer(AssetWriteSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    child_assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
