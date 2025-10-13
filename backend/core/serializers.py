@@ -383,33 +383,25 @@ class AssetWriteSerializer(BaseModelSerializer):
         model = Asset
         exclude = ["business_value"]
 
-    def validate_parent_assets(self, parent_assets):
+    def validate(self, data):
+        parent_assets = data.get("parent_assets", [])
+        support_assets = data.get("child_assets", [])
+        print("validate is called")
         """
         Check that the assets graph will not contain cycles
         """
-        if not self.instance:
-            return parent_assets
+        myset = set()
+        if self.instance:
+            myset = set([self.instance])
         if parent_assets:
-            for asset in parent_assets:
-                if self.instance in asset.ancestors_plus_self():
-                    raise serializers.ValidationError(
-                        "errorAssetGraphMustNotContainCycles"
-                    )
-        return parent_assets
+            myset = myset | set(support_assets)
 
-    def validate_support_assets(self, support_assets):
-        """
-        Check that adding support assets won't create cycles
-        """
-        if not self.instance:
-            return support_assets
-        if support_assets:
-            for asset in support_assets:
-                if asset in self.instance.ancestors_plus_self():
+            for asset in parent_assets:
+                if myset & set(asset.ancestors_plus_self()):
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return support_assets
+        return data
 
     def create(self, validated_data):
         child_assets = validated_data.pop("child_assets", None)
