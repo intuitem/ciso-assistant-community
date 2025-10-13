@@ -4,7 +4,8 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def migrate_category_to_terminology(apps, schema_editor):
+def migrate_stakeholder_data(apps, schema_editor):
+    """Migrate stakeholder category data after FK is added"""
     Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
     Terminology = apps.get_model("core", "Terminology")
 
@@ -33,7 +34,7 @@ def migrate_category_to_terminology(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0104_add_info_severity"),
+        ("core", "0105_add_entity_relationship_terminology"),
         ("ebios_rm", "0017_alter_operationalscenario_operating_modes_description"),
     ]
 
@@ -62,9 +63,7 @@ class Migration(migrations.Migration):
             ),
         ),
         # Step 3: Migrate data from category_old to category
-        migrations.RunPython(
-            migrate_category_to_terminology, migrations.RunPython.noop
-        ),
+        migrations.RunPython(migrate_stakeholder_data, migrations.RunPython.noop),
         # Step 4: Make category non-nullable
         migrations.AlterField(
             model_name="stakeholder",
