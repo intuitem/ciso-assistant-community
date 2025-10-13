@@ -802,7 +802,7 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
         "value": "yes",
         "add_score": 20,
-        "compute_compliance": true,
+        "compute_result": true,
         "select_implementation_groups": ["1"],
         "description": "Indicates that a formal access control policy is in place", // (optional, to add context if needed without overloading the interface),
         "color": "#28a745" // to be retrieved with the excel cell
@@ -811,7 +811,7 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
         "value": "no",
         "add_score": 0,
-        "compute_compliance": false,
+        "compute_result": false,
         "description": "No policy exists or is documented",
         "color": "#dc3545"
       }
@@ -833,14 +833,14 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer02:choice:1",
         "value": "yes",
         "add_score": 10,
-        "compute_compliance": true,
+        "compute_result": true,
         "select_implementation_groups": ["2"]
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer02:choice:2",
         "value": "no",
         "add_score": 0,
-        "compute_compliance": false
+        "compute_result": false
       }
     ]
   },
@@ -860,26 +860,26 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:1",
         "value": "Role-based access control",
         "add_score": 5,
-        "compute_compliance": true
+        "compute_result": true
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:2",
         "value": "MFA for privileged accounts",
         "add_score": 5,
-        "compute_compliance": true,
+        "compute_result": true,
         "select_implementation_groups": ["1", "2"]
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:3",
         "value": "Audit logging",
         "add_score": 5,
-        "compute_compliance": true
+        "compute_result": true
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:4",
         "value": "None of the above", // or N/A
         "add_score": 0,
-        "compute_compliance": false
+        "compute_result": false
       }
     ]
   }
@@ -916,17 +916,17 @@ The score cannot be changed manually as long as one choice with add_score is sel
 
 #### Result computing
 
-- compute_compliance: `<boolean-value>`
+- compute_result: `<boolean-value>`
 
 If true, this choice contributes to compliance. If false, this choice contributes to non-compliance.
 
-When compute_compliance is defined for one or several answered questions, the result is calculated based on the following rules:
+When compute_result is defined for one or several answered questions, the result is calculated based on the following rules:
 
-- if all answered questions with compute_compliance have true values, the result is "compliant"
-- else if at least one answered question with compute_compliance has a true value, the result is "partially compliant"
+- if all answered questions with compute_result have true values, the result is "compliant"
+- else if at least one answered question with compute_result has a true value, the result is "partially compliant"
 - else, the result is "non compliant".
 
-To select "not-applicable" result, the user shall not answer any of the questions with compute_compliance flag.
+To select "not-applicable" result, the user shall not answer any of the questions with compute_result flag.
 
 #### IG piloted selection
 
