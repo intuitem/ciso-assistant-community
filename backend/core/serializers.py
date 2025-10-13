@@ -430,15 +430,9 @@ class AssetWriteSerializer(BaseModelSerializer):
             validated_data.pop("parent_assets", None)
             instance.parent_assets.clear()
 
-        # If switching to SUPPORT type, clear child_assets (already popped above)
-        if old_type != new_type and new_type == Asset.Type.SUPPORT:
-            child_assets = None  # Prevent setting below
-            instance.child_assets.clear()
-
         instance = super().update(instance, validated_data)
 
-        # Set support_assets (child_assets) if provided
-        # Note: child_assets will be None if we switched TO SP type above
+        # Set support_assets (child_assets) if provided (both PRIMARY and SUPPORT can have children)
         if child_assets is not None:
             instance.child_assets.set(child_assets)
 
