@@ -1911,6 +1911,38 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
             )
 
 
+class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
+    DEFAULT_ASSET_CAPABILITIES = [
+        "confidentiality",
+        "integrity",
+        "availability",
+        "proof",
+        "authenticity",
+        "privacy",
+        "safety",
+        "rto",
+        "rpo",
+        "mtd",
+    ]
+
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def create_default_values(cls):
+        for value in cls.DEFAULT_ASSET_CAPABILITIES:
+            AssetCapability.objects.update_or_create(
+                name=value,
+            )
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Asset Capability"
+        verbose_name_plural = "Asset Capabilities"
+
+
 class Asset(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -2052,7 +2084,9 @@ class Asset(
             JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
         ],
     )
-
+    overridden_children_capabilities = models.ManyToManyField(
+        AssetCapability, blank=True, verbose_name=_("Overridden children capabilities")
+    )
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )

@@ -364,6 +364,16 @@ class RiskAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class AssetCapabilityReadSerializer(ReferentialSerializer):
+    class Meta:
+        model = AssetCapability
+        exclude = ["translations"]
+
+
+class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
+    pass
+
+
 class AssetWriteSerializer(BaseModelSerializer):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -402,6 +412,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["name"])
+    overridden_children_capabilities = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()

@@ -649,6 +649,11 @@ class AssetFilter(GenericFilterSet):
         ]
 
 
+class AssetCapabilityViewSet(BaseModelViewSet):
+    model = AssetCapability
+    search_fields = ["name"]
+
+
 class AssetViewSet(BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
@@ -671,6 +676,7 @@ class AssetViewSet(BaseModelViewSet):
                 "security_exceptions",
                 "filtering_labels",
                 "personal_data",
+                "overridden_children_capabilities",
             )
         )
 
