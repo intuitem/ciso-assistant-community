@@ -97,7 +97,7 @@ erDiagram
 
 ```
 
-### Project management model
+* [ ] Project management model
 
 ```mermaid
 erDiagram
@@ -794,27 +794,95 @@ The format for questions and answers json fields will evolve over time. The init
 
 ```json
 {
-    "urn:intuitem:risk:req_node:example:a.1:question:1": {
-        "type": "unique_choice",
-        "choices": [
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
-                "value": "yes"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
-                "value": "no"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
-                "value": "n/a"
-            }
-        ],
-        "text": "Question title",
+  "urn:intuitem:risk:req_node:example:a.1:question:1": {
+    "type": "unique_choice",
+    "text": "Do you maintain an access control policy?",
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+        "value": "yes",
+        "add_score": 20,
+        "compute_compliance": true,
+        "select_implementation_groups": ["1"],
+        "description": "Indicates that a formal access control policy is in place", // (optional, to add context if needed without overloading the interface),
+        "color": "#28a745" // to be retrieved with the excel cell
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+        "value": "no",
+        "add_score": 0,
+        "compute_compliance": false,
+        "description": "No policy exists or is documented",
+        "color": "#dc3545"
+      }
+    ]
+  },
+
+  "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    "type": "unique_choice",
+    "text": "Is the policy reviewed annually?",
+    "depends_on": {
+      "question": "urn:intuitem:risk:req_node:example:a.1:question:1",
+      "answers": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1"
+      ],
+      "condition": "any"
     },
-    "urn:intuitem:risk:req_node:example:a.1:question:2": {
-    ...
-    }
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer02:choice:1",
+        "value": "yes",
+        "add_score": 10,
+        "compute_compliance": true,
+        "select_implementation_groups": ["2"]
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer02:choice:2",
+        "value": "no",
+        "add_score": 0,
+        "compute_compliance": false
+      }
+    ]
+  },
+
+  "urn:intuitem:risk:req_node:example:a.1:question:3": {
+    "type": "multiple_choice",
+    "text": "Which access controls are implemented?",
+    "depends_on": {
+      "question": "urn:intuitem:risk:req_node:example:a.1:question:1",
+      "answers": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1"
+      ],
+      "condition": "any" // or "all" (optional, defaults to "any")
+    },
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:1",
+        "value": "Role-based access control",
+        "add_score": 5,
+        "compute_compliance": true
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:2",
+        "value": "MFA for privileged accounts",
+        "add_score": 5,
+        "compute_compliance": true,
+        "select_implementation_groups": ["1", "2"]
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:3",
+        "value": "Audit logging",
+        "add_score": 5,
+        "compute_compliance": true
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:4",
+        "value": "None of the above", // or N/A
+        "add_score": 0,
+        "compute_compliance": false
+      }
+    ]
+  }
 }
 ```
 
@@ -822,11 +890,12 @@ The format for questions and answers json fields will evolve over time. The init
 
 ```json
 {
-    "urn:intuitem:risk:req_node:example:a.1:question:1": [
-        "urn:intuitem:risk:framework:example:answer01:choice:1",
-        "urn:intuitem:risk:framework:example:answer01:choice:2"
-    ],
-    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
+    "urn:intuitem:risk:req_node:example:a.1:question:1": "urn:intuitem:risk:framework:example:answer01:choice:1",
+    "urn:intuitem:risk:req_node:example:a.1:question:2": "urn:intuitem:risk:framework:example:answer02:choice:2",
+    "urn:intuitem:risk:req_node:example:a.1:question:3": [
+        "urn:intuitem:risk:framework:example:answer03:choice:1",
+        "urn:intuitem:risk:framework:example:answer03:choice:2"
+    ]
     ...
 }
 ```
@@ -835,28 +904,29 @@ The schema variable follows JSON Schema standard (WIP).
 
 ### Automation based on questions
 
-Unique choice questions can have additional fieds for automation.
+Questions can have additional fieds for automation.
 
 #### Score computing
 
-- add_score: <integer-value>
- 
+- add_score: `<integer-value>`
+
 The score is calculated based on this choice. The integer value can be positive or negative. All values selected within a requirement assessment are summed, and the sum is clipped by the scale.
- 
+
 The score cannot be changed manually as long as one choice with add_score is selected.
 
 #### Result computing
 
-- compute_compliance: <boolean-value>
+- compute_compliance: `<boolean-value>`
 
 If true, this choice contributes to compliance. If false, this choice contributes to non-compliance.
 
-When result_compliance is defined for one or several answered questions, the result is calculated based on the following rules:
-- if all answered questions with result_compliance have true values, the result is "compliant"
-- else if at least one answered question with result_compliance has a true value, the result is "partially compliant"
+When compute_compliance is defined for one or several answered questions, the result is calculated based on the following rules:
+
+- if all answered questions with compute_compliance have true values, the result is "compliant"
+- else if at least one answered question with compute_compliance has a true value, the result is "partially compliant"
 - else, the result is "non compliant".
 
-To select "not-applicable" result, the user shall not answer any of the questions with result_compliance flag.
+To select "not-applicable" result, the user shall not answer any of the questions with compute_compliance flag.
 
 #### IG piloted selection
 
@@ -865,12 +935,13 @@ To select "not-applicable" result, the user shall not answer any of the question
 This choice provokes the selection of the indicated IG to the selected_implementation_groups of the compliance assessment.
 
 If there is at least one select_implementation_groups field, then the selection of IGs is deemded to be in piloted mode:
+
 - The user cannot select IGs
 - The list of selected IGs is computed as the union of the initial_implementation_groups with the IGs that are selected via the select_implementation_groups choices. This is done at each saving of a requirement assessment.
 
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see <https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf>).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see [https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf](https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf)).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
@@ -1005,6 +1076,7 @@ The performance of the UX shall be optimized, by avoiding to preload all possibl
 ## Incidents
 
 Significant security incidents can be traced in CISO Assistant. An incident object has the following fields:
+
 - ref_id/name/description
 - qualifications
 - severity (like security exceptions)
@@ -1015,6 +1087,7 @@ Incidents can be linked to threats, assets, owners.
 Incidents contain a table of timeline_entry objects.
 
 Timeline_entry objects have the following fields:
+
 - entry (a string to describe the entry)
 - entry_type within detection/mitigation/observation/status_changed/severity_changed
 - observation
@@ -1244,6 +1317,7 @@ A user can be authenticated either locally or with SSO.
 When SSO is activated, all users can use SSO.
 
 When the force_sso global flag is set, all users without keep_local_login:
+
 - have their password disabled,
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.
@@ -1655,9 +1729,11 @@ erDiagram
 This new type of assessments is intended to gather and manage findings. The section is present in governance with the name "follow-up"/"Suivi".
 
 A findings assessment has the following specific fields:
+
 - category: --/pentest/audit/internal
 
 A finding ("constat") has the following fields:
+
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
@@ -1767,6 +1843,7 @@ The task_date is copied in the due_date of the task_node for a non-recurring tas
 When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
 
 The following concepts will not be included in the MVP:
+
 - subtasks
 - exceptions
 - overdue_behavior (will be NO_IMPACT)
@@ -1774,6 +1851,7 @@ The following concepts will not be included in the MVP:
 ### Implementation
 
 Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+
 - 5 years for yearly frequency
 - 24 months for monthly frequency
 - 53 weeks for weekly frequency
@@ -1890,6 +1968,7 @@ QUANT_AGGREGATION {
 7. All the LEC generated for the study are available in a reporting section.
 
 The json field `estimated_parameters` contains:
+
 - the reference period as a drop-down value (hour/day/week/month/year)
 - the reference period in seconds (for calculations)
 - the probability if a real that can be entered directly as percentage, or cacluated from:
@@ -1905,6 +1984,7 @@ The json field `simulation_data` contains the MC simulation parameters (or a sam
 An aggregation can only be simulated if it contains compatible hypotheses. Two hypotheses are compatible if and only if the don't contain any control that is added in one and removed from the other.
 
 Notes for MVP:
+
 - the proability is entered as a percentage
 - the reference period is hardcoded to year
 - aggregations are not implemented
