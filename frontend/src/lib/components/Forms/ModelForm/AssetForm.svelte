@@ -151,6 +151,7 @@
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
+  helpText={m.supportedAssetsHelpText()}
 />
 <TextField
 	{form}
@@ -231,6 +232,7 @@
 		cacheLock={cacheLocks['support_assets']}
 		bind:cachedValue={formDataCache['support_assets']}
 		label={m.supportAssets()}
+    helpText={m.supportingAssetsHelpText()}
 	/>
 {/if}
 <AutocompleteSelect
