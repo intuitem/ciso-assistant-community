@@ -1546,6 +1546,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             self._send_assignment_notifications(
                 assessment, [user.id for user in authors_data]
             )
+        
+        if assessment.framework.implementation_groups_definition:
+            default_implementation_groups = []
+            for ig in assessment.framework.implementation_groups_definition:
+                if ig.get("default_selected", False):
+                    default_implementation_groups += [ig["ref_id"]]
+            assessment.selected_implementation_groups = default_implementation_groups
+            assessment.save()
 
         return assessment
 

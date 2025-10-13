@@ -47,6 +47,15 @@
 						value: group.ref_id
 					}));
 					suggestions = r['reference_controls'].length > 0;
+
+					// Deactivate implementation groups if any is marked as default_selected
+					const defaultSelectedGroups = implementation_groups
+						.filter(group => group.default_selected)
+						.map(group => group.name);
+					
+					if (defaultSelectedGroups.length > 0) {
+						implementationGroupsChoices = [];
+					}
 				});
 		}
 	}
