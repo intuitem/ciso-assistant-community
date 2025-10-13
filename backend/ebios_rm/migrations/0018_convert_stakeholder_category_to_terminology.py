@@ -4,10 +4,61 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def migrate_stakeholder_data(apps, schema_editor):
-    """Migrate stakeholder category data after FK is added"""
+def migrate_category_to_terminology(apps, schema_editor):
     Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
     Terminology = apps.get_model("core", "Terminology")
+
+    DEFAULT_ENTITY_RELATIONSHIPS = [
+        {
+            "name": "regulatory_authority",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "partner",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_authority",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "client",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "supplier",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "contractor",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+    ]
+
+    for item in DEFAULT_ENTITY_RELATIONSHIPS:
+        Terminology.objects.update_or_create(
+            name=item["name"],
+            field_path=item["field_path"],
+            defaults=item,
+        )
 
     # Mapping of old category values to terminology names
     category_mapping = {
@@ -33,8 +84,12 @@ def migrate_stakeholder_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    atomic = (
+        False  # Required for PostgreSQL: avoids trigger event conflicts when adding FK
+    )
+
     dependencies = [
-        ("core", "0105_add_entity_relationship_terminology"),
+        ("core", "0104_add_info_severity"),
         ("ebios_rm", "0017_alter_operationalscenario_operating_modes_description"),
     ]
 
@@ -63,7 +118,9 @@ class Migration(migrations.Migration):
             ),
         ),
         # Step 3: Migrate data from category_old to category
-        migrations.RunPython(migrate_stakeholder_data, migrations.RunPython.noop),
+        migrations.RunPython(
+            migrate_category_to_terminology, migrations.RunPython.noop
+        ),
         # Step 4: Make category non-nullable
         migrations.AlterField(
             model_name="stakeholder",
