@@ -237,7 +237,7 @@ export const AssetSchema = z.object({
 	folder: z.string(),
 	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
-	child_assets: z.string().optional().array().optional(),
+	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
 			objectives: z

@@ -227,9 +227,9 @@
 		optionsLabelField="auto"
 		pathField="path"
 		optionsSelf={object}
-		field="child_assets"
-		cacheLock={cacheLocks['child_assets']}
-		bind:cachedValue={formDataCache['child_assets']}
+		field="support_assets"
+		cacheLock={cacheLocks['support_assets']}
+		bind:cachedValue={formDataCache['support_assets']}
 		label={m.supportAssets()}
 	/>
 {/if}

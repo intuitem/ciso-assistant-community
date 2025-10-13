@@ -481,7 +481,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
-			{ field: 'child_assets', urlModel: 'assets' },
+			{ field: 'support_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'asset_class', urlModel: 'asset-class' },

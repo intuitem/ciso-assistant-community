@@ -372,7 +372,8 @@ class AssetWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
-    child_assets = serializers.PrimaryKeyRelatedField(
+    support_assets = serializers.PrimaryKeyRelatedField(
+        source="child_assets",
         many=True,
         queryset=Asset.objects.all(),
         required=False,
@@ -396,19 +397,19 @@ class AssetWriteSerializer(BaseModelSerializer):
                     )
         return parent_assets
 
-    def validate_child_assets(self, child_assets):
+    def validate_support_assets(self, support_assets):
         """
-        Check that adding children won't create cycles
+        Check that adding support assets won't create cycles
         """
         if not self.instance:
-            return child_assets
-        if child_assets:
-            for asset in child_assets:
+            return support_assets
+        if support_assets:
+            for asset in support_assets:
                 if asset in self.instance.ancestors_plus_self():
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return child_assets
+        return support_assets
 
     def create(self, validated_data):
         child_assets = validated_data.pop("child_assets", None)
@@ -447,7 +448,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
-    child_assets = FieldsRelatedField(many=True)
+    support_assets = FieldsRelatedField(source="child_assets", many=True)
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
