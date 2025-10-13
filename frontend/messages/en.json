@@ -180,7 +180,7 @@
 	"childrenAssets": "Underlying dependencies",
 	"supportAssets": "Supporting assets ↓",
 	"approver": "Approver",
-	"supportingAssetsHelpText": "Other assets supporting this one (downstream)",
+	"supportingAssetsHelpText": "Specifiy the assets supporting this one (downstream)",
 	"state": "State",
 	"justification": "Justification",
 	"parentFolder": "Parent folder",

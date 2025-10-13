@@ -177,14 +177,6 @@
 	label={m.supportAssets()}
 	helpText={m.supportingAssetsHelpText()}
 />
-<TextField
-	{form}
-	field="reference_link"
-	label={m.link()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['reference_link']}
-	bind:cachedValue={formDataCache['reference_link']}
-/>
 {#if data.type === 'PR'}
 	<Dropdown
 		open={false}
@@ -259,26 +251,36 @@
 		helpText={m.supportingAssetsHelpText()}
 	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	translateOptions={false}
-	allowUserOptions="append"
-/>
-<MarkdownField
-	{form}
-	field="observation"
-	label={m.observation()}
-	helpText={m.observationHelpText()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<TextField
+		{form}
+		field="reference_link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['reference_link']}
+		bind:cachedValue={formDataCache['reference_link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
+	/>
+	<MarkdownField
+		{form}
+		field="observation"
+		label={m.observation()}
+		helpText={m.observationHelpText()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+</Dropdown>
 {#if initialData.ebios_rm_studies}
 	<AutocompleteSelect
 		{form}
