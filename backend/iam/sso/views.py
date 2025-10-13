@@ -37,7 +37,7 @@ class RedirectToProviderView(APIView):
                 headless=True,
             )
         except Exception as e:
-            logger.error("SSO redirection failed", provider=provider.id, error=str(e))
+            logger.error("SSO redirection failed", provider=provider.id, exc_info=e)
             return render_authentication_error(request, provider, error="failedSSO")
 
 
