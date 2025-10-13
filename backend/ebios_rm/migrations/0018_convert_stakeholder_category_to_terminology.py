@@ -4,8 +4,8 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def migrate_category_to_terminology(apps, schema_editor):
-    Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
+def create_terminology_records(apps, schema_editor):
+    """Create terminology records before adding FK constraint"""
     Terminology = apps.get_model("core", "Terminology")
 
     DEFAULT_ENTITY_RELATIONSHIPS = [
@@ -60,6 +60,12 @@ def migrate_category_to_terminology(apps, schema_editor):
             defaults=item,
         )
 
+
+def migrate_stakeholder_data(apps, schema_editor):
+    """Migrate stakeholder category data after FK is added"""
+    Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
+    Terminology = apps.get_model("core", "Terminology")
+
     # Mapping of old category values to terminology names
     category_mapping = {
         "client": "client",
@@ -96,7 +102,11 @@ class Migration(migrations.Migration):
             old_name="category",
             new_name="category_old",
         ),
-        # Step 2: Add new category field as ForeignKey (nullable temporarily)
+        # Step 2: Create terminology records before adding FK constraint
+        migrations.RunPython(
+            create_terminology_records, migrations.RunPython.noop
+        ),
+        # Step 3: Add new category field as ForeignKey (nullable temporarily)
         migrations.AddField(
             model_name="stakeholder",
             name="category",
@@ -113,11 +123,11 @@ class Migration(migrations.Migration):
                 verbose_name="Category",
             ),
         ),
-        # Step 3: Migrate data from category_old to category
+        # Step 4: Migrate data from category_old to category
         migrations.RunPython(
-            migrate_category_to_terminology, migrations.RunPython.noop
+            migrate_stakeholder_data, migrations.RunPython.noop
         ),
-        # Step 4: Make category non-nullable
+        # Step 5: Make category non-nullable
         migrations.AlterField(
             model_name="stakeholder",
             name="category",
@@ -132,7 +142,7 @@ class Migration(migrations.Migration):
                 verbose_name="Category",
             ),
         ),
-        # Step 5: Remove old category field
+        # Step 6: Remove old category field
         migrations.RemoveField(
             model_name="stakeholder",
             name="category_old",
