@@ -151,7 +151,31 @@
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
-  helpText={m.supportedAssetsHelpText()}
+	helpText={m.supportedAssetsHelpText()}
+/>
+<AutocompleteSelect
+	disabled={data.type === 'PR'}
+	hidden={data.type === 'PR'}
+	multiple
+	{form}
+	optionsEndpoint="assets?type=SP"
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
+	optionsDetailedUrlParameters={[['exclude_parents', object.id]]}
+	optionsLabelField="auto"
+	pathField="path"
+	optionsSelf={object}
+	field="support_assets"
+	cacheLock={cacheLocks['support_assets']}
+	bind:cachedValue={formDataCache['support_assets']}
+	label={m.supportAssets()}
+	helpText={m.supportingAssetsHelpText()}
 />
 <TextField
 	{form}
@@ -232,7 +256,7 @@
 		cacheLock={cacheLocks['support_assets']}
 		bind:cachedValue={formDataCache['support_assets']}
 		label={m.supportAssets()}
-    helpText={m.supportingAssetsHelpText()}
+		helpText={m.supportingAssetsHelpText()}
 	/>
 {/if}
 <AutocompleteSelect

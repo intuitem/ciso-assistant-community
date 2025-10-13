@@ -437,8 +437,9 @@ class AssetWriteSerializer(BaseModelSerializer):
 
         instance = super().update(instance, validated_data)
 
-        # Set child_assets for PRIMARY type if provided
-        if child_assets is not None and instance.type == Asset.Type.PRIMARY:
+        # Set support_assets (child_assets) if provided
+        # Note: child_assets will be None if we switched TO SP type above
+        if child_assets is not None:
             instance.child_assets.set(child_assets)
 
         return instance
