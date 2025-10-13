@@ -103,9 +103,7 @@ class Migration(migrations.Migration):
             new_name="category_old",
         ),
         # Step 2: Create terminology records before adding FK constraint
-        migrations.RunPython(
-            create_terminology_records, migrations.RunPython.noop
-        ),
+        migrations.RunPython(create_terminology_records, migrations.RunPython.noop),
         # Step 3: Add new category field as ForeignKey (nullable temporarily)
         migrations.AddField(
             model_name="stakeholder",
@@ -124,9 +122,7 @@ class Migration(migrations.Migration):
             ),
         ),
         # Step 4: Migrate data from category_old to category
-        migrations.RunPython(
-            migrate_stakeholder_data, migrations.RunPython.noop
-        ),
+        migrations.RunPython(migrate_stakeholder_data, migrations.RunPython.noop),
         # Step 5: Make category non-nullable
         migrations.AlterField(
             model_name="stakeholder",
