@@ -122,7 +122,9 @@ urlpatterns = [
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
+    path("pmbok/", include("pmbok.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
+    path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),
     path(
         "evidences/<uuid:pk>/upload/",
@@ -136,6 +138,16 @@ urlpatterns = [
     ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "get_combined_assessments_status/",
+        get_combined_assessments_status_view,
+        name="get_combined_assessments_status_view",
+    ),
+    path(
+        "get_governance_calendar_data/",
+        get_governance_calendar_data_view,
+        name="get_governance_calendar_data_view",
+    ),
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
@@ -160,8 +172,17 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/evidences-list/",
+        ComplianceAssessmentEvidenceList.as_view(),
+    ),
+    path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "folders/<uuid:pk>/users/",
+        UserRolesOnFolderList.as_view(),
+        name="user-perms-on-folder-list",
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),

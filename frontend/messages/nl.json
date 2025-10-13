@@ -978,5 +978,7 @@
 	"samlPrivateKeyHelpText": "Alleen-schrijven: gebruik dit veld alleen als u uw eigen privésleutel/certificaat moet opgeven. Anders genereert de applicatie het.",
 	"samlCertificateHelpText": "U kunt uw eigen certificaat opgeven of de applicatie laten genereren.",
 	"samlAuthnRequestSignedHelpText": "Wanneer ingeschakeld, wordt het SAML-authenticatieverzoek ondertekend met de privésleutel hieronder. Het bijbehorende openbare certificaat wordt naar de identiteitsprovider verzonden, zodat deze de handtekening kan verifiëren.",
-	"downloadCertificate": "Certificaat downloaden"
+	"downloadCertificate": "Certificaat downloaden",
+	"viewMore": "Afficher plus",
+	"viewLess": "Afficher moins"
 }

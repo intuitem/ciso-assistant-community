@@ -223,7 +223,6 @@
 								return obj.str;
 							})
 						: [];
-				path.pop(); // remove duplicate last part if it exists
 
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
@@ -244,15 +243,20 @@
 				}
 
 				const fullLabel = `${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
+				const valueField = getNestedValue(object, optionsValueField);
 
 				return {
 					label: fullLabel,
-					value: getNestedValue(object, optionsValueField),
+					value: valueField,
 					suggested: optionsSuggestions?.some(
-						(s) =>
-							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
+						(s) => getNestedValue(s, optionsValueField) === valueField
 					),
-					translatedLabel: safeTranslate(fullLabel),
+					translatedLabel:
+						safeTranslate(fullLabel) !== fullLabel
+							? safeTranslate(fullLabel)
+							: safeTranslate(valueField) !== valueField
+								? safeTranslate(valueField)
+								: fullLabel,
 					path,
 					infoString,
 					contentType: object?.content_type || ''
@@ -525,6 +529,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

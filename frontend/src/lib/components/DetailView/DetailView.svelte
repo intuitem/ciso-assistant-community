@@ -202,6 +202,25 @@
 		modalStore.trigger(modal);
 	}
 
+	function getReverseForeignKeyEndpoint({
+		parentModel,
+		targetUrlModel,
+		field,
+		id,
+		endpointUrl
+	}: {
+		parentModel: ModelMapEntry;
+		targetUrlModel: string;
+		field: string;
+		id: string;
+		endpointUrl?: string;
+	}) {
+		if (endpointUrl?.startsWith('./')) {
+			return `/${parentModel.urlModel}/${id}/${endpointUrl.slice(2)}`;
+		}
+		return `/${targetUrlModel}?${field}=${id}`;
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -236,10 +255,19 @@
 	}
 
 	let openStateRA = $state(false);
+
+	let expandedTable = $state(false);
+	const MAX_ROWS = 10;
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
+		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
+			<div class="text-yelloW-900">
+				{m.riskAcceptanceNotYetSubmittedMessage()}
+			</div>
+		</div>
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -300,9 +328,12 @@
 					: 'w-full'}"
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					{#each Object.entries(filteredData).filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4"
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >=
+								MAX_ROWS && !expandedTable
+								? 'hidden'
+								: ''}"
 						>
 							<dt
 								class="font-medium text-gray-900"
@@ -378,9 +409,16 @@
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+														{#each value.sort((a, b) => {
+															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id && key !== 'qualifications'}
+																{#if key === 'security_objectives'}
+																	{@const [securityObjectiveName, securityObjectiveValue] =
+																		Object.entries(val)[0]}
+																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
@@ -453,7 +491,6 @@
 					{/each}
 				</dl>
 			</div>
-
 			<!-- Right side - Widgets area (only if widgets exist) -->
 			{#if hasWidgets}
 				<div class="flex-1 min-w-[300px] flex flex-col">
@@ -464,6 +501,16 @@
 				</div>
 			{/if}
 		</div>
+		{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+			<button
+				onclick={() => (expandedTable = !expandedTable)}
+				class="m-5 text-blue-800"
+				aria-expanded={expandedTable}
+			>
+				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
+				{expandedTable ? m.viewLess() : m.viewMore()}
+			</button>
+		{/if}
 
 		<!-- Bottom row for action buttons -->
 		<div class="flex flex-row justify-end mt-4 gap-2">
@@ -561,7 +608,12 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
+		<Tabs
+			value={group}
+			onValueChange={(e) => (group = e.value)}
+			listJustify="justify-center"
+			listClasses="flex flex-wrap"
+		>
 			{#snippet list()}
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Control value={urlmodel}>
@@ -584,13 +636,21 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = getListViewFields({
-								key: urlmodel,
-								featureFlags: page.data?.featureflags
-							}).body.filter((v) => v !== field.field)}
+							{@const fieldsToUse =
+								field?.tableFields ||
+								getListViewFields({
+									key: urlmodel,
+									featureFlags: page.data?.featureflags
+								}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+									baseEndpoint={getReverseForeignKeyEndpoint({
+										parentModel: data.model,
+										targetUrlModel: urlmodel,
+										field: field.field,
+										id: data.data.id,
+										endpointUrl: field.endpointUrl
+									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
 									disableDelete={disableDelete || model.disableDelete}

@@ -63,6 +63,5 @@
 		bind:cachedValue={formDataCache['observation']}
 	/>
 	<HiddenInput {form} field="folder" />
-	<HiddenInput {form} field="requirement" />
 	<HiddenInput {form} field="compliance_assessment" />
 {/if}

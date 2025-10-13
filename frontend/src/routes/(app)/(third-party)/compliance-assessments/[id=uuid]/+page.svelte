@@ -381,7 +381,13 @@
 	{/if}
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
+				const fieldsToShow = ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
+				if (!fieldsToShow.includes(key)) return false;
+				// Hide selected_implementation_groups if framework doesn't support implementation groups
+				if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
+				return true;
+			}) as [key, value]}
 				<div class="flex flex-col">
 					<div
 						class="text-sm font-medium text-gray-800 capitalize-first"
@@ -555,6 +561,11 @@
 					class="btn preset-filled-primary-500 h-fit"
 					breadcrumbAction="push"
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+				>
+				<Anchor
+					href={`${page.url.pathname}/evidences-list`}
+					class="btn preset-filled-secondary-500 h-fit"
+					breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>

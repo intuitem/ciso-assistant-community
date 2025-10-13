@@ -965,5 +965,7 @@
 	"samlPrivateKeyHelpText": "Pouze pro zápis: použijte toto pole pouze v případě, že potřebujete zadat vlastní soukromý klíč/certifikát. Jinak aplikace vygeneruje klíč.",
 	"samlCertificateHelpText": "Můžete zadat vlastní certifikát nebo nechat aplikaci vygenerovat klíč.",
 	"samlAuthnRequestSignedHelpText": "Pokud je povoleno, požadavek na ověření SAML je podepsán soukromým klíčem níže. Odpovídající veřejný certifikát je odeslán poskytovateli identity, aby mohl ověřit podpis.",
-	"downloadCertificate": "Stáhnout certifikát"
+	"downloadCertificate": "Stáhnout certifikát",
+	"viewMore": "Zobrazit více",
+	"viewLess": "Zobrazit méně"
 }

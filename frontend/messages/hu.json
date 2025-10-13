@@ -977,5 +977,7 @@
 	"samlPrivateKeyHelpText": "Csak írásra használható: csak akkor használja ezt a mezőt, ha saját privát kulcs/tanúsítványt kell megadnia. Ellenkező esetben az alkalmazás generálja.",
 	"samlCertificateHelpText": "Saját tanúsítványt adhat meg, vagy az alkalmazás generálhatja.",
 	"samlAuthnRequestSignedHelpText": "Ha engedélyezve van, a SAML hitelesítési kérelem aláírva lesz az alábbi privát kulccsal. A megfelelő nyilvános tanúsítvány elküldve lesz az Azonosítószolgáltatónak, hogy ellenőrizhesse az aláírást.",
-	"downloadCertificate": "Tanúsítvány letöltése"
+	"downloadCertificate": "Tanúsítvány letöltése",
+	"viewMore": "Megtekintés több",
+	"viewLess": "Megtekintés kevesebb"
 }

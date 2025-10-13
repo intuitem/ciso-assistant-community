@@ -1257,5 +1257,7 @@
 	"samlPrivateKeyHelpText": "Skrivebeskyttet: brug kun dette felt, hvis du skal angive din egen private nøgle/certifikat. Ellers vil applikationen generere det.",
 	"samlCertificateHelpText": "Du kan angive dit eget certifikat eller lade applikationen generere det.",
 	"samlAuthnRequestSignedHelpText": "Når aktiveret, bliver SAML-autentificeringsanmodningen underskrevet med den private nøgle nedenfor. Det tilsvarende offentlige certifikat sendes til Identity Provider, så det kan verificere underskriften.",
-	"downloadCertificate": "Download certifikat"
+	"downloadCertificate": "Download certifikat",
+	"viewMore": "Se mere",
+	"viewLess": "Se mindre"
 }

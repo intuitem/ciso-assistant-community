@@ -15,6 +15,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -168,9 +169,9 @@
 					: 'text-gray-500'}">{m.activityOne()}</span
 			>
 			{#if ebiosRmStudy.description}
-				<p class="text-gray-600 whitespace-pre-wrap text-justify w-full">
-					{ebiosRmStudy.description}
-				</p>
+				<div class="text-gray-600 text-justify w-full">
+					<MarkdownRenderer content={ebiosRmStudy.description} />
+				</div>
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
@@ -298,7 +299,9 @@
 				<span>{m.observation()}</span>
 			</h3>
 			{#if ebiosRmStudy.observation}
-				<p class="text-gray-600">{ebiosRmStudy.observation}</p>
+				<div class="text-gray-600">
+					<MarkdownRenderer content={ebiosRmStudy.observation} />
+				</div>
 			{:else}
 				<p class="text-gray-600">{m.noObservation()}</p>
 			{/if}

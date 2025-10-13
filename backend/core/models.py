@@ -28,7 +28,8 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+
 from library.helpers import (
     get_referential_translation,
     update_translations,
@@ -47,8 +48,6 @@ from .validators import (
 from collections import defaultdict, deque
 
 logger = get_logger(__name__)
-
-User = get_user_model()
 
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
@@ -226,10 +225,11 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 
 class Severity(models.IntegerChoices):
     UNDEFINED = -1, "undefined"
-    LOW = 0, "low"
-    MEDIUM = 1, "medium"
-    HIGH = 2, "high"
-    CRITICAL = 3, "critical"
+    INFO = 0, "info"
+    LOW = 1, "low"
+    MEDIUM = 2, "medium"
+    HIGH = 3, "high"
+    CRITICAL = 4, "critical"
 
 
 class StoredLibrary(LibraryMixin):
@@ -967,6 +967,9 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
         QUALIFICATIONS = "qualifications", "qualifications"
+        ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
+        ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
+        ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1136,6 +1139,122 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    DEFAULT_ACCREDITATION_STATUS = [
+        {
+            "name": "draft",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "in_progress",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "accredited",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "not_accredited",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+        {
+            "name": "obsolete",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_STATUS,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_ACCREDITATION_CATEGORY = [
+        {
+            "name": "accreditation_simplified",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_elaborated",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_advanced",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_sensitive",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_restricted",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ACCREDITATION_CATEGORY,
+            "is_visible": True,
+        },
+    ]
+
+    DEFAULT_ENTITY_RELATIONSHIPS = [
+        {
+            "name": "regulatory_authority",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "partner",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_authority",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "client",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "supplier",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "contractor",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+    ]
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -1177,6 +1296,33 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 name=qualification["name"],
                 field_path=qualification["field_path"],
                 defaults=qualification,
+            )
+
+    @classmethod
+    def create_default_accreditations_status(cls):
+        for item in cls.DEFAULT_ACCREDITATION_STATUS:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_accreditations_category(cls):
+        for item in cls.DEFAULT_ACCREDITATION_CATEGORY:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
+    @classmethod
+    def create_default_entity_relationships(cls):
+        for item in cls.DEFAULT_ENTITY_RELATIONSHIPS:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
             )
 
     @property
@@ -1377,10 +1523,15 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     def render_grid_as_colors(self):
         risk_matrix = self.parse_json()
-        grid = risk_matrix["grid"]
-        res = [[risk_matrix["risk"][i] for i in row] for row in grid]
+        raw_grid = risk_matrix["grid"]
+        populated_grid = [[risk_matrix["risk"][i] for i in row] for row in raw_grid]
+        return populated_grid
 
-        return res
+    def render_transposed_grid_as_colors(self):
+        """Return the transposed version of the grid given by the render_grid_as_colors method."""
+        grid = self.render_grid_as_colors()
+        transposed_grid = [list(x) for x in zip(*grid)]
+        return transposed_grid
 
     @property
     def get_json_translated(self):
@@ -2200,9 +2351,9 @@ class Asset(
 
         return {"objectives": disaster_recovery_objectives}
 
-    def get_security_objectives_display(self) -> list[dict[str, str]]:
+    def get_security_objectives_display(self) -> list[dict[str, int]]:
         """
-        Gets the security objectives of a given asset as strings.
+        Gets the security objectives values of a given asset.
         """
         security_objectives = self.get_security_objectives()
         if len(security_objectives) == 0:
@@ -2214,9 +2365,7 @@ class Asset(
             else "1-4"
         )
         return [
-            {
-                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
-            }
+            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 security_objectives.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
@@ -2870,6 +3019,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         max_length=2048,
         verbose_name=_("Link"),
     )
+    # note: made this syntax to avoid circular dependencies
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="incidents",
+        verbose_name="Entities",
+        blank=True,
+    )
 
     is_published = models.BooleanField(_("published"), default=True)
 
@@ -3465,6 +3621,8 @@ class Vulnerability(
         EXPLOITABLE = "exploitable", _("Exploitable")
         MITIGATED = "mitigated", _("Mitigated")
         FIXED = "fixed", _("Fixed")
+        NOTEXPLOITABLE = "not_exploitable", _("Not exploitable")
+        UNAFFECTED = "unaffected", _("Unaffected")
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -3822,6 +3980,59 @@ class RiskAssessment(Assessment):
                             "object": ri,
                         }
                     )
+
+        # --- checks on existing_applied_controls (controls marked as existing but not active)
+        # Create a mapping of scenario ID to scenario object with prefetched controls
+        scenario_objects = {
+            str(s.id): s
+            for s in self.risk_scenarios.prefetch_related(
+                "existing_applied_controls", "applied_controls"
+            ).all()
+        }
+
+        for ri in scenarios:
+            scenario_obj = scenario_objects.get(ri["id"])
+            if not scenario_obj:
+                continue
+            existing_controls_set = set(scenario_obj.existing_applied_controls.all())
+            applied_controls_set = set(scenario_obj.applied_controls.all())
+
+            # Check for controls appearing in both lists
+            duplicate_controls = existing_controls_set & applied_controls_set
+            for duplicate_control in duplicate_controls:
+                errors_lst.append(
+                    {
+                        "msg": _(
+                            "{} appears in both existing and additional controls"
+                        ).format(duplicate_control.name),
+                        "msgid": "controlInBothLists",
+                        "link": f"applied-controls/{duplicate_control.id}",
+                        "obj_type": "appliedcontrol",
+                        "object": {
+                            "name": duplicate_control.name,
+                            "id": duplicate_control.id,
+                        },
+                    }
+                )
+
+            # Check for existing controls that are not active
+            for existing_control in scenario_obj.existing_applied_controls.all():
+                if existing_control.status != "active":
+                    errors_lst.append(
+                        {
+                            "msg": _(
+                                "{} is marked as an existing control but its status is not active"
+                            ).format(existing_control.name),
+                            "msgid": "existingControlNotActive",
+                            "link": f"applied-controls/{existing_control.id}",
+                            "obj_type": "appliedcontrol",
+                            "object": {
+                                "name": existing_control.name,
+                                "id": existing_control.id,
+                            },
+                        }
+                    )
+
         # --- checks on the applied controls
         _measures = serializers.serialize(
             "json",
@@ -4502,6 +4713,7 @@ class ComplianceAssessment(Assessment):
                         "is_scored",
                         "observation",
                     ],
+                    batch_size=1000,
                 )
 
             # Handle M2M relationships
@@ -4914,6 +5126,25 @@ class ComplianceAssessment(Assessment):
             ra_dict["name"] = str(ra)
             ra_dict["id"] = ra.id
             requirement_assessments.append(ra_dict)
+
+            # Check if assessable requirement assessment with compliant result has no evidence
+            if (
+                ra.requirement.assessable
+                and ra.result == RequirementAssessment.Result.COMPLIANT
+                and not ra.has_evidence()
+            ):
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{}: Requirement assessment is compliant but has no evidence attached"
+                        ).format(str(ra)),
+                        "msgid": "requirementAssessmentCompliantNoEvidence",
+                        "link": f"requirement-assessments/{ra.id}",
+                        "obj_type": "requirementassessment",
+                        "object": ra_dict,
+                    }
+                )
+
         for requirement_assessment in requirement_assessments:
             if (
                 requirement_assessment["result"] in ("compliant", "partially_compliant")
@@ -4958,28 +5189,35 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on evidence:
-        _evidences = serializers.serialize(
-            "json",
-            Evidence.objects.filter(
-                applied_controls__in=AppliedControl.objects.filter(
-                    requirement_assessments__compliance_assessment=self
-                )
-            ).order_by("created_at"),
-        )
-        evidences = [x["fields"] for x in json.loads(_evidences)]
-        for i in range(len(evidences)):
-            evidences[i]["id"] = json.loads(_evidences)[i]["pk"]
-        for evidence in evidences:
-            if not evidence["attachment"]:
+        evidence_objects = Evidence.objects.filter(
+            applied_controls__in=AppliedControl.objects.filter(
+                requirement_assessments__compliance_assessment=self
+            )
+        ).order_by("created_at")
+
+        for evidence_obj in evidence_objects:
+            # Check if evidence has any revisions with attachments or links
+            has_attachment = evidence_obj.revisions.filter(
+                models.Q(attachment__isnull=False) & ~models.Q(attachment="")
+            ).exists()
+            has_link = evidence_obj.revisions.filter(
+                models.Q(link__isnull=False) & ~models.Q(link="")
+            ).exists()
+
+            if not has_attachment and not has_link:
+                evidence_dict = json.loads(
+                    serializers.serialize("json", [evidence_obj])
+                )[0]["fields"]
+                evidence_dict["id"] = evidence_obj.id
                 warnings_lst.append(
                     {
-                        "msg": _("{}: Evidence has no file uploaded").format(
-                            evidence["name"]
+                        "msg": _("{}: Evidence has no file or link uploaded").format(
+                            evidence_obj.name
                         ),
                         "msgid": "evidenceNoFile",
-                        "link": f"evidences/{evidence['id']}",
+                        "link": f"evidences/{evidence_obj.id}",
                         "obj_type": "evidence",
-                        "object": evidence,
+                        "object": evidence_dict,
                     }
                 )
 
@@ -5071,9 +5309,20 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
-                requirement_assessment.save()
                 requirement_assessments.append(requirement_assessment)
 
+        RequirementAssessment.objects.bulk_update(
+            requirement_assessments,
+            [
+                "mapping_inference",
+                "result",
+                "status",
+                "score",
+                "is_scored",
+                "observation",
+            ],
+            batch_size=1000,
+        )
         return requirement_assessments
 
     def get_progress(self) -> int:
@@ -5306,6 +5555,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
 
+    def has_evidence(self) -> bool:
+        """
+        Check if this requirement assessment has evidence attached,
+        either directly or through its applied controls.
+        """
+        # Check for direct evidences or evidences through applied controls in a single query
+        return Evidence.objects.filter(
+            Q(requirement_assessments=self)
+            | Q(applied_controls__requirement_assessments=self)
+        ).exists()
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -5368,10 +5628,11 @@ class FindingsAssessment(Assessment):
         # Severity distribution using the defined severity levels - we need a better way for this
         severity_values = {
             -1: "undefined",
-            0: "low",
-            1: "medium",
-            2: "high",
-            3: "critical",
+            0: "info",
+            1: "low",
+            2: "medium",
+            3: "high",
+            4: "critical",
         }
 
         severity_distribution = {}
@@ -5379,16 +5640,17 @@ class FindingsAssessment(Assessment):
             severity_distribution[label] = findings.filter(severity=value).count()
 
         # Count of unresolved important findings (severity is HIGH or CRITICAL)
-        # Excludes findings that are mitigated, resolved, or dismissed
+        # Excludes findings that are mitigated, resolved, dismissed, or closed
         unresolved_important = (
             findings.filter(
-                severity__gte=2  # HIGH or CRITICAL (>=2)
+                severity__gte=3  # HIGH or CRITICAL (>=3)
             )
             .exclude(
                 status__in=[
                     Finding.Status.MITIGATED,
                     Finding.Status.RESOLVED,
                     Finding.Status.DISMISSED,
+                    Finding.Status.CLOSED,
                 ]
             )
             .count()
@@ -5412,6 +5674,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         IN_PROGRESS = "in_progress", _("In Progress")
         MITIGATED = "mitigated", _("Mitigated")
         RESOLVED = "resolved", _("Resolved")
+        CLOSED = "closed", _("Closed")
         DEPRECATED = "deprecated", _("Deprecated")
 
     findings_assessment = models.ForeignKey(
@@ -5653,9 +5916,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     enabled = models.BooleanField(default=True)
 
     assigned_to = models.ManyToManyField(
-        User,
-        verbose_name="Assigned to",
-        blank=True,
+        User, verbose_name="Assigned to", blank=True, related_name="task_templates"
     )
     assets = models.ManyToManyField(
         Asset,

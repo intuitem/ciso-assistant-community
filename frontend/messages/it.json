@@ -1352,5 +1352,7 @@
 	"samlPrivateKeyHelpText": "Scrittura sola: usa questo campo solo se devi fornire la tua chiave/certificato privata. Altrimenti, l'applicazione lo genererà.",
 	"samlCertificateHelpText": "Puoi specificare il tuo certificato o lasciare che l'applicazione lo generi.",
 	"samlAuthnRequestSignedHelpText": "Quando abilitato, la richiesta di autenticazione SAML viene firmata con la chiave privata qui sotto. Il certificato pubblico corrispondente viene inviato al Provider di Identità in modo che possa verificare la firma.",
-	"downloadCertificate": "Scarica certificato"
+	"downloadCertificate": "Scarica certificato",
+	"viewMore": "Vedi di più",
+	"viewLess": "Vedi meno"
 }

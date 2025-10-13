@@ -1710,5 +1710,7 @@
 	"samlPrivateKeyHelpText": "Yalnızca yazma: özel anahtar/belgenizi sağlamanız gerekiyorsa bu alanı kullanın. Aksi takdirde uygulama onu oluşturacaktır.",
 	"samlCertificateHelpText": "Kendi sertifikanızı belirleyebilir veya uygulamanın oluşturmasını sağlayabilirsiniz.",
 	"samlAuthnRequestSignedHelpText": "Etkinleştirildiğinde, SAML kimlik doğrulama isteği aşağıdaki özel anahtar ile imzalanır. İmzayı doğrulayabilmesi için ilgili genel sertifika Kimlik Sağlayıcıya gönderilir.",
-	"downloadCertificate": "Sertifikayı indir"
+	"downloadCertificate": "Sertifikayı indir",
+	"viewMore": "Daha fazla görüntüle",
+	"viewLess": "Daha az görüntüle"
 }
