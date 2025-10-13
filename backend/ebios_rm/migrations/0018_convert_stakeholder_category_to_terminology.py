@@ -4,63 +4,6 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def create_terminology_records(apps, schema_editor):
-    """Create terminology records for stakeholder categories"""
-    Terminology = apps.get_model("core", "Terminology")
-
-    DEFAULT_ENTITY_RELATIONSHIPS = [
-        {
-            "name": "regulatory_authority",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-        {
-            "name": "partner",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-        {
-            "name": "accreditation_authority",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-        {
-            "name": "client",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-        {
-            "name": "supplier",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-        {
-            "name": "contractor",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-        {
-            "name": "other",
-            "builtin": True,
-            "field_path": "entity.relationship",
-            "is_visible": True,
-        },
-    ]
-
-    for item in DEFAULT_ENTITY_RELATIONSHIPS:
-        Terminology.objects.update_or_create(
-            name=item["name"],
-            field_path=item["field_path"],
-            defaults=item,
-        )
-
-
 def migrate_stakeholder_data(apps, schema_editor):
     """Migrate stakeholder category data after FK is added"""
     Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
@@ -90,25 +33,19 @@ def migrate_stakeholder_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    atomic = (
-        False  # Allow operations to commit separately (fixes PostgreSQL trigger events)
-    )
-
     dependencies = [
-        ("core", "0104_add_info_severity"),
+        ("core", "0105_add_entity_relationship_terminology"),
         ("ebios_rm", "0017_alter_operationalscenario_operating_modes_description"),
     ]
 
     operations = [
-        # Step 1: Create terminology records first (commits before FK is added)
-        migrations.RunPython(create_terminology_records, migrations.RunPython.noop),
-        # Step 2: Rename old category field to category_old
+        # Step 1: Rename old category field to category_old
         migrations.RenameField(
             model_name="stakeholder",
             old_name="category",
             new_name="category_old",
         ),
-        # Step 3: Add new category field as ForeignKey (nullable temporarily)
+        # Step 2: Add new category field as ForeignKey (nullable temporarily)
         migrations.AddField(
             model_name="stakeholder",
             name="category",
@@ -125,9 +62,9 @@ class Migration(migrations.Migration):
                 verbose_name="Category",
             ),
         ),
-        # Step 4: Migrate data from category_old to category
+        # Step 3: Migrate data from category_old to category
         migrations.RunPython(migrate_stakeholder_data, migrations.RunPython.noop),
-        # Step 5: Make category non-nullable
+        # Step 4: Make category non-nullable
         migrations.AlterField(
             model_name="stakeholder",
             name="category",
@@ -142,7 +79,7 @@ class Migration(migrations.Migration):
                 verbose_name="Category",
             ),
         ),
-        # Step 6: Remove old category field
+        # Step 5: Remove old category field
         migrations.RemoveField(
             model_name="stakeholder",
             name="category_old",
