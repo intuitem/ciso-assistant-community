@@ -8,6 +8,58 @@ def migrate_category_to_terminology(apps, schema_editor):
     Stakeholder = apps.get_model("ebios_rm", "Stakeholder")
     Terminology = apps.get_model("core", "Terminology")
 
+    DEFAULT_ENTITY_RELATIONSHIPS = [
+        {
+            "name": "regulatory_authority",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "partner",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "accreditation_authority",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "client",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "supplier",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "contractor",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+        {
+            "name": "other",
+            "builtin": True,
+            "field_path": "entity.relationship",
+            "is_visible": True,
+        },
+    ]
+
+    for item in DEFAULT_ENTITY_RELATIONSHIPS:
+        Terminology.objects.update_or_create(
+            name=item["name"],
+            field_path=item["field_path"],
+            defaults=item,
+        )
+
     # Mapping of old category values to terminology names
     category_mapping = {
         "client": "client",
