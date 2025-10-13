@@ -386,7 +386,6 @@ class AssetWriteSerializer(BaseModelSerializer):
     def validate(self, data):
         parent_assets = data.get("parent_assets", [])
         support_assets = data.get("child_assets", [])
-        print("validate is called")
         """
         Check that the assets graph will not contain cycles
         """
