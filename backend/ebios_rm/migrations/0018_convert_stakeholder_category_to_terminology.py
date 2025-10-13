@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 
 def create_terminology_records(apps, schema_editor):
-    """Create terminology records before adding FK constraint"""
+    """Create terminology records for stakeholder categories"""
     Terminology = apps.get_model("core", "Terminology")
 
     DEFAULT_ENTITY_RELATIONSHIPS = [
@@ -90,20 +90,24 @@ def migrate_stakeholder_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    atomic = (
+        False  # Allow operations to commit separately (fixes PostgreSQL trigger events)
+    )
+
     dependencies = [
         ("core", "0104_add_info_severity"),
         ("ebios_rm", "0017_alter_operationalscenario_operating_modes_description"),
     ]
 
     operations = [
-        # Step 1: Rename old category field to category_old
+        # Step 1: Create terminology records first (commits before FK is added)
+        migrations.RunPython(create_terminology_records, migrations.RunPython.noop),
+        # Step 2: Rename old category field to category_old
         migrations.RenameField(
             model_name="stakeholder",
             old_name="category",
             new_name="category_old",
         ),
-        # Step 2: Create terminology records before adding FK constraint
-        migrations.RunPython(create_terminology_records, migrations.RunPython.noop),
         # Step 3: Add new category field as ForeignKey (nullable temporarily)
         migrations.AddField(
             model_name="stakeholder",
