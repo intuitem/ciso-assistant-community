@@ -183,7 +183,6 @@ erDiagram
         json    translations
 
         json    implementation_groups_definition
-        string  initial_implementation_group
         int     min_score
         int     max_score
         json    scores_definition
@@ -653,7 +652,8 @@ The implementation_groups field contains a comma-separated list of implementatio
 {
   "ref_id": "1",
   "name": "Foundational",
-  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause"
+  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause",
+  "default_selected": true
 }
 ```
 
@@ -775,7 +775,7 @@ For the sake of performance, when a change is done on the selected implementatio
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
 
-If the framework used by the compliance assessment has a non-empty initial_implementation_groups, then the corresponding IGs are selected initialy.
+If the framework used by the compliance assessment has default_selected implementation groups, then the corresponding IGs are selected initialy.
 
 Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
 
@@ -937,7 +937,7 @@ This choice provokes the selection of the indicated IG to the selected_implement
 If there is at least one select_implementation_groups field, then the selection of IGs is deemded to be in piloted mode:
 
 - The user cannot select IGs
-- The list of selected IGs is computed as the union of the initial_implementation_groups with the IGs that are selected via the select_implementation_groups choices. This is done at each saving of a requirement assessment.
+- The list of selected IGs is computed as the union of the initial implementation_groups with the IGs that are selected via the select_implementation_groups choices. This is done at each saving of a requirement assessment.
 
 ### Requirement Mapping set
 
