@@ -7,8 +7,9 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages';
 	import Checkbox from '../Checkbox.svelte';
-
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { page } from '$app/state';
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -235,12 +236,14 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	<Checkbox
-		{form}
-		field="is_locked"
-		label={m.isLocked()}
-		helpText={m.isLockedHelpText()}
-		cacheLock={cacheLocks['is_locked']}
-		bind:cachedValue={formDataCache['is_locked']}
-	/>
+	{#if !page.data.user.is_third_party}
+		<Checkbox
+			{form}
+			field="is_locked"
+			label={m.isLocked()}
+			helpText={m.isLockedHelpText()}
+			cacheLock={cacheLocks['is_locked']}
+			bind:cachedValue={formDataCache['is_locked']}
+		/>
+	{/if}
 </Dropdown>
