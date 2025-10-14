@@ -628,10 +628,19 @@ class AssetFilter(GenericFilterSet):
         method="filter_exclude_children",
         label="Exclude children",
     )
+    exclude_parents = df.ModelChoiceFilter(
+        queryset=Asset.objects.all(),
+        method="filter_exclude_parents",
+        label="Exclude parents",
+    )
 
     def filter_exclude_children(self, queryset, name, value):
         descendants = value.get_descendants()
         return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    def filter_exclude_parents(self, queryset, name, value):
+        ancestors = value.ancestors_plus_self()
+        return queryset.exclude(id__in=[ancestor.id for ancestor in ancestors])
 
     class Meta:
         model = Asset
@@ -640,6 +649,7 @@ class AssetFilter(GenericFilterSet):
             "type",
             "parent_assets",
             "exclude_children",
+            "exclude_parents",
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
