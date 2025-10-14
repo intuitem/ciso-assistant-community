@@ -11,6 +11,7 @@
 	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { isQuestionVisible } from '$lib/utils/helpers';
 
 	interface Props {
 		ref_id: string;
@@ -153,11 +154,26 @@
 		resultColor === '#000000' ? 'text-white' : ''
 	);
 
-	const getBadgeStyles = (answers: any, questions: any) => {
-		const answeredCount = Object.values(answers || {}).filter((answer) => answer !== null).length;
-		const totalCount = Object.keys(questions || {}).length;
+	export const getBadgeStyles = (answers: any, questions: any) => {
+		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
+			isQuestionVisible(q, answers)
+		);
+
+		const answeredCount = visibleQuestions.filter(([urn, _]) => {
+			const answer = answers[urn];
+			if (Array.isArray(answer)) return answer.length > 0;
+			return answer !== null && answer !== undefined && answer !== '';
+		}).length;
+
+		const totalCount = visibleQuestions.length;
+
 		const backgroundColor =
-			answeredCount === 0 ? '#fca5a5' : answeredCount === totalCount ? '#bbf7d0' : '#fef08a';
+			answeredCount === 0
+				? '#fca5a5'
+				: answeredCount === totalCount
+				? '#bbf7d0'
+				: '#fef08a';
+
 		return {
 			backgroundColor,
 			color: darkenColor(backgroundColor, 0.6),

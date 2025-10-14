@@ -179,3 +179,31 @@ export function normalizeSearchString(str: string): string {
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
 }
+
+
+export function isQuestionVisible(question: any, answers: any): boolean {
+	if (!question.depends_on) return true;
+
+	const dependency = question.depends_on;
+	const targetAnswer = answers[dependency.question];
+	if (!targetAnswer) return false;
+
+	if (dependency.condition === 'any') {
+		// If targetAnswer is an array (multiple choice)
+		if (Array.isArray(targetAnswer)) {
+			return targetAnswer.some((a) => dependency.answers.includes(a));
+		}
+		// Single value
+		return dependency.answers.includes(targetAnswer);
+	}
+
+	if (dependency.condition === 'all') {
+		if (Array.isArray(targetAnswer)) {
+			return dependency.answers.every((a) => targetAnswer.includes(a));
+		}
+		// Single value (must match all, so only true if exactly one)
+		return dependency.answers.length === 1 && dependency.answers[0] === targetAnswer;
+	}
+
+	return true; // fallback
+}

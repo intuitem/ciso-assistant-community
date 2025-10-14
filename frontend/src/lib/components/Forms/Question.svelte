@@ -2,6 +2,7 @@
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import RadioGroup from './RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { isQuestionVisible } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
 
 	interface Props {
@@ -67,30 +68,6 @@
 	function resetTextAnswer(urn: string) {
 		questionBuffers[urn] = internalAnswers[urn] || '';
 	}
-
-	// depends_on logic helper
-	function isVisible(question: any): boolean {
-		if (!question.depends_on) return true;
-
-		const { question: parentUrn, answers = [], condition = 'any' } = question.depends_on;
-		const currentAnswer = internalAnswers[parentUrn];
-
-		if (currentAnswer == null) return false;
-
-		// For single choice questions
-		if (typeof currentAnswer === 'string') {
-			return answers.includes(currentAnswer);
-		}
-
-		// For multi-choice questions
-		if (Array.isArray(currentAnswer)) {
-			const matches = currentAnswer.filter((ans) => answers.includes(ans));
-			if (condition === 'all') return matches.length === answers.length;
-			return matches.length > 0;
-		}
-
-		return false;
-	}
 </script>
 
 <div>
@@ -101,7 +78,7 @@
 	<div class="control whitespace-pre-line">
 		{#each Object.entries(questions) as [urn, question]}
 			<!-- Only render if visible according to depends_on -->
-			{#if isVisible(question)}
+			{#if isQuestionVisible(question, internalAnswers)}
 				<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 					<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
 
