@@ -1255,6 +1255,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+    is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
