@@ -2457,5 +2457,6 @@
 	"loadedLibrary": "Bibliothèque chargée",
 	"storedLibrary": "Bibliothèque stockée",
 	"timelineEntry": "Évènement chronologique",
-	"vulnerability": "Vulnérabilité"
+	"vulnerability": "Vulnérabilité",
+	"dataFlowOverview": "Vue sur le flux de données"
 }
