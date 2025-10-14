@@ -911,7 +911,7 @@
 	"mtdHelpText": "Maximum Tolerable Downtime",
 	"disasterRecoveryObjectives": "Disaster Recovery objectives",
 	"noExpirationDateSet": "No expiration date set",
-	"sumpageTotal": "total",
+	"sumpageTotal": "total (all categories)",
 	"sumpageActive": "active",
 	"sumpageDeprecated": "deprecated",
 	"sumpageToDo": "to do",
