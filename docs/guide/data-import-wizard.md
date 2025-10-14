@@ -15,6 +15,8 @@ If the object supports the domain column, the wizard will attempt to add the obj
 
 Fields with (\*) are mandatory and don't have any supported fallback.&#x20;
 
+Unless marked as mandatory, ref\_id fields can be left blank but the column must still exist.
+
 &#x20;
 
 ## 📦 Assets
@@ -39,7 +41,7 @@ Fields with (\*) are mandatory and don't have any supported fallback.&#x20;
 
 ### Special considerations
 
-* type will default to `supporting` if not set
+* type will default to `supporting` if the column does not exist
 
 
 
@@ -92,11 +94,11 @@ Fields with (\*) are mandatory and don't have any supported fallback.&#x20;
 
 
 
-#### Template
+### Template
 
 {% file src="../.gitbook/assets/sample003.xlsx" %}
 
-#### Supported fields
+### Supported fields
 
 * ref\_id
 * name\*
@@ -154,6 +156,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 * The wizard will attempt to match based on the ref\_id and fallback to the urn otherwise. If none could be used, the row will be skipped.
 * name and description columns are not used but serve as an anchor point for reference.
+* Assessable will fallback to false
 * Unassessable rows are skipped.
 
 ## 🐞 Findings followup (eg. pentest)
@@ -178,7 +181,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `medium`
   * `high`
   * `critical`
-* status
+* status\*
   * `identified`
   * `confirmed`
   * `dismissed`
@@ -192,19 +195,17 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 ### 👥 Users
 
-
-
-**Supported fields**
-
-
-
-* email
-* first\_name
-* last\_name
+### Template
 
 {% file src="../.gitbook/assets/sample005.xlsx" %}
 
+### **Supported fields**
 
+
+
+* email\*
+* first\_name
+* last\_name
 
 ### ☣️ Risk assessment&#x20;
 
