@@ -48,7 +48,6 @@
 			implementationGroupsChoices = [];
 		}
 	}
-
 </script>
 
 <AutocompleteSelect
@@ -75,7 +74,6 @@
 		label={m.selectedImplementationGroups()}
 	/>
 {/if}
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
@@ -86,7 +84,6 @@
 	label={m.perimeter()}
 	hidden={initialData.perimeter}
 />
-
 <TextField
 	type="date"
 	{form}
