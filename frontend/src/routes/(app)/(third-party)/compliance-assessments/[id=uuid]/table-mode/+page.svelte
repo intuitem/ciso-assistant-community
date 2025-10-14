@@ -21,7 +21,7 @@
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, computeRequirementScoreAndResult, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
@@ -559,20 +559,29 @@
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
-									<RadioGroup
-										possibleOptions={result_options}
-										key="id"
-										labelKey="label"
-										field="result"
-										colorMap={complianceResultTailwindColorMap}
-										initialValue={requirementAssessment.result}
-										onChange={(newValue) => {
-											const newResult =
-												requirementAssessment.result === newValue ? 'to_do' : newValue;
-											requirementAssessment.result = newResult;
-											update(requirementAssessment, 'result');
-										}}
-									/>
+									{#if computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result}
+										<span
+											class="badge text-sm font-semibold"
+											style="background-color: {complianceResultColorMap[computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result] || '#ddd'}"
+										>
+											{safeTranslate(computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result)}
+										</span>
+									{:else}
+										<RadioGroup
+											possibleOptions={result_options}
+											key="id"
+											labelKey="label"
+											field="result"
+											colorMap={complianceResultTailwindColorMap}
+											initialValue={requirementAssessment.result}
+											onChange={(newValue) => {
+												const newResult =
+													requirementAssessment.result === newValue ? 'to_do' : newValue;
+												requirementAssessment.result = newResult;
+												update(requirementAssessment, 'result');
+											}}
+										/>
+									{/if}
 								</div>
 							</div>
 						{/if}
@@ -592,58 +601,71 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
-								<Score
-									form={scoreForms[requirementAssessment.id]}
-									min_score={complianceAssessment.min_score}
-									max_score={complianceAssessment.max_score}
-									scores_definition={data.scores.scores_definition}
-									field="score"
-									label={complianceAssessment.show_documentation_score
-										? m.implementationScore()
-										: m.score()}
-									styles="w-full p-1"
-									onChange={(newScore) => {
-										requirementAssessment.score = newScore;
-										updateScore(requirementAssessment);
-									}}
-									disabled={!requirementAssessment.is_scored ||
-										requirementAssessment.result === 'not_applicable'}
-								>
-									{#snippet left()}
-										<div>
-											<Checkbox
-												form={isScoredForms[requirementAssessment.id]}
-												field="is_scored"
-												label={''}
-												helpText={m.scoringHelpText()}
-												checkboxComponent="switch"
-												classes="h-full flex flex-row items-center justify-center my-1"
-												classesContainer="h-full flex flex-row items-center space-x-4"
-												onChange={async () => {
-													requirementAssessment.is_scored = !requirementAssessment.is_scored;
-													await update(requirementAssessment, 'is_scored');
-												}}
-											/>
-										</div>
-									{/snippet}
-								</Score>
-								{#if complianceAssessment.show_documentation_score}
+								{#if computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score !== null}
+									<div class="flex flex-row items-center space-x-4">
+										<span class="font-medium">{m.score()}</span>
+										<ProgressRing
+											strokeWidth="20px"
+											meterStroke={displayScoreColor(computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score, complianceAssessment.max_score)}
+											value={formatScoreValue(computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score, complianceAssessment.max_score)}
+											classes="shrink-0"
+											size="size-10">{computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score}</ProgressRing
+										>
+									</div>
+								{:else}
 									<Score
-										form={docScoreForms[requirementAssessment.id]}
+										form={scoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
 										scores_definition={data.scores.scores_definition}
-										field="documentation_score"
-										label={m.documentationScore()}
-										isDoc={true}
+										field="score"
+										label={complianceAssessment.show_documentation_score
+											? m.implementationScore()
+											: m.score()}
 										styles="w-full p-1"
 										onChange={(newScore) => {
-											requirementAssessment.documentation_score = newScore;
+											requirementAssessment.score = newScore;
 											updateScore(requirementAssessment);
 										}}
 										disabled={!requirementAssessment.is_scored ||
 											requirementAssessment.result === 'not_applicable'}
-									/>
+									>
+										{#snippet left()}
+											<div>
+												<Checkbox
+													form={isScoredForms[requirementAssessment.id]}
+													field="is_scored"
+													label={''}
+													helpText={m.scoringHelpText()}
+													checkboxComponent="switch"
+													classes="h-full flex flex-row items-center justify-center my-1"
+													classesContainer="h-full flex flex-row items-center space-x-4"
+													onChange={async () => {
+														requirementAssessment.is_scored = !requirementAssessment.is_scored;
+														await update(requirementAssessment, 'is_scored');
+													}}
+												/>
+											</div>
+										{/snippet}
+									</Score>
+									{#if complianceAssessment.show_documentation_score}
+										<Score
+											form={docScoreForms[requirementAssessment.id]}
+											min_score={complianceAssessment.min_score}
+											max_score={complianceAssessment.max_score}
+											scores_definition={data.scores.scores_definition}
+											field="documentation_score"
+											label={m.documentationScore()}
+											isDoc={true}
+											styles="w-full p-1"
+											onChange={(newScore) => {
+												requirementAssessment.documentation_score = newScore;
+												updateScore(requirementAssessment);
+											}}
+											disabled={!requirementAssessment.is_scored ||
+												requirementAssessment.result === 'not_applicable'}
+										/>
+									{/if}
 								{/if}
 							{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 								<div class="flex flex-row items-center space-x-2 w-full">

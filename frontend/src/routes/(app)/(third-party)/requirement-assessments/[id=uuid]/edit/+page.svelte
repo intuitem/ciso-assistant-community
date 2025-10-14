@@ -9,7 +9,6 @@
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -33,6 +32,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { computeRequirementScoreAndResult, formatScoreValue, displayScoreColor } from '$lib/utils/helpers';
 
 	interface Props {
 		data: PageData;
@@ -590,50 +590,75 @@
 						field="status"
 						label={m.status()}
 					/>
-					<Select
-						{form}
-						options={page.data.model.selectOptions['result']}
-						field="result"
-						label={m.result()}
-					/>
-					<div class="flex flex-col">
-						<Score
+					{#if computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).result}
+						<p class="flex flex-row items-center space-x-4">
+							<span class="font-medium">{m.result()}</span>
+							<span
+								class="badge text-sm font-semibold"
+								style="background-color: {complianceResultColorMap[computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).result] || '#ddd'}"
+							>
+								{safeTranslate(computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).result)}
+							</span>
+						</p>
+					{:else}
+						<Select
 							{form}
-							min_score={page.data.compliance_assessment_score.min_score}
-							max_score={page.data.compliance_assessment_score.max_score}
-							scores_definition={page.data.compliance_assessment_score.scores_definition}
-							field="score"
-							label={page.data.compliance_assessment_score.show_documentation_score
-								? m.implementationScore()
-								: m.score()}
-							disabled={!data.is_scored || data.result === 'not_applicable'}
-						>
-							{#snippet left()}
-								<div>
-									<Checkbox
-										{form}
-										field="is_scored"
-										label={''}
-										helpText={m.scoringHelpText()}
-										checkboxComponent="switch"
-										classes="h-full flex flex-row items-center justify-center my-1"
-										classesContainer="h-full flex flex-row items-center space-x-4"
-									/>
-								</div>
-							{/snippet}
-						</Score>
-					</div>
-					{#if page.data.compliance_assessment_score.show_documentation_score}
-						<Score
-							{form}
-							min_score={page.data.compliance_assessment_score.min_score}
-							max_score={page.data.compliance_assessment_score.max_score}
-							scores_definition={page.data.compliance_assessment_score.scores_definition}
-							field="documentation_score"
-							label={m.documentationScore()}
-							isDoc={true}
-							disabled={!data.is_scored || data.result === 'not_applicable'}
+							options={page.data.model.selectOptions['result']}
+							field="result"
+							label={m.result()}
 						/>
+					{/if}
+					{#if computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score !== null}
+						<div class="flex flex-row items-center space-x-4">
+							<span class="font-medium">{m.score()}</span>
+							<ProgressRing
+								strokeWidth="20px"
+								meterStroke={displayScoreColor(computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score, page.data.compliance_assessment_score.max_score)}
+								value={formatScoreValue(computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score, page.data.compliance_assessment_score.max_score)}
+								classes="shrink-0"
+								size="size-10">{computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score}</ProgressRing
+							>
+						</div>
+					{:else}
+						<div class="flex flex-col">
+							<Score
+								{form}
+								min_score={page.data.compliance_assessment_score.min_score}
+								max_score={page.data.compliance_assessment_score.max_score}
+								scores_definition={page.data.compliance_assessment_score.scores_definition}
+								field="score"
+								label={page.data.compliance_assessment_score.show_documentation_score
+									? m.implementationScore()
+									: m.score()}
+								disabled={!data.is_scored || data.result === 'not_applicable'}
+							>
+								{#snippet left()}
+									<div>
+										<Checkbox
+											{form}
+											field="is_scored"
+											label={''}
+											helpText={m.scoringHelpText()}
+											checkboxComponent="switch"
+											classes="h-full flex flex-row items-center justify-center my-1"
+											classesContainer="h-full flex flex-row items-center space-x-4"
+										/>
+									</div>
+								{/snippet}
+							</Score>
+						</div>
+						{#if page.data.compliance_assessment_score.show_documentation_score}
+							<Score
+								{form}
+								min_score={page.data.compliance_assessment_score.min_score}
+								max_score={page.data.compliance_assessment_score.max_score}
+								scores_definition={page.data.compliance_assessment_score.scores_definition}
+								field="documentation_score"
+								label={m.documentationScore()}
+								isDoc={true}
+								disabled={!data.is_scored || data.result === 'not_applicable'}
+							/>
+						{/if}
 					{/if}
 
 					<MarkdownField {form} field="observation" label="Observation" />

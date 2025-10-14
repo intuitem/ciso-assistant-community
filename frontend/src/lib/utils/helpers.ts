@@ -207,3 +207,44 @@ export function isQuestionVisible(question: any, answers: any): boolean {
 
 	return true; // fallback
 }
+
+export function computeRequirementScoreAndResult(questions: any, answers: any) {
+	let totalScore = 0;
+	let results: boolean[] = [];
+
+	if (!questions) return { score: 0, result: 'not_assessed' };
+
+	for (const [q_urn, question] of Object.entries(questions)) {
+		if (!isQuestionVisible(question, answers)) continue;
+
+		const selectedChoiceURNs = answers?.[q_urn];
+		if (!selectedChoiceURNs) continue;
+
+		const choiceURNs = Array.isArray(selectedChoiceURNs) ? selectedChoiceURNs : [selectedChoiceURNs];
+
+		for (const urn of choiceURNs) {
+		const selectedChoice = question.choices.find(
+				(choice: any) => choice.urn === urn
+		);
+
+		if (!selectedChoice) continue;
+
+		if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
+			totalScore += selectedChoice.add_score;
+		}
+
+		if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
+			results.push(selectedChoice.compute_result);
+		}
+	}
+	}
+
+	let result = 'not_assessed';
+	if (results.length > 0) {
+		if (results.every((r) => r === true)) result = 'compliant';
+		else if (results.some((r) => r === true)) result = 'partially_compliant';
+		else result = 'non_compliant';
+	}
+
+	return { score: totalScore, result };
+}
