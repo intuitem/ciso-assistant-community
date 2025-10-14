@@ -654,3 +654,54 @@ def _generate_occurrences(template, start_date, end_date):
         current_date = _calculate_next_occurrence(template, current_date)
 
     return occurrences
+
+def _is_question_visible(question, answers):
+    """Check if a question is visible based on depends_on logic."""
+    depends_on = question.get("depends_on")
+    if not depends_on:
+        return True
+
+    target_answer = answers.get(depends_on["question"])
+    if not target_answer:
+        return False
+
+    if depends_on["condition"] == "any":
+        if isinstance(target_answer, list):
+            return any(a in depends_on["answers"] for a in target_answer)
+        return target_answer in depends_on["answers"]
+
+    if depends_on["condition"] == "all":
+        if isinstance(target_answer, list):
+            return all(a in target_answer for a in depends_on["answers"])
+        return target_answer == depends_on["answers"][0]
+
+    return True
+
+
+def update_selected_implementation_groups(compliance_assessment):
+    """Recalculate selected IGs based on all visible answers in the assessment."""
+    igs_to_select = set()
+
+    requirement_assessments = compliance_assessment.requirement_assessments.select_related("requirement").all()
+    for ra in requirement_assessments:
+        answers = ra.answers or {}
+        for question_urn, question in ra.requirement.questions.items():
+            if not _is_question_visible(question, answers):
+                continue
+
+            question_answers = answers.get(question_urn)
+            if not question_answers:
+                continue
+            if not isinstance(question_answers, list):
+                question_answers = [question_answers]
+
+            for choice in question["choices"]:
+                if choice["urn"] in question_answers:
+                    igs_to_select.update(choice.get("select_implementation_groups", []))
+        
+        for ig in ra.requirement.framework.implementation_groups_definition:
+            if ig.get("default_selected"):
+                igs_to_select.add(ig["ref_id"])
+
+    compliance_assessment.selected_implementation_groups = list(igs_to_select)
+    compliance_assessment.save(update_fields=["selected_implementation_groups"])
