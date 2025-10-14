@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def publish_terminologies(apps, schema_editor):
-    """Create terminology records for entity relationships"""
+    """Publish terminologies that are not published yet."""
     Terminology = apps.get_model("core", "Terminology")
 
     Terminology.objects.filter(is_published=False).update(is_published=True)
@@ -15,4 +15,6 @@ class Migration(migrations.Migration):
         ("core", "0104_add_info_severity"),
     ]
 
-    operations = [migrations.RunPython(publish_terminologies)]
+    operations = [
+        migrations.RunPython(publish_terminologies, migrations.RunPython.noop)
+    ]
